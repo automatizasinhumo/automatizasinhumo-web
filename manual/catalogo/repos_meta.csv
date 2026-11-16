@@ -1,0 +1,88 @@
+Poison675/free-wedding-website-templates;;MIT;;0;HTML
+mmrahmanbappi/100-free-html-templates;100 free HTML templates, one file each: business, AI and SaaS, dashboard, store, portfolio, restaurant, fitness, education, travel, events, landing pages and local services. Mobile friendly, SEO ready, new templates every week.;MIT;https://mmrahmanbappi.github.io/100-free-html-templates/;9;HTML
+ultimatewebtemplates/free-website-templates;Free, MIT-licensed HTML website templates for small businesses, restaurants, portfolios and more. No build step.;NOASSERTION;https://ultimatewebtemplates.com;0;HTML
+JacobStephens2/wedding-platform;A custom-built wedding website with RSVP management, guest tracking, registry integration, and an admin dashboard. Built with PHP and MySQL.;MIT;https://wedding.stephens.page;2;PHP
+1molehayo/wedding-website-builder;A whitelabel wedding website builder. User guide: https://1molehayo.github.io/wedding-website-builder/;GPL-3.0;https://igbeyawowa.app;2;TypeScript
+lonestone/astro-template;Website starter kit with Astro + MDX;MIT;;4;Astro
+dumbuk12/qr-menu-guide;A minimal, no-database QR code restaurant menu on Cloudflare Workers — template + step-by-step guide;MIT;;1;HTML
+caresdev/restaurant-menu;;NONE;;0;JavaScript
+CCCrafts/punctual;Scheduling that shows up on time — an open, edge-native Calendly alternative on Cloudflare Workers. MIT, no seat limits, ever.;MIT;https://punctual.sh;129;TypeScript
+tbxark/ChatGPT-Telegram-Workers;Easily deploy your Telegram ChatGPT bot on Cloudflare Workers (or Vercel, Docker...).;MIT;https://chatgpt-telegram-workers.tbxark.workers.dev;3815;TypeScript
+investblog/contact-relay;Free serverless contact form → Telegram relay on Cloudflare Workers. Multi-tenant, spam-protected, zero infrastructure.;MIT;https://301.st;2;TypeScript
+gianfrancodemarco/resume-builder;Free, private resume builder: Typst-quality PDFs compiled in your browser, JSON Resume compatible, no signup.;MIT;https://resume-builder.gianfrancodemarco.dev/;31;JavaScript
+kbichave/wedding-invite;Beautiful, free wedding website template built with React & Tailwind CSS. 100% FREE - no credit card required. Fully customizable with photo uploads, RSVP, blessings & more.;ISC;;11;JavaScript
+yusizer/n8n-lead-automation;n8n automation workflow: web form → Google Sheets → confirmation email → Telegram notification. Self-hostable, importable workflow JSON + demo form.;NONE;https://portfolio-site-jade-beta.vercel.app/projects/n8n-lead-automation.html;0;HTML
+dawidolko/Website-Templates;170 HTML5 Website Templates -  free editable templates;MIT;https://templateswebsite.dawidolko.pl;299;JavaScript
+bts-io/hookforms-cloud;Cloudflare Workers webhook inbox with multi-channel notifications — Discord, Slack, Teams, Telegram, email, and more;MIT;https://oss.hookforms.com;8;TypeScript
+Holojerm/nuxt-wedding-template;A wedding website you own: schedule, travel, FAQ and a real RSVP system on Cloudflare Workers. Nuxt 4 + NuxtUI + D1.;MIT;https://nuxt-wedding-template.jeremy-ettlinger.workers.dev;1;TypeScript
+MohamadTaher/mechanic-shop;Simple appointment booking site for a local mechanic shop (Cloudflare Workers + D1);NONE;;0;JavaScript
+satendragoswamii/portfolio-website-with-admin-panel;Modern personal portfolio with a full admin panel: edit every word, section and image from the browser. Free hosting on Cloudflare Workers + KV, or run locally with Node.js.;MIT;https://satendragoswami.satendragoshwami.workers.dev;0;JavaScript
+Kahaan83/digital-cards;A custom static-site generator that turns a JSON dataset into responsive digital business card pages with vCard export, theming, and incremental MD5-based builds.;MIT;https://digital-cards-lemon.vercel.app;5;HTML
+Shahabuddin-mahar/whatsapp-restaurant-qr-menu;Modern Restaurant QR Code Menu & Direct WhatsApp Order System with live cart and zero server costs.;MIT;https://shahabuddin-mahar.github.io/whatsapp-restaurant-qr-menu/;0;JavaScript
+dimasmong/MoBio;Open-source, self-hosted Link in Bio platform with a visual editor, customizable themes, live preview, media library, and analytics. Powered by React Router and Cloudflare.;MIT;https://github.com/dimasmong/MoBio;0;TypeScript
+Mrbarnx/Open-Link-Hub;A free, self-hosted link-in-bio, portfolio, CV and product showcase with an admin dashboard, click analytics and one-click Cloudflare deployment.;MIT;;0;TypeScript
+arjoonarora/real-estate-website-template;Premium real estate website template for property listings, agents, and client consultations;MIT;;1;CSS
+t0ma5/tinygallery;Self-hosted Tiny photo gallery on Cloudflare Pages, D1 and R2. Private album links, favorites, admin panel, no build step.;MIT;https://tinygallery.pages.dev;0;JavaScript
+BartekBis/wedding-website;Wedding website for guests: RSVP, guestbook, gallery, guest photo uploads, admin panel. Astro + Cloudflare Pages, D1, R2. Anonymised demo.;NONE;;0;Astro
+d4mr/0list;Self-hosted waitlist software for Cloudflare Workers;MIT;https://0list.d4mr.com;7;TypeScript
+jhodges3401-code/kudoshelf-lite;Free self-hosted testimonial wall and widget. Senja alternative, host free.;MIT;https://jhodges3401-code.github.io/kudoshelf-demo/;0;JavaScript
+miantiao-me/Sink;⚡ A Simple, Speedy, Secure, and Serverless Link Shortener with Analytics, Running Entirely on Cloudflare.;AGPL-3.0;https://Sink.Cool;7284;TypeScript
+investblog/qr-generator;Cloudflare Worker: ultra-lightweight B/W QR code SVG generator with edge caching and RLE path encoding;MIT;;2;TypeScript
+maxi-blocks/maxi-blocks;Fast-styling web templates for professional site creators. Build better, launch faster.;NOASSERTION;https://maxiblocks.com/;71;JavaScript
+frappe/builder_hub;Centralised hub of Frappe Builder page templates, plugins and components;MIT;;14;Python
+givanz/VvvebJs;Drag and drop page builder library written in vanilla javascript without dependencies or build tools.;Apache-2.0;https://www.vvveb.com/vvvebjs/editor.html;8733;JavaScript
+heulaulab-dev/attimo-studios;;NONE;https://attimo-studios.vercel.app;0;TypeScript
+sotomaque/wedding-website;Wedding Website;NONE;https://theceremony.app;6;TypeScript
+clentebanks/wedding-invitation;;NOASSERTION;;0;HTML
+zachspiel/wedding-rsvp;Nextjs website for our wedding 💍;MIT;https://zachandsedona.com;3;TypeScript
+aiogram/aiogram;aiogram is a modern and fully asynchronous framework for Telegram Bot API written in Python using asyncio;MIT;https://aiogram.dev;5944;Python
+{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/repos#get-a-repository","status":"404"}Olawill/Ceremonia;ERR
+ColorlibHQ/bootstrap-templates;Free, self-contained website templates built on Bootstrap 6 — 28 site templates and 6 component packs. No build step, MIT licensed.;MIT;https://uicookies.com/;3;HTML
+micah-masuka/free-website-templates;Free HTML/CSS website templates (business, church, restaurant, portfolio, and more). MIT licence.;MIT;https://micah-masuka.github.io/free-website-templates/;0;HTML
+givanz/Vvveb;Powerful and easy to use cms to build websites, blogs or ecommerce stores.;AGPL-3.0;https://www.vvveb.com;1323;HTML
+uiuxlabz/uiuxlabz;Premium free HTML website templates marketplace — 120+ framework-free, MIT-licensed templates for every industry. Each template is a separate repo with a live GitHub Pages demo.;NONE;https://uiuxlabz.github.io/uiuxlabz/;24;HTML
+Paymug/paymug;Sell digital products on your own terms;NOASSERTION;https://paymug.co;28;TypeScript
+fengyiqicoder/astro-ai-shop;Free Astro store theme: products as Markdown files, Stripe Payment Links checkout, no backend, plus an "Ask about this product" AI box on every product page.;MIT;https://fengyiqicoder.github.io/astro-ai-shop/;0;Astro
+vignesh-gupta/digibee-marketplace;DigiBee is a Full-Stack built with Next.js for frontend and Payload as backend. It is a modern digital product marketplace where you can sell your digital products like e-books, courses, templates, etc. It is a fully functional marketplace with a lot of features. ;MIT;https://digibee.vigneshgupta.tech/;51;TypeScript
+Kylelau339/digital-sales-platform;Open-source marketplace for selling any digital product — templates, presets, plugins, 3D assets, audio, e-books, and downloads. Includes a .motion animation-pack demo built with React, Fastify, SQLite, and Stripe.;MIT;;0;TypeScript
+IAMBOYYY/storefront-kit;open source ai  ecommerce website builder for free . ;NONE;;6;HTML
+w4seemdev/Templix;Premium website template marketplace: 61 templates with live previews, Stripe checkout, and Supabase-gated downloads. React 19 + Vite.;NOASSERTION;https://templix-peach.vercel.app;0;TypeScript
+mohamedmashalyeng-dot/framevault;Digital product store for website templates, UI components and AI prompts (Next.js 16, Better Auth, Stripe);NONE;;0;TypeScript
+playlikeboy/scriptly.store;A curated marketplace for production-ready code — SaaS templates, scripts, UI kits and developer tools. Next.js 16 on Cloudflare Workers, Neon, Razorpay.;NONE;https://scriptly.store;0;TypeScript
+Vojislav77/digital-downloads-website;Static storefront template for selling digital products — vanilla HTML/CSS/JS, no build step;MIT;https://vojislav77.github.io/digital-downloads-website/;0;HTML
+russellkmoore/mercora;Next.js Commerce on Cloudflare Workers ;MIT;https://voltique.russellkmoore.me;6;TypeScript
+BohdanPetryshyn/formzero;Form backend with zero paid features. One-click deploy to your free Cloudflare account.;MIT;;92;TypeScript
+cloudflare/workflows-starter;A starter template for Cloudflare Workflows. ;Apache-2.0;https://developers.cloudflare.com/workflows/;50;TypeScript
+Vibra-Labs/Atrium;A self-hosted client portal for agencies and freelancers. Manage projects, share files, and give clients a branded portal to track progress;NOASSERTION;https://atrium.vibralabs.co;87;TypeScript
+directus-labs/agency-os;The open source operating system for digital agencies. Built with Directus and Nuxt.;MIT;https://agencyos.dev;990;Vue
+SimplerDevelopment/SimplerDevelopment;Open-source multi-tenant SaaS platform: admin + client portal + per-tenant sites + CRM + Company Brain (AI/RAG) + automations + Google Workspace + Stripe billing. Next.js 16, React 19, Drizzle/Postgres. Self-host or managed hosting.;Apache-2.0;https://simplerdevelopment-workfriends-ai.vercel.app;18;TypeScript
+onlineprfoundation/pr-agency-platform;Online PR - Self-hosted PR agency platform – clients, projects, invoicing, client portal;NOASSERTION;https://online.pr/opensource/pr-agency-platform;0;Blade
+sagarpatil199/qr-menu;Hotel Qr Menu ;NONE;;1;JavaScript
+restoreriyadh/menu-web;;NONE;;0;JavaScript
+akhil-dara/CVAurum;Free, open-source, 100% local résumé builder. 75 ATS-ready templates, a deterministic ATS score, PDF résumé import with on-device OCR, and archival vector PDF (PDF/A-2B + PDF/UA-1), Word and JSON Resume export — no account, no server, no tracking, fully offline.;AGPL-3.0;https://cvaurum.com;23;TypeScript
+vixonoffice/n8n-automation-templates;Four importable n8n workflows for lead capture, lead scoring, review summaries and invoice extraction. Built by Vixon Lab.;NONE;;0;JavaScript
+enescingoz/awesome-n8n-templates;280+ free n8n automation templates — ready-to-use workflows for Gmail, Telegram, Slack, Discord, WhatsApp, Google Drive, Notion, OpenAI, and more. AI agents, RAG   chatbots, email automation, social media, DevOps, and document processing. The largest open-source n8n template collection.;NOASSERTION;https://n8n.partnerlinks.io/h1pwwf5m4toe;26443;
+thisyourei/fastfood-ai-assistant;Asistente de pedidos por WhatsApp con RAG, Supabase y Cloudflare Workers;NONE;;0;JavaScript
+thareekanvar/replyloom;Open-source, self-hosted WhatsApp CRM that runs entirely on Cloudflare. Shared team inbox, multiple numbers, contacts, deal pipeline, broadcasts, auto-replies and an AI agent. No servers, no per-seat pricing.;MIT;;14;TypeScript
+ShadmanArafin/open_portfolio;Open source, self-hosted portfolio website builder. Build and edit your site from an admin panel — no code — and keep the content in your own database.;MIT;https://getopenportfolio.vercel.app;0;TypeScript
+samuelbelo/cvfree;Open-source, self-hosted resume builder. Live preview, 14 templates, PDF and Word export, one Docker command to deploy.;MIT;;1;TypeScript
+MrDemonWolf/linkden;Self-hosted link-in-bio platform for Cloudflare Workers and D1, with visual blocks, analytics, themes, Wallet passes, and forms;MIT;https://mrdemonwolf.github.io/linkden/;7;TypeScript
+inonalfa/wedding-rsvp-seating;Hebrew RTL wedding RSVP, guest calling, seating charts and PDF room sketches. Self-hosted on Cloudflare Workers and D1, with fictional demo data.;MIT;;1;TypeScript
+nabinbabuuranw/palo;Palo (पालो): appointment booking + customer book for clinics and salons in Nepal. Day 1 of 100 platforms. React, Vite, TypeScript, Tailwind, Cloudflare Worker + D1.;MIT;https://palo.sites.tab.bot/;0;TypeScript
+RamtinBabaei/quickdine-platform;Full-stack restaurant reservations with React, TypeScript, Tailwind CSS, Cloudflare Workers and D1. Diner, owner and admin portals, live seat availability, secure sessions and automated tests.;MIT;;0;TypeScript
+Salora-Software/Salora;An open-source, embeddable booking engine designed for salons and service-based businesses. Built with SvelteKit and optimized for Edge deployment (Cloudflare Workers).;AGPL-3.0;https://docs.salora.app/docs;5;HTML
+kirollosfayezh/tabla-qr-menu-saas;Multi-tenant QR menu SaaS for restaurants: bilingual menus, WhatsApp ordering, Paymob billing.;MIT;;0;TypeScript
+Metareignity/waitlist-cloudflare;Cloudflare-Native Next.js 15 Waitlist Boilerplate. Powered by Cloudflare D1 SQL, edge rate-limiting, referral swarms, and interactive WebGL shaders. Zero external dependencies.;MIT;https://waitlist.metareignity.com;14;TypeScript
+botnick/shortlink;Open-source self-hosted URL shortener & link management on Cloudflare Workers — custom domains, branded links, QR codes, click analytics, REST API + MCP. A free Bitly alternative ($0 on the free plan).;NONE;;5;TypeScript
+AnandSundar/Kindwords;Open-source, self-hostable testimonial wall. Collect, approve and embed customer testimonials with one docker compose up.;MIT;;1;TypeScript
+WordPress/wordpress-develop;WordPress Develop, Git-ified. Synced from git://develop.git.wordpress.org/, including branches and tags! This repository is just a mirror of the WordPress subversion repository. Please include a link to a pre-existing ticket on https://core.trac.wordpress.org/ with every pull request.;GPL-2.0;https://make.wordpress.org/core/handbook/contribute/git/github-pull-requests-for-code-review/;3515;PHP
+n8n-io/n8n;Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.;NOASSERTION;https://n8n.io;210652;TypeScript
+coollabsio/coolify;An open-source, self-hostable PaaS alternative to Vercel, Heroku & Netlify that lets you easily deploy static sites, databases, full-stack applications and 360+ one-click services on your own servers.;Apache-2.0;https://coolify.io;66142;PHP
+webstudio-is/webstudio;Open source website builder and Webflow alternative. Webstudio is an advanced visual builder that connects to any headless CMS, supports all CSS properties, and can be hosted anywhere, including with us.;AGPL-3.0;https://webstudio.is;9173;TypeScript
+activepieces/activepieces;AI Agents & MCPs & AI Workflow Automation • (~400 MCP servers for AI agents) • AI Automation / AI Agent with MCPs • AI Workflows & AI Agents • MCPs for AI Agents;NOASSERTION;https://www.activepieces.com;25568;TypeScript
+microweber/microweber;Drag and Drop Website Builder and CMS with E-commerce;MIT;https://microweber.org;3441;HTML
+automatisch/automatisch;The open source Zapier alternative. Build workflow automation without spending time and money.;NOASSERTION;https://automatisch.io;14023;JavaScript
+umami-software/umami;Umami is a privacy-first web and product analytics platform. Traffic, campaigns, behavior, conversions, and revenue in one place. No cookies, no surveillance, self-hosted or in the cloud.;MIT;https://umami.is;40182;TypeScript
+frappe/builder;Craft beautiful websites effortlessly with an intuitive visual builder and publish them instantly;MIT;https://frappe.io/builder;2496;Python
+GrapesJS/grapesjs;Free and Open source Web Builder Framework. Next generation tool for building templates without coding;NOASSERTION;https://grapesjs.com;26413;TypeScript
+puckeditor/puck;The visual editor for React.;MIT;https://puckeditor.com;13725;TypeScript

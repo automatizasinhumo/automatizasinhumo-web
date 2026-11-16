@@ -1,0 +1,463 @@
+// Catálogo "barras de pan" de Automatiza sin humo.
+// Fuente única: categorías (pestañas del menú), productos con campos que rellena
+// el cliente, ejemplo tangible y repos base. gen-sql.mjs lo convierte en SQL
+// para D1 (staging) y cruza cada repo con repos_meta.csv (licencia y demo).
+//
+// Precios en EUR. Cada producto tiene dos modalidades (variantes):
+//   - "Lo montas tú": plantilla + guía paso a paso.
+//   - "Te lo montamos": nosotros lo publicamos con tus datos.
+
+export const categorias = [
+  { slug: 'webs', nombre: 'Webs para tu negocio', menu: 'header' },
+  { slug: 'hosteleria', nombre: 'Restaurantes y bares', menu: 'header' },
+  { slug: 'reservas', nombre: 'Reservas y citas', menu: 'header' },
+  { slug: 'bodas', nombre: 'Bodas y eventos', menu: 'header' },
+  { slug: 'identidad', nombre: 'Tarjetas, link-in-bio y CV', menu: 'header' },
+  { slug: 'captacion', nombre: 'Formularios y captación', menu: 'header' },
+  { slug: 'bots', nombre: 'Bots e IA', menu: 'header' },
+  { slug: 'automatizaciones', nombre: 'Automatizaciones', menu: 'header' },
+  { slug: 'enlaces', nombre: 'Enlaces, QR y analítica', menu: 'footer' },
+  { slug: 'tiendas', nombre: 'Tiendas y productos digitales', menu: 'footer' },
+  { slug: 'portales', nombre: 'Portales y webs editables', menu: 'footer' },
+  { slug: 'planes', nombre: 'Planes mensuales', menu: 'header' },
+];
+
+// p = [precio "Lo montas tú", precio "Te lo montamos"] en euros.
+// Si p tiene un solo valor, el producto no tiene modalidades.
+export const productos = [
+  // ── Webs ───────────────────────────────────────────────
+  {
+    slug: 'web-una-pagina', cat: 'webs', nombre: 'Web de una página para tu negocio', p: [149, 349], plazo: '48 h',
+    resumen: 'Tu negocio en internet con una sola página clara: quién eres, qué ofreces, cómo contactarte.',
+    recibes: ['Web de una página adaptada a móvil', 'Botón de WhatsApp y llamada', 'Mapa y horario', 'Publicada con tu dominio (o uno gratuito)'],
+    campos: ['Nombre del negocio', 'Sector', 'Logo (opcional)', '3–6 servicios con precio', 'Teléfono / WhatsApp', 'Dirección y horario', '3–8 fotos'],
+    ejemplo: 'Peluquería Lola: portada con foto, lista de servicios con precios, botón «Pide cita por WhatsApp» y mapa.',
+    repos: ['ColorlibHQ/bootstrap-templates', 'mmrahmanbappi/100-free-html-templates', 'micah-masuka/free-website-templates'],
+  },
+  {
+    slug: 'web-corporativa-5-secciones', cat: 'webs', nombre: 'Web corporativa de 5 secciones', p: [449, 899], plazo: '5 días',
+    resumen: 'Inicio, servicios, sobre nosotros, opiniones y contacto. Para empresas que necesitan algo más que una tarjeta.',
+    recibes: ['5 páginas con diseño a elegir entre +300 plantillas', 'Formulario de contacto con aviso', 'SEO básico (títulos, descripción, sitemap)', 'Publicación y certificado SSL'],
+    campos: ['Datos de la empresa', 'Textos de cada sección (o te los redactamos)', 'Logo y colores', 'Fotos', 'Email donde recibir contactos'],
+    ejemplo: 'Asesoría García: página por servicio (fiscal, laboral, contable), equipo, testimonios y formulario.',
+    repos: ['dawidolko/Website-Templates', 'uiuxlabz/uiuxlabz', 'ultimatewebtemplates/free-website-templates'],
+  },
+  {
+    slug: 'web-inmobiliaria', cat: 'webs', nombre: 'Web para inmobiliaria', p: [299, 599], plazo: '4 días',
+    resumen: 'Escaparate de inmuebles con fichas, fotos y contacto directo con el agente.',
+    recibes: ['Listado de inmuebles con filtros', 'Ficha por inmueble con galería', 'Página de agentes', 'Formulario de consulta'],
+    campos: ['Nombre de la agencia', 'Inmuebles (precio, m², habitaciones, fotos)', 'Agentes', 'Zona de trabajo'],
+    ejemplo: 'Inmobiliaria Costa: 12 pisos en venta con fotos, botón «Quiero visitarlo» y WhatsApp del agente.',
+    repos: ['arjoonarora/real-estate-website-template'],
+  },
+  {
+    slug: 'portfolio-editable', cat: 'webs', nombre: 'Portfolio con panel para editarlo tú', p: [179, 349], plazo: '3 días',
+    resumen: 'Para fotógrafos, diseñadores, arquitectos o freelancers: cambias textos y fotos desde un panel, sin tocar código.',
+    recibes: ['Portfolio con proyectos y galería', 'Panel de administración', 'Formulario de contacto', 'Alojamiento gratuito en Cloudflare'],
+    campos: ['Nombre y profesión', 'Proyectos (título, fotos, descripción)', 'Biografía', 'Redes sociales'],
+    ejemplo: 'Marta, fotógrafa: 8 reportajes, sobre mí, tarifas y contacto. Ella sube los nuevos trabajos desde el móvil.',
+    repos: ['satendragoswamii/portfolio-website-with-admin-panel', 'ShadmanArafin/open_portfolio'],
+  },
+  {
+    slug: 'web-blog-astro', cat: 'webs', nombre: 'Web con blog rápida (SEO)', p: [249, 499], plazo: '4 días',
+    resumen: 'Web ultrarrápida con blog para posicionar en Google y publicar artículos fácilmente.',
+    recibes: ['Web + blog con categorías', 'Carga en menos de 1 segundo', 'Sitemap y RSS', '3 artículos iniciales (modalidad «Te lo montamos»)'],
+    campos: ['Temática', 'Palabras clave', 'Logo y colores', 'Primeros temas del blog'],
+    ejemplo: 'Clínica de fisioterapia con blog «Ejercicios para la espalda» que atrae visitas desde Google.',
+    repos: ['lonestone/astro-template'],
+  },
+  {
+    slug: 'web-taller', cat: 'webs', nombre: 'Web para taller con cita previa', p: [249, 449], plazo: '4 días',
+    resumen: 'Taller mecánico, de bicis o de reparación: servicios, precios orientativos y cita online.',
+    recibes: ['Web con servicios y precios', 'Calendario de citas', 'Aviso de cada cita por email', 'Mapa y horario'],
+    campos: ['Nombre del taller', 'Servicios y duración', 'Horario y huecos disponibles', 'Fotos del taller'],
+    ejemplo: 'Talleres Pérez: «Cambio de aceite – 45 min – desde 59 €» y el cliente reserva el hueco del jueves.',
+    repos: ['MohamadTaher/mechanic-shop', 'CCCrafts/punctual'],
+  },
+
+  // ── Hostelería ──────────────────────────────────────────
+  {
+    slug: 'carta-qr', cat: 'hosteleria', nombre: 'Carta digital con código QR', p: [49, 129], plazo: '24 h',
+    resumen: 'Tu carta en el móvil del cliente con un QR en la mesa. Cambias precios cuando quieras, sin reimprimir.',
+    recibes: ['Carta digital por secciones', 'QR listo para imprimir', 'Alérgenos e idiomas', 'Cambios ilimitados de precios'],
+    campos: ['Nombre del local', 'Platos (nombre, precio, alérgenos)', 'Fotos (opcional)', 'Idiomas'],
+    ejemplo: 'Bar La Esquina: QR en cada mesa → carta con tapas, raciones y bebidas, en español e inglés.',
+    repos: ['dumbuk12/qr-menu-guide', 'investblog/qr-generator', 'kirollosfayezh/tabla-qr-menu-saas'],
+  },
+  {
+    slug: 'carta-pedidos-whatsapp', cat: 'hosteleria', nombre: 'Carta QR con pedidos por WhatsApp', p: [99, 199], plazo: '48 h',
+    resumen: 'El cliente elige en la carta, añade al carrito y el pedido te llega por WhatsApp ya escrito.',
+    recibes: ['Carta con carrito', 'Pedido enviado a tu WhatsApp', 'Opción recoger / a domicilio', 'Sin comisiones por pedido'],
+    campos: ['Carta y precios', 'Número de WhatsApp', 'Zona y coste de envío', 'Horario de pedidos'],
+    ejemplo: 'Pizzería Nápoles: el cliente pide 2 pizzas y te llega «2× Margarita, recoger 21:00» al WhatsApp.',
+    repos: ['Shahabuddin-mahar/whatsapp-restaurant-qr-menu'],
+  },
+  {
+    slug: 'reservas-restaurante', cat: 'hosteleria', nombre: 'Reservas de mesa online', p: [149, 299], plazo: '3 días',
+    resumen: 'Sistema propio de reservas sin pagar comisión por comensal a plataformas.',
+    recibes: ['Página de reservas', 'Panel para ver y confirmar reservas', 'Avisos al cliente', 'Control de aforo por turno'],
+    campos: ['Turnos y aforo', 'Mesas', 'Días de cierre', 'Email / teléfono de avisos'],
+    ejemplo: 'Restaurante El Puerto: el cliente reserva para 4 el sábado a las 14:30 y tú lo ves en el panel.',
+    repos: ['RamtinBabaei/quickdine-platform'],
+  },
+  {
+    slug: 'asistente-ia-pedidos', cat: 'hosteleria', nombre: 'Asistente IA que toma pedidos', p: [299, 599], plazo: '7 días',
+    resumen: 'Un asistente que contesta dudas de la carta y toma pedidos por chat, 24 horas.',
+    recibes: ['Asistente entrenado con tu carta', 'Respuestas sobre alérgenos y horarios', 'Pedido resumido para cocina', 'Informe de preguntas frecuentes'],
+    campos: ['Carta completa', 'Preguntas frecuentes', 'Horarios y zonas', 'Canal (web, Telegram o WhatsApp)'],
+    ejemplo: '«¿Tenéis algo sin gluten?» → el asistente recomienda 3 platos y apunta el pedido.',
+    repos: ['thisyourei/fastfood-ai-assistant', 'tbxark/ChatGPT-Telegram-Workers'],
+  },
+
+  // ── Reservas ────────────────────────────────────────────
+  {
+    slug: 'pagina-citas', cat: 'reservas', nombre: 'Página de citas tipo Calendly', p: [79, 179], plazo: '48 h',
+    resumen: 'Comparte un enlace y tus clientes reservan hueco en tu agenda. Sin cuotas por usuario.',
+    recibes: ['Página de reserva con tus huecos', 'Tipos de cita (15, 30, 60 min…)', 'Confirmación y recordatorio por email', 'Enlace para tu web, Instagram o firma'],
+    campos: ['Tipos de cita y duración', 'Horario disponible', 'Email de avisos', 'Preguntas previas al cliente'],
+    ejemplo: 'Coach Ana: enlace «Reserva tu sesión de 30 min» en su Instagram; las citas caen solas en su agenda.',
+    repos: ['CCCrafts/punctual'],
+  },
+  {
+    slug: 'reservas-salon', cat: 'reservas', nombre: 'Reservas para peluquería, estética o clínica', p: [199, 399], plazo: '5 días',
+    resumen: 'Motor de reservas por servicio y profesional, con ficha de cliente.',
+    recibes: ['Reserva por servicio y profesional', 'Ficha e historial de clientes', 'Recordatorios', 'Widget para tu web'],
+    campos: ['Servicios, duración y precio', 'Profesionales y horarios', 'Política de cancelación'],
+    ejemplo: 'Centro Bella: «Manicura con Laura – martes 17:00 – 25 €», con recordatorio el día antes.',
+    repos: ['Salora-Software/Salora', 'nabinbabuuranw/palo'],
+  },
+
+  // ── Bodas y eventos ─────────────────────────────────────
+  {
+    slug: 'web-boda-rsvp', cat: 'bodas', nombre: 'Web de boda con confirmación de asistencia', p: [99, 249], plazo: '3 días',
+    resumen: 'Toda la información de la boda en una web y los invitados confirman asistencia y menú.',
+    recibes: ['Web con historia, programa, cómo llegar y alojamiento', 'Formulario RSVP con menú y alergias', 'Lista de confirmados descargable', 'Preguntas frecuentes'],
+    campos: ['Nombres y fecha', 'Lugar de ceremonia y banquete', 'Programa del día', 'Fotos', 'Opciones de menú'],
+    ejemplo: 'Lucía & Pablo: 140 invitados confirman desde el móvil y descargáis el Excel para el catering.',
+    repos: ['Holojerm/nuxt-wedding-template', 'kbichave/wedding-invite', 'zachspiel/wedding-rsvp', 'sotomaque/wedding-website'],
+  },
+  {
+    slug: 'invitacion-digital', cat: 'bodas', nombre: 'Invitación digital animada', p: [39, 89], plazo: '24 h',
+    resumen: 'Invitación para enviar por WhatsApp: cuenta atrás, ubicación y botón para confirmar.',
+    recibes: ['Invitación web animada', 'Cuenta atrás', 'Botón de mapa y confirmación', 'Enlace para compartir'],
+    campos: ['Tipo de evento', 'Nombres', 'Fecha, hora y lugar', 'Foto o estilo'],
+    ejemplo: 'Bautizo de Hugo: enlace por WhatsApp con foto, cuenta atrás y «Confirmo asistencia».',
+    repos: ['Poison675/free-wedding-website-templates', 'clentebanks/wedding-invitation'],
+  },
+  {
+    slug: 'galeria-privada-evento', cat: 'bodas', nombre: 'Galería privada de fotos del evento', p: [69, 149], plazo: '48 h',
+    resumen: 'Álbum privado con enlace: los invitados ven y suben sus fotos, tú las descargas todas.',
+    recibes: ['Galería privada con enlace', 'Subida de fotos de invitados', 'Favoritas y descarga', 'Panel de administración'],
+    campos: ['Nombre del evento', 'Fotos iniciales', 'Contraseña o enlace privado'],
+    ejemplo: 'Tras la boda, 300 fotos de invitados reunidas en un solo álbum privado.',
+    repos: ['t0ma5/tinygallery', 'BartekBis/wedding-website'],
+  },
+  {
+    slug: 'gestion-invitados-mesas', cat: 'bodas', nombre: 'Gestión de invitados y plano de mesas', p: [79, 179], plazo: '3 días',
+    resumen: 'Lista de invitados, confirmaciones, llamadas pendientes y plano de mesas en PDF.',
+    recibes: ['Panel de invitados', 'Seguimiento de confirmaciones', 'Plano de mesas imprimible', 'Exportación a Excel'],
+    campos: ['Lista de invitados', 'Número de mesas y capacidad', 'Restricciones (quién no con quién)'],
+    ejemplo: 'Plano de 15 mesas generado en PDF para el restaurante a partir de las confirmaciones.',
+    repos: ['inonalfa/wedding-rsvp-seating', 'JacobStephens2/wedding-platform'],
+  },
+
+  // ── Identidad ──────────────────────────────────────────
+  {
+    slug: 'tarjeta-digital', cat: 'identidad', nombre: 'Tarjeta de visita digital con QR', p: [29, 69], plazo: '24 h',
+    resumen: 'Tu tarjeta en el móvil: un QR y el cliente guarda tu contacto con un toque.',
+    recibes: ['Tarjeta web personal', 'Botón «Guardar contacto» (vCard)', 'QR para imprimir', 'Enlaces a redes y WhatsApp'],
+    campos: ['Nombre y cargo', 'Foto', 'Teléfono, email y web', 'Redes sociales'],
+    ejemplo: 'Javier, comercial: enseña el QR en una feria y el contacto queda guardado en el móvil del cliente.',
+    repos: ['Kahaan83/digital-cards'],
+  },
+  {
+    slug: 'link-in-bio', cat: 'identidad', nombre: 'Link-in-bio propio con estadísticas', p: [39, 99], plazo: '24 h',
+    resumen: 'Tu alternativa a Linktree, en tu dominio y sin cuota mensual, con clics medidos.',
+    recibes: ['Página de enlaces con tu marca', 'Estadísticas de clics', 'Bloques de vídeo, formulario y productos', 'Panel para editar'],
+    campos: ['Nombre o marca', 'Foto / logo', 'Enlaces con su texto', 'Colores'],
+    ejemplo: 'Creadora de recetas: enlace en Instagram con su libro, YouTube y newsletter, y sabe cuál funciona.',
+    repos: ['MrDemonWolf/linkden', 'Mrbarnx/Open-Link-Hub', 'dimasmong/MoBio'],
+  },
+  {
+    slug: 'cv-profesional', cat: 'identidad', nombre: 'Currículum profesional ATS en PDF', p: [29, 79], plazo: '48 h',
+    resumen: 'CV preparado para pasar los filtros automáticos de selección, en PDF y Word.',
+    recibes: ['CV en PDF y Word', 'Plantilla a elegir', 'Revisión de palabras clave ATS', 'Versión web opcional'],
+    campos: ['Experiencia', 'Formación', 'Habilidades', 'Puesto al que aspiras'],
+    ejemplo: 'Elena, enfermera: CV de 1 página con las palabras clave de la oferta del hospital.',
+    repos: ['gianfrancodemarco/resume-builder', 'samuelbelo/cvfree', 'akhil-dara/CVAurum'],
+  },
+  {
+    slug: 'muro-testimonios', cat: 'identidad', nombre: 'Muro de opiniones de clientes', p: [49, 119], plazo: '48 h',
+    resumen: 'Recoge opiniones con un enlace, apruébalas y muéstralas en tu web.',
+    recibes: ['Formulario para dejar opinión', 'Panel para aprobar', 'Muro/widget para tu web', 'Opiniones con foto y estrellas'],
+    campos: ['Nombre del negocio', 'Preguntas para el cliente', 'Web donde insertarlo'],
+    ejemplo: 'Academia de inglés: tras cada curso envía el enlace y las mejores opiniones salen en su portada.',
+    repos: ['jhodges3401-code/kudoshelf-lite', 'AnandSundar/Kindwords'],
+  },
+
+  // ── Captación ──────────────────────────────────────────
+  {
+    slug: 'formulario-aviso-telegram', cat: 'captacion', nombre: 'Formulario de contacto con aviso al móvil', p: [39, 89], plazo: '24 h',
+    resumen: 'Cada mensaje de tu web te llega al instante por Telegram o email, con antispam.',
+    recibes: ['Formulario listo para tu web', 'Aviso por Telegram y/o email', 'Protección antispam', 'Histórico de mensajes'],
+    campos: ['Campos del formulario', 'Canal de aviso', 'Web donde va'],
+    ejemplo: 'Fontanero: «Nueva consulta: fuga en cocina, Calle Mayor 3» le llega al Telegram en 2 segundos.',
+    repos: ['investblog/contact-relay', 'BohdanPetryshyn/formzero'],
+  },
+  {
+    slug: 'lista-espera', cat: 'captacion', nombre: 'Lista de espera con referidos', p: [79, 179], plazo: '48 h',
+    resumen: 'Para lanzamientos: la gente se apunta, comparte su enlace y sube puestos en la lista.',
+    recibes: ['Página de lista de espera', 'Enlace de referido por persona', 'Ranking y exportación', 'Email de bienvenida'],
+    campos: ['Nombre del producto', 'Fecha de lanzamiento', 'Premio por referidos'],
+    ejemplo: 'Nueva app de recetas: 1.200 apuntados antes de abrir, 40 % llegados por referidos.',
+    repos: ['d4mr/0list', 'Metareignity/waitlist-cloudflare'],
+  },
+  {
+    slug: 'avisos-multicanal', cat: 'captacion', nombre: 'Avisos automáticos multicanal (webhooks)', p: [59, 129], plazo: '48 h',
+    resumen: 'Cualquier evento de tus herramientas (pago, formulario, pedido) avisa a Slack, Telegram, Discord o email.',
+    recibes: ['Bandeja de eventos', 'Reglas de aviso por canal', 'Histórico consultable'],
+    campos: ['Herramientas que envían eventos', 'Canales de aviso', 'Qué eventos interesan'],
+    ejemplo: 'Cada venta de la tienda manda «🎉 Nueva venta 49 €» al grupo de Telegram del equipo.',
+    repos: ['bts-io/hookforms-cloud'],
+  },
+
+  // ── Bots ───────────────────────────────────────────────
+  {
+    slug: 'bot-telegram-chatgpt', cat: 'bots', nombre: 'Bot de Telegram con IA', p: [99, 249], plazo: '48 h',
+    resumen: 'Un asistente con IA en Telegram para tu negocio o comunidad, con tus instrucciones.',
+    recibes: ['Bot de Telegram publicado', 'Personalidad e instrucciones a medida', 'Control de quién puede usarlo', 'Alojamiento sin servidor'],
+    campos: ['Nombre del bot', 'Para qué sirve', 'Instrucciones/tono', 'Usuarios permitidos'],
+    ejemplo: 'Gimnasio: bot que responde horarios, tarifas y ejercicios a los socios a cualquier hora.',
+    repos: ['tbxark/ChatGPT-Telegram-Workers'],
+  },
+  {
+    slug: 'bot-telegram-medida', cat: 'bots', nombre: 'Bot de Telegram con menús y pedidos', p: [249, 499], plazo: '7 días',
+    resumen: 'Bot con botones: catálogo, reservas, avisos y pedidos, conectado a tu hoja de cálculo.',
+    recibes: ['Bot con menús de botones', 'Conexión con Google Sheets', 'Avisos programados', 'Panel de mensajes'],
+    campos: ['Opciones del menú', 'Datos (productos, horarios)', 'Quién recibe los pedidos'],
+    ejemplo: 'Panadería: el cliente pulsa «Encargar», elige pan y hora, y el pedido cae en la hoja del obrador.',
+    repos: ['aiogram/aiogram'],
+  },
+  {
+    slug: 'crm-whatsapp', cat: 'bots', nombre: 'CRM de WhatsApp para tu equipo', p: [299, 699], plazo: '7 días',
+    resumen: 'Bandeja compartida de WhatsApp: varios agentes, contactos, embudo de ventas y envíos masivos.',
+    recibes: ['Bandeja compartida', 'Contactos y etiquetas', 'Embudo de oportunidades', 'Difusiones'],
+    campos: ['Números de WhatsApp Business', 'Agentes', 'Etapas de venta'],
+    ejemplo: 'Autoescuela: 3 personas atienden el mismo WhatsApp y nadie responde dos veces al mismo alumno.',
+    repos: ['thareekanvar/replyloom'],
+  },
+
+  // ── Automatizaciones ───────────────────────────────────
+  {
+    slug: 'auto-captacion-leads', cat: 'automatizaciones', nombre: 'Captación de clientes automática', p: [149, 299], plazo: '3 días',
+    resumen: 'Formulario → hoja de cálculo → email de bienvenida → aviso a tu móvil. Sin copiar y pegar.',
+    recibes: ['Flujo n8n importado y probado', 'Registro en Google Sheets', 'Email automático al cliente', 'Aviso a Telegram'],
+    campos: ['Formulario de origen', 'Hoja de destino', 'Texto del email', 'Canal de aviso'],
+    ejemplo: 'Academia: cada interesado queda en la hoja, recibe el temario y tú te enteras al momento.',
+    repos: ['yusizer/n8n-lead-automation', 'n8n-io/n8n'],
+  },
+  {
+    slug: 'auto-facturas', cat: 'automatizaciones', nombre: 'Facturas recibidas a hoja de cálculo', p: [149, 299], plazo: '4 días',
+    resumen: 'Las facturas que llegan al email se leen solas y se apuntan en tu hoja: proveedor, fecha, importe, IVA.',
+    recibes: ['Flujo que vigila tu email', 'Extracción automática de datos', 'Hoja de cálculo ordenada', 'Copia del PDF en tu nube'],
+    campos: ['Email donde llegan las facturas', 'Hoja de destino', 'Campos a extraer'],
+    ejemplo: 'Autónomo: a final de trimestre tiene todas las facturas apuntadas para la gestoría.',
+    repos: ['vixonoffice/n8n-automation-templates', 'enescingoz/awesome-n8n-templates'],
+  },
+  {
+    slug: 'auto-resenas', cat: 'automatizaciones', nombre: 'Resumen semanal de reseñas', p: [99, 199], plazo: '3 días',
+    resumen: 'Cada lunes recibes un resumen con IA de lo que dicen tus clientes: lo bueno, lo malo y qué responder.',
+    recibes: ['Flujo semanal programado', 'Resumen con IA', 'Borradores de respuesta', 'Envío por email o Telegram'],
+    campos: ['Dónde están tus reseñas', 'Email/Telegram de destino'],
+    ejemplo: 'Hotel rural: «Esta semana 12 reseñas, 2 quejas por el wifi», con respuesta sugerida.',
+    repos: ['vixonoffice/n8n-automation-templates', 'enescingoz/awesome-n8n-templates'],
+  },
+  {
+    slug: 'auto-plantilla-medida', cat: 'automatizaciones', nombre: 'Una automatización a elegir del catálogo', p: [99, 199], plazo: '3 días',
+    resumen: 'Elige entre más de 280 flujos probados (Gmail, WhatsApp, Notion, Drive, IA…) y lo dejamos funcionando con tus cuentas.',
+    recibes: ['Flujo instalado y conectado', 'Prueba con datos reales', 'Guía de uso de 1 página'],
+    campos: ['Qué tarea repetitiva quieres quitarte', 'Herramientas que usas', 'Accesos (te guiamos)'],
+    ejemplo: 'Guardar adjuntos de Gmail en Drive por cliente, o publicar en redes lo que subes al blog.',
+    repos: ['enescingoz/awesome-n8n-templates', 'n8n-io/n8n', 'activepieces/activepieces', 'automatisch/automatisch'],
+  },
+  {
+    slug: 'auto-tareas-programadas', cat: 'automatizaciones', nombre: 'Tareas programadas en la nube', p: [199, 399], plazo: '5 días',
+    resumen: 'Procesos que se ejecutan solos cada hora/día: copias, informes, sincronizaciones, recordatorios.',
+    recibes: ['Proceso en Cloudflare con reintentos', 'Registro de ejecuciones', 'Aviso si algo falla'],
+    campos: ['Qué hay que hacer', 'Cada cuánto', 'Origen y destino de los datos'],
+    ejemplo: 'Cada noche se copian los pedidos del día a la hoja de contabilidad y se envía el total por email.',
+    repos: ['cloudflare/workflows-starter'],
+  },
+
+  // ── Enlaces, QR y analítica ────────────────────────────
+  {
+    slug: 'acortador-enlaces', cat: 'enlaces', nombre: 'Acortador de enlaces con tu dominio', p: [49, 129], plazo: '48 h',
+    resumen: 'Enlaces cortos de marca (tunegocio.es/oferta) con estadísticas de clics y QR.',
+    recibes: ['Acortador en tu dominio', 'Estadísticas por enlace', 'QR por enlace', 'Panel de gestión'],
+    campos: ['Dominio o subdominio', 'Primeros enlaces'],
+    ejemplo: 'Campaña de flyers con tunegocio.es/verano: sabes cuántos escanearon el QR y desde dónde.',
+    repos: ['miantiao-me/Sink', 'botnick/shortlink'],
+  },
+  {
+    slug: 'qr-campanas', cat: 'enlaces', nombre: 'Pack de códigos QR para campañas', p: [19, 49], plazo: '24 h',
+    resumen: 'QR en vector listos para imprenta, con enlace editable y medición.',
+    recibes: ['Hasta 10 QR en SVG/PNG', 'Enlaces editables después de imprimir', 'Medición de escaneos'],
+    campos: ['Destinos de cada QR', 'Colores / logo'],
+    ejemplo: 'QR en escaparate, carta y tarjetas, cada uno medido por separado.',
+    repos: ['investblog/qr-generator'],
+  },
+  {
+    slug: 'analitica-sin-cookies', cat: 'enlaces', nombre: 'Analítica web sin cookies', p: [49, 99], plazo: '24 h',
+    resumen: 'Sabe cuántas visitas tienes y de dónde vienen, sin banner de cookies molesto.',
+    recibes: ['Panel de analítica privado', 'Instalación en tu web', 'Informe mensual por email (con plan)'],
+    campos: ['Web(s) a medir', 'Email para informes'],
+    ejemplo: 'Tienda local: «este mes 2.300 visitas, 40 % desde Instagram, la página más vista es Ofertas».',
+    repos: ['umami-software/umami'],
+  },
+
+  // ── Tiendas ────────────────────────────────────────────
+  {
+    slug: 'tienda-productos-digitales', cat: 'tiendas', nombre: 'Tienda de productos digitales', p: [299, 599], plazo: '5 días',
+    resumen: 'Vende ebooks, plantillas, cursos o presets: el cliente paga y descarga al momento.',
+    recibes: ['Tienda con pago online', 'Entrega automática del archivo', 'Panel de pedidos', 'Emails de compra'],
+    campos: ['Productos y precios', 'Archivos a entregar', 'Cuenta de cobro (Stripe)'],
+    ejemplo: 'Diseñadora vende packs de plantillas de Canva a 9 € con descarga instantánea.',
+    repos: ['ddyy/minshop', 'Vojislav77/digital-downloads-website', 'fengyiqicoder/astro-ai-shop', 'Paymug/paymug'],
+  },
+  {
+    slug: 'tienda-online', cat: 'tiendas', nombre: 'Tienda online completa', p: [499, 999], plazo: '7 días',
+    resumen: 'Catálogo, variantes, carrito, pagos, envíos y panel de pedidos. Sin comisiones de plataforma.',
+    recibes: ['Tienda con tu marca', 'Pagos con tarjeta', 'Gestión de stock y envíos', 'Panel de administración'],
+    campos: ['Productos, variantes y fotos', 'Tarifas de envío', 'Datos legales', 'Cuenta de cobro'],
+    ejemplo: 'Tienda de cerámica artesana con 40 productos, envío a península y aviso de cada venta.',
+    repos: ['ddyy/minshop', 'russellkmoore/mercora'],
+  },
+  {
+    slug: 'marketplace-plantillas', cat: 'tiendas', nombre: 'Marketplace de productos digitales', p: [699, 1299], plazo: '10 días',
+    resumen: 'Plataforma donde varios creadores venden plantillas, presets o cursos y tú cobras comisión.',
+    recibes: ['Marketplace multivendedor', 'Previsualizaciones', 'Pagos y descargas protegidas', 'Panel de vendedores'],
+    campos: ['Nombre y nicho', 'Comisión', 'Categorías', 'Primeros vendedores'],
+    ejemplo: 'Marketplace de plantillas de Notion para estudiantes con 15 creadores.',
+    repos: ['Kylelau339/digital-sales-platform', 'w4seemdev/Templix', 'playlikeboy/scriptly.store', 'vignesh-gupta/digibee-marketplace'],
+  },
+
+  // ── Portales ───────────────────────────────────────────
+  {
+    slug: 'portal-cliente', cat: 'portales', nombre: 'Portal de clientes para agencias y freelancers', p: [299, 599], plazo: '7 días',
+    resumen: 'Tus clientes entran con su usuario y ven proyectos, archivos, facturas y avances.',
+    recibes: ['Portal con tu marca', 'Proyectos y tareas', 'Archivos compartidos', 'Facturas y presupuestos'],
+    campos: ['Logo y colores', 'Clientes y proyectos iniciales', 'Servicios que facturas'],
+    ejemplo: 'Estudio de diseño: el cliente ve «Logo – fase 2 de 3» y descarga las propuestas.',
+    repos: ['directus-labs/agency-os', 'Vibra-Labs/Atrium', 'onlineprfoundation/pr-agency-platform'],
+  },
+  {
+    slug: 'web-editable-visual', cat: 'portales', nombre: 'Web que editas arrastrando bloques', p: [399, 799], plazo: '7 días',
+    resumen: 'Web con editor visual: cambias textos, imágenes y secciones arrastrando, como en Wix, pero tuya.',
+    recibes: ['Web con editor visual', 'Bloques prediseñados', 'Formación de 30 min', 'Alojamiento propio'],
+    campos: ['Secciones que necesitas', 'Contenido inicial', 'Quién la editará'],
+    ejemplo: 'Asociación cultural: la junta cambia la agenda de actividades cada semana sin depender de nadie.',
+    repos: ['GrapesJS/grapesjs', 'puckeditor/puck', 'givanz/VvvebJs', 'webstudio-is/webstudio'],
+  },
+
+  // ── Planes mensuales ───────────────────────────────────
+  {
+    slug: 'plan-mantenimiento-web', cat: 'planes', nombre: 'Mantenimiento web (mes)', p: [19], plazo: 'Mensual',
+    resumen: 'Nos ocupamos de que tu web siga funcionando: copias, actualizaciones y pequeños cambios.',
+    recibes: ['Copias de seguridad', 'Actualizaciones de seguridad', '30 min de cambios al mes', 'Vigilancia de caídas'],
+    campos: ['Web a mantener', 'Accesos (te guiamos)'],
+    ejemplo: 'Cambiar el horario de verano o subir la nueva carta: nos lo mandas y está hecho.',
+    repos: [],
+  },
+  {
+    slug: 'plan-hosting-dominio', cat: 'planes', nombre: 'Alojamiento + dominio gestionado (mes)', p: [9], plazo: 'Mensual',
+    resumen: 'Tu web publicada en Cloudflare con SSL y tu dominio, sin preocuparte de renovaciones.',
+    recibes: ['Alojamiento rápido con SSL', 'Gestión del dominio', 'Email de reenvío'],
+    campos: ['Dominio deseado', 'Web a alojar'],
+    ejemplo: 'tunegocio.es apuntando a tu web, renovado cada año sin que tengas que hacer nada.',
+    repos: ['coollabsio/coolify'],
+  },
+  {
+    slug: 'plan-automatizaciones', cat: 'planes', nombre: 'Automatizaciones vigiladas (mes)', p: [39], plazo: 'Mensual',
+    resumen: 'Mantenemos tus automatizaciones en marcha: si una falla, la arreglamos antes de que lo notes.',
+    recibes: ['Servidor n8n/Activepieces gestionado', 'Vigilancia de errores', '1 flujo nuevo pequeño al mes'],
+    campos: ['Automatizaciones actuales', 'Canal de aviso'],
+    ejemplo: 'El token de Google caduca un viernes por la noche: lo renovamos y el flujo sigue.',
+    repos: ['n8n-io/n8n', 'activepieces/activepieces'],
+  },
+  {
+    slug: 'auditoria-web', cat: 'planes', nombre: 'Auditoría web exprés', p: [49], plazo: '48 h',
+    resumen: 'Informe claro de velocidad, SEO, móvil y accesibilidad de tu web, con lo que hay que arreglar primero.',
+    recibes: ['Informe PDF de 5–8 páginas', 'Lista priorizada de mejoras', 'Presupuesto cerrado para arreglarlo'],
+    campos: ['URL de la web', 'Objetivo (más ventas, más llamadas…)'],
+    ejemplo: '«Tu web tarda 6 s en móvil por 3 imágenes de 4 MB: arreglarlo sube las llamadas».',
+    repos: [],
+  },
+];
+
+export const paginas = [
+  {
+    slug: 'como-funciona', titulo: 'Cómo funciona', menu: 'header',
+    md: `## Servicios digitales como barras de pan
+
+Cada servicio es un producto cerrado: **precio fijo, plazo fijo y una lista de campos** que rellenas tú. Nada de reuniones eternas ni presupuestos a medida.
+
+### 1. Eliges
+Busca tu servicio por pestaña (webs, hostelería, reservas, bodas, bots, automatizaciones…). Cada ficha te dice qué recibes, un ejemplo real y el plazo.
+
+### 2. Rellenas los campos
+Tras el pago te llega un formulario con los datos que necesitamos: nombre, fotos, horarios, textos… Si no tienes algo, lo marcamos y seguimos.
+
+### 3. Lo recibes funcionando
+Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta de uso.
+
+## Dos modalidades
+
+| | Lo montas tú | Te lo montamos |
+|---|---|---|
+| Qué recibes | Plantilla + guía paso a paso | Servicio publicado con tus datos |
+| Para quién | Quien quiere ahorrar y se maneja | Quien quiere olvidarse |
+| Soporte | Por email | Por email y WhatsApp |
+
+## Sin humo
+- Todo se basa en software probado y de código abierto: **es tuyo**, sin cuotas obligatorias.
+- Si en 7 días no está como te prometimos, te devolvemos el dinero.
+`,
+  },
+  {
+    slug: 'preguntas-frecuentes', titulo: 'Preguntas frecuentes', menu: 'footer',
+    md: `## ¿De quién es la web o la automatización?
+Tuya. Usamos software de código abierto y te entregamos los accesos.
+
+## ¿Hay cuotas mensuales?
+No son obligatorias. Muchos servicios funcionan gratis en Cloudflare. Si prefieres que lo mantengamos, tienes los **Planes mensuales**.
+
+## ¿Y si no tengo textos o fotos?
+Marca «no lo tengo» en el campo y te proponemos textos e imágenes libres de derechos.
+
+## ¿Puedo pedir cambios?
+Sí: cada servicio incluye una ronda de cambios. Después, con el plan de mantenimiento o por horas.
+
+## ¿Cuánto tarda?
+El plazo aparece en cada ficha y cuenta desde que recibimos los campos completos.
+
+## ¿Emitís factura?
+Sí, factura con IVA en cada compra.
+`,
+  },
+  {
+    slug: 'herramientas-recomendadas', titulo: 'Herramientas recomendadas', menu: 'footer',
+    md: `## Herramientas que usamos y recomendamos
+
+Esta página se completa con los programas de afiliación seleccionados (hosting, dominios, email marketing, IA…).
+
+_Pendiente de rellenar con el listado revisado._
+`,
+  },
+  {
+    slug: 'aviso-legal', titulo: 'Aviso legal y privacidad', menu: 'footer',
+    md: `## Aviso legal
+
+_Pendiente: datos del titular (nombre, NIF, domicilio, email de contacto), condiciones de contratación, política de devoluciones y de privacidad._
+`,
+  },
+];

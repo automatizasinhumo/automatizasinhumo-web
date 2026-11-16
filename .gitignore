@@ -46,3 +46,6 @@ Thumbs.db
 src/styles/themes/
 tsconfig.theme.json
 tsconfig.theme.*.json
+
+# Credenciales locales (no subir)
+manual/CREDENCIALES*
