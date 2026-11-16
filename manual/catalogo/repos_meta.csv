@@ -86,3 +86,13 @@ umami-software/umami;Umami is a privacy-first web and product analytics platform
 frappe/builder;Craft beautiful websites effortlessly with an intuitive visual builder and publish them instantly;MIT;https://frappe.io/builder;2496;Python
 GrapesJS/grapesjs;Free and Open source Web Builder Framework. Next generation tool for building templates without coding;NOASSERTION;https://grapesjs.com;26413;TypeScript
 puckeditor/puck;The visual editor for React.;MIT;https://puckeditor.com;13725;TypeScript
+louislam/uptime-kuma;A fancy self-hosted monitoring tool;MIT;https://uptime.kuma.pet;94498;JavaScript
+al1abb/invoify;An invoice generator app built using Next.js, Typescript, and Shadcn;MIT;https://invoify.vercel.app;6392;TypeScript
+pdfme/pdfme;Open-source PDF generation library built with TypeScript and React. Features a WYSIWYG template designer, PDF viewer, and powerful generation capabilities. Create custom PDFs effortlessly in both browser and Node.js environments.;MIT;http://pdfme.com/;5069;TypeScript
+openai/whisper;Robust Speech Recognition via Large-Scale Weak Supervision;MIT;;112851;Python
+mckaywrigley/chatbot-ui;AI chat for any model.;MIT;;33307;TypeScript
+withastro/starlight;🌟 Build beautiful, accessible, high-performance documentation websites with Astro;MIT;https://starlight.astro.build;9600;TypeScript
+knadh/listmonk;High performance, self-hosted, newsletter and mailing list manager with a modern dashboard. Single binary app.;AGPL-3.0;https://listmonk.app;24341;Go
+orestbida/cookieconsent;:cookie: Simple cross-browser cookie-consent plugin written in vanilla js;MIT;https://playground.cookieconsent.orestbida.com/;5771;JavaScript
+danielgatis/rembg;Rembg is a tool to remove images background;MIT;;25527;Python
+excalidraw/excalidraw;Virtual whiteboard for sketching hand-drawn like diagrams;MIT;https://excalidraw.com;135801;TypeScript

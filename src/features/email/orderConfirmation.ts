@@ -37,11 +37,11 @@ const thumbCell = (
 /** Shipping / discount / tax / total, in the order they appear on a receipt. */
 function totalRows(order: Order, money: (cents: number) => string): TotalRow[] {
   return [
-    ...(order.shipping_cents > 0 ? [{ label: 'Shipping', amount: money(order.shipping_cents) }] : []),
+    ...(order.shipping_cents > 0 ? [{ label: 'Envío', amount: money(order.shipping_cents) }] : []),
     ...(order.discount_cents > 0
-      ? [{ label: 'Discount', amount: `&minus;${money(order.discount_cents)}` }]
+      ? [{ label: 'Descuento', amount: `&minus;${money(order.discount_cents)}` }]
       : []),
-    ...(order.tax_cents > 0 ? [{ label: 'Tax', amount: money(order.tax_cents) }] : []),
+    ...(order.tax_cents > 0 ? [{ label: 'IVA', amount: money(order.tax_cents) }] : []),
     { label: 'Total', amount: money(order.amount_total_cents), strong: true },
   ];
 }
@@ -85,23 +85,23 @@ export function orderConfirmationEmail(
   );
 
   const text = [
-    `Thanks for your order!`,
+    `¡Gracias por tu pedido!`,
     ``,
-    `Order #${num}, ${storeName}`,
+    `Pedido n.º ${num}, ${storeName}`,
     ``,
     ...rows,
-    ...(order.shipping_cents > 0 ? [`Shipping: ${money(order.shipping_cents)}`] : []),
-    ...(order.discount_cents > 0 ? [`Discount: -${money(order.discount_cents)}`] : []),
-    ...(order.tax_cents > 0 ? [`Tax: ${money(order.tax_cents)}`] : []),
+    ...(order.shipping_cents > 0 ? [`Envío: ${money(order.shipping_cents)}`] : []),
+    ...(order.discount_cents > 0 ? [`Descuento: -${money(order.discount_cents)}`] : []),
+    ...(order.tax_cents > 0 ? [`IVA: ${money(order.tax_cents)}`] : []),
     `Total: ${money(order.amount_total_cents)}`,
-    ...(hasDigital && orderUrl ? [``, `Your download is ready.`] : []),
-    ...(orderUrl ? [``, `View your order: ${orderUrl}`] : []),
+    ...(hasDigital && orderUrl ? [``, `Tu descarga está lista.`] : []),
+    ...(orderUrl ? [``, `Ver tu pedido: ${orderUrl}`] : []),
   ].join('\n');
 
   const html = emailShell({
     storeName,
-    heading: 'Thanks for your order',
-    subheading: `Order #${num} is confirmed. We'll email you again when it ships.`,
+    heading: 'Gracias por tu pedido',
+    subheading: `El pedido n.º ${num} está confirmado. Ahora te llega el formulario con los campos para empezar.`,
     body:
       emailItemsTable(
         items.map((it) => ({
@@ -113,15 +113,15 @@ export function orderConfirmationEmail(
         totalRows(order, money),
       ) +
       (hasDigital && orderUrl
-        ? `<p style="margin:20px 0 0;font-size:14px;">Your download is ready.</p>`
+        ? `<p style="margin:20px 0 0;font-size:14px;">Tu descarga está lista.</p>`
         : '') +
-      (orderUrl ? emailButton(orderUrl, 'View your order') : ''),
-    footer: `Questions about this order? Just reply to this email.`,
+      (orderUrl ? emailButton(orderUrl, 'Ver tu pedido') : ''),
+    footer: `¿Dudas sobre el pedido? Responde a este email.`,
   });
 
   return {
     to: order.email!,
-    subject: `Your ${storeName} order #${num}`,
+    subject: `Tu pedido n.º ${num} en ${storeName}`,
     html,
     text,
   };
@@ -162,9 +162,9 @@ export function orderNotificationEmail(
     shipText,
     ``,
     ...rows,
-    ...(order.shipping_cents > 0 ? [`Shipping: ${money(order.shipping_cents)}`] : []),
-    ...(order.discount_cents > 0 ? [`Discount: -${money(order.discount_cents)}`] : []),
-    ...(order.tax_cents > 0 ? [`Tax: ${money(order.tax_cents)}`] : []),
+    ...(order.shipping_cents > 0 ? [`Envío: ${money(order.shipping_cents)}`] : []),
+    ...(order.discount_cents > 0 ? [`Descuento: -${money(order.discount_cents)}`] : []),
+    ...(order.tax_cents > 0 ? [`IVA: ${money(order.tax_cents)}`] : []),
     `Total: ${money(order.amount_total_cents)}`,
     ``,
     `View in admin: ${adminUrl}`,
@@ -212,20 +212,20 @@ export function orderShippedEmail(
   const orderUrl = guestOrderUrl ?? null;
 
   const text = [
-    `Your order #${num} has shipped!`,
+    `¡Tu pedido n.º ${num} está entregado!`,
     ...(order.tracking_number
       ? [
           ``,
-          `Carrier: ${carrierName(order.tracking_carrier)}`,
-          `Tracking: ${order.tracking_number}`,
-          ...(url ? [`Track it: ${url}`] : []),
+          `Transportista: ${carrierName(order.tracking_carrier)}`,
+          `Seguimiento: ${order.tracking_number}`,
+          ...(url ? [`Seguirlo: ${url}`] : []),
         ]
       : []),
-    ...(orderUrl ? [``, `View your order: ${orderUrl}`] : []),
+    ...(orderUrl ? [``, `Ver tu pedido: ${orderUrl}`] : []),
   ].join('\n');
 
   const trackingHtml = order.tracking_number
-    ? emailLabel('Tracking') +
+    ? emailLabel('Seguimiento') +
       `<p style="margin:0;font-size:14px;line-height:1.6;">
         ${escapeHtml(carrierName(order.tracking_carrier))}<br>
         ${
@@ -238,21 +238,21 @@ export function orderShippedEmail(
 
   const html = emailShell({
     storeName,
-    heading: 'Your order is on its way',
-    subheading: `Order #${num} shipped.`,
+    heading: 'Tu pedido está en camino',
+    subheading: `Pedido n.º ${num} enviado.`,
     body:
       trackingHtml +
       (url
-        ? emailButton(url, 'Track your package')
+        ? emailButton(url, 'Seguir el envío')
         : orderUrl
-          ? emailButton(orderUrl, 'View your order')
+          ? emailButton(orderUrl, 'Ver tu pedido')
           : ''),
     footer: orderUrl && url ? `Order details: <a href="${orderUrl}" style="color:${PALETTE.muted};">${orderUrl}</a>` : undefined,
   });
 
   return {
     to: order.email!,
-    subject: `Your ${storeName} order #${num} has shipped`,
+    subject: `Tu pedido n.º ${num} en ${storeName} está entregado`,
     html,
     text,
   };
@@ -285,39 +285,39 @@ export function orderRefundedEmail(
   // "it depends on your bank" for cards. Saying nothing invites a support email.
   const timing =
     method === 'stripe' || method === null
-      ? 'Card refunds usually appear within 5-10 business days, depending on your bank.'
-      : 'The refund was sent back over the same payment method you used.';
+      ? 'Los reembolsos con tarjeta suelen aparecer en 5-10 días hábiles, según tu banco.'
+      : 'El reembolso se ha hecho por el mismo método de pago que usaste.';
 
   // Prices in the ORDER's currency, not the store's current one — an order
   // placed before a currency change must still read back in what was charged.
   const money = (cents: number) => formatPrice(cents, order.currency);
 
   const priorLine =
-    refundedCents > refundCents ? `Total refunded so far: ${money(refundedCents)}` : null;
+    refundedCents > refundCents ? `Total reembolsado hasta ahora: ${money(refundedCents)}` : null;
 
   const text = [
-    full ? `Your order #${num} has been refunded.` : `A refund was issued for order #${num}.`,
+    full ? `Tu pedido n.º ${num} ha sido reembolsado.` : `Se ha emitido un reembolso del pedido n.º ${num}.`,
     ``,
-    `Refunded: ${money(refundCents)}`,
+    `Reembolsado: ${money(refundCents)}`,
     ...(priorLine ? [priorLine] : []),
-    ...(full ? [] : [`Still paid: ${money(remaining)}`]),
+    ...(full ? [] : [`Pagado restante: ${money(remaining)}`]),
     ``,
     timing,
-    ...(orderUrl ? [``, `View your order: ${orderUrl}`] : []),
+    ...(orderUrl ? [``, `Ver tu pedido: ${orderUrl}`] : []),
   ].join('\n');
 
   const rows: TotalRow[] = [
-    { label: 'Refunded', amount: money(refundCents), strong: true },
-    ...(priorLine ? [{ label: 'Total refunded', amount: money(refundedCents) }] : []),
-    ...(full ? [] : [{ label: 'Still paid', amount: money(remaining) }]),
+    { label: 'Reembolsado', amount: money(refundCents), strong: true },
+    ...(priorLine ? [{ label: 'Total reembolsado', amount: money(refundedCents) }] : []),
+    ...(full ? [] : [{ label: 'Pagado restante', amount: money(remaining) }]),
   ];
 
   const html = emailShell({
     storeName,
-    heading: full ? 'Your order has been refunded' : 'A refund is on its way',
-    subheading: `Order #${num}`,
+    heading: full ? 'Tu pedido ha sido reembolsado' : 'Tu reembolso está en camino',
+    subheading: `Pedido n.º ${num}`,
     body:
-      emailLabel('Refund') +
+      emailLabel('Reembolso') +
       `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">${rows
         .map(
           (r) =>
@@ -326,14 +326,14 @@ export function orderRefundedEmail(
         )
         .join('')}</table>` +
       `<p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${PALETTE.muted};">${escapeHtml(timing)}</p>` +
-      (orderUrl ? emailButton(orderUrl, 'View your order') : ''),
+      (orderUrl ? emailButton(orderUrl, 'Ver tu pedido') : ''),
   });
 
   return {
     to: order.email!,
     subject: full
-      ? `Your ${storeName} order #${num} has been refunded`
-      : `A refund for your ${storeName} order #${num}`,
+      ? `Tu pedido n.º ${num} en ${storeName} ha sido reembolsado`
+      : `Reembolso de tu pedido n.º ${num} en ${storeName}`,
     html,
     text,
   };

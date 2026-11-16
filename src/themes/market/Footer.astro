@@ -21,7 +21,7 @@ const { model } = Astro.props;
     <span class="font-serif uppercase tracking-wide text-gray-900">&copy; {model.storeName}</span>
     {
       model.footerLinks.length > 0 && (
-        <nav aria-label="Footer" class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <nav aria-label="Pie de página" class="flex flex-wrap items-center gap-x-5 gap-y-2">
           {model.footerLinks.map((link) => (
             <a href={link.href} class="hover:text-gray-900">
               {link.text}

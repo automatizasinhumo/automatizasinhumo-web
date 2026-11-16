@@ -29,7 +29,7 @@ if (guestParam && isAccessToken(guestParam)) {
 } else if (guestParam && isLegacyPublicId(guestParam)) {
   orderPublicId = guestParam;
 }
-if (!orderPublicId) return new Response('Not found', { status: 404 });
+if (!orderPublicId) return new Response('No encontrado', { status: 404 });
 
 // Capability URL: never cache, never leak in referrers.
 Astro.response.headers.set('cache-control', 'private, no-store');
@@ -43,7 +43,7 @@ if (await getOrderByPublicId(env.DB, orderPublicId)) {
 }
 
 const pending = await getPendingByPublicId(env.DB, orderPublicId);
-if (!pending) return new Response('Not found', { status: 404 });
+if (!pending) return new Response('No encontrado', { status: 404 });
 
 const isDemo = pending.backend === 'demo';
 const isLightning = pending.backend === 'lnbits' || pending.backend === 'phoenixd';
@@ -92,7 +92,7 @@ if (
 const lightningExpired = isLightning && payExpired;
 
 const { storeName } = getConfig();
-const title = isDemo ? 'Demo checkout' : 'Pay with Lightning';
+const title = isDemo ? 'Demo checkout' : 'Pagar con Lightning';
 const description = isDemo
   ? `Simulated checkout for ${storeName}.`
   : `Pay ${storeName} with Bitcoin Lightning.`;

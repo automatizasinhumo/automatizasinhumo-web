@@ -49,3 +49,4 @@ tsconfig.theme.*.json
 
 # Credenciales locales (no subir)
 manual/CREDENCIALES*
+

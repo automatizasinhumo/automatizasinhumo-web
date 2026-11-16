@@ -65,11 +65,11 @@ describe('label fallback', () => {
       null,
     );
     const catalog = toMenuItem(
-      row({ target_type: 'catalog', target_id: null, target_name: 'Shop', target_slug: null }),
+      row({ target_type: 'catalog', target_id: null, target_name: 'Catálogo', target_slug: null }),
       null,
     );
     expect(home.text).toBe('Home');
-    expect(catalog.text).toBe('Shop');
+    expect(catalog.text).toBe('Catálogo');
   });
 });
 

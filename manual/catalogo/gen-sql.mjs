@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { categorias, productos, paginas } from './catalogo.mjs';
+import { DEMOS, DEMOS_URL, demosDe } from '../demos/demos.mjs';
 
 const here = new URL('.', import.meta.url);
 const meta = new Map();
@@ -27,6 +28,8 @@ function descripcion(p) {
   l.push('### Qué recibes', ...p.recibes.map((x) => `- ${x}`), '');
   l.push('### Campos que rellenas', ...p.campos.map((x) => `- ${x}`), '');
   l.push('### Ejemplo', `> ${p.ejemplo}`, '');
+  const demos = demosDe(p.slug);
+  if (demos.length) l.push('### Demo en vivo', ...demos.map((d) => `- [${d.titulo}](${d.url})`), '');
   l.push(`**Plazo:** ${p.plazo}`, '');
   if (p.p.length === 2) {
     l.push('### Modalidades',
@@ -68,8 +71,9 @@ for (const p of productos) {
 }
 
 // Páginas
+const lista = DEMOS.map(([slug, , t, prod]) => `- **[${t}](${DEMOS_URL}/${slug}/)** · servicio: [${productos.find((x) => x.slug === prod)?.nombre ?? prod}](/products/${prod})`).join('\n');
 for (const pg of paginas)
-  out.push(`INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES (${q(pg.titulo)}, ${q(pg.slug)}, ${q(pg.md)}, 1, 'standard', ${q(pid('page'))});`);
+  out.push(`INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES (${q(pg.titulo)}, ${q(pg.slug)}, ${q(pg.md.replace('DEMOS_LISTA', lista))}, 1, 'standard', ${q(pid('page'))});`);
 
 // Menú
 let pos = 0;

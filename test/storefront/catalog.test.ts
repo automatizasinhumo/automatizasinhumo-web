@@ -59,14 +59,14 @@ describe('buildSortModel', () => {
   it('flips direction on the field already sorting the list', () => {
     const active = buildSortModel('/products', 'price', 'asc').options.find((o) => o.current);
 
-    expect(active?.label).toBe('Price');
+    expect(active?.label).toBe('Precio');
     expect(active?.direction).toBe('asc');
     expect(active?.href).toContain('dir=desc');
   });
 
   it('applies each inactive field its own natural direction', () => {
     const name = buildSortModel('/products', 'price', 'asc').options.find(
-      (o) => o.label === 'Name',
+      (o) => o.label === 'Nombre',
     );
 
     expect(name?.current).toBe(false);
@@ -129,7 +129,7 @@ describe('the store-owned catalog', () => {
     expect(html).toContain('All products');
     expect(html).toContain('href="/categories/apparel"');
     expect(html).toContain('href="/products/item-1"');
-    expect(html).toContain('$10.01');
+    expect(html).toMatch(/10,01\sUS\$/);
   });
 
   it('announces an empty catalog instead of rendering a blank grid', async () => {
@@ -147,7 +147,7 @@ describe('the store-owned catalog', () => {
   it('keeps pagination a labelled landmark with rel hints', async () => {
     const html = await render(Catalog, model());
 
-    expect(html).toContain('aria-label="Pagination"');
+    expect(html).toContain('aria-label="Paginación"');
     expect(html).toContain('rel="next"');
     expect(html).toContain('aria-current="page"');
   });
@@ -158,7 +158,7 @@ describe('the store-owned catalog', () => {
       model({ pagination: buildPaginationModel('/products', 1, 1, 'newest', 'desc') }),
     );
 
-    expect(html).not.toContain('aria-label="Pagination"');
+    expect(html).not.toContain('aria-label="Paginación"');
   });
 
   it('marks the sorted field for assistive technology', async () => {
@@ -195,7 +195,7 @@ describe('an independently authored catalog', () => {
     expect(html).toContain('<table');
     expect(html).toContain('data-product="prod_k7m2qx8vn1"');
     expect(html).toContain('In stock');
-    expect(html).toContain('aria-label="Pagination"');
+    expect(html).toContain('aria-label="Paginación"');
     expect(html).not.toContain('reveal group');
   });
 

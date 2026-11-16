@@ -62,10 +62,24 @@ const query =
     ? normalizeSearchQuery(Astro.url.searchParams.get('q') ?? '')
     : '';
 
-const desc = (description ?? `Shop ${storeName}.`).slice(0, 160);
+const desc = (description ?? `${storeName}: webs, automatizaciones y servicios digitales a precio cerrado. Eliges, rellenas unos campos y lo recibes funcionando.`).slice(0, 160);
 const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
 const canonical = canonicalOverride ?? new URL(Astro.url.pathname, origin).href;
-const ogImage = image ? new URL(image, origin).href : undefined;
+// Sin foto de producto (placeholder): usar la imagen social de la marca.
+const ogImage = new URL(image && !image.endsWith('/placeholder.png') ? image : '/og-default.png', origin).href;
+// Los *.workers.dev son staging: nunca indexables.
+const noindex = origin.includes('.workers.dev');
+const orgLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: storeName,
+  url: origin + '/',
+  logo: new URL('/apple-touch-icon.png', origin).href,
+  email: 'hola@automatizasinhumo.com',
+  areaServed: 'ES',
+  inLanguage: 'es',
+  description: 'Webs, automatizaciones y servicios digitales a precio cerrado.',
+}).replace(/</g, '\\u003c');
 
 // The header and footer are store-owned, so they receive a model rather than
 // request context. Built from values middleware already loaded — no extra D1
@@ -85,7 +99,7 @@ const shell = buildShellModel({
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -100,8 +114,11 @@ const shell = buildShellModel({
     <title>{pageTitle}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0f172a" />
 
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content={storeName} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={desc} />
@@ -129,6 +146,7 @@ const shell = buildShellModel({
       document.addEventListener('load', finishImageFade, true);
       document.addEventListener('error', finishImageFade, true);
     </script>
+    <script is:inline type="application/ld+json" set:html={orgLd}></script>
   </head>
   <body class="flex min-h-screen flex-col bg-paper text-ink antialiased">
     <StoreHeader model={shell} />
@@ -146,7 +164,7 @@ const shell = buildShellModel({
       class="invisible pointer-events-none fixed inset-0 z-40"
       role="dialog"
       aria-modal="true"
-      aria-label="Cart"
+      aria-label="Carrito"
     >
       <div data-cart-backdrop class="absolute inset-0 bg-black/30 opacity-0 transition-opacity duration-300"></div>
       <aside
@@ -154,7 +172,7 @@ const shell = buildShellModel({
         class="absolute right-0 top-0 flex h-full w-full max-w-md translate-x-full flex-col bg-paper shadow-xl transition-transform duration-300"
       >
         <div class="flex items-center justify-between border-b border-line px-6 py-5">
-          <h2 class="font-serif text-2xl tracking-tight">Your cart</h2>
+          <h2 class="font-serif text-2xl tracking-tight">Tu carrito</h2>
           {/* 44px box, not a bare glyph: the hit area was only as big as the
               × itself, which is well under the 44×44 minimum for a touch target
               — and this is the primary way out of a full-height mobile drawer.
@@ -163,7 +181,7 @@ const shell = buildShellModel({
           <button
             type="button"
             data-cart-close
-            aria-label="Close cart"
+            aria-label="Cerrar carrito"
             class="-mr-2 flex h-11 w-11 items-center justify-center rounded-md text-3xl leading-none text-faint transition-colors hover:bg-surface hover:text-brand"
           >
             &times;

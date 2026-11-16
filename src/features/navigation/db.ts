@@ -36,7 +36,7 @@ export const MENU_CAPS: Record<MenuLocation, number> = { header: 6, footer: 50 }
  */
 export const SINGLETON_LABELS: Record<'home' | 'catalog', string> = {
   home: 'Home',
-  catalog: 'Shop',
+  catalog: 'Catálogo',
 };
 
 /** Label overrides are merchant free text; bound it before it reaches the DOM. */

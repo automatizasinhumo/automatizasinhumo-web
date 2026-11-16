@@ -6,10 +6,21 @@ export const prerender = false;
 
 export const GET: APIRoute = ({ url }) => {
   const origin = publicOrigin(url.origin, env.CANONICAL_ORIGIN);
+  // Staging (*.workers.dev): no indexar nada.
+  if (origin.includes('.workers.dev')) {
+    return new Response(`User-agent: *
+Disallow: /
+`, {
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
   const body = `User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
 Sitemap: ${origin}/sitemap.xml
 `;
   return new Response(body, {

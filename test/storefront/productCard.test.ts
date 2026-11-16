@@ -110,7 +110,7 @@ describe('the store-owned product card', () => {
 
     expect(html).toContain('href="/products/sample-tee"');
     expect(html).toContain('Sample Tee');
-    expect(html).toContain('$24.00');
+    expect(html).toMatch(/24,00\sUS\$/);
   });
 
   it('never publishes a stock count, in or out of stock', async () => {

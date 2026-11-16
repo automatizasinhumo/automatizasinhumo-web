@@ -19,6 +19,7 @@ export const categorias = [
   { slug: 'enlaces', nombre: 'Enlaces, QR y analítica', menu: 'footer' },
   { slug: 'tiendas', nombre: 'Tiendas y productos digitales', menu: 'footer' },
   { slug: 'portales', nombre: 'Portales y webs editables', menu: 'footer' },
+  { slug: 'documentos', nombre: 'Documentos, PDF e IA', menu: 'header' },
   { slug: 'planes', nombre: 'Planes mensuales', menu: 'header' },
 ];
 
@@ -392,6 +393,112 @@ export const productos = [
     ejemplo: '«Tu web tarda 6 s en móvil por 3 imágenes de 4 MB: arreglarlo sube las llamadas».',
     repos: [],
   },
+  {
+    slug: 'vigilancia-caidas', cat: 'planes', nombre: 'Aviso si tu web se cae + página de estado', p: [39, 99], plazo: '24 h',
+    resumen: 'Comprobamos tu web cada minuto y te avisamos al móvil si deja de funcionar, con una página pública de estado.',
+    recibes: ['Vigilancia cada 60 s de webs, tiendas o reservas', 'Aviso por Telegram o email', 'Página de estado con tu logo', 'Informe mensual de disponibilidad'],
+    campos: ['Webs a vigilar (URLs)', 'Canal de aviso (Telegram / email)', 'Logo'],
+    ejemplo: 'La tienda de Ana cae un sábado a las 23:10; a las 23:11 le llega «tienda caída» al Telegram y lo arreglamos.',
+    repos: ['louislam/uptime-kuma'],
+  },
+
+  // ── Documentos, PDF e IA ───────────────────────────────
+  {
+    slug: 'facturas-presupuestos', cat: 'documentos', nombre: 'Generador de facturas y presupuestos con tu marca', p: [79, 179], plazo: '48 h',
+    resumen: 'Rellenas cliente y conceptos, y sale una factura o presupuesto en PDF con tu logo, IVA calculado y numeración.',
+    recibes: ['Generador web propio (tuyo, sin cuotas)', 'Plantilla con tu logo y datos fiscales', 'Descarga en PDF y envío por email', 'Guía de uso de 1 página'],
+    campos: ['Razón social y NIF', 'Logo y colores', 'Tipos de IVA / IRPF que usas', 'Formato de numeración'],
+    ejemplo: 'Electricista autónomo: «Presupuesto P-2026-014 · cambio de cuadro · 380 € + IVA» enviado al cliente en 2 minutos desde el móvil.',
+    repos: ['al1abb/invoify'],
+  },
+  {
+    slug: 'certificados-automaticos', cat: 'documentos', nombre: 'Diplomas y certificados en PDF automáticos', p: [99, 229], plazo: '3 días',
+    resumen: 'Para academias, cursos y eventos: subes la lista de alumnos y cada uno recibe su certificado personalizado.',
+    recibes: ['Plantilla de diploma con tu diseño', 'Generación masiva desde una hoja de cálculo', 'Envío automático por email', 'Código QR de verificación'],
+    campos: ['Logo y firma', 'Texto del certificado', 'Hoja con nombres, emails y horas', 'Email remitente'],
+    ejemplo: 'Academia de inglés: 120 alumnos terminan el curso y en 5 minutos cada uno tiene su diploma con QR en el correo.',
+    repos: ['pdfme/pdfme'],
+  },
+  {
+    slug: 'transcripcion-audios', cat: 'documentos', nombre: 'Transcripción automática de audios y reuniones', p: [49, 149], plazo: '48 h',
+    resumen: 'Mandas un audio o una grabación y recibes el texto y un resumen con tareas. Funciona con audios de WhatsApp.',
+    recibes: ['Carpeta o bot donde dejar los audios', 'Texto completo en español', 'Resumen con puntos y tareas', 'Copia en Google Docs o email'],
+    campos: ['Dónde te llegan los audios (WhatsApp, Telegram, carpeta)', 'Dónde quieres el texto', 'Idioma principal'],
+    ejemplo: 'Gestoría: reenvía al bot la nota de voz del cliente y recibe «Pide cita para la renta, trae 3 nóminas».',
+    repos: ['openai/whisper'],
+  },
+  {
+    slug: 'chat-ia-web', cat: 'bots', nombre: 'Chat con IA en tu web que responde con tus datos', p: [199, 449], plazo: '5 días',
+    resumen: 'Un asistente en tu web que contesta horarios, precios y dudas frecuentes usando tu información, y te pasa los contactos.',
+    recibes: ['Chat en tu web o en una página propia', 'Entrenado con tus textos, PDFs y preguntas frecuentes', 'Aviso cuando alguien deja sus datos', 'Panel para revisar conversaciones'],
+    campos: ['Web donde va el chat', 'Documentos o FAQ', 'Tono (cercano / formal)', 'Email o Telegram para avisos'],
+    ejemplo: 'Clínica dental: «¿Abrís el sábado?» → «Sí, de 10 a 14. ¿Te reservo una revisión?» y llega el contacto al móvil.',
+    repos: ['mckaywrigley/chatbot-ui'],
+  },
+  {
+    slug: 'centro-ayuda', cat: 'portales', nombre: 'Centro de ayuda o manual para tus clientes', p: [149, 349], plazo: '4 días',
+    resumen: 'Una web de ayuda con buscador para que tus clientes resuelvan dudas solos: guías, preguntas frecuentes y tutoriales.',
+    recibes: ['Web de documentación con buscador', 'Menú lateral por temas', 'Modo claro/oscuro y versión móvil', 'Fácil de ampliar escribiendo textos'],
+    campos: ['Nombre del producto o servicio', 'Temas y preguntas', 'Capturas o vídeos', 'Logo y colores'],
+    ejemplo: 'Software de reservas para gimnasios: «Cómo cancelar una clase», «Cómo cambiar la tarifa»… y bajan los emails de soporte.',
+    repos: ['withastro/starlight'],
+  },
+  {
+    slug: 'newsletter-propia', cat: 'captacion', nombre: 'Boletín de email propio sin cuotas por contacto', p: [149, 299], plazo: '4 días',
+    resumen: 'Tu propio sistema de newsletter: formulario de alta, plantillas y envíos programados, sin pagar por cada suscriptor.',
+    recibes: ['Servidor de newsletter configurado', 'Formulario de alta para tu web', 'Plantilla de email con tu marca', 'Doble confirmación y baja (RGPD)'],
+    campos: ['Nombre del boletín', 'Logo y colores', 'Contactos actuales (si tienes)', 'Frecuencia de envío'],
+    ejemplo: 'Librería de barrio: cada lunes «Novedades de la semana» a 2.300 suscriptores sin cuota mensual por contactos.',
+    repos: ['knadh/listmonk'],
+  },
+  {
+    slug: 'banner-cookies-rgpd', cat: 'webs', nombre: 'Banner de cookies legal y textos RGPD', p: [29, 79], plazo: '24 h',
+    resumen: 'Pon tu web en regla: banner de cookies que bloquea de verdad hasta que el usuario acepta, y textos legales base.',
+    recibes: ['Banner de cookies con aceptar / rechazar / configurar', 'Bloqueo real de analítica y píxeles', 'Plantillas de aviso legal, privacidad y cookies', 'Instalado en tu web (modalidad «Te lo montamos»)'],
+    campos: ['URL de la web', 'Datos del titular', 'Herramientas que usas (Analytics, Meta…)'],
+    ejemplo: 'Tienda con píxel de Meta: el píxel ya no se carga hasta que el cliente pulsa «Aceptar».',
+    repos: ['orestbida/cookieconsent'],
+  },
+  {
+    slug: 'web-multidioma', cat: 'webs', nombre: 'Tu web en inglés (u otro idioma)', p: [99, 249], plazo: '4 días',
+    resumen: 'Añadimos un segundo idioma a tu web con selector, URLs propias y SEO para que te encuentren turistas y clientes de fuera.',
+    recibes: ['Versión completa en el idioma elegido', 'Selector de idioma', 'Etiquetas hreflang para Google', 'Revisión humana de textos clave'],
+    campos: ['URL de la web', 'Idioma', 'Textos que no se traducen (marcas, platos…)'],
+    ejemplo: 'Restaurante en Sevilla con carta y reservas en inglés: el turista que busca «tapas Seville» llega a una web que entiende y reserva.',
+    repos: [],
+  },
+  {
+    slug: 'ficha-google', cat: 'captacion', nombre: 'Ficha de Google de tu negocio optimizada', p: [49, 129], plazo: '48 h',
+    resumen: 'Que te encuentren en Google Maps: ficha completa, categorías correctas, fotos, horarios y enlace de reseñas.',
+    recibes: ['Ficha revisada y completada', 'Categorías y servicios optimizados', 'Enlace y QR para pedir reseñas', 'Checklist mensual de publicaciones'],
+    campos: ['Nombre y dirección del negocio', 'Servicios principales', '5–10 fotos', 'Acceso a la ficha (te guiamos)'],
+    ejemplo: 'Fisioterapeuta en Valencia: aparece en «fisio cerca de mí» con 40 fotos, horario y botón de cita.',
+    repos: [],
+  },
+  {
+    slug: 'fotos-producto-fondo', cat: 'tiendas', nombre: 'Fotos de producto con fondo blanco automático', p: [29, 79], plazo: '24 h',
+    resumen: 'Subes las fotos hechas con el móvil y te devolvemos las imágenes recortadas, con fondo blanco y tamaño para tu tienda.',
+    recibes: ['Hasta 50 fotos recortadas (ampliable)', 'Fondo blanco o de color', 'Tamaños para web, Amazon e Instagram', 'Carpeta compartida para nuevas tandas'],
+    campos: ['Fotos (carpeta o zip)', 'Color de fondo', 'Medidas que necesitas'],
+    ejemplo: 'Tienda de cerámica: 36 fotos hechas en la mesa de la cocina, listas para la web en una tarde.',
+    repos: ['danielgatis/rembg'],
+  },
+  {
+    slug: 'firma-email', cat: 'identidad', nombre: 'Firma de email profesional', p: [19, 49], plazo: '24 h',
+    resumen: 'Firma con tu foto o logo, cargo, teléfono, redes y aviso legal, que se ve bien en Gmail, Outlook y móvil.',
+    recibes: ['Firma HTML probada en Gmail y Outlook', 'Versión para todo tu equipo', 'Guía de instalación en 2 minutos'],
+    campos: ['Nombre y cargo de cada persona', 'Logo o foto', 'Teléfono y web', 'Redes sociales'],
+    ejemplo: 'Despacho de 6 abogados: misma firma para todos, con logo, teléfono directo y enlace de cita.',
+    repos: [],
+  },
+  {
+    slug: 'pizarra-planos', cat: 'documentos', nombre: 'Pizarra online privada para tu equipo', p: [49, 129], plazo: '48 h',
+    resumen: 'Una pizarra colaborativa propia para esquemas, planos de local o diagramas, con tu dominio y sin cuentas de terceros.',
+    recibes: ['Pizarra colaborativa publicada en tu dominio', 'Bibliotecas de iconos para tu sector', 'Exportación a PNG y PDF'],
+    campos: ['Subdominio deseado', 'Uso principal (planos, esquemas, clases)', 'Logo'],
+    ejemplo: 'Reformas López dibuja con el cliente la cocina nueva en la tablet y le manda el PDF al terminar.',
+    repos: ['excalidraw/excalidraw'],
+  },
 ];
 
 export const paginas = [
@@ -448,16 +555,132 @@ Sí, factura con IVA en cada compra.
     slug: 'herramientas-recomendadas', titulo: 'Herramientas recomendadas', menu: 'footer',
     md: `## Herramientas que usamos y recomendamos
 
-Esta página se completa con los programas de afiliación seleccionados (hosting, dominios, email marketing, IA…).
+Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y otras son de pago; te decimos cuál conviene en cada caso. Algunos enlaces pueden ser de afiliado: a ti no te cuesta más y nos ayuda a mantener precios bajos.
 
-_Pendiente de rellenar con el listado revisado._
+### Alojamiento y dominios
+- **Cloudflare**: hosting gratuito de webs estáticas, DNS, SSL y protección. Es donde publicamos casi todo.
+- **Registro de dominios**: Cloudflare Registrar (a precio de coste) u otro registrador que prefieras.
+
+### Email y avisos
+- **Brevo** o **MailerLite**: boletines y emails automáticos con plan gratuito.
+- **Telegram**: avisos instantáneos gratis desde formularios, reservas y pedidos.
+
+### Automatización
+- **n8n**: automatizaciones de código abierto; se puede alojar sin cuota.
+- **Make**: automatizaciones visuales con plan gratuito.
+
+### Diseño y contenido
+- **Canva**: imágenes y cartas para redes.
+- **Unsplash / Pexels**: fotos libres de derechos.
+
+### Hosting tradicional (si necesitas WordPress o correo con tu dominio)
+- **Raiola Networks** y **Webempresa**: hosting en España con soporte en español.
+- **Hostinger**: hosting y correo económicos.
+
+### Facturación y gestión
+- **Holded** o **Quipu**: facturación, gastos e impuestos para autónomos y pymes.
+
+### Pagos
+- **Stripe**: cobros con tarjeta, Bizum vía TPV de tu banco si lo prefieres.
+
+### Herramientas libres que instalamos sin cuota
+- **Uptime Kuma** (vigilancia de caídas), **listmonk** (newsletter), **Invoify** (facturas), **Starlight** (centros de ayuda), **Excalidraw** (pizarra).
+
+_Si quieres que configuremos alguna, está incluido en «Te lo montamos»._
 `,
   },
   {
-    slug: 'aviso-legal', titulo: 'Aviso legal y privacidad', menu: 'footer',
+    slug: 'demos', titulo: 'Demos en vivo', menu: 'header',
+    md: `## Mira lo que recibes antes de comprar
+
+Estas demos son webs reales funcionando. Cambiamos textos, fotos y colores por los tuyos.
+
+DEMOS_LISTA
+
+Todas las bases son de código abierto con licencia MIT: el resultado es tuyo, sin cuotas obligatorias.
+
+¿No ves tu caso? [Cuéntanos qué necesitas](/pages/contacto).
+`,
+  },
+  {
+    slug: 'contacto', titulo: 'Contacto', menu: 'header',
+    md: `## Cuéntanos qué necesitas
+
+Responde en un mensaje a estas cinco preguntas y te decimos qué servicio encaja y su precio cerrado:
+
+1. **Tu negocio**: nombre, sector y ciudad.
+2. **Qué quieres conseguir**: más reservas, vender online, ahorrar tiempo, una web para tu evento…
+3. **Qué tienes ya**: web, dominio, redes, herramientas.
+4. **Para cuándo** lo necesitas.
+5. **Presupuesto** aproximado.
+
+### Dónde escribirnos
+- Email: [hola@automatizasinhumo.com](mailto:hola@automatizasinhumo.com)
+- Respondemos en menos de 24 horas laborables.
+
+_Si ya sabes qué quieres, cómpralo directamente en el catálogo: tras el pago te llega el formulario con los campos._
+`,
+  },
+  {
+    slug: 'aviso-legal', titulo: 'Aviso legal', menu: 'footer',
     md: `## Aviso legal
 
-_Pendiente: datos del titular (nombre, NIF, domicilio, email de contacto), condiciones de contratación, política de devoluciones y de privacidad._
+En cumplimiento de la Ley 34/2002 (LSSI-CE):
+
+- **Titular**: [NOMBRE O RAZÓN SOCIAL]
+- **NIF**: [NIF]
+- **Domicilio**: [DIRECCIÓN]
+- **Email**: hola@automatizasinhumo.com
+
+### Objeto
+Este sitio ofrece la venta de servicios digitales (webs, automatizaciones y herramientas) a precio cerrado.
+
+### Propiedad intelectual
+Los textos y el diseño de este sitio pertenecen al titular. Los servicios se basan en software de código abierto; cada entrega respeta e incluye la licencia original de cada componente.
+
+### Responsabilidad
+El titular no se hace responsable del uso que terceros hagan de los servicios entregados ni de los contenidos que el cliente aporte.
+`,
+  },
+  {
+    slug: 'condiciones', titulo: 'Condiciones de contratación', menu: 'footer',
+    md: `## Condiciones de contratación
+
+### Precio y pago
+Los precios incluyen IVA salvo que se indique lo contrario. El pago se realiza al contratar.
+
+### Entrega
+El plazo de cada ficha cuenta desde que recibimos los campos completos del formulario. Entregamos por email el enlace, los accesos y una guía de uso.
+
+### Cambios
+Cada servicio incluye una ronda de cambios sobre lo entregado. Cambios posteriores, con plan de mantenimiento o por horas.
+
+### Garantía y devoluciones
+Si en 7 días desde la entrega el servicio no hace lo que describe su ficha, te devolvemos el importe. Al tratarse de contenido digital personalizado, una vez entregado y aceptado no aplica el derecho de desistimiento (art. 103 TRLGDCU).
+
+### Planes mensuales
+Se pueden cancelar en cualquier momento; el servicio sigue activo hasta el final del periodo pagado.
+`,
+  },
+  {
+    slug: 'privacidad', titulo: 'Privacidad', menu: 'footer',
+    md: `## Política de privacidad
+
+- **Responsable**: [NOMBRE O RAZÓN SOCIAL], hola@automatizasinhumo.com
+- **Finalidad**: gestionar pedidos, entregar los servicios y responder consultas.
+- **Base legal**: ejecución del contrato y consentimiento.
+- **Conservación**: el tiempo necesario y los plazos legales de facturación.
+- **Destinatarios**: proveedores necesarios para prestar el servicio (alojamiento en Cloudflare, pasarela de pago, email). No vendemos datos.
+- **Derechos**: acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a hola@automatizasinhumo.com. Puedes reclamar ante la AEPD (aepd.es).
+`,
+  },
+  {
+    slug: 'cookies', titulo: 'Cookies', menu: 'footer',
+    md: `## Política de cookies
+
+Este sitio solo usa **cookies técnicas** imprescindibles (carrito y sesión de tu cuenta). No usamos cookies de publicidad ni de seguimiento de terceros, por eso no te mostramos un banner de consentimiento.
+
+Si en el futuro añadimos analítica, será sin cookies o con tu consentimiento previo.
 `,
   },
 ];

@@ -59,7 +59,7 @@ export const GET: APIRoute = async ({ url }) => {
 
   const body = `# ${storeName}
 
-> ${storeName} is an online store you can browse and purchase from programmatically. All prices are in ${currency.toUpperCase()}. This file follows the llms.txt convention (https://llmstxt.org). Catalog and category links are live; an agent can complete a purchase via the JSON checkout endpoint under "For agents".
+> ${storeName} vende webs, automatizaciones y servicios digitales a precio cerrado para negocios y particulares en España: el cliente elige un servicio, rellena unos campos y lo recibe funcionando. Precios en ${currency.toUpperCase()}. Este fichero sigue la convención llms.txt (https://llmstxt.org); el catálogo y las categorías están enlazados y un agente puede comprar con el endpoint JSON de "For agents".
 
 ## Products
 ${productLines.length > 0 ? productLines.join('\n') : '- (no products listed)'}

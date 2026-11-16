@@ -150,7 +150,8 @@ async function resolveLocal(specifier, fromFile) {
   ];
   for (const candidate of candidates) {
     try {
-      if ((await stat(candidate)).isFile()) return candidate;
+      // Forward slashes on every OS: the rules below compare POSIX prefixes.
+      if ((await stat(candidate)).isFile()) return candidate.replaceAll('\\', '/');
     } catch {
       // Keep trying; an unresolvable specifier is reported by the caller.
     }
