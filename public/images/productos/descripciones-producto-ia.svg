@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Descripciones de producto escritas con IA y revisadas">
+<rect width="1200" height="1200" fill="#F8EAF2"/>
+<circle cx="1050" cy="150" r="380" fill="#A3487E" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="150" y="40" width="230" height="300" rx="20" fill="#A3487E" opacity=".3"/><rect x="110" y="70" width="230" height="300" rx="20" fill="#A3487E" opacity=".6"/><rect x="60" y="100" width="230" height="300" rx="20" fill="#fff" stroke="#6E2A55" stroke-width="8"/><circle cx="175" cy="210" r="50" fill="#A3487E"/><rect x="100" y="300" width="150" height="16" rx="8" fill="#6E2A55" opacity=".4"/><rect x="100" y="336" width="100" height="16" rx="8" fill="#6E2A55" opacity=".25"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#6E2A55" font-weight="700">CONTENIDO Y REDES</text>
+<text x="90" y="748" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Descripciones de</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">producto escritas con</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">IA y revisadas</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#A3487E"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 29 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#6E2A55">Entrega en 48 h</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Diplomas y certificados en PDF automáticos">
+<rect width="1200" height="1200" fill="#F1EFE8"/>
+<circle cx="1050" cy="150" r="380" fill="#6E6A55" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="120" y="40" width="240" height="310" rx="18" fill="#fff" stroke="#45422F" stroke-width="6" opacity=".6"/><rect x="70" y="80" width="240" height="310" rx="18" fill="#fff" stroke="#45422F" stroke-width="8"/><rect x="105" y="125" width="130" height="20" rx="10" fill="#6E6A55"/><rect x="105" y="175" width="170" height="12" rx="6" fill="#45422F" opacity=".3"/><rect x="105" y="209" width="140" height="12" rx="6" fill="#45422F" opacity=".3"/><rect x="105" y="243" width="170" height="12" rx="6" fill="#45422F" opacity=".3"/><rect x="105" y="277" width="140" height="12" rx="6" fill="#45422F" opacity=".3"/><rect x="105" y="311" width="170" height="12" rx="6" fill="#45422F" opacity=".3"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#45422F" font-weight="700">DOCUMENTOS, PDF E IA</text>
+<text x="90" y="748" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Diplomas y</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">certificados en PDF</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">automáticos</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#6E6A55"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 99 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#45422F">Entrega en 3 días</text>
+</svg>

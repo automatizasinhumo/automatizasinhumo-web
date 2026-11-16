@@ -2,6 +2,7 @@
 import { env } from 'cloudflare:workers';
 import Layout from '../layouts/Layout.astro';
 import ProductList from '../features/products/ProductList.astro';
+import HomeHero from '../features/storefront/HomeHero.astro';
 import { resolveHomePath } from '../features/settings/home';
 
 // A store can point `/` at a page or a single product instead of the catalog.
@@ -12,8 +13,11 @@ import { resolveHomePath } from '../features/settings/home';
 // through to the catalog: a 404 homepage would be edge-cached for everyone.
 const homePath = await resolveHomePath(env.DB, Astro.locals.settings?.homePage);
 if (homePath) return Astro.rewrite(homePath);
+// La portada solo en la primera vista del catálogo, no al ordenar ni paginar.
+const showHero = Astro.url.searchParams.size === 0;
 ---
 
 <Layout>
+  {showHero && <HomeHero />}
   <ProductList />
 </Layout>

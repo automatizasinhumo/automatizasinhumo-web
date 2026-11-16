@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Optimización de imágenes para tu web">
+<rect width="1200" height="1200" fill="#E8EEF6"/>
+<circle cx="1050" cy="150" r="380" fill="#2F5D9E" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="20" y="40" width="380" height="290" rx="22" fill="#fff" stroke="#1F3F6E" stroke-width="8"/><line x1="20" y1="100" x2="400" y2="100" stroke="#1F3F6E" stroke-width="8"/><circle cx="56" cy="70" r="10" fill="#2F5D9E"/><circle cx="88" cy="70" r="10" fill="#2F5D9E" opacity=".6"/><circle cx="120" cy="70" r="10" fill="#2F5D9E" opacity=".3"/><rect x="56" y="135" width="200" height="22" rx="11" fill="#1F3F6E"/><rect x="56" y="175" width="300" height="14" rx="7" fill="#2F5D9E" opacity=".45"/><rect x="56" y="203" width="260" height="14" rx="7" fill="#2F5D9E" opacity=".45"/><rect x="56" y="255" width="120" height="44" rx="22" fill="#2F5D9E"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#1F3F6E" font-weight="700">WEBS PARA TU NEGOCIO</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Optimización de</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">imágenes para tu web</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#2F5D9E"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 14 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#1F3F6E">Entrega en 24 h</text>
+</svg>

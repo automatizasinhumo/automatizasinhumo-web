@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Bot de Telegram con IA">
+<rect width="1200" height="1200" fill="#E5F2F6"/>
+<circle cx="1050" cy="150" r="380" fill="#23809B" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="30" y="50" width="260" height="140" rx="30" fill="#23809B"/><path d="M80 190 l-20 46 l60 -46z" fill="#23809B"/><rect x="130" y="210" width="260" height="130" rx="30" fill="#fff" stroke="#145669" stroke-width="8"/><circle cx="210" cy="275" r="12" fill="#145669"/><circle cx="260" cy="275" r="12" fill="#145669"/><circle cx="310" cy="275" r="12" fill="#145669"/><rect x="70" y="95" width="180" height="16" rx="8" fill="#fff"/><rect x="70" y="130" width="120" height="16" rx="8" fill="#fff" opacity=".7"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#145669" font-weight="700">BOTS E IA</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Bot de Telegram con IA</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#23809B"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 99 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#145669">Entrega en 48 h</text>
+</svg>

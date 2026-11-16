@@ -20,6 +20,7 @@ export const categorias = [
   { slug: 'tiendas', nombre: 'Tiendas y productos digitales', menu: 'footer' },
   { slug: 'portales', nombre: 'Portales y webs editables', menu: 'footer' },
   { slug: 'documentos', nombre: 'Documentos, PDF e IA', menu: 'header' },
+  { slug: 'contenido', nombre: 'Contenido y redes', menu: 'header' },
   { slug: 'planes', nombre: 'Planes mensuales', menu: 'header' },
 ];
 
@@ -135,7 +136,7 @@ export const productos = [
     recibes: ['Web con historia, programa, cómo llegar y alojamiento', 'Formulario RSVP con menú y alergias', 'Lista de confirmados descargable', 'Preguntas frecuentes'],
     campos: ['Nombres y fecha', 'Lugar de ceremonia y banquete', 'Programa del día', 'Fotos', 'Opciones de menú'],
     ejemplo: 'Lucía & Pablo: 140 invitados confirman desde el móvil y descargáis el Excel para el catering.',
-    repos: ['Holojerm/nuxt-wedding-template', 'kbichave/wedding-invite', 'zachspiel/wedding-rsvp', 'sotomaque/wedding-website'],
+    repos: ['Holojerm/nuxt-wedding-template', 'kbichave/wedding-invite', 'zachspiel/wedding-rsvp', 'sotomaque/wedding-website', '1molehayo/wedding-website-builder'],
   },
   {
     slug: 'invitacion-digital', cat: 'bodas', nombre: 'Invitación digital animada', p: [39, 89], plazo: '24 h',
@@ -391,7 +392,7 @@ export const productos = [
     recibes: ['Informe PDF de 5–8 páginas', 'Lista priorizada de mejoras', 'Presupuesto cerrado para arreglarlo'],
     campos: ['URL de la web', 'Objetivo (más ventas, más llamadas…)'],
     ejemplo: '«Tu web tarda 6 s en móvil por 3 imágenes de 4 MB: arreglarlo sube las llamadas».',
-    repos: [],
+    repos: ['GoogleChrome/lighthouse'],
   },
   {
     slug: 'vigilancia-caidas', cat: 'planes', nombre: 'Aviso si tu web se cae + página de estado', p: [39, 99], plazo: '24 h',
@@ -499,6 +500,127 @@ export const productos = [
     ejemplo: 'Reformas López dibuja con el cliente la cocina nueva en la tablet y le manda el PDF al terminar.',
     repos: ['excalidraw/excalidraw'],
   },
+  // ── Tanda 3: ideas de ChatGPT + repos del Excel ────────
+  {
+    slug: 'vigilancia-precios', cat: 'planes', nombre: 'Vigilancia de precios de la competencia (mes)', p: [12], plazo: 'Mensual',
+    resumen: 'Te avisamos por email o Telegram cuando un competidor cambia el precio, se queda sin stock o vuelve a tenerlo.',
+    recibes: ['Hasta 25 productos vigilados', 'Aviso por email o Telegram', 'Historial de precios de cada producto', 'Cambio de la lista cuando quieras'],
+    campos: ['Enlaces de los productos', 'Precio a partir del cual avisar', 'Frecuencia (diaria, cada hora)', 'Email o Telegram'],
+    ejemplo: 'Tienda de bicis: «La Orbea X de la competencia ha bajado de 1.299 € a 1.149 €» llega al móvil a las 9:00.',
+    repos: ['dgtlmoon/changedetection.io'],
+  },
+  {
+    slug: 'aviso-cambios-web', cat: 'planes', nombre: 'Aviso de cambios en webs que te interesan (mes)', p: [9], plazo: 'Mensual',
+    resumen: 'Vigilamos boletines oficiales, licitaciones, convocatorias o webs de proveedores y te avisamos cuando cambian.',
+    recibes: ['Hasta 15 páginas vigiladas', 'Solo te avisa si cambia la parte que te importa', 'Resumen del cambio en el aviso'],
+    campos: ['Páginas a vigilar', 'Qué parte vigilar (p. ej. «tabla de convocatorias»)', 'Frecuencia', 'Email o Telegram'],
+    ejemplo: 'Gestoría: aviso cada vez que el ayuntamiento publica una nueva ayuda para autónomos.',
+    repos: ['dgtlmoon/changedetection.io'],
+  },
+  {
+    slug: 'etiquetas-codigo-barras', cat: 'tiendas', nombre: 'Etiquetas con código de barras listas para imprimir', p: [19, 49], plazo: '24 h',
+    resumen: 'Nos pasas tu lista de productos y recibes un PDF con las etiquetas (código de barras, nombre y precio) al tamaño de tu papel.',
+    recibes: ['PDF con hasta 100 etiquetas (ampliable)', 'Códigos CODE128 o EAN-13', 'Tamaño adaptado a tu hoja o impresora', 'Plantilla para volver a generarlas tú'],
+    campos: ['Lista de referencias (Excel o CSV)', 'Nombre y precio de cada producto', 'Tamaño de etiqueta / hoja', 'Unidades por referencia'],
+    ejemplo: 'Artesana de jabones: 40 referencias con código, nombre y PVP en hojas A4 de 24 etiquetas.',
+    repos: ['lindell/JsBarcode', 'Hopding/pdf-lib'],
+  },
+  {
+    slug: 'optimizar-imagenes', cat: 'webs', nombre: 'Optimización de imágenes para tu web', p: [14, 39], plazo: '24 h',
+    resumen: 'Tus fotos pesadas, convertidas a WebP o AVIF con el tamaño justo: la web carga más rápido sin perder calidad visible.',
+    recibes: ['Hasta 100 imágenes optimizadas', 'Formato WebP o AVIF + copia JPG', 'Nombres de archivo amigables para SEO', 'Informe de peso antes / después'],
+    campos: ['Imágenes (carpeta o zip)', 'Formato deseado', 'Ancho máximo', 'Calidad (alta / equilibrada)'],
+    ejemplo: 'Casa rural: 60 fotos de 5 MB sacadas con la cámara, convertidas a WebP de 1600 px listas para la galería.',
+    repos: ['lovell/sharp'],
+  },
+  {
+    slug: 'logo-vectorial', cat: 'identidad', nombre: 'Tu logo en vectorial y en todos los tamaños', p: [19, 49], plazo: '48 h',
+    resumen: 'Tu logo limpio en SVG y en todos los formatos que te pedirán: web, redes, favicon, imprenta y fondo oscuro.',
+    recibes: ['SVG optimizado', 'PNG en 6 tamaños', 'Favicon e icono de app', 'Versión en blanco para fondos oscuros'],
+    campos: ['Logo actual (el mejor archivo que tengas)', 'Colores corporativos', 'Dónde lo vas a usar'],
+    ejemplo: 'Peluquería con el logo solo en una foto del cartel: recibe el SVG, el favicon y la versión blanca para Instagram.',
+    repos: ['svg/svgo'],
+  },
+  {
+    slug: 'limpieza-csv', cat: 'documentos', nombre: 'Limpieza de listados de clientes y productos', p: [29, 69], plazo: '48 h',
+    resumen: 'Ese Excel lleno de duplicados, mayúsculas mezcladas y teléfonos con formatos distintos, ordenado y listo para importar.',
+    recibes: ['Archivo limpio sin duplicados exactos', 'Columnas unificadas (nombres, teléfonos, emails)', 'Informe de lo que se ha corregido', 'Formato listo para tu CRM o tienda'],
+    campos: ['Archivo (Excel o CSV)', 'Columna que identifica cada registro', 'Columnas que quieres conservar', 'Programa al que lo vas a importar'],
+    ejemplo: 'Autoescuela: 3 hojas de alumnos de distintos años unidas en una sola, sin repetidos, lista para el email de bienvenida.',
+    repos: ['mholt/PapaParse'],
+  },
+  {
+    slug: 'plantilla-inventario', cat: 'documentos', nombre: 'Plantilla de inventario a medida en Excel', p: [29, 69], plazo: '48 h',
+    resumen: 'Un Excel con tus productos y categorías que avisa en rojo cuando algo baja del mínimo y calcula lo que vale tu stock.',
+    recibes: ['Excel con tus productos y categorías', 'Alertas de stock mínimo', 'Valoración del inventario', 'Hoja de entradas y salidas'],
+    campos: ['Categorías', 'Lista de productos', 'Stock mínimo de cada uno', 'Coste y precio de venta'],
+    ejemplo: 'Bar de barrio: la hoja marca en rojo «tónica: quedan 6» antes de hacer el pedido del lunes.',
+    repos: ['exceljs/exceljs'],
+  },
+  {
+    slug: 'informe-graficos', cat: 'documentos', nombre: 'Informe con gráficos a partir de tu Excel', p: [29, 79], plazo: '48 h',
+    resumen: 'Nos mandas tus datos de ventas, socios o visitas y recibes un PDF claro con gráficos listo para presentar.',
+    recibes: ['PDF con hasta 10 gráficos', 'Resumen en una página', 'Plantilla para repetirlo cada mes'],
+    campos: ['Archivo de datos', 'Qué quieres medir', 'Periodo', 'Logo y colores'],
+    ejemplo: 'Asociación de vecinos: informe anual de cuotas y actividades para la asamblea, con logo y 6 gráficos.',
+    repos: ['chartjs/Chart.js', 'Hopding/pdf-lib'],
+  },
+  {
+    slug: 'dossier-comercial', cat: 'documentos', nombre: 'Dossier comercial en PDF con tu marca', p: [39, 99], plazo: '3 días',
+    resumen: 'Un PDF de 4 páginas para mandar por email o WhatsApp: quién eres, qué ofreces, por qué tú y cómo contratarte.',
+    recibes: ['PDF de 4 páginas con tu marca', 'Versión ligera para WhatsApp', 'Archivo editable para actualizar precios'],
+    campos: ['Nombre comercial y logo', 'Servicios y precios', 'Por qué elegirte (3 razones)', 'Datos de contacto'],
+    ejemplo: 'Fotógrafo de bodas: dossier con 3 packs, fotos de muestra y botón de WhatsApp para pedir fecha.',
+    repos: ['Hopding/pdf-lib'],
+  },
+  {
+    slug: 'diagramas-procesos', cat: 'documentos', nombre: 'Diagramas de procesos y organigramas', p: [29, 69], plazo: '48 h',
+    resumen: 'Nos explicas cómo funciona tu proceso o tu equipo y te devolvemos diagramas claros en SVG, PNG y PDF.',
+    recibes: ['Hasta 5 diagramas', 'Formatos SVG, PNG y PDF', 'Archivo de texto para editarlos tú'],
+    campos: ['Pasos del proceso o personas del equipo', 'Decisiones o responsables', 'Orientación (horizontal / vertical)', 'Colores'],
+    ejemplo: 'Clínica dental: el circuito del paciente, de la llamada a la factura, en un diagrama colgado en recepción.',
+    repos: ['mermaid-js/mermaid'],
+  },
+  {
+    slug: 'descripciones-producto-ia', cat: 'contenido', nombre: 'Descripciones de producto escritas con IA y revisadas', p: [29, 69], plazo: '48 h',
+    resumen: 'Títulos y descripciones de venta para tu tienda, con tus palabras clave, revisados por una persona antes de entregarlos.',
+    recibes: ['20 títulos y descripciones (ampliable)', 'Palabras clave para Google', 'Archivo CSV listo para importar', 'Guía de tono para las siguientes'],
+    campos: ['Catálogo (nombre y características)', 'Público al que vendes', 'Tono (cercano, técnico, premium)', 'Palabras clave'],
+    ejemplo: 'Tienda de té: «Rooibos vainilla 100 g · sin teína, para después de cenar» en lugar de «Té rojo 100g».',
+    repos: [],
+  },
+  {
+    slug: 'carruseles-redes', cat: 'contenido', nombre: 'Pack de carruseles para Instagram y LinkedIn', p: [39, 99], plazo: '3 días',
+    resumen: 'Diez carruseles con tu marca generados desde tus textos, en PNG listos para subir y con la plantilla para repetir.',
+    recibes: ['10 carruseles de 5–8 diapositivas', 'Plantilla con tus colores y tipografías', 'Textos de publicación sugeridos', 'Regeneración desde una hoja de cálculo'],
+    campos: ['Temas o textos', 'Tono', 'Colores y logo', 'Red principal'],
+    ejemplo: 'Nutricionista: «5 desayunos en 5 minutos», un carrusel por semana durante dos meses y medio.',
+    repos: ['puppeteer/puppeteer'],
+  },
+  {
+    slug: 'web-wordpress', cat: 'webs', nombre: 'Web WordPress llave en mano', p: [249, 549], plazo: '5 días',
+    resumen: 'Si prefieres WordPress: instalada, con tema ligero, tus páginas, formulario, copias automáticas y seguridad básica.',
+    recibes: ['WordPress instalado en tu hosting', '5 páginas con tus textos y fotos', 'Formulario de contacto y aviso legal', 'Copias de seguridad y actualizaciones automáticas', 'Vídeo de 10 minutos para editarla tú'],
+    campos: ['Dominio y hosting (o te recomendamos uno)', 'Textos de las 5 páginas', 'Logo y fotos', 'Colores'],
+    ejemplo: 'Academia de música: inicio, profesores, horarios, precios y contacto; la dueña cambia los horarios ella misma.',
+    repos: ['WordPress/wordpress-develop'],
+  },
+  {
+    slug: 'web-arrastrar-soltar', cat: 'portales', nombre: 'Web que editas arrastrando bloques', p: [199, 449], plazo: '5 días',
+    resumen: 'Tu web en un editor visual de código abierto: cambias textos, fotos y secciones arrastrando, sin tocar código ni pagar cuota.',
+    recibes: ['Editor visual instalado y configurado', 'Web inicial de 4 páginas con tus datos', 'Bloques de tu sector listos para usar', 'Formación de 30 minutos'],
+    campos: ['Sector', 'Páginas que necesitas', 'Logo, colores y fotos', 'Dominio'],
+    ejemplo: 'Tienda de muebles: monta ella misma la página de ofertas de enero arrastrando el bloque «producto destacado».',
+    repos: ['microweber/microweber', 'frappe/builder', 'GrapesJS/grapesjs'],
+  },
+  {
+    slug: 'plataforma-agencia', cat: 'portales', nombre: 'Plataforma para tu agencia: clientes, webs y CRM', p: [490, 990], plazo: '10 días',
+    resumen: 'Para agencias y freelancers: un panel donde cada cliente tiene su web, su portal y su ficha en el CRM, con cobros automáticos.',
+    recibes: ['Panel multi-cliente propio', 'Portal privado para cada cliente', 'CRM con fichas y tareas', 'Cobros recurrentes con Stripe (con tus claves)'],
+    campos: ['Nombre de la agencia y logo', 'Servicios que vendes', 'Primeros clientes a dar de alta', 'Dominio'],
+    ejemplo: 'Diseñadora freelance con 12 clientes: cada uno entra a su portal, ve facturas y pide cambios sin escribir al WhatsApp personal.',
+    repos: ['SimplerDevelopment/SimplerDevelopment', 'directus-labs/agency-os'],
+  },
 ];
 
 export const paginas = [
@@ -563,19 +685,23 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 
 ### Email y avisos
 - **Brevo** o **MailerLite**: boletines y emails automáticos con plan gratuito.
+- **GetResponse**: email marketing con embudos y webinars.
 - **Telegram**: avisos instantáneos gratis desde formularios, reservas y pedidos.
 
-### Automatización
+### Automatización y embudos
 - **n8n**: automatizaciones de código abierto; se puede alojar sin cuota.
 - **Make**: automatizaciones visuales con plan gratuito.
+- **Systeme.io**: embudos de venta, cursos y emails en una sola herramienta, con plan gratuito.
 
 ### Diseño y contenido
 - **Canva**: imágenes y cartas para redes.
+- **Elementor**: maquetador visual si tu web es WordPress.
 - **Unsplash / Pexels**: fotos libres de derechos.
 
 ### Hosting tradicional (si necesitas WordPress o correo con tu dominio)
 - **Raiola Networks** y **Webempresa**: hosting en España con soporte en español.
 - **Hostinger**: hosting y correo económicos.
+- **Kinsta**: hosting WordPress gestionado para webs con mucho tráfico.
 
 ### Facturación y gestión
 - **Holded** o **Quipu**: facturación, gastos e impuestos para autónomos y pymes.

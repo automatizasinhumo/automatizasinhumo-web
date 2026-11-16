@@ -64,6 +64,10 @@ for (const p of productos) {
   const varios = p.p.length === 2;
   out.push(`INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES (${q(p.nombre)}, ${q(descripcion(p))}, ${p.p[0] * 100}, 'eur', 999, 1, ${q(p.slug)}, ${varios ? q('Modalidad') : 'NULL'}, 0, ${q(pid('prod'))});`);
   out.push(`INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug=${q(p.slug)} AND c.slug=${q(p.cat)};`);
+  // Portada PNG estática (public/images/productos, generada por gen-imagenes.mjs)
+  const img = `productos/${p.slug}.png`;
+  out.push(`UPDATE products SET image_key=${q(img)} WHERE slug=${q(p.slug)};`);
+  out.push(`INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, ${q(img)}, 0, ${q(pid('pimg'))} FROM products WHERE slug=${q(p.slug)};`);
   if (varios) {
     [['Lo montas tú (plantilla + guía)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(label)}, ${eur * 100}, 999, ${q(`${p.slug}-${i ? 'pro' : 'diy'}`)}, ${i}, 1, ${q(pid('var'))} FROM products WHERE slug=${q(p.slug)};`));

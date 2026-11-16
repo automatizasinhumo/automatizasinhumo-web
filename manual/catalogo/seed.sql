@@ -8,19 +8,20 @@ DELETE FROM categories;
 DELETE FROM menu_items;
 DELETE FROM page_media;
 DELETE FROM pages;
-INSERT INTO categories (name, slug, public_id) VALUES ('Webs para tu negocio', 'webs', 'cat_7y6g7dvhvt');
-INSERT INTO categories (name, slug, public_id) VALUES ('Restaurantes y bares', 'hosteleria', 'cat_0n55tcwzbh');
-INSERT INTO categories (name, slug, public_id) VALUES ('Reservas y citas', 'reservas', 'cat_b5ytf9n5m6');
-INSERT INTO categories (name, slug, public_id) VALUES ('Bodas y eventos', 'bodas', 'cat_zqyswrber8');
-INSERT INTO categories (name, slug, public_id) VALUES ('Tarjetas, link-in-bio y CV', 'identidad', 'cat_99v8806wh7');
-INSERT INTO categories (name, slug, public_id) VALUES ('Formularios y captación', 'captacion', 'cat_hsyknd5k8d');
-INSERT INTO categories (name, slug, public_id) VALUES ('Bots e IA', 'bots', 'cat_344wtm99y4');
-INSERT INTO categories (name, slug, public_id) VALUES ('Automatizaciones', 'automatizaciones', 'cat_9wjehgx4x5');
-INSERT INTO categories (name, slug, public_id) VALUES ('Enlaces, QR y analítica', 'enlaces', 'cat_ecq16p38hs');
-INSERT INTO categories (name, slug, public_id) VALUES ('Tiendas y productos digitales', 'tiendas', 'cat_4a7g7t62rn');
-INSERT INTO categories (name, slug, public_id) VALUES ('Portales y webs editables', 'portales', 'cat_j43eax7ktx');
-INSERT INTO categories (name, slug, public_id) VALUES ('Documentos, PDF e IA', 'documentos', 'cat_w6n9za7m3y');
-INSERT INTO categories (name, slug, public_id) VALUES ('Planes mensuales', 'planes', 'cat_2yykezztqj');
+INSERT INTO categories (name, slug, public_id) VALUES ('Webs para tu negocio', 'webs', 'cat_3wk5cgqxrx');
+INSERT INTO categories (name, slug, public_id) VALUES ('Restaurantes y bares', 'hosteleria', 'cat_yee0wwcywt');
+INSERT INTO categories (name, slug, public_id) VALUES ('Reservas y citas', 'reservas', 'cat_ffa7wenyvk');
+INSERT INTO categories (name, slug, public_id) VALUES ('Bodas y eventos', 'bodas', 'cat_fbwm3nnapr');
+INSERT INTO categories (name, slug, public_id) VALUES ('Tarjetas, link-in-bio y CV', 'identidad', 'cat_0z4btwghbm');
+INSERT INTO categories (name, slug, public_id) VALUES ('Formularios y captación', 'captacion', 'cat_22bptvfsnv');
+INSERT INTO categories (name, slug, public_id) VALUES ('Bots e IA', 'bots', 'cat_d79az3ghnp');
+INSERT INTO categories (name, slug, public_id) VALUES ('Automatizaciones', 'automatizaciones', 'cat_zsepf7pjdd');
+INSERT INTO categories (name, slug, public_id) VALUES ('Enlaces, QR y analítica', 'enlaces', 'cat_s6nk2ek8dz');
+INSERT INTO categories (name, slug, public_id) VALUES ('Tiendas y productos digitales', 'tiendas', 'cat_xccmej3bkd');
+INSERT INTO categories (name, slug, public_id) VALUES ('Portales y webs editables', 'portales', 'cat_epzkwhfd0t');
+INSERT INTO categories (name, slug, public_id) VALUES ('Documentos, PDF e IA', 'documentos', 'cat_9rfbxmmygw');
+INSERT INTO categories (name, slug, public_id) VALUES ('Contenido y redes', 'contenido', 'cat_ws4qewsjx6');
+INSERT INTO categories (name, slug, public_id) VALUES ('Planes mensuales', 'planes', 'cat_qc0xn3a44c');
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web de una página para tu negocio', 'Tu negocio en internet con una sola página clara: quién eres, qué ofreces, cómo contactarte.
 
 ### Qué recibes
@@ -54,10 +55,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [ColorlibHQ/bootstrap-templates](https://github.com/ColorlibHQ/bootstrap-templates) — MIT: libre para uso comercial · [demo](https://uicookies.com/)
 - [mmrahmanbappi/100-free-html-templates](https://github.com/mmrahmanbappi/100-free-html-templates) — MIT: libre para uso comercial · [demo](https://mmrahmanbappi.github.io/100-free-html-templates/)
 - [micah-masuka/free-website-templates](https://github.com/micah-masuka/free-website-templates) — MIT: libre para uso comercial · [demo](https://micah-masuka.github.io/free-website-templates/)
-', 14900, 'eur', 999, 1, 'web-una-pagina', 'Modalidad', 0, 'prod_83sqfj73m6');
+', 14900, 'eur', 999, 1, 'web-una-pagina', 'Modalidad', 0, 'prod_fkmqnyzfgm');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-una-pagina' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'web-una-pagina-diy', 0, 1, 'var_2935019p3r' FROM products WHERE slug='web-una-pagina';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'web-una-pagina-pro', 1, 1, 'var_9vp6ke6c81' FROM products WHERE slug='web-una-pagina';
+UPDATE products SET image_key='productos/web-una-pagina.png' WHERE slug='web-una-pagina';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-una-pagina.png', 0, 'pimg_gvec68pj3c' FROM products WHERE slug='web-una-pagina';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'web-una-pagina-diy', 0, 1, 'var_j6zd8x556q' FROM products WHERE slug='web-una-pagina';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'web-una-pagina-pro', 1, 1, 'var_fjb0h89bp7' FROM products WHERE slug='web-una-pagina';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web corporativa de 5 secciones', 'Inicio, servicios, sobre nosotros, opiniones y contacto. Para empresas que necesitan algo más que una tarjeta.
 
 ### Qué recibes
@@ -90,10 +93,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [dawidolko/Website-Templates](https://github.com/dawidolko/Website-Templates) — MIT: libre para uso comercial · [demo](https://templateswebsite.dawidolko.pl)
 - [uiuxlabz/uiuxlabz](https://github.com/uiuxlabz/uiuxlabz) — sin licencia clara: solo referencia de diseño · [demo](https://uiuxlabz.github.io/uiuxlabz/)
 - [ultimatewebtemplates/free-website-templates](https://github.com/ultimatewebtemplates/free-website-templates) — sin licencia clara: solo referencia de diseño · [demo](https://ultimatewebtemplates.com)
-', 44900, 'eur', 999, 1, 'web-corporativa-5-secciones', 'Modalidad', 0, 'prod_xc7nph34j9');
+', 44900, 'eur', 999, 1, 'web-corporativa-5-secciones', 'Modalidad', 0, 'prod_16eyntjgkd');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-corporativa-5-secciones' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 44900, 999, 'web-corporativa-5-secciones-diy', 0, 1, 'var_j77w752jw9' FROM products WHERE slug='web-corporativa-5-secciones';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 89900, 999, 'web-corporativa-5-secciones-pro', 1, 1, 'var_d7a8c7x04v' FROM products WHERE slug='web-corporativa-5-secciones';
+UPDATE products SET image_key='productos/web-corporativa-5-secciones.png' WHERE slug='web-corporativa-5-secciones';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-corporativa-5-secciones.png', 0, 'pimg_k7jqmhmdkz' FROM products WHERE slug='web-corporativa-5-secciones';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 44900, 999, 'web-corporativa-5-secciones-diy', 0, 1, 'var_x9b2mytwgm' FROM products WHERE slug='web-corporativa-5-secciones';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 89900, 999, 'web-corporativa-5-secciones-pro', 1, 1, 'var_610f1ycz9r' FROM products WHERE slug='web-corporativa-5-secciones';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web para inmobiliaria', 'Escaparate de inmuebles con fichas, fotos y contacto directo con el agente.
 
 ### Qué recibes
@@ -122,10 +127,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [arjoonarora/real-estate-website-template](https://github.com/arjoonarora/real-estate-website-template) — MIT: libre para uso comercial
-', 29900, 'eur', 999, 1, 'web-inmobiliaria', 'Modalidad', 0, 'prod_ezqpx7n2sy');
+', 29900, 'eur', 999, 1, 'web-inmobiliaria', 'Modalidad', 0, 'prod_7h88bj4ttj');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-inmobiliaria' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'web-inmobiliaria-diy', 0, 1, 'var_kda6q7kx1d' FROM products WHERE slug='web-inmobiliaria';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'web-inmobiliaria-pro', 1, 1, 'var_r2ce3ycsrc' FROM products WHERE slug='web-inmobiliaria';
+UPDATE products SET image_key='productos/web-inmobiliaria.png' WHERE slug='web-inmobiliaria';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-inmobiliaria.png', 0, 'pimg_s4r2705xyd' FROM products WHERE slug='web-inmobiliaria';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'web-inmobiliaria-diy', 0, 1, 'var_253wnjahjk' FROM products WHERE slug='web-inmobiliaria';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'web-inmobiliaria-pro', 1, 1, 'var_98jwp6fhqj' FROM products WHERE slug='web-inmobiliaria';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Portfolio con panel para editarlo tú', 'Para fotógrafos, diseñadores, arquitectos o freelancers: cambias textos y fotos desde un panel, sin tocar código.
 
 ### Qué recibes
@@ -155,10 +162,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [satendragoswamii/portfolio-website-with-admin-panel](https://github.com/satendragoswamii/portfolio-website-with-admin-panel) — MIT: libre para uso comercial · [demo](https://satendragoswami.satendragoshwami.workers.dev)
 - [ShadmanArafin/open_portfolio](https://github.com/ShadmanArafin/open_portfolio) — MIT: libre para uso comercial · [demo](https://getopenportfolio.vercel.app)
-', 17900, 'eur', 999, 1, 'portfolio-editable', 'Modalidad', 0, 'prod_wzx1drhca8');
+', 17900, 'eur', 999, 1, 'portfolio-editable', 'Modalidad', 0, 'prod_kx6en35m8h');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='portfolio-editable' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 17900, 999, 'portfolio-editable-diy', 0, 1, 'var_6q9k5mc8hm' FROM products WHERE slug='portfolio-editable';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'portfolio-editable-pro', 1, 1, 'var_rcnj50scc1' FROM products WHERE slug='portfolio-editable';
+UPDATE products SET image_key='productos/portfolio-editable.png' WHERE slug='portfolio-editable';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/portfolio-editable.png', 0, 'pimg_9dj7h9nxdk' FROM products WHERE slug='portfolio-editable';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 17900, 999, 'portfolio-editable-diy', 0, 1, 'var_e65dhe9rsz' FROM products WHERE slug='portfolio-editable';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'portfolio-editable-pro', 1, 1, 'var_2b04rfx43s' FROM products WHERE slug='portfolio-editable';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web con blog rápida (SEO)', 'Web ultrarrápida con blog para posicionar en Google y publicar artículos fácilmente.
 
 ### Qué recibes
@@ -184,10 +193,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [lonestone/astro-template](https://github.com/lonestone/astro-template) — MIT: libre para uso comercial
-', 24900, 'eur', 999, 1, 'web-blog-astro', 'Modalidad', 0, 'prod_ew1apkztq0');
+', 24900, 'eur', 999, 1, 'web-blog-astro', 'Modalidad', 0, 'prod_reahjndvy2');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-blog-astro' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'web-blog-astro-diy', 0, 1, 'var_4h6w5jceyv' FROM products WHERE slug='web-blog-astro';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 49900, 999, 'web-blog-astro-pro', 1, 1, 'var_bb7p9r6c83' FROM products WHERE slug='web-blog-astro';
+UPDATE products SET image_key='productos/web-blog-astro.png' WHERE slug='web-blog-astro';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-blog-astro.png', 0, 'pimg_0vqwpezqxd' FROM products WHERE slug='web-blog-astro';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'web-blog-astro-diy', 0, 1, 'var_df7st8pzv7' FROM products WHERE slug='web-blog-astro';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 49900, 999, 'web-blog-astro-pro', 1, 1, 'var_061swak6jq' FROM products WHERE slug='web-blog-astro';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web para taller con cita previa', 'Taller mecánico, de bicis o de reparación: servicios, precios orientativos y cita online.
 
 ### Qué recibes
@@ -217,10 +228,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [MohamadTaher/mechanic-shop](https://github.com/MohamadTaher/mechanic-shop) — sin licencia clara: solo referencia de diseño
 - [CCCrafts/punctual](https://github.com/CCCrafts/punctual) — MIT: libre para uso comercial · [demo](https://punctual.sh)
-', 24900, 'eur', 999, 1, 'web-taller', 'Modalidad', 0, 'prod_p2ds7q10y6');
+', 24900, 'eur', 999, 1, 'web-taller', 'Modalidad', 0, 'prod_4jx255p0q4');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-taller' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'web-taller-diy', 0, 1, 'var_5f0s3qw05d' FROM products WHERE slug='web-taller';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 44900, 999, 'web-taller-pro', 1, 1, 'var_ww9mdwq7dz' FROM products WHERE slug='web-taller';
+UPDATE products SET image_key='productos/web-taller.png' WHERE slug='web-taller';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-taller.png', 0, 'pimg_ng2scqs5kx' FROM products WHERE slug='web-taller';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'web-taller-diy', 0, 1, 'var_be1185a7z9' FROM products WHERE slug='web-taller';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 44900, 999, 'web-taller-pro', 1, 1, 'var_q3d5fj45e6' FROM products WHERE slug='web-taller';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Carta digital con código QR', 'Tu carta en el móvil del cliente con un QR en la mesa. Cambias precios cuando quieras, sin reimprimir.
 
 ### Qué recibes
@@ -252,10 +265,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [dumbuk12/qr-menu-guide](https://github.com/dumbuk12/qr-menu-guide) — MIT: libre para uso comercial
 - [investblog/qr-generator](https://github.com/investblog/qr-generator) — MIT: libre para uso comercial
 - [kirollosfayezh/tabla-qr-menu-saas](https://github.com/kirollosfayezh/tabla-qr-menu-saas) — MIT: libre para uso comercial
-', 4900, 'eur', 999, 1, 'carta-qr', 'Modalidad', 0, 'prod_j6fqeahawq');
+', 4900, 'eur', 999, 1, 'carta-qr', 'Modalidad', 0, 'prod_3tbwknyzrw');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='carta-qr' AND c.slug='hosteleria';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'carta-qr-diy', 0, 1, 'var_sh4d9tqqxk' FROM products WHERE slug='carta-qr';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'carta-qr-pro', 1, 1, 'var_e1900k0099' FROM products WHERE slug='carta-qr';
+UPDATE products SET image_key='productos/carta-qr.png' WHERE slug='carta-qr';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/carta-qr.png', 0, 'pimg_0crfpprcwg' FROM products WHERE slug='carta-qr';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'carta-qr-diy', 0, 1, 'var_5pdq6bpmge' FROM products WHERE slug='carta-qr';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'carta-qr-pro', 1, 1, 'var_jjbv15q8z5' FROM products WHERE slug='carta-qr';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Carta QR con pedidos por WhatsApp', 'El cliente elige en la carta, añade al carrito y el pedido te llega por WhatsApp ya escrito.
 
 ### Qué recibes
@@ -284,10 +299,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [Shahabuddin-mahar/whatsapp-restaurant-qr-menu](https://github.com/Shahabuddin-mahar/whatsapp-restaurant-qr-menu) — MIT: libre para uso comercial · [demo](https://shahabuddin-mahar.github.io/whatsapp-restaurant-qr-menu/)
-', 9900, 'eur', 999, 1, 'carta-pedidos-whatsapp', 'Modalidad', 0, 'prod_wa24ffggrv');
+', 9900, 'eur', 999, 1, 'carta-pedidos-whatsapp', 'Modalidad', 0, 'prod_nq9afrjzqv');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='carta-pedidos-whatsapp' AND c.slug='hosteleria';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'carta-pedidos-whatsapp-diy', 0, 1, 'var_rkpp4fn6z2' FROM products WHERE slug='carta-pedidos-whatsapp';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 19900, 999, 'carta-pedidos-whatsapp-pro', 1, 1, 'var_s0ydm5k0ew' FROM products WHERE slug='carta-pedidos-whatsapp';
+UPDATE products SET image_key='productos/carta-pedidos-whatsapp.png' WHERE slug='carta-pedidos-whatsapp';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/carta-pedidos-whatsapp.png', 0, 'pimg_vzm4851ewe' FROM products WHERE slug='carta-pedidos-whatsapp';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'carta-pedidos-whatsapp-diy', 0, 1, 'var_tmfyx3jk9g' FROM products WHERE slug='carta-pedidos-whatsapp';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 19900, 999, 'carta-pedidos-whatsapp-pro', 1, 1, 'var_vr512sfqp1' FROM products WHERE slug='carta-pedidos-whatsapp';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Reservas de mesa online', 'Sistema propio de reservas sin pagar comisión por comensal a plataformas.
 
 ### Qué recibes
@@ -313,10 +330,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [RamtinBabaei/quickdine-platform](https://github.com/RamtinBabaei/quickdine-platform) — MIT: libre para uso comercial
-', 14900, 'eur', 999, 1, 'reservas-restaurante', 'Modalidad', 0, 'prod_m2jx4fqp07');
+', 14900, 'eur', 999, 1, 'reservas-restaurante', 'Modalidad', 0, 'prod_h00880x36h');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='reservas-restaurante' AND c.slug='hosteleria';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'reservas-restaurante-diy', 0, 1, 'var_nx7ejb6yxz' FROM products WHERE slug='reservas-restaurante';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'reservas-restaurante-pro', 1, 1, 'var_hwxs6se44k' FROM products WHERE slug='reservas-restaurante';
+UPDATE products SET image_key='productos/reservas-restaurante.png' WHERE slug='reservas-restaurante';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/reservas-restaurante.png', 0, 'pimg_yqkdvk6vye' FROM products WHERE slug='reservas-restaurante';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'reservas-restaurante-diy', 0, 1, 'var_06ns040ehg' FROM products WHERE slug='reservas-restaurante';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'reservas-restaurante-pro', 1, 1, 'var_6h4p8chxfa' FROM products WHERE slug='reservas-restaurante';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Asistente IA que toma pedidos', 'Un asistente que contesta dudas de la carta y toma pedidos por chat, 24 horas.
 
 ### Qué recibes
@@ -343,10 +362,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [thisyourei/fastfood-ai-assistant](https://github.com/thisyourei/fastfood-ai-assistant) — sin licencia clara: solo referencia de diseño
 - [tbxark/ChatGPT-Telegram-Workers](https://github.com/tbxark/ChatGPT-Telegram-Workers) — MIT: libre para uso comercial · [demo](https://chatgpt-telegram-workers.tbxark.workers.dev)
-', 29900, 'eur', 999, 1, 'asistente-ia-pedidos', 'Modalidad', 0, 'prod_7wb5hx5h90');
+', 29900, 'eur', 999, 1, 'asistente-ia-pedidos', 'Modalidad', 0, 'prod_3w5q14kd08');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='asistente-ia-pedidos' AND c.slug='hosteleria';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'asistente-ia-pedidos-diy', 0, 1, 'var_k1pmc7ktk3' FROM products WHERE slug='asistente-ia-pedidos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'asistente-ia-pedidos-pro', 1, 1, 'var_fd9dvsc8mp' FROM products WHERE slug='asistente-ia-pedidos';
+UPDATE products SET image_key='productos/asistente-ia-pedidos.png' WHERE slug='asistente-ia-pedidos';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/asistente-ia-pedidos.png', 0, 'pimg_78j6xg23j3' FROM products WHERE slug='asistente-ia-pedidos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'asistente-ia-pedidos-diy', 0, 1, 'var_25bx30z5hc' FROM products WHERE slug='asistente-ia-pedidos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'asistente-ia-pedidos-pro', 1, 1, 'var_18t1q509gt' FROM products WHERE slug='asistente-ia-pedidos';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Página de citas tipo Calendly', 'Comparte un enlace y tus clientes reservan hueco en tu agenda. Sin cuotas por usuario.
 
 ### Qué recibes
@@ -372,10 +393,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [CCCrafts/punctual](https://github.com/CCCrafts/punctual) — MIT: libre para uso comercial · [demo](https://punctual.sh)
-', 7900, 'eur', 999, 1, 'pagina-citas', 'Modalidad', 0, 'prod_pdc51ptssg');
+', 7900, 'eur', 999, 1, 'pagina-citas', 'Modalidad', 0, 'prod_8mrv9s2j3r');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='pagina-citas' AND c.slug='reservas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'pagina-citas-diy', 0, 1, 'var_ks9gzjwfqe' FROM products WHERE slug='pagina-citas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'pagina-citas-pro', 1, 1, 'var_akpr18bnrc' FROM products WHERE slug='pagina-citas';
+UPDATE products SET image_key='productos/pagina-citas.png' WHERE slug='pagina-citas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/pagina-citas.png', 0, 'pimg_ywb4h45s2b' FROM products WHERE slug='pagina-citas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'pagina-citas-diy', 0, 1, 'var_ntg872petb' FROM products WHERE slug='pagina-citas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'pagina-citas-pro', 1, 1, 'var_r2mp5g5hsg' FROM products WHERE slug='pagina-citas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Reservas para peluquería, estética o clínica', 'Motor de reservas por servicio y profesional, con ficha de cliente.
 
 ### Qué recibes
@@ -401,10 +424,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [Salora-Software/Salora](https://github.com/Salora-Software/Salora) — AGPL-3.0: uso con condiciones (código abierto si se distribuye) · [demo](https://docs.salora.app/docs)
 - [nabinbabuuranw/palo](https://github.com/nabinbabuuranw/palo) — MIT: libre para uso comercial · [demo](https://palo.sites.tab.bot/)
-', 19900, 'eur', 999, 1, 'reservas-salon', 'Modalidad', 0, 'prod_6gn5cztc3j');
+', 19900, 'eur', 999, 1, 'reservas-salon', 'Modalidad', 0, 'prod_00b86qpb2b');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='reservas-salon' AND c.slug='reservas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'reservas-salon-diy', 0, 1, 'var_yn8ee1b5f1' FROM products WHERE slug='reservas-salon';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 39900, 999, 'reservas-salon-pro', 1, 1, 'var_fxanq3yp7x' FROM products WHERE slug='reservas-salon';
+UPDATE products SET image_key='productos/reservas-salon.png' WHERE slug='reservas-salon';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/reservas-salon.png', 0, 'pimg_7wpennjpws' FROM products WHERE slug='reservas-salon';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'reservas-salon-diy', 0, 1, 'var_7m05ct7rfk' FROM products WHERE slug='reservas-salon';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 39900, 999, 'reservas-salon-pro', 1, 1, 'var_ys7p0x6013' FROM products WHERE slug='reservas-salon';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web de boda con confirmación de asistencia', 'Toda la información de la boda en una web y los invitados confirman asistencia y menú.
 
 ### Qué recibes
@@ -438,10 +463,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [kbichave/wedding-invite](https://github.com/kbichave/wedding-invite) — ISC: libre para uso comercial
 - [zachspiel/wedding-rsvp](https://github.com/zachspiel/wedding-rsvp) — MIT: libre para uso comercial · [demo](https://zachandsedona.com)
 - [sotomaque/wedding-website](https://github.com/sotomaque/wedding-website) — sin licencia clara: solo referencia de diseño · [demo](https://theceremony.app)
-', 9900, 'eur', 999, 1, 'web-boda-rsvp', 'Modalidad', 0, 'prod_ee3m4kp6zt');
+- [1molehayo/wedding-website-builder](https://github.com/1molehayo/wedding-website-builder) — GPL-3.0: uso con condiciones (código abierto si se distribuye) · [demo](https://igbeyawowa.app)
+', 9900, 'eur', 999, 1, 'web-boda-rsvp', 'Modalidad', 0, 'prod_dkbbesgwjj');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-boda-rsvp' AND c.slug='bodas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'web-boda-rsvp-diy', 0, 1, 'var_q9p8wytw4v' FROM products WHERE slug='web-boda-rsvp';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 24900, 999, 'web-boda-rsvp-pro', 1, 1, 'var_enpr9swsd2' FROM products WHERE slug='web-boda-rsvp';
+UPDATE products SET image_key='productos/web-boda-rsvp.png' WHERE slug='web-boda-rsvp';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-boda-rsvp.png', 0, 'pimg_s504mwcwhx' FROM products WHERE slug='web-boda-rsvp';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'web-boda-rsvp-diy', 0, 1, 'var_bwmzycpeyc' FROM products WHERE slug='web-boda-rsvp';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 24900, 999, 'web-boda-rsvp-pro', 1, 1, 'var_tg7ybjfpqg' FROM products WHERE slug='web-boda-rsvp';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Invitación digital animada', 'Invitación para enviar por WhatsApp: cuenta atrás, ubicación y botón para confirmar.
 
 ### Qué recibes
@@ -471,10 +499,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [Poison675/free-wedding-website-templates](https://github.com/Poison675/free-wedding-website-templates) — sin licencia clara: solo referencia de diseño
 - [clentebanks/wedding-invitation](https://github.com/clentebanks/wedding-invitation) — sin licencia clara: solo referencia de diseño
-', 3900, 'eur', 999, 1, 'invitacion-digital', 'Modalidad', 0, 'prod_pa0ytvygt5');
+', 3900, 'eur', 999, 1, 'invitacion-digital', 'Modalidad', 0, 'prod_mbndqw7bt3');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='invitacion-digital' AND c.slug='bodas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'invitacion-digital-diy', 0, 1, 'var_0vr107996e' FROM products WHERE slug='invitacion-digital';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 8900, 999, 'invitacion-digital-pro', 1, 1, 'var_rafqh242ca' FROM products WHERE slug='invitacion-digital';
+UPDATE products SET image_key='productos/invitacion-digital.png' WHERE slug='invitacion-digital';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/invitacion-digital.png', 0, 'pimg_6gqq23em7v' FROM products WHERE slug='invitacion-digital';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'invitacion-digital-diy', 0, 1, 'var_m7xa5kpdkw' FROM products WHERE slug='invitacion-digital';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 8900, 999, 'invitacion-digital-pro', 1, 1, 'var_q4h9k8yr7v' FROM products WHERE slug='invitacion-digital';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Galería privada de fotos del evento', 'Álbum privado con enlace: los invitados ven y suben sus fotos, tú las descargas todas.
 
 ### Qué recibes
@@ -500,10 +530,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [t0ma5/tinygallery](https://github.com/t0ma5/tinygallery) — MIT: libre para uso comercial · [demo](https://tinygallery.pages.dev)
 - [BartekBis/wedding-website](https://github.com/BartekBis/wedding-website) — sin licencia clara: solo referencia de diseño
-', 6900, 'eur', 999, 1, 'galeria-privada-evento', 'Modalidad', 0, 'prod_vzyvyqyz09');
+', 6900, 'eur', 999, 1, 'galeria-privada-evento', 'Modalidad', 0, 'prod_v11vgrt01s');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='galeria-privada-evento' AND c.slug='bodas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 6900, 999, 'galeria-privada-evento-diy', 0, 1, 'var_bk4q4ae685' FROM products WHERE slug='galeria-privada-evento';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 14900, 999, 'galeria-privada-evento-pro', 1, 1, 'var_4e7xd41vrr' FROM products WHERE slug='galeria-privada-evento';
+UPDATE products SET image_key='productos/galeria-privada-evento.png' WHERE slug='galeria-privada-evento';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/galeria-privada-evento.png', 0, 'pimg_x9v8bwrmjf' FROM products WHERE slug='galeria-privada-evento';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 6900, 999, 'galeria-privada-evento-diy', 0, 1, 'var_be5zgj27k9' FROM products WHERE slug='galeria-privada-evento';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 14900, 999, 'galeria-privada-evento-pro', 1, 1, 'var_xwwrjp6mcm' FROM products WHERE slug='galeria-privada-evento';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Gestión de invitados y plano de mesas', 'Lista de invitados, confirmaciones, llamadas pendientes y plano de mesas en PDF.
 
 ### Qué recibes
@@ -532,10 +564,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [inonalfa/wedding-rsvp-seating](https://github.com/inonalfa/wedding-rsvp-seating) — MIT: libre para uso comercial
 - [JacobStephens2/wedding-platform](https://github.com/JacobStephens2/wedding-platform) — MIT: libre para uso comercial · [demo](https://wedding.stephens.page)
-', 7900, 'eur', 999, 1, 'gestion-invitados-mesas', 'Modalidad', 0, 'prod_fwvygskg1q');
+', 7900, 'eur', 999, 1, 'gestion-invitados-mesas', 'Modalidad', 0, 'prod_x9skq8r323');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='gestion-invitados-mesas' AND c.slug='bodas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'gestion-invitados-mesas-diy', 0, 1, 'var_q1x0hcvhwb' FROM products WHERE slug='gestion-invitados-mesas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'gestion-invitados-mesas-pro', 1, 1, 'var_s9twqf5drd' FROM products WHERE slug='gestion-invitados-mesas';
+UPDATE products SET image_key='productos/gestion-invitados-mesas.png' WHERE slug='gestion-invitados-mesas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/gestion-invitados-mesas.png', 0, 'pimg_2wvtyexdwg' FROM products WHERE slug='gestion-invitados-mesas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'gestion-invitados-mesas-diy', 0, 1, 'var_6aamfxgkza' FROM products WHERE slug='gestion-invitados-mesas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'gestion-invitados-mesas-pro', 1, 1, 'var_ckd14jf12x' FROM products WHERE slug='gestion-invitados-mesas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Tarjeta de visita digital con QR', 'Tu tarjeta en el móvil: un QR y el cliente guarda tu contacto con un toque.
 
 ### Qué recibes
@@ -561,10 +595,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [Kahaan83/digital-cards](https://github.com/Kahaan83/digital-cards) — MIT: libre para uso comercial · [demo](https://digital-cards-lemon.vercel.app)
-', 2900, 'eur', 999, 1, 'tarjeta-digital', 'Modalidad', 0, 'prod_zyt20ddfnz');
+', 2900, 'eur', 999, 1, 'tarjeta-digital', 'Modalidad', 0, 'prod_1s2h09y1rj');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tarjeta-digital' AND c.slug='identidad';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'tarjeta-digital-diy', 0, 1, 'var_vr2mvy0jap' FROM products WHERE slug='tarjeta-digital';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'tarjeta-digital-pro', 1, 1, 'var_9tvzqej9a3' FROM products WHERE slug='tarjeta-digital';
+UPDATE products SET image_key='productos/tarjeta-digital.png' WHERE slug='tarjeta-digital';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tarjeta-digital.png', 0, 'pimg_thr8r9xjxv' FROM products WHERE slug='tarjeta-digital';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'tarjeta-digital-diy', 0, 1, 'var_gtj9pqabmn' FROM products WHERE slug='tarjeta-digital';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'tarjeta-digital-pro', 1, 1, 'var_1ntf3a3jxt' FROM products WHERE slug='tarjeta-digital';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Link-in-bio propio con estadísticas', 'Tu alternativa a Linktree, en tu dominio y sin cuota mensual, con clics medidos.
 
 ### Qué recibes
@@ -592,10 +628,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [MrDemonWolf/linkden](https://github.com/MrDemonWolf/linkden) — MIT: libre para uso comercial · [demo](https://mrdemonwolf.github.io/linkden/)
 - [Mrbarnx/Open-Link-Hub](https://github.com/Mrbarnx/Open-Link-Hub) — MIT: libre para uso comercial
 - [dimasmong/MoBio](https://github.com/dimasmong/MoBio) — MIT: libre para uso comercial · [demo](https://github.com/dimasmong/MoBio)
-', 3900, 'eur', 999, 1, 'link-in-bio', 'Modalidad', 0, 'prod_rdz1sz6wv6');
+', 3900, 'eur', 999, 1, 'link-in-bio', 'Modalidad', 0, 'prod_195psx5gvf');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='link-in-bio' AND c.slug='identidad';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'link-in-bio-diy', 0, 1, 'var_q1kd3xbadw' FROM products WHERE slug='link-in-bio';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'link-in-bio-pro', 1, 1, 'var_51mczew1f6' FROM products WHERE slug='link-in-bio';
+UPDATE products SET image_key='productos/link-in-bio.png' WHERE slug='link-in-bio';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/link-in-bio.png', 0, 'pimg_9hsxegwvq3' FROM products WHERE slug='link-in-bio';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'link-in-bio-diy', 0, 1, 'var_wkjm5q232y' FROM products WHERE slug='link-in-bio';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'link-in-bio-pro', 1, 1, 'var_sd602q79es' FROM products WHERE slug='link-in-bio';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Currículum profesional ATS en PDF', 'CV preparado para pasar los filtros automáticos de selección, en PDF y Word.
 
 ### Qué recibes
@@ -623,10 +661,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [gianfrancodemarco/resume-builder](https://github.com/gianfrancodemarco/resume-builder) — MIT: libre para uso comercial · [demo](https://resume-builder.gianfrancodemarco.dev/)
 - [samuelbelo/cvfree](https://github.com/samuelbelo/cvfree) — MIT: libre para uso comercial
 - [akhil-dara/CVAurum](https://github.com/akhil-dara/CVAurum) — AGPL-3.0: uso con condiciones (código abierto si se distribuye) · [demo](https://cvaurum.com)
-', 2900, 'eur', 999, 1, 'cv-profesional', 'Modalidad', 0, 'prod_hnc6d85ev6');
+', 2900, 'eur', 999, 1, 'cv-profesional', 'Modalidad', 0, 'prod_n872aynsa4');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='cv-profesional' AND c.slug='identidad';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'cv-profesional-diy', 0, 1, 'var_hd56qhjnz7' FROM products WHERE slug='cv-profesional';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'cv-profesional-pro', 1, 1, 'var_7xkjnb1b23' FROM products WHERE slug='cv-profesional';
+UPDATE products SET image_key='productos/cv-profesional.png' WHERE slug='cv-profesional';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/cv-profesional.png', 0, 'pimg_j8tbz31f0d' FROM products WHERE slug='cv-profesional';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'cv-profesional-diy', 0, 1, 'var_5qjbrrq881' FROM products WHERE slug='cv-profesional';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'cv-profesional-pro', 1, 1, 'var_2r8cdnzq8p' FROM products WHERE slug='cv-profesional';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Muro de opiniones de clientes', 'Recoge opiniones con un enlace, apruébalas y muéstralas en tu web.
 
 ### Qué recibes
@@ -655,10 +695,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [jhodges3401-code/kudoshelf-lite](https://github.com/jhodges3401-code/kudoshelf-lite) — MIT: libre para uso comercial · [demo](https://jhodges3401-code.github.io/kudoshelf-demo/)
 - [AnandSundar/Kindwords](https://github.com/AnandSundar/Kindwords) — MIT: libre para uso comercial
-', 4900, 'eur', 999, 1, 'muro-testimonios', 'Modalidad', 0, 'prod_8fswxfcrh4');
+', 4900, 'eur', 999, 1, 'muro-testimonios', 'Modalidad', 0, 'prod_zrvrxncmgz');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='muro-testimonios' AND c.slug='identidad';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'muro-testimonios-diy', 0, 1, 'var_mb8pfq362h' FROM products WHERE slug='muro-testimonios';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 11900, 999, 'muro-testimonios-pro', 1, 1, 'var_kbxvh5yp36' FROM products WHERE slug='muro-testimonios';
+UPDATE products SET image_key='productos/muro-testimonios.png' WHERE slug='muro-testimonios';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/muro-testimonios.png', 0, 'pimg_kp22cxax3m' FROM products WHERE slug='muro-testimonios';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'muro-testimonios-diy', 0, 1, 'var_pfhh0afj5t' FROM products WHERE slug='muro-testimonios';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 11900, 999, 'muro-testimonios-pro', 1, 1, 'var_xq0nvmm95h' FROM products WHERE slug='muro-testimonios';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Formulario de contacto con aviso al móvil', 'Cada mensaje de tu web te llega al instante por Telegram o email, con antispam.
 
 ### Qué recibes
@@ -684,10 +726,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [investblog/contact-relay](https://github.com/investblog/contact-relay) — MIT: libre para uso comercial · [demo](https://301.st)
 - [BohdanPetryshyn/formzero](https://github.com/BohdanPetryshyn/formzero) — MIT: libre para uso comercial
-', 3900, 'eur', 999, 1, 'formulario-aviso-telegram', 'Modalidad', 0, 'prod_xzb1ftjy0v');
+', 3900, 'eur', 999, 1, 'formulario-aviso-telegram', 'Modalidad', 0, 'prod_jez3bb0tqw');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='formulario-aviso-telegram' AND c.slug='captacion';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'formulario-aviso-telegram-diy', 0, 1, 'var_ehg6t9xyyd' FROM products WHERE slug='formulario-aviso-telegram';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 8900, 999, 'formulario-aviso-telegram-pro', 1, 1, 'var_jh0pjw3w71' FROM products WHERE slug='formulario-aviso-telegram';
+UPDATE products SET image_key='productos/formulario-aviso-telegram.png' WHERE slug='formulario-aviso-telegram';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/formulario-aviso-telegram.png', 0, 'pimg_qmvzgf2eep' FROM products WHERE slug='formulario-aviso-telegram';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'formulario-aviso-telegram-diy', 0, 1, 'var_rf88xzk7jj' FROM products WHERE slug='formulario-aviso-telegram';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 8900, 999, 'formulario-aviso-telegram-pro', 1, 1, 'var_gjzfvskee9' FROM products WHERE slug='formulario-aviso-telegram';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Lista de espera con referidos', 'Para lanzamientos: la gente se apunta, comparte su enlace y sube puestos en la lista.
 
 ### Qué recibes
@@ -713,10 +757,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [d4mr/0list](https://github.com/d4mr/0list) — MIT: libre para uso comercial · [demo](https://0list.d4mr.com)
 - [Metareignity/waitlist-cloudflare](https://github.com/Metareignity/waitlist-cloudflare) — MIT: libre para uso comercial · [demo](https://waitlist.metareignity.com)
-', 7900, 'eur', 999, 1, 'lista-espera', 'Modalidad', 0, 'prod_jnv41pk5tt');
+', 7900, 'eur', 999, 1, 'lista-espera', 'Modalidad', 0, 'prod_6bggdbb0mc');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='lista-espera' AND c.slug='captacion';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'lista-espera-diy', 0, 1, 'var_sn3k7b1z9e' FROM products WHERE slug='lista-espera';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'lista-espera-pro', 1, 1, 'var_py55cchtbt' FROM products WHERE slug='lista-espera';
+UPDATE products SET image_key='productos/lista-espera.png' WHERE slug='lista-espera';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/lista-espera.png', 0, 'pimg_1j710djb19' FROM products WHERE slug='lista-espera';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'lista-espera-diy', 0, 1, 'var_nrtjc8ay1p' FROM products WHERE slug='lista-espera';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'lista-espera-pro', 1, 1, 'var_z7tawey7ga' FROM products WHERE slug='lista-espera';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Avisos automáticos multicanal (webhooks)', 'Cualquier evento de tus herramientas (pago, formulario, pedido) avisa a Slack, Telegram, Discord o email.
 
 ### Qué recibes
@@ -740,10 +786,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [bts-io/hookforms-cloud](https://github.com/bts-io/hookforms-cloud) — MIT: libre para uso comercial · [demo](https://oss.hookforms.com)
-', 5900, 'eur', 999, 1, 'avisos-multicanal', 'Modalidad', 0, 'prod_qc47yjez38');
+', 5900, 'eur', 999, 1, 'avisos-multicanal', 'Modalidad', 0, 'prod_qsjq7qpbth');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='avisos-multicanal' AND c.slug='captacion';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 5900, 999, 'avisos-multicanal-diy', 0, 1, 'var_bnzgrbpdsp' FROM products WHERE slug='avisos-multicanal';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'avisos-multicanal-pro', 1, 1, 'var_f01t7wt9h7' FROM products WHERE slug='avisos-multicanal';
+UPDATE products SET image_key='productos/avisos-multicanal.png' WHERE slug='avisos-multicanal';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/avisos-multicanal.png', 0, 'pimg_55qehbd4h1' FROM products WHERE slug='avisos-multicanal';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 5900, 999, 'avisos-multicanal-diy', 0, 1, 'var_s0k2p9vb2d' FROM products WHERE slug='avisos-multicanal';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'avisos-multicanal-pro', 1, 1, 'var_1papfdktgy' FROM products WHERE slug='avisos-multicanal';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Bot de Telegram con IA', 'Un asistente con IA en Telegram para tu negocio o comunidad, con tus instrucciones.
 
 ### Qué recibes
@@ -769,10 +817,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [tbxark/ChatGPT-Telegram-Workers](https://github.com/tbxark/ChatGPT-Telegram-Workers) — MIT: libre para uso comercial · [demo](https://chatgpt-telegram-workers.tbxark.workers.dev)
-', 9900, 'eur', 999, 1, 'bot-telegram-chatgpt', 'Modalidad', 0, 'prod_bp3tcw2xmd');
+', 9900, 'eur', 999, 1, 'bot-telegram-chatgpt', 'Modalidad', 0, 'prod_w3e6watwhg');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='bot-telegram-chatgpt' AND c.slug='bots';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'bot-telegram-chatgpt-diy', 0, 1, 'var_3z0xpty4ms' FROM products WHERE slug='bot-telegram-chatgpt';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 24900, 999, 'bot-telegram-chatgpt-pro', 1, 1, 'var_cps20yrygv' FROM products WHERE slug='bot-telegram-chatgpt';
+UPDATE products SET image_key='productos/bot-telegram-chatgpt.png' WHERE slug='bot-telegram-chatgpt';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/bot-telegram-chatgpt.png', 0, 'pimg_5kynty2xk2' FROM products WHERE slug='bot-telegram-chatgpt';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'bot-telegram-chatgpt-diy', 0, 1, 'var_2f9khxmvdn' FROM products WHERE slug='bot-telegram-chatgpt';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 24900, 999, 'bot-telegram-chatgpt-pro', 1, 1, 'var_rkawzycrx6' FROM products WHERE slug='bot-telegram-chatgpt';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Bot de Telegram con menús y pedidos', 'Bot con botones: catálogo, reservas, avisos y pedidos, conectado a tu hoja de cálculo.
 
 ### Qué recibes
@@ -797,10 +847,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [aiogram/aiogram](https://github.com/aiogram/aiogram) — MIT: libre para uso comercial · [demo](https://aiogram.dev)
-', 24900, 'eur', 999, 1, 'bot-telegram-medida', 'Modalidad', 0, 'prod_e38w777cxx');
+', 24900, 'eur', 999, 1, 'bot-telegram-medida', 'Modalidad', 0, 'prod_y5wmrrxmmy');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='bot-telegram-medida' AND c.slug='bots';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'bot-telegram-medida-diy', 0, 1, 'var_qxwxr0e3nh' FROM products WHERE slug='bot-telegram-medida';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 49900, 999, 'bot-telegram-medida-pro', 1, 1, 'var_pekq8a0he5' FROM products WHERE slug='bot-telegram-medida';
+UPDATE products SET image_key='productos/bot-telegram-medida.png' WHERE slug='bot-telegram-medida';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/bot-telegram-medida.png', 0, 'pimg_za10csmwkm' FROM products WHERE slug='bot-telegram-medida';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'bot-telegram-medida-diy', 0, 1, 'var_ejfs4th16v' FROM products WHERE slug='bot-telegram-medida';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 49900, 999, 'bot-telegram-medida-pro', 1, 1, 'var_tqkt4mkrtd' FROM products WHERE slug='bot-telegram-medida';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('CRM de WhatsApp para tu equipo', 'Bandeja compartida de WhatsApp: varios agentes, contactos, embudo de ventas y envíos masivos.
 
 ### Qué recibes
@@ -825,10 +877,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [thareekanvar/replyloom](https://github.com/thareekanvar/replyloom) — MIT: libre para uso comercial
-', 29900, 'eur', 999, 1, 'crm-whatsapp', 'Modalidad', 0, 'prod_xhsd5aw0ff');
+', 29900, 'eur', 999, 1, 'crm-whatsapp', 'Modalidad', 0, 'prod_f5rwfvvjpe');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='crm-whatsapp' AND c.slug='bots';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'crm-whatsapp-diy', 0, 1, 'var_gevt9311a3' FROM products WHERE slug='crm-whatsapp';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 69900, 999, 'crm-whatsapp-pro', 1, 1, 'var_arx71tccaq' FROM products WHERE slug='crm-whatsapp';
+UPDATE products SET image_key='productos/crm-whatsapp.png' WHERE slug='crm-whatsapp';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/crm-whatsapp.png', 0, 'pimg_etsr1rnmn6' FROM products WHERE slug='crm-whatsapp';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'crm-whatsapp-diy', 0, 1, 'var_4sj5v4j632' FROM products WHERE slug='crm-whatsapp';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 69900, 999, 'crm-whatsapp-pro', 1, 1, 'var_2e461eadn8' FROM products WHERE slug='crm-whatsapp';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Captación de clientes automática', 'Formulario → hoja de cálculo → email de bienvenida → aviso a tu móvil. Sin copiar y pegar.
 
 ### Qué recibes
@@ -855,10 +909,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [yusizer/n8n-lead-automation](https://github.com/yusizer/n8n-lead-automation) — sin licencia clara: solo referencia de diseño · [demo](https://portfolio-site-jade-beta.vercel.app/projects/n8n-lead-automation.html)
 - [n8n-io/n8n](https://github.com/n8n-io/n8n) — sin licencia clara: solo referencia de diseño · [demo](https://n8n.io)
-', 14900, 'eur', 999, 1, 'auto-captacion-leads', 'Modalidad', 0, 'prod_rpx625hfdv');
+', 14900, 'eur', 999, 1, 'auto-captacion-leads', 'Modalidad', 0, 'prod_9n400pmtmv');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-captacion-leads' AND c.slug='automatizaciones';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'auto-captacion-leads-diy', 0, 1, 'var_xshsyntc2j' FROM products WHERE slug='auto-captacion-leads';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'auto-captacion-leads-pro', 1, 1, 'var_gejvsjwb1s' FROM products WHERE slug='auto-captacion-leads';
+UPDATE products SET image_key='productos/auto-captacion-leads.png' WHERE slug='auto-captacion-leads';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-captacion-leads.png', 0, 'pimg_4xy1ma1j04' FROM products WHERE slug='auto-captacion-leads';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'auto-captacion-leads-diy', 0, 1, 'var_ft1b4h99df' FROM products WHERE slug='auto-captacion-leads';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'auto-captacion-leads-pro', 1, 1, 'var_4jyxybttwr' FROM products WHERE slug='auto-captacion-leads';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Facturas recibidas a hoja de cálculo', 'Las facturas que llegan al email se leen solas y se apuntan en tu hoja: proveedor, fecha, importe, IVA.
 
 ### Qué recibes
@@ -884,10 +940,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [vixonoffice/n8n-automation-templates](https://github.com/vixonoffice/n8n-automation-templates) — sin licencia clara: solo referencia de diseño
 - [enescingoz/awesome-n8n-templates](https://github.com/enescingoz/awesome-n8n-templates) — sin licencia clara: solo referencia de diseño · [demo](https://n8n.partnerlinks.io/h1pwwf5m4toe)
-', 14900, 'eur', 999, 1, 'auto-facturas', 'Modalidad', 0, 'prod_km2mzxycs8');
+', 14900, 'eur', 999, 1, 'auto-facturas', 'Modalidad', 0, 'prod_bwwsc6g4bh');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-facturas' AND c.slug='automatizaciones';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'auto-facturas-diy', 0, 1, 'var_974nt34mez' FROM products WHERE slug='auto-facturas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'auto-facturas-pro', 1, 1, 'var_ytvfy1h5zj' FROM products WHERE slug='auto-facturas';
+UPDATE products SET image_key='productos/auto-facturas.png' WHERE slug='auto-facturas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-facturas.png', 0, 'pimg_s8cncx4j76' FROM products WHERE slug='auto-facturas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'auto-facturas-diy', 0, 1, 'var_pjvpzfsgjp' FROM products WHERE slug='auto-facturas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'auto-facturas-pro', 1, 1, 'var_ke5v8x8pn5' FROM products WHERE slug='auto-facturas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Resumen semanal de reseñas', 'Cada lunes recibes un resumen con IA de lo que dicen tus clientes: lo bueno, lo malo y qué responder.
 
 ### Qué recibes
@@ -915,10 +973,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [vixonoffice/n8n-automation-templates](https://github.com/vixonoffice/n8n-automation-templates) — sin licencia clara: solo referencia de diseño
 - [enescingoz/awesome-n8n-templates](https://github.com/enescingoz/awesome-n8n-templates) — sin licencia clara: solo referencia de diseño · [demo](https://n8n.partnerlinks.io/h1pwwf5m4toe)
-', 9900, 'eur', 999, 1, 'auto-resenas', 'Modalidad', 0, 'prod_mrq14fca5e');
+', 9900, 'eur', 999, 1, 'auto-resenas', 'Modalidad', 0, 'prod_jm4ph33krw');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-resenas' AND c.slug='automatizaciones';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'auto-resenas-diy', 0, 1, 'var_7qnm00p32c' FROM products WHERE slug='auto-resenas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 19900, 999, 'auto-resenas-pro', 1, 1, 'var_1rwk71s4ea' FROM products WHERE slug='auto-resenas';
+UPDATE products SET image_key='productos/auto-resenas.png' WHERE slug='auto-resenas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-resenas.png', 0, 'pimg_cqq4qpwpdr' FROM products WHERE slug='auto-resenas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'auto-resenas-diy', 0, 1, 'var_qcngskb2n5' FROM products WHERE slug='auto-resenas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 19900, 999, 'auto-resenas-pro', 1, 1, 'var_kdey594hb2' FROM products WHERE slug='auto-resenas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Una automatización a elegir del catálogo', 'Elige entre más de 280 flujos probados (Gmail, WhatsApp, Notion, Drive, IA…) y lo dejamos funcionando con tus cuentas.
 
 ### Qué recibes
@@ -948,10 +1008,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [n8n-io/n8n](https://github.com/n8n-io/n8n) — sin licencia clara: solo referencia de diseño · [demo](https://n8n.io)
 - [activepieces/activepieces](https://github.com/activepieces/activepieces) — sin licencia clara: solo referencia de diseño · [demo](https://www.activepieces.com)
 - [automatisch/automatisch](https://github.com/automatisch/automatisch) — sin licencia clara: solo referencia de diseño · [demo](https://automatisch.io)
-', 9900, 'eur', 999, 1, 'auto-plantilla-medida', 'Modalidad', 0, 'prod_2c08219gs2');
+', 9900, 'eur', 999, 1, 'auto-plantilla-medida', 'Modalidad', 0, 'prod_28qwqjj8vg');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-plantilla-medida' AND c.slug='automatizaciones';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'auto-plantilla-medida-diy', 0, 1, 'var_badrbbzbwh' FROM products WHERE slug='auto-plantilla-medida';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 19900, 999, 'auto-plantilla-medida-pro', 1, 1, 'var_d1wacnhgv8' FROM products WHERE slug='auto-plantilla-medida';
+UPDATE products SET image_key='productos/auto-plantilla-medida.png' WHERE slug='auto-plantilla-medida';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-plantilla-medida.png', 0, 'pimg_82xc99g744' FROM products WHERE slug='auto-plantilla-medida';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'auto-plantilla-medida-diy', 0, 1, 'var_gb9tdmg1q9' FROM products WHERE slug='auto-plantilla-medida';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 19900, 999, 'auto-plantilla-medida-pro', 1, 1, 'var_mr62pr5v17' FROM products WHERE slug='auto-plantilla-medida';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Tareas programadas en la nube', 'Procesos que se ejecutan solos cada hora/día: copias, informes, sincronizaciones, recordatorios.
 
 ### Qué recibes
@@ -975,10 +1037,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [cloudflare/workflows-starter](https://github.com/cloudflare/workflows-starter) — Apache-2.0: libre para uso comercial · [demo](https://developers.cloudflare.com/workflows/)
-', 19900, 'eur', 999, 1, 'auto-tareas-programadas', 'Modalidad', 0, 'prod_b2wz5rjt2z');
+', 19900, 'eur', 999, 1, 'auto-tareas-programadas', 'Modalidad', 0, 'prod_b32paray05');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-tareas-programadas' AND c.slug='automatizaciones';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'auto-tareas-programadas-diy', 0, 1, 'var_bxyxwq28zg' FROM products WHERE slug='auto-tareas-programadas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 39900, 999, 'auto-tareas-programadas-pro', 1, 1, 'var_hqbfatwwge' FROM products WHERE slug='auto-tareas-programadas';
+UPDATE products SET image_key='productos/auto-tareas-programadas.png' WHERE slug='auto-tareas-programadas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-tareas-programadas.png', 0, 'pimg_6jm0ne3mxx' FROM products WHERE slug='auto-tareas-programadas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'auto-tareas-programadas-diy', 0, 1, 'var_mnjee234jx' FROM products WHERE slug='auto-tareas-programadas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 39900, 999, 'auto-tareas-programadas-pro', 1, 1, 'var_bc01cjbfzc' FROM products WHERE slug='auto-tareas-programadas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Acortador de enlaces con tu dominio', 'Enlaces cortos de marca (tunegocio.es/oferta) con estadísticas de clics y QR.
 
 ### Qué recibes
@@ -1003,10 +1067,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [miantiao-me/Sink](https://github.com/miantiao-me/Sink) — AGPL-3.0: uso con condiciones (código abierto si se distribuye) · [demo](https://Sink.Cool)
 - [botnick/shortlink](https://github.com/botnick/shortlink) — sin licencia clara: solo referencia de diseño
-', 4900, 'eur', 999, 1, 'acortador-enlaces', 'Modalidad', 0, 'prod_yqb0787zve');
+', 4900, 'eur', 999, 1, 'acortador-enlaces', 'Modalidad', 0, 'prod_9tg8xcgmvq');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='acortador-enlaces' AND c.slug='enlaces';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'acortador-enlaces-diy', 0, 1, 'var_64er788shg' FROM products WHERE slug='acortador-enlaces';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'acortador-enlaces-pro', 1, 1, 'var_6b34s2q2d9' FROM products WHERE slug='acortador-enlaces';
+UPDATE products SET image_key='productos/acortador-enlaces.png' WHERE slug='acortador-enlaces';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/acortador-enlaces.png', 0, 'pimg_h13gs54hhr' FROM products WHERE slug='acortador-enlaces';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'acortador-enlaces-diy', 0, 1, 'var_4m13sbrt7k' FROM products WHERE slug='acortador-enlaces';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'acortador-enlaces-pro', 1, 1, 'var_zp796js73p' FROM products WHERE slug='acortador-enlaces';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Pack de códigos QR para campañas', 'QR en vector listos para imprenta, con enlace editable y medición.
 
 ### Qué recibes
@@ -1029,10 +1095,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [investblog/qr-generator](https://github.com/investblog/qr-generator) — MIT: libre para uso comercial
-', 1900, 'eur', 999, 1, 'qr-campanas', 'Modalidad', 0, 'prod_cvwfew69sx');
+', 1900, 'eur', 999, 1, 'qr-campanas', 'Modalidad', 0, 'prod_cz0rgcwp50');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='qr-campanas' AND c.slug='enlaces';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1900, 999, 'qr-campanas-diy', 0, 1, 'var_k7bf7hdqq3' FROM products WHERE slug='qr-campanas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 4900, 999, 'qr-campanas-pro', 1, 1, 'var_natmy10wwt' FROM products WHERE slug='qr-campanas';
+UPDATE products SET image_key='productos/qr-campanas.png' WHERE slug='qr-campanas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/qr-campanas.png', 0, 'pimg_vwye3ab91r' FROM products WHERE slug='qr-campanas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1900, 999, 'qr-campanas-diy', 0, 1, 'var_ad86ad4qs6' FROM products WHERE slug='qr-campanas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 4900, 999, 'qr-campanas-pro', 1, 1, 'var_kxdhfvcf5r' FROM products WHERE slug='qr-campanas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Analítica web sin cookies', 'Sabe cuántas visitas tienes y de dónde vienen, sin banner de cookies molesto.
 
 ### Qué recibes
@@ -1055,10 +1123,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [umami-software/umami](https://github.com/umami-software/umami) — MIT: libre para uso comercial · [demo](https://umami.is)
-', 4900, 'eur', 999, 1, 'analitica-sin-cookies', 'Modalidad', 0, 'prod_0t022cb88e');
+', 4900, 'eur', 999, 1, 'analitica-sin-cookies', 'Modalidad', 0, 'prod_skqcbha8kq');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='analitica-sin-cookies' AND c.slug='enlaces';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'analitica-sin-cookies-diy', 0, 1, 'var_b021ts7ghm' FROM products WHERE slug='analitica-sin-cookies';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'analitica-sin-cookies-pro', 1, 1, 'var_b79vryy1vg' FROM products WHERE slug='analitica-sin-cookies';
+UPDATE products SET image_key='productos/analitica-sin-cookies.png' WHERE slug='analitica-sin-cookies';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/analitica-sin-cookies.png', 0, 'pimg_9fh6jzybj1' FROM products WHERE slug='analitica-sin-cookies';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'analitica-sin-cookies-diy', 0, 1, 'var_s8shce9epm' FROM products WHERE slug='analitica-sin-cookies';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'analitica-sin-cookies-pro', 1, 1, 'var_m1pyx2qzqy' FROM products WHERE slug='analitica-sin-cookies';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Tienda de productos digitales', 'Vende ebooks, plantillas, cursos o presets: el cliente paga y descarga al momento.
 
 ### Qué recibes
@@ -1089,10 +1159,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [Vojislav77/digital-downloads-website](https://github.com/Vojislav77/digital-downloads-website) — MIT: libre para uso comercial · [demo](https://vojislav77.github.io/digital-downloads-website/)
 - [fengyiqicoder/astro-ai-shop](https://github.com/fengyiqicoder/astro-ai-shop) — MIT: libre para uso comercial · [demo](https://fengyiqicoder.github.io/astro-ai-shop/)
 - [Paymug/paymug](https://github.com/Paymug/paymug) — sin licencia clara: solo referencia de diseño · [demo](https://paymug.co)
-', 29900, 'eur', 999, 1, 'tienda-productos-digitales', 'Modalidad', 0, 'prod_3brw9j1hjh');
+', 29900, 'eur', 999, 1, 'tienda-productos-digitales', 'Modalidad', 0, 'prod_wn6vvgbpnp');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tienda-productos-digitales' AND c.slug='tiendas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'tienda-productos-digitales-diy', 0, 1, 'var_zqq1f66cjn' FROM products WHERE slug='tienda-productos-digitales';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'tienda-productos-digitales-pro', 1, 1, 'var_ev35m50p7b' FROM products WHERE slug='tienda-productos-digitales';
+UPDATE products SET image_key='productos/tienda-productos-digitales.png' WHERE slug='tienda-productos-digitales';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tienda-productos-digitales.png', 0, 'pimg_5tg9ehjzdm' FROM products WHERE slug='tienda-productos-digitales';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'tienda-productos-digitales-diy', 0, 1, 'var_7g5sgww5fp' FROM products WHERE slug='tienda-productos-digitales';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'tienda-productos-digitales-pro', 1, 1, 'var_6ppherxj1k' FROM products WHERE slug='tienda-productos-digitales';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Tienda online completa', 'Catálogo, variantes, carrito, pagos, envíos y panel de pedidos. Sin comisiones de plataforma.
 
 ### Qué recibes
@@ -1119,10 +1191,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [ddyy/minshop](https://github.com/ddyy/minshop) — sin licencia clara: solo referencia de diseño
 - [russellkmoore/mercora](https://github.com/russellkmoore/mercora) — MIT: libre para uso comercial · [demo](https://voltique.russellkmoore.me)
-', 49900, 'eur', 999, 1, 'tienda-online', 'Modalidad', 0, 'prod_9cz558dwjc');
+', 49900, 'eur', 999, 1, 'tienda-online', 'Modalidad', 0, 'prod_2c056qp06n');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tienda-online' AND c.slug='tiendas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 49900, 999, 'tienda-online-diy', 0, 1, 'var_79shb5y03n' FROM products WHERE slug='tienda-online';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 99900, 999, 'tienda-online-pro', 1, 1, 'var_jhe8av6dy8' FROM products WHERE slug='tienda-online';
+UPDATE products SET image_key='productos/tienda-online.png' WHERE slug='tienda-online';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tienda-online.png', 0, 'pimg_763g0hwpj5' FROM products WHERE slug='tienda-online';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 49900, 999, 'tienda-online-diy', 0, 1, 'var_7h3dvar75f' FROM products WHERE slug='tienda-online';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 99900, 999, 'tienda-online-pro', 1, 1, 'var_mkc2agqt0q' FROM products WHERE slug='tienda-online';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Marketplace de productos digitales', 'Plataforma donde varios creadores venden plantillas, presets o cursos y tú cobras comisión.
 
 ### Qué recibes
@@ -1151,10 +1225,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [w4seemdev/Templix](https://github.com/w4seemdev/Templix) — sin licencia clara: solo referencia de diseño · [demo](https://templix-peach.vercel.app)
 - [playlikeboy/scriptly.store](https://github.com/playlikeboy/scriptly.store) — sin licencia clara: solo referencia de diseño · [demo](https://scriptly.store)
 - [vignesh-gupta/digibee-marketplace](https://github.com/vignesh-gupta/digibee-marketplace) — MIT: libre para uso comercial · [demo](https://digibee.vigneshgupta.tech/)
-', 69900, 'eur', 999, 1, 'marketplace-plantillas', 'Modalidad', 0, 'prod_gja84hdd7b');
+', 69900, 'eur', 999, 1, 'marketplace-plantillas', 'Modalidad', 0, 'prod_htwnkdn7qc');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='marketplace-plantillas' AND c.slug='tiendas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 69900, 999, 'marketplace-plantillas-diy', 0, 1, 'var_5ay7q0td82' FROM products WHERE slug='marketplace-plantillas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 129900, 999, 'marketplace-plantillas-pro', 1, 1, 'var_m3effj1efz' FROM products WHERE slug='marketplace-plantillas';
+UPDATE products SET image_key='productos/marketplace-plantillas.png' WHERE slug='marketplace-plantillas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/marketplace-plantillas.png', 0, 'pimg_ykv2g7s90d' FROM products WHERE slug='marketplace-plantillas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 69900, 999, 'marketplace-plantillas-diy', 0, 1, 'var_g73was8fkn' FROM products WHERE slug='marketplace-plantillas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 129900, 999, 'marketplace-plantillas-pro', 1, 1, 'var_cmzva85qfs' FROM products WHERE slug='marketplace-plantillas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Portal de clientes para agencias y freelancers', 'Tus clientes entran con su usuario y ven proyectos, archivos, facturas y avances.
 
 ### Qué recibes
@@ -1181,10 +1257,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [directus-labs/agency-os](https://github.com/directus-labs/agency-os) — MIT: libre para uso comercial · [demo](https://agencyos.dev)
 - [Vibra-Labs/Atrium](https://github.com/Vibra-Labs/Atrium) — sin licencia clara: solo referencia de diseño · [demo](https://atrium.vibralabs.co)
 - [onlineprfoundation/pr-agency-platform](https://github.com/onlineprfoundation/pr-agency-platform) — sin licencia clara: solo referencia de diseño · [demo](https://online.pr/opensource/pr-agency-platform)
-', 29900, 'eur', 999, 1, 'portal-cliente', 'Modalidad', 0, 'prod_72kq4yre8k');
+', 29900, 'eur', 999, 1, 'portal-cliente', 'Modalidad', 0, 'prod_yd26dcax4d');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='portal-cliente' AND c.slug='portales';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'portal-cliente-diy', 0, 1, 'var_asvg6r8j77' FROM products WHERE slug='portal-cliente';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'portal-cliente-pro', 1, 1, 'var_35faa4tv2f' FROM products WHERE slug='portal-cliente';
+UPDATE products SET image_key='productos/portal-cliente.png' WHERE slug='portal-cliente';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/portal-cliente.png', 0, 'pimg_xnjaxs9vea' FROM products WHERE slug='portal-cliente';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 29900, 999, 'portal-cliente-diy', 0, 1, 'var_kpycca2hec' FROM products WHERE slug='portal-cliente';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 59900, 999, 'portal-cliente-pro', 1, 1, 'var_a14gq6xkkt' FROM products WHERE slug='portal-cliente';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web que editas arrastrando bloques', 'Web con editor visual: cambias textos, imágenes y secciones arrastrando, como en Wix, pero tuya.
 
 ### Qué recibes
@@ -1215,10 +1293,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - [puckeditor/puck](https://github.com/puckeditor/puck) — MIT: libre para uso comercial · [demo](https://puckeditor.com)
 - [givanz/VvvebJs](https://github.com/givanz/VvvebJs) — Apache-2.0: libre para uso comercial · [demo](https://www.vvveb.com/vvvebjs/editor.html)
 - [webstudio-is/webstudio](https://github.com/webstudio-is/webstudio) — AGPL-3.0: uso con condiciones (código abierto si se distribuye) · [demo](https://webstudio.is)
-', 39900, 'eur', 999, 1, 'web-editable-visual', 'Modalidad', 0, 'prod_rtzv9dzh7s');
+', 39900, 'eur', 999, 1, 'web-editable-visual', 'Modalidad', 0, 'prod_08qpqd1jcp');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-editable-visual' AND c.slug='portales';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 39900, 999, 'web-editable-visual-diy', 0, 1, 'var_s2w80nkf3k' FROM products WHERE slug='web-editable-visual';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 79900, 999, 'web-editable-visual-pro', 1, 1, 'var_7gaqmyct89' FROM products WHERE slug='web-editable-visual';
+UPDATE products SET image_key='productos/web-editable-visual.png' WHERE slug='web-editable-visual';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-editable-visual.png', 0, 'pimg_atka3hakqq' FROM products WHERE slug='web-editable-visual';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 39900, 999, 'web-editable-visual-diy', 0, 1, 'var_kr0t5sfnfz' FROM products WHERE slug='web-editable-visual';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 79900, 999, 'web-editable-visual-pro', 1, 1, 'var_d5a50z2bvw' FROM products WHERE slug='web-editable-visual';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Mantenimiento web (mes)', 'Nos ocupamos de que tu web siga funcionando: copias, actualizaciones y pequeños cambios.
 
 ### Qué recibes
@@ -1235,8 +1315,10 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 > Cambiar el horario de verano o subir la nueva carta: nos lo mandas y está hecho.
 
 **Plazo:** Mensual
-', 1900, 'eur', 999, 1, 'plan-mantenimiento-web', NULL, 0, 'prod_1k33bgddpc');
+', 1900, 'eur', 999, 1, 'plan-mantenimiento-web', NULL, 0, 'prod_dqvdg5habd');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plan-mantenimiento-web' AND c.slug='planes';
+UPDATE products SET image_key='productos/plan-mantenimiento-web.png' WHERE slug='plan-mantenimiento-web';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plan-mantenimiento-web.png', 0, 'pimg_qmqwg9reh2' FROM products WHERE slug='plan-mantenimiento-web';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Alojamiento + dominio gestionado (mes)', 'Tu web publicada en Cloudflare con SSL y tu dominio, sin preocuparte de renovaciones.
 
 ### Qué recibes
@@ -1255,8 +1337,10 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [coollabsio/coolify](https://github.com/coollabsio/coolify) — Apache-2.0: libre para uso comercial · [demo](https://coolify.io)
-', 900, 'eur', 999, 1, 'plan-hosting-dominio', NULL, 0, 'prod_n3jkzthj15');
+', 900, 'eur', 999, 1, 'plan-hosting-dominio', NULL, 0, 'prod_35jz0jc170');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plan-hosting-dominio' AND c.slug='planes';
+UPDATE products SET image_key='productos/plan-hosting-dominio.png' WHERE slug='plan-hosting-dominio';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plan-hosting-dominio.png', 0, 'pimg_yf9gvgtgyx' FROM products WHERE slug='plan-hosting-dominio';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Automatizaciones vigiladas (mes)', 'Mantenemos tus automatizaciones en marcha: si una falla, la arreglamos antes de que lo notes.
 
 ### Qué recibes
@@ -1276,8 +1360,10 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Base técnica (código abierto)
 - [n8n-io/n8n](https://github.com/n8n-io/n8n) — sin licencia clara: solo referencia de diseño · [demo](https://n8n.io)
 - [activepieces/activepieces](https://github.com/activepieces/activepieces) — sin licencia clara: solo referencia de diseño · [demo](https://www.activepieces.com)
-', 3900, 'eur', 999, 1, 'plan-automatizaciones', NULL, 0, 'prod_5yhc536hxa');
+', 3900, 'eur', 999, 1, 'plan-automatizaciones', NULL, 0, 'prod_azjbx13w1h');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plan-automatizaciones' AND c.slug='planes';
+UPDATE products SET image_key='productos/plan-automatizaciones.png' WHERE slug='plan-automatizaciones';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plan-automatizaciones.png', 0, 'pimg_6sgpwd1amn' FROM products WHERE slug='plan-automatizaciones';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Auditoría web exprés', 'Informe claro de velocidad, SEO, móvil y accesibilidad de tu web, con lo que hay que arreglar primero.
 
 ### Qué recibes
@@ -1293,8 +1379,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 > «Tu web tarda 6 s en móvil por 3 imágenes de 4 MB: arreglarlo sube las llamadas».
 
 **Plazo:** 48 h
-', 4900, 'eur', 999, 1, 'auditoria-web', NULL, 0, 'prod_81s7gxh49s');
+
+### Base técnica (código abierto)
+- [GoogleChrome/lighthouse](https://github.com/GoogleChrome/lighthouse) — Apache-2.0: libre para uso comercial · [demo](https://developer.chrome.com/docs/lighthouse/overview/)
+', 4900, 'eur', 999, 1, 'auditoria-web', NULL, 0, 'prod_nrtvcd4jc1');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auditoria-web' AND c.slug='planes';
+UPDATE products SET image_key='productos/auditoria-web.png' WHERE slug='auditoria-web';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auditoria-web.png', 0, 'pimg_n35pkq6rmv' FROM products WHERE slug='auditoria-web';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Aviso si tu web se cae + página de estado', 'Comprobamos tu web cada minuto y te avisamos al móvil si deja de funcionar, con una página pública de estado.
 
 ### Qué recibes
@@ -1319,10 +1410,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) — MIT: libre para uso comercial · [demo](https://uptime.kuma.pet)
-', 3900, 'eur', 999, 1, 'vigilancia-caidas', 'Modalidad', 0, 'prod_y94kfhk4ft');
+', 3900, 'eur', 999, 1, 'vigilancia-caidas', 'Modalidad', 0, 'prod_gk8531k381');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='vigilancia-caidas' AND c.slug='planes';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'vigilancia-caidas-diy', 0, 1, 'var_k16j5822ys' FROM products WHERE slug='vigilancia-caidas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'vigilancia-caidas-pro', 1, 1, 'var_dgjdzs8vje' FROM products WHERE slug='vigilancia-caidas';
+UPDATE products SET image_key='productos/vigilancia-caidas.png' WHERE slug='vigilancia-caidas';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/vigilancia-caidas.png', 0, 'pimg_fftwtxzd4j' FROM products WHERE slug='vigilancia-caidas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'vigilancia-caidas-diy', 0, 1, 'var_qn0wpe9eh7' FROM products WHERE slug='vigilancia-caidas';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'vigilancia-caidas-pro', 1, 1, 'var_ggee7eb95x' FROM products WHERE slug='vigilancia-caidas';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Generador de facturas y presupuestos con tu marca', 'Rellenas cliente y conceptos, y sale una factura o presupuesto en PDF con tu logo, IVA calculado y numeración.
 
 ### Qué recibes
@@ -1348,10 +1441,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [al1abb/invoify](https://github.com/al1abb/invoify) — MIT: libre para uso comercial · [demo](https://invoify.vercel.app)
-', 7900, 'eur', 999, 1, 'facturas-presupuestos', 'Modalidad', 0, 'prod_h7baq87cry');
+', 7900, 'eur', 999, 1, 'facturas-presupuestos', 'Modalidad', 0, 'prod_kj70vfgefs');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='facturas-presupuestos' AND c.slug='documentos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'facturas-presupuestos-diy', 0, 1, 'var_9wm9zh46eq' FROM products WHERE slug='facturas-presupuestos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'facturas-presupuestos-pro', 1, 1, 'var_z4afv1gzrh' FROM products WHERE slug='facturas-presupuestos';
+UPDATE products SET image_key='productos/facturas-presupuestos.png' WHERE slug='facturas-presupuestos';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/facturas-presupuestos.png', 0, 'pimg_g6rw1hjn3x' FROM products WHERE slug='facturas-presupuestos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 7900, 999, 'facturas-presupuestos-diy', 0, 1, 'var_yhxcnze8e3' FROM products WHERE slug='facturas-presupuestos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'facturas-presupuestos-pro', 1, 1, 'var_jqhcmqn9ea' FROM products WHERE slug='facturas-presupuestos';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Diplomas y certificados en PDF automáticos', 'Para academias, cursos y eventos: subes la lista de alumnos y cada uno recibe su certificado personalizado.
 
 ### Qué recibes
@@ -1377,10 +1472,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [pdfme/pdfme](https://github.com/pdfme/pdfme) — MIT: libre para uso comercial · [demo](http://pdfme.com/)
-', 9900, 'eur', 999, 1, 'certificados-automaticos', 'Modalidad', 0, 'prod_xgpj80q2q9');
+', 9900, 'eur', 999, 1, 'certificados-automaticos', 'Modalidad', 0, 'prod_fv0jv0pk56');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='certificados-automaticos' AND c.slug='documentos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'certificados-automaticos-diy', 0, 1, 'var_d9jfd1shs7' FROM products WHERE slug='certificados-automaticos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 22900, 999, 'certificados-automaticos-pro', 1, 1, 'var_ssgtphbw6t' FROM products WHERE slug='certificados-automaticos';
+UPDATE products SET image_key='productos/certificados-automaticos.png' WHERE slug='certificados-automaticos';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/certificados-automaticos.png', 0, 'pimg_17gx3gpceh' FROM products WHERE slug='certificados-automaticos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'certificados-automaticos-diy', 0, 1, 'var_zdgj1pyn11' FROM products WHERE slug='certificados-automaticos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 22900, 999, 'certificados-automaticos-pro', 1, 1, 'var_se2vy8zswh' FROM products WHERE slug='certificados-automaticos';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Transcripción automática de audios y reuniones', 'Mandas un audio o una grabación y recibes el texto y un resumen con tareas. Funciona con audios de WhatsApp.
 
 ### Qué recibes
@@ -1405,10 +1502,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [openai/whisper](https://github.com/openai/whisper) — MIT: libre para uso comercial
-', 4900, 'eur', 999, 1, 'transcripcion-audios', 'Modalidad', 0, 'prod_t4akhzkdex');
+', 4900, 'eur', 999, 1, 'transcripcion-audios', 'Modalidad', 0, 'prod_1ctj4evh2s');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='transcripcion-audios' AND c.slug='documentos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'transcripcion-audios-diy', 0, 1, 'var_8kwstmjh97' FROM products WHERE slug='transcripcion-audios';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 14900, 999, 'transcripcion-audios-pro', 1, 1, 'var_s48s39cfjy' FROM products WHERE slug='transcripcion-audios';
+UPDATE products SET image_key='productos/transcripcion-audios.png' WHERE slug='transcripcion-audios';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/transcripcion-audios.png', 0, 'pimg_jbpxz40r1z' FROM products WHERE slug='transcripcion-audios';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'transcripcion-audios-diy', 0, 1, 'var_yn9dn2ahhp' FROM products WHERE slug='transcripcion-audios';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 14900, 999, 'transcripcion-audios-pro', 1, 1, 'var_3xhbst3awk' FROM products WHERE slug='transcripcion-audios';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Chat con IA en tu web que responde con tus datos', 'Un asistente en tu web que contesta horarios, precios y dudas frecuentes usando tu información, y te pasa los contactos.
 
 ### Qué recibes
@@ -1434,10 +1533,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [mckaywrigley/chatbot-ui](https://github.com/mckaywrigley/chatbot-ui) — MIT: libre para uso comercial
-', 19900, 'eur', 999, 1, 'chat-ia-web', 'Modalidad', 0, 'prod_vz7y90w18d');
+', 19900, 'eur', 999, 1, 'chat-ia-web', 'Modalidad', 0, 'prod_wpwdpwgejq');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='chat-ia-web' AND c.slug='bots';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'chat-ia-web-diy', 0, 1, 'var_qbt568vskz' FROM products WHERE slug='chat-ia-web';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 44900, 999, 'chat-ia-web-pro', 1, 1, 'var_na4p0eg9pf' FROM products WHERE slug='chat-ia-web';
+UPDATE products SET image_key='productos/chat-ia-web.png' WHERE slug='chat-ia-web';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/chat-ia-web.png', 0, 'pimg_323tnrtfyv' FROM products WHERE slug='chat-ia-web';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'chat-ia-web-diy', 0, 1, 'var_8sp301dza2' FROM products WHERE slug='chat-ia-web';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 44900, 999, 'chat-ia-web-pro', 1, 1, 'var_jxx7cp13wt' FROM products WHERE slug='chat-ia-web';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Centro de ayuda o manual para tus clientes', 'Una web de ayuda con buscador para que tus clientes resuelvan dudas solos: guías, preguntas frecuentes y tutoriales.
 
 ### Qué recibes
@@ -1463,10 +1564,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [withastro/starlight](https://github.com/withastro/starlight) — MIT: libre para uso comercial · [demo](https://starlight.astro.build)
-', 14900, 'eur', 999, 1, 'centro-ayuda', 'Modalidad', 0, 'prod_q2affs8sky');
+', 14900, 'eur', 999, 1, 'centro-ayuda', 'Modalidad', 0, 'prod_c72ykvnrm5');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='centro-ayuda' AND c.slug='portales';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'centro-ayuda-diy', 0, 1, 'var_zmqnndm16b' FROM products WHERE slug='centro-ayuda';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'centro-ayuda-pro', 1, 1, 'var_xtjftrqfsh' FROM products WHERE slug='centro-ayuda';
+UPDATE products SET image_key='productos/centro-ayuda.png' WHERE slug='centro-ayuda';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/centro-ayuda.png', 0, 'pimg_z9d7pcatz4' FROM products WHERE slug='centro-ayuda';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'centro-ayuda-diy', 0, 1, 'var_fnazk30m2b' FROM products WHERE slug='centro-ayuda';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'centro-ayuda-pro', 1, 1, 'var_0a1vx39gjy' FROM products WHERE slug='centro-ayuda';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Boletín de email propio sin cuotas por contacto', 'Tu propio sistema de newsletter: formulario de alta, plantillas y envíos programados, sin pagar por cada suscriptor.
 
 ### Qué recibes
@@ -1492,10 +1595,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [knadh/listmonk](https://github.com/knadh/listmonk) — AGPL-3.0: uso con condiciones (código abierto si se distribuye) · [demo](https://listmonk.app)
-', 14900, 'eur', 999, 1, 'newsletter-propia', 'Modalidad', 0, 'prod_qsbj4zpk00');
+', 14900, 'eur', 999, 1, 'newsletter-propia', 'Modalidad', 0, 'prod_mk2gs10tjp');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='newsletter-propia' AND c.slug='captacion';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'newsletter-propia-diy', 0, 1, 'var_wzkvp1g5dr' FROM products WHERE slug='newsletter-propia';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'newsletter-propia-pro', 1, 1, 'var_pvj73majm7' FROM products WHERE slug='newsletter-propia';
+UPDATE products SET image_key='productos/newsletter-propia.png' WHERE slug='newsletter-propia';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/newsletter-propia.png', 0, 'pimg_z5mxqe3sv3' FROM products WHERE slug='newsletter-propia';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 14900, 999, 'newsletter-propia-diy', 0, 1, 'var_72mgxt7m8v' FROM products WHERE slug='newsletter-propia';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 29900, 999, 'newsletter-propia-pro', 1, 1, 'var_qnyneqmctc' FROM products WHERE slug='newsletter-propia';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Banner de cookies legal y textos RGPD', 'Pon tu web en regla: banner de cookies que bloquea de verdad hasta que el usuario acepta, y textos legales base.
 
 ### Qué recibes
@@ -1520,10 +1625,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [orestbida/cookieconsent](https://github.com/orestbida/cookieconsent) — MIT: libre para uso comercial · [demo](https://playground.cookieconsent.orestbida.com/)
-', 2900, 'eur', 999, 1, 'banner-cookies-rgpd', 'Modalidad', 0, 'prod_wpv5y3aeac');
+', 2900, 'eur', 999, 1, 'banner-cookies-rgpd', 'Modalidad', 0, 'prod_5r5z2cx09g');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='banner-cookies-rgpd' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'banner-cookies-rgpd-diy', 0, 1, 'var_ean05pnsd4' FROM products WHERE slug='banner-cookies-rgpd';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'banner-cookies-rgpd-pro', 1, 1, 'var_aws1cnqvjd' FROM products WHERE slug='banner-cookies-rgpd';
+UPDATE products SET image_key='productos/banner-cookies-rgpd.png' WHERE slug='banner-cookies-rgpd';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/banner-cookies-rgpd.png', 0, 'pimg_6xjpvar9j9' FROM products WHERE slug='banner-cookies-rgpd';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'banner-cookies-rgpd-diy', 0, 1, 'var_0arv1wjge6' FROM products WHERE slug='banner-cookies-rgpd';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'banner-cookies-rgpd-pro', 1, 1, 'var_66jxdyr5z6' FROM products WHERE slug='banner-cookies-rgpd';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Tu web en inglés (u otro idioma)', 'Añadimos un segundo idioma a tu web con selector, URLs propias y SEO para que te encuentren turistas y clientes de fuera.
 
 ### Qué recibes
@@ -1545,10 +1652,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Modalidades
 - **Lo montas tú** (99 €): plantilla + guía paso a paso.
 - **Te lo montamos** (249 €): lo publicamos con tus datos.
-', 9900, 'eur', 999, 1, 'web-multidioma', 'Modalidad', 0, 'prod_w4sn0e5897');
+', 9900, 'eur', 999, 1, 'web-multidioma', 'Modalidad', 0, 'prod_mvfpjbj1kz');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-multidioma' AND c.slug='webs';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'web-multidioma-diy', 0, 1, 'var_n2dhezgbt9' FROM products WHERE slug='web-multidioma';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 24900, 999, 'web-multidioma-pro', 1, 1, 'var_ycq0swrwys' FROM products WHERE slug='web-multidioma';
+UPDATE products SET image_key='productos/web-multidioma.png' WHERE slug='web-multidioma';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-multidioma.png', 0, 'pimg_f7qbt3akb2' FROM products WHERE slug='web-multidioma';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 9900, 999, 'web-multidioma-diy', 0, 1, 'var_5q4363bqyr' FROM products WHERE slug='web-multidioma';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 24900, 999, 'web-multidioma-pro', 1, 1, 'var_cgwbwhe0r1' FROM products WHERE slug='web-multidioma';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Ficha de Google de tu negocio optimizada', 'Que te encuentren en Google Maps: ficha completa, categorías correctas, fotos, horarios y enlace de reseñas.
 
 ### Qué recibes
@@ -1571,10 +1680,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Modalidades
 - **Lo montas tú** (49 €): plantilla + guía paso a paso.
 - **Te lo montamos** (129 €): lo publicamos con tus datos.
-', 4900, 'eur', 999, 1, 'ficha-google', 'Modalidad', 0, 'prod_c4rp9qaes5');
+', 4900, 'eur', 999, 1, 'ficha-google', 'Modalidad', 0, 'prod_yb647z8zx0');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='ficha-google' AND c.slug='captacion';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'ficha-google-diy', 0, 1, 'var_9rkq9gg44h' FROM products WHERE slug='ficha-google';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'ficha-google-pro', 1, 1, 'var_c0n47xe920' FROM products WHERE slug='ficha-google';
+UPDATE products SET image_key='productos/ficha-google.png' WHERE slug='ficha-google';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/ficha-google.png', 0, 'pimg_dg135tecyh' FROM products WHERE slug='ficha-google';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'ficha-google-diy', 0, 1, 'var_czkggb2wcs' FROM products WHERE slug='ficha-google';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'ficha-google-pro', 1, 1, 'var_rwbcdw6vy1' FROM products WHERE slug='ficha-google';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Fotos de producto con fondo blanco automático', 'Subes las fotos hechas con el móvil y te devolvemos las imágenes recortadas, con fondo blanco y tamaño para tu tienda.
 
 ### Qué recibes
@@ -1599,10 +1710,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [danielgatis/rembg](https://github.com/danielgatis/rembg) — MIT: libre para uso comercial
-', 2900, 'eur', 999, 1, 'fotos-producto-fondo', 'Modalidad', 0, 'prod_708cmptpnq');
+', 2900, 'eur', 999, 1, 'fotos-producto-fondo', 'Modalidad', 0, 'prod_rc5kw193py');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='fotos-producto-fondo' AND c.slug='tiendas';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'fotos-producto-fondo-diy', 0, 1, 'var_js1w58de6s' FROM products WHERE slug='fotos-producto-fondo';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'fotos-producto-fondo-pro', 1, 1, 'var_djxbvvtr9t' FROM products WHERE slug='fotos-producto-fondo';
+UPDATE products SET image_key='productos/fotos-producto-fondo.png' WHERE slug='fotos-producto-fondo';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/fotos-producto-fondo.png', 0, 'pimg_84wmt0jh8g' FROM products WHERE slug='fotos-producto-fondo';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'fotos-producto-fondo-diy', 0, 1, 'var_njrxwbv8xs' FROM products WHERE slug='fotos-producto-fondo';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'fotos-producto-fondo-pro', 1, 1, 'var_1twstcp3e6' FROM products WHERE slug='fotos-producto-fondo';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Firma de email profesional', 'Firma con tu foto o logo, cargo, teléfono, redes y aviso legal, que se ve bien en Gmail, Outlook y móvil.
 
 ### Qué recibes
@@ -1624,10 +1737,12 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 ### Modalidades
 - **Lo montas tú** (19 €): plantilla + guía paso a paso.
 - **Te lo montamos** (49 €): lo publicamos con tus datos.
-', 1900, 'eur', 999, 1, 'firma-email', 'Modalidad', 0, 'prod_6xn4cq93x4');
+', 1900, 'eur', 999, 1, 'firma-email', 'Modalidad', 0, 'prod_0gy6xtrr5b');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='firma-email' AND c.slug='identidad';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1900, 999, 'firma-email-diy', 0, 1, 'var_44hs4df9zc' FROM products WHERE slug='firma-email';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 4900, 999, 'firma-email-pro', 1, 1, 'var_y60843jrpc' FROM products WHERE slug='firma-email';
+UPDATE products SET image_key='productos/firma-email.png' WHERE slug='firma-email';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/firma-email.png', 0, 'pimg_2hcrw1khjd' FROM products WHERE slug='firma-email';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1900, 999, 'firma-email-diy', 0, 1, 'var_dwz11ysevm' FROM products WHERE slug='firma-email';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 4900, 999, 'firma-email-pro', 1, 1, 'var_szf1btgn1c' FROM products WHERE slug='firma-email';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Pizarra online privada para tu equipo', 'Una pizarra colaborativa propia para esquemas, planos de local o diagramas, con tu dominio y sin cuentas de terceros.
 
 ### Qué recibes
@@ -1651,10 +1766,463 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 
 ### Base técnica (código abierto)
 - [excalidraw/excalidraw](https://github.com/excalidraw/excalidraw) — MIT: libre para uso comercial · [demo](https://excalidraw.com)
-', 4900, 'eur', 999, 1, 'pizarra-planos', 'Modalidad', 0, 'prod_hmtem23y0j');
+', 4900, 'eur', 999, 1, 'pizarra-planos', 'Modalidad', 0, 'prod_pakqtrfe36');
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='pizarra-planos' AND c.slug='documentos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'pizarra-planos-diy', 0, 1, 'var_kxp6g4qprh' FROM products WHERE slug='pizarra-planos';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'pizarra-planos-pro', 1, 1, 'var_3egznehq72' FROM products WHERE slug='pizarra-planos';
+UPDATE products SET image_key='productos/pizarra-planos.png' WHERE slug='pizarra-planos';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/pizarra-planos.png', 0, 'pimg_gf7ed9zsyz' FROM products WHERE slug='pizarra-planos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 4900, 999, 'pizarra-planos-diy', 0, 1, 'var_6aacnq905j' FROM products WHERE slug='pizarra-planos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 12900, 999, 'pizarra-planos-pro', 1, 1, 'var_m821rvv5ck' FROM products WHERE slug='pizarra-planos';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Vigilancia de precios de la competencia (mes)', 'Te avisamos por email o Telegram cuando un competidor cambia el precio, se queda sin stock o vuelve a tenerlo.
+
+### Qué recibes
+- Hasta 25 productos vigilados
+- Aviso por email o Telegram
+- Historial de precios de cada producto
+- Cambio de la lista cuando quieras
+
+### Campos que rellenas
+- Enlaces de los productos
+- Precio a partir del cual avisar
+- Frecuencia (diaria, cada hora)
+- Email o Telegram
+
+### Ejemplo
+> Tienda de bicis: «La Orbea X de la competencia ha bajado de 1.299 € a 1.149 €» llega al móvil a las 9:00.
+
+**Plazo:** Mensual
+
+### Base técnica (código abierto)
+- [dgtlmoon/changedetection.io](https://github.com/dgtlmoon/changedetection.io) — Apache-2.0: libre para uso comercial · [demo](https://changedetection.io)
+', 1200, 'eur', 999, 1, 'vigilancia-precios', NULL, 0, 'prod_gsmn626yk3');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='vigilancia-precios' AND c.slug='planes';
+UPDATE products SET image_key='productos/vigilancia-precios.png' WHERE slug='vigilancia-precios';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/vigilancia-precios.png', 0, 'pimg_w55r745y5t' FROM products WHERE slug='vigilancia-precios';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Aviso de cambios en webs que te interesan (mes)', 'Vigilamos boletines oficiales, licitaciones, convocatorias o webs de proveedores y te avisamos cuando cambian.
+
+### Qué recibes
+- Hasta 15 páginas vigiladas
+- Solo te avisa si cambia la parte que te importa
+- Resumen del cambio en el aviso
+
+### Campos que rellenas
+- Páginas a vigilar
+- Qué parte vigilar (p. ej. «tabla de convocatorias»)
+- Frecuencia
+- Email o Telegram
+
+### Ejemplo
+> Gestoría: aviso cada vez que el ayuntamiento publica una nueva ayuda para autónomos.
+
+**Plazo:** Mensual
+
+### Base técnica (código abierto)
+- [dgtlmoon/changedetection.io](https://github.com/dgtlmoon/changedetection.io) — Apache-2.0: libre para uso comercial · [demo](https://changedetection.io)
+', 900, 'eur', 999, 1, 'aviso-cambios-web', NULL, 0, 'prod_fyhryg9jzs');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='aviso-cambios-web' AND c.slug='planes';
+UPDATE products SET image_key='productos/aviso-cambios-web.png' WHERE slug='aviso-cambios-web';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/aviso-cambios-web.png', 0, 'pimg_fe4mnrzrns' FROM products WHERE slug='aviso-cambios-web';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Etiquetas con código de barras listas para imprimir', 'Nos pasas tu lista de productos y recibes un PDF con las etiquetas (código de barras, nombre y precio) al tamaño de tu papel.
+
+### Qué recibes
+- PDF con hasta 100 etiquetas (ampliable)
+- Códigos CODE128 o EAN-13
+- Tamaño adaptado a tu hoja o impresora
+- Plantilla para volver a generarlas tú
+
+### Campos que rellenas
+- Lista de referencias (Excel o CSV)
+- Nombre y precio de cada producto
+- Tamaño de etiqueta / hoja
+- Unidades por referencia
+
+### Ejemplo
+> Artesana de jabones: 40 referencias con código, nombre y PVP en hojas A4 de 24 etiquetas.
+
+**Plazo:** 24 h
+
+### Modalidades
+- **Lo montas tú** (19 €): plantilla + guía paso a paso.
+- **Te lo montamos** (49 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [lindell/JsBarcode](https://github.com/lindell/JsBarcode) — MIT: libre para uso comercial · [demo](http://lindell.me/JsBarcode)
+- [Hopding/pdf-lib](https://github.com/Hopding/pdf-lib) — MIT: libre para uso comercial · [demo](https://pdf-lib.js.org)
+', 1900, 'eur', 999, 1, 'etiquetas-codigo-barras', 'Modalidad', 0, 'prod_ce1fv684gw');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='etiquetas-codigo-barras' AND c.slug='tiendas';
+UPDATE products SET image_key='productos/etiquetas-codigo-barras.png' WHERE slug='etiquetas-codigo-barras';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/etiquetas-codigo-barras.png', 0, 'pimg_c9q4t5ers8' FROM products WHERE slug='etiquetas-codigo-barras';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1900, 999, 'etiquetas-codigo-barras-diy', 0, 1, 'var_tqhhzn7q76' FROM products WHERE slug='etiquetas-codigo-barras';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 4900, 999, 'etiquetas-codigo-barras-pro', 1, 1, 'var_rh9yp83p2m' FROM products WHERE slug='etiquetas-codigo-barras';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Optimización de imágenes para tu web', 'Tus fotos pesadas, convertidas a WebP o AVIF con el tamaño justo: la web carga más rápido sin perder calidad visible.
+
+### Qué recibes
+- Hasta 100 imágenes optimizadas
+- Formato WebP o AVIF + copia JPG
+- Nombres de archivo amigables para SEO
+- Informe de peso antes / después
+
+### Campos que rellenas
+- Imágenes (carpeta o zip)
+- Formato deseado
+- Ancho máximo
+- Calidad (alta / equilibrada)
+
+### Ejemplo
+> Casa rural: 60 fotos de 5 MB sacadas con la cámara, convertidas a WebP de 1600 px listas para la galería.
+
+**Plazo:** 24 h
+
+### Modalidades
+- **Lo montas tú** (14 €): plantilla + guía paso a paso.
+- **Te lo montamos** (39 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [lovell/sharp](https://github.com/lovell/sharp) — Apache-2.0: libre para uso comercial · [demo](https://sharp.pixelplumbing.com)
+', 1400, 'eur', 999, 1, 'optimizar-imagenes', 'Modalidad', 0, 'prod_vpp45bth7d');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='optimizar-imagenes' AND c.slug='webs';
+UPDATE products SET image_key='productos/optimizar-imagenes.png' WHERE slug='optimizar-imagenes';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/optimizar-imagenes.png', 0, 'pimg_vsanx0axw3' FROM products WHERE slug='optimizar-imagenes';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1400, 999, 'optimizar-imagenes-diy', 0, 1, 'var_jxf38xp8dq' FROM products WHERE slug='optimizar-imagenes';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 3900, 999, 'optimizar-imagenes-pro', 1, 1, 'var_wsngwdr0a6' FROM products WHERE slug='optimizar-imagenes';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Tu logo en vectorial y en todos los tamaños', 'Tu logo limpio en SVG y en todos los formatos que te pedirán: web, redes, favicon, imprenta y fondo oscuro.
+
+### Qué recibes
+- SVG optimizado
+- PNG en 6 tamaños
+- Favicon e icono de app
+- Versión en blanco para fondos oscuros
+
+### Campos que rellenas
+- Logo actual (el mejor archivo que tengas)
+- Colores corporativos
+- Dónde lo vas a usar
+
+### Ejemplo
+> Peluquería con el logo solo en una foto del cartel: recibe el SVG, el favicon y la versión blanca para Instagram.
+
+**Plazo:** 48 h
+
+### Modalidades
+- **Lo montas tú** (19 €): plantilla + guía paso a paso.
+- **Te lo montamos** (49 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [svg/svgo](https://github.com/svg/svgo) — MIT: libre para uso comercial · [demo](https://svgo.dev/)
+', 1900, 'eur', 999, 1, 'logo-vectorial', 'Modalidad', 0, 'prod_nt6wgh9w73');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='logo-vectorial' AND c.slug='identidad';
+UPDATE products SET image_key='productos/logo-vectorial.png' WHERE slug='logo-vectorial';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/logo-vectorial.png', 0, 'pimg_wjvr6m56d1' FROM products WHERE slug='logo-vectorial';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 1900, 999, 'logo-vectorial-diy', 0, 1, 'var_fmtx6xptmn' FROM products WHERE slug='logo-vectorial';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 4900, 999, 'logo-vectorial-pro', 1, 1, 'var_emtxcq2qy4' FROM products WHERE slug='logo-vectorial';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Limpieza de listados de clientes y productos', 'Ese Excel lleno de duplicados, mayúsculas mezcladas y teléfonos con formatos distintos, ordenado y listo para importar.
+
+### Qué recibes
+- Archivo limpio sin duplicados exactos
+- Columnas unificadas (nombres, teléfonos, emails)
+- Informe de lo que se ha corregido
+- Formato listo para tu CRM o tienda
+
+### Campos que rellenas
+- Archivo (Excel o CSV)
+- Columna que identifica cada registro
+- Columnas que quieres conservar
+- Programa al que lo vas a importar
+
+### Ejemplo
+> Autoescuela: 3 hojas de alumnos de distintos años unidas en una sola, sin repetidos, lista para el email de bienvenida.
+
+**Plazo:** 48 h
+
+### Modalidades
+- **Lo montas tú** (29 €): plantilla + guía paso a paso.
+- **Te lo montamos** (69 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [mholt/PapaParse](https://github.com/mholt/PapaParse) — MIT: libre para uso comercial · [demo](http://PapaParse.com)
+', 2900, 'eur', 999, 1, 'limpieza-csv', 'Modalidad', 0, 'prod_z55arm0p75');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='limpieza-csv' AND c.slug='documentos';
+UPDATE products SET image_key='productos/limpieza-csv.png' WHERE slug='limpieza-csv';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/limpieza-csv.png', 0, 'pimg_fybpvnanry' FROM products WHERE slug='limpieza-csv';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'limpieza-csv-diy', 0, 1, 'var_4nyzqaeam2' FROM products WHERE slug='limpieza-csv';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'limpieza-csv-pro', 1, 1, 'var_cx26jbxg45' FROM products WHERE slug='limpieza-csv';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Plantilla de inventario a medida en Excel', 'Un Excel con tus productos y categorías que avisa en rojo cuando algo baja del mínimo y calcula lo que vale tu stock.
+
+### Qué recibes
+- Excel con tus productos y categorías
+- Alertas de stock mínimo
+- Valoración del inventario
+- Hoja de entradas y salidas
+
+### Campos que rellenas
+- Categorías
+- Lista de productos
+- Stock mínimo de cada uno
+- Coste y precio de venta
+
+### Ejemplo
+> Bar de barrio: la hoja marca en rojo «tónica: quedan 6» antes de hacer el pedido del lunes.
+
+**Plazo:** 48 h
+
+### Modalidades
+- **Lo montas tú** (29 €): plantilla + guía paso a paso.
+- **Te lo montamos** (69 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [exceljs/exceljs](https://github.com/exceljs/exceljs) — MIT: libre para uso comercial
+', 2900, 'eur', 999, 1, 'plantilla-inventario', 'Modalidad', 0, 'prod_wevqas4b3a');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plantilla-inventario' AND c.slug='documentos';
+UPDATE products SET image_key='productos/plantilla-inventario.png' WHERE slug='plantilla-inventario';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plantilla-inventario.png', 0, 'pimg_cashpsk44e' FROM products WHERE slug='plantilla-inventario';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'plantilla-inventario-diy', 0, 1, 'var_pgqt5w44ry' FROM products WHERE slug='plantilla-inventario';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'plantilla-inventario-pro', 1, 1, 'var_nqwh4xm5hx' FROM products WHERE slug='plantilla-inventario';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Informe con gráficos a partir de tu Excel', 'Nos mandas tus datos de ventas, socios o visitas y recibes un PDF claro con gráficos listo para presentar.
+
+### Qué recibes
+- PDF con hasta 10 gráficos
+- Resumen en una página
+- Plantilla para repetirlo cada mes
+
+### Campos que rellenas
+- Archivo de datos
+- Qué quieres medir
+- Periodo
+- Logo y colores
+
+### Ejemplo
+> Asociación de vecinos: informe anual de cuotas y actividades para la asamblea, con logo y 6 gráficos.
+
+**Plazo:** 48 h
+
+### Modalidades
+- **Lo montas tú** (29 €): plantilla + guía paso a paso.
+- **Te lo montamos** (79 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [chartjs/Chart.js](https://github.com/chartjs/Chart.js) — MIT: libre para uso comercial · [demo](https://www.chartjs.org/)
+- [Hopding/pdf-lib](https://github.com/Hopding/pdf-lib) — MIT: libre para uso comercial · [demo](https://pdf-lib.js.org)
+', 2900, 'eur', 999, 1, 'informe-graficos', 'Modalidad', 0, 'prod_apr1fytft0');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='informe-graficos' AND c.slug='documentos';
+UPDATE products SET image_key='productos/informe-graficos.png' WHERE slug='informe-graficos';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/informe-graficos.png', 0, 'pimg_zytc2g0r37' FROM products WHERE slug='informe-graficos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'informe-graficos-diy', 0, 1, 'var_px5tkdxq01' FROM products WHERE slug='informe-graficos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'informe-graficos-pro', 1, 1, 'var_cwcv2dk3v3' FROM products WHERE slug='informe-graficos';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Dossier comercial en PDF con tu marca', 'Un PDF de 4 páginas para mandar por email o WhatsApp: quién eres, qué ofreces, por qué tú y cómo contratarte.
+
+### Qué recibes
+- PDF de 4 páginas con tu marca
+- Versión ligera para WhatsApp
+- Archivo editable para actualizar precios
+
+### Campos que rellenas
+- Nombre comercial y logo
+- Servicios y precios
+- Por qué elegirte (3 razones)
+- Datos de contacto
+
+### Ejemplo
+> Fotógrafo de bodas: dossier con 3 packs, fotos de muestra y botón de WhatsApp para pedir fecha.
+
+**Plazo:** 3 días
+
+### Modalidades
+- **Lo montas tú** (39 €): plantilla + guía paso a paso.
+- **Te lo montamos** (99 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [Hopding/pdf-lib](https://github.com/Hopding/pdf-lib) — MIT: libre para uso comercial · [demo](https://pdf-lib.js.org)
+', 3900, 'eur', 999, 1, 'dossier-comercial', 'Modalidad', 0, 'prod_83jbhw3jsz');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='dossier-comercial' AND c.slug='documentos';
+UPDATE products SET image_key='productos/dossier-comercial.png' WHERE slug='dossier-comercial';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/dossier-comercial.png', 0, 'pimg_4sgy9khf4y' FROM products WHERE slug='dossier-comercial';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'dossier-comercial-diy', 0, 1, 'var_1f5tre10p1' FROM products WHERE slug='dossier-comercial';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'dossier-comercial-pro', 1, 1, 'var_wdjfqfk2we' FROM products WHERE slug='dossier-comercial';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Diagramas de procesos y organigramas', 'Nos explicas cómo funciona tu proceso o tu equipo y te devolvemos diagramas claros en SVG, PNG y PDF.
+
+### Qué recibes
+- Hasta 5 diagramas
+- Formatos SVG, PNG y PDF
+- Archivo de texto para editarlos tú
+
+### Campos que rellenas
+- Pasos del proceso o personas del equipo
+- Decisiones o responsables
+- Orientación (horizontal / vertical)
+- Colores
+
+### Ejemplo
+> Clínica dental: el circuito del paciente, de la llamada a la factura, en un diagrama colgado en recepción.
+
+**Plazo:** 48 h
+
+### Modalidades
+- **Lo montas tú** (29 €): plantilla + guía paso a paso.
+- **Te lo montamos** (69 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [mermaid-js/mermaid](https://github.com/mermaid-js/mermaid) — MIT: libre para uso comercial · [demo](https://mermaid.ai/open-source/)
+', 2900, 'eur', 999, 1, 'diagramas-procesos', 'Modalidad', 0, 'prod_a29xsa13f5');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='diagramas-procesos' AND c.slug='documentos';
+UPDATE products SET image_key='productos/diagramas-procesos.png' WHERE slug='diagramas-procesos';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/diagramas-procesos.png', 0, 'pimg_y93nsnhtb3' FROM products WHERE slug='diagramas-procesos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'diagramas-procesos-diy', 0, 1, 'var_4s88fdbkh3' FROM products WHERE slug='diagramas-procesos';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'diagramas-procesos-pro', 1, 1, 'var_e4c9z3fx6j' FROM products WHERE slug='diagramas-procesos';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Descripciones de producto escritas con IA y revisadas', 'Títulos y descripciones de venta para tu tienda, con tus palabras clave, revisados por una persona antes de entregarlos.
+
+### Qué recibes
+- 20 títulos y descripciones (ampliable)
+- Palabras clave para Google
+- Archivo CSV listo para importar
+- Guía de tono para las siguientes
+
+### Campos que rellenas
+- Catálogo (nombre y características)
+- Público al que vendes
+- Tono (cercano, técnico, premium)
+- Palabras clave
+
+### Ejemplo
+> Tienda de té: «Rooibos vainilla 100 g · sin teína, para después de cenar» en lugar de «Té rojo 100g».
+
+**Plazo:** 48 h
+
+### Modalidades
+- **Lo montas tú** (29 €): plantilla + guía paso a paso.
+- **Te lo montamos** (69 €): lo publicamos con tus datos.
+', 2900, 'eur', 999, 1, 'descripciones-producto-ia', 'Modalidad', 0, 'prod_rvv8caqv14');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='descripciones-producto-ia' AND c.slug='contenido';
+UPDATE products SET image_key='productos/descripciones-producto-ia.png' WHERE slug='descripciones-producto-ia';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/descripciones-producto-ia.png', 0, 'pimg_bnwnf8qqcf' FROM products WHERE slug='descripciones-producto-ia';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 2900, 999, 'descripciones-producto-ia-diy', 0, 1, 'var_nck3s1kqny' FROM products WHERE slug='descripciones-producto-ia';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'descripciones-producto-ia-pro', 1, 1, 'var_zr34fd4brq' FROM products WHERE slug='descripciones-producto-ia';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Pack de carruseles para Instagram y LinkedIn', 'Diez carruseles con tu marca generados desde tus textos, en PNG listos para subir y con la plantilla para repetir.
+
+### Qué recibes
+- 10 carruseles de 5–8 diapositivas
+- Plantilla con tus colores y tipografías
+- Textos de publicación sugeridos
+- Regeneración desde una hoja de cálculo
+
+### Campos que rellenas
+- Temas o textos
+- Tono
+- Colores y logo
+- Red principal
+
+### Ejemplo
+> Nutricionista: «5 desayunos en 5 minutos», un carrusel por semana durante dos meses y medio.
+
+**Plazo:** 3 días
+
+### Modalidades
+- **Lo montas tú** (39 €): plantilla + guía paso a paso.
+- **Te lo montamos** (99 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) — Apache-2.0: libre para uso comercial · [demo](https://pptr.dev)
+', 3900, 'eur', 999, 1, 'carruseles-redes', 'Modalidad', 0, 'prod_aevbm336yc');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='carruseles-redes' AND c.slug='contenido';
+UPDATE products SET image_key='productos/carruseles-redes.png' WHERE slug='carruseles-redes';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/carruseles-redes.png', 0, 'pimg_hwjv80wc44' FROM products WHERE slug='carruseles-redes';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 3900, 999, 'carruseles-redes-diy', 0, 1, 'var_8t43zz7zgz' FROM products WHERE slug='carruseles-redes';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'carruseles-redes-pro', 1, 1, 'var_079yvmcjmd' FROM products WHERE slug='carruseles-redes';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web WordPress llave en mano', 'Si prefieres WordPress: instalada, con tema ligero, tus páginas, formulario, copias automáticas y seguridad básica.
+
+### Qué recibes
+- WordPress instalado en tu hosting
+- 5 páginas con tus textos y fotos
+- Formulario de contacto y aviso legal
+- Copias de seguridad y actualizaciones automáticas
+- Vídeo de 10 minutos para editarla tú
+
+### Campos que rellenas
+- Dominio y hosting (o te recomendamos uno)
+- Textos de las 5 páginas
+- Logo y fotos
+- Colores
+
+### Ejemplo
+> Academia de música: inicio, profesores, horarios, precios y contacto; la dueña cambia los horarios ella misma.
+
+**Plazo:** 5 días
+
+### Modalidades
+- **Lo montas tú** (249 €): plantilla + guía paso a paso.
+- **Te lo montamos** (549 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [WordPress/wordpress-develop](https://github.com/WordPress/wordpress-develop) — GPL-2.0: uso con condiciones (código abierto si se distribuye) · [demo](https://wordpress.org)
+', 24900, 'eur', 999, 1, 'web-wordpress', 'Modalidad', 0, 'prod_ef31v8nhka');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-wordpress' AND c.slug='webs';
+UPDATE products SET image_key='productos/web-wordpress.png' WHERE slug='web-wordpress';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-wordpress.png', 0, 'pimg_rb66sbv5k3' FROM products WHERE slug='web-wordpress';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 24900, 999, 'web-wordpress-diy', 0, 1, 'var_ve3vjr6220' FROM products WHERE slug='web-wordpress';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 54900, 999, 'web-wordpress-pro', 1, 1, 'var_sjxqha1rd7' FROM products WHERE slug='web-wordpress';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Web que editas arrastrando bloques', 'Tu web en un editor visual de código abierto: cambias textos, fotos y secciones arrastrando, sin tocar código ni pagar cuota.
+
+### Qué recibes
+- Editor visual instalado y configurado
+- Web inicial de 4 páginas con tus datos
+- Bloques de tu sector listos para usar
+- Formación de 30 minutos
+
+### Campos que rellenas
+- Sector
+- Páginas que necesitas
+- Logo, colores y fotos
+- Dominio
+
+### Ejemplo
+> Tienda de muebles: monta ella misma la página de ofertas de enero arrastrando el bloque «producto destacado».
+
+**Plazo:** 5 días
+
+### Modalidades
+- **Lo montas tú** (199 €): plantilla + guía paso a paso.
+- **Te lo montamos** (449 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [microweber/microweber](https://github.com/microweber/microweber) — MIT: libre para uso comercial · [demo](https://microweber.org)
+- [frappe/builder](https://github.com/frappe/builder) — MIT: libre para uso comercial · [demo](https://frappe.io/builder)
+- [GrapesJS/grapesjs](https://github.com/GrapesJS/grapesjs) — sin licencia clara: solo referencia de diseño · [demo](https://grapesjs.com)
+', 19900, 'eur', 999, 1, 'web-arrastrar-soltar', 'Modalidad', 0, 'prod_gebfe07wcf');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-arrastrar-soltar' AND c.slug='portales';
+UPDATE products SET image_key='productos/web-arrastrar-soltar.png' WHERE slug='web-arrastrar-soltar';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-arrastrar-soltar.png', 0, 'pimg_sft1adk4dw' FROM products WHERE slug='web-arrastrar-soltar';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 19900, 999, 'web-arrastrar-soltar-diy', 0, 1, 'var_k9jb1w2ajk' FROM products WHERE slug='web-arrastrar-soltar';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 44900, 999, 'web-arrastrar-soltar-pro', 1, 1, 'var_sk1ncq0z8m' FROM products WHERE slug='web-arrastrar-soltar';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES ('Plataforma para tu agencia: clientes, webs y CRM', 'Para agencias y freelancers: un panel donde cada cliente tiene su web, su portal y su ficha en el CRM, con cobros automáticos.
+
+### Qué recibes
+- Panel multi-cliente propio
+- Portal privado para cada cliente
+- CRM con fichas y tareas
+- Cobros recurrentes con Stripe (con tus claves)
+
+### Campos que rellenas
+- Nombre de la agencia y logo
+- Servicios que vendes
+- Primeros clientes a dar de alta
+- Dominio
+
+### Ejemplo
+> Diseñadora freelance con 12 clientes: cada uno entra a su portal, ve facturas y pide cambios sin escribir al WhatsApp personal.
+
+**Plazo:** 10 días
+
+### Modalidades
+- **Lo montas tú** (490 €): plantilla + guía paso a paso.
+- **Te lo montamos** (990 €): lo publicamos con tus datos.
+
+### Base técnica (código abierto)
+- [SimplerDevelopment/SimplerDevelopment](https://github.com/SimplerDevelopment/SimplerDevelopment) — Apache-2.0: libre para uso comercial · [demo](https://simplerdevelopment-workfriends-ai.vercel.app)
+- [directus-labs/agency-os](https://github.com/directus-labs/agency-os) — MIT: libre para uso comercial · [demo](https://agencyos.dev)
+', 49000, 'eur', 999, 1, 'plataforma-agencia', 'Modalidad', 0, 'prod_79vhw0g7gs');
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plataforma-agencia' AND c.slug='portales';
+UPDATE products SET image_key='productos/plataforma-agencia.png' WHERE slug='plataforma-agencia';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plataforma-agencia.png', 0, 'pimg_a9z3529arg' FROM products WHERE slug='plataforma-agencia';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Lo montas tú (plantilla + guía)', 49000, 999, 'plataforma-agencia-diy', 0, 1, 'var_7ped1vs7cw' FROM products WHERE slug='plataforma-agencia';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 99000, 999, 'plataforma-agencia-pro', 1, 1, 'var_2045zd5k5j' FROM products WHERE slug='plataforma-agencia';
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Cómo funciona', 'como-funciona', '## Servicios digitales como barras de pan
 
 Cada servicio es un producto cerrado: **precio fijo, plazo fijo y una lista de campos** que rellenas tú. Nada de reuniones eternas ni presupuestos a medida.
@@ -1679,7 +2247,7 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
 ## Sin humo
 - Todo se basa en software probado y de código abierto: **es tuyo**, sin cuotas obligatorias.
 - Si en 7 días no está como te prometimos, te devolvemos el dinero.
-', 1, 'standard', 'page_h8w1yrm9qw');
+', 1, 'standard', 'page_jh1ps0fxvs');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Preguntas frecuentes', 'preguntas-frecuentes', '## ¿De quién es la web o la automatización?
 Tuya. Usamos software de código abierto y te entregamos los accesos.
 
@@ -1697,7 +2265,7 @@ El plazo aparece en cada ficha y cuenta desde que recibimos los campos completos
 
 ## ¿Emitís factura?
 Sí, factura con IVA en cada compra.
-', 1, 'standard', 'page_xzxccg9dhj');
+', 1, 'standard', 'page_repbn395a3');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Herramientas recomendadas', 'herramientas-recomendadas', '## Herramientas que usamos y recomendamos
 
 Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y otras son de pago; te decimos cuál conviene en cada caso. Algunos enlaces pueden ser de afiliado: a ti no te cuesta más y nos ayuda a mantener precios bajos.
@@ -1708,19 +2276,23 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 
 ### Email y avisos
 - **Brevo** o **MailerLite**: boletines y emails automáticos con plan gratuito.
+- **GetResponse**: email marketing con embudos y webinars.
 - **Telegram**: avisos instantáneos gratis desde formularios, reservas y pedidos.
 
-### Automatización
+### Automatización y embudos
 - **n8n**: automatizaciones de código abierto; se puede alojar sin cuota.
 - **Make**: automatizaciones visuales con plan gratuito.
+- **Systeme.io**: embudos de venta, cursos y emails en una sola herramienta, con plan gratuito.
 
 ### Diseño y contenido
 - **Canva**: imágenes y cartas para redes.
+- **Elementor**: maquetador visual si tu web es WordPress.
 - **Unsplash / Pexels**: fotos libres de derechos.
 
 ### Hosting tradicional (si necesitas WordPress o correo con tu dominio)
 - **Raiola Networks** y **Webempresa**: hosting en España con soporte en español.
 - **Hostinger**: hosting y correo económicos.
+- **Kinsta**: hosting WordPress gestionado para webs con mucho tráfico.
 
 ### Facturación y gestión
 - **Holded** o **Quipu**: facturación, gastos e impuestos para autónomos y pymes.
@@ -1732,7 +2304,7 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 - **Uptime Kuma** (vigilancia de caídas), **listmonk** (newsletter), **Invoify** (facturas), **Starlight** (centros de ayuda), **Excalidraw** (pizarra).
 
 _Si quieres que configuremos alguna, está incluido en «Te lo montamos»._
-', 1, 'standard', 'page_t47x299wbj');
+', 1, 'standard', 'page_4y7ww17m8k');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Demos en vivo', 'demos', '## Mira lo que recibes antes de comprar
 
 Estas demos son webs reales funcionando. Cambiamos textos, fotos y colores por los tuyos.
@@ -1751,7 +2323,7 @@ Estas demos son webs reales funcionando. Cambiamos textos, fotos y colores por l
 Todas las bases son de código abierto con licencia MIT: el resultado es tuyo, sin cuotas obligatorias.
 
 ¿No ves tu caso? [Cuéntanos qué necesitas](/pages/contacto).
-', 1, 'standard', 'page_sbwh3tzxsz');
+', 1, 'standard', 'page_x3cdya3bv0');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Contacto', 'contacto', '## Cuéntanos qué necesitas
 
 Responde en un mensaje a estas cinco preguntas y te decimos qué servicio encaja y su precio cerrado:
@@ -1767,7 +2339,7 @@ Responde en un mensaje a estas cinco preguntas y te decimos qué servicio encaja
 - Respondemos en menos de 24 horas laborables.
 
 _Si ya sabes qué quieres, cómpralo directamente en el catálogo: tras el pago te llega el formulario con los campos._
-', 1, 'standard', 'page_sv7getr145');
+', 1, 'standard', 'page_vvmhyjy6kv');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Aviso legal', 'aviso-legal', '## Aviso legal
 
 En cumplimiento de la Ley 34/2002 (LSSI-CE):
@@ -1785,7 +2357,7 @@ Los textos y el diseño de este sitio pertenecen al titular. Los servicios se ba
 
 ### Responsabilidad
 El titular no se hace responsable del uso que terceros hagan de los servicios entregados ni de los contenidos que el cliente aporte.
-', 1, 'standard', 'page_71hmz0cvna');
+', 1, 'standard', 'page_nd1peyqx01');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Condiciones de contratación', 'condiciones', '## Condiciones de contratación
 
 ### Precio y pago
@@ -1802,7 +2374,7 @@ Si en 7 días desde la entrega el servicio no hace lo que describe su ficha, te 
 
 ### Planes mensuales
 Se pueden cancelar en cualquier momento; el servicio sigue activo hasta el final del periodo pagado.
-', 1, 'standard', 'page_8s0bpbb6pz');
+', 1, 'standard', 'page_a7g48qwva3');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Privacidad', 'privacidad', '## Política de privacidad
 
 - **Responsable**: [NOMBRE O RAZÓN SOCIAL], hola@automatizasinhumo.com
@@ -1811,37 +2383,38 @@ INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VAL
 - **Conservación**: el tiempo necesario y los plazos legales de facturación.
 - **Destinatarios**: proveedores necesarios para prestar el servicio (alojamiento en Cloudflare, pasarela de pago, email). No vendemos datos.
 - **Derechos**: acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a hola@automatizasinhumo.com. Puedes reclamar ante la AEPD (aepd.es).
-', 1, 'standard', 'page_sq2618wmkx');
+', 1, 'standard', 'page_v70yr9vv3x');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Cookies', 'cookies', '## Política de cookies
 
 Este sitio solo usa **cookies técnicas** imprescindibles (carrito y sesión de tu cuenta). No usamos cookies de publicidad ni de seguimiento de terceros, por eso no te mostramos un banner de consentimiento.
 
 Si en el futuro añadimos analítica, será sin cookies o con tu consentimiento previo.
-', 1, 'standard', 'page_43apsny8z1');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'catalog', NULL, 'Todos los servicios', 0, 'nav_5j735y41br');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='webs'), 'Webs para tu negocio', 1, 'nav_tc9sy6vh89');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='hosteleria'), 'Restaurantes y bares', 2, 'nav_4aeshadt99');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='reservas'), 'Reservas y citas', 3, 'nav_3187vqh8yr');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='bodas'), 'Bodas y eventos', 4, 'nav_33dkz9thby');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='identidad'), 'Tarjetas, link-in-bio y CV', 5, 'nav_5nzcje84mm');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='captacion'), 'Formularios y captación', 6, 'nav_hmqfahjg3b');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='bots'), 'Bots e IA', 7, 'nav_m7ft6zgz94');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='automatizaciones'), 'Automatizaciones', 8, 'nav_msjgzsfp5x');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='documentos'), 'Documentos, PDF e IA', 9, 'nav_ba9cjghn57');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='planes'), 'Planes mensuales', 10, 'nav_gsme82vpf7');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'page', (SELECT id FROM pages WHERE slug='como-funciona'), 'Cómo funciona', 11, 'nav_baqea4d03r');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'page', (SELECT id FROM pages WHERE slug='demos'), 'Demos en vivo', 12, 'nav_g0wxqsj6va');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'page', (SELECT id FROM pages WHERE slug='contacto'), 'Contacto', 13, 'nav_tw8jer0v1t');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'home', NULL, 'Inicio', 0, 'nav_r1cjkp5r13');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'category', (SELECT id FROM categories WHERE slug='enlaces'), 'Enlaces, QR y analítica', 1, 'nav_f7d93znnbb');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'category', (SELECT id FROM categories WHERE slug='tiendas'), 'Tiendas y productos digitales', 2, 'nav_nrs9twst46');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'category', (SELECT id FROM categories WHERE slug='portales'), 'Portales y webs editables', 3, 'nav_h12d9v252p');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='preguntas-frecuentes'), 'Preguntas frecuentes', 4, 'nav_25yq6aqrm6');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='herramientas-recomendadas'), 'Herramientas recomendadas', 5, 'nav_r6cbp2mvs2');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='aviso-legal'), 'Aviso legal', 6, 'nav_s9z88wq6sm');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='condiciones'), 'Condiciones de contratación', 7, 'nav_vd83phbamc');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='privacidad'), 'Privacidad', 8, 'nav_mscsjtwcg0');
-INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='cookies'), 'Cookies', 9, 'nav_6h1j3hd3v3');
+', 1, 'standard', 'page_028qmxtej7');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'catalog', NULL, 'Todos los servicios', 0, 'nav_m6vxnrqnvm');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='webs'), 'Webs para tu negocio', 1, 'nav_bk0j4egsck');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='hosteleria'), 'Restaurantes y bares', 2, 'nav_a9e749569h');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='reservas'), 'Reservas y citas', 3, 'nav_5z4rj4e3fp');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='bodas'), 'Bodas y eventos', 4, 'nav_p16r27evrc');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='identidad'), 'Tarjetas, link-in-bio y CV', 5, 'nav_v4sjqvgmhb');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='captacion'), 'Formularios y captación', 6, 'nav_wsqw1j9aer');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='bots'), 'Bots e IA', 7, 'nav_pas44fk61b');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='automatizaciones'), 'Automatizaciones', 8, 'nav_aqfzh178j5');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='documentos'), 'Documentos, PDF e IA', 9, 'nav_94anyhdvwh');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='contenido'), 'Contenido y redes', 10, 'nav_3xd34r2vwz');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'category', (SELECT id FROM categories WHERE slug='planes'), 'Planes mensuales', 11, 'nav_0q4qv03cpf');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'page', (SELECT id FROM pages WHERE slug='como-funciona'), 'Cómo funciona', 12, 'nav_4c3ec2zxg6');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'page', (SELECT id FROM pages WHERE slug='demos'), 'Demos en vivo', 13, 'nav_5s5j1gzzgp');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('header', 'page', (SELECT id FROM pages WHERE slug='contacto'), 'Contacto', 14, 'nav_10d5xwstvf');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'home', NULL, 'Inicio', 0, 'nav_sg2jzw9m19');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'category', (SELECT id FROM categories WHERE slug='enlaces'), 'Enlaces, QR y analítica', 1, 'nav_as3959nzjv');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'category', (SELECT id FROM categories WHERE slug='tiendas'), 'Tiendas y productos digitales', 2, 'nav_vkydke0m07');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'category', (SELECT id FROM categories WHERE slug='portales'), 'Portales y webs editables', 3, 'nav_22shbtfesf');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='preguntas-frecuentes'), 'Preguntas frecuentes', 4, 'nav_nc9tjfgq8v');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='herramientas-recomendadas'), 'Herramientas recomendadas', 5, 'nav_0ffzcrg4kn');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='aviso-legal'), 'Aviso legal', 6, 'nav_bza7zq8n5n');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='condiciones'), 'Condiciones de contratación', 7, 'nav_6ff78m091t');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='privacidad'), 'Privacidad', 8, 'nav_4debx9pxsq');
+INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES ('footer', 'page', (SELECT id FROM pages WHERE slug='cookies'), 'Cookies', 9, 'nav_2szswm4bcd');
 INSERT INTO settings (key, value) VALUES ('store_name', 'Automatiza sin humo') ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 INSERT INTO settings (key, value) VALUES ('announcement', 'Webs y automatizaciones a precio cerrado · Eliges, rellenas campos y lo recibes funcionando') ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 INSERT INTO settings (key, value) VALUES ('announcement_href', '/pages/como-funciona') ON CONFLICT(key) DO UPDATE SET value=excluded.value;

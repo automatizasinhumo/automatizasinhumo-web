@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Tareas programadas en la nube">
+<rect width="1200" height="1200" fill="#EAF1E4"/>
+<circle cx="1050" cy="150" r="380" fill="#4F7F2E" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><line x1="90" y1="110" x2="210" y2="210" stroke="#335619" stroke-width="8"/><line x1="210" y1="210" x2="340" y2="100" stroke="#335619" stroke-width="8"/><line x1="210" y1="210" x2="320" y2="330" stroke="#335619" stroke-width="8"/><line x1="90" y1="110" x2="90" y2="320" stroke="#335619" stroke-width="8" stroke-dasharray="14 12"/><circle cx="90" cy="110" r="44" fill="#fff" stroke="#335619" stroke-width="8"/><circle cx="210" cy="210" r="56" fill="#4F7F2E"/><circle cx="340" cy="100" r="38" fill="#fff" stroke="#335619" stroke-width="8"/><circle cx="320" cy="330" r="38" fill="#fff" stroke="#335619" stroke-width="8"/><circle cx="90" cy="320" r="30" fill="#4F7F2E" opacity=".5"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#335619" font-weight="700">AUTOMATIZACIONES</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Tareas programadas en</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">la nube</text>
+<rect x="90" y="1010" width="334" height="84" rx="42" fill="#4F7F2E"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 199 €</text>
+<text x="454" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#335619">Entrega en 5 días</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Tarjeta de visita digital con QR">
+<rect width="1200" height="1200" fill="#EFEAF6"/>
+<circle cx="1050" cy="150" r="380" fill="#6B4FA3" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="30" y="90" width="360" height="220" rx="24" fill="#fff" stroke="#45307A" stroke-width="8"/><circle cx="120" cy="180" r="46" fill="#6B4FA3"/><rect x="190" y="150" width="160" height="20" rx="10" fill="#45307A"/><rect x="190" y="190" width="120" height="14" rx="7" fill="#6B4FA3" opacity=".5"/><rect x="70" y="250" width="280" height="14" rx="7" fill="#45307A" opacity=".2"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#45307A" font-weight="700">TARJETAS, LINK-IN-BIO Y CV</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Tarjeta de visita</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">digital con QR</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#6B4FA3"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 29 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#45307A">Entrega en 24 h</text>
+</svg>

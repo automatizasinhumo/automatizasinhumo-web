@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Carta digital con código QR">
+<rect width="1200" height="1200" fill="#F6ECE3"/>
+<circle cx="1050" cy="150" r="380" fill="#B5582B" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><circle cx="210" cy="200" r="150" fill="#fff" stroke="#7A3517" stroke-width="8"/><circle cx="210" cy="200" r="100" fill="none" stroke="#B5582B" stroke-width="6" opacity=".5"/><rect x="160" y="150" width="28" height="28" rx="4" fill="#7A3517"/><rect x="160" y="218" width="28" height="28" rx="4" fill="#7A3517"/><rect x="194" y="184" width="28" height="28" rx="4" fill="#7A3517"/><rect x="228" y="150" width="28" height="28" rx="4" fill="#7A3517"/><rect x="228" y="218" width="28" height="28" rx="4" fill="#7A3517"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#7A3517" font-weight="700">RESTAURANTES Y BARES</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Carta digital con</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">código QR</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#B5582B"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 49 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#7A3517">Entrega en 24 h</text>
+</svg>

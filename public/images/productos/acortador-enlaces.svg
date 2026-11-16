@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Acortador de enlaces con tu dominio">
+<rect width="1200" height="1200" fill="#F3EBE6"/>
+<circle cx="1050" cy="150" r="380" fill="#8A5A44" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="40" y="150" width="200" height="100" rx="50" fill="none" stroke="#5E3A2A" stroke-width="22"/><rect x="180" y="150" width="200" height="100" rx="50" fill="none" stroke="#8A5A44" stroke-width="22"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#5E3A2A" font-weight="700">ENLACES, QR Y ANALÍTICA</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Acortador de enlaces</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">con tu dominio</text>
+<rect x="90" y="1010" width="310" height="84" rx="42" fill="#8A5A44"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 49 €</text>
+<text x="430" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#5E3A2A">Entrega en 48 h</text>
+</svg>

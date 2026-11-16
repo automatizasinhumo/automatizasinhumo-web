@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Centro de ayuda o manual para tus clientes">
+<rect width="1200" height="1200" fill="#E9ECF2"/>
+<circle cx="1050" cy="150" r="380" fill="#45526B" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="30" y="50" width="360" height="300" rx="24" fill="#fff" stroke="#2A3447" stroke-width="8"/><rect x="30" y="50" width="100" height="300" rx="24" fill="#2A3447" opacity=".12"/><rect x="52" y="90" width="56" height="14" rx="7" fill="#2A3447" opacity=".5"/><rect x="52" y="140" width="56" height="14" rx="7" fill="#2A3447" opacity=".5"/><rect x="52" y="190" width="56" height="14" rx="7" fill="#2A3447" opacity=".5"/><rect x="52" y="240" width="56" height="14" rx="7" fill="#2A3447" opacity=".5"/><rect x="160" y="85" width="200" height="110" rx="14" fill="#45526B" opacity=".25"/><rect x="160" y="215" width="94" height="100" rx="14" fill="#45526B"/><rect x="266" y="215" width="94" height="100" rx="14" fill="#2A3447" opacity=".2"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#2A3447" font-weight="700">PORTALES Y WEBS EDITABLES</text>
+<text x="90" y="748" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Centro de ayuda o</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">manual para tus</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">clientes</text>
+<rect x="90" y="1010" width="334" height="84" rx="42" fill="#45526B"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 149 €</text>
+<text x="454" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#2A3447">Entrega en 4 días</text>
+</svg>

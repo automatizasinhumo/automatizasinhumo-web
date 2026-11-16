@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Reservas para peluquería, estética o clínica">
+<rect width="1200" height="1200" fill="#E7F2EE"/>
+<circle cx="1050" cy="150" r="380" fill="#2E7D62" opacity=".08"/>
+<g transform="translate(680 190) scale(.88)"><rect x="40" y="50" width="340" height="300" rx="24" fill="#fff" stroke="#1C5241" stroke-width="8"/><rect x="40" y="50" width="340" height="70" rx="24" fill="#2E7D62"/><rect x="100" y="25" width="16" height="50" rx="8" fill="#1C5241"/><rect x="304" y="25" width="16" height="50" rx="8" fill="#1C5241"/><rect x="72" y="150" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="144" y="150" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="216" y="150" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="288" y="150" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="72" y="212" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="144" y="212" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="216" y="212" width="48" height="40" rx="8" fill="#2E7D62" opacity="1"/><rect x="288" y="212" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="72" y="274" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="144" y="274" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="216" y="274" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/><rect x="288" y="274" width="48" height="40" rx="8" fill="#1C5241" opacity="0.15"/></g>
+<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#1C5241" font-weight="700">RESERVAS Y CITAS</text>
+<text x="90" y="748" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Reservas para</text>
+<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">peluquería, estética o</text>
+<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">clínica</text>
+<rect x="90" y="1010" width="334" height="84" rx="42" fill="#2E7D62"/>
+<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 199 €</text>
+<text x="454" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#1C5241">Entrega en 5 días</text>
+</svg>
