@@ -93,8 +93,15 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
   - Debajo hay 3 bloques: qué recibes, qué necesito de ti, qué pasa después.
 - **Capturas de demos**: comprimidas de 21 MB a 7 MB con `node manual/demos/optimizar-capturas.mjs`, sin perder nitidez.
 - **Tests**: 921 en verde y `astro check` sin errores.
-- **Ideas de la auditoría para más adelante**: sección «Qué no incluye» en cada ficha, formulario por pasos con barra de progreso, comparador antes/después y contador de proyectos entregados (cuando haya datos reales).
-- **Ojo al desplegar**: si la web sale sin estilos, el build quedó a medias (el HTML pide un CSS que no existe). Repite `npx astro build` y despliega otra vez.
+- **Qué no incluye** (hecho): bloque plegable en cada ficha, debajo de los 3 bloques. Cuenta 4 límites: cuotas de terceros, textos o fotos desde cero, funciones fuera de la ficha y cambios después de la ronda incluida.
+- **Formulario por pasos** (hecho, `src/pages/empezar/[slug].astro`):
+  - Muestra un paso cada vez, con «Paso X de N» y una barra de progreso.
+  - No deja avanzar si faltan datos, y Enter avanza en lugar de enviar.
+  - Si el servidor devuelve un error de consentimiento o de mensaje, abre directamente en el último paso.
+  - Sin JavaScript se ve el formulario completo, como antes.
+- **Cabecera en móviles de unos 400 px**: el nombre del logo baja a `text-base` por debajo de 420 px y ya no se sale de pantalla.
+- **Ideas de la auditoría para más adelante**: comparador antes/después y contador de proyectos entregados (cuando haya datos reales).
+- **Ojo al desplegar**: si la web sale sin estilos, primero recarga con `?v=N`. Justo después de desplegar a veces tarda en propagarse. Si sigue sin estilos, comprueba que el hash de `Layout.*.css` de `dist/server/entry.mjs` coincide con el de `dist/client/_astro/`. Si no coincide, repite `npx astro build` y despliega otra vez.
 
 ## Pendiente de David (al final, por orden)
 1. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.

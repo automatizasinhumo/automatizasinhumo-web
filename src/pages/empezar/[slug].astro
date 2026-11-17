@@ -31,6 +31,8 @@ const ERRORES: Record<string, string> = {
 };
 const error = q.get('error');
 const errorTexto = error ? (ERRORES[error] ?? 'Revisa los datos del formulario.') : null;
+// Con ?error= el formulario por pasos abre en el paso que tiene el campo a corregir.
+const errorEnUltimo = error === 'consentimiento' || error === 'mensaje';
 const titulo = producto ? `Empieza gratis: ${producto.name}` : 'Cuéntanos qué necesitas';
 const referrer = (Astro.request.headers.get('referer') ?? '').slice(0, 300);
 const input =
@@ -67,7 +69,17 @@ const label = 'block text-sm font-medium text-ink';
           )
         }
 
-        <form method="post" action="/api/solicitudes" class="mt-8 space-y-6" data-solicitud>
+        <form method="post" action="/api/solicitudes" class="mt-8 space-y-6" data-solicitud data-error-ultimo={errorEnUltimo ? '' : undefined}>
+          {/* Sin JS se ve todo de una vez; con JS, un paso cada vez con esta barra. */}
+          <div class="hidden" data-progreso aria-live="polite">
+            <div class="flex items-baseline justify-between text-xs font-semibold">
+              <span class="text-brand" data-progreso-texto></span>
+              <span class="text-faint" data-progreso-titulo></span>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin="1" data-progreso-barra>
+              <div class="h-full rounded-full bg-brand transition-all duration-300" style="width:0%" data-progreso-relleno></div>
+            </div>
+          </div>
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="utm_source" value={q.get('utm_source') ?? ''} />
           <input type="hidden" name="utm_medium" value={q.get('utm_medium') ?? ''} />
@@ -77,7 +89,7 @@ const label = 'block text-sm font-medium text-ink';
             <label>No rellenes este campo <input type="text" name="web" tabindex="-1" autocomplete="off" /></label>
           </div>
 
-          <fieldset class="space-y-4 rounded-2xl border border-line p-5">
+          <fieldset class="space-y-4 rounded-2xl border border-line p-5" data-paso="Tus datos">
             <legend class="px-1 text-sm font-semibold text-ink">1. Tus datos de contacto</legend>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class={label}>Nombre *
@@ -95,7 +107,7 @@ const label = 'block text-sm font-medium text-ink';
 
           {
             conModalidad && (
-              <fieldset class="rounded-2xl border border-line p-5">
+              <fieldset class="rounded-2xl border border-line p-5" data-paso="Modalidad">
                 <legend class="px-1 text-sm font-semibold text-ink">2. ¿Cómo lo quieres?</legend>
                 <div class="mt-2 grid gap-3 sm:grid-cols-2">
                   {[
@@ -118,7 +130,7 @@ const label = 'block text-sm font-medium text-ink';
 
           {
             campos.length > 0 && (
-              <fieldset class="space-y-4 rounded-2xl border border-line p-5">
+              <fieldset class="space-y-4 rounded-2xl border border-line p-5" data-paso="Tu información">
                 <legend class="px-1 text-sm font-semibold text-ink">{conModalidad ? '3' : '2'}. Lo que necesitamos para tu vista previa</legend>
                 <p class="text-sm text-muted">Todo opcional: rellena lo que tengas. Lo demás te lo preguntamos.</p>
                 {campos.map((c, i) => (
@@ -131,6 +143,7 @@ const label = 'block text-sm font-medium text-ink';
             )
           }
 
+          <div class="space-y-6" data-paso={consulta ? 'Tu caso' : 'Enviar'}>
           <label class={label}>
             {consulta ? '¿Qué necesitas? *' : '¿Algo más que debamos saber?'}
             <textarea
@@ -158,6 +171,12 @@ const label = 'block text-sm font-medium text-ink';
             Enviar y recibir mi vista previa gratis
           </button>
           <p class="text-xs text-faint">No pedimos tarjeta. No se cobra nada al enviar.</p>
+          </div>
+
+          <div class="hidden gap-3" data-pasos-nav>
+            <button type="button" class="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink hover:border-brand" data-atras>&larr; Atrás</button>
+            <button type="button" class="ml-auto rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover" data-siguiente>Siguiente &rarr;</button>
+          </div>
         </form>
       </div>
 
@@ -202,4 +221,63 @@ const label = 'block text-sm font-medium text-ink';
       }
     }),
   );
+
+  // Formulario por pasos (mejora progresiva): un bloque cada vez, barra de
+  // progreso y validación del paso antes de avanzar. Sin JS, se ve todo junto.
+  document.querySelectorAll<HTMLFormElement>('form[data-solicitud]').forEach((f) => {
+    const pasos = [...f.querySelectorAll<HTMLElement>('[data-paso]')];
+    const nav = f.querySelector<HTMLElement>('[data-pasos-nav]');
+    const prog = f.querySelector<HTMLElement>('[data-progreso]');
+    if (pasos.length < 2 || !nav || !prog) return;
+    const atras = nav.querySelector<HTMLButtonElement>('[data-atras]')!;
+    const sig = nav.querySelector<HTMLButtonElement>('[data-siguiente]')!;
+    const barra = prog.querySelector<HTMLElement>('[data-progreso-barra]')!;
+    const relleno = prog.querySelector<HTMLElement>('[data-progreso-relleno]')!;
+    const texto = prog.querySelector<HTMLElement>('[data-progreso-texto]')!;
+    const titulo = prog.querySelector<HTMLElement>('[data-progreso-titulo]')!;
+    let actual = f.hasAttribute('data-error-ultimo') ? pasos.length - 1 : 0;
+
+    const mostrar = (i: number, foco = false) => {
+      actual = i;
+      pasos.forEach((p, j) => (p.hidden = j !== i));
+      const ultimo = i === pasos.length - 1;
+      atras.style.visibility = i === 0 ? 'hidden' : 'visible';
+      sig.hidden = ultimo;
+      texto.textContent = `Paso ${i + 1} de ${pasos.length}`;
+      titulo.textContent = pasos[i].dataset.paso ?? '';
+      relleno.style.width = `${((i + 1) / pasos.length) * 100}%`;
+      barra.setAttribute('aria-valuemax', String(pasos.length));
+      barra.setAttribute('aria-valuenow', String(i + 1));
+      if (foco) {
+        prog.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        pasos[i].querySelector<HTMLElement>('input:not([type=hidden]),textarea')?.focus({ preventScroll: true });
+      }
+    };
+    const valido = () => {
+      for (const el of pasos[actual].querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea')) {
+        if (!el.checkValidity()) {
+          el.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    };
+    const avanzar = () => {
+      if (valido() && actual < pasos.length - 1) mostrar(actual + 1, true);
+    };
+
+    prog.classList.remove('hidden');
+    nav.classList.replace('hidden', 'flex');
+    sig.addEventListener('click', avanzar);
+    atras.addEventListener('click', () => actual > 0 && mostrar(actual - 1, true));
+    // Intro en un campo de texto avanza de paso en vez de intentar enviar.
+    f.addEventListener('keydown', (e) => {
+      const t = e.target as HTMLElement;
+      if (e.key === 'Enter' && t.tagName === 'INPUT' && actual < pasos.length - 1) {
+        e.preventDefault();
+        avanzar();
+      }
+    });
+    mostrar(actual);
+  });
 </script>
