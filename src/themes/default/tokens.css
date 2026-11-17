@@ -9,20 +9,19 @@
  */
 @theme {
   /* Primary brand — solid buttons, primary actions, focus ring */
-  --color-brand: #111827;        /* swap for your brand color */
-  --color-brand-hover: #374151;  /* hover shade of the above */
+  --color-brand: #176b5a;        /* swap for your brand color */
+  --color-brand-hover: #0f5547;  /* hover shade of the above */
 
-  /* Body text. Tokenized alongside --color-paper: a theme that changes the page
-     colour must be able to change the text colour with it, and a hardcoded
-     utility on <body> beats anything a theme declares in the base layer. */
-  --color-ink: #111827;
+  /* Body text (tinta). Tokenized alongside the page colour so a theme can
+     change both together. */
+  --color-ink: #172d2d;
 
-  /* Accent — text links */
-  --color-accent: #2563eb;
+  /* Accent — terracota: numeración, detalles y flechas */
+  --color-accent: #b34a28;
 
-  /* Surfaces — warm paper background + hairline rules (editorial minimal) */
-  --color-paper: #faf8f4;
-  --color-line: #e7e2d9;
+  /* Surfaces — papel claro + líneas finas */
+  --color-paper: #f5f7f4;
+  --color-line: #d5ddd8;
 
   /* Raised panels: cards, form wells, the checkout summary. Distinct from
      `paper` so a panel can sit *on* the page rather than dissolving into it. */
@@ -35,23 +34,23 @@
      Both clear 4.5:1 on `surface`. `faint` was gray-400 in a dozen places
      before these became tokens, which is 2.6:1 on white — legible to us,
      invisible to anyone else. */
-  --color-muted: #4b5563;
-  --color-faint: #6b7280;
+  --color-muted: #435653;
+  --color-faint: #5a6b67;
 
   /* Label colour on a `brand` fill. A token rather than a hardcoded white,
      because a theme is free to pick a light brand — and then white fails
      contrast on every primary button at once. */
   --color-on-brand: #ffffff;
 
-  /* Typography — sans body + a characterful system serif for display (no webfont) */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
-    Helvetica, Arial, sans-serif;
-  --font-serif: 'Hoefler Text', 'Iowan Old Style', 'Palatino Linotype', Palatino,
-    Georgia, 'Times New Roman', serif;
+  /* Tipografía de marca autoalojada (@font-face en src/styles/overrides.css) */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', Roboto, Arial,
+    sans-serif;
+  --font-serif: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui,
+    sans-serif; /* titulares: grotesca de marca */
 
   /* Corner radius (Tailwind defaults, surfaced here for one-place editing) */
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
 }
 
 /*
@@ -77,7 +76,7 @@
   --prose-measure: 48rem;
   --prose-leading: 1.75;
   --prose-h1-size: 2.25rem;
-  --prose-h1-tracking: -0.02em;
+  --prose-h1-tracking: -0.03em;
   --prose-h2-size: 1.5rem;
   --prose-h2-tracking: -0.01em;
   --prose-h3-size: 1.125rem;

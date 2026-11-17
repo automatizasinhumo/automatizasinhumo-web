@@ -18,9 +18,11 @@ interface Props {
   /** Shown above the title; the section label. */
   eyebrow?: string;
   heading?: string;
+  /** True when a hero above already carries the page's h1. */
+  belowHero?: boolean;
 }
 
-const { eyebrow = 'Catálogo', heading = 'Todos los servicios' } = Astro.props;
+const { eyebrow = 'Catálogo', heading = 'Todos los servicios', belowHero = false } = Astro.props;
 
 const model = await loadCatalogPage(env.DB, {
   base: Astro.url.pathname,
@@ -34,4 +36,4 @@ const model = await loadCatalogPage(env.DB, {
 });
 ---
 
-<Catalog model={model} />
+<Catalog model={model} headingLevel={belowHero ? 'h2' : 'h1'} />

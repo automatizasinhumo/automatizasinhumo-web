@@ -1,11 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Facturas recibidas a hoja de cálculo">
-<rect width="1200" height="1200" fill="#EAF1E4"/>
-<circle cx="1050" cy="150" r="380" fill="#4F7F2E" opacity=".08"/>
-<g transform="translate(680 190) scale(.88)"><line x1="90" y1="110" x2="210" y2="210" stroke="#335619" stroke-width="8"/><line x1="210" y1="210" x2="340" y2="100" stroke="#335619" stroke-width="8"/><line x1="210" y1="210" x2="320" y2="330" stroke="#335619" stroke-width="8"/><line x1="90" y1="110" x2="90" y2="320" stroke="#335619" stroke-width="8" stroke-dasharray="14 12"/><circle cx="90" cy="110" r="44" fill="#fff" stroke="#335619" stroke-width="8"/><circle cx="210" cy="210" r="56" fill="#4F7F2E"/><circle cx="340" cy="100" r="38" fill="#fff" stroke="#335619" stroke-width="8"/><circle cx="320" cy="330" r="38" fill="#fff" stroke="#335619" stroke-width="8"/><circle cx="90" cy="320" r="30" fill="#4F7F2E" opacity=".5"/></g>
-<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#335619" font-weight="700">AUTOMATIZACIONES</text>
-<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Facturas recibidas a</text>
-<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">hoja de cálculo</text>
-<rect x="90" y="1010" width="334" height="84" rx="42" fill="#4F7F2E"/>
-<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 149 €</text>
-<text x="454" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#335619">Entrega en 4 días</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Facturas recibidas a hoja de cálculo">
+<defs><pattern id="d" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1.1" fill="#81938C" opacity=".45"/></pattern></defs>
+<rect width="1200" height="900" fill="#F5F7F4"/>
+<rect width="1200" height="900" fill="url(#d)"/>
+<rect x="690" y="70" width="440" height="440" rx="28" fill="#fff" stroke="#D5DDD8" stroke-width="3"/>
+<g transform="translate(715 95) scale(.93)"><line x1="90" y1="110" x2="210" y2="210" stroke="#172D2D" stroke-width="8"/><line x1="210" y1="210" x2="340" y2="100" stroke="#172D2D" stroke-width="8"/><line x1="210" y1="210" x2="320" y2="330" stroke="#172D2D" stroke-width="8"/><line x1="90" y1="110" x2="90" y2="320" stroke="#172D2D" stroke-width="8" stroke-dasharray="14 12"/><circle cx="90" cy="110" r="44" fill="#fff" stroke="#172D2D" stroke-width="8"/><circle cx="210" cy="210" r="56" fill="#176B5A"/><circle cx="340" cy="100" r="38" fill="#fff" stroke="#172D2D" stroke-width="8"/><circle cx="320" cy="330" r="38" fill="#fff" stroke="#172D2D" stroke-width="8"/><circle cx="90" cy="320" r="30" fill="#176B5A" opacity=".5"/></g>
+<path d="M1060 545 h60 m-22 -20 l22 20 l-22 20" stroke="#B34A28" stroke-width="7" fill="none" stroke-linecap="square"/>
+<rect x="80" y="86" width="328" height="56" rx="28" fill="#176B5A" opacity=".1"/>
+<text x="108" y="124" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="28" font-weight="600" fill="#176B5A">Automatizaciones</text>
+<text x="80" y="610" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="-1.5" fill="#172D2D">Facturas recibidas a</text>
+<text x="80" y="690" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="-1.5" fill="#172D2D">hoja de cálculo</text>
+<rect x="80" y="760" width="323" height="76" rx="38" fill="#176B5A"/>
+<text x="115" y="810" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700" fill="#fff">desde 149 €</text>
+<text x="431" y="808" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="30" fill="#172D2D" opacity=".8">Entrega en 4 días</text>
 </svg>

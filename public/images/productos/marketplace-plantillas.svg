@@ -1,11 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Marketplace de productos digitales">
-<rect width="1200" height="1200" fill="#F7E9E4"/>
-<circle cx="1050" cy="150" r="380" fill="#C0533D" opacity=".08"/>
-<g transform="translate(680 190) scale(.88)"><path d="M70 130 h280 l-22 230 h-236z" fill="#fff" stroke="#8A3424" stroke-width="8" stroke-linejoin="round"/><path d="M140 130 v-30 a70 70 0 0 1 140 0 v30" fill="none" stroke="#C0533D" stroke-width="14"/><circle cx="160" cy="190" r="10" fill="#8A3424"/><circle cx="260" cy="190" r="10" fill="#8A3424"/><rect x="150" y="260" width="120" height="36" rx="18" fill="#C0533D"/></g>
-<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="#8A3424" font-weight="700">TIENDAS Y PRODUCTOS DIGITALES</text>
-<text x="90" y="834" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">Marketplace de</text>
-<text x="90" y="920" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#1d1b17">productos digitales</text>
-<rect x="90" y="1010" width="334" height="84" rx="42" fill="#C0533D"/>
-<text x="125" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">desde 699 €</text>
-<text x="454" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#8A3424">Entrega en 10 días</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Marketplace de productos digitales">
+<defs><pattern id="d" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1.1" fill="#81938C" opacity=".45"/></pattern></defs>
+<rect width="1200" height="900" fill="#F5F7F4"/>
+<rect width="1200" height="900" fill="url(#d)"/>
+<rect x="690" y="70" width="440" height="440" rx="28" fill="#fff" stroke="#D5DDD8" stroke-width="3"/>
+<g transform="translate(715 95) scale(.93)"><path d="M70 130 h280 l-22 230 h-236z" fill="#fff" stroke="#172D2D" stroke-width="8" stroke-linejoin="round"/><path d="M140 130 v-30 a70 70 0 0 1 140 0 v30" fill="none" stroke="#176B5A" stroke-width="14"/><circle cx="160" cy="190" r="10" fill="#172D2D"/><circle cx="260" cy="190" r="10" fill="#172D2D"/><rect x="150" y="260" width="120" height="36" rx="18" fill="#176B5A"/></g>
+<path d="M1060 545 h60 m-22 -20 l22 20 l-22 20" stroke="#B34A28" stroke-width="7" fill="none" stroke-linecap="square"/>
+<rect x="80" y="86" width="549" height="56" rx="28" fill="#176B5A" opacity=".1"/>
+<text x="108" y="124" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="28" font-weight="600" fill="#176B5A">Tiendas y productos digitales</text>
+<text x="80" y="610" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="-1.5" fill="#172D2D">Marketplace de productos</text>
+<text x="80" y="690" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="-1.5" fill="#172D2D">digitales</text>
+<rect x="80" y="760" width="323" height="76" rx="38" fill="#176B5A"/>
+<text x="115" y="810" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700" fill="#fff">desde 699 €</text>
+<text x="431" y="808" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="30" fill="#172D2D" opacity=".8">Entrega en 10 días</text>
 </svg>

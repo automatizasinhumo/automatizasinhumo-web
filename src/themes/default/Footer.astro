@@ -1,5 +1,6 @@
 ---
 import type { StorefrontShellModel } from '../../features/storefront/models';
+import Logo from './Logo.astro';
 
 /**
  * STORE-OWNED. Edit freely — this file belongs to your store.
@@ -15,21 +16,27 @@ interface Props {
 const { model } = Astro.props;
 ---
 
-<footer class="border-t border-line">
-  <div
-    class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-10 text-xs uppercase tracking-widest text-muted"
-  >
-    <span>&copy; {model.storeName}</span>
+<footer class="mt-16 border-t border-line bg-ink text-white">
+  <div class="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-[1.4fr_1fr]">
+    <div>
+      <span class="inline-block rounded-xl bg-paper px-3 py-2"><Logo /></span>
+      <p class="mt-5 max-w-sm text-sm leading-relaxed text-white/75">
+        Webs y automatizaciones a precio cerrado para pymes y autónomos. Eliges, rellenas un formulario y lo recibes funcionando.
+      </p>
+    </div>
     {
       model.footerLinks.length > 0 && (
-        <nav aria-label="Pie de página" class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <nav aria-label="Pie de página" class="grid grid-cols-2 content-start gap-x-6 gap-y-3 text-sm">
           {model.footerLinks.map((link) => (
-            <a href={link.href} class="hover:text-brand">
+            <a href={link.href} class="text-white/80 hover:text-white hover:underline">
               {link.text}
             </a>
           ))}
         </nav>
       )
     }
+  </div>
+  <div class="border-t border-white/10">
+    <p class="mx-auto max-w-6xl px-6 py-5 text-xs text-white/60">&copy; {new Date().getFullYear()} {model.storeName} · Software de código abierto, resultados tuyos.</p>
   </div>
 </footer>

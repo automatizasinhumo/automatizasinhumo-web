@@ -19,23 +19,27 @@ import CatalogPagination from '../../features/storefront/controls/CatalogPaginat
  */
 interface Props {
   model: CatalogPageModel;
+  /** 'h2' when a hero above already holds the page's h1. */
+  headingLevel?: 'h1' | 'h2';
 }
 
-const { model } = Astro.props;
+const { model, headingLevel = 'h1' } = Astro.props;
+// En la portada el h1 es el del hero; aquí el catálogo pasa a h2.
+const H = headingLevel;
 ---
 
 <div class="mb-10">
-  <p class="text-xs uppercase tracking-[0.25em] text-muted">{model.eyebrow}</p>
-  <h1 class="mt-2 font-serif text-4xl tracking-tight sm:text-5xl">{model.heading}</h1>
+  <p class="etiqueta">{model.eyebrow}</p>
+  <H class="mt-3 font-serif text-4xl font-bold tracking-tight sm:text-5xl">{model.heading}</H>
 </div>
 
 {
   model.categories.length > 0 && (
-    <div class="mb-12 flex flex-wrap gap-x-6 gap-y-2 text-xs uppercase tracking-widest text-muted">
+    <div class="mb-12 flex flex-wrap gap-2 text-sm">
       {model.categories.map((category) => (
         <a
           href={category.href}
-          class="border-b border-transparent pb-0.5 hover:border-brand hover:text-brand"
+          class="rounded-full border border-line bg-surface px-4 py-1.5 font-medium hover:border-brand hover:text-brand"
         >
           {category.text}
         </a>
@@ -57,7 +61,7 @@ const { model } = Astro.props;
   )
 }
 
-<ul class="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
+<ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
   {model.products.map((card, i) => <ProductCard card={card} index={i} />)}
 </ul>
 

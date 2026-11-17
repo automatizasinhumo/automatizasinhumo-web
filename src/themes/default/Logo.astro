@@ -1,0 +1,26 @@
+---
+/**
+ * Logotipo de Automatiza sin humo: una "A" de dos trazos cuyo travesaño sale
+ * hacia la derecha y termina en flecha ("del trabajo al resultado"). La A va en
+ * verde de marca y la punta en terracota. Sin degradados ni engranajes.
+ */
+interface Props {
+  class?: string;
+  /** Muestra el nombre junto al símbolo. */
+  conNombre?: boolean;
+}
+const { class: cls = '', conNombre = true } = Astro.props;
+---
+
+<span class={`inline-flex items-center gap-2.5 ${cls}`}>
+  <svg viewBox="0 0 28 28" width="32" height="32" fill="none" aria-hidden="true" class="shrink-0">
+    <path d="M3.5 25 L12 3.5 L17 16" stroke="#176B5A" stroke-width="2.6" stroke-linecap="square" stroke-linejoin="miter" />
+    <path d="M7.4 17 H24.5" stroke="#176B5A" stroke-width="2.6" stroke-linecap="square" />
+    <path d="M20.5 12.8 L25 17 L20.5 21.2" stroke="#B34A28" stroke-width="2.6" stroke-linecap="square" stroke-linejoin="miter" />
+  </svg>
+  {conNombre && (
+    <span class="font-serif text-xl leading-none tracking-tight text-ink sm:text-[1.35rem]">
+      <span class="font-bold">Automatiza</span> <span class="font-medium text-brand">sin humo</span>
+    </span>
+  )}
+</span>

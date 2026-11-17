@@ -702,6 +702,11 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 - **Raiola Networks** y **Webempresa**: hosting en España con soporte en español.
 - **Hostinger**: hosting y correo económicos.
 - **Kinsta**: hosting WordPress gestionado para webs con mucho tráfico.
+- **SiteGround** y **Cloudways**: hosting gestionado con buen soporte y copias diarias.
+- **WP Rocket**: caché para que un WordPress cargue rápido sin tocar código.
+
+### Redes sociales
+- **Metricool**: programa publicaciones y mide resultados de todas tus redes desde un panel.
 
 ### Facturación y gestión
 - **Holded** o **Quipu**: facturación, gastos e impuestos para autónomos y pymes.

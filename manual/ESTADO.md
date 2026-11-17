@@ -13,6 +13,17 @@
 - SEO: títulos y descripciones por producto, canonical, JSON-LD (Organization y Product), sitemap.xml, llms.txt, imagen social `og-default.png` y una portada PNG por producto (también og:image).
 - Tests: 906/906 en verde (`npx vitest run`).
 
+## Marca (aplicada el 17-11-2026)
+- Idea: "taller digital contemporáneo, no startup de IA". Paleta: papel #F5F7F4, tinta #172D2D, verde #176B5A, terracota #B34A28 (contrastes AA comprobados).
+- Tipos autoalojados (licencia OFL, sin Google Fonts, por el RGPD): Space Grotesk para titulares y logo, IBM Plex Sans para el texto. Están en `public/fonts/`.
+- Dónde está cada cosa:
+  - Tokens de color, fuente y radio: `src/themes/default/tokens.css`.
+  - Texturas y componentes (retícula de puntos `.fondo-tecnico`, `.tarjeta`, `.etiqueta`, botones píldora): `src/styles/overrides.css`.
+  - Logo con la "A" en flecha: `src/components/Logo.astro`.
+- Favicon, apple-touch-icon y la imagen social `og-default.png` salen de `node manual/catalogo/gen-marca.mjs`.
+- La portada muestra un collage de capturas reales de plantillas. Las fichas tienen galería con capturas de sus demos (`public/images/demos/`, que `gen-sql.mjs` enlaza solo si existe el PNG).
+- En las 100 plantillas de demos se ha quitado la barra promocional del autor original, como pide la propia plantilla (licencia MIT, se conserva el crédito en el código).
+
 ## Fuente del catálogo
 `manual/catalogo/catalogo.mjs` → `node manual/catalogo/gen-sql.mjs > manual/catalogo/seed.sql` → aplicar a D1:
 

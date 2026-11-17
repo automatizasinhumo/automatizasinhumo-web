@@ -30,22 +30,27 @@ const Heading = headingLevel;
 ---
 
 <li class="reveal group" style={`animation-delay:${Math.min(index, 8) * 60}ms`}>
-  <a href={card.href} class="block">
-    <div class="relative overflow-hidden rounded-md bg-surface">
+  <a href={card.href} class="tarjeta flex h-full flex-col overflow-hidden">
+    <div class="relative overflow-hidden border-b border-line bg-paper">
       <StoreImage
         image={card.image}
         fade
-        class={`aspect-square w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]${card.inStock ? '' : ' opacity-60'}`}
+        class={`aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]${card.inStock ? '' : ' opacity-60'}`}
       />
       {
         !card.inStock && (
-          <span class="absolute left-3 top-3 rounded-full bg-surface/90 px-2.5 py-0.5 text-xs uppercase tracking-widest text-muted ring-1 ring-line">
+          <span class="absolute left-3 top-3 rounded-full bg-surface/90 px-2.5 py-0.5 text-xs text-muted ring-1 ring-line">
             Agotado
           </span>
         )
       }
     </div>
-    <Heading class="mt-4 text-sm font-medium tracking-tight">{card.name}</Heading>
-    <p class="mt-1 text-sm tabular-nums text-muted">{card.formattedPrice}</p>
+    <div class="flex flex-1 flex-col p-5">
+      <Heading class="font-serif text-lg font-semibold leading-snug tracking-tight">{card.name}</Heading>
+      <div class="mt-auto flex items-center justify-between pt-4">
+        <p class="text-base font-semibold tabular-nums text-ink">{card.formattedPrice}</p>
+        <span class="text-sm font-medium text-brand">Ver servicio <span class="text-accent">→</span></span>
+      </div>
+    </div>
   </a>
 </li>

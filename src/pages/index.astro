@@ -19,5 +19,5 @@ const showHero = Astro.url.searchParams.size === 0;
 
 <Layout>
   {showHero && <HomeHero />}
-  <ProductList />
+  <ProductList belowHero={showHero} />
 </Layout>

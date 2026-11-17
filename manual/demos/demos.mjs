@@ -15,22 +15,40 @@ export const DEMOS = [
   ['plantillas-bootstrap', 'ColorlibHQ__bootstrap-templates', 'Plantillas Bootstrap (Colorlib)', 'web-corporativa-5-secciones'],
 ];
 
-// Demos adicionales que encajan con otros productos.
+// Demos adicionales por producto: [ruta dentro del worker de demos, título].
+const N = 'plantillas-negocio', E = 'plantillas-eventos/templates', BS = 'plantillas-bootstrap';
 export const EXTRA = {
-  'carta-qr': ['carta-whatsapp', 'plantillas-eventos/restaurant-template'],
-  'gestion-invitados-mesas': ['plantillas-eventos/rsvp-only'],
-  'portfolio-editable': ['plantillas-eventos/portfolio-template'],
-  'web-taller': ['plantillas-negocio'],
-  'web-editable-visual': ['plantillas-bootstrap'],
-  'auto-plantilla-medida': ['plantillas-negocio'],
-  'auto-resenas': ['testimonios'],
+  'carta-qr': [['carta-whatsapp', 'Carta QR con pedido por WhatsApp'], [`${N}/restaurant/restaurant`, 'Restaurante'], [`${N}/restaurant/cafe-coffee-shop`, 'Cafetería'], [`${N}/restaurant/bar-lounge`, 'Bar de copas']],
+  'reservas-restaurante': [[`${N}/restaurant/restaurant`, 'Web de restaurante'], [`${N}/restaurant/pizza-delivery`, 'Pizzería a domicilio']],
+  'asistente-ia-pedidos': [[`${N}/restaurant/food-truck`, 'Food truck'], ['carta-whatsapp', 'Carta con pedido por WhatsApp']],
+  'web-una-pagina': [[`${E}/landing-page-template`, 'Landing de una página'], [`${E}/business-template`, 'Negocio local'], [`${N}/landing-pages/product-launch`, 'Lanzamiento de producto']],
+  'web-corporativa-5-secciones': [[`${N}/business/consulting-firm`, 'Consultoría'], [`${N}/business/creative-agency`, 'Agencia creativa'], [`${BS}/atelier`, 'Atelier (Bootstrap)'], [`${BS}/ironworks`, 'Ironworks (Bootstrap)']],
+  'web-taller': [[`${N}/local-services/auto-repair`, 'Taller mecánico'], [`${N}/local-services/plumber-home-services`, 'Fontanería'], [`${N}/local-services/cleaning-company`, 'Limpiezas']],
+  'pagina-citas': [[`${N}/health-fitness/physiotherapy`, 'Fisioterapia'], [`${N}/health-fitness/dental-clinic`, 'Clínica dental'], [`${N}/health-fitness/nutritionist`, 'Nutricionista']],
+  'reservas-salon': [[`${N}/health-fitness/spa-salon`, 'Peluquería y spa'], [`${N}/health-fitness/yoga-studio`, 'Estudio de yoga'], [`${N}/health-fitness/gym-fitness`, 'Gimnasio']],
+  'web-inmobiliaria': [[`${N}/real-estate-travel/real-estate-agency`, 'Agencia inmobiliaria'], [`${N}/real-estate-travel/vacation-rental`, 'Alquiler vacacional']],
+  'portfolio-editable': [[`${E}/portfolio-template`, 'Portfolio sencillo'], [`${N}/portfolio/photographer-portfolio`, 'Fotógrafo'], [`${N}/portfolio/architect-portfolio`, 'Arquitecto']],
+  'cv-profesional': [[`${N}/portfolio/resume-cv`, 'Currículum web']],
+  'link-in-bio': [[`${N}/landing-pages/link-in-bio`, 'Página de enlaces']],
+  'lista-espera': [[`${N}/landing-pages/coming-soon`, 'Próximamente'], [`${N}/landing-pages/webinar-signup`, 'Inscripción a webinar']],
+  'web-boda-rsvp': [[`${E}/rsvp-only`, 'Solo confirmación de asistencia'], [`${N}/events-community/wedding`, 'Boda clásica']],
+  'invitacion-digital': [[`${E}/weekend-itinerary`, 'Itinerario de fin de semana']],
+  'gestion-invitados-mesas': [[`${E}/rsvp-only`, 'Confirmación de asistencia'], [`${E}/registry-template`, 'Lista de regalos']],
+  'galeria-privada-evento': [[`${N}/portfolio/photographer-portfolio`, 'Galería de fotógrafo']],
+  'tienda-online': [[`${N}/ecommerce/fashion-store`, 'Tienda de moda'], [`${N}/ecommerce/cosmetics-skincare-store`, 'Cosmética'], [`${N}/ecommerce/single-product-store`, 'Tienda de un producto']],
+  'tienda-productos-digitales': [[`${N}/landing-pages/ebook-download`, 'Descarga de ebook']],
+  'web-editable-visual': [[`${BS}/meridian`, 'Meridian (Bootstrap)'], [`${BS}/northstar`, 'Northstar (Bootstrap)']],
+  'web-wordpress': [[`${N}/business/corporate-company`, 'Empresa'], [`${N}/portfolio/writer-blogger`, 'Blog personal']],
+  'web-blog-astro': [[`${N}/portfolio/writer-blogger`, 'Blog personal']],
+  'web-multidioma': [[`${N}/real-estate-travel/hotel-resort`, 'Hotel'], [`${N}/real-estate-travel/tour-guide`, 'Guía turístico']],
+  'auto-plantilla-medida': [['plantillas-negocio', 'Catálogo de 100 plantillas por sector']],
+  'auto-resenas': [['testimonios', 'Muro de testimonios']],
+  'plataforma-agencia': [[`${N}/business/digital-marketing-agency`, 'Agencia de marketing']],
+  'web-arrastrar-soltar': [[`${BS}`, 'Galería de 40 diseños Bootstrap']],
 };
 
 export function demosDe(slugProducto) {
   const out = DEMOS.filter((d) => d[3] === slugProducto).map((d) => ({ url: `${DEMOS_URL}/${d[0]}/`, titulo: d[2] }));
-  for (const path of EXTRA[slugProducto] ?? []) {
-    const d = DEMOS.find((x) => x[0] === path.split('/')[0]);
-    out.push({ url: `${DEMOS_URL}/${path}/`, titulo: path.includes('/') ? `${d[2].split(':')[0]} · ${path.split('/')[1].replace(/-template$/, '').replace(/-/g, ' ')}` : d[2] });
-  }
+  for (const [path, titulo] of EXTRA[slugProducto] ?? []) out.push({ url: `${DEMOS_URL}/${path}/`, titulo });
   return out;
 }

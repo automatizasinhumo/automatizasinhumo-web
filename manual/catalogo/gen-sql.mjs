@@ -1,6 +1,6 @@
 // node manual/catalogo/gen-sql.mjs > manual/catalogo/seed.sql
 // Sustituye el catálogo demo de Minshop por el catálogo de servicios.
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { categorias, productos, paginas } from './catalogo.mjs';
 import { DEMOS, DEMOS_URL, demosDe } from '../demos/demos.mjs';
@@ -68,6 +68,16 @@ for (const p of productos) {
   const img = `productos/${p.slug}.png`;
   out.push(`UPDATE products SET image_key=${q(img)} WHERE slug=${q(p.slug)};`);
   out.push(`INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, ${q(img)}, 0, ${q(pid('pimg'))} FROM products WHERE slug=${q(p.slug)};`);
+  // Galería: capturas reales de las plantillas demo (public/images/demos/<último segmento>.png)
+  const vistas = new Set();
+  let n = 1;
+  for (const d of demosDe(p.slug)) {
+    const nombre = new URL(d.url).pathname.split('/').filter(Boolean).pop();
+    const key = `demos/${nombre}.png`;
+    if (!nombre || vistas.has(key) || !existsSync(new URL(`../../public/images/${key}`, import.meta.url))) continue;
+    vistas.add(key);
+    out.push(`INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, ${q(key)}, ${n++}, ${q(pid('pimg'))} FROM products WHERE slug=${q(p.slug)};`);
+  }
   if (varios) {
     [['Lo montas tú (plantilla + guía)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(label)}, ${eur * 100}, 999, ${q(`${p.slug}-${i ? 'pro' : 'diy'}`)}, ${i}, 1, ${q(pid('var'))} FROM products WHERE slug=${q(p.slug)};`));

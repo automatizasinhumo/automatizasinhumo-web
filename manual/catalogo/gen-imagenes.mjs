@@ -62,24 +62,32 @@ const M = {
 
 const catNombre = Object.fromEntries(categorias.map((c) => [c.slug, c.nombre]));
 
+// Marca: todas las portadas comparten paleta (fondo papel técnico, verde de
+// marca, tinta y un toque terracota). Formato 4:3, el mismo de las tarjetas.
+const B = { bg: '#F5F7F4', ink: '#172D2D', brand: '#176B5A', acc: '#B34A28', line: '#D5DDD8' };
+const FONT = "'Space Grotesk', 'Segoe UI', Arial, sans-serif";
 for (const p of productos) {
-  const [bg, a, t] = PAL[p.cat] ?? PAL.webs;
-  const motivo = (M[p.cat] ?? M.webs)(a, t);
+  const motivo = (M[p.cat] ?? M.webs)(B.brand, B.ink);
   const nombre = p.nombre.replace(/\s*\((mes|mensual)\)\s*$/i, '');
-  const ls = lineas(nombre, 22).slice(0, 4);
-  const fs = ls.length > 3 ? 66 : 76;
-  const y0 = 1040 - (ls.length - 1) * (fs + 10) - 120;
+  const ls = lineas(nombre, 24).slice(0, 3);
+  const fs = ls.length > 2 ? 62 : 72;
+  const y0 = 690 - (ls.length - 1) * (fs + 8);
   const precio = p.plazo === 'Mensual' ? `${p.p[0]} €/mes` : p.p.length === 2 ? `desde ${p.p[0]} €` : `${p.p[0]} €`;
   const plazo = p.plazo === 'Mensual' ? 'Sin permanencia' : `Entrega en ${p.plazo}`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="${esc(nombre)}">
-<rect width="1200" height="1200" fill="${bg}"/>
-<circle cx="1050" cy="150" r="380" fill="${a}" opacity=".08"/>
-<g transform="translate(680 190) scale(.88)">${motivo}</g>
-<text x="90" y="150" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="5" fill="${t}" font-weight="700">${esc((catNombre[p.cat] ?? '').toUpperCase())}</text>
-${ls.map((l, i) => `<text x="90" y="${y0 + i * (fs + 10)}" font-family="Georgia, 'Times New Roman', serif" font-size="${fs}" fill="#1d1b17">${esc(l)}</text>`).join('\n')}
-<rect x="90" y="1010" width="${precio.length * 24 + 70}" height="84" rx="42" fill="${a}"/>
-<text x="${90 + 35}" y="1066" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff">${esc(precio)}</text>
-<text x="${90 + precio.length * 24 + 100}" y="1064" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="${t}">${esc(plazo)}</text>
+  const pw = precio.length * 23 + 70;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="${esc(nombre)}">
+<defs><pattern id="d" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1.1" fill="#81938C" opacity=".45"/></pattern></defs>
+<rect width="1200" height="900" fill="${B.bg}"/>
+<rect width="1200" height="900" fill="url(#d)"/>
+<rect x="690" y="70" width="440" height="440" rx="28" fill="#fff" stroke="${B.line}" stroke-width="3"/>
+<g transform="translate(715 95) scale(.93)">${motivo}</g>
+<path d="M1060 545 h60 m-22 -20 l22 20 l-22 20" stroke="${B.acc}" stroke-width="7" fill="none" stroke-linecap="square"/>
+<rect x="80" y="86" width="${(catNombre[p.cat] ?? '').length * 17 + 56}" height="56" rx="28" fill="${B.brand}" opacity=".1"/>
+<text x="108" y="124" font-family="${FONT}" font-size="28" font-weight="600" fill="${B.brand}">${esc(catNombre[p.cat] ?? '')}</text>
+${ls.map((l, i) => `<text x="80" y="${y0 + i * (fs + 8)}" font-family="${FONT}" font-size="${fs}" font-weight="700" letter-spacing="-1.5" fill="${B.ink}">${esc(l)}</text>`).join('\n')}
+<rect x="80" y="760" width="${pw}" height="76" rx="38" fill="${B.brand}"/>
+<text x="${80 + 35}" y="810" font-family="${FONT}" font-size="38" font-weight="700" fill="#fff">${esc(precio)}</text>
+<text x="${80 + pw + 28}" y="808" font-family="${FONT}" font-size="30" fill="${B.ink}" opacity=".8">${esc(plazo)}</text>
 </svg>`;
   writeFileSync(new URL(`${p.slug}.svg`, OUT), svg);
   await sharp(Buffer.from(svg)).png({ compressionLevel: 9, palette: true }).toFile(fileURLToPath(new URL(`${p.slug}.png`, OUT)));
