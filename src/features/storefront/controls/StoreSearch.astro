@@ -38,4 +38,6 @@ const {
     aria-label="Buscar servicios"
     class={inputClass}
   />
+  {/* WCAG 3.2.2 (pa11y H32): a form needs a submit control. Visually hidden. */}
+  <button type="submit" class="sr-only">Buscar</button>
 </form>
