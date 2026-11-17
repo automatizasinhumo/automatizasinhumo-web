@@ -22,9 +22,9 @@ const stripAnalytics = (html) => html
 
 // Aviso fijo en español. Las plantillas traen marcas inventadas en inglés
 // (Brightline, Meridian…): el aviso deja claro que es un ejemplo nuestro.
-const aviso = (interactiva) => `<div id="ash-aviso" role="note" style="position:fixed;left:12px;bottom:12px;z-index:2147483647;max-width:min(92vw,520px);display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:#172D2D;color:#F5F7F4;font:14px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25)"><span><b>${interactiva ? 'Demo interactiva' : 'Diseño de ejemplo'}</b> de <a href="${TIENDA}/" style="color:#9fe0cf">Automatiza sin humo</a>. ${interactiva ? 'Pruébala: no se guarda nada.' : 'Tu versión lleva tus textos, fotos y colores, en español.'} <a href="${TIENDA}/pages/demos" style="color:#9fe0cf">Ver todas</a></span><button type="button" aria-label="Cerrar aviso" onclick="this.parentNode.remove()" style="background:none;border:0;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button></div>`;
-const conAviso = (html, interactiva) => (html.includes('id="ash-aviso"') ? html
-  : /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${aviso(interactiva)}</body>`) : html + aviso(interactiva));
+const aviso = (interactiva, producto) => `<div id="ash-aviso" role="note" style="position:fixed;left:12px;bottom:12px;z-index:2147483647;max-width:min(92vw,520px);display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:#172D2D;color:#F5F7F4;font:14px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25)"><span><b>${interactiva ? 'Demo interactiva' : 'Diseño de ejemplo'}</b> de <a href="${TIENDA}/" style="color:#9fe0cf">Automatiza sin humo</a>. ${interactiva ? 'Pruébala: no se guarda nada.' : 'Tu versión lleva tus textos, fotos y colores, en español.'} ${producto ? `<a href="${TIENDA}/products/${producto}" style="color:#9fe0cf;font-weight:700">Lo quiero: ver precio →</a> · ` : ''}<a href="${TIENDA}/pages/demos" style="color:#9fe0cf">Ver todas</a></span><button type="button" aria-label="Cerrar aviso" onclick="this.parentNode.remove()" style="background:none;border:0;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button></div>`;
+const conAviso = (html, interactiva, producto) => (html.includes('id="ash-aviso"') ? html
+  : /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${aviso(interactiva, producto)}</body>`) : html + aviso(interactiva, producto));
 
 let files = 0, bytes = 0;
 // opts: interactiva (tipo de aviso), aviso (false = no inyectar), soloRaiz (aviso solo en el primer nivel), skip (nombres a omitir)
@@ -41,12 +41,12 @@ function copy(from, to, opts = {}) {
       const [es, usados] = traducir(opts.slug, readFileSync(f, 'utf8'));
       usados.forEach((i) => opts.usados.add(i));
       if (ext === '.js') { writeFileSync(t, es); files++; bytes += st.size; continue; }
-      writeFileSync(t, opts.aviso === false ? stripAnalytics(es) : conAviso(stripAnalytics(es), opts.interactiva));
+      writeFileSync(t, opts.aviso === false ? stripAnalytics(es) : conAviso(stripAnalytics(es), opts.interactiva, opts.producto));
       files++; bytes += st.size; continue;
     }
     if (ext === '.html') {
       const html = stripAnalytics(readFileSync(f, 'utf8'));
-      writeFileSync(t, opts.aviso === false ? html : conAviso(html, opts.interactiva));
+      writeFileSync(t, opts.aviso === false ? html : conAviso(html, opts.interactiva, opts.producto));
     } else cpSync(f, t);
     files++; bytes += st.size;
   }
@@ -54,12 +54,12 @@ function copy(from, to, opts = {}) {
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-for (const [slug, dir] of DEMOS) {
+for (const [slug, dir, , producto] of DEMOS) {
   if (!existsSync(join(SRC, dir))) { console.error('falta', dir); continue; }
   // En el editor, las páginas de demo/ se editan dentro de un iframe: sin aviso.
   const editor = slug === 'editor-bloques';
   const usados = new Set();
-  copy(join(SRC, dir), join(OUT, slug), { slug, usados, interactiva: INTERACTIVAS.has(slug), soloRaiz: editor, skip: editor ? new Set(['landing']) : undefined });
+  copy(join(SRC, dir), join(OUT, slug), { slug, producto, usados, interactiva: INTERACTIVAS.has(slug), soloRaiz: editor, skip: editor ? new Set(['landing']) : undefined });
   // Textos que la plantilla ya no trae: avisar para revisar la traducción.
   (TRADUCCIONES[slug] ?? []).forEach(([de], i) => { if (!usados.has(i)) console.warn(`traducción sin uso en ${slug}:`, String(de).slice(0, 60)); });
   // Ficheros ya en español (p. ej. la carta en euros) sustituyen a los originales.
