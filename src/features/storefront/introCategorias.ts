@@ -1,0 +1,12 @@
+// Una frase bajo el título de cada categoría: dice para quién es y qué resuelve,
+// para que nadie tenga que leer 10 fichas para saber si está en el sitio correcto.
+export const INTRO_CATEGORIA: Record<string, string> = {
+  bodas:
+    'Crea la web de vuestra boda, recoge confirmaciones y organiza a los invitados. Elige solo lo que necesitéis.',
+  webs: 'Webs para negocios y particulares, publicadas con tu dominio y lista para enseñar.',
+  hosteleria: 'Carta QR, reservas y avisos para bares y restaurantes, sin apps ni comisiones.',
+  reservas: 'Que tus clientes reserven solos, con recordatorio y sin llamadas.',
+  automatizaciones: 'Quita de en medio las tareas repetitivas: avisos, formularios, hojas y correos que se mueven solos.',
+  documentos: 'Facturas, PDF y documentos que se rellenan solos o se resumen con IA.',
+  planes: 'Mantenimiento mensual: cambios, copias y alguien que responde.',
+};

@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import { getProductBySlug, maxVariantPrices } from '../../features/products/db';
 import { camposDeDescripcion, nombreCampo, LIMITES } from '../../features/solicitudes';
 import { formatPrice } from '../../config';
+import { resolverPedido } from '../../features/solicitudes/pedido';
 
 export const prerender = false;
 
@@ -26,6 +27,7 @@ const precioDe = (valor: string) =>
   producto ? formatPrice(valor === 'Te lo montamos' && precioMontado ? precioMontado : producto.price_cents, producto.currency) : '';
 const q = Astro.url.searchParams;
 const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Plantilla + guía';
+// (con pedido verificado manda la modalidad pagada; ver modalidadFija)
 const ERRORES: Record<string, string> = {
   nombre: 'Escribe tu nombre (mínimo 2 letras).',
   email: 'Revisa el email: ahí te mandamos la vista previa.',
@@ -35,9 +37,18 @@ const ERRORES: Record<string, string> = {
   guardar: 'No hemos podido guardar tu solicitud. Inténtalo de nuevo en un minuto o escríbenos a hola@automatizasinhumo.com.',
   servicio: 'Ese servicio ya no está disponible. Cuéntanos qué necesitas y te ayudamos.',
 };
-// Compra directa: llega desde la página del pedido con ?pedido=<ref>. Ya pagó: solo faltan sus datos.
-const pedidoRaw = q.get('pedido') ?? '';
-const pedido = /^[A-Za-z0-9_-]{4,40}$/.test(pedidoRaw) ? pedidoRaw : null;
+// Compra directa: llega desde la página del pedido con ?pedido=<token de acceso>.
+// Se comprueba en D1 (pagado, sin reembolso total, con este servicio); la URL sola no basta.
+const pedidoToken = (q.get('pedido') ?? '').slice(0, 80);
+const verificado = producto && pedidoToken ? await resolverPedido(env.DB, pedidoToken, producto.slug) : null;
+const pedido = verificado?.ref ?? null;
+const pedidoInvalido = Boolean(pedidoToken) && !verificado;
+if (pedidoToken) {
+  // El token da acceso al pedido: que no se cachee ni viaje en el Referer.
+  Astro.response.headers.set('cache-control', 'private, no-store');
+  Astro.response.headers.set('referrer-policy', 'no-referrer');
+}
+const modalidadFija = verificado?.modalidad ?? null;
 const error = q.get('error');
 const errorTexto = error ? (ERRORES[error] ?? 'Revisa los datos del formulario.') : null;
 // Con ?error= el formulario por pasos abre en el paso que tiene el campo a corregir.
@@ -70,10 +81,17 @@ const label = 'block text-sm font-medium text-ink';
               ? 'Ya está pagado. Rellena lo que tengas a mano (lo que falte te lo preguntamos) y nos ponemos con ello. Antes de entregarlo te enseñamos el resultado.'
               : producto
               ? 'Rellena lo que tengas a mano (lo que falte lo vemos luego). Te enviamos una vista previa con tus datos y solo pagas si te gusta.'
-              : 'Explícanos tu caso con tus palabras. David te responde con una propuesta, un precio cerrado y una vista previa. Sin compromiso.'
+              : 'Cuéntame qué necesitas. Te propondré una solución y su precio cerrado, sin compromiso. Si encaja, podremos preparar una muestra gratuita.'
           }
         </p>
 
+        {
+          pedidoInvalido && (
+            <p role="alert" class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              No encontramos un pedido pagado de este servicio con ese enlace. Abre el enlace del email de tu pedido o escríbenos a hola@automatizasinhumo.com y lo revisamos. Mientras, puedes pedir la vista previa gratis.
+            </p>
+          )
+        }
         {
           errorTexto && (
             <p role="alert" class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -94,7 +112,7 @@ const label = 'block text-sm font-medium text-ink';
             </div>
           </div>
           <input type="hidden" name="slug" value={slug} />
-          {pedido && <input type="hidden" name="pedido" value={pedido} />}
+          {verificado && <input type="hidden" name="pedido" value={pedidoToken} />}
           <input type="hidden" name="utm_source" value={q.get('utm_source') ?? ''} />
           <input type="hidden" name="utm_medium" value={q.get('utm_medium') ?? ''} />
           <input type="hidden" name="utm_campaign" value={q.get('utm_campaign') ?? ''} />
@@ -122,7 +140,14 @@ const label = 'block text-sm font-medium text-ink';
           {
             conModalidad && (
               <fieldset class="rounded-2xl border border-line p-5" data-paso="Modalidad">
-                <legend class="px-1 text-sm font-semibold text-ink">2. ¿Cómo lo quieres?</legend>
+                <legend class="px-1 text-sm font-semibold text-ink">{modalidadFija ? '2. Modalidad contratada' : '2. ¿Cómo lo quieres?'}</legend>
+                {modalidadFija && verificado ? (
+                  <div class="mt-2 rounded-xl border border-brand bg-brand/5 p-4">
+                    <input type="hidden" name="modalidad" value={modalidadFija} />
+                    <p class="flex flex-wrap items-baseline justify-between gap-x-2 font-semibold text-ink">{modalidadFija} <span class="tabular-nums">{formatPrice(verificado.pagadoCents, verificado.currency)} · pagado</span></p>
+                    <p class="text-sm text-muted">{modalidadFija === 'Te lo montamos' ? 'Te lo entregamos publicado y funcionando. Tú no tocas nada.' : 'Te damos la plantilla con tus datos y una guía paso a paso para publicarla tú.'}</p>
+                  </div>
+                ) : (
                 <div class="mt-2 grid gap-3 sm:grid-cols-2">
                   {[
                     ['Plantilla + guía', 'Te damos la plantilla con tus datos y una guía paso a paso para publicarla tú.'],
@@ -137,7 +162,8 @@ const label = 'block text-sm font-medium text-ink';
                     </label>
                   ))}
                 </div>
-                <p class="mt-3 text-xs text-faint">{pedido ? 'Marca la que contrataste. Si dudas, lo vemos por email.' : 'Puedes cambiarlo después de ver la vista previa.'}</p>
+                )}
+                <p class="mt-3 text-xs text-faint">{modalidadFija ? '¿Querías la otra modalidad? Escríbenos y lo ajustamos.' : 'Puedes cambiarlo después de ver la vista previa.'}</p>
               </fieldset>
             )
           }
@@ -166,7 +192,7 @@ const label = 'block text-sm font-medium text-ink';
               rows={consulta ? 5 : 3}
               maxlength={LIMITES.mensaje}
               required={consulta}
-              placeholder={consulta ? 'Ej.: tengo una peluquería y quiero que me reserven por internet y les llegue un recordatorio.' : 'Colores, ejemplos que te gusten, fechas…'}
+              placeholder={consulta ? 'Por ejemplo: quiero organizar un cumpleaños y que los invitados confirmen si vienen, pero no sé qué necesito.' : 'Colores, ejemplos que te gusten, fechas…'}
             />
           </label>
 

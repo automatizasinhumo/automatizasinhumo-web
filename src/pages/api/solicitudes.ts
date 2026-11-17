@@ -4,6 +4,7 @@ import { getProductBySlug } from '../../features/products/db';
 import { getStoreSettings } from '../../features/settings/db';
 import { getEmailProvider } from '../../features/email';
 import { getConfig } from '../../config';
+import { resolverPedido } from '../../features/solicitudes/pedido';
 import { CAMPO_PEDIDO, camposDeDescripcion, crearSolicitud, resumenSolicitud, validarSolicitud } from '../../features/solicitudes';
 
 export const prerender = false;
@@ -23,11 +24,15 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   // Los campos válidos salen del servidor (ficha del servicio), no del navegador.
   let etiquetas: string[] = [];
   let producto: string | null = null;
+  let pedido: Awaited<ReturnType<typeof resolverPedido>> = null;
   if (slug !== 'consulta') {
     const p = await getProductBySlug(env.DB, slug);
     if (!p) return redirect('/empezar/consulta?error=servicio', 303);
     etiquetas = camposDeDescripcion(p.description);
     producto = p.name;
+    // Compra directa: el token del pedido se vuelve a comprobar aquí; un ?pedido= inventado no cuenta.
+    const token = String(form.get('pedido') ?? '').slice(0, 80);
+    if (token) pedido = await resolverPedido(env.DB, token, p.slug);
   }
   form.set('producto', producto ?? 'Consulta general');
 
@@ -37,6 +42,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     const primero = Object.keys(v.errores)[0] ?? 'datos';
     return redirect(`${volver}?error=${encodeURIComponent(primero)}`, 303);
   }
+  if (pedido) {
+    v.data.campos = { [CAMPO_PEDIDO]: pedido.ref, ...v.data.campos };
+    if (pedido.modalidad) v.data.modalidad = pedido.modalidad; // la pagada, no la del formulario
+  }
+  const tipo = pedido ? 'pedido' : slug === 'consulta' ? 'consulta' : 'prueba';
 
   let publicId: string;
   try {
@@ -77,10 +87,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       }
     }
   } catch (e) {
-    console.error('solicitudes: email no enviado', e);
+    // La solicitud ya está guardada; el aviso queda en los logs del Worker para revisarlo.
+    console.error(`solicitudes: email no enviado (${publicId})`, e);
   }
 
-  return redirect(`/empezar/gracias?id=${encodeURIComponent(publicId)}`, 303);
+  return redirect(`/empezar/gracias?id=${encodeURIComponent(publicId)}&tipo=${tipo}`, 303);
 };
 
 function escapar(s: string): string {

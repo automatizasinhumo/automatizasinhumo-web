@@ -12,7 +12,7 @@ import Pagination from '../components/Pagination.astro';
 import { normalizeSearchQuery } from '../features/search/query';
 import { addCacheTags, productCacheTags } from '../features/cache/tags';
 import Icono from '../components/Icono.astro';
-import { POPULARES } from '../features/search/sinonimos';
+import { POPULARES, categoriasPara } from '../features/search/sinonimos';
 import { listCategories, childrenOf } from '../features/categories/db';
 import { ICONO_CAT } from '../features/storefront/iconos';
 
@@ -66,7 +66,10 @@ const maxPrices = await maxVariantPrices(env.DB, [...products, ...fillers].map((
 const cards = products.map((product, i) =>
   buildProductCard(product, { ...cardOptions, maxPriceCents: maxPrices.get(product.id), priority: i === 0 }),
 );
-const cats = !q || products.length === 0 ? childrenOf(await listCategories(env.DB), null) : [];
+const allCats = await listCategories(env.DB);
+const cats = !q || products.length === 0 ? childrenOf(allCats, null) : [];
+// «boda» → atajo a Bodas y eventos: la categoría entera suele ser mejor respuesta que la lista.
+const catAtajos = q ? categoriasPara(q).map((slug) => allCats.find((c) => c.slug === slug)).filter((c) => c !== undefined) : [];
 const fillerCards = fillers.map((product) =>
   buildProductCard(product, { ...cardOptions, maxPriceCents: maxPrices.get(product.id) }),
 );
@@ -91,6 +94,18 @@ const fillerCards = fillers.map((product) =>
       ))}
     </div>
   </section>
+
+  {
+    catAtajos.length > 0 && (
+      <div class="mb-6 flex flex-wrap gap-2">
+        {catAtajos.map((c) => (
+          <a href={`/categories/${c.slug}`} class="inline-flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2 text-sm font-semibold text-brand hover:bg-brand/20">
+            Ver todo en {c.name} <span aria-hidden="true">→</span>
+          </a>
+        ))}
+      </div>
+    )
+  }
 
   {
     q &&

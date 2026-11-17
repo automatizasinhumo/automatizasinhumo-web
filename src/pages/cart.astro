@@ -24,10 +24,10 @@ const ready = (m: string) => m === "demo" || (!!settings && isMethodAvailable(m 
 const firstReady = methods.find(ready);
 const methodRows = methods.map((m) => ({ m, ready: ready(m), primary: m === firstReady }));
 const METHOD: Record<string, { label: string; hint: string; setupHint: string }> = {
-  stripe: { label: 'Pagar con tarjeta', hint: 'Visa, Mastercard, Apple Pay & more', setupHint: 'Configurar pagos con tarjeta' },
-  lightning: { label: 'Pay with Lightning ⚡', hint: 'Instant — from any Lightning wallet', setupHint: 'Configurar Lightning' },
-  opennode: { label: 'Pagar con Bitcoin', hint: 'On-chain or Lightning (OpenNode)', setupHint: 'Configurar OpenNode' },
-  demo: { label: 'Pago de prueba', hint: 'Simulated — places a real test order, no charge', setupHint: '' },
+  stripe: { label: 'Pagar con tarjeta', hint: 'Visa, Mastercard, Apple Pay y más', setupHint: 'Configurar pagos con tarjeta' },
+  lightning: { label: 'Pagar con Lightning ⚡', hint: 'Al instante, desde cualquier cartera Lightning', setupHint: 'Configurar Lightning' },
+  opennode: { label: 'Pagar con Bitcoin', hint: 'En cadena o Lightning (OpenNode)', setupHint: 'Configurar OpenNode' },
+  demo: { label: 'Pago de prueba', hint: 'Simulado: crea un pedido de prueba, sin cobro', setupHint: '' },
 };
 
 const cart = readCart(Astro.cookies);
@@ -115,7 +115,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                     </span>
                   )}
                   <span class="block text-xs tabular-nums text-muted">
-                    {formatPrice(l.unitPriceCents)} each
+                    {formatPrice(l.unitPriceCents)} por unidad
                   </span>
                   {l.availableStock <= 0 ? (
                     <span class="mt-1 block text-xs uppercase tracking-widest text-red-600">
@@ -123,7 +123,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                     </span>
                   ) : l.qty > l.availableStock ? (
                     <span class="mt-1 block text-xs text-amber-700">
-                      Only {l.availableStock} available
+                      Solo quedan {l.availableStock}
                     </span>
                   ) : null}
                 </span>

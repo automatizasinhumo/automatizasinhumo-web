@@ -37,9 +37,9 @@ describe('validarSolicitud', () => {
       expect(r.data.telefono).toBeNull();
     }
   });
-  it('compra directa: guarda el n.º de pedido válido y descarta uno raro', () => {
+  it('compra directa: el formulario nunca marca un pedido como pagado (lo comprueba la API en D1)', () => {
     const ok = validarSolicitud(fd({ ...base, pedido: 'AB12cd34' }), ['Negocio']);
-    expect(ok.ok && !ok.spam && ok.data.campos[CAMPO_PEDIDO]).toBe('AB12cd34');
+    expect(ok.ok && !ok.spam && ok.data.campos[CAMPO_PEDIDO]).toBeUndefined();
     const raro = validarSolicitud(fd({ ...base, pedido: '<script>' }), ['Negocio']);
     expect(raro.ok && !raro.spam && raro.data.campos[CAMPO_PEDIDO]).toBeUndefined();
   });

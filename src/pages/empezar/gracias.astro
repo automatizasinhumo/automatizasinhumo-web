@@ -5,9 +5,38 @@ export const prerender = false;
 
 const raw = Astro.url.searchParams.get('id') ?? '';
 const id = /^S-[A-Z0-9]{6,12}$/.test(raw) ? raw : null;
+// Tres finales distintos: prueba gratis, datos de un pedido ya pagado o consulta abierta.
+const t = Astro.url.searchParams.get('tipo');
+const tipo = t === 'pedido' || t === 'consulta' ? t : 'prueba';
+const TEXTO = {
+  prueba: {
+    aviso: 'No has pagado nada.',
+    pasos: [
+      ['Revisamos tus datos', 'Si falta algo, te escribimos. Mira también la carpeta de spam.'],
+      ['Vista previa en 24-72 h laborables', 'La ves con tu información, antes de decidir nada.'],
+      ['Pagas solo si te gusta', 'Te mandamos el enlace de pago y lo dejamos funcionando. Si no te convence, no pagas.'],
+    ],
+  },
+  pedido: {
+    aviso: 'Ya hemos recibido los datos de tu pedido. No tienes que pagar de nuevo.',
+    pasos: [
+      ['Revisamos tus datos', 'Si falta algo, te escribimos. Mira también la carpeta de spam.'],
+      ['Preparamos tu encargo', 'Te enseñamos el resultado para que lo revises antes de entregarlo.'],
+      ['Entrega', 'Lo recibes según la modalidad que contrataste, con las instrucciones para usarlo.'],
+    ],
+  },
+  consulta: {
+    aviso: 'Hemos recibido tu idea. No has pagado nada.',
+    pasos: [
+      ['Leemos tu caso', 'Si necesitamos aclarar algo, te escribimos. Mira también la carpeta de spam.'],
+      ['Te proponemos una solución', 'Con su precio cerrado y sin compromiso.'],
+      ['Muestra gratis si encaja', 'Solo preparamos una muestra cuando nos digas que te interesa.'],
+    ],
+  },
+}[tipo];
 ---
 
-<Layout title="Solicitud recibida" description="Hemos recibido tu solicitud. Te enviamos la vista previa y pagas solo si te gusta.">
+<Layout title="Solicitud recibida" description="Hemos recibido tu solicitud. Te respondemos por email con los siguientes pasos.">
   <div class="mx-auto max-w-2xl px-4 py-12 text-center sm:py-16">
     <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand text-3xl text-on-brand" aria-hidden="true">✓</div>
     <h1 class="mt-6 font-serif text-3xl font-bold text-ink sm:text-4xl">¡Recibido! Ya estamos en ello</h1>
@@ -17,21 +46,15 @@ const id = /^S-[A-Z0-9]{6,12}$/.test(raw) ? raw : null;
         <a href={`/empezar/estado?id=${encodeURIComponent(id)}`} class="mt-2 block text-sm font-semibold text-brand underline-offset-2 hover:underline" data-seguimiento>Sigue tu solicitud aquí →</a>
       </p>
     )}
-    <p class="mt-3 font-semibold text-ink">No has pagado nada.</p>
+    <p class="mt-3 font-semibold text-ink" data-tipo={tipo}>{TEXTO.aviso}</p>
 
     <ol class="mx-auto mt-10 max-w-md space-y-4 text-left">
-      <li class="flex gap-4 rounded-2xl border border-line p-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">1</span>
-        <span class="text-sm text-muted"><strong class="block text-ink">Revisamos tus datos</strong>Si falta algo, te escribimos. Mira también la carpeta de spam.</span>
-      </li>
-      <li class="flex gap-4 rounded-2xl border border-line p-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">2</span>
-        <span class="text-sm text-muted"><strong class="block text-ink">Vista previa en 24-72 h laborables</strong>La ves con tu información, antes de decidir nada.</span>
-      </li>
-      <li class="flex gap-4 rounded-2xl border border-line p-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">3</span>
-        <span class="text-sm text-muted"><strong class="block text-ink">Pagas solo si te gusta</strong>Te mandamos el enlace de pago y lo dejamos funcionando. Si no te convence, no pagas.</span>
-      </li>
+      {TEXTO.pasos.map(([titulo, texto], i) => (
+        <li class="flex gap-4 rounded-2xl border border-line p-4">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">{i + 1}</span>
+          <span class="text-sm text-muted"><strong class="block text-ink">{titulo}</strong>{texto}</span>
+        </li>
+      ))}
     </ol>
 
     <p class="mt-10 text-sm text-muted">

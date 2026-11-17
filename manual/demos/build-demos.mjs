@@ -6,6 +6,7 @@
 import { cpSync, mkdirSync, rmSync, readdirSync, statSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { DEMOS, INTERACTIVAS } from './demos.mjs';
+import { TRADUCCIONES, traducir } from './traducciones.mjs';
 
 const SRC = 'C:/GIT/automatizasinhumo-productos';
 const OUT = 'C:/GIT/automatizasinhumo-demos/site/';
@@ -35,7 +36,15 @@ function copy(from, to, opts = {}) {
     if (!OK.has(extname(name).toLowerCase()) || st.size > MAX) continue;
     if (name === 'package.json' || name === 'package-lock.json' || name === 'tsconfig.json') continue;
     mkdirSync(to, { recursive: true });
-    if (extname(name).toLowerCase() === '.html') {
+    const ext = extname(name).toLowerCase();
+    if (opts.slug && TRADUCCIONES[opts.slug] && (ext === '.html' || ext === '.js')) {
+      const [es, usados] = traducir(opts.slug, readFileSync(f, 'utf8'));
+      usados.forEach((i) => opts.usados.add(i));
+      if (ext === '.js') { writeFileSync(t, es); files++; bytes += st.size; continue; }
+      writeFileSync(t, opts.aviso === false ? stripAnalytics(es) : conAviso(stripAnalytics(es), opts.interactiva));
+      files++; bytes += st.size; continue;
+    }
+    if (ext === '.html') {
       const html = stripAnalytics(readFileSync(f, 'utf8'));
       writeFileSync(t, opts.aviso === false ? html : conAviso(html, opts.interactiva));
     } else cpSync(f, t);
@@ -49,7 +58,13 @@ for (const [slug, dir] of DEMOS) {
   if (!existsSync(join(SRC, dir))) { console.error('falta', dir); continue; }
   // En el editor, las páginas de demo/ se editan dentro de un iframe: sin aviso.
   const editor = slug === 'editor-bloques';
-  copy(join(SRC, dir), join(OUT, slug), { interactiva: INTERACTIVAS.has(slug), soloRaiz: editor, skip: editor ? new Set(['landing']) : undefined });
+  const usados = new Set();
+  copy(join(SRC, dir), join(OUT, slug), { slug, usados, interactiva: INTERACTIVAS.has(slug), soloRaiz: editor, skip: editor ? new Set(['landing']) : undefined });
+  // Textos que la plantilla ya no trae: avisar para revisar la traducción.
+  (TRADUCCIONES[slug] ?? []).forEach(([de], i) => { if (!usados.has(i)) console.warn(`traducción sin uso en ${slug}:`, String(de).slice(0, 60)); });
+  // Ficheros ya en español (p. ej. la carta en euros) sustituyen a los originales.
+  const es = join('manual/demos/es', slug);
+  if (existsSync(es)) cpSync(es, join(OUT, slug), { recursive: true });
   const lic = ['LICENSE', 'LICENSE.md', 'LICENSE.txt'].map((l) => join(SRC, dir.split('/')[0], l)).find(existsSync);
   if (lic) cpSync(lic, join(OUT, slug, 'LICENSE.txt'));
 }

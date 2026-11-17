@@ -36,3 +36,31 @@ export function expandirSinonimos(q: string): string | null {
 
 /** Búsquedas populares que se muestran como atajos en /search. */
 export const POPULARES = ['web', 'carta QR', 'reservas', 'boda', 'bot IA', 'tienda', 'facturas', 'reseñas'];
+
+// Palabras del cliente → categoría del menú, para ofrecer «Ver todo en …» encima de
+// los resultados («boda» lleva a Bodas y eventos aunque un dossier mencione bodas).
+const CATEGORIA_DE: Record<string, string> = {
+  boda: 'bodas', evento: 'bodas', invitado: 'bodas', bautizo: 'bodas', comunion: 'bodas', fiesta: 'bodas',
+  restaurante: 'hosteleria', bar: 'hosteleria', cafeteria: 'hosteleria', carta: 'hosteleria', menu: 'hosteleria', hosteleria: 'hosteleria',
+  reserva: 'reservas', cita: 'reservas', peluqueria: 'reservas', estetica: 'reservas', clinica: 'reservas', agenda: 'reservas',
+  web: 'webs', pagina: 'webs', landing: 'webs',
+  bot: 'bots', chatbot: 'bots', ia: 'bots',
+  tienda: 'tiendas', vender: 'tiendas',
+  cv: 'identidad', curriculum: 'identidad', tarjeta: 'identidad',
+  automatizacion: 'automatizaciones', automatizar: 'automatizaciones',
+  pdf: 'documentos', factura: 'documentos', documento: 'documentos',
+  formulario: 'captacion', encuesta: 'captacion',
+  redes: 'contenido', instagram: 'contenido', carrusel: 'contenido',
+  qr: 'enlaces', enlace: 'enlaces',
+};
+
+/** Slugs de categoría que encajan con la consulta, sin repetir y en orden de aparición. */
+export function categoriasPara(q: string): string[] {
+  const out: string[] = [];
+  for (const w of q.split(/\s+/)) {
+    const s = plano(w);
+    const slug = CATEGORIA_DE[s] ?? CATEGORIA_DE[s.replace(/s$/, '')] ?? CATEGORIA_DE[s.replace(/es$/, '')];
+    if (slug && !out.includes(slug)) out.push(slug);
+  }
+  return out;
+}

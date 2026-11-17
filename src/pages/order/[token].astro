@@ -145,7 +145,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
             <div class="mt-4 flex flex-wrap gap-3">
               {servicios.map((s) => (
                 <a
-                  href={`/empezar/${s.slug}?pedido=${encodeURIComponent(orderRef ?? '')}`}
+                  href={`/empezar/${s.slug}?pedido=${encodeURIComponent(token ?? '')}`}
                   class="rounded-full bg-brand px-5 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover"
                 >
                   {servicios.length > 1 ? `Datos para: ${s.name}` : 'Rellenar mis datos'} →

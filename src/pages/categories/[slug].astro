@@ -1,5 +1,6 @@
 ---
 import { env } from 'cloudflare:workers';
+import { INTRO_CATEGORIA } from '../../features/storefront/introCategorias';
 import Layout from '../../layouts/Layout.astro';
 import {
   getCategoryBySlug,
@@ -92,7 +93,8 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
     }
   </nav>
 
-  <h1 class="mb-8 font-serif text-4xl tracking-tight sm:text-5xl">{category.name}</h1>
+  <h1 class="mb-3 font-serif text-4xl tracking-tight sm:text-5xl">{category.name}</h1>
+  <p class="mb-8 max-w-2xl text-lg text-muted">{INTRO_CATEGORIA[category.slug] ?? ''}</p>
 
   {
     subcats.length > 0 && (

@@ -23,8 +23,8 @@ export interface DemoSettleResult {
 }
 
 const DECLINE: Record<string, string> = {
-  insufficient: 'Payment declined — insufficient funds. (Simulated)',
-  decline: 'Payment declined — your card was declined. (Simulated)',
+  insufficient: 'Pago rechazado: fondos insuficientes. (Simulado)',
+  decline: 'Pago rechazado: la tarjeta ha sido denegada. (Simulado)',
 };
 
 /**
@@ -42,7 +42,7 @@ export async function settleDemoCheckout(
 ): Promise<DemoSettleResult> {
   // Fail closed after the demo window even if a POST slips past the page guard.
   if (pending.expires_at != null && Date.parse(pending.expires_at) <= Date.now()) {
-    return { declined: 'This demo checkout has expired.' };
+    return { declined: 'Este pago de prueba ha caducado. Vuelve al carrito para empezar de nuevo.' };
   }
   const outcome = String(form.get('outcome') ?? 'approve');
   const email = resolveRequiredOrderEmail(String(form.get('email') ?? ''), pending.email);
