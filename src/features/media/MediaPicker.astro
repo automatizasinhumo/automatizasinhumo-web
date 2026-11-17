@@ -53,7 +53,7 @@ const {
 
   <dialog
     data-picker-dialog
-    aria-label="Choose an image"
+    aria-label="Elegir una imagen"
     class="w-[min(56rem,92vw)] rounded-md border border-line p-0 backdrop:bg-black/40"
   >
     <div class="flex items-center justify-between border-b border-line px-5 py-4">
@@ -61,7 +61,7 @@ const {
       <button
         type="button"
         data-picker-close
-        aria-label="Close"
+        aria-label="Cerrar"
         class="text-2xl leading-none text-faint hover:text-brand"
       >
         &times;
@@ -91,7 +91,7 @@ const {
     <p data-picker-error class="hidden px-5 pt-3 text-sm text-red-700"></p>
 
     <div data-picker-grid class="grid max-h-[60vh] grid-cols-3 gap-4 overflow-y-auto p-5 sm:grid-cols-4">
-      <p class="col-span-full py-8 text-center text-sm text-muted">Loading…</p>
+      <p class="col-span-full py-8 text-center text-sm text-muted">Cargando…</p>
     </div>
 
     <div class="flex items-center justify-between border-t border-line px-5 py-3 text-xs">
@@ -160,7 +160,7 @@ const {
 
     async function load() {
       clearError();
-      grid.innerHTML = '<p class="col-span-full py-8 text-center text-sm text-muted">Loading…</p>';
+      grid.innerHTML = '<p class="col-span-full py-8 text-center text-sm text-muted">Cargando…</p>';
       let payload: PickerPage;
       try {
         const res = await fetch(`/api/admin/media?limit=${PAGE_SIZE}&offset=${offset}`, {

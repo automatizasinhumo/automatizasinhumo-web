@@ -18,7 +18,8 @@ export function isPublicStorefrontPath(pathname: string): boolean {
     pathname.startsWith('/pages/') ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml' ||
-    pathname === '/llms.txt'
+    pathname === '/llms.txt' ||
+    pathname === '/llms-full.txt'
   );
 }
 

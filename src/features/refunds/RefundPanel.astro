@@ -121,7 +121,7 @@ const dollars = (cents: number) => (cents / 100).toFixed(2);
       )
     }
     <div>
-      <dt class="text-xs uppercase tracking-widest text-faint">Total refunded</dt>
+      <dt class="text-xs uppercase tracking-widest text-faint">Total reembolsado</dt>
       <dd class="font-medium tabular-nums">{formatPrice(order.refunded_cents, order.currency)}</dd>
     </div>
     <div>
@@ -235,14 +235,14 @@ const dollars = (cents: number) => (cents / 100).toFixed(2);
                 max={dollars(remaining)}
                 value={dollars(remaining)}
                 required
-                aria-label="Refund amount"
+                aria-label="Importe a reembolsar"
                 class="w-28 rounded-md border border-line px-2 py-1.5 text-sm tabular-nums"
               />
               <input
                 type="text"
                 name="note"
                 placeholder="How it was sent (internal)"
-                aria-label="Internal note"
+                aria-label="Nota interna"
                 class="min-w-48 flex-1 rounded-md border border-line px-2 py-1.5 text-sm"
               />
               <button
@@ -274,7 +274,7 @@ const dollars = (cents: number) => (cents / 100).toFixed(2);
                 min="0"
                 max={dollars(order.amount_total_cents)}
                 required
-                aria-label="Total refunded at the provider"
+                aria-label="Total reembolsado en la pasarela"
                 placeholder={dollars(order.amount_total_cents)}
                 class="w-28 rounded-md border border-line px-2 py-1.5 text-sm tabular-nums"
               />

@@ -92,17 +92,17 @@ if (
 const lightningExpired = isLightning && payExpired;
 
 const { storeName } = getConfig();
-const title = isDemo ? 'Demo checkout' : 'Pagar con Lightning';
+const title = isDemo ? 'Pago de prueba' : 'Pagar con Lightning';
 const description = isDemo
-  ? `Simulated checkout for ${storeName}.`
-  : `Pay ${storeName} with Bitcoin Lightning.`;
+  ? `Pago simulado en ${storeName}.`
+  : `Paga en ${storeName} con Bitcoin Lightning.`;
 ---
 
 <Layout title={title} description={description}>
   {isDemo && payExpired && (
     <Fragment>
-      <h1 class="mb-2 font-serif text-3xl tracking-tight sm:text-4xl">Checkout expired</h1>
-      <p class="text-muted">This demo checkout has expired. Please start a new one.</p>
+      <h1 class="mb-2 font-serif text-3xl tracking-tight sm:text-4xl">El pago ha caducado</h1>
+      <p class="text-muted">Este pago de prueba ha caducado. Empieza uno nuevo.</p>
     </Fragment>
   )}
   {isDemo && !payExpired && <DemoCheckout pending={pending} declined={declined} />}

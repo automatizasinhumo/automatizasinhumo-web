@@ -144,6 +144,7 @@ export async function loadCatalogPage(
   return {
     eyebrow: options.eyebrow,
     heading: options.heading,
+    total,
     categories: childrenOf(categories, null).map((category) => ({
       text: category.name,
       href: `/categories/${category.slug}`,

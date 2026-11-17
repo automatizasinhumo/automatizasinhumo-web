@@ -1,95 +1,112 @@
 // node manual/catalogo/gen-imagenes.mjs
-// Genera una portada SVG por producto en public/images/productos/<slug>.svg.
-// Cloudflare sirve /public como estático, así que no hace falta R2.
-// También escribe <slug>.png: las redes sociales no leen SVG en og:image.
-import { mkdirSync, writeFileSync } from 'node:fs';
+// Portada PNG 1200x900 por producto en public/images/productos/<slug>.png
+// (estático de Workers, sin R2; también sirve de og:image).
+//
+// - Si el producto tiene captura de una demo real (public/images/demos/), la
+//   portada es esa captura dentro de un marco de navegador.
+// - Si no, un icono grande de Tabler Icons (MIT, src/icons/) sobre el papel de marca.
+// El nombre y el precio ya salen debajo en la tarjeta: aquí no se repiten.
+import { mkdirSync, readFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { categorias, productos } from './catalogo.mjs';
+import { demosDe } from '../demos/demos.mjs';
 
-const OUT = new URL('../../public/images/productos/', import.meta.url);
+const ROOT = new URL('../../', import.meta.url);
+const OUT = new URL('public/images/productos/', ROOT);
+const DEMOS = new URL('public/images/demos/', ROOT);
+const ICONS = new URL('src/icons/', ROOT);
 mkdirSync(OUT, { recursive: true });
 
-// Paleta por categoría: [fondo, acento, tinta del motivo]
-const PAL = {
-  webs: ['#E8EEF6', '#2F5D9E', '#1F3F6E'],
-  hosteleria: ['#F6ECE3', '#B5582B', '#7A3517'],
-  reservas: ['#E7F2EE', '#2E7D62', '#1C5241'],
-  bodas: ['#F7ECEF', '#B0566F', '#7C3349'],
-  identidad: ['#EFEAF6', '#6B4FA3', '#45307A'],
-  captacion: ['#FBF1DC', '#B7831C', '#7A5509'],
-  bots: ['#E5F2F6', '#23809B', '#145669'],
-  automatizaciones: ['#EAF1E4', '#4F7F2E', '#335619'],
-  enlaces: ['#F3EBE6', '#8A5A44', '#5E3A2A'],
-  tiendas: ['#F7E9E4', '#C0533D', '#8A3424'],
-  portales: ['#E9ECF2', '#45526B', '#2A3447'],
-  documentos: ['#F1EFE8', '#6E6A55', '#45422F'],
-  planes: ['#E6F0F0', '#2C7873', '#1B4F4C'],
-  contenido: ['#F8EAF2', '#A3487E', '#6E2A55'],
+// Icono por categoría y, cuando aporta, por producto.
+export const ICONO_CAT = {
+  webs: 'world-www', hosteleria: 'tools-kitchen-2', reservas: 'calendar-check', bodas: 'heart',
+  identidad: 'id-badge-2', captacion: 'forms', bots: 'message-chatbot', automatizaciones: 'route',
+  enlaces: 'qrcode', tiendas: 'shopping-bag', portales: 'layout-dashboard', documentos: 'file-text',
+  contenido: 'photo-edit', planes: 'calendar-repeat',
+};
+export const ICONO_PROD = {
+  'formulario-aviso-telegram': 'brand-telegram', 'avisos-multicanal': 'bell-ringing', 'bot-telegram-chatgpt': 'brand-telegram',
+  'bot-telegram-medida': 'robot', 'crm-whatsapp': 'brand-whatsapp', 'auto-captacion-leads': 'user-plus', 'auto-facturas': 'file-invoice',
+  'auto-tareas-programadas': 'clock-play', 'acortador-enlaces': 'link', 'qr-campanas': 'qrcode', 'analitica-sin-cookies': 'chart-bar',
+  'marketplace-plantillas': 'building-store', 'portal-cliente': 'user-circle', 'plan-mantenimiento-web': 'tool', 'plan-hosting-dominio': 'server',
+  'plan-automatizaciones': 'refresh', 'auditoria-web': 'report-search', 'vigilancia-caidas': 'heartbeat', 'facturas-presupuestos': 'receipt',
+  'certificados-automaticos': 'certificate', 'transcripcion-audios': 'microphone', 'chat-ia-web': 'message-chatbot', 'centro-ayuda': 'help-circle',
+  'newsletter-propia': 'mail', 'banner-cookies-rgpd': 'cookie', 'ficha-google': 'map-pin', 'fotos-producto-fondo': 'photo-scan',
+  'firma-email': 'signature', 'pizarra-planos': 'chalkboard', 'vigilancia-precios': 'tag', 'aviso-cambios-web': 'eye',
+  'etiquetas-codigo-barras': 'barcode', 'optimizar-imagenes': 'photo-down', 'logo-vectorial': 'vector', 'limpieza-csv': 'table',
+  'plantilla-inventario': 'packages', 'informe-graficos': 'chart-pie', 'dossier-comercial': 'presentation', 'diagramas-procesos': 'sitemap',
+  'descripciones-producto-ia': 'sparkles', 'carruseles-redes': 'carousel-horizontal', 'tarjeta-digital': 'id-badge-2', 'lista-espera': 'clock',
+};
+// Captura preferida cuando la primera demo es un índice genérico de plantillas.
+const CAPTURA = {
+  'web-una-pagina': 'cafe-coffee-shop', 'web-corporativa-5-secciones': 'consulting-firm', 'tarjeta-digital': 'link-in-bio',
+  'auto-plantilla-medida': 'business-template', 'web-arrastrar-soltar': 'northstar', 'lista-espera': 'coming-soon',
 };
 
+const B = { bg: '#F5F7F4', ink: '#172D2D', brand: '#176B5A', acc: '#B34A28', line: '#D5DDD8', tint: '#E3EDE8' };
+const FONT = "'Space Grotesk', 'Segoe UI', Arial, sans-serif";
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-// Corta el nombre en líneas de ~maxCh caracteres
-function lineas(texto, maxCh) {
-  const out = [];
-  let cur = '';
-  for (const w of texto.split(' ')) {
-    if ((cur + ' ' + w).trim().length > maxCh && cur) { out.push(cur); cur = w; }
-    else cur = (cur + ' ' + w).trim();
-  }
-  if (cur) out.push(cur);
-  return out;
-}
-
-// Motivos sencillos dibujados en un cuadro de 420x420 (se colocan arriba a la derecha)
-const M = {
-  webs: (a, t) => `<rect x="20" y="40" width="380" height="290" rx="22" fill="#fff" stroke="${t}" stroke-width="8"/><line x1="20" y1="100" x2="400" y2="100" stroke="${t}" stroke-width="8"/><circle cx="56" cy="70" r="10" fill="${a}"/><circle cx="88" cy="70" r="10" fill="${a}" opacity=".6"/><circle cx="120" cy="70" r="10" fill="${a}" opacity=".3"/><rect x="56" y="135" width="200" height="22" rx="11" fill="${t}"/><rect x="56" y="175" width="300" height="14" rx="7" fill="${a}" opacity=".45"/><rect x="56" y="203" width="260" height="14" rx="7" fill="${a}" opacity=".45"/><rect x="56" y="255" width="120" height="44" rx="22" fill="${a}"/>`,
-  hosteleria: (a, t) => `<circle cx="210" cy="200" r="150" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="210" cy="200" r="100" fill="none" stroke="${a}" stroke-width="6" opacity=".5"/>${[0, 1, 2].map((i) => [0, 1, 2].map((j) => ((i + j) % 2 === 0 || (i === 1 && j === 1)) ? `<rect x="${160 + i * 34}" y="${150 + j * 34}" width="28" height="28" rx="4" fill="${t}"/>` : '').join('')).join('')}`,
-  reservas: (a, t) => `<rect x="40" y="50" width="340" height="300" rx="24" fill="#fff" stroke="${t}" stroke-width="8"/><rect x="40" y="50" width="340" height="70" rx="24" fill="${a}"/><rect x="100" y="25" width="16" height="50" rx="8" fill="${t}"/><rect x="304" y="25" width="16" height="50" rx="8" fill="${t}"/>${Array.from({ length: 12 }, (_, k) => `<rect x="${72 + (k % 4) * 72}" y="${150 + Math.floor(k / 4) * 62}" width="48" height="40" rx="8" fill="${k === 6 ? a : t}" opacity="${k === 6 ? 1 : 0.15}"/>`).join('')}`,
-  bodas: (a, t) => `<circle cx="160" cy="220" r="100" fill="none" stroke="${t}" stroke-width="18"/><circle cx="270" cy="220" r="100" fill="none" stroke="${a}" stroke-width="18"/><path d="M270 60 l14 24 l-14 18 l-14 -18z" fill="${a}"/>`,
-  identidad: (a, t) => `<rect x="30" y="90" width="360" height="220" rx="24" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="120" cy="180" r="46" fill="${a}"/><rect x="190" y="150" width="160" height="20" rx="10" fill="${t}"/><rect x="190" y="190" width="120" height="14" rx="7" fill="${a}" opacity=".5"/><rect x="70" y="250" width="280" height="14" rx="7" fill="${t}" opacity=".2"/>`,
-  captacion: (a, t) => `<path d="M40 60 h340 l-120 150 v120 l-100 40 v-160z" fill="#fff" stroke="${t}" stroke-width="8" stroke-linejoin="round"/><circle cx="120" cy="40" r="18" fill="${a}"/><circle cx="210" cy="30" r="18" fill="${a}" opacity=".7"/><circle cx="300" cy="40" r="18" fill="${a}" opacity=".5"/><circle cx="210" cy="400" r="20" fill="${a}"/>`,
-  bots: (a, t) => `<rect x="30" y="50" width="260" height="140" rx="30" fill="${a}"/><path d="M80 190 l-20 46 l60 -46z" fill="${a}"/><rect x="130" y="210" width="260" height="130" rx="30" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="210" cy="275" r="12" fill="${t}"/><circle cx="260" cy="275" r="12" fill="${t}"/><circle cx="310" cy="275" r="12" fill="${t}"/><rect x="70" y="95" width="180" height="16" rx="8" fill="#fff"/><rect x="70" y="130" width="120" height="16" rx="8" fill="#fff" opacity=".7"/>`,
-  automatizaciones: (a, t) => `<line x1="90" y1="110" x2="210" y2="210" stroke="${t}" stroke-width="8"/><line x1="210" y1="210" x2="340" y2="100" stroke="${t}" stroke-width="8"/><line x1="210" y1="210" x2="320" y2="330" stroke="${t}" stroke-width="8"/><line x1="90" y1="110" x2="90" y2="320" stroke="${t}" stroke-width="8" stroke-dasharray="14 12"/><circle cx="90" cy="110" r="44" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="210" cy="210" r="56" fill="${a}"/><circle cx="340" cy="100" r="38" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="320" cy="330" r="38" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="90" cy="320" r="30" fill="${a}" opacity=".5"/>`,
-  enlaces: (a, t) => `<rect x="40" y="150" width="200" height="100" rx="50" fill="none" stroke="${t}" stroke-width="22"/><rect x="180" y="150" width="200" height="100" rx="50" fill="none" stroke="${a}" stroke-width="22"/>`,
-  tiendas: (a, t) => `<path d="M70 130 h280 l-22 230 h-236z" fill="#fff" stroke="${t}" stroke-width="8" stroke-linejoin="round"/><path d="M140 130 v-30 a70 70 0 0 1 140 0 v30" fill="none" stroke="${a}" stroke-width="14"/><circle cx="160" cy="190" r="10" fill="${t}"/><circle cx="260" cy="190" r="10" fill="${t}"/><rect x="150" y="260" width="120" height="36" rx="18" fill="${a}"/>`,
-  portales: (a, t) => `<rect x="30" y="50" width="360" height="300" rx="24" fill="#fff" stroke="${t}" stroke-width="8"/><rect x="30" y="50" width="100" height="300" rx="24" fill="${t}" opacity=".12"/>${[0, 1, 2, 3].map((k) => `<rect x="52" y="${90 + k * 50}" width="56" height="14" rx="7" fill="${t}" opacity=".5"/>`).join('')}<rect x="160" y="85" width="200" height="110" rx="14" fill="${a}" opacity=".25"/><rect x="160" y="215" width="94" height="100" rx="14" fill="${a}"/><rect x="266" y="215" width="94" height="100" rx="14" fill="${t}" opacity=".2"/>`,
-  documentos: (a, t) => `<rect x="120" y="40" width="240" height="310" rx="18" fill="#fff" stroke="${t}" stroke-width="6" opacity=".6"/><rect x="70" y="80" width="240" height="310" rx="18" fill="#fff" stroke="${t}" stroke-width="8"/><rect x="105" y="125" width="130" height="20" rx="10" fill="${a}"/>${[0, 1, 2, 3, 4].map((k) => `<rect x="105" y="${175 + k * 34}" width="${k % 2 ? 140 : 170}" height="12" rx="6" fill="${t}" opacity=".3"/>`).join('')}`,
-  planes: (a, t) => `<circle cx="210" cy="210" r="150" fill="#fff" stroke="${t}" stroke-width="8"/><path d="M210 90 a120 120 0 1 1 -104 60" fill="none" stroke="${a}" stroke-width="18" stroke-linecap="round"/><path d="M92 112 l14 40 l40 -16" fill="none" stroke="${a}" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M160 215 l35 35 l70 -80" fill="none" stroke="${t}" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`,
-  contenido: (a, t) => `<rect x="150" y="40" width="230" height="300" rx="20" fill="${a}" opacity=".3"/><rect x="110" y="70" width="230" height="300" rx="20" fill="${a}" opacity=".6"/><rect x="60" y="100" width="230" height="300" rx="20" fill="#fff" stroke="${t}" stroke-width="8"/><circle cx="175" cy="210" r="50" fill="${a}"/><rect x="100" y="300" width="150" height="16" rx="8" fill="${t}" opacity=".4"/><rect x="100" y="336" width="100" height="16" rx="8" fill="${t}" opacity=".25"/>`,
-};
-
 const catNombre = Object.fromEntries(categorias.map((c) => [c.slug, c.nombre]));
 
-// Marca: todas las portadas comparten paleta (fondo papel técnico, verde de
-// marca, tinta y un toque terracota). Formato 4:3, el mismo de las tarjetas.
-const B = { bg: '#F5F7F4', ink: '#172D2D', brand: '#176B5A', acc: '#B34A28', line: '#D5DDD8' };
-const FONT = "'Space Grotesk', 'Segoe UI', Arial, sans-serif";
-for (const p of productos) {
-  const motivo = (M[p.cat] ?? M.webs)(B.brand, B.ink);
-  const nombre = p.nombre.replace(/\s*\((mes|mensual)\)\s*$/i, '');
-  const ls = lineas(nombre, 24).slice(0, 3);
-  const fs = ls.length > 2 ? 62 : 72;
-  const y0 = 690 - (ls.length - 1) * (fs + 8);
-  const precio = p.plazo === 'Mensual' ? `${p.p[0]} €/mes` : p.p.length === 2 ? `desde ${p.p[0]} €` : `${p.p[0]} €`;
-  const plazo = p.plazo === 'Mensual' ? 'Sin permanencia' : `Entrega en ${p.plazo}`;
-  const pw = precio.length * 23 + 70;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="${esc(nombre)}">
-<defs><pattern id="d" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1.1" fill="#81938C" opacity=".45"/></pattern></defs>
-<rect width="1200" height="900" fill="${B.bg}"/>
-<rect width="1200" height="900" fill="url(#d)"/>
-<rect x="690" y="70" width="440" height="440" rx="28" fill="#fff" stroke="${B.line}" stroke-width="3"/>
-<g transform="translate(715 95) scale(.93)">${motivo}</g>
-<path d="M1060 545 h60 m-22 -20 l22 20 l-22 20" stroke="${B.acc}" stroke-width="7" fill="none" stroke-linecap="square"/>
-<rect x="80" y="86" width="${(catNombre[p.cat] ?? '').length * 17 + 56}" height="56" rx="28" fill="${B.brand}" opacity=".1"/>
-<text x="108" y="124" font-family="${FONT}" font-size="28" font-weight="600" fill="${B.brand}">${esc(catNombre[p.cat] ?? '')}</text>
-${ls.map((l, i) => `<text x="80" y="${y0 + i * (fs + 8)}" font-family="${FONT}" font-size="${fs}" font-weight="700" letter-spacing="-1.5" fill="${B.ink}">${esc(l)}</text>`).join('\n')}
-<rect x="80" y="760" width="${pw}" height="76" rx="38" fill="${B.brand}"/>
-<text x="${80 + 35}" y="810" font-family="${FONT}" font-size="38" font-weight="700" fill="#fff">${esc(precio)}</text>
-<text x="${80 + pw + 28}" y="808" font-family="${FONT}" font-size="30" fill="${B.ink}" opacity=".8">${esc(plazo)}</text>
-</svg>`;
-  writeFileSync(new URL(`${p.slug}.svg`, OUT), svg);
-  await sharp(Buffer.from(svg)).png({ compressionLevel: 9, palette: true }).toFile(fileURLToPath(new URL(`${p.slug}.png`, OUT)));
+// Interior (paths) de un icono Tabler, para pintarlo dentro de otro SVG.
+const icono = (n) => readFileSync(new URL(`${n}.svg`, ICONS), 'utf8').replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+const usa = (name, x, y, size, color, sw = 1.5) =>
+  `<g transform="translate(${x} ${y}) scale(${size / 24})" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${icono(name)}</g>`;
+
+function captura(p) {
+  if (CAPTURA[p.slug]) return CAPTURA[p.slug];
+  const ns = demosDe(p.slug).map((d) => new URL(d.url).pathname.split('/').filter(Boolean).pop())
+    .filter((n) => n && existsSync(new URL(`${n}.png`, DEMOS)));
+  return ns.find((n) => !n.startsWith('plantillas-')) ?? ns[0];
 }
-console.error(`${productos.length} portadas en public/images/productos/`);
+
+const fondo = `<defs><pattern id="d" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1.1" fill="#81938C" opacity=".45"/></pattern>
+<filter id="s" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#172D2D" flood-opacity=".22"/></filter></defs>
+<rect width="1200" height="900" fill="${B.bg}"/><rect width="1200" height="900" fill="url(#d)"/>`;
+
+function pastilla(p, ico) {
+  const t = catNombre[p.cat] ?? '';
+  const w = t.length * 13.6 + 96;
+  return `<rect x="70" y="52" width="${w}" height="60" rx="30" fill="#fff" stroke="${B.line}" stroke-width="2"/>
+${usa(ico, 92, 66, 32, B.brand, 2)}<text x="138" y="92" font-family="${FONT}" font-size="26" font-weight="600" fill="${B.ink}">${esc(t)}</text>`;
+}
+
+const FW = 1060, FX = 70, FY = 150, BAR = 46;
+async function conCaptura(p, nombre, ico) {
+  const shot = await sharp(fileURLToPath(new URL(`${nombre}.png`, DEMOS))).resize({ width: FW }).toBuffer();
+  const h = 900 - FY - BAR + 40; // sangra por abajo
+  const recorte = await sharp(shot).extract({ left: 0, top: 0, width: FW, height: Math.min(h, (await sharp(shot).metadata()).height) }).toBuffer();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">${fondo}
+<rect x="${FX}" y="${FY}" width="${FW}" height="900" rx="22" fill="#fff" stroke="${B.line}" stroke-width="2" filter="url(#s)"/>
+<circle cx="${FX + 30}" cy="${FY + 23}" r="7" fill="${B.acc}" opacity=".75"/><circle cx="${FX + 54}" cy="${FY + 23}" r="7" fill="${B.line}"/><circle cx="${FX + 78}" cy="${FY + 23}" r="7" fill="${B.line}"/>
+<rect x="${FX + 330}" y="${FY + 11}" width="400" height="24" rx="12" fill="${B.bg}"/>
+${pastilla(p, ico)}</svg>`;
+  return sharp(Buffer.from(svg)).composite([{ input: recorte, left: FX, top: FY + BAR }]).png({ palette: true, quality: 92, effort: 10 });
+}
+
+function conIcono(p, ico) {
+  const cx = 600, cy = 500;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">${fondo}
+<circle cx="${cx}" cy="${cy}" r="300" fill="${B.tint}" opacity=".7"/>
+<rect x="${cx - 330}" y="${cy - 150}" width="200" height="200" rx="36" fill="#fff" stroke="${B.line}" stroke-width="2" transform="rotate(-8 ${cx - 230} ${cy - 50})" opacity=".85"/>
+${usa(ICONO_CAT[p.cat] ?? 'sparkles', cx - 282, cy - 102, 104, B.ink, 1.25).replace('<g ', `<g opacity=".35" `)}
+<rect x="${cx + 140}" y="${cy + 10}" width="180" height="180" rx="32" fill="#fff" stroke="${B.line}" stroke-width="2" transform="rotate(7 ${cx + 230} ${cy + 100})" opacity=".85"/>
+${usa('check', cx + 185, cy + 55, 90, B.acc, 1.5)}
+<rect x="${cx - 175}" y="${cy - 175}" width="350" height="350" rx="56" fill="#fff" stroke="${B.line}" stroke-width="2" filter="url(#s)"/>
+${usa(ico, cx - 115, cy - 115, 230, B.brand, 1.25)}
+${pastilla(p, ICONO_CAT[p.cat] ?? ico)}</svg>`;
+  return sharp(Buffer.from(svg)).png({ palette: true, quality: 92, effort: 10 });
+}
+
+let n = 0;
+for (const p of productos) {
+  const ico = ICONO_PROD[p.slug] ?? ICONO_CAT[p.cat] ?? 'sparkles';
+  const nombre = captura(p);
+  const img = nombre ? await conCaptura(p, nombre, ICONO_CAT[p.cat] ?? ico) : conIcono(p, ico);
+  await img.toFile(fileURLToPath(new URL(`${p.slug}.png`, OUT)));
+  if (nombre) n++;
+}
+// Las portadas SVG antiguas ya no se usan.
+for (const f of readdirSync(OUT)) if (f.endsWith('.svg')) unlinkSync(fileURLToPath(new URL(f, OUT)));
+console.error(`${productos.length} portadas (${n} con captura real) en public/images/productos/`);

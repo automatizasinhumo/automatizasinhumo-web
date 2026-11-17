@@ -7,6 +7,8 @@ import { getPublishedPageBySlug } from '../../features/pages/db';
 import { pageImageDimensions } from '../../features/media/db';
 import { renderMarkdown, markdownExcerpt } from '../../features/pages/markdown';
 import { normalizePageLayout, pageLayoutStyle } from '../../features/pages/layouts';
+import ComoFunciona from '../../features/storefront/ComoFunciona.astro';
+import DemosGaleria from '../../features/storefront/DemosGaleria.astro';
 
 const { slug } = Astro.params;
 const page = slug ? await getPublishedPageBySlug(env.DB, slug) : null;
@@ -32,10 +34,16 @@ const html = renderMarkdown(page.body_markdown, {
 });
 const description = markdownExcerpt(page.body_markdown);
 const layout = normalizePageLayout(page.layout);
+// Páginas con maquetación propia: el markdown de la BD queda como respaldo y fuente del extracto.
+const Propia = slug === 'como-funciona' ? ComoFunciona : slug === 'demos' ? DemosGaleria : null;
 ---
 
 <Layout title={page.title} description={description}>
-  <ContentPage
-    model={{ title: page.title, html, layout, layoutStyle: pageLayoutStyle(layout) }}
-  />
+  {Propia ? (
+    <div class="mx-auto max-w-6xl px-4 py-8 sm:py-10"><Propia /></div>
+  ) : (
+    <ContentPage
+      model={{ title: page.title, html, layout, layoutStyle: pageLayoutStyle(layout) }}
+    />
+  )}
 </Layout>

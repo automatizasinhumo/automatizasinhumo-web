@@ -124,6 +124,8 @@ export interface CatalogPageModel {
   heading: string;
   categories: StorefrontLink[];
   products: ProductCardModel[];
+  /** Total de servicios publicados (todas las páginas). */
+  total?: number;
   sort: StorefrontSortModel;
   pagination: StorefrontPaginationModel;
 }

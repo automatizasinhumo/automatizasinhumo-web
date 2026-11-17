@@ -1,0 +1,12 @@
+---
+/**
+ * Icono de Tabler Icons (MIT, © Paweł Kuna; licencia en src/icons/LICENSE-tabler.txt).
+ * Se pinta en línea, hereda el color del texto (currentColor) y es decorativo.
+ */
+interface Props { name: string; class?: string; size?: number; stroke?: number }
+const { name, class: cls = 'h-5 w-5', size = 24, stroke = 1.75 } = Astro.props;
+const iconos = import.meta.glob<string>('../icons/*.svg', { query: '?raw', import: 'default', eager: true });
+const raw = iconos[`../icons/${name}.svg`] ?? '';
+const interior = raw.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+---
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" stroke-width={stroke} stroke-linecap="round" stroke-linejoin="round" class={cls} aria-hidden="true" focusable="false" set:html={interior} />

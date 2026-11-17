@@ -2,6 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 import type { SearchProvider, SearchResult } from './provider';
 import { countSearchProducts, searchProducts, suggestQuery } from '../products/search';
 import { normalizeSearchQuery } from './query';
+import { expandirSinonimos } from './sinonimos';
 
 /**
  * Keyword search (SQLite FTS5) with typo-correction fallback — the default
@@ -24,6 +25,16 @@ export function createFtsSearch(db: D1Database): SearchProvider {
             : directTotal;
         const products = await searchProducts(db, normalized, limit, offset, excludeIds);
         return { products, total, correctedTo: null };
+      }
+
+      // Sinónimos («restaurante» → «carta») antes de intentar corregir erratas.
+      const sinonimo = expandirSinonimos(normalized);
+      if (sinonimo) {
+        const t = await countSearchProducts(db, sinonimo, excludeIds);
+        if (t > 0) {
+          const products = await searchProducts(db, sinonimo, limit, offset, excludeIds);
+          return { products, total: t, correctedTo: sinonimo };
+        }
       }
 
       const suggestion = await suggestQuery(db, normalized);

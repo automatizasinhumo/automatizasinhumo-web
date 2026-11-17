@@ -1,0 +1,578 @@
+{
+ "cats": [
+  {
+   "slug": "webs",
+   "nombre": "Webs"
+  },
+  {
+   "slug": "hosteleria",
+   "nombre": "Restaurantes y bares"
+  },
+  {
+   "slug": "reservas",
+   "nombre": "Reservas y citas"
+  },
+  {
+   "slug": "bodas",
+   "nombre": "Bodas y eventos"
+  },
+  {
+   "slug": "identidad",
+   "nombre": "Tarjetas, link-in-bio y CV"
+  },
+  {
+   "slug": "captacion",
+   "nombre": "Formularios y captación"
+  },
+  {
+   "slug": "tiendas",
+   "nombre": "Tiendas y productos digitales"
+  },
+  {
+   "slug": "portales",
+   "nombre": "Portales y webs editables"
+  }
+ ],
+ "items": [
+  {
+   "img": "plantillas-eventos",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/",
+   "titulo": "Plantillas: restaurante, negocio, portfolio, RSVP…",
+   "producto": "web-una-pagina",
+   "nombre": "Web de una página para tu negocio",
+   "precio": 149,
+   "plazo": "48 h",
+   "cat": "webs"
+  },
+  {
+   "img": "landing-page-template",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/landing-page-template/",
+   "titulo": "Landing de una página",
+   "producto": "web-una-pagina",
+   "nombre": "Web de una página para tu negocio",
+   "precio": 149,
+   "plazo": "48 h",
+   "cat": "webs"
+  },
+  {
+   "img": "business-template",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/business-template/",
+   "titulo": "Negocio local",
+   "producto": "web-una-pagina",
+   "nombre": "Web de una página para tu negocio",
+   "precio": 149,
+   "plazo": "48 h",
+   "cat": "webs"
+  },
+  {
+   "img": "product-launch",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/product-launch/",
+   "titulo": "Lanzamiento de producto",
+   "producto": "web-una-pagina",
+   "nombre": "Web de una página para tu negocio",
+   "precio": 149,
+   "plazo": "48 h",
+   "cat": "webs"
+  },
+  {
+   "img": "plantillas-negocio",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/",
+   "titulo": "100 plantillas por sector",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "plantillas-bootstrap",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/",
+   "titulo": "Plantillas Bootstrap (Colorlib)",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "consulting-firm",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/consulting-firm/",
+   "titulo": "Consultoría",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "creative-agency",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/creative-agency/",
+   "titulo": "Agencia creativa",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "atelier",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/atelier/",
+   "titulo": "Atelier (Bootstrap)",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "ironworks",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/ironworks/",
+   "titulo": "Ironworks (Bootstrap)",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "real-estate-agency",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/real-estate-agency/",
+   "titulo": "Agencia inmobiliaria",
+   "producto": "web-inmobiliaria",
+   "nombre": "Web para inmobiliaria",
+   "precio": 299,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "vacation-rental",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/vacation-rental/",
+   "titulo": "Alquiler vacacional",
+   "producto": "web-inmobiliaria",
+   "nombre": "Web para inmobiliaria",
+   "precio": 299,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "portfolio-template",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/portfolio-template/",
+   "titulo": "Portfolio sencillo",
+   "producto": "portfolio-editable",
+   "nombre": "Portfolio con panel para editarlo tú",
+   "precio": 179,
+   "plazo": "3 días",
+   "cat": "webs"
+  },
+  {
+   "img": "photographer-portfolio",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/photographer-portfolio/",
+   "titulo": "Fotógrafo",
+   "producto": "portfolio-editable",
+   "nombre": "Portfolio con panel para editarlo tú",
+   "precio": 179,
+   "plazo": "3 días",
+   "cat": "webs"
+  },
+  {
+   "img": "architect-portfolio",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/architect-portfolio/",
+   "titulo": "Arquitecto",
+   "producto": "portfolio-editable",
+   "nombre": "Portfolio con panel para editarlo tú",
+   "precio": 179,
+   "plazo": "3 días",
+   "cat": "webs"
+  },
+  {
+   "img": "writer-blogger",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/writer-blogger/",
+   "titulo": "Blog personal",
+   "producto": "web-blog-astro",
+   "nombre": "Web con blog rápida (SEO)",
+   "precio": 249,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "auto-repair",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/local-services/auto-repair/",
+   "titulo": "Taller mecánico",
+   "producto": "web-taller",
+   "nombre": "Web para taller con cita previa",
+   "precio": 249,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "plumber-home-services",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/local-services/plumber-home-services/",
+   "titulo": "Fontanería",
+   "producto": "web-taller",
+   "nombre": "Web para taller con cita previa",
+   "precio": 249,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "cleaning-company",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/local-services/cleaning-company/",
+   "titulo": "Limpiezas",
+   "producto": "web-taller",
+   "nombre": "Web para taller con cita previa",
+   "precio": 249,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "carta-whatsapp",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/carta-whatsapp/",
+   "titulo": "Carta QR con pedido por WhatsApp",
+   "producto": "carta-qr",
+   "nombre": "Carta digital con código QR",
+   "precio": 49,
+   "plazo": "24 h",
+   "cat": "hosteleria"
+  },
+  {
+   "img": "restaurant",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/restaurant/",
+   "titulo": "Restaurante",
+   "producto": "carta-qr",
+   "nombre": "Carta digital con código QR",
+   "precio": 49,
+   "plazo": "24 h",
+   "cat": "hosteleria"
+  },
+  {
+   "img": "cafe-coffee-shop",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/cafe-coffee-shop/",
+   "titulo": "Cafetería",
+   "producto": "carta-qr",
+   "nombre": "Carta digital con código QR",
+   "precio": 49,
+   "plazo": "24 h",
+   "cat": "hosteleria"
+  },
+  {
+   "img": "bar-lounge",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/bar-lounge/",
+   "titulo": "Bar de copas",
+   "producto": "carta-qr",
+   "nombre": "Carta digital con código QR",
+   "precio": 49,
+   "plazo": "24 h",
+   "cat": "hosteleria"
+  },
+  {
+   "img": "pizza-delivery",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/pizza-delivery/",
+   "titulo": "Pizzería a domicilio",
+   "producto": "reservas-restaurante",
+   "nombre": "Reservas de mesa online",
+   "precio": 149,
+   "plazo": "3 días",
+   "cat": "hosteleria"
+  },
+  {
+   "img": "food-truck",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/food-truck/",
+   "titulo": "Food truck",
+   "producto": "asistente-ia-pedidos",
+   "nombre": "Asistente IA que toma pedidos",
+   "precio": 299,
+   "plazo": "7 días",
+   "cat": "hosteleria"
+  },
+  {
+   "img": "physiotherapy",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/physiotherapy/",
+   "titulo": "Fisioterapia",
+   "producto": "pagina-citas",
+   "nombre": "Página de citas tipo Calendly",
+   "precio": 79,
+   "plazo": "48 h",
+   "cat": "reservas"
+  },
+  {
+   "img": "dental-clinic",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/dental-clinic/",
+   "titulo": "Clínica dental",
+   "producto": "pagina-citas",
+   "nombre": "Página de citas tipo Calendly",
+   "precio": 79,
+   "plazo": "48 h",
+   "cat": "reservas"
+  },
+  {
+   "img": "nutritionist",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/nutritionist/",
+   "titulo": "Nutricionista",
+   "producto": "pagina-citas",
+   "nombre": "Página de citas tipo Calendly",
+   "precio": 79,
+   "plazo": "48 h",
+   "cat": "reservas"
+  },
+  {
+   "img": "spa-salon",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/spa-salon/",
+   "titulo": "Peluquería y spa",
+   "producto": "reservas-salon",
+   "nombre": "Reservas para peluquería, estética o clínica",
+   "precio": 199,
+   "plazo": "5 días",
+   "cat": "reservas"
+  },
+  {
+   "img": "yoga-studio",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/yoga-studio/",
+   "titulo": "Estudio de yoga",
+   "producto": "reservas-salon",
+   "nombre": "Reservas para peluquería, estética o clínica",
+   "precio": 199,
+   "plazo": "5 días",
+   "cat": "reservas"
+  },
+  {
+   "img": "gym-fitness",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/gym-fitness/",
+   "titulo": "Gimnasio",
+   "producto": "reservas-salon",
+   "nombre": "Reservas para peluquería, estética o clínica",
+   "precio": 199,
+   "plazo": "5 días",
+   "cat": "reservas"
+  },
+  {
+   "img": "boda-blush",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-blush/",
+   "titulo": "Web de boda · estilo Blush",
+   "producto": "web-boda-rsvp",
+   "nombre": "Web de boda con confirmación de asistencia",
+   "precio": 99,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "boda-midnight",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-midnight/",
+   "titulo": "Web de boda · estilo Midnight Gold",
+   "producto": "web-boda-rsvp",
+   "nombre": "Web de boda con confirmación de asistencia",
+   "precio": 99,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "rsvp-only",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/rsvp-only/",
+   "titulo": "Solo confirmación de asistencia",
+   "producto": "web-boda-rsvp",
+   "nombre": "Web de boda con confirmación de asistencia",
+   "precio": 99,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "wedding",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/events-community/wedding/",
+   "titulo": "Boda clásica",
+   "producto": "web-boda-rsvp",
+   "nombre": "Web de boda con confirmación de asistencia",
+   "precio": 99,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "boda-sage",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-sage/",
+   "titulo": "Web de boda · estilo Sage Garden",
+   "producto": "invitacion-digital",
+   "nombre": "Invitación digital animada",
+   "precio": 39,
+   "plazo": "24 h",
+   "cat": "bodas"
+  },
+  {
+   "img": "weekend-itinerary",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/weekend-itinerary/",
+   "titulo": "Itinerario de fin de semana",
+   "producto": "invitacion-digital",
+   "nombre": "Invitación digital animada",
+   "precio": 39,
+   "plazo": "24 h",
+   "cat": "bodas"
+  },
+  {
+   "img": "registry-template",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/registry-template/",
+   "titulo": "Lista de regalos",
+   "producto": "gestion-invitados-mesas",
+   "nombre": "Gestión de invitados y plano de mesas",
+   "precio": 79,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "link-in-bio",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/link-in-bio/",
+   "titulo": "Página de enlaces",
+   "producto": "link-in-bio",
+   "nombre": "Link-in-bio propio con estadísticas",
+   "precio": 39,
+   "plazo": "24 h",
+   "cat": "identidad"
+  },
+  {
+   "img": "resume-cv",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/resume-cv/",
+   "titulo": "Currículum web",
+   "producto": "cv-profesional",
+   "nombre": "Currículum profesional ATS en PDF",
+   "precio": 29,
+   "plazo": "48 h",
+   "cat": "identidad"
+  },
+  {
+   "img": "testimonios",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/testimonios/",
+   "titulo": "Muro de testimonios",
+   "producto": "muro-testimonios",
+   "nombre": "Muro de opiniones de clientes",
+   "precio": 49,
+   "plazo": "48 h",
+   "cat": "identidad"
+  },
+  {
+   "img": "coming-soon",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/coming-soon/",
+   "titulo": "Próximamente",
+   "producto": "lista-espera",
+   "nombre": "Lista de espera con referidos",
+   "precio": 79,
+   "plazo": "48 h",
+   "cat": "captacion"
+  },
+  {
+   "img": "webinar-signup",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/webinar-signup/",
+   "titulo": "Inscripción a webinar",
+   "producto": "lista-espera",
+   "nombre": "Lista de espera con referidos",
+   "precio": 79,
+   "plazo": "48 h",
+   "cat": "captacion"
+  },
+  {
+   "img": "tienda-descargas",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/tienda-descargas/",
+   "titulo": "Tienda de descargas digitales",
+   "producto": "tienda-productos-digitales",
+   "nombre": "Tienda de productos digitales",
+   "precio": 299,
+   "plazo": "5 días",
+   "cat": "tiendas"
+  },
+  {
+   "img": "ebook-download",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/ebook-download/",
+   "titulo": "Descarga de ebook",
+   "producto": "tienda-productos-digitales",
+   "nombre": "Tienda de productos digitales",
+   "precio": 299,
+   "plazo": "5 días",
+   "cat": "tiendas"
+  },
+  {
+   "img": "fashion-store",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/ecommerce/fashion-store/",
+   "titulo": "Tienda de moda",
+   "producto": "tienda-online",
+   "nombre": "Tienda online completa",
+   "precio": 499,
+   "plazo": "7 días",
+   "cat": "tiendas"
+  },
+  {
+   "img": "cosmetics-skincare-store",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/ecommerce/cosmetics-skincare-store/",
+   "titulo": "Cosmética",
+   "producto": "tienda-online",
+   "nombre": "Tienda online completa",
+   "precio": 499,
+   "plazo": "7 días",
+   "cat": "tiendas"
+  },
+  {
+   "img": "single-product-store",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/ecommerce/single-product-store/",
+   "titulo": "Tienda de un producto",
+   "producto": "tienda-online",
+   "nombre": "Tienda online completa",
+   "precio": 499,
+   "plazo": "7 días",
+   "cat": "tiendas"
+  },
+  {
+   "img": "meridian",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/meridian/",
+   "titulo": "Meridian (Bootstrap)",
+   "producto": "web-editable-visual",
+   "nombre": "Web que editas arrastrando bloques",
+   "precio": 399,
+   "plazo": "7 días",
+   "cat": "portales"
+  },
+  {
+   "img": "northstar",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/northstar/",
+   "titulo": "Northstar (Bootstrap)",
+   "producto": "web-editable-visual",
+   "nombre": "Web que editas arrastrando bloques",
+   "precio": 399,
+   "plazo": "7 días",
+   "cat": "portales"
+  },
+  {
+   "img": "hotel-resort",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/hotel-resort/",
+   "titulo": "Hotel",
+   "producto": "web-multidioma",
+   "nombre": "Tu web en inglés (u otro idioma)",
+   "precio": 99,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "tour-guide",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/tour-guide/",
+   "titulo": "Guía turístico",
+   "producto": "web-multidioma",
+   "nombre": "Tu web en inglés (u otro idioma)",
+   "precio": 99,
+   "plazo": "4 días",
+   "cat": "webs"
+  },
+  {
+   "img": "corporate-company",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/corporate-company/",
+   "titulo": "Empresa",
+   "producto": "web-wordpress",
+   "nombre": "Web WordPress llave en mano",
+   "precio": 249,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "digital-marketing-agency",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/digital-marketing-agency/",
+   "titulo": "Agencia de marketing",
+   "producto": "plataforma-agencia",
+   "nombre": "Plataforma para tu agencia: clientes, webs y CRM",
+   "precio": 490,
+   "plazo": "10 días",
+   "cat": "portales"
+  }
+ ]
+}

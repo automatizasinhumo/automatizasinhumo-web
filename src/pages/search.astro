@@ -10,6 +10,10 @@ import { MAX_PUBLIC_PAGE, paginate, queryHref, requestedPage } from '../paginati
 import Pagination from '../components/Pagination.astro';
 import { normalizeSearchQuery } from '../features/search/query';
 import { addCacheTags, productCacheTags } from '../features/cache/tags';
+import Icono from '../components/Icono.astro';
+import { POPULARES } from '../features/search/sinonimos';
+import { listCategories, childrenOf } from '../features/categories/db';
+import { ICONO_CAT } from '../features/storefront/iconos';
 
 const q = normalizeSearchQuery(Astro.url.searchParams.get('q') ?? '');
 const PAGE_SIZE = 24;
@@ -60,46 +64,47 @@ const cardOptions = {
 const cards = products.map((product, i) =>
   buildProductCard(product, { ...cardOptions, priority: i === 0 }),
 );
+const cats = !q || products.length === 0 ? childrenOf(await listCategories(env.DB), null) : [];
 const fillerCards = fillers.map((product) => buildProductCard(product, cardOptions));
 ---
 
-<Layout title={q ? `Búsqueda: ${q}` : 'Buscar'}>
-  <div class="mb-8">
-    <p class="text-xs uppercase tracking-[0.25em] text-muted">Buscar</p>
-    <h1 class="mt-2 font-serif text-4xl tracking-tight sm:text-5xl">
-      {q ? q : 'Encuentra tu servicio'}
+<Layout title={q ? `Búsqueda: ${q}` : 'Buscar servicios'} description="Busca entre webs, reservas, cartas QR, bots y automatizaciones con precio cerrado.">
+  <section class="fondo-tecnico mb-10 rounded-3xl border border-line px-6 py-8 sm:px-10 sm:py-10">
+    <p class="etiqueta">Buscar</p>
+    <h1 class="mt-3 text-3xl font-bold text-ink sm:text-4xl">
+      {q ? <>Resultados para <span class="text-brand">“{q}”</span></> : '¿Qué necesita tu negocio?'}
     </h1>
-  </div>
-
-  <form method="GET" action="/search" class="mb-10 max-w-md" role="search">
-    <input
-      type="search"
-      name="q"
-      value={q}
-      placeholder="Buscar servicios…"
-      aria-label="Buscar servicios"
-      autofocus={!q}
-      class="w-full border-0 border-b border-line bg-transparent px-1 py-2 text-base transition-colors focus:border-brand focus:outline-none"
-    />
-  </form>
+    <form method="GET" action="/search" class="mt-6 flex max-w-2xl items-center gap-2 rounded-full border border-line bg-surface p-1.5 pl-5 shadow-sm focus-within:border-brand" role="search">
+      <Icono name="search" class="h-5 w-5 shrink-0 text-muted" />
+      <input type="search" name="q" value={q} placeholder="Ej.: restaurante, reservas, web, boda…" aria-label="Buscar servicios" autofocus={!q}
+        class="min-w-0 flex-1 border-0 bg-transparent py-2 text-base focus:outline-none" />
+      <button type="submit" class="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Buscar</button>
+    </form>
+    <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+      <span class="text-muted">Populares:</span>
+      {POPULARES.map((p) => (
+        <a href={`/search?q=${encodeURIComponent(p)}`} class="rounded-full border border-line bg-surface px-3 py-1 font-medium text-ink hover:border-brand hover:text-brand">{p}</a>
+      ))}
+    </div>
+  </section>
 
   {
     q &&
       (autoCorrected ? (
-        <p class="mb-8 text-sm text-muted">
-          Sin resultados para “{q}”. Mostrando resultados para{' '}
-          <strong class="font-medium text-ink">{suggestion}</strong>.
+        <p class="mb-8 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted">
+          No hay fichas con “{q}” literalmente. Te enseñamos lo que más se parece:{' '}
+          <strong class="font-semibold text-ink">{suggestion}</strong> ({total}).
         </p>
       ) : products.length > 0 ? (
-        <p class="mb-8 text-xs uppercase tracking-widest text-muted">
-          {total} resultado{total === 1 ? '' : 's'} para “{q}”
+        <p class="mb-8 text-sm font-semibold text-muted" role="status">
+          {total} servicio{total === 1 ? '' : 's'} encontrado{total === 1 ? '' : 's'}
         </p>
       ) : null)
   }
 
   {
     products.length > 0 && (
-      <ul class="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
+      <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card, i) => (
           <ProductCard card={card} index={i} />
         ))}
@@ -110,10 +115,8 @@ const fillerCards = fillers.map((product) => buildProductCard(product, cardOptio
   {
     fillers.length > 0 && (
       <>
-        <p class="mb-8 mt-16 text-xs uppercase tracking-widest text-muted">
-          Más de estas categorías
-        </p>
-        <ul class="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
+        <h2 class="mb-6 mt-16 text-xl font-bold text-ink">También te puede interesar</h2>
+        <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {fillerCards.map((card, i) => (
             <ProductCard card={card} index={i} />
           ))}
@@ -124,7 +127,29 @@ const fillerCards = fillers.map((product) => buildProductCard(product, cardOptio
 
   {
     q && products.length === 0 && (
-      <p class="text-muted">No hay servicios para “{q}”. Prueba con otra palabra.</p>
+      <div class="mb-8 rounded-2xl border border-dashed border-line px-6 py-8 text-center" role="status">
+        <p class="text-lg font-semibold text-ink">No encontramos nada para “{q}”.</p>
+        <p class="mt-1 text-muted">Prueba con otra palabra, mira las categorías o cuéntanos qué necesitas.</p>
+        <a href="/pages/contacto" class="mt-4 inline-block rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Pedir algo a medida</a>
+      </div>
+    )
+  }
+
+  {
+    cats.length > 0 && (
+      <section aria-labelledby="explora">
+        <h2 id="explora" class="mb-5 text-xl font-bold text-ink">Explora por categoría</h2>
+        <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {cats.map((c) => (
+            <li>
+              <a href={`/categories/${c.slug}`} class="tarjeta group flex items-center gap-3 p-4 hover:border-brand">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand/10 text-brand transition-colors group-hover:bg-brand group-hover:text-on-brand"><Icono name={ICONO_CAT[c.slug] ?? 'sparkles'} class="h-5 w-5" /></span>
+                <span class="text-sm font-semibold text-ink">{c.name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
     )
   }
 

@@ -1,0 +1,157 @@
+---
+/**
+ * Página «Cómo funciona» maquetada (sustituye al markdown de la página `como-funciona`).
+ * Pasos con iconos, comparativa de modalidades, línea de tiempo y FAQ con datos estructurados.
+ */
+import Icono from '../../components/Icono.astro';
+
+const pasos = [
+  { n: '01', icono: 'search', titulo: 'Eliges tu servicio', texto: 'Filtra por categoría o busca lo que necesitas. Cada ficha muestra qué recibes, un ejemplo real, el precio cerrado y el plazo.' },
+  { n: '02', icono: 'forms', titulo: 'Rellenas un formulario corto', texto: 'Tras el pago te llega un formulario con los datos que necesitamos: nombre, fotos, horarios, textos. Si te falta algo, lo marcamos y seguimos.' },
+  { n: '03', icono: 'rocket', titulo: 'Lo recibes funcionando', texto: 'Te enviamos el enlace publicado (o la plantilla con guía) y una guía corta de uso. Los ajustes sobre lo pedido están incluidos.' },
+];
+const filas = [
+  ['Qué recibes', 'Plantilla rellenada + guía paso a paso', 'El servicio publicado con tus datos'],
+  ['Para quién', 'Quien se maneja y quiere ahorrar', 'Quien quiere olvidarse'],
+  ['Publicación', 'La haces tú siguiendo la guía', 'La hacemos nosotros'],
+  ['Ajustes tras la entrega', 'Dudas por email', 'Incluidos'],
+  ['Soporte', 'Email', 'Email y WhatsApp'],
+];
+const linea = [
+  { icono: 'receipt-euro', cuando: 'Día 0', texto: 'Pagas el precio cerrado. Sin permanencia.' },
+  { icono: 'mail', cuando: 'Al momento', texto: 'Recibes el email con el formulario de campos.' },
+  { icono: 'tool', cuando: '24 h – 5 días', texto: 'Montamos el servicio con tus datos. El plazo está en cada ficha.' },
+  { icono: 'check', cuando: 'Entrega', texto: 'Enlace, accesos y guía. Revisas y pides ajustes.' },
+];
+const garantias = [
+  { icono: 'shield-check', titulo: 'Devolución en 7 días', texto: 'Si no está como te prometimos, te devolvemos el dinero.' },
+  { icono: 'lock-open', titulo: 'Es tuyo', texto: 'Software de código abierto y accesos a tu nombre. Sin cuotas obligatorias.' },
+  { icono: 'eye', titulo: 'Sin letra pequeña', texto: 'Si algo necesita una cuenta de pago, lo verás en la ficha antes de comprar.' },
+];
+const faq = [
+  ['¿Tengo que saber de informática?', 'No. Solo rellenas un formulario con tus textos, fotos y datos. Si eliges «Lo montas tú», la guía explica cada paso con capturas.'],
+  ['¿Qué pasa si no tengo fotos o textos?', 'Lo marcas en el formulario y usamos imágenes libres de derechos y textos de partida que luego puedes cambiar.'],
+  ['¿Puedo pedir cambios después?', 'Sí. Los ajustes sobre lo que has pedido están incluidos. Contesta al email de entrega y los hacemos.'],
+  ['¿Hay cuotas mensuales?', 'No son obligatorias. Casi todo se publica en planes gratuitos. Los planes mensuales son opcionales, por si quieres que lo mantengamos nosotros.'],
+];
+const ld = JSON.stringify([
+  {
+    '@context': 'https://schema.org', '@type': 'HowTo', name: 'Cómo contratar un servicio en Automatiza sin humo',
+    step: pasos.map((p, i) => ({ '@type': 'HowToStep', position: i + 1, name: p.titulo, text: p.texto })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+  },
+]);
+---
+
+<script is:inline type="application/ld+json" set:html={ld}></script>
+
+<section class="fondo-tecnico rounded-3xl border border-line px-6 py-10 sm:px-10 sm:py-14">
+  <span class="etiqueta">Cómo funciona</span>
+  <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
+    Servicios digitales como barras de pan: <span class="text-brand">precio fijo, plazo fijo.</span>
+  </h1>
+  <p class="mt-5 max-w-2xl text-lg text-muted">Nada de reuniones eternas ni presupuestos a medida. Eliges, rellenas unos campos y lo recibes funcionando.</p>
+
+  <ol class="relative mt-10 grid gap-5 md:grid-cols-3">
+    {pasos.map((p) => (
+      <li class="tarjeta relative p-6">
+        <span class="flex items-center justify-between">
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-on-brand shadow-sm"><Icono name={p.icono} class="h-6 w-6" /></span>
+          <span class="font-serif text-3xl font-bold text-line">{p.n}</span>
+        </span>
+        <h2 class="mt-4 text-xl font-semibold text-ink">{p.titulo}</h2>
+        <p class="mt-2 text-sm leading-relaxed text-muted">{p.texto}</p>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<section class="mt-16" aria-labelledby="modalidades">
+  <span class="etiqueta">Dos modalidades</span>
+  <h2 id="modalidades" class="mt-3 text-3xl font-bold text-ink">Lo montas tú o te lo montamos</h2>
+  <p class="mt-2 max-w-2xl text-muted">Muchos servicios tienen las dos opciones. El precio de cada una está en la ficha.</p>
+  <div class="mt-6 grid gap-5 md:grid-cols-2">
+    {[
+      { t: 'Lo montas tú', ico: 'tool', sub: 'Plantilla + guía', destacado: false, col: 1 },
+      { t: 'Te lo montamos', ico: 'sparkles', sub: 'Publicado y funcionando', destacado: true, col: 2 },
+    ].map((m) => (
+      <div class={`tarjeta p-6 ${m.destacado ? 'ring-2 ring-brand' : ''}`}>
+        <div class="flex items-center gap-3">
+          <span class={`grid h-11 w-11 place-items-center rounded-xl ${m.destacado ? 'bg-brand text-on-brand' : 'bg-brand/10 text-brand'}`}><Icono name={m.ico} class="h-6 w-6" /></span>
+          <div>
+            <h3 class="text-lg font-semibold text-ink">{m.t}</h3>
+            <p class="text-sm text-muted">{m.sub}</p>
+          </div>
+          {m.destacado && <span class="ml-auto rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">La más pedida</span>}
+        </div>
+        <dl class="mt-5 divide-y divide-line border-t border-line text-sm">
+          {filas.map((f) => (
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-muted">{f[0]}</dt>
+              <dd class="text-right font-medium text-ink">{f[m.col]}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    ))}
+  </div>
+</section>
+
+<section class="mt-16 grid gap-10 lg:grid-cols-[1fr_1fr]">
+  <div>
+    <span class="etiqueta">Del pago a la entrega</span>
+    <h2 class="mt-3 text-3xl font-bold text-ink">Qué pasa después de comprar</h2>
+    <ol class="mt-6 space-y-0 border-l-2 border-line pl-6">
+      {linea.map((l) => (
+        <li class="relative pb-6 last:pb-0">
+          <span class="absolute -left-[2.35rem] grid h-8 w-8 place-items-center rounded-full border-2 border-line bg-surface text-brand"><Icono name={l.icono} class="h-4 w-4" /></span>
+          <p class="text-xs font-bold uppercase tracking-wider text-accent">{l.cuando}</p>
+          <p class="mt-1 text-ink">{l.texto}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div>
+    <span class="etiqueta">Sin humo</span>
+    <h2 class="mt-3 text-3xl font-bold text-ink">Nuestras garantías</h2>
+    <ul class="mt-6 space-y-4">
+      {garantias.map((g) => (
+        <li class="tarjeta flex gap-4 p-5">
+          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent"><Icono name={g.icono} class="h-6 w-6" /></span>
+          <div>
+            <p class="font-semibold text-ink">{g.titulo}</p>
+            <p class="mt-1 text-sm text-muted">{g.texto}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<section class="mt-16" aria-labelledby="dudas">
+  <h2 id="dudas" class="text-3xl font-bold text-ink">Dudas habituales</h2>
+  <div class="mt-6 divide-y divide-line border-y border-line">
+    {faq.map(([q, a]) => (
+      <details class="group py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink">
+          {q}<span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand/10 text-brand transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-muted">{a}</p>
+      </details>
+    ))}
+  </div>
+</section>
+
+<section class="mt-16 flex flex-col items-start justify-between gap-6 rounded-3xl bg-brand px-8 py-10 text-on-brand sm:flex-row sm:items-center">
+  <div>
+    <h2 class="text-2xl font-bold">¿Lo vemos funcionando?</h2>
+    <p class="mt-1 opacity-90">Mira las demos reales o ve directo al catálogo.</p>
+  </div>
+  <div class="flex flex-wrap gap-3">
+    <a href="/pages/demos" class="rounded-full bg-surface px-6 py-3 text-sm font-semibold text-brand hover:opacity-90">Ver demos en vivo</a>
+    <a href="/products" class="rounded-full border border-current px-6 py-3 text-sm font-semibold hover:bg-surface hover:text-brand">Ver los 71 servicios</a>
+  </div>
+</section>
