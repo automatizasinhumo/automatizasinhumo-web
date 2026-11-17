@@ -76,6 +76,25 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
   - `/empezar/consulta`.
   - Login del admin traducido al español.
   - La cabecera ya no se sale de pantalla en móviles de 360-414 px.
+- **Seguimiento para el cliente** (`/empezar/estado?id=S-XXXXXXXX`):
+  - Muestra 5 pasos: Recibida → Preparando tu vista previa → Vista previa enviada → Pago → Entregado. El paso actual lleva la etiqueta «Ahora».
+  - Solo enseña el servicio, el paso y las fechas, nunca nombre, email ni lo que escribió el cliente.
+  - El enlace aparece en la página de gracias y en el email de confirmación.
+  - Se mueve solo cuando cambias el estado en Admin → Solicitudes.
+
+## 3.ª ronda de diseño (auditoría de ChatGPT, 17-11-2026)
+- **Portada**:
+  - El proceso es el protagonista: «Así funciona · pagas al final», en 3 pasos con flechas.
+  - Chips bajo los botones: sin pago por adelantado, atendido por una persona real, precio cerrado.
+  - Mockup de móvil en el collage.
+  - Las tarjetas «Para empezar hoy» abren con la necesidad del cliente («Necesito estar en internet»…).
+- **Ficha**:
+  - «Pruébalo antes de pagar» es ahora una línea de tiempo de 3 pasos.
+  - Debajo hay 3 bloques: qué recibes, qué necesito de ti, qué pasa después.
+- **Capturas de demos**: comprimidas de 21 MB a 7 MB con `node manual/demos/optimizar-capturas.mjs`, sin perder nitidez.
+- **Tests**: 921 en verde y `astro check` sin errores.
+- **Ideas de la auditoría para más adelante**: sección «Qué no incluye» en cada ficha, formulario por pasos con barra de progreso, comparador antes/después y contador de proyectos entregados (cuando haya datos reales).
+- **Ojo al desplegar**: si la web sale sin estilos, el build quedó a medias (el HTML pide un CSS que no existe). Repite `npx astro build` y despliega otra vez.
 
 ## Pendiente de David (al final, por orden)
 1. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.

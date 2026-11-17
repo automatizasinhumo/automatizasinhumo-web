@@ -53,11 +53,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     if (mail) {
       const r = resumenSolicitud(v.data, publicId);
       const tienda = s.storeName ?? getConfig().storeName;
+      const seguimiento = new URL(`/empezar/estado?id=${encodeURIComponent(publicId)}`, request.url).toString();
       await mail.send({
         to: v.data.email,
         subject: `Hemos recibido tu solicitud ${publicId} · ${tienda}`,
-        text: `Hola ${v.data.nombre}:\n\nGracias. No has pagado nada. David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.\n\n${r.text}\n\nSi quieres añadir algo, responde a este email.`,
-        html: `<p>Hola ${escapar(v.data.nombre)}:</p><p>Gracias. <strong>No has pagado nada.</strong> David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.</p>${r.html}<p>Si quieres añadir algo, responde a este email.</p>`,
+        text: `Hola ${v.data.nombre}:\n\nGracias. No has pagado nada. David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.\n\nSigue tu solicitud: ${seguimiento}\n\n${r.text}\n\nSi quieres añadir algo, responde a este email.`,
+        html: `<p>Hola ${escapar(v.data.nombre)}:</p><p>Gracias. <strong>No has pagado nada.</strong> David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.</p><p><a href="${escapar(seguimiento)}">Sigue tu solicitud</a></p>${r.html}<p>Si quieres añadir algo, responde a este email.</p>`,
         idempotencyKey: `solicitud-cliente-${publicId}`,
       });
       const aviso = s.emailNotifyTo || getConfig().email.notifyTo;

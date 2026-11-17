@@ -202,6 +202,46 @@ export async function cambiarEstado(
   return (r.meta?.changes ?? 0) > 0;
 }
 
+/** Pasos que ve el cliente en /empezar/estado (sin datos internos). */
+export const PASOS_CLIENTE = ['Recibida', 'Preparando tu vista previa', 'Vista previa enviada', 'Pago', 'Entregado'] as const;
+
+/** Índice del paso del cliente para cada estado interno (-1 = cerrada sin seguir). */
+export function pasoCliente(estado: Estado): number {
+  switch (estado) {
+    case 'nueva': return 0;
+    case 'en_preparacion': return 1;
+    case 'vista_previa_enviada': return 2;
+    case 'aprobada': return 3;
+    case 'pagada': return 3;
+    case 'entregada': return 4;
+    default: return -1;
+  }
+}
+
+/** Formato del número que ve el cliente («S-» + 6-12 caracteres). */
+export function normalizarPublicId(raw: string | null | undefined): string | null {
+  const v = String(raw ?? '').trim().toUpperCase();
+  return /^S-[A-Z0-9]{6,12}$/.test(v) ? v : null;
+}
+
+export interface EstadoPublico {
+  publicId: string;
+  producto: string | null;
+  estado: Estado;
+  creada: string;
+  actualizada: string;
+}
+
+/** Solo lo imprescindible para el seguimiento: nunca nombre, email ni campos. */
+export async function estadoPublico(db: D1Database, publicId: string): Promise<EstadoPublico | null> {
+  const r = await db
+    .prepare('SELECT public_id, producto, estado, created_at, updated_at FROM solicitudes WHERE public_id = ?')
+    .bind(publicId)
+    .first<{ public_id: string; producto: string | null; estado: Estado; created_at: string; updated_at: string }>();
+  if (!r) return null;
+  return { publicId: r.public_id, producto: r.producto, estado: r.estado, creada: r.created_at, actualizada: r.updated_at };
+}
+
 export function esEstado(v: unknown): v is Estado {
   return typeof v === 'string' && (ESTADOS as readonly string[]).includes(v);
 }

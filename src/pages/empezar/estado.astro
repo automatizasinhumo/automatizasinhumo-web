@@ -1,0 +1,84 @@
+---
+import { env } from 'cloudflare:workers';
+import Layout from '../../layouts/Layout.astro';
+import { PASOS_CLIENTE, estadoPublico, normalizarPublicId, pasoCliente } from '../../features/solicitudes';
+
+export const prerender = false;
+
+// Seguimiento de una solicitud «Empieza gratis» con su número (S-XXXXXXXX).
+// Solo muestra servicio, paso y fechas: nunca nombre, email ni lo que escribió.
+const raw = Astro.url.searchParams.get('id');
+const id = normalizarPublicId(raw);
+const solicitud = id ? await estadoPublico(env.DB, id).catch(() => null) : null;
+const paso = solicitud ? pasoCliente(solicitud.estado) : -1;
+const fecha = (s: string) =>
+  new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+---
+
+<Layout title="Sigue tu solicitud" description="Consulta en qué punto está tu solicitud. No pagas nada hasta ver la vista previa.">
+  <div class="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+    <h1 class="font-serif text-3xl font-bold text-ink sm:text-4xl">Sigue tu solicitud</h1>
+    <p class="mt-2 text-muted">Escribe el número que te dimos al enviarla (empieza por «S-»). También está en el email de confirmación.</p>
+
+    <form method="GET" action="/empezar/estado" class="mt-6 flex flex-wrap gap-2">
+      <label class="sr-only" for="id">Número de solicitud</label>
+      <input
+        id="id"
+        name="id"
+        value={raw ?? ''}
+        required
+        placeholder="S-7K3M9QXZ"
+        autocomplete="off"
+        spellcheck="false"
+        class="min-w-0 flex-1 rounded-full border border-line bg-surface px-5 py-3 font-mono uppercase text-ink"
+      />
+      <button type="submit" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Consultar</button>
+    </form>
+
+    {raw && !solicitud && (
+      <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" data-estado-no-encontrado>
+        No encontramos esa solicitud. Revisa el número o escríbenos y lo miramos.
+      </p>
+    )}
+
+    {solicitud && (
+      <section class="mt-8 rounded-2xl border border-line bg-surface p-5 sm:p-6" data-estado-solicitud>
+        <p class="text-xs font-semibold uppercase tracking-widest text-brand">{solicitud.publicId}</p>
+        <h2 class="mt-1 text-xl font-bold text-ink">{solicitud.producto ?? 'Consulta'}</h2>
+        <p class="mt-1 text-sm text-faint">Enviada el {fecha(solicitud.creada)} · última novedad el {fecha(solicitud.actualizada)}</p>
+
+        {paso < 0 ? (
+          <p class="mt-5 text-sm text-muted">Esta solicitud está cerrada. Si quieres retomarla, escríbenos y seguimos.</p>
+        ) : (
+          <ol class="mt-6 space-y-3">
+            {PASOS_CLIENTE.map((t, i) => (
+              <li class="flex items-center gap-3 text-sm" aria-current={i === paso ? 'step' : undefined}>
+                <span
+                  class={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                    i < paso ? 'bg-brand text-on-brand' : i === paso ? 'bg-accent text-on-brand ring-4 ring-accent/20' : 'border border-line text-faint'
+                  }`}
+                >
+                  {i < paso ? '✓' : i + 1}
+                </span>
+                <span class={i <= paso ? 'font-semibold text-ink' : 'text-faint'}>{t}</span>
+                {i === paso && <span class="ml-auto rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent">Ahora</span>}
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {paso >= 0 && paso < 3 && (
+          <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 text-sm font-medium text-ink">Todavía no has pagado nada. Solo pagas si la vista previa te gusta.</p>
+        )}
+      </section>
+    )}
+
+    <p class="mt-10 text-sm text-muted">
+      ¿Dudas? Te responde David Porto Díaz en{' '}
+      <a href="mailto:hola@automatizasinhumo.com" class="underline hover:text-brand">hola@automatizasinhumo.com</a>.
+    </p>
+  </div>
+</Layout>
