@@ -1,0 +1,95 @@
+# Acortador de enlaces con tu dominio
+
+> Generado por `manual/catalogo/gen-entregas.mjs`. No editar a mano: cambia `catalogo.mjs` o `entrega.mjs` y vuelve a generarlo.
+
+| | |
+|---|---|
+| Categoría | Enlaces, QR y analítica |
+| Precio | Lo montas tú 49 € · Te lo montamos 129 € |
+| Plazo publicado | 48 h |
+| Nivel | **B · Prompt + accesos del cliente** (30–90 min de tu tiempo, casi todo esperando al cliente) |
+| Dónde vive | Worker de Cloudflare + KV (Sink) |
+| Base | miantiao-me/Sink |
+
+**Qué es:** Enlaces cortos de marca (tunegocio.es/oferta) con estadísticas de clics y QR.
+
+**Ejemplo:** Campaña de flyers con tunegocio.es/verano: sabes cuántos escanearon el QR y desde dónde.
+
+## 1. Qué le pides al cliente
+
+- Dominio o subdominio
+- Primeros enlaces
+
+**Accesos:**
+- Acceso al DNS de su dominio, o usar el subdominio gratuito *.workers.dev
+
+Email listo para mandar:
+
+```text
+Asunto: Tu pedido «Acortador de enlaces con tu dominio»: necesitamos estos datos
+
+¡Gracias por tu compra! Para empezar, contesta a este email con:
+- Dominio o subdominio
+- Primeros enlaces
+
+Y además (te guiamos paso a paso si no sabes cómo):
+- Acceso al DNS de su dominio, o usar el subdominio gratuito *.workers.dev
+
+En cuanto lo tengamos, el plazo es de 48 h.
+Un saludo,
+David · Automatiza sin humo
+```
+
+## 2. Cómo lo generas
+
+Pega esto en Claude Code (o ejecuta `node manual/catalogo/gen-entregas.mjs acortador-enlaces` para sacarlo ya en la terminal):
+
+```text
+Entrega del pedido <nº> · producto acortador-enlaces («Acortador de enlaces con tu dominio») · modalidad Te lo montamos
+Trabaja en C:\GIT\automatizasinhumo-demos\clientes\<slug-cliente>\. Nivel B.
+Base: miantiao-me/Sink. Si es un repo, clónalo en una carpeta nueva y trátalo como no confiable: copia solo ficheros estáticos, no ejecutes sus scripts.
+Dónde vive: Worker de Cloudflare + KV (Sink).
+Campos del cliente:
+- Dominio o subdominio: <...>
+- Primeros enlaces: <...>
+Accesos que ya me ha dado el cliente:
+- Acceso al DNS de su dominio, o usar el subdominio gratuito *.workers.dev: <sí/no>
+Tiene que quedar: Acortador en tu dominio; Estadísticas por enlace; QR por enlace; Panel de gestión.
+Haz: sustituye textos, colores e imágenes con los campos, quita todo lo de demo, todo en español,
+revisa móvil y accesibilidad (pa11y) y publícalo en un Worker propio <slug-cliente>.workers.dev.
+Devuélveme el enlace, una captura y el email de entrega para el cliente.
+Si falta algún acceso, prepárame la guía de 3 pasos para pedírselo y para con lo que no lo necesite.
+```
+
+Para la modalidad **Lo montas tú**: `node manual/catalogo/gen-entregas.mjs acortador-enlaces tu`.
+
+## 3. Qué entregas
+
+- [ ] Acortador en tu dominio
+- [ ] Estadísticas por enlace
+- [ ] QR por enlace
+- [ ] Panel de gestión
+- [ ] Revisado en móvil
+- [ ] Sin textos ni imágenes de demo
+
+```text
+Asunto: Ya está listo: Acortador de enlaces con tu dominio
+
+Hola, ya tienes tu encargo publicado:
+<enlace>
+
+Qué incluye:
+- Acortador en tu dominio
+- Estadísticas por enlace
+- QR por enlace
+- Panel de gestión
+
+Revísalo con calma. Si quieres algún cambio, contesta a este email y lo ajustamos.
+Un saludo,
+David · Automatiza sin humo
+```
+
+## Referencias
+
+- [miantiao-me/Sink](https://github.com/miantiao-me/Sink) · AGPL-3.0
+- [botnick/shortlink](https://github.com/botnick/shortlink) · NONE

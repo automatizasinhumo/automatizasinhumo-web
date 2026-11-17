@@ -2,6 +2,8 @@
 
 Idea: el cliente compra, rellena los campos y tú me pasas un prompt. Yo genero el resultado desde la plantilla, lo publico gratis en Cloudflare (`<cliente>.workers.dev` o Pages) y te devuelvo el enlace. Tú solo lo revisas y se lo envías.
 
+> **Cuando entre un pedido, abre `manual/entregas/<producto>.md`.** Ahí tienes qué pedir al cliente, el email listo para mandarle, el prompt para pegar, el checklist y el email de entrega. Para sacar el prompt en la terminal: `node manual/catalogo/gen-entregas.mjs <producto>`.
+
 ## Niveles
 
 | Nivel | Qué significa | Tu tiempo real | Productos |

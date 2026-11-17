@@ -43,6 +43,7 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
 - **Fotos sin R2**: van en `public/images/` como static assets de Workers. Es gratis y no hace falta tarjeta.
 - **Empleados QA** (`.github/workflows/empleados-qa.yml`): smoke, Lighthouse, pa11y y lychee contra staging en cada push y cada lunes. Gratis aunque el repo sea privado.
 - **CodeRabbit** (`.coderabbit.yaml` listo) y **SonarCloud** solo son gratis si el repo es público. Decide tú si se hace público.
+- **Guía de entrega por producto** (qué pedir al cliente, email listo, prompt para pegar, checklist y email de entrega): `manual/entregas/<producto>.md`, con índice en `manual/entregas/README.md`. Se regeneran con `node manual/catalogo/gen-entregas.mjs`. Para sacar el prompt de un pedido en la terminal: `node manual/catalogo/gen-entregas.mjs gestion-invitados-mesas` (añade `tu` para la modalidad Lo montas tú). Los niveles y accesos de cada producto están en `manual/catalogo/entrega.mjs`.
 - Entregas: ver `ENTREGA.md`. Repos de referencia verificados: ver `REFERENCIAS.md`.
 
 ## Pendiente de David (al final, por orden)

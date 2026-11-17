@@ -32,9 +32,15 @@ function descripcion(p) {
   if (demos.length) l.push('### Demo en vivo', ...demos.map((d) => `- [${d.titulo}](${d.url})`), '');
   l.push(`**Plazo:** ${p.plazo}`, '');
   if (p.p.length === 2) {
-    l.push('### Modalidades',
-      `- **Lo montas tú** (${p.p[0]} €): plantilla + guía paso a paso.`,
-      `- **Te lo montamos** (${p.p[1]} €): lo publicamos con tus datos.`, '');
+    l.push('### Lo montas tú o te lo montamos',
+      '| | Lo montas tú | Te lo montamos |',
+      '|---|---|---|',
+      `| Precio | **${p.p[0]} €** | **${p.p[1]} €** |`,
+      '| Plantilla rellenada con tus datos | Sí | Sí |',
+      '| Guía paso a paso para publicarla | Sí | No hace falta |',
+      '| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |',
+      `| Plazo | ${p.plazo} | ${p.plazo} |`,
+      '| Ajustes tras la entrega | Dudas por email | Incluidos |', '');
   }
   if (p.repos.length) {
     l.push('### Base técnica (código abierto)');
