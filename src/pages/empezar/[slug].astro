@@ -1,0 +1,205 @@
+---
+import { env } from 'cloudflare:workers';
+import Layout from '../../layouts/Layout.astro';
+import { getProductBySlug } from '../../features/products/db';
+import { camposDeDescripcion, nombreCampo, LIMITES } from '../../features/solicitudes';
+import { formatPrice } from '../../config';
+
+export const prerender = false;
+
+// «Empieza gratis»: el cliente deja sus datos SIN pagar. David prepara una vista
+// previa y solo si le gusta se le envía el enlace de pago.
+const { slug = 'consulta' } = Astro.params;
+const consulta = slug === 'consulta';
+const producto = consulta ? null : await getProductBySlug(env.DB, slug);
+if (!consulta && !producto) {
+  return new Response('Not found', { status: 404, headers: { 'cache-control': 'no-store' } });
+}
+
+const campos = producto ? camposDeDescripcion(producto.description) : [];
+const conModalidad = Boolean(producto?.variant_label);
+const q = Astro.url.searchParams;
+const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Lo montas tú';
+const ERRORES: Record<string, string> = {
+  nombre: 'Escribe tu nombre (mínimo 2 letras).',
+  email: 'Revisa el email: ahí te mandamos la vista previa.',
+  telefono: 'Revisa el teléfono o déjalo vacío.',
+  consentimiento: 'Marca la casilla de permiso para que podamos preparar tu vista previa.',
+  mensaje: 'Cuéntanos en dos líneas qué necesitas.',
+  guardar: 'No hemos podido guardar tu solicitud. Inténtalo de nuevo en un minuto o escríbenos a hola@automatizasinhumo.com.',
+  servicio: 'Ese servicio ya no está disponible. Cuéntanos qué necesitas y te ayudamos.',
+};
+const error = q.get('error');
+const errorTexto = error ? (ERRORES[error] ?? 'Revisa los datos del formulario.') : null;
+const titulo = producto ? `Empieza gratis: ${producto.name}` : 'Cuéntanos qué necesitas';
+const referrer = (Astro.request.headers.get('referer') ?? '').slice(0, 300);
+const input =
+  'mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-faint focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30';
+const label = 'block text-sm font-medium text-ink';
+---
+
+<Layout
+  title={titulo}
+  description="Empieza gratis, sin tarjeta: rellena tus datos, recibe una vista previa y paga solo si te gusta. Te atiende una persona."
+>
+  <div class="mx-auto max-w-5xl px-4 py-8 sm:py-12">
+    <a href={producto ? `/products/${producto.slug}` : '/'} class="text-sm font-medium text-faint hover:text-brand">
+      &larr; {producto ? 'Volver a la ficha' : 'Volver al inicio'}
+    </a>
+
+    <div class="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest text-brand">Gratis · sin tarjeta · 2-3 minutos</p>
+        <h1 class="mt-2 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl">{titulo}</h1>
+        <p class="mt-3 max-w-prose text-muted">
+          {
+            producto
+              ? 'Rellena lo que tengas a mano (lo que falte lo vemos luego). Te enviamos una vista previa con tus datos y solo pagas si te gusta.'
+              : 'Explícanos tu caso con tus palabras. David te responde con una propuesta, un precio cerrado y una vista previa. Sin compromiso.'
+          }
+        </p>
+
+        {
+          errorTexto && (
+            <p role="alert" class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {errorTexto}
+            </p>
+          )
+        }
+
+        <form method="post" action="/api/solicitudes" class="mt-8 space-y-6" data-solicitud>
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="utm_source" value={q.get('utm_source') ?? ''} />
+          <input type="hidden" name="utm_medium" value={q.get('utm_medium') ?? ''} />
+          <input type="hidden" name="utm_campaign" value={q.get('utm_campaign') ?? ''} />
+          <input type="hidden" name="referrer" value={referrer} />
+          <div class="hidden" aria-hidden="true">
+            <label>No rellenes este campo <input type="text" name="web" tabindex="-1" autocomplete="off" /></label>
+          </div>
+
+          <fieldset class="space-y-4 rounded-2xl border border-line p-5">
+            <legend class="px-1 text-sm font-semibold text-ink">1. Tus datos de contacto</legend>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class={label}>Nombre *
+                <input class={input} name="nombre" required minlength="2" maxlength={LIMITES.nombre} autocomplete="name" />
+              </label>
+              <label class={label}>Email *
+                <input class={input} type="email" name="email" required maxlength={LIMITES.email} autocomplete="email" inputmode="email" />
+                <span class="mt-1 block text-xs text-faint">Ahí te enviamos la vista previa.</span>
+              </label>
+            </div>
+            <label class={label}>Teléfono <span class="font-normal text-faint">(opcional, por si prefieres WhatsApp o llamada)</span>
+              <input class={input} type="tel" name="telefono" maxlength={LIMITES.telefono} autocomplete="tel" inputmode="tel" />
+            </label>
+          </fieldset>
+
+          {
+            conModalidad && (
+              <fieldset class="rounded-2xl border border-line p-5">
+                <legend class="px-1 text-sm font-semibold text-ink">2. ¿Cómo lo quieres?</legend>
+                <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                  {[
+                    ['Lo montas tú', 'Te damos la plantilla con tus datos y una guía paso a paso.'],
+                    ['Te lo montamos', 'Te lo entregamos publicado y funcionando. Tú no tocas nada.'],
+                  ].map(([valor, texto]) => (
+                    <label class="flex cursor-pointer gap-3 rounded-xl border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand/5">
+                      <input type="radio" name="modalidad" value={valor} checked={valor === modalidadInicial} class="mt-1 accent-[var(--color-brand)]" />
+                      <span>
+                        <span class="block font-semibold text-ink">{valor}</span>
+                        <span class="block text-sm text-muted">{texto}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <p class="mt-3 text-xs text-faint">Puedes cambiarlo después de ver la vista previa.</p>
+              </fieldset>
+            )
+          }
+
+          {
+            campos.length > 0 && (
+              <fieldset class="space-y-4 rounded-2xl border border-line p-5">
+                <legend class="px-1 text-sm font-semibold text-ink">{conModalidad ? '3' : '2'}. Lo que necesitamos para tu vista previa</legend>
+                <p class="text-sm text-muted">Todo opcional: rellena lo que tengas. Lo demás te lo preguntamos.</p>
+                {campos.map((c, i) => (
+                  <label class={label}>
+                    {c}
+                    <textarea class={input} name={nombreCampo(i)} rows="2" maxlength={LIMITES.campo} />
+                  </label>
+                ))}
+              </fieldset>
+            )
+          }
+
+          <label class={label}>
+            {consulta ? '¿Qué necesitas? *' : '¿Algo más que debamos saber?'}
+            <textarea
+              class={input}
+              name="mensaje"
+              rows={consulta ? 5 : 3}
+              maxlength={LIMITES.mensaje}
+              required={consulta}
+              placeholder={consulta ? 'Ej.: tengo una peluquería y quiero que me reserven por internet y les llegue un recordatorio.' : 'Colores, ejemplos que te gusten, fechas…'}
+            />
+          </label>
+
+          <label class="flex gap-3 text-sm text-muted">
+            <input type="checkbox" name="consentimiento" value="si" required class="mt-1 h-4 w-4 accent-[var(--color-brand)]" />
+            <span>
+              Acepto que David Porto Díaz use estos datos solo para preparar mi vista previa y responderme.
+              Más info en la <a href="/pages/privacidad" class="underline hover:text-brand">política de privacidad</a>. *
+            </span>
+          </label>
+
+          <button
+            type="submit"
+            class="flex w-full items-center justify-center rounded-full bg-brand px-6 py-4 text-base font-semibold text-on-brand shadow-sm transition hover:bg-brand-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60 sm:w-auto"
+          >
+            Enviar y recibir mi vista previa gratis
+          </button>
+          <p class="text-xs text-faint">No pedimos tarjeta. No se cobra nada al enviar.</p>
+        </form>
+      </div>
+
+      <aside class="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        {
+          producto && (
+            <div class="rounded-2xl border border-line bg-surface p-5">
+              <p class="text-xs uppercase tracking-widest text-faint">Servicio</p>
+              <p class="mt-1 font-semibold text-ink">{producto.name}</p>
+              <p class="mt-1 text-sm text-muted">
+                Precio cerrado {conModalidad ? 'desde ' : ''}<strong class="text-ink">{formatPrice(producto.price_cents, producto.currency)}</strong>. Solo si apruebas la vista previa.
+              </p>
+            </div>
+          )
+        }
+        <div class="rounded-2xl bg-brand/5 p-5">
+          <p class="font-semibold text-ink">Qué pasa después</p>
+          <ol class="mt-3 space-y-3 text-sm text-muted">
+            <li><strong class="text-ink">1. Te escribimos</strong> para confirmar que lo hemos recibido.</li>
+            <li><strong class="text-ink">2. Vista previa en 24-72 h</strong> laborables, con tus datos.</li>
+            <li><strong class="text-ink">3. Si te gusta, pagas</strong> y te lo entregamos funcionando.</li>
+            <li><strong class="text-ink">4. Si no, no pagas nada.</strong> Sin letra pequeña.</li>
+          </ol>
+        </div>
+        <div class="rounded-2xl border border-line p-5 text-sm text-muted">
+          <p class="font-semibold text-ink">Un humano detrás</p>
+          <p class="mt-1">Te atiende David Porto Díaz. Cualquier duda: <a href="mailto:hola@automatizasinhumo.com" class="underline hover:text-brand">hola@automatizasinhumo.com</a>.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Evita envíos dobles (doble clic o red lenta).
+  document.querySelectorAll<HTMLFormElement>('form[data-solicitud]').forEach((f) =>
+    f.addEventListener('submit', () => {
+      const b = f.querySelector<HTMLButtonElement>('button[type=submit]');
+      if (b) {
+        b.disabled = true;
+        b.textContent = 'Enviando…';
+      }
+    }),
+  );
+</script>

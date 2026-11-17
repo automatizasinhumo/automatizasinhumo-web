@@ -7,8 +7,9 @@ import Icono from '../../components/Icono.astro';
 
 const pasos = [
   { n: '01', icono: 'search', titulo: 'Eliges tu servicio', texto: 'Filtra por categoría o busca lo que necesitas. Cada ficha muestra qué recibes, un ejemplo real, el precio cerrado y el plazo.' },
-  { n: '02', icono: 'forms', titulo: 'Rellenas un formulario corto', texto: 'Tras el pago te llega un formulario con los datos que necesitamos: nombre, fotos, horarios, textos. Si te falta algo, lo marcamos y seguimos.' },
-  { n: '03', icono: 'rocket', titulo: 'Lo recibes funcionando', texto: 'Te enviamos el enlace publicado (o la plantilla con guía) y una guía corta de uso. Los ajustes sobre lo pedido están incluidos.' },
+  { n: '02', icono: 'forms', titulo: 'Empiezas gratis', texto: 'Pulsas «Empieza gratis» y rellenas un formulario corto: nombre, textos, horarios, lo que tengas. Sin tarjeta y sin compromiso.' },
+  { n: '03', icono: 'eye', titulo: 'Ves la vista previa', texto: 'Te enviamos un adelanto con tus datos para que veas cómo queda. Si no te convence, no pagas nada.' },
+  { n: '04', icono: 'rocket', titulo: 'Si te gusta, lo recibes funcionando', texto: 'Pagas el precio cerrado y te entregamos el enlace publicado (o la plantilla con guía). Los ajustes sobre lo pedido están incluidos.' },
 ];
 const filas = [
   ['Qué recibes', 'Plantilla rellenada + guía paso a paso', 'El servicio publicado con tus datos'],
@@ -18,17 +19,21 @@ const filas = [
   ['Soporte', 'Email', 'Email y WhatsApp'],
 ];
 const linea = [
-  { icono: 'receipt-euro', cuando: 'Día 0', texto: 'Pagas el precio cerrado. Sin permanencia.' },
-  { icono: 'mail', cuando: 'Al momento', texto: 'Recibes el email con el formulario de campos.' },
-  { icono: 'tool', cuando: '24 h – 5 días', texto: 'Montamos el servicio con tus datos. El plazo está en cada ficha.' },
+  { icono: 'forms', cuando: 'Día 0', texto: 'Rellenas el formulario gratis. Te llega un email de confirmación con tu número de solicitud.' },
+  { icono: 'eye', cuando: '24–72 h', texto: 'David te envía la vista previa con tus datos y resuelve tus dudas.' },
+  { icono: 'receipt-euro', cuando: 'Si te gusta', texto: 'Pagas el precio cerrado. Sin permanencia.' },
   { icono: 'check', cuando: 'Entrega', texto: 'Enlace, accesos y guía. Revisas y pides ajustes.' },
 ];
 const garantias = [
   { icono: 'shield-check', titulo: 'Devolución en 7 días', texto: 'Si no está como te prometimos, te devolvemos el dinero.' },
-  { icono: 'lock-open', titulo: 'Es tuyo', texto: 'Software de código abierto y accesos a tu nombre. Sin cuotas obligatorias.' },
+  { icono: 'mood-smile', titulo: 'Una persona detrás', texto: 'Te atiende David Porto Díaz. Te responde cualquier duda, sin bots ni tecnicismos.' },
+  { icono: 'lock-open', titulo: 'Es tuyo', texto: 'Accesos a tu nombre. Sin cuotas obligatorias ni permanencia.' },
   { icono: 'eye', titulo: 'Sin letra pequeña', texto: 'Si algo necesita una cuenta de pago, lo verás en la ficha antes de comprar.' },
 ];
 const faq = [
+  ['¿Pago antes de ver nada?', 'No. Empiezas gratis, ves una vista previa con tus datos y solo pagas si te gusta. Si no te convence, no pagas nada.'],
+  ['¿Es también para particulares?', 'Sí. Webs de boda, invitaciones, eventos, asociaciones o proyectos personales. El proceso es igual de sencillo.'],
+  ['¿Con quién hablo si tengo dudas?', 'Con David Porto Díaz, una persona de verdad. Escríbele desde el formulario y te responde.'],
   ['¿Tengo que saber de informática?', 'No. Solo rellenas un formulario con tus textos, fotos y datos. Si eliges «Lo montas tú», la guía explica cada paso con capturas.'],
   ['¿Qué pasa si no tengo fotos o textos?', 'Lo marcas en el formulario y usamos imágenes libres de derechos y textos de partida que luego puedes cambiar.'],
   ['¿Puedo pedir cambios después?', 'Sí. Los ajustes sobre lo que has pedido están incluidos. Contesta al email de entrega y los hacemos.'],
@@ -53,9 +58,9 @@ const ld = JSON.stringify([
   <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
     Servicios digitales como barras de pan: <span class="text-brand">precio fijo, plazo fijo.</span>
   </h1>
-  <p class="mt-5 max-w-2xl text-lg text-muted">Nada de reuniones eternas ni presupuestos a medida. Eliges, rellenas unos campos y lo recibes funcionando.</p>
+  <p class="mt-5 max-w-2xl text-lg text-muted">Nada de reuniones eternas ni presupuestos a medida. Eliges, empiezas gratis, ves una vista previa y pagas solo si te gusta. Para negocios y también para particulares.</p>
 
-  <ol class="relative mt-10 grid gap-5 md:grid-cols-3">
+  <ol class="relative mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
     {pasos.map((p) => (
       <li class="tarjeta relative p-6">
         <span class="flex items-center justify-between">
@@ -102,8 +107,8 @@ const ld = JSON.stringify([
 
 <section class="mt-16 grid gap-10 lg:grid-cols-[1fr_1fr]">
   <div>
-    <span class="etiqueta">Del pago a la entrega</span>
-    <h2 class="mt-3 text-3xl font-bold text-ink">Qué pasa después de comprar</h2>
+    <span class="etiqueta">De la solicitud a la entrega</span>
+    <h2 class="mt-3 text-3xl font-bold text-ink">Qué pasa después de empezar</h2>
     <ol class="mt-6 space-y-0 border-l-2 border-line pl-6">
       {linea.map((l) => (
         <li class="relative pb-6 last:pb-0">

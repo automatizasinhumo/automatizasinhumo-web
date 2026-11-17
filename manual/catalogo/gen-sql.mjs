@@ -1,26 +1,13 @@
 // node manual/catalogo/gen-sql.mjs > manual/catalogo/seed.sql
 // Sustituye el catálogo demo de Minshop por el catálogo de servicios.
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { categorias, productos, paginas } from './catalogo.mjs';
 import { DEMOS, DEMOS_URL, demosDe } from '../demos/demos.mjs';
 
-const here = new URL('.', import.meta.url);
-const meta = new Map();
-for (const line of readFileSync(new URL('repos_meta.csv', here), 'utf8').split(/\r?\n/).slice(1)) {
-  const [name, desc, lic, home, stars] = line.split(';');
-  if (name) meta.set(name.toLowerCase(), { lic, home, stars });
-}
-
 const ALPHA = '0123456789abcdefghjkmnpqrstvwxyz';
 const pid = (p) => `${p}_${Array.from({ length: 10 }, () => ALPHA[randomInt(32)]).join('')}`;
 const q = (s) => (s == null ? 'NULL' : `'${String(s).replace(/'/g, "''")}'`);
-
-const licNota = (lic) => {
-  if (!lic || lic === 'NONE' || lic === 'NOASSERTION') return 'sin licencia clara: solo referencia de diseño';
-  if (/AGPL|GPL/.test(lic)) return `${lic}: uso con condiciones (código abierto si se distribuye)`;
-  return `${lic}: libre para uso comercial`;
-};
 
 function descripcion(p) {
   const l = [];
@@ -42,15 +29,12 @@ function descripcion(p) {
       `| Plazo | ${p.plazo} | ${p.plazo} |`,
       '| Ajustes tras la entrega | Dudas por email | Incluidos |', '');
   }
-  if (p.repos.length) {
-    l.push('### Base técnica (código abierto)');
-    for (const r of p.repos) {
-      const m = meta.get(r.toLowerCase());
-      const demo = m?.home && /^https?:/.test(m.home) ? ` · [demo](${m.home})` : '';
-      l.push(`- [${r}](https://github.com/${r}) — ${licNota(m?.lic)}${demo}`);
-    }
-    l.push('');
-  }
+  l.push('### Pruébalo antes de pagar',
+    '1. Pulsa **Empieza gratis** y rellena los campos (2-3 minutos).',
+    '2. Te enviamos una vista previa con tus datos.',
+    '3. Si te gusta, pagas y te lo entregamos funcionando. Si no, no pagas nada.',
+    '',
+    '_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._', '');
   return l.join('\n');
 }
 
@@ -70,8 +54,8 @@ for (const p of productos) {
   const varios = p.p.length === 2;
   out.push(`INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES (${q(p.nombre)}, ${q(descripcion(p))}, ${p.p[0] * 100}, 'eur', 999, 1, ${q(p.slug)}, ${varios ? q('Modalidad') : 'NULL'}, 0, ${q(pid('prod'))});`);
   out.push(`INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug=${q(p.slug)} AND c.slug=${q(p.cat)};`);
-  // Portada PNG estática (public/images/productos, generada por gen-imagenes.mjs)
-  const img = `productos/${p.slug}.png`;
+  // Portada JPEG estática (public/images/productos, generada por gen-imagenes.mjs)
+  const img = `productos/${p.slug}.jpg`;
   out.push(`UPDATE products SET image_key=${q(img)} WHERE slug=${q(p.slug)};`);
   out.push(`INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, ${q(img)}, 0, ${q(pid('pimg'))} FROM products WHERE slug=${q(p.slug)};`);
   // Galería: capturas reales de las plantillas demo (public/images/demos/<último segmento>.png)
@@ -114,7 +98,7 @@ for (const pg of paginas.filter((p) => p.menu === 'footer'))
 // Ajustes
 const set = (k, v) => out.push(`INSERT INTO settings (key, value) VALUES (${q(k)}, ${q(v)}) ON CONFLICT(key) DO UPDATE SET value=excluded.value;`);
 set('store_name', 'Automatiza sin humo');
-set('announcement', 'Webs y automatizaciones a precio cerrado · Eliges, rellenas campos y lo recibes funcionando');
+set('announcement', 'Empieza gratis: ves la vista previa y pagas solo si te gusta · Te atiende una persona');
 set('announcement_href', '/pages/como-funciona');
 
 process.stdout.write(out.join('\n') + '\n');

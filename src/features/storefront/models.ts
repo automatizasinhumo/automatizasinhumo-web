@@ -226,6 +226,8 @@ export interface ProductDetailModel {
   related: ProductCardModel[];
   /** Where "back to shop" goes — the catalog, wherever the merchant put it. */
   backHref: string;
+  /** «Empieza gratis»: formulario sin pago (/empezar/<slug>). */
+  startHref: string;
   /** Validated message from ?error=, or null. */
   error: string | null;
 }

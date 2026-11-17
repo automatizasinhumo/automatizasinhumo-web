@@ -226,6 +226,7 @@ export async function loadProductDetail(
         }),
       ),
       backHref: catalogPath(options.settings?.homePage),
+      startHref: `/empezar/${product.slug}`,
       error: options.searchParams.get('error'),
     },
     purchase: {

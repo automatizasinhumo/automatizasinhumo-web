@@ -62,7 +62,7 @@ const query =
     ? normalizeSearchQuery(Astro.url.searchParams.get('q') ?? '')
     : '';
 
-const desc = (description ?? `${storeName}: webs, automatizaciones y servicios digitales a precio cerrado. Eliges, rellenas unos campos y lo recibes funcionando.`).slice(0, 160);
+const desc = (description ?? `${storeName}: webs, automatizaciones y servicios digitales a precio cerrado para negocios y particulares. Empiezas gratis y pagas solo si te gusta.`).slice(0, 160);
 const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
 const canonical = canonicalOverride ?? new URL(Astro.url.pathname, origin).href;
 // Sin foto de producto (placeholder): usar la imagen social de la marca.

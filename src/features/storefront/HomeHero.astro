@@ -14,8 +14,8 @@ const destacados = [
 ];
 const pasos = [
   ['01', 'Eliges', 'Un servicio con precio cerrado y plazo de entrega. Sin presupuestos ni reuniones.', 'hand-click'],
-  ['02', 'Rellenas campos', 'Un formulario corto con tus textos, colores y datos. Nada técnico.', 'pencil'],
-  ['03', 'Lo recibes funcionando', 'Publicado con tu marca, o en plantilla con guía si prefieres montarlo tú.', 'rocket'],
+  ['02', 'Empiezas gratis', 'Rellenas un formulario corto (2-3 minutos) con tus textos y datos. Sin tarjeta.', 'pencil'],
+  ['03', 'Ves la vista previa', 'Te enviamos un adelanto con tus datos. Si te gusta, pagas y lo recibes funcionando.', 'eye'],
 ];
 // Nivel A de manual/catalogo/entrega.mjs: salen con un prompt y se entregan el mismo día.
 const rapidos = [
@@ -25,10 +25,13 @@ const rapidos = [
 ];
 const ventajas = [
   ['Precio cerrado', 'Ves el precio antes de pagar. No hay presupuestos que crecen ni horas extra.', 'receipt-euro'],
-  ['Lo tuyo es tuyo', 'Código abierto y alojamiento gratuito o en tu cuenta. Sin cuotas obligatorias.', 'lock-open'],
-  ['Sin reuniones', 'Rellenas un formulario corto y te escribimos solo si falta algo.', 'mood-smile'],
+  ['Pruebas antes de pagar', 'Primero ves una vista previa con tus datos. Si no te convence, no pagas nada.', 'eye'],
+  ['Una persona detrás', 'Te atiende David Porto Díaz, no un robot. Te responde cualquier duda, rápido y sin tecnicismos.', 'mood-smile'],
+  ['Es tuyo', 'Accesos a tu nombre y sin cuotas obligatorias. Sin permanencia.', 'lock-open'],
 ];
 const faq = [
+  ['¿Tengo que pagar antes?', 'No. Empiezas gratis rellenando los datos, te enviamos una vista previa y solo pagas si te gusta.'],
+  ['¿Es solo para empresas?', 'No. También para particulares: bodas, cumpleaños, eventos, asociaciones o un proyecto personal.'],
   ['¿Qué diferencia hay entre «Lo montas tú» y «Te lo montamos»?', 'Con «Lo montas tú» recibes la plantilla rellenada y una guía paso a paso para publicarla. Con «Te lo montamos» te la entregamos publicada y funcionando.'],
   ['¿Y si necesito cambios?', 'Los ajustes sobre lo que has pedido están incluidos. Contesta al email de entrega y los hacemos.'],
   ['¿Tengo que pagar algo cada mes?', 'No. Casi todo se publica en planes gratuitos. Si algo necesita una cuenta de pago, lo verás en la ficha antes de comprar.'],
@@ -49,14 +52,14 @@ const muestras = [
         Tu web, tus reservas y tus tareas repetitivas, <span class="text-brand">resueltas sin humo.</span>
       </h1>
       <p class="mt-5 max-w-xl text-lg text-muted">
-        Más de 70 servicios para pymes y autónomos, montados sobre software de código abierto.
-        Pagas una vez, sin permanencia, y el resultado es tuyo.
+        Más de 70 servicios para negocios, autónomos y particulares (bodas, eventos, asociaciones…).
+        Sin complicaciones, rápido y con una persona que te responde. Empiezas gratis y pagas solo si te gusta.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="#catalogo" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Ver servicios</a>
-        <a href="/pages/demos" class="rounded-full border border-brand bg-surface px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Ver demos en vivo →</a>
+        <a href="#catalogo" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Elegir servicio</a>
+        <a href="/empezar/consulta" class="rounded-full border border-brand bg-surface px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Cuéntanos qué necesitas →</a>
       </div>
-      <p class="mt-5 text-sm text-faint">Plantillas reales · Entrega en días · Sin cuotas obligatorias</p>
+      <p class="mt-5 text-sm text-faint">Vista previa gratis · Pagas solo si te gusta · Te atiende una persona</p>
     </div>
 
     <a href="/pages/demos" class="relative mx-auto block h-[300px] w-full max-w-[520px] sm:h-[360px]" aria-label="Ver las demos en vivo">

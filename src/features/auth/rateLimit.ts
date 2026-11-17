@@ -17,7 +17,12 @@ export function rateLimitBucket(
   }
   if (method !== 'POST') return null;
   if (pathname === '/admin/login' || pathname === '/account/login') return 'auth';
-  if (pathname === '/api/checkout' || pathname === '/checkout' || pathname.startsWith('/pay/')) {
+  if (
+    pathname === '/api/checkout' ||
+    pathname === '/checkout' ||
+    pathname.startsWith('/pay/') ||
+    pathname === '/api/solicitudes'
+  ) {
     return 'checkout';
   }
   return null;

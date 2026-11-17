@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false;
+
+const raw = Astro.url.searchParams.get('id') ?? '';
+const id = /^S-[A-Z0-9]{6,12}$/.test(raw) ? raw : null;
+---
+
+<Layout title="Solicitud recibida" description="Hemos recibido tu solicitud. Te enviamos la vista previa y pagas solo si te gusta.">
+  <div class="mx-auto max-w-2xl px-4 py-12 text-center sm:py-16">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand text-3xl text-on-brand" aria-hidden="true">✓</div>
+    <h1 class="mt-6 font-serif text-3xl font-bold text-ink sm:text-4xl">¡Recibido! Ya estamos en ello</h1>
+    {id && (
+      <p class="mt-3 text-muted">
+        Tu número de solicitud es <strong class="rounded bg-brand/10 px-2 py-0.5 font-mono text-ink" data-solicitud-id>{id}</strong>. Guárdalo por si nos escribes.
+      </p>
+    )}
+    <p class="mt-3 font-semibold text-ink">No has pagado nada.</p>
+
+    <ol class="mx-auto mt-10 max-w-md space-y-4 text-left">
+      <li class="flex gap-4 rounded-2xl border border-line p-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">1</span>
+        <span class="text-sm text-muted"><strong class="block text-ink">Revisamos tus datos</strong>Si falta algo, te escribimos. Mira también la carpeta de spam.</span>
+      </li>
+      <li class="flex gap-4 rounded-2xl border border-line p-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">2</span>
+        <span class="text-sm text-muted"><strong class="block text-ink">Vista previa en 24-72 h laborables</strong>La ves con tu información, antes de decidir nada.</span>
+      </li>
+      <li class="flex gap-4 rounded-2xl border border-line p-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand">3</span>
+        <span class="text-sm text-muted"><strong class="block text-ink">Pagas solo si te gusta</strong>Te mandamos el enlace de pago y lo dejamos funcionando. Si no te convence, no pagas.</span>
+      </li>
+    </ol>
+
+    <p class="mt-10 text-sm text-muted">
+      ¿Dudas? Te responde David Porto Díaz en{' '}
+      <a href="mailto:hola@automatizasinhumo.com" class="underline hover:text-brand">hola@automatizasinhumo.com</a>.
+    </p>
+    <a href="/" class="mt-6 inline-block rounded-full border border-brand px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Seguir viendo servicios</a>
+  </div>
+</Layout>

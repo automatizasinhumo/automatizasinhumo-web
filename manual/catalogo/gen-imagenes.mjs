@@ -1,5 +1,5 @@
 // node manual/catalogo/gen-imagenes.mjs
-// Portada PNG 1200x900 por producto en public/images/productos/<slug>.png
+// Portada JPEG 1200x900 por producto en public/images/productos/<slug>.jpg
 // (estático de Workers, sin R2; también sirve de og:image).
 //
 // - Si el producto tiene captura de una demo real (public/images/demos/), la
@@ -26,8 +26,9 @@ export const ICONO_CAT = {
   contenido: 'photo-edit', planes: 'calendar-repeat',
 };
 export const ICONO_PROD = {
-  'formulario-aviso-telegram': 'brand-telegram', 'avisos-multicanal': 'bell-ringing', 'bot-telegram-chatgpt': 'brand-telegram',
-  'bot-telegram-medida': 'robot', 'crm-whatsapp': 'brand-whatsapp', 'auto-captacion-leads': 'user-plus', 'auto-facturas': 'file-invoice',
+  // Sin logos de marcas ajenas: solo iconos genéricos.
+  'formulario-aviso-telegram': 'bell-ringing', 'avisos-multicanal': 'bell-ringing', 'bot-telegram-chatgpt': 'message-chatbot',
+  'bot-telegram-medida': 'robot', 'crm-whatsapp': 'users', 'auto-captacion-leads': 'user-plus', 'auto-facturas': 'file-invoice',
   'auto-tareas-programadas': 'clock-play', 'acortador-enlaces': 'link', 'qr-campanas': 'qrcode', 'analitica-sin-cookies': 'chart-bar',
   'marketplace-plantillas': 'building-store', 'portal-cliente': 'user-circle', 'plan-mantenimiento-web': 'tool', 'plan-hosting-dominio': 'server',
   'plan-automatizaciones': 'refresh', 'auditoria-web': 'report-search', 'vigilancia-caidas': 'heartbeat', 'facturas-presupuestos': 'receipt',
@@ -72,6 +73,9 @@ function pastilla(p, ico) {
 ${usa(ico, 92, 66, 32, B.brand, 2)}<text x="138" y="92" font-family="${FONT}" font-size="26" font-weight="600" fill="${B.ink}">${esc(t)}</text>`;
 }
 
+// JPEG sin submuestreo de color (4:4:4): el texto de las capturas se ve nítido.
+// Antes era PNG con paleta de 256 colores, que pixelaba degradados y fotos.
+const JPG = { quality: 88, mozjpeg: true, chromaSubsampling: '4:4:4' };
 const FW = 1060, FX = 70, FY = 150, BAR = 46;
 async function conCaptura(p, nombre, ico) {
   const shot = await sharp(fileURLToPath(new URL(`${nombre}.png`, DEMOS))).resize({ width: FW }).toBuffer();
@@ -82,7 +86,7 @@ async function conCaptura(p, nombre, ico) {
 <circle cx="${FX + 30}" cy="${FY + 23}" r="7" fill="${B.acc}" opacity=".75"/><circle cx="${FX + 54}" cy="${FY + 23}" r="7" fill="${B.line}"/><circle cx="${FX + 78}" cy="${FY + 23}" r="7" fill="${B.line}"/>
 <rect x="${FX + 330}" y="${FY + 11}" width="400" height="24" rx="12" fill="${B.bg}"/>
 ${pastilla(p, ico)}</svg>`;
-  return sharp(Buffer.from(svg)).composite([{ input: recorte, left: FX, top: FY + BAR }]).png({ palette: true, quality: 92, effort: 10 });
+  return sharp(Buffer.from(svg)).composite([{ input: recorte, left: FX, top: FY + BAR }]).jpeg(JPG);
 }
 
 function conIcono(p, ico) {
@@ -96,7 +100,7 @@ ${usa('check', cx + 185, cy + 55, 90, B.acc, 1.5)}
 <rect x="${cx - 175}" y="${cy - 175}" width="350" height="350" rx="56" fill="#fff" stroke="${B.line}" stroke-width="2" filter="url(#s)"/>
 ${usa(ico, cx - 115, cy - 115, 230, B.brand, 1.25)}
 ${pastilla(p, ICONO_CAT[p.cat] ?? ico)}</svg>`;
-  return sharp(Buffer.from(svg)).png({ palette: true, quality: 92, effort: 10 });
+  return sharp(Buffer.from(svg)).jpeg(JPG);
 }
 
 let n = 0;
@@ -104,9 +108,9 @@ for (const p of productos) {
   const ico = ICONO_PROD[p.slug] ?? ICONO_CAT[p.cat] ?? 'sparkles';
   const nombre = captura(p);
   const img = nombre ? await conCaptura(p, nombre, ICONO_CAT[p.cat] ?? ico) : conIcono(p, ico);
-  await img.toFile(fileURLToPath(new URL(`${p.slug}.png`, OUT)));
+  await img.toFile(fileURLToPath(new URL(`${p.slug}.jpg`, OUT)));
   if (nombre) n++;
 }
-// Las portadas SVG antiguas ya no se usan.
-for (const f of readdirSync(OUT)) if (f.endsWith('.svg')) unlinkSync(fileURLToPath(new URL(f, OUT)));
+// Las portadas SVG y PNG antiguas ya no se usan.
+for (const f of readdirSync(OUT)) if (/\.(svg|png)$/.test(f)) unlinkSync(fileURLToPath(new URL(f, OUT)));
 console.error(`${productos.length} portadas (${n} con captura real) en public/images/productos/`);

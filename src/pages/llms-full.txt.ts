@@ -41,12 +41,12 @@ export const GET: APIRoute = async ({ url }) => {
 
   const body = `# ${storeName} — índice completo para LLM
 
-> ${storeName} es una tienda online de servicios digitales a precio cerrado en España: webs, cartas QR, reservas, webs de boda y eventos, bots con IA, tiendas, documentos y automatizaciones para autónomos, pequeños negocios y particulares. El cliente elige, rellena un formulario y recibe el servicio funcionando. Resumen corto: ${origin}/llms.txt
+> ${storeName} es una tienda online de servicios digitales a precio cerrado en España: webs, cartas QR, reservas, webs de boda y eventos, bots con IA, tiendas, documentos y automatizaciones para autónomos, pequeños negocios y particulares. El cliente elige, empieza gratis, ve una vista previa con sus datos y paga solo si le gusta. Resumen corto: ${origin}/llms.txt
 
 ## Cómo trabaja
 - Precio cerrado y plazo publicados en cada ficha, sin presupuestos a medida.
 - Cada servicio tiene una demo navegable: ${origin}/pages/demos
-- Proceso: elegir servicio → pagar → rellenar datos → entrega y revisión. Detalle: ${origin}/pages/como-funciona
+- Proceso: elegir servicio → empezar gratis (rellenar datos, sin tarjeta) → vista previa → pagar solo si le gusta → entrega y revisión. Detalle: ${origin}/pages/como-funciona
 - Responsable: David Porto Díaz (persona física), que entrega y da soporte directamente.
 - Buscador con sinónimos: ${origin}/search?q=restaurante
 

@@ -96,6 +96,7 @@ const detail = (overrides: Partial<ProductDetailModel> = {}): ProductDetailModel
   heroImage: { ...image('/images/tee.jpg'), priority: true },
   related: [],
   backHref: '/',
+  startHref: '/empezar/tee',
   error: null,
   ...overrides,
 });

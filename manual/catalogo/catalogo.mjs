@@ -607,7 +607,7 @@ export const productos = [
   },
   {
     slug: 'web-arrastrar-soltar', cat: 'portales', nombre: 'Web que editas arrastrando bloques', p: [199, 449], plazo: '5 días',
-    resumen: 'Tu web en un editor visual de código abierto: cambias textos, fotos y secciones arrastrando, sin tocar código ni pagar cuota.',
+    resumen: 'Tu web en un editor visual muy sencillo: cambias textos, fotos y secciones arrastrando, sin tocar código ni pagar cuota.',
     recibes: ['Editor visual instalado y configurado', 'Web inicial de 4 páginas con tus datos', 'Bloques de tu sector listos para usar', 'Formación de 30 minutos'],
     campos: ['Sector', 'Páginas que necesitas', 'Logo, colores y fotos', 'Dominio'],
     ejemplo: 'Tienda de muebles: monta ella misma la página de ofertas de enero arrastrando el bloque «producto destacado».',
@@ -633,11 +633,14 @@ Cada servicio es un producto cerrado: **precio fijo, plazo fijo y una lista de c
 ### 1. Eliges
 Busca tu servicio por pestaña (webs, hostelería, reservas, bodas, bots, automatizaciones…). Cada ficha te dice qué recibes, un ejemplo real y el plazo.
 
-### 2. Rellenas los campos
-Tras el pago te llega un formulario con los datos que necesitamos: nombre, fotos, horarios, textos… Si no tienes algo, lo marcamos y seguimos.
+### 2. Empiezas gratis
+Pulsa **Empieza gratis** y rellena los datos que necesitamos: nombre, fotos, horarios, textos… Si no tienes algo, lo marcas y seguimos. No pagas nada todavía.
 
-### 3. Lo recibes funcionando
-Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta de uso.
+### 3. Ves una vista previa
+Te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+### 4. Lo recibes funcionando
+Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta de uso. Detrás hay una persona, David Porto Díaz, que te responde cualquier duda.
 
 ## Dos modalidades
 
@@ -648,14 +651,24 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
 | Soporte | Por email | Por email y WhatsApp |
 
 ## Sin humo
-- Todo se basa en software probado y de código abierto: **es tuyo**, sin cuotas obligatorias.
+- **Es tuyo**: accesos a tu nombre y sin cuotas obligatorias.
+- Pagas solo cuando has visto la vista previa y te gusta.
 - Si en 7 días no está como te prometimos, te devolvemos el dinero.
 `,
   },
   {
     slug: 'preguntas-frecuentes', titulo: 'Preguntas frecuentes', menu: 'footer',
     md: `## ¿De quién es la web o la automatización?
-Tuya. Usamos software de código abierto y te entregamos los accesos.
+Tuya. Te entregamos todos los accesos a tu nombre.
+
+## ¿Tengo que pagar antes?
+No. Pulsas **Empieza gratis**, rellenas los datos y te enviamos una vista previa. Solo pagas si te gusta.
+
+## ¿Es solo para empresas?
+No. También para particulares: webs de boda, cumpleaños, viajes, asociaciones, currículums o tu proyecto personal.
+
+## ¿Hay alguien al otro lado?
+Sí. David Porto Díaz atiende cada pedido en persona y responde a cualquier duda.
 
 ## ¿Hay cuotas mensuales?
 No son obligatorias. Muchos servicios funcionan gratis en Cloudflare. Si prefieres que lo mantengamos, tienes los **Planes mensuales**.
@@ -689,7 +702,7 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 - **Telegram**: avisos instantáneos gratis desde formularios, reservas y pedidos.
 
 ### Automatización y embudos
-- **n8n**: automatizaciones de código abierto; se puede alojar sin cuota.
+- **n8n**: automatizaciones que se pueden alojar sin cuota.
 - **Make**: automatizaciones visuales con plan gratuito.
 - **Systeme.io**: embudos de venta, cursos y emails en una sola herramienta, con plan gratuito.
 
@@ -714,9 +727,6 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 ### Pagos
 - **Stripe**: cobros con tarjeta, Bizum vía TPV de tu banco si lo prefieres.
 
-### Herramientas libres que instalamos sin cuota
-- **Uptime Kuma** (vigilancia de caídas), **listmonk** (newsletter), **Invoify** (facturas), **Starlight** (centros de ayuda), **Excalidraw** (pizarra).
-
 _Si quieres que configuremos alguna, está incluido en «Te lo montamos»._
 `,
   },
@@ -728,28 +738,33 @@ Estas demos son webs reales funcionando. Cambiamos textos, fotos y colores por l
 
 DEMOS_LISTA
 
-Todas las bases son de código abierto con licencia MIT: el resultado es tuyo, sin cuotas obligatorias.
+Con tus textos, fotos y colores queda así en 2-10 días. Pruébalo gratis: rellenas los datos, ves la vista previa y pagas solo si te gusta.
 
 ¿No ves tu caso? [Cuéntanos qué necesitas](/pages/contacto).
 `,
   },
   {
     slug: 'contacto', titulo: 'Contacto', menu: 'footer',
-    md: `## Cuéntanos qué necesitas
+    md: `## Habla con una persona
 
-Responde en un mensaje a estas cinco preguntas y te decimos qué servicio encaja y su precio cerrado:
+Te atiende **David Porto Díaz**, que monta y entrega cada servicio. Sin bots ni centralitas: te responde una persona en menos de 24 horas laborables. Da igual que seas empresa, autónomo o particular (una boda, un cumpleaños, una asociación…).
 
-1. **Tu negocio**: nombre, sector y ciudad.
+**[Escríbenos con el formulario](/empezar/consulta)**: tardas un minuto.
+
+Si quieres afinar, cuéntanos:
+
+1. **Quién eres**: tu negocio o tu proyecto personal.
 2. **Qué quieres conseguir**: más reservas, vender online, ahorrar tiempo, una web para tu evento…
 3. **Qué tienes ya**: web, dominio, redes, herramientas.
 4. **Para cuándo** lo necesitas.
 5. **Presupuesto** aproximado.
 
 ### Dónde escribirnos
+- Formulario: [/empezar/consulta](/empezar/consulta)
 - Email: [hola@automatizasinhumo.com](mailto:hola@automatizasinhumo.com)
 - Respondemos en menos de 24 horas laborables.
 
-_Si ya sabes qué quieres, cómpralo directamente en el catálogo: tras el pago te llega el formulario con los campos._
+_Si ya sabes qué quieres, entra en su ficha y pulsa **Empieza gratis**: rellenas los datos, ves una vista previa y pagas solo si te gusta._
 `,
   },
   {
@@ -767,7 +782,7 @@ En cumplimiento de la Ley 34/2002 (LSSI-CE):
 Este sitio ofrece la venta de servicios digitales (webs, automatizaciones y herramientas) a precio cerrado.
 
 ### Propiedad intelectual
-Los textos y el diseño de este sitio pertenecen al titular. Los servicios se basan en software de código abierto; cada entrega respeta e incluye la licencia original de cada componente.
+Los textos y el diseño de este sitio pertenecen al titular. Cada entrega respeta las licencias de los componentes de terceros que incluya.
 
 ### Responsabilidad
 El titular no se hace responsable del uso que terceros hagan de los servicios entregados ni de los contenidos que el cliente aporte.
@@ -778,10 +793,10 @@ El titular no se hace responsable del uso que terceros hagan de los servicios en
     md: `## Condiciones de contratación
 
 ### Precio y pago
-El precio de cada ficha es el precio final, sin recargos. El pago se realiza al contratar y recibes factura del pedido.
+El precio de cada ficha es el precio final, sin recargos. Puedes empezar gratis: rellenas los datos, te enviamos una vista previa y solo pagas si la apruebas. Recibes factura del pedido.
 
 ### Entrega
-El plazo de cada ficha cuenta desde que recibimos los campos completos del formulario. Entregamos por email el enlace, los accesos y una guía de uso.
+El plazo de cada ficha cuenta desde que recibimos los campos completos del formulario (o desde el pago, si empezaste con la vista previa). Entregamos por email el enlace, los accesos y una guía de uso.
 
 ### Cambios
 Cada servicio incluye una ronda de cambios sobre lo entregado. Cambios posteriores, con plan de mantenimiento o por horas.
