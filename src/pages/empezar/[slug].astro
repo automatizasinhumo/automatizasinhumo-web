@@ -88,7 +88,12 @@ const label = 'block text-sm font-medium text-ink';
         {
           pedidoInvalido && (
             <p role="alert" class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              No encontramos un pedido pagado de este servicio con ese enlace. Abre el enlace del email de tu pedido o escríbenos a hola@automatizasinhumo.com y lo revisamos. Mientras, puedes pedir la vista previa gratis.
+              No encontramos un pedido pagado de este servicio con ese enlace.
+              <span class="mt-3 flex flex-wrap gap-2">
+                <a href="mailto:hola@automatizasinhumo.com?subject=Revisar%20mi%20pedido" class="rounded-full bg-amber-900 px-4 py-2 font-semibold text-white hover:bg-amber-800">Revisar mi pedido</a>
+                <a href="#solicitud-form" class="rounded-full border border-amber-900 px-4 py-2 font-semibold hover:bg-amber-100">Solicitar muestra gratuita</a>
+              </span>
+              <span class="mt-2 block text-xs">Si ya pagaste, no empieces de nuevo: abre el enlace del correo de tu pedido o escríbenos y lo revisamos.</span>
             </p>
           )
         }
@@ -100,7 +105,7 @@ const label = 'block text-sm font-medium text-ink';
           )
         }
 
-        <form method="post" action="/api/solicitudes" class="mt-8 space-y-6" data-solicitud data-error-ultimo={errorEnUltimo ? '' : undefined}>
+        <form method="post" action="/api/solicitudes" id="solicitud-form" class="mt-8 space-y-6" data-solicitud data-error-ultimo={errorEnUltimo ? '' : undefined}>
           {/* Sin JS se ve todo de una vez; con JS, un paso cada vez con esta barra. */}
           <div class="hidden" data-progreso aria-live="polite">
             <div class="flex items-baseline justify-between text-xs font-semibold">
@@ -239,10 +244,21 @@ const label = 'block text-sm font-medium text-ink';
         <div class="rounded-2xl bg-brand/5 p-5">
           <p class="font-semibold text-ink">Qué pasa después</p>
           <ol class="mt-3 space-y-3 text-sm text-muted">
-            <li><strong class="text-ink">1. Te escribimos</strong> para confirmar que lo hemos recibido.</li>
-            <li><strong class="text-ink">2. Vista previa en 24-72 h</strong> laborables, con tus datos.</li>
-            <li><strong class="text-ink">3. Si te gusta, pagas</strong> y te lo entregamos funcionando.</li>
-            <li><strong class="text-ink">4. Si no, no pagas nada.</strong> Sin letra pequeña.</li>
+            {pedido ? (
+              <Fragment>
+                <li><strong class="text-ink">1. Ya has pagado.</strong> No se cobra nada más.</li>
+                <li><strong class="text-ink">2. Revisamos tus datos</strong> y te escribimos si falta algo.</li>
+                <li><strong class="text-ink">3. Te enseñamos el resultado</strong> en 24-72 h laborables.</li>
+                <li><strong class="text-ink">4. Lo entregamos tras tu aprobación,</strong> con una ronda de ajustes incluida.</li>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <li><strong class="text-ink">1. Te escribimos</strong> para confirmar que lo hemos recibido.</li>
+                <li><strong class="text-ink">2. Vista previa en 24-72 h</strong> laborables, con tus datos.</li>
+                <li><strong class="text-ink">3. Si te gusta, pagas</strong> y lo recibes según la modalidad elegida.</li>
+                <li><strong class="text-ink">4. Si no, no pagas nada.</strong> Sin letra pequeña.</li>
+              </Fragment>
+            )}
           </ol>
         </div>
         <div class="rounded-2xl border border-line p-5 text-sm text-muted">

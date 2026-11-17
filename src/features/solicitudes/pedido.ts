@@ -9,6 +9,8 @@ import { getOrderByPublicId } from '../orders/db';
 export interface PedidoVerificado {
   /** Número que ve el cliente (parte del ord_ o el id antiguo). */
   ref: string;
+  /** ord_… del pedido, para unir la solicitud en D1. */
+  publicId: string;
   /** «Plantilla + guía» | «Te lo montamos» | null si el servicio no tiene modalidades. */
   modalidad: string | null;
   /** Lo pagado por esa línea (precio unitario × cantidad), en céntimos. */
@@ -52,6 +54,7 @@ export async function resolverPedido(
   if (!linea) return null;
   return {
     ref: publicIdToken(order.public_id ?? '', 'order') ?? publicId,
+    publicId,
     modalidad: modalidadDeEtiqueta(linea.variante),
     pagadoCents: linea.price_cents * linea.quantity,
     currency: order.currency,

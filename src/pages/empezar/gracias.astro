@@ -1,13 +1,17 @@
 ---
+import { env } from 'cloudflare:workers';
 import Layout from '../../layouts/Layout.astro';
+import { estadoPublico } from '../../features/solicitudes';
 
 export const prerender = false;
 
 const raw = Astro.url.searchParams.get('id') ?? '';
 const id = /^S-[A-Z0-9]{6,12}$/.test(raw) ? raw : null;
 // Tres finales distintos: prueba gratis, datos de un pedido ya pagado o consulta abierta.
-const t = Astro.url.searchParams.get('tipo');
-const tipo = t === 'pedido' || t === 'consulta' ? t : 'prueba';
+// El tipo sale de la solicitud guardada en D1, no de la URL: un ?tipo= cambiado no
+// puede mostrar «pedido pagado» a quien no ha pagado.
+const guardada = id ? await estadoPublico(env.DB, id).catch(() => null) : null;
+const tipo = guardada?.tipo ?? 'prueba';
 const TEXTO = {
   prueba: {
     aviso: 'No has pagado nada.',

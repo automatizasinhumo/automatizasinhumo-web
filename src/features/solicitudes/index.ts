@@ -152,12 +152,17 @@ export interface SolicitudRow extends Omit<SolicitudInput, 'campos'> {
   updated_at: string;
 }
 
-export async function crearSolicitud(db: D1Database, s: SolicitudInput): Promise<string> {
+export async function crearSolicitud(
+  db: D1Database,
+  s: SolicitudInput,
+  /** ord_… del pedido pagado ya verificado en el servidor (compra directa). */
+  pedidoPublicId: string | null = null,
+): Promise<string> {
   const publicId = nuevoPublicId();
   await db
     .prepare(
-      `INSERT INTO solicitudes (public_id, slug, producto, modalidad, nombre, email, telefono, campos, mensaje, utm_source, utm_medium, utm_campaign, referrer)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO solicitudes (public_id, slug, producto, modalidad, nombre, email, telefono, campos, mensaje, utm_source, utm_medium, utm_campaign, referrer, pedido_public_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       publicId,
@@ -173,6 +178,7 @@ export async function crearSolicitud(db: D1Database, s: SolicitudInput): Promise
       s.utm_medium,
       s.utm_campaign,
       s.referrer,
+      pedidoPublicId,
     )
     .run();
   return publicId;
@@ -235,16 +241,19 @@ export interface EstadoPublico {
   estado: Estado;
   creada: string;
   actualizada: string;
+  /** Final que corresponde: datos de un pedido pagado, prueba gratis o consulta. */
+  tipo: 'pedido' | 'prueba' | 'consulta';
 }
 
 /** Solo lo imprescindible para el seguimiento: nunca nombre, email ni campos. */
 export async function estadoPublico(db: D1Database, publicId: string): Promise<EstadoPublico | null> {
   const r = await db
-    .prepare('SELECT public_id, producto, estado, created_at, updated_at FROM solicitudes WHERE public_id = ?')
+    .prepare('SELECT public_id, slug, producto, estado, created_at, updated_at, pedido_public_id FROM solicitudes WHERE public_id = ?')
     .bind(publicId)
-    .first<{ public_id: string; producto: string | null; estado: Estado; created_at: string; updated_at: string }>();
+    .first<{ public_id: string; slug: string; producto: string | null; estado: Estado; created_at: string; updated_at: string; pedido_public_id: string | null }>();
   if (!r) return null;
-  return { publicId: r.public_id, producto: r.producto, estado: r.estado, creada: r.created_at, actualizada: r.updated_at };
+  const tipo = r.pedido_public_id ? 'pedido' : r.slug === 'consulta' ? 'consulta' : 'prueba';
+  return { publicId: r.public_id, producto: r.producto, estado: r.estado, creada: r.created_at, actualizada: r.updated_at, tipo };
 }
 
 export function esEstado(v: unknown): v is Estado {
@@ -275,4 +284,56 @@ export function resumenSolicitud(s: SolicitudInput, publicId: string): { text: s
         .join('') +
       '</table>',
   };
+}
+
+/**
+ * Compra directa: cinco estados que ve el cliente de un pedido ya pagado (sin paso
+ * «Pago»). Mismo texto en /order/<token> y en /empezar/estado.
+ */
+export const PASOS_PEDIDO = [
+  { titulo: 'Pendiente de datos', texto: 'Tu pedido está confirmado. Necesitamos tus datos para empezar.' },
+  { titulo: 'En preparación', texto: 'Ya tenemos tus datos y estamos preparando tu encargo. Te avisaremos cuando puedas revisarlo.' },
+  { titulo: 'Listo para revisar', texto: 'Tu primera versión está lista. Revísala y dinos si la apruebas o necesitas ajustes.' },
+  { titulo: 'Ajustes finales', texto: 'Hemos recibido tus cambios y estamos aplicándolos. Te avisaremos cuando estén listos.' },
+  { titulo: 'Entregado', texto: 'Tu trabajo está entregado. Tienes el acceso y las instrucciones en tu correo.' },
+] as const;
+
+/** Paso del pedido pagado según su solicitud (null = aún no ha mandado datos; -1 = cerrada). */
+export function pasoPedido(estado: Estado | null | undefined): number {
+  switch (estado) {
+    case null:
+    case undefined:
+      return 0;
+    case 'nueva':
+    case 'en_preparacion':
+      return 1;
+    case 'vista_previa_enviada':
+      return 2;
+    case 'aprobada':
+    case 'pagada':
+      return 3;
+    case 'entregada':
+      return 4;
+    default:
+      return -1;
+  }
+}
+
+export interface SolicitudDePedido {
+  publicId: string;
+  estado: Estado;
+  actualizada: string;
+}
+
+/** Solicitudes unidas a un pedido, por servicio (la más reciente de cada uno). */
+export async function solicitudesDePedido(db: D1Database, pedidoPublicId: string): Promise<Map<string, SolicitudDePedido>> {
+  const { results } = await db
+    .prepare('SELECT public_id, slug, estado, updated_at FROM solicitudes WHERE pedido_public_id = ? ORDER BY id DESC')
+    .bind(pedidoPublicId)
+    .all<{ public_id: string; slug: string; estado: Estado; updated_at: string }>();
+  const out = new Map<string, SolicitudDePedido>();
+  for (const r of results ?? []) {
+    if (!out.has(r.slug)) out.set(r.slug, { publicId: r.public_id, estado: r.estado, actualizada: r.updated_at });
+  }
+  return out;
 }

@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
   let publicId: string;
   try {
-    publicId = await crearSolicitud(env.DB, v.data);
+    publicId = await crearSolicitud(env.DB, v.data, pedido?.publicId ?? null);
   } catch (e) {
     console.error('solicitudes: no se pudo guardar', e);
     return redirect(`${volver}?error=guardar`, 303);
@@ -65,12 +65,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       const tienda = s.storeName ?? getConfig().storeName;
       const pagado = v.data.campos[CAMPO_PEDIDO];
       const intro = pagado
-        ? `Gracias. Tenemos tus datos para el pedido ${pagado}. David Porto Díaz se pone con ello y te envía el resultado para que lo revises antes de entregarlo.`
+        ? `Hemos recibido los datos de tu pedido ${pagado}. Gracias. Revisamos la información y, si está completa, tendrás una primera versión en 24-72 h laborables. Si falta algo, te escribimos por este mismo correo. No tienes que volver a pagar.`
         : 'Gracias. No has pagado nada. David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.';
       const seguimiento = new URL(`/empezar/estado?id=${encodeURIComponent(publicId)}`, request.url).toString();
       await mail.send({
         to: v.data.email,
-        subject: `Hemos recibido tu solicitud ${publicId} · ${tienda}`,
+        subject: pagado ? `Ya tenemos tus datos · ${v.data.producto ?? tienda}` : `Hemos recibido tu solicitud ${publicId} · ${tienda}`,
         text: `Hola ${v.data.nombre}:\n\n${intro}\n\nSigue tu solicitud: ${seguimiento}\n\n${r.text}\n\nSi quieres añadir algo, responde a este email.`,
         html: `<p>Hola ${escapar(v.data.nombre)}:</p><p>${escapar(intro)}</p><p><a href="${escapar(seguimiento)}">Sigue tu solicitud</a></p>${r.html}<p>Si quieres añadir algo, responde a este email.</p>`,
         idempotencyKey: `solicitud-cliente-${publicId}`,

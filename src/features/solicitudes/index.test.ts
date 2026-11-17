@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   CAMPO_PEDIDO,
+  PASOS_PEDIDO,
+  pasoPedido,
   camposDeDescripcion,
   esEstado,
   nombreCampo,
@@ -79,5 +81,19 @@ describe('ids y estados', () => {
     expect(html).toContain('&lt;b&gt;x&lt;/b&gt;');
     expect(html).toContain('a<br>b');
     expect(text).toContain('Solicitud: S-ABCDEFGH');
+  });
+});
+
+describe('pasoPedido', () => {
+  it('sin datos enviados = pendiente de datos; luego avanza sin paso de pago', () => {
+    expect(pasoPedido(null)).toBe(0);
+    expect(pasoPedido('nueva')).toBe(1);
+    expect(pasoPedido('en_preparacion')).toBe(1);
+    expect(pasoPedido('vista_previa_enviada')).toBe(2);
+    expect(pasoPedido('aprobada')).toBe(3);
+    expect(pasoPedido('entregada')).toBe(4);
+    expect(pasoPedido('descartada')).toBe(-1);
+    expect(PASOS_PEDIDO).toHaveLength(5);
+    expect(PASOS_PEDIDO.some((p) => /pago/i.test(p.titulo))).toBe(false);
   });
 });

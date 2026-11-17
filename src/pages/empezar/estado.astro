@@ -1,7 +1,7 @@
 ---
 import { env } from 'cloudflare:workers';
 import Layout from '../../layouts/Layout.astro';
-import { PASOS_CLIENTE, estadoPublico, normalizarPublicId, pasoCliente } from '../../features/solicitudes';
+import { PASOS_CLIENTE, PASOS_PEDIDO, estadoPublico, normalizarPublicId, pasoCliente, pasoPedido } from '../../features/solicitudes';
 
 export const prerender = false;
 
@@ -10,7 +10,10 @@ export const prerender = false;
 const raw = Astro.url.searchParams.get('id');
 const id = normalizarPublicId(raw);
 const solicitud = id ? await estadoPublico(env.DB, id).catch(() => null) : null;
-const paso = solicitud ? pasoCliente(solicitud.estado) : -1;
+// Pedido pagado: sus cinco estados (sin paso «Pago»). Prueba gratis: el recorrido de siempre.
+const esPedido = solicitud?.tipo === 'pedido';
+const pasos: readonly string[] = esPedido ? PASOS_PEDIDO.map((p) => p.titulo) : PASOS_CLIENTE;
+const paso = solicitud ? (esPedido ? pasoPedido(solicitud.estado) : pasoCliente(solicitud.estado)) : -1;
 const fecha = (s: string) =>
   new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -54,7 +57,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
           <p class="mt-5 text-sm text-muted">Esta solicitud está cerrada. Si quieres retomarla, escríbenos y seguimos.</p>
         ) : (
           <ol class="mt-6 space-y-3">
-            {PASOS_CLIENTE.map((t, i) => (
+            {pasos.map((t, i) => (
               <li class="flex items-center gap-3 text-sm" aria-current={i === paso ? 'step' : undefined}>
                 <span
                   class={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
@@ -70,7 +73,10 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
           </ol>
         )}
 
-        {paso >= 0 && paso < 3 && (
+        {esPedido && paso >= 0 && (
+          <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 text-sm font-medium text-ink" data-estado-pedido>{PASOS_PEDIDO[paso]!.texto} Tu pedido ya está pagado.</p>
+        )}
+        {!esPedido && paso >= 0 && paso < 3 && (
           <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 text-sm font-medium text-ink">Todavía no has pagado nada. Solo pagas si la vista previa te gusta.</p>
         )}
       </section>
