@@ -93,11 +93,11 @@ for (const pg of paginas)
 let pos = 0;
 const nav = (loc, type, targetSql, label) =>
   out.push(`INSERT INTO menu_items (location, target_type, target_id, label, position, public_id) VALUES (${q(loc)}, ${q(type)}, ${targetSql}, ${q(label)}, ${pos++}, ${q(pid('nav'))});`);
-nav('header', 'catalog', 'NULL', 'Todos los servicios');
+nav('header', 'catalog', 'NULL', 'Servicios');
 for (const c of categorias.filter((c) => c.menu === 'header'))
-  nav('header', 'category', `(SELECT id FROM categories WHERE slug=${q(c.slug)})`, c.nombre);
+  nav('header', 'category', `(SELECT id FROM categories WHERE slug=${q(c.slug)})`, c.corto ?? c.nombre);
 for (const pg of paginas.filter((p) => p.menu === 'header'))
-  nav('header', 'page', `(SELECT id FROM pages WHERE slug=${q(pg.slug)})`, pg.titulo);
+  nav('header', 'page', `(SELECT id FROM pages WHERE slug=${q(pg.slug)})`, pg.corto ?? pg.titulo);
 pos = 0;
 nav('footer', 'home', 'NULL', 'Inicio');
 for (const c of categorias.filter((c) => c.menu === 'footer'))

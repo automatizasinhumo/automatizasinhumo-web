@@ -53,7 +53,7 @@ const hasGallery = images.length > 1;
             fetchpriority={image.hero.priority ? 'high' : 'auto'}
             decoding="async"
             {...(image.hero.priority ? {} : { 'data-image-fade': '' })}
-            class={`aspect-square w-full shrink-0 snap-center bg-surface object-cover${soldOut ? ' opacity-60' : ''}`}
+            class={`aspect-[4/3] w-full shrink-0 snap-center bg-surface object-cover object-top${soldOut ? ' opacity-60' : ''}`}
           />
         ))}
         {soldOut && (
@@ -78,7 +78,7 @@ const hasGallery = images.length > 1;
               loading="lazy"
               decoding="async"
               data-image-fade
-              class="h-16 w-16 bg-surface object-cover"
+              class="h-16 w-16 bg-surface object-cover object-top"
             />
           </a>
         ))}

@@ -8,20 +8,20 @@
 //   - "Te lo montamos": nosotros lo publicamos con tus datos.
 
 export const categorias = [
-  { slug: 'webs', nombre: 'Webs para tu negocio', menu: 'header' },
-  { slug: 'hosteleria', nombre: 'Restaurantes y bares', menu: 'header' },
-  { slug: 'reservas', nombre: 'Reservas y citas', menu: 'header' },
-  { slug: 'bodas', nombre: 'Bodas y eventos', menu: 'header' },
-  { slug: 'identidad', nombre: 'Tarjetas, link-in-bio y CV', menu: 'header' },
-  { slug: 'captacion', nombre: 'Formularios y captación', menu: 'header' },
-  { slug: 'bots', nombre: 'Bots e IA', menu: 'header' },
+  { slug: 'webs', nombre: 'Webs para tu negocio', corto: 'Webs', menu: 'header' },
+  { slug: 'hosteleria', nombre: 'Restaurantes y bares', menu: 'footer' },
+  { slug: 'reservas', nombre: 'Reservas y citas', menu: 'footer' },
+  { slug: 'bodas', nombre: 'Bodas y eventos', menu: 'footer' },
+  { slug: 'identidad', nombre: 'Tarjetas, link-in-bio y CV', menu: 'footer' },
+  { slug: 'captacion', nombre: 'Formularios y captación', menu: 'footer' },
+  { slug: 'bots', nombre: 'Bots e IA', menu: 'footer' },
   { slug: 'automatizaciones', nombre: 'Automatizaciones', menu: 'header' },
   { slug: 'enlaces', nombre: 'Enlaces, QR y analítica', menu: 'footer' },
   { slug: 'tiendas', nombre: 'Tiendas y productos digitales', menu: 'footer' },
   { slug: 'portales', nombre: 'Portales y webs editables', menu: 'footer' },
-  { slug: 'documentos', nombre: 'Documentos, PDF e IA', menu: 'header' },
-  { slug: 'contenido', nombre: 'Contenido y redes', menu: 'header' },
-  { slug: 'planes', nombre: 'Planes mensuales', menu: 'header' },
+  { slug: 'documentos', nombre: 'Documentos, PDF e IA', menu: 'footer' },
+  { slug: 'contenido', nombre: 'Contenido y redes', menu: 'footer' },
+  { slug: 'planes', nombre: 'Planes mensuales', menu: 'footer' },
 ];
 
 // p = [precio "Lo montas tú", precio "Te lo montamos"] en euros.
@@ -721,7 +721,7 @@ _Si quieres que configuremos alguna, está incluido en «Te lo montamos»._
 `,
   },
   {
-    slug: 'demos', titulo: 'Demos en vivo', menu: 'header',
+    slug: 'demos', titulo: 'Demos en vivo', corto: 'Demos', menu: 'header',
     md: `## Mira lo que recibes antes de comprar
 
 Estas demos son webs reales funcionando. Cambiamos textos, fotos y colores por los tuyos.
@@ -734,7 +734,7 @@ Todas las bases son de código abierto con licencia MIT: el resultado es tuyo, s
 `,
   },
   {
-    slug: 'contacto', titulo: 'Contacto', menu: 'header',
+    slug: 'contacto', titulo: 'Contacto', menu: 'footer',
     md: `## Cuéntanos qué necesitas
 
 Responde en un mensaje a estas cinco preguntas y te decimos qué servicio encaja y su precio cerrado:
