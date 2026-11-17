@@ -9,29 +9,22 @@
 - Aplicar las ideas de la auditoría de ChatGPT, consultado en el navegador integrado sin iniciar sesión.
 
 ## Hecho (todo en staging y en origin/main)
-- Último commit: `7db6059` «Ficha: qué no incluye; formulario por pasos con barra de progreso».
-- **Ficha**:
-  - Línea de tiempo «Pruébalo antes de pagar».
-  - Bloques qué recibes / qué necesito / qué pasa después.
-  - Plegable «Qué no incluye» (`src/themes/default/ProductDetail.astro`).
-- **Formulario por pasos** `/empezar/<slug>` (`src/pages/empezar/[slug].astro`):
-  - «Paso X de N» con barra de progreso.
-  - Valida antes de avanzar; Enter avanza en vez de enviar.
-  - Con `?error=consentimiento|mensaje` abre en el último paso.
-  - Sin JavaScript se ve el formulario completo.
-- **Solicitudes**:
-  - Se guardan en D1 (tabla `solicitudes`) y se gestionan en Admin → Solicitudes.
-  - El cliente sigue su estado en `/empezar/estado?id=S-XXXXXXXX`.
-- **Cabecera móvil**: el nombre del logo pasa a `text-base` por debajo de 420 px. Comprobado sin scroll lateral a 399 px.
-- **Pruebas**:
-  - `npx vitest run`: 921 en verde.
-  - `npx astro check`: 0 errores.
-- El detalle completo está en `manual/ESTADO.md`.
+- Último commit: `e8f45a7` «Compra directa visible y datos tras el pago; modalidad «Plantilla + guía»». Staging: versión 963cbb24. Seed aplicado en D1 staging.
+- **Ficha** (`src/themes/default/ProductDetail.astro`): dos opciones visibles.
+  - Opción 1 · Compra directa: el formulario de compra («Añadir al carrito» / «Contratar ahora»). Es la principal.
+  - Opción 2 · Empieza gratis: botón secundario (con borde) que lleva a la vista previa sin tarjeta.
+- **Tras pagar** (`src/pages/order/[token].astro`): página en español con la tarjeta «Siguiente paso · Envíanos tus datos». Enlaza a `/empezar/<slug>?pedido=<ref>`.
+- **Formulario con `?pedido=`**: textos de pedido pagado. El número se guarda en la solicitud como campo «Pedido pagado» (sin cambiar el esquema). El email al cliente y el aviso a David («Datos de pedido pagado») cambian en consecuencia.
+- **Modalidades**: «Lo montas tú» pasa a llamarse «Plantilla + guía» (la publicas tú). La otra sigue siendo «Te lo montamos».
+- **Demos**: galería «Demos en vivo» con filtro por categoría. Etiquetas «Demo interactiva» y «Diseño de ejemplo», en lugar de Brightline/Meridian.
+- **Pruebas**: `npx vitest run` 922 en verde (nuevo test del n.º de pedido); `npx astro check` 0 errores.
 
 ## Falta
-1. **Comparador antes/después** en la ficha, cuando haya un caso real. Siguiente paso: pedir a David capturas reales de un cliente.
-2. **Contador de proyectos entregados**, cuando haya datos. Siguiente paso: sacarlo del recuento de `solicitudes` con estado `entregada`.
-3. **Pendiente de David** (ver ESTADO.md): dominio de producción con `CANONICAL_ORIGIN`, conectar Stripe, alta en afiliados y, opcional, Cloudflare Access en staging.
+1. **Probar el flujo de pago completo** cuando David conecte Stripe en modo test: comprar → página del pedido → «Rellenar mis datos» → solicitud con «Pedido pagado» en Admin. No se ha podido probar sin pago.
+2. **Admin → Solicitudes**: destacar con una etiqueta las que traen «Pedido pagado» (hoy se ven como un campo más).
+3. **Imágenes**: retomar `public/images/demos/editor-bloques.png` y revisar las imágenes de producto en `gen-imagenes.mjs`.
+4. **Comparador antes/después** y **contador de proyectos entregados**, cuando haya casos y datos reales.
+5. **Pendiente de David** (ver ESTADO.md): dominio de producción con `CANONICAL_ORIGIN`, conectar Stripe, alta en afiliados y, opcional, Cloudflare Access en staging.
 
 ## Estado vivo
 - Rama `main` limpia y subida a `origin`. Repo: `davidpd89/automatizasinhumo-web`.

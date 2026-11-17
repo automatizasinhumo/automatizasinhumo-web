@@ -103,6 +103,13 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
 - **Ideas de la auditoría para más adelante**: comparador antes/después y contador de proyectos entregados (cuando haya datos reales).
 - **Ojo al desplegar**: si la web sale sin estilos, primero recarga con `?v=N`. Justo después de desplegar a veces tarda en propagarse. Si sigue sin estilos, comprueba que el hash de `Layout.*.css` de `dist/server/entry.mjs` coincide con el de `dist/client/_astro/`. Si no coincide, repite `npx astro build` y despliega otra vez.
 
+## Compra directa (prioridad) y datos tras el pago (17-11-2026)
+- La ficha enseña dos opciones visibles: **1 · Compra directa** (principal: modalidad, pagar, empezamos) y **2 · Empieza gratis** (secundaria: vista previa sin tarjeta).
+- Al pagar, `/order/<token>` muestra «Siguiente paso · Envíanos tus datos», que enlaza a `/empezar/<slug>?pedido=<ref>`.
+- Ese formulario guarda el n.º en la solicitud (campo «Pedido pagado»). A David le llega el aviso «Datos de pedido pagado S-XXXX».
+- Modalidades: **Plantilla + guía** (la publicas tú) y **Te lo montamos** (te lo entregamos publicado).
+- Falta probar el pago de punta a punta con Stripe en modo test.
+
 ## Pendiente de David (al final, por orden)
 1. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.
 2. **Pagos**: conectar Stripe desde el admin con tus claves (no lo he hecho: no introduzco datos de pago).
