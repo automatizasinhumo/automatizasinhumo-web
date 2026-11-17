@@ -670,7 +670,7 @@ Sí: cada servicio incluye una ronda de cambios. Después, con el plan de manten
 El plazo aparece en cada ficha y cuenta desde que recibimos los campos completos.
 
 ## ¿Emitís factura?
-Sí, factura con IVA en cada compra.
+Sí, cada compra lleva su factura.
 `,
   },
   {
@@ -758,10 +758,10 @@ _Si ya sabes qué quieres, cómpralo directamente en el catálogo: tras el pago 
 
 En cumplimiento de la Ley 34/2002 (LSSI-CE):
 
-- **Titular**: [NOMBRE O RAZÓN SOCIAL]
-- **NIF**: [NIF]
-- **Domicilio**: [DIRECCIÓN]
+- **Titular**: David Porto Díaz (persona física)
+- **Web**: automatizasinhumo.com
 - **Email**: hola@automatizasinhumo.com
+- Los datos fiscales completos se facilitan en la factura de cada pedido.
 
 ### Objeto
 Este sitio ofrece la venta de servicios digitales (webs, automatizaciones y herramientas) a precio cerrado.
@@ -778,7 +778,7 @@ El titular no se hace responsable del uso que terceros hagan de los servicios en
     md: `## Condiciones de contratación
 
 ### Precio y pago
-Los precios incluyen IVA salvo que se indique lo contrario. El pago se realiza al contratar.
+El precio de cada ficha es el precio final, sin recargos. El pago se realiza al contratar y recibes factura del pedido.
 
 ### Entrega
 El plazo de cada ficha cuenta desde que recibimos los campos completos del formulario. Entregamos por email el enlace, los accesos y una guía de uso.
@@ -797,7 +797,7 @@ Se pueden cancelar en cualquier momento; el servicio sigue activo hasta el final
     slug: 'privacidad', titulo: 'Privacidad', menu: 'footer',
     md: `## Política de privacidad
 
-- **Responsable**: [NOMBRE O RAZÓN SOCIAL], hola@automatizasinhumo.com
+- **Responsable**: David Porto Díaz, hola@automatizasinhumo.com
 - **Finalidad**: gestionar pedidos, entregar los servicios y responder consultas.
 - **Base legal**: ejecución del contrato y consentimiento.
 - **Conservación**: el tiempo necesario y los plazos legales de facturación.

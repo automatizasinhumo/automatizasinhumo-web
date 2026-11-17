@@ -285,24 +285,6 @@ do
   assert_cache_control "$path" "$private_cache"
 done
 
-deploy_purge_headers="$state_dir/deploy-purge-headers.txt"
-deploy_purge_status="$(curl --max-time 30 --silent --output /dev/null \
-  --dump-header "$deploy_purge_headers" \
-  --write-out '%{http_code}' \
-  --request POST \
-  --header 'content-type: application/json' \
-  --header 'authorization: MinshopDeploy invalid' \
-  --data '{}' \
-  "http://127.0.0.1:$test_port/api/internal/cache-purge")"
-if [[ "$deploy_purge_status" != "401" ]]; then
-  echo "D1 integration failed: unsigned deploy purge returned $deploy_purge_status" >&2
-  exit 1
-fi
-if ! tr -d '\r' <"$deploy_purge_headers" | grep -qi '^cache-control: private, no-store$'; then
-  echo "D1 integration failed: deploy purge response was cacheable" >&2
-  exit 1
-fi
-
 assert_cache_control /product/sample-tee "$public_cache"
 assert_cache_control /category/apparel "$public_cache"
 assert_cache_control /images/media/cache-header-fixture.svg \
@@ -644,6 +626,27 @@ scheduled_status="$(curl --silent --output /dev/null --write-out '%{http_code}' 
   "http://127.0.0.1:$test_port/cdn-cgi/handler/scheduled")"
 if [[ "$scheduled_status" != "200" ]]; then
   echo "D1 integration failed: built worker exposes no scheduled handler (got $scheduled_status)" >&2
+  exit 1
+fi
+
+# Unsigned deploy purge must be refused and uncacheable. Kept LAST: on some
+# wrangler dev versions the 401 to a JSON POST tears down the local dev proxy,
+# and every request after it would then fail for reasons unrelated to the app.
+deploy_purge_headers="$state_dir/deploy-purge-headers.txt"
+deploy_purge_status="$(curl --max-time 30 --silent --output /dev/null \
+  --dump-header "$deploy_purge_headers" \
+  --write-out '%{http_code}' \
+  --request POST \
+  --header 'content-type: application/json' \
+  --header 'authorization: MinshopDeploy invalid' \
+  --data '{}' \
+  "http://127.0.0.1:$test_port/api/internal/cache-purge")"
+if [[ "$deploy_purge_status" != "401" ]]; then
+  echo "D1 integration failed: unsigned deploy purge returned $deploy_purge_status" >&2
+  exit 1
+fi
+if ! tr -d '\r' <"$deploy_purge_headers" | grep -qi '^cache-control: private, no-store$'; then
+  echo "D1 integration failed: deploy purge response was cacheable" >&2
   exit 1
 fi
 

@@ -18,6 +18,8 @@ import CatalogPagination from '../../features/storefront/controls/CatalogPaginat
  */
 interface Props {
   model: CatalogPageModel;
+  /** Aceptado por compatibilidad con el tema default (h2 bajo la portada). */
+  headingLevel?: 'h1' | 'h2';
 }
 
 const { model } = Astro.props;
