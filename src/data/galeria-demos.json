@@ -18,7 +18,7 @@
   },
   {
    "slug": "identidad",
-   "nombre": "Tarjetas, link-in-bio y CV"
+   "nombre": "Tarjetas, página de enlaces y CV"
   },
   {
    "slug": "captacion",
@@ -68,20 +68,9 @@
    "cat": "portales"
   },
   {
-   "img": "plantillas-eventos",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/",
-   "titulo": "Plantillas: restaurante, negocio, portfolio, RSVP…",
-   "tipo": "diseno",
-   "producto": "web-una-pagina",
-   "nombre": "Web de una página para tu negocio",
-   "precio": 149,
-   "plazo": "48 h",
-   "cat": "webs"
-  },
-  {
-   "img": "landing-page-template",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/landing-page-template/",
-   "titulo": "Landing de una página",
+   "img": "spa-salon",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/spa-salon/",
+   "titulo": "Peluquería y spa",
    "tipo": "diseno",
    "producto": "web-una-pagina",
    "nombre": "Web de una página para tu negocio",
@@ -112,25 +101,14 @@
    "cat": "webs"
   },
   {
-   "img": "plantillas-negocio",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/",
-   "titulo": "100 plantillas por sector",
+   "img": "plantillas-eventos",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/",
+   "titulo": "Plantillas: restaurante, negocio, portfolio, invitaciones…",
    "tipo": "diseno",
-   "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
-   "plazo": "5 días",
-   "cat": "webs"
-  },
-  {
-   "img": "plantillas-bootstrap",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/",
-   "titulo": "Plantillas Bootstrap (Colorlib)",
-   "tipo": "diseno",
-   "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
-   "plazo": "5 días",
+   "producto": "web-una-pagina",
+   "nombre": "Web de una página para tu negocio",
+   "precio": 149,
+   "plazo": "48 h",
    "cat": "webs"
   },
   {
@@ -158,7 +136,7 @@
   {
    "img": "atelier",
    "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/atelier/",
-   "titulo": "Atelier (Bootstrap)",
+   "titulo": "Atelier",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
    "nombre": "Web corporativa de 5 secciones",
@@ -169,7 +147,29 @@
   {
    "img": "ironworks",
    "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/ironworks/",
-   "titulo": "Ironworks (Bootstrap)",
+   "titulo": "Ironworks",
+   "tipo": "diseno",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "plantillas-negocio",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/",
+   "titulo": "100 plantillas por sector",
+   "tipo": "diseno",
+   "producto": "web-corporativa-5-secciones",
+   "nombre": "Web corporativa de 5 secciones",
+   "precio": 449,
+   "plazo": "5 días",
+   "cat": "webs"
+  },
+  {
+   "img": "plantillas-bootstrap",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/",
+   "titulo": "Plantillas de estilo clásico",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
    "nombre": "Web corporativa de 5 secciones",
@@ -238,7 +238,7 @@
    "titulo": "Blog personal",
    "tipo": "diseno",
    "producto": "web-blog-astro",
-   "nombre": "Web con blog rápida (SEO)",
+   "nombre": "Web con blog rápida",
    "precio": 249,
    "plazo": "4 días",
    "cat": "webs"
@@ -365,17 +365,6 @@
    "cat": "reservas"
   },
   {
-   "img": "spa-salon",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/spa-salon/",
-   "titulo": "Peluquería y spa",
-   "tipo": "diseno",
-   "producto": "reservas-salon",
-   "nombre": "Reservas para peluquería, estética o clínica",
-   "precio": 199,
-   "plazo": "5 días",
-   "cat": "reservas"
-  },
-  {
    "img": "yoga-studio",
    "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/yoga-studio/",
    "titulo": "Estudio de yoga",
@@ -396,28 +385,6 @@
    "precio": 199,
    "plazo": "5 días",
    "cat": "reservas"
-  },
-  {
-   "img": "boda-blush",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-blush/",
-   "titulo": "Web de boda · estilo Blush",
-   "tipo": "diseno",
-   "producto": "web-boda-rsvp",
-   "nombre": "Web de boda con confirmación de asistencia",
-   "precio": 99,
-   "plazo": "3 días",
-   "cat": "bodas"
-  },
-  {
-   "img": "boda-midnight",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-midnight/",
-   "titulo": "Web de boda · estilo Midnight Gold",
-   "tipo": "diseno",
-   "producto": "web-boda-rsvp",
-   "nombre": "Web de boda con confirmación de asistencia",
-   "precio": 99,
-   "plazo": "3 días",
-   "cat": "bodas"
   },
   {
    "img": "rsvp-only",
@@ -442,9 +409,31 @@
    "cat": "bodas"
   },
   {
-   "img": "boda-sage",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-sage/",
-   "titulo": "Web de boda · estilo Sage Garden",
+   "img": "boda-blush",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-blush/",
+   "titulo": "Web de boda · estilo Blush",
+   "tipo": "diseno",
+   "producto": "web-boda-rsvp",
+   "nombre": "Web de boda con confirmación de asistencia",
+   "precio": 99,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "boda-midnight",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-midnight/",
+   "titulo": "Web de boda · estilo Midnight Gold",
+   "tipo": "diseno",
+   "producto": "web-boda-rsvp",
+   "nombre": "Web de boda con confirmación de asistencia",
+   "precio": 99,
+   "plazo": "3 días",
+   "cat": "bodas"
+  },
+  {
+   "img": "weekend-itinerary",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/weekend-itinerary/",
+   "titulo": "Itinerario de fin de semana",
    "tipo": "diseno",
    "producto": "invitacion-digital",
    "nombre": "Invitación digital animada",
@@ -453,9 +442,9 @@
    "cat": "bodas"
   },
   {
-   "img": "weekend-itinerary",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/weekend-itinerary/",
-   "titulo": "Itinerario de fin de semana",
+   "img": "boda-sage",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-sage/",
+   "titulo": "Web de boda · estilo Sage Garden",
    "tipo": "diseno",
    "producto": "invitacion-digital",
    "nombre": "Invitación digital animada",
@@ -480,7 +469,7 @@
    "titulo": "Página de enlaces",
    "tipo": "diseno",
    "producto": "link-in-bio",
-   "nombre": "Link-in-bio propio con estadísticas",
+   "nombre": "Página de enlaces para tu bio con estadísticas",
    "precio": 39,
    "plazo": "24 h",
    "cat": "identidad"
@@ -519,9 +508,9 @@
    "cat": "captacion"
   },
   {
-   "img": "tienda-descargas",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/tienda-descargas/",
-   "titulo": "Tienda de descargas digitales",
+   "img": "ebook-download",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/ebook-download/",
+   "titulo": "Descarga de ebook",
    "tipo": "diseno",
    "producto": "tienda-productos-digitales",
    "nombre": "Tienda de productos digitales",
@@ -530,9 +519,9 @@
    "cat": "tiendas"
   },
   {
-   "img": "ebook-download",
-   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/ebook-download/",
-   "titulo": "Descarga de ebook",
+   "img": "tienda-descargas",
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/tienda-descargas/",
+   "titulo": "Tienda de descargas digitales",
    "tipo": "diseno",
    "producto": "tienda-productos-digitales",
    "nombre": "Tienda de productos digitales",

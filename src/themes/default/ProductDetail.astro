@@ -71,13 +71,40 @@ const { model, purchase } = Astro.props;
       {model.formattedPrice}
     </p>
 
+    {
+      model.demos.length > 0 && (
+        <a href="#demo" class="mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-brand hover:underline" data-ver-demo>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7s10 7 10 7s-3.5 7-10 7s-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+          Ver cómo queda, aquí mismo ↓
+        </a>
+      )
+    }
+
+    {/* ¿Lo puedes montar tú? Respuesta directa antes de las opciones de pago. */}
+    <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-quien-monta>
+      <strong class="text-ink">¿Lo tienes que montar tú?</strong>{' '}
+      {purchase.variants.length >= 2
+        ? 'Tú eliges: «Te lo montamos» (lo dejamos publicado y funcionando) o «Plantilla + guía» (te lo damos preparado con tus datos y lo publicas tú siguiendo la guía).'
+        : 'No. Lo montamos nosotros; tú solo nos das los datos.'}
+    </p>
+
+    <p class="mt-5 text-sm font-semibold text-ink">Dos formas de empezar: contrátalo directamente, o pruébalo gratis y paga solo si te gusta.</p>
+
     {/* Dos caminos visibles, sin desplegables: compra directa (precio cerrado) y,
         para quien duda, la vista previa gratis. */}
-    <div class="mt-6 rounded-2xl border-2 border-brand bg-surface p-5" data-compra-directa>
+    <div id="comprar" class="mt-3 scroll-mt-20 rounded-2xl border-2 border-brand bg-surface p-5" data-compra-directa>
       <p class="text-xs font-semibold uppercase tracking-widest text-brand">Opción 1 · Compra directa</p>
       <p class="mt-1 text-lg font-bold text-ink">Contrátalo ya, a precio cerrado</p>
-      <p class="mt-1 text-sm text-muted">Eliges la modalidad, pagas y empezamos. Te pedimos tus datos después del pago y te enseñamos el resultado antes de entregarlo, con una ronda de ajustes incluida.</p>
+      <ol class="mt-2 space-y-1 text-sm text-muted" data-que-pasa>
+        <li><strong class="text-ink">1.</strong> Pagas con tarjeta en una página segura.</li>
+        <li><strong class="text-ink">2.</strong> Nos mandas tus datos en un formulario (2-3 minutos).</li>
+        <li><strong class="text-ink">3.</strong> Te enseñamos el resultado en 24-72 h laborables.</li>
+        <li><strong class="text-ink">4.</strong> Una ronda de ajustes y te lo entregamos.</li>
+      </ol>
       <ProductPurchaseForm model={purchase} />
+      <p class="mt-3 text-xs leading-relaxed text-faint" data-garantia>
+        Pago seguro con tarjeta. Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero. Factura incluida.
+      </p>
     </div>
 
     <div class="mt-4 rounded-2xl border border-line bg-brand/5 p-5" data-empieza-gratis>
@@ -132,7 +159,7 @@ const { model, purchase } = Astro.props;
       </summary>
       <ul class="mt-3 space-y-1.5 text-xs leading-relaxed text-muted">
         <li>· Cuotas de terceros: dominio, hosting de pago o herramientas con suscripción (te decimos cuáles son gratis).</li>
-        <li>· Redactar textos o hacer fotos desde cero: trabajamos con lo que nos das, y lo pulimos.</li>
+        <li>· Textos a medida o sesiones de fotos. Si te faltan, usamos textos de partida e imágenes libres de derechos.</li>
         <li>· Funciones que no aparecen en esta ficha. Si necesitas algo más, te damos precio antes.</li>
         <li>· Cambios después de la entrega más allá de la ronda incluida: van con mantenimiento o por horas.</li>
       </ul>
@@ -183,6 +210,61 @@ const { model, purchase } = Astro.props;
     </button>
   </div>
 </div>
+
+{
+  /* Demo DENTRO de la ficha: el cliente la ve y la toca sin salir de la tienda.
+     Las pestañas son enlaces con target al iframe, así que funciona sin JS. */
+  model.demos.length > 0 && (
+    <section id="demo" class="mt-16 scroll-mt-20" data-demo-visor>
+      <h2 class="text-2xl font-bold text-ink">Míralo funcionando</h2>
+      <p class="mt-1 text-sm text-muted">
+        {model.demos[0].tipo === 'interactiva' ? 'Pulsa y prueba: es una demo real. ' : ''}
+        Son ejemplos de muestra; tu versión irá en español, con tus textos, tu marca y tus datos.
+      </p>
+      {model.demos.length > 1 && (
+        <ul class="mt-4 flex flex-wrap gap-2" role="list">
+          {model.demos.map((demo) => (
+            <li>
+              <a
+                href={demo.url}
+                target="vista-demo"
+                class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
+              >
+                <span class={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase ${demo.tipo === 'interactiva' ? 'bg-brand text-on-brand' : 'bg-line text-muted'}`}>
+                  {demo.tipo === 'interactiva' ? 'Pruébala' : 'Diseño'}
+                </span>
+                {demo.titulo}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div class="mt-4 overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
+        <div class="flex items-center gap-2 border-b border-line px-4 py-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-line" aria-hidden="true"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-line" aria-hidden="true"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-line" aria-hidden="true"></span>
+          <span class="ml-2 truncate text-xs text-faint">Demo · {model.name}</span>
+          <a href={model.demos[0].url} target="_blank" rel="noopener" class="ml-auto shrink-0 text-xs font-medium text-brand hover:underline">
+            Abrir a pantalla completa ↗
+          </a>
+        </div>
+        <iframe
+          name="vista-demo"
+          src={model.demos[0].url}
+          title={`Demo de ${model.name}`}
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          class="block h-[70vh] min-h-[420px] w-full bg-white"
+        ></iframe>
+      </div>
+      <p class="mt-4 text-sm text-muted">
+        ¿Te encaja? <a href="#comprar" class="font-semibold text-brand hover:underline">Contrátalo arriba</a> o{' '}
+        <a href={model.startHref} class="font-semibold text-brand hover:underline">pruébalo gratis con tus datos</a>.
+      </p>
+    </section>
+  )
+}
 
 {
   model.related.length > 0 && (

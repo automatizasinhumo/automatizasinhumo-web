@@ -42,6 +42,9 @@ export type SettingKey =
   | 'home_page' // what / renders: 'page:<id>' | 'product:<id>'; absent = the catalog list
   | 'announcement' // storefront announcement bar text; absent/empty = bar hidden
   | 'announcement_href' // optional link for the announcement bar
+  | 'contact_whatsapp' // contacto flotante: número en formato internacional, solo dígitos
+  | 'contact_telegram' // contacto flotante: usuario de Telegram sin @
+  | 'contact_email' // contacto flotante: email de contacto
   | 'email_from' // sender address; absent = build-time default
   | 'store_url' // origin last seen serving a settlement, so the cron can build order links
   | 'email_from_name' // sender display name; absent = store name
@@ -97,6 +100,10 @@ export interface StoreSettings {
   announcement: string | null;
   /** Optional destination making the whole announcement bar clickable. */
   announcementHref: string | null;
+  /** Contacto flotante: cada canal se muestra solo si está rellenado. */
+  contactWhatsapp: string | null;
+  contactTelegram: string | null;
+  contactEmail: string | null;
   emailFrom: string | null;
   emailFromName: string | null;
   emailNotifyTo: string | null;
@@ -200,6 +207,9 @@ export function parseStoreSettings(
     homePage: map.get('home_page') ?? null,
     announcement: map.get('announcement') ?? null,
     announcementHref: map.get('announcement_href') ?? null,
+    contactWhatsapp: map.get('contact_whatsapp') ?? null,
+    contactTelegram: map.get('contact_telegram') ?? null,
+    contactEmail: map.get('contact_email') ?? null,
     emailFrom: map.get('email_from') ?? null,
     emailFromName: map.get('email_from_name') ?? null,
     emailNotifyTo: map.get('email_notify_to') ?? null,

@@ -97,6 +97,7 @@ const detail = (overrides: Partial<ProductDetailModel> = {}): ProductDetailModel
   related: [],
   backHref: '/',
   startHref: '/empezar/tee',
+  demos: [],
   error: null,
   ...overrides,
 });

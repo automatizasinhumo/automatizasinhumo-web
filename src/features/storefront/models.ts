@@ -197,6 +197,13 @@ export interface ProductSeoModel {
   jsonLd: string;
 }
 
+/** Demo publicada en el Worker de demos; `interactiva` se usa, `diseno` solo enseña un estilo. */
+export interface StorefrontDemo {
+  url: string;
+  titulo: string;
+  tipo: 'interactiva' | 'diseno';
+}
+
 export interface ProductDetailModel {
   id: string;
   name: string;
@@ -228,6 +235,8 @@ export interface ProductDetailModel {
   backHref: string;
   /** «Empieza gratis»: formulario sin pago (/empezar/<slug>). */
   startHref: string;
+  /** Demos que se ven DENTRO de la ficha (visor embebido), primero las que se tocan. */
+  demos: StorefrontDemo[];
   /** Validated message from ?error=, or null. */
   error: string | null;
 }

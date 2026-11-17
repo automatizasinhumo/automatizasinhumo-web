@@ -1,0 +1,361 @@
+{
+ "web-una-pagina": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/spa-salon/",
+   "titulo": "Peluquería y spa",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/business-template/",
+   "titulo": "Negocio local",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/product-launch/",
+   "titulo": "Lanzamiento de producto",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/",
+   "titulo": "Plantillas: restaurante, negocio, portfolio, invitaciones…",
+   "tipo": "diseno"
+  }
+ ],
+ "web-corporativa-5-secciones": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/consulting-firm/",
+   "titulo": "Consultoría",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/creative-agency/",
+   "titulo": "Agencia creativa",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/atelier/",
+   "titulo": "Atelier",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/ironworks/",
+   "titulo": "Ironworks",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/",
+   "titulo": "100 plantillas por sector",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-bootstrap/",
+   "titulo": "Plantillas de estilo clásico",
+   "tipo": "diseno"
+  }
+ ],
+ "web-inmobiliaria": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/real-estate-agency/",
+   "titulo": "Agencia inmobiliaria",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/vacation-rental/",
+   "titulo": "Alquiler vacacional",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/inmobiliaria/",
+   "titulo": "Web inmobiliaria con buscador",
+   "tipo": "diseno"
+  }
+ ],
+ "portfolio-editable": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/portfolio-template/",
+   "titulo": "Portfolio sencillo",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/photographer-portfolio/",
+   "titulo": "Fotógrafo",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/architect-portfolio/",
+   "titulo": "Arquitecto",
+   "tipo": "diseno"
+  }
+ ],
+ "web-blog-astro": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/writer-blogger/",
+   "titulo": "Blog personal",
+   "tipo": "diseno"
+  }
+ ],
+ "web-taller": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/local-services/auto-repair/",
+   "titulo": "Taller mecánico",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/local-services/plumber-home-services/",
+   "titulo": "Fontanería",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/local-services/cleaning-company/",
+   "titulo": "Limpiezas",
+   "tipo": "diseno"
+  }
+ ],
+ "carta-qr": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/carta-whatsapp/",
+   "titulo": "Carta QR con pedido por WhatsApp",
+   "tipo": "interactiva"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/restaurant/",
+   "titulo": "Restaurante",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/cafe-coffee-shop/",
+   "titulo": "Cafetería",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/bar-lounge/",
+   "titulo": "Bar de copas",
+   "tipo": "diseno"
+  }
+ ],
+ "carta-pedidos-whatsapp": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/carta-whatsapp/",
+   "titulo": "Carta QR con pedido por WhatsApp",
+   "tipo": "interactiva"
+  }
+ ],
+ "reservas-restaurante": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/restaurant/",
+   "titulo": "Web de restaurante",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/pizza-delivery/",
+   "titulo": "Pizzería a domicilio",
+   "tipo": "diseno"
+  }
+ ],
+ "asistente-ia-pedidos": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/carta-whatsapp/",
+   "titulo": "Carta con pedido por WhatsApp",
+   "tipo": "interactiva"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/restaurant/food-truck/",
+   "titulo": "Food truck",
+   "tipo": "diseno"
+  }
+ ],
+ "pagina-citas": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/physiotherapy/",
+   "titulo": "Fisioterapia",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/dental-clinic/",
+   "titulo": "Clínica dental",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/nutritionist/",
+   "titulo": "Nutricionista",
+   "tipo": "diseno"
+  }
+ ],
+ "reservas-salon": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/spa-salon/",
+   "titulo": "Peluquería y spa",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/yoga-studio/",
+   "titulo": "Estudio de yoga",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/health-fitness/gym-fitness/",
+   "titulo": "Gimnasio",
+   "tipo": "diseno"
+  }
+ ],
+ "web-boda-rsvp": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/rsvp-only/",
+   "titulo": "Solo confirmación de asistencia",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/events-community/wedding/",
+   "titulo": "Boda clásica",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-blush/",
+   "titulo": "Web de boda · estilo Blush",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-midnight/",
+   "titulo": "Web de boda · estilo Midnight Gold",
+   "tipo": "diseno"
+  }
+ ],
+ "invitacion-digital": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/weekend-itinerary/",
+   "titulo": "Itinerario de fin de semana",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/boda-sage/",
+   "titulo": "Web de boda · estilo Sage Garden",
+   "tipo": "diseno"
+  }
+ ],
+ "galeria-privada-evento": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/photographer-portfolio/",
+   "titulo": "Galería de fotógrafo",
+   "tipo": "diseno"
+  }
+ ],
+ "gestion-invitados-mesas": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/rsvp-only/",
+   "titulo": "Confirmación de asistencia",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-eventos/templates/registry-template/",
+   "titulo": "Lista de regalos",
+   "tipo": "diseno"
+  }
+ ],
+ "link-in-bio": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/link-in-bio/",
+   "titulo": "Página de enlaces",
+   "tipo": "diseno"
+  }
+ ],
+ "cv-profesional": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/resume-cv/",
+   "titulo": "Currículum web",
+   "tipo": "diseno"
+  }
+ ],
+ "muro-testimonios": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/testimonios/",
+   "titulo": "Muro de testimonios",
+   "tipo": "interactiva"
+  }
+ ],
+ "lista-espera": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/coming-soon/",
+   "titulo": "Próximamente",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/webinar-signup/",
+   "titulo": "Inscripción a webinar",
+   "tipo": "diseno"
+  }
+ ],
+ "auto-resenas": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/testimonios/",
+   "titulo": "Muro de testimonios",
+   "tipo": "interactiva"
+  }
+ ],
+ "tienda-productos-digitales": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/landing-pages/ebook-download/",
+   "titulo": "Descarga de ebook",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/tienda-descargas/",
+   "titulo": "Tienda de descargas digitales",
+   "tipo": "diseno"
+  }
+ ],
+ "tienda-online": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/ecommerce/fashion-store/",
+   "titulo": "Tienda de moda",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/ecommerce/cosmetics-skincare-store/",
+   "titulo": "Cosmética",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/ecommerce/single-product-store/",
+   "titulo": "Tienda de un producto",
+   "tipo": "diseno"
+  }
+ ],
+ "web-editable-visual": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/editor-bloques/",
+   "titulo": "Editor de bloques: pruébalo en el navegador",
+   "tipo": "interactiva"
+  }
+ ],
+ "web-multidioma": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/hotel-resort/",
+   "titulo": "Hotel",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/real-estate-travel/tour-guide/",
+   "titulo": "Guía turístico",
+   "tipo": "diseno"
+  }
+ ],
+ "web-wordpress": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/business/corporate-company/",
+   "titulo": "Empresa",
+   "tipo": "diseno"
+  },
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/plantillas-negocio/portfolio/writer-blogger/",
+   "titulo": "Blog personal",
+   "tipo": "diseno"
+  }
+ ],
+ "web-arrastrar-soltar": [
+  {
+   "url": "https://automatizasinhumo-demos.davidpd89.workers.dev/editor-bloques/",
+   "titulo": "Editor de bloques: pruébalo en el navegador",
+   "tipo": "interactiva"
+  }
+ ]
+}

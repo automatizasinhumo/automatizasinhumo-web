@@ -8,11 +8,11 @@ export const DEMOS = [
   ['boda-sage', 'Poison675__free-wedding-website-templates/sage-garden', 'Web de boda · estilo Sage Garden', 'invitacion-digital'],
   ['tienda-descargas', 'Vojislav77__digital-downloads-website', 'Tienda de descargas digitales', 'tienda-productos-digitales'],
   ['inmobiliaria', 'arjoonarora__real-estate-website-template', 'Web inmobiliaria con buscador', 'web-inmobiliaria'],
-  ['plantillas-eventos', 'micah-masuka__free-website-templates', 'Plantillas: restaurante, negocio, portfolio, RSVP…', 'web-una-pagina'],
+  ['plantillas-eventos', 'micah-masuka__free-website-templates', 'Plantillas: restaurante, negocio, portfolio, invitaciones…', 'web-una-pagina'],
   ['carta-whatsapp', 'Shahabuddin-mahar__whatsapp-restaurant-qr-menu', 'Carta QR con pedido por WhatsApp', 'carta-pedidos-whatsapp'],
   ['testimonios', 'jhodges3401-code__kudoshelf-lite', 'Muro de testimonios', 'muro-testimonios'],
   ['plantillas-negocio', 'mmrahmanbappi__100-free-html-templates', '100 plantillas por sector', 'web-corporativa-5-secciones'],
-  ['plantillas-bootstrap', 'ColorlibHQ__bootstrap-templates', 'Plantillas Bootstrap (Colorlib)', 'web-corporativa-5-secciones'],
+  ['plantillas-bootstrap', 'ColorlibHQ__bootstrap-templates', 'Plantillas de estilo clásico', 'web-corporativa-5-secciones'],
   ['editor-bloques', 'givanz__VvvebJs', 'Editor de bloques: pruébalo en el navegador', 'web-editable-visual'],
 ];
 
@@ -26,8 +26,8 @@ export const EXTRA = {
   'carta-qr': [['carta-whatsapp', 'Carta QR con pedido por WhatsApp'], [`${N}/restaurant/restaurant`, 'Restaurante'], [`${N}/restaurant/cafe-coffee-shop`, 'Cafetería'], [`${N}/restaurant/bar-lounge`, 'Bar de copas']],
   'reservas-restaurante': [[`${N}/restaurant/restaurant`, 'Web de restaurante'], [`${N}/restaurant/pizza-delivery`, 'Pizzería a domicilio']],
   'asistente-ia-pedidos': [[`${N}/restaurant/food-truck`, 'Food truck'], ['carta-whatsapp', 'Carta con pedido por WhatsApp']],
-  'web-una-pagina': [[`${E}/landing-page-template`, 'Landing de una página'], [`${E}/business-template`, 'Negocio local'], [`${N}/landing-pages/product-launch`, 'Lanzamiento de producto']],
-  'web-corporativa-5-secciones': [[`${N}/business/consulting-firm`, 'Consultoría'], [`${N}/business/creative-agency`, 'Agencia creativa'], [`${BS}/atelier`, 'Atelier (Bootstrap)'], [`${BS}/ironworks`, 'Ironworks (Bootstrap)']],
+  'web-una-pagina': [[`${N}/health-fitness/spa-salon`, 'Peluquería y spa'], [`${E}/business-template`, 'Negocio local'], [`${N}/landing-pages/product-launch`, 'Lanzamiento de producto']],
+  'web-corporativa-5-secciones': [[`${N}/business/consulting-firm`, 'Consultoría'], [`${N}/business/creative-agency`, 'Agencia creativa'], [`${BS}/atelier`, 'Atelier'], [`${BS}/ironworks`, 'Ironworks']],
   'web-taller': [[`${N}/local-services/auto-repair`, 'Taller mecánico'], [`${N}/local-services/plumber-home-services`, 'Fontanería'], [`${N}/local-services/cleaning-company`, 'Limpiezas']],
   'pagina-citas': [[`${N}/health-fitness/physiotherapy`, 'Fisioterapia'], [`${N}/health-fitness/dental-clinic`, 'Clínica dental'], [`${N}/health-fitness/nutritionist`, 'Nutricionista']],
   'reservas-salon': [[`${N}/health-fitness/spa-salon`, 'Peluquería y spa'], [`${N}/health-fitness/yoga-studio`, 'Estudio de yoga'], [`${N}/health-fitness/gym-fitness`, 'Gimnasio']],
@@ -52,7 +52,8 @@ export const EXTRA = {
 // tipo: 'interactiva' (se usa) | 'diseno' (se mira). La raíz de la ruta decide.
 const tipo = (path) => (INTERACTIVAS.has(path.split('/')[0]) ? 'interactiva' : 'diseno');
 export function demosDe(slugProducto) {
-  const out = DEMOS.filter((d) => d[3] === slugProducto).map((d) => ({ url: `${DEMOS_URL}/${d[0]}/`, titulo: d[2], tipo: tipo(d[0]) }));
-  for (const [path, titulo] of EXTRA[slugProducto] ?? []) out.push({ url: `${DEMOS_URL}/${path}/`, titulo, tipo: tipo(path) });
+  // Primero las demos concretas (EXTRA); las colecciones de plantillas, al final.
+  const out = (EXTRA[slugProducto] ?? []).map(([path, titulo]) => ({ url: `${DEMOS_URL}/${path}/`, titulo, tipo: tipo(path) }));
+  for (const d of DEMOS.filter((d) => d[3] === slugProducto)) out.push({ url: `${DEMOS_URL}/${d[0]}/`, titulo: d[2], tipo: tipo(d[0]) });
   return out;
 }

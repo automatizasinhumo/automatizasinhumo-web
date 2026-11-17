@@ -12,7 +12,7 @@ export const categorias = [
   { slug: 'hosteleria', nombre: 'Restaurantes y bares', menu: 'footer' },
   { slug: 'reservas', nombre: 'Reservas y citas', menu: 'footer' },
   { slug: 'bodas', nombre: 'Bodas y eventos', menu: 'footer' },
-  { slug: 'identidad', nombre: 'Tarjetas, link-in-bio y CV', menu: 'footer' },
+  { slug: 'identidad', nombre: 'Tarjetas, página de enlaces y CV', menu: 'footer' },
   { slug: 'captacion', nombre: 'Formularios y captación', menu: 'footer' },
   { slug: 'bots', nombre: 'Bots e IA', menu: 'footer' },
   { slug: 'automatizaciones', nombre: 'Automatizaciones', menu: 'header' },
@@ -55,13 +55,13 @@ export const productos = [
   {
     slug: 'portfolio-editable', cat: 'webs', nombre: 'Portfolio con panel para editarlo tú', p: [179, 349], plazo: '3 días',
     resumen: 'Para fotógrafos, diseñadores, arquitectos o freelancers: cambias textos y fotos desde un panel, sin tocar código.',
-    recibes: ['Portfolio con proyectos y galería', 'Panel de administración', 'Formulario de contacto', 'Alojamiento gratuito en Cloudflare'],
+    recibes: ['Portfolio con proyectos y galería', 'Panel de administración', 'Formulario de contacto', 'Alojamiento gratuito, sin cuota'],
     campos: ['Nombre y profesión', 'Proyectos (título, fotos, descripción)', 'Biografía', 'Redes sociales'],
     ejemplo: 'Marta, fotógrafa: 8 reportajes, sobre mí, tarifas y contacto. Ella sube los nuevos trabajos desde el móvil.',
     repos: ['satendragoswamii/portfolio-website-with-admin-panel', 'ShadmanArafin/open_portfolio'],
   },
   {
-    slug: 'web-blog-astro', cat: 'webs', nombre: 'Web con blog rápida (SEO)', p: [249, 499], plazo: '4 días',
+    slug: 'web-blog-astro', cat: 'webs', nombre: 'Web con blog rápida', p: [249, 499], plazo: '4 días',
     resumen: 'Web ultrarrápida con blog para posicionar en Google y publicar artículos fácilmente.',
     recibes: ['Web + blog con categorías', 'Carga en menos de 1 segundo', 'Sitemap y RSS', '3 artículos iniciales (modalidad «Te lo montamos»)'],
     campos: ['Temática', 'Palabras clave', 'Logo y colores', 'Primeros temas del blog'],
@@ -80,7 +80,7 @@ export const productos = [
   // ── Hostelería ──────────────────────────────────────────
   {
     slug: 'carta-qr', cat: 'hosteleria', nombre: 'Carta digital con código QR', p: [49, 129], plazo: '24 h',
-    resumen: 'Tu carta en el móvil del cliente con un QR en la mesa. Cambias precios cuando quieras, sin reimprimir.',
+    resumen: 'Tu carta en el móvil del cliente con un QR en la mesa. Cambias tú los precios cuando quieras desde el móvil, sin coste y sin reimprimir.',
     recibes: ['Carta digital por secciones', 'QR listo para imprimir', 'Alérgenos e idiomas', 'Cambios ilimitados de precios'],
     campos: ['Nombre del local', 'Platos (nombre, precio, alérgenos)', 'Fotos (opcional)', 'Idiomas'],
     ejemplo: 'Bar La Esquina: QR en cada mesa → carta con tapas, raciones y bebidas, en español e inglés.',
@@ -173,7 +173,7 @@ export const productos = [
     repos: ['Kahaan83/digital-cards'],
   },
   {
-    slug: 'link-in-bio', cat: 'identidad', nombre: 'Link-in-bio propio con estadísticas', p: [39, 99], plazo: '24 h',
+    slug: 'link-in-bio', cat: 'identidad', nombre: 'Página de enlaces para tu bio con estadísticas', p: [39, 99], plazo: '24 h',
     resumen: 'Tu alternativa a Linktree, en tu dominio y sin cuota mensual, con clics medidos.',
     recibes: ['Página de enlaces con tu marca', 'Estadísticas de clics', 'Bloques de vídeo, formulario y productos', 'Panel para editar'],
     campos: ['Nombre o marca', 'Foto / logo', 'Enlaces con su texto', 'Colores'],
@@ -285,7 +285,7 @@ export const productos = [
   {
     slug: 'auto-tareas-programadas', cat: 'automatizaciones', nombre: 'Tareas programadas en la nube', p: [199, 399], plazo: '5 días',
     resumen: 'Procesos que se ejecutan solos cada hora/día: copias, informes, sincronizaciones, recordatorios.',
-    recibes: ['Proceso en Cloudflare con reintentos', 'Registro de ejecuciones', 'Aviso si algo falla'],
+    recibes: ['Proceso en la nube con reintentos', 'Registro de ejecuciones', 'Aviso si algo falla'],
     campos: ['Qué hay que hacer', 'Cada cuánto', 'Origen y destino de los datos'],
     ejemplo: 'Cada noche se copian los pedidos del día a la hoja de contabilidad y se envía el total por email.',
     repos: ['cloudflare/workflows-starter'],
@@ -372,7 +372,7 @@ export const productos = [
   },
   {
     slug: 'plan-hosting-dominio', cat: 'planes', nombre: 'Alojamiento + dominio gestionado (mes)', p: [9], plazo: 'Mensual',
-    resumen: 'Tu web publicada en Cloudflare con SSL y tu dominio, sin preocuparte de renovaciones.',
+    resumen: 'Tu web publicada con candado de seguridad (https) y tu dominio, sin preocuparte de renovaciones.',
     recibes: ['Alojamiento rápido con SSL', 'Gestión del dominio', 'Email de reenvío'],
     campos: ['Dominio deseado', 'Web a alojar'],
     ejemplo: 'tunegocio.es apuntando a tu web, renovado cada año sin que tengas que hacer nada.',
@@ -633,11 +633,15 @@ Cada servicio es un producto cerrado: **precio fijo, plazo fijo y una lista de c
 ### 1. Eliges
 Busca tu servicio por pestaña (webs, hostelería, reservas, bodas, bots, automatizaciones…). Cada ficha te dice qué recibes, un ejemplo real y el plazo.
 
-### 2. Empiezas gratis
-Pulsa **Empieza gratis** y rellena los datos que necesitamos: nombre, fotos, horarios, textos… Si no tienes algo, lo marcas y seguimos. No pagas nada todavía.
+### 2. Lo contratas o lo pruebas gratis
+Dos formas de empezar:
+- **Contrátalo directamente**: pagas con tarjeta en la ficha y después nos mandas tus datos (2-3 minutos). Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero.
+- **Pruébalo gratis**: pulsas **Empieza gratis**, rellenas los datos y no pagas nada todavía.
 
-### 3. Ves una vista previa
-Te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+Si no tienes algo (textos, fotos), lo marcas y seguimos.
+
+### 3. Ves el resultado antes de la entrega
+Te enviamos una vista previa con tus datos en 24-72 h laborables. Si empezaste gratis, pagas solo si te gusta.
 
 ### 4. Lo recibes funcionando
 Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta de uso. Detrás hay una persona, David Porto Díaz, que te responde cualquier duda.
@@ -652,7 +656,7 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
 
 ## Sin humo
 - **Es tuyo**: accesos a tu nombre y sin cuotas obligatorias.
-- Pagas solo cuando has visto la vista previa y te gusta.
+- Puedes probar gratis antes de pagar, o contratarlo directamente con garantía.
 - Si en 7 días no está como te prometimos, te devolvemos el dinero.
 `,
   },
@@ -662,7 +666,7 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
 Tuya. Te entregamos todos los accesos a tu nombre.
 
 ## ¿Tengo que pagar antes?
-No. Pulsas **Empieza gratis**, rellenas los datos y te enviamos una vista previa. Solo pagas si te gusta.
+Tú eliges. Puedes **contratarlo directamente** con tarjeta (si en 7 días no hace lo que dice la ficha, te devolvemos el dinero) o pulsar **Empieza gratis**, ver una vista previa con tus datos y pagar solo si te gusta.
 
 ## ¿Es solo para empresas?
 No. También para particulares: webs de boda, cumpleaños, viajes, asociaciones, currículums o tu proyecto personal.
@@ -671,13 +675,13 @@ No. También para particulares: webs de boda, cumpleaños, viajes, asociaciones,
 Sí. David Porto Díaz atiende cada pedido en persona y responde a cualquier duda.
 
 ## ¿Hay cuotas mensuales?
-No son obligatorias. Muchos servicios funcionan gratis en Cloudflare. Si prefieres que lo mantengamos, tienes los **Planes mensuales**.
+No son obligatorias. Muchos servicios funcionan gratis, sin cuota. Si prefieres que lo mantengamos, tienes los **Planes mensuales**.
 
 ## ¿Y si no tengo textos o fotos?
 Marca «no lo tengo» en el campo y te proponemos textos e imágenes libres de derechos.
 
 ## ¿Puedo pedir cambios?
-Sí: cada servicio incluye una ronda de cambios. Después, con el plan de mantenimiento o por horas.
+Sí. Todo incluye una ronda de ajustes antes de la entrega. Después, con **Te lo montamos** tienes ajustes sobre lo pedido; con **Plantilla + guía**, resolvemos tus dudas por email. Para cambios nuevos, el plan de mantenimiento.
 
 ## ¿Cuánto tarda?
 El plazo aparece en cada ficha y cuenta desde que recibimos los campos completos.
@@ -738,7 +742,7 @@ Hay dos tipos. Las **demos interactivas** se pueden usar ya (editar una web, ped
 
 DEMOS_LISTA
 
-Con tus textos, fotos y colores queda así en 2-10 días. Pruébalo gratis: rellenas los datos, ves la vista previa y pagas solo si te gusta.
+Con tus textos, fotos y colores queda así en 2-10 días. Contrátalo directamente o pruébalo gratis y paga solo si te gusta.
 
 ¿No ves tu caso? [Cuéntanos qué necesitas](/pages/contacto).
 `,
@@ -764,7 +768,7 @@ Si quieres afinar, cuéntanos:
 - Email: [hola@automatizasinhumo.com](mailto:hola@automatizasinhumo.com)
 - Respondemos en menos de 24 horas laborables.
 
-_Si ya sabes qué quieres, entra en su ficha y pulsa **Empieza gratis**: rellenas los datos, ves una vista previa y pagas solo si te gusta._
+_Si ya sabes qué quieres, entra en su ficha: contrátalo directamente o pulsa **Empieza gratis** y paga solo si te gusta._
 `,
   },
   {

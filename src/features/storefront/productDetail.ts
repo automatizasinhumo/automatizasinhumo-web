@@ -12,11 +12,14 @@ import { catalogPath } from '../settings/home';
 import { formatMoney, toMajorUnits, currencyDecimals } from '../../money';
 import { requirePublicId } from '../catalog/serialize';
 import { buildProductCard } from './productCard';
+// Generado por manual/demos/gen-galeria.mjs: slug del servicio → demos.
+import demosPorProducto from '../../data/demos-producto.json';
 import type {
   ProductDetailModel,
   ProductPurchaseModel,
   ProductSeoModel,
   StorefrontGalleryImage,
+  StorefrontDemo,
   StorefrontImage,
 } from './models';
 
@@ -227,6 +230,7 @@ export async function loadProductDetail(
       ),
       backHref: catalogPath(options.settings?.homePage),
       startHref: `/empezar/${product.slug}`,
+      demos: ((demosPorProducto as Record<string, StorefrontDemo[]>)[product.slug] ?? []),
       error: options.searchParams.get('error'),
     },
     purchase: {

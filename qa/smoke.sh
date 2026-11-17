@@ -16,10 +16,19 @@ check /products "€"
 check /pages/como-funciona "funciona"
 check /pages/aviso-legal "David Porto"
 check /pages/privacidad ""
-check /cart ""
+check /cart "carrito"
+# Recorrido de compra directa: la ficha enseña la demo dentro y el bloque de compra.
+check /products/web-una-pagina "data-compra-directa"
+check /products/web-una-pagina "data-demo-visor"
+check /products/web-una-pagina "<iframe"
+check /empezar/web-una-pagina "<form"
 check /search?q=web ""
 check /sitemap.xml "<urlset"
 check /robots.txt "User-agent"
 check /llms.txt ""
 check /og-default.png ""
+# Sin jerga técnica en la portada (la ven clientes, no programadores).
+if curl -sS --max-time 30 "$BASE/" | sed -e "s/<[^>]*>/ /g" | grep -qiwE "cloudflare|serverless"; then
+  echo "FALLO / -> jerga técnica en la portada"; fail=1
+else echo "ok   / sin jerga"; fi
 exit $fail

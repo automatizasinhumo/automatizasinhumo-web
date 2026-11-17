@@ -7,7 +7,7 @@
 import Icono from '../../components/Icono.astro';
 
 const destacados = [
-  { href: '/categories/webs', titulo: 'Webs para tu negocio', desde: 'desde 14 €', icono: 'world-www' },
+  { href: '/categories/webs', titulo: 'Webs para tu negocio', desde: 'desde 149 €', icono: 'world-www' },
   { href: '/categories/automatizaciones', titulo: 'Automatizaciones', desde: 'desde 99 €', icono: 'route' },
   { href: '/categories/documentos', titulo: 'Documentos, PDF e IA', desde: 'desde 29 €', icono: 'file-text' },
   { href: '/categories/planes', titulo: 'Planes mensuales', desde: 'desde 9 €/mes', icono: 'calendar-repeat' },
@@ -15,7 +15,7 @@ const destacados = [
 const pasos = [
   ['01', 'Solicitas', 'Eliges un servicio con precio cerrado y rellenas un formulario corto (2-3 minutos). Sin tarjeta.', 'pencil'],
   ['02', 'Recibes la vista previa', 'David Porto Díaz la prepara con tus datos reales y te la envía en 24-72 h laborables.', 'eye'],
-  ['03', 'Decides si pagas', 'Si te gusta, pagas y lo recibes funcionando. Si no te convence, no pagas nada.', 'cash'],
+  ['03', 'Lo recibes funcionando', 'Si lo contrataste directamente, ya está pagado. Si empezaste gratis, pagas solo si te gusta.', 'cash'],
 ];
 // Nivel A de manual/catalogo/entrega.mjs: salen con un prompt y se entregan el mismo día.
 const rapidos = [
@@ -25,12 +25,12 @@ const rapidos = [
 ];
 const ventajas = [
   ['Precio cerrado', 'Ves el precio antes de pagar. No hay presupuestos que crecen ni horas extra.', 'receipt-euro'],
-  ['Pruebas antes de pagar', 'Primero ves una vista previa con tus datos. Si no te convence, no pagas nada.', 'eye'],
+  ['Lo ves antes de comprar', 'Cada ficha tiene una demo que puedes tocar. Y si prefieres, pides una vista previa gratis con tus datos.', 'eye'],
   ['Una persona detrás', 'Te atiende David Porto Díaz, no un robot. Te responde cualquier duda, rápido y sin tecnicismos.', 'mood-smile'],
   ['Es tuyo', 'Accesos a tu nombre y sin cuotas obligatorias. Sin permanencia.', 'lock-open'],
 ];
 const faq = [
-  ['¿Tengo que pagar antes?', 'No. Empiezas gratis rellenando los datos, te enviamos una vista previa y solo pagas si te gusta.'],
+  ['¿Tengo que pagar antes?', 'Tú eliges. Puedes contratarlo directamente con tarjeta (con garantía de devolución de 7 días) o pedir una vista previa gratis y pagar solo si te gusta.'],
   ['¿Es solo para empresas?', 'No. También para particulares: bodas, cumpleaños, eventos, asociaciones o un proyecto personal.'],
   ['¿Qué diferencia hay entre «Plantilla + guía» y «Te lo montamos»?', 'Con «Plantilla + guía» recibes la plantilla rellenada y una guía paso a paso para publicarla. Con «Te lo montamos» te la entregamos publicada y funcionando.'],
   ['¿Y si necesito cambios?', 'Los ajustes sobre lo que has pedido están incluidos. Contesta al email de entrega y los hacemos.'],
@@ -53,7 +53,7 @@ const muestras = [
       </h1>
       <p class="mt-5 max-w-xl text-lg text-muted">
         Más de 70 servicios para negocios, autónomos y particulares (bodas, eventos, asociaciones…).
-        Sin complicaciones, rápido y con una persona que te responde. Empiezas gratis y pagas solo si te gusta.
+        Sin complicaciones, rápido y con una persona que te responde. Contrátalo directamente o pruébalo gratis y paga solo si te gusta.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="#catalogo" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Elegir servicio</a>
@@ -95,7 +95,7 @@ const muestras = [
     </a>
   </div>
 
-  <h2 class="mt-14 text-center text-sm font-semibold uppercase tracking-widest text-brand">Así funciona · pagas al final</h2>
+  <h2 class="mt-14 text-center text-sm font-semibold uppercase tracking-widest text-brand">Así funciona · dos formas de empezar</h2>
   <ol class="mt-4 grid gap-4 sm:grid-cols-3">
     {pasos.map(([n, t, d, ico], i) => (
       <li class="tarjeta relative p-5">

@@ -89,6 +89,43 @@ ${pastilla(p, ico)}</svg>`;
   return sharp(Buffer.from(svg)).composite([{ input: recorte, left: FX, top: FY + BAR }]).jpeg(JPG);
 }
 
+// Sin demo: una «ficha de entrega» que enseña QUÉ RECIBES y el plazo, para que la
+// tarjeta explique el servicio por sí sola (antes era solo un icono genérico).
+function lineas(t, max) {
+  const out = [];
+  let cur = '';
+  for (const w of String(t).split(/\s+/)) {
+    if ((cur + ' ' + w).trim().length > max && cur) { out.push(cur); cur = w; } else cur = (cur + ' ' + w).trim();
+  }
+  if (cur) out.push(cur);
+  return out.length > 2 ? [out[0], out[1].replace(/[,.;:]?$/, '…')] : out;
+}
+function conFicha(p, ico) {
+  const X = 70, Y = 150, W = 1060;
+  const items = (p.recibes ?? []).slice(0, 4);
+  // Letra grande y bloque centrado en el hueco: nada de media tarjeta vacía.
+  const fs = items.length > 3 ? 40 : 46;
+  const max = Math.floor(860 / (fs * 0.52));
+  const partes = items.map((it) => lineas(it, max));
+  const alto = partes.reduce((a, ls) => a + fs * 1.2 * ls.length + 44, -44);
+  let y = Math.round(Y + 270 + Math.max(0, (900 - 40 - (Y + 270) - alto) / 2) + fs * 0.8), filas = '';
+  for (const ls of partes) {
+    filas += `<circle cx="${X + 78}" cy="${y - fs * 0.32}" r="26" fill="${B.tint}"/>${usa('check', X + 60, y - fs * 0.32 - 18, 36, B.brand, 2.5)}`;
+    ls.forEach((l, i) => { filas += `<text x="${X + 124}" y="${y + i * fs * 1.2}" font-family="${FONT}" font-size="${fs}" fill="${B.ink}">${esc(l)}</text>`; });
+    y += fs * 1.2 * ls.length + 44;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">${fondo}
+<rect x="${X}" y="${Y}" width="${W}" height="${900 - Y + 40}" rx="28" fill="#fff" stroke="${B.line}" stroke-width="2" filter="url(#s)"/>
+<rect x="${X + 50}" y="${Y + 50}" width="150" height="150" rx="32" fill="${B.tint}"/>
+${usa(ico, X + 80, Y + 80, 90, B.brand, 1.6)}
+<text x="${X + 240}" y="${Y + 105}" font-family="${FONT}" font-size="26" font-weight="700" letter-spacing="3" fill="${B.brand}">LO QUE RECIBES</text>
+<text x="${X + 240}" y="${Y + 165}" font-family="${FONT}" font-size="46" font-weight="700" fill="${B.ink}">${esc(p.plazo ? `Listo en ${p.plazo}` : 'Precio cerrado')}</text>
+<line x1="${X + 50}" y1="${Y + 240}" x2="${X + W - 50}" y2="${Y + 240}" stroke="${B.line}" stroke-width="2"/>
+${filas}
+${pastilla(p, ICONO_CAT[p.cat] ?? ico)}</svg>`;
+  return sharp(Buffer.from(svg)).jpeg(JPG);
+}
+
 function conIcono(p, ico) {
   const cx = 600, cy = 500;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">${fondo}
@@ -107,7 +144,7 @@ let n = 0;
 for (const p of productos) {
   const ico = ICONO_PROD[p.slug] ?? ICONO_CAT[p.cat] ?? 'sparkles';
   const nombre = captura(p);
-  const img = nombre ? await conCaptura(p, nombre, ICONO_CAT[p.cat] ?? ico) : conIcono(p, ico);
+  const img = nombre ? await conCaptura(p, nombre, ICONO_CAT[p.cat] ?? ico) : conFicha(p, ico);
   await img.toFile(fileURLToPath(new URL(`${p.slug}.jpg`, OUT)));
   if (nombre) n++;
 }

@@ -3,3 +3,4 @@
 /pages/como-funciona
 /pages/preguntas-frecuentes
 /pages/aviso-legal
+/products/web-una-pagina

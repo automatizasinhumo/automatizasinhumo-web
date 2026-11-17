@@ -15,28 +15,26 @@ function descripcion(p) {
   l.push('### Qué recibes', ...p.recibes.map((x) => `- ${x}`), '');
   l.push('### Campos que rellenas', ...p.campos.map((x) => `- ${x}`), '');
   l.push('### Ejemplo', `> ${p.ejemplo}`, '');
-  const demos = demosDe(p.slug);
-  // Separamos lo que se usa (demo interactiva) de lo que solo enseña un estilo.
-  const usa = demos.filter((d) => d.tipo === 'interactiva'), mira = demos.filter((d) => d.tipo !== 'interactiva');
-  if (usa.length) l.push('### Pruébalo ahora', 'Demo interactiva con datos de ejemplo: puedes tocarla, no se guarda nada.', ...usa.map((d) => `- [${d.titulo}](${d.url})`), '');
-  if (mira.length) l.push('### Diseños de ejemplo', 'Plantillas de estilo. Tu versión lleva tus textos, fotos y colores, en español.', ...mira.map((d) => `- [${d.titulo}](${d.url})`), '');
-  l.push(`**Plazo:** ${p.plazo}`, '');
+  // Las demos ya no van como enlaces en el texto: la ficha las enseña en un visor
+  // embebido (src/data/demos-producto.json, de manual/demos/gen-galeria.mjs).
+  l.push(p.plazo === 'Mensual'
+    ? '**Plazo:** puesta en marcha en 24-72 h laborables; después, servicio mensual.'
+    : `**Plazo:** vista previa en 24-72 h laborables; entrega en ${p.plazo} desde que la apruebas.`, '');
   if (p.p.length === 2) {
     l.push('### Plantilla + guía o te lo montamos',
+      'Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).', '',
       '| | Plantilla + guía | Te lo montamos |',
       '|---|---|---|',
       `| Precio | **${p.p[0]} €** | **${p.p[1]} €** |`,
-      '| Plantilla rellenada con tus datos | Sí | Sí |',
-      '| Guía paso a paso para publicarla | Sí | No hace falta |',
+      '| Preparado con tus datos | Sí | Sí |',
+      '| Guía paso a paso para publicarlo | Sí | No hace falta |',
       '| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |',
-      `| Plazo | ${p.plazo} | ${p.plazo} |`,
-      '| Ajustes tras la entrega | Dudas por email | Incluidos |', '');
+      '| Ronda de ajustes antes de entregar | Sí | Sí |',
+      '| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |', '');
   }
-  l.push('### Pruébalo antes de pagar',
-    '1. Pulsa **Empieza gratis** y rellena los campos (2-3 minutos).',
-    '2. Te enviamos una vista previa con tus datos.',
-    '3. Si te gusta, pagas y te lo entregamos funcionando. Si no, no pagas nada.',
-    '',
+  l.push('### Cómo funciona',
+    '**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.', '',
+    '**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.', '',
     '_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._', '');
   return l.join('\n');
 }
@@ -53,9 +51,13 @@ for (const c of categorias)
   out.push(`INSERT INTO categories (name, slug, public_id) VALUES (${q(c.nombre)}, ${q(c.slug)}, ${q(pid('cat'))});`);
 
 // Productos
+// «Novedades» ordena por created_at desc: fecha escalonada para que la tienda
+// muestre el orden curado de catalogo.mjs (lo más vendible primero).
+let orden = 0;
 for (const p of productos) {
+  const creado = `datetime('2026-01-01', '-${orden++} minutes')`;
   const varios = p.p.length === 2;
-  out.push(`INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id) VALUES (${q(p.nombre)}, ${q(descripcion(p))}, ${p.p[0] * 100}, 'eur', 999, 1, ${q(p.slug)}, ${varios ? q('Modalidad') : 'NULL'}, 0, ${q(pid('prod'))});`);
+  out.push(`INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES (${q(p.nombre)}, ${q(descripcion(p))}, ${p.p[0] * 100}, 'eur', 999, 1, ${q(p.slug)}, ${varios ? q('Modalidad') : 'NULL'}, 0, ${q(pid('prod'))}, ${creado});`);
   out.push(`INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug=${q(p.slug)} AND c.slug=${q(p.cat)};`);
   // Portada JPEG estática (public/images/productos, generada por gen-imagenes.mjs)
   const img = `productos/${p.slug}.jpg`;
@@ -101,7 +103,7 @@ for (const pg of paginas.filter((p) => p.menu === 'footer'))
 // Ajustes
 const set = (k, v) => out.push(`INSERT INTO settings (key, value) VALUES (${q(k)}, ${q(v)}) ON CONFLICT(key) DO UPDATE SET value=excluded.value;`);
 set('store_name', 'Automatiza sin humo');
-set('announcement', 'Empieza gratis: ves la vista previa y pagas solo si te gusta · Te atiende una persona');
+set('announcement', 'Contrátalo directamente con garantía de 7 días o pruébalo gratis · Te atiende una persona');
 set('announcement_href', '/pages/como-funciona');
 
 process.stdout.write(out.join('\n') + '\n');
