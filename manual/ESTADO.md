@@ -7,7 +7,8 @@
 
 ## Qué hay
 - Portada (home) con propuesta de valor, 3 pasos y accesos a categorías destacadas (`src/features/storefront/HomeHero.astro`).
-- 71 productos tipo "barra de pan" en 14 categorías (pestañas del menú), cada uno con precio fijo, plazo, campos, ejemplo y dos modalidades (Lo montas tú / Te lo montamos).
+- Menú de cabecera corto: Servicios, Webs, Automatizaciones, Cómo funciona, Demos. El resto de categorías y páginas están en el pie.
+- 71 productos tipo "barra de pan" en 14 categorías, cada uno con precio fijo, plazo, campos, ejemplo y dos modalidades (Lo montas tú / Te lo montamos).
 - Páginas: Cómo funciona, Preguntas frecuentes, Herramientas recomendadas, Demos, Contacto, Aviso legal, Condiciones, Privacidad y Cookies.
 - Tienda, emails y buscador en español. Moneda EUR.
 - SEO: títulos y descripciones por producto, canonical, JSON-LD (Organization y Product), sitemap.xml, llms.txt, imagen social `og-default.png` y una portada PNG por producto (también og:image).
