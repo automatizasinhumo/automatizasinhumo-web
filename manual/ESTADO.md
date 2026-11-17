@@ -38,10 +38,15 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
 
     cp wrangler.jsonc "$TMP/wrangler.jsonc.orig" && cp .instances/automatizasinhumo-staging.wrangler.jsonc wrangler.jsonc && npx astro build && npx wrangler deploy; cp "$TMP/wrangler.jsonc.orig" wrangler.jsonc
 
-## Pendiente de David (antes de producción)
-1. **Datos legales**: rellenar `[NOMBRE O RAZÓN SOCIAL]`, `[NIF]` y `[DIRECCIÓN]` en aviso legal, condiciones y privacidad (`catalogo.mjs`) y volver a generar y aplicar el seed.
-2. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.
-3. **Pagos**: conectar Stripe desde el admin con tus claves (no lo he hecho: no introduzco datos de pago).
-4. **R2** (subir fotos desde el admin): pulsar tú "Add R2 subscription" en dash.cloudflare.com → R2. Ahora funciona sin R2.
-5. **Afiliados**: darte de alta en los programas (Hostinger, Raiola, Webempresa, Kinsta, Elementor, MailerLite/Brevo, GetResponse, Systeme.io, Holded) y cambiar los nombres de "Herramientas recomendadas" por tus enlaces.
-6. Opcional: proteger staging con Cloudflare Access (Zero Trust). Hoy no está enlazado ni indexado.
+## Hecho el 17-11-2026
+- **Datos legales**: titular David Porto Díaz (persona física), sin NIF ni dirección publicados. Si hay una venta, se emite la factura puntual. Seed aplicado en staging.
+- **Fotos sin R2**: van en `public/images/` como static assets de Workers. Es gratis y no hace falta tarjeta.
+- **Empleados QA** (`.github/workflows/empleados-qa.yml`): smoke, Lighthouse, pa11y y lychee contra staging en cada push y cada lunes. Gratis aunque el repo sea privado.
+- **CodeRabbit** (`.coderabbit.yaml` listo) y **SonarCloud** solo son gratis si el repo es público. Decide tú si se hace público.
+- Entregas: ver `ENTREGA.md`. Repos de referencia verificados: ver `REFERENCIAS.md`.
+
+## Pendiente de David (al final, por orden)
+1. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.
+2. **Pagos**: conectar Stripe desde el admin con tus claves (no lo he hecho: no introduzco datos de pago).
+3. **Afiliados**: darte de alta en los programas (Hostinger, Raiola, Webempresa, Kinsta, Elementor, MailerLite/Brevo, GetResponse, Systeme.io, Holded) y cambiar los nombres de "Herramientas recomendadas" por tus enlaces.
+4. Opcional: proteger staging con Cloudflare Access (Zero Trust). Hoy no está enlazado ni indexado.

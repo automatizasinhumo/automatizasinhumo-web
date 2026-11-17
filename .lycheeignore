@@ -1,0 +1,5 @@
+# Enlaces que bloquean bots o requieren sesión
+^https://(www\.)?linkedin\.com
+^https://(www\.)?instagram\.com
+^https://(www\.)?facebook\.com
+^mailto:

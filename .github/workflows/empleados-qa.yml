@@ -1,0 +1,87 @@
+name: Empleados QA (staging)
+
+# "Empleados" gratuitos que revisan la web publicada en staging:
+#   - smoke: rutas clave responden 200 con su contenido
+#   - lighthouse: accesibilidad, SEO, rendimiento y CLS
+#   - pa11y: WCAG 2 AA
+#   - lychee: enlaces rotos
+# Corren tras cada push a main, cada lunes y a mano. No necesitan secretos.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: empleados-qa
+  cancel-in-progress: true
+
+env:
+  BASE: https://automatizasinhumo-staging.davidpd89.workers.dev
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - run: bash qa/smoke.sh
+
+  lighthouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Lighthouse CI
+        run: |
+          args=()
+          while read -r p; do [ -n "$p" ] && args+=(--collect.url="$BASE$p"); done < qa/urls.txt
+          npx --yes @lhci/cli@0.15.1 collect --config=./lighthouserc.json "${args[@]}"
+          npx --yes @lhci/cli@0.15.1 upload --config=./lighthouserc.json || true
+          npx --yes @lhci/cli@0.15.1 assert --config=./lighthouserc.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: lighthouse
+          path: .lighthouseci/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
+
+  pa11y:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: pa11y-ci (WCAG2AA)
+        run: |
+          urls=()
+          while read -r p; do [ -n "$p" ] && urls+=("$BASE$p"); done < qa/urls.txt
+          npx --yes pa11y-ci@3.1.0 --config .pa11yci "${urls[@]}"
+
+  enlaces:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Descargar páginas de staging
+        run: |
+          mkdir -p site
+          i=0
+          while read -r p; do [ -n "$p" ] && curl -sS --max-time 30 "$BASE$p" -o "site/p$((i++)).html"; done < qa/urls.txt
+      - name: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --base-url ${{ env.BASE }} --no-progress --max-retries 2 --accept 200,204,206,301,302,403,429 site/*.html
+          fail: true

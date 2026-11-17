@@ -1,0 +1,28 @@
+# CodeRabbit (gratis en repos públicos). Revisa cada PR en español.
+language: es-ES
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!public/images/**"
+    - "!public/fonts/**"
+    - "!manual/catalogo/seed.sql"
+    - "!package-lock.json"
+  path_instructions:
+    - path: "src/**"
+      instructions: >-
+        Tienda Astro SSR en Cloudflare Workers + D1. Vigila: inyección SQL (usar bind),
+        cabeceras de caché (lo privado debe ser private, no-store), accesibilidad (WCAG AA),
+        textos visibles en español y que no se filtren secretos.
+    - path: "manual/catalogo/**"
+      instructions: >-
+        Catálogo de servicios. Comprueba precios coherentes (Lo montas tú < Te lo montamos),
+        tono claro sin promesas exageradas y que no aparezcan datos personales salvo el nombre del titular.
+chat:
+  auto_reply: true
