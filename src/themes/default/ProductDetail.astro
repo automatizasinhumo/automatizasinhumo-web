@@ -176,7 +176,7 @@ const { model, purchase } = Astro.props;
     }
     {
       model.descriptionHtml && (
-        <div class="markdown-content mt-6 max-w-prose text-muted" set:html={model.descriptionHtml} />
+        <div class="markdown-content mt-6 max-w-prose text-muted" style="--prose-h2-size:1.2rem" set:html={model.descriptionHtml} />
       )
     }
 

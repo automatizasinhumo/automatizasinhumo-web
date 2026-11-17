@@ -439,3 +439,25 @@ export async function deleteProduct(db: D1Database, id: number): Promise<void> {
     db.prepare('DELETE FROM products WHERE id = ?').bind(id),
   ]);
 }
+
+/**
+ * Highest active variant price per product, so a card can show both tiers
+ * ("149 € la publicas tú · 349 € te la montamos") instead of a bare base price
+ * that hides the second option until the detail page. One batched query;
+ * products without variants are absent from the map.
+ */
+export async function maxVariantPrices(
+  db: D1Database,
+  productIds: number[],
+): Promise<Map<number, number>> {
+  if (productIds.length === 0) return new Map();
+  const placeholders = productIds.map(() => '?').join(',');
+  const { results } = await db
+    .prepare(
+      `SELECT product_id, MAX(price_cents) AS max_cents FROM product_variants
+        WHERE active = 1 AND product_id IN (${placeholders}) GROUP BY product_id`,
+    )
+    .bind(...productIds)
+    .all<{ product_id: number; max_cents: number }>();
+  return new Map(results.map((r) => [r.product_id, r.max_cents]));
+}

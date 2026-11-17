@@ -63,9 +63,10 @@ const hasGallery = images.length > 1;
         )}
       </div>
       <div class="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
-        {images.map((image) => (
+        {images.map((image, i) => (
           <a
             href={`#pi-${image.anchor}`}
+            aria-label={`Ver imagen ${i + 1} de ${images.length}`}
             class="shrink-0 overflow-hidden rounded border border-line bg-surface transition hover:border-brand"
           >
             <img

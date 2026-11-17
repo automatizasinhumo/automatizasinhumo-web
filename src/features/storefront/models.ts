@@ -48,6 +48,9 @@ export interface ProductCardModel {
   /** Server-formatted price in the store's currency. Display only — money is
    *  never posted back from a template as authority. */
   formattedPrice: string;
+  /** Top variant price ("Te lo montamos") when above the base price; absent
+   *  for single-price products. */
+  formattedMaxPrice?: string;
   /** Availability as a boolean, deliberately not a quantity: exact stock counts
    *  stay private, and bucket-level changes avoid cache invalidation. */
   inStock: boolean;

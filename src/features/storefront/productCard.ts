@@ -63,6 +63,9 @@ export interface ProductCardOptions extends StorefrontImageOptions {
    * pass the store's configured currency.
    */
   currency: string;
+  /** Highest active variant price (minor units) from maxVariantPrices().
+   *  Shown only when above the base price. */
+  maxPriceCents?: number;
 }
 
 /**
@@ -82,6 +85,9 @@ export function buildProductCard(
     // The store's currency, not the row's: a product row can carry a legacy
     // currency, and the catalog has always displayed one consistent currency.
     formattedPrice: formatMoney(product.price_cents, options.currency),
+    ...(options.maxPriceCents !== undefined && options.maxPriceCents > product.price_cents
+      ? { formattedMaxPrice: formatMoney(options.maxPriceCents, options.currency) }
+      : {}),
     // Availability only — never the count. `stockState` is the authoritative
     // classification; re-deriving `stock > 0` here would fork that rule.
     inStock: stockState(product.stock) !== 'out',

@@ -11,6 +11,7 @@ import {
 } from '../../features/categories/db';
 import ProductCard from '#theme/ProductCard.astro';
 import { buildProductCard } from '../../features/storefront/productCard';
+import { maxVariantPrices } from '../../features/products/db';
 import { getConfig } from '../../config';
 import { orderByClause, parseStoreSortQuery } from '../../features/products/sort';
 import {
@@ -54,8 +55,10 @@ const products = await productsInCategory(env.DB, category.id, PAGE_SIZE, offset
 addCacheTags(Astro.response.headers, productCacheTags(products.map((product) => product.public_id)));
 // Presentation models are built here, where the store's image settings are
 // known; only the first card is the LCP image.
+const maxPrices = await maxVariantPrices(env.DB, products.map((product) => product.id));
 const cards = products.map((product, i) =>
   buildProductCard(product, {
+    maxPriceCents: maxPrices.get(product.id),
     baseUrl: getConfig().images.baseUrl,
     currency: getConfig().currency,
     delivery: Astro.locals.settings?.imageDelivery,

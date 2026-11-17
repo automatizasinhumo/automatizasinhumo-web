@@ -40,7 +40,7 @@ export const productos = [
     slug: 'web-corporativa-5-secciones', cat: 'webs', nombre: 'Web corporativa de 5 secciones', p: [449, 899], plazo: '5 días',
     resumen: 'Inicio, servicios, sobre nosotros, opiniones y contacto. Para empresas que necesitan algo más que una tarjeta.',
     recibes: ['5 páginas con diseño a elegir entre +300 plantillas', 'Formulario de contacto con aviso', 'SEO básico (títulos, descripción, sitemap)', 'Publicación y certificado SSL'],
-    campos: ['Datos de la empresa', 'Textos de cada sección (o te los redactamos)', 'Logo y colores', 'Fotos', 'Email donde recibir contactos'],
+    campos: ['Datos de la empresa', 'Textos de cada sección (o te los redactamos)', 'Logo y colores', 'Fotos', 'Correo donde recibir contactos'],
     ejemplo: 'Asesoría García: página por servicio (fiscal, laboral, contable), equipo, testimonios y formulario.',
     repos: ['dawidolko/Website-Templates', 'uiuxlabz/uiuxlabz', 'ultimatewebtemplates/free-website-templates'],
   },
@@ -54,7 +54,7 @@ export const productos = [
   },
   {
     slug: 'portfolio-editable', cat: 'webs', nombre: 'Portfolio con panel para editarlo tú', p: [179, 349], plazo: '3 días',
-    resumen: 'Para fotógrafos, diseñadores, arquitectos o freelancers: cambias textos y fotos desde un panel, sin tocar código.',
+    resumen: 'Para fotógrafos, diseñadores, arquitectos o autónomos: cambias textos y fotos desde un panel, sin tocar código.',
     recibes: ['Portfolio con proyectos y galería', 'Panel de administración', 'Formulario de contacto', 'Alojamiento gratuito, sin cuota'],
     campos: ['Nombre y profesión', 'Proyectos (título, fotos, descripción)', 'Biografía', 'Redes sociales'],
     ejemplo: 'Marta, fotógrafa: 8 reportajes, sobre mí, tarifas y contacto. Ella sube los nuevos trabajos desde el móvil.',
@@ -98,7 +98,7 @@ export const productos = [
     slug: 'reservas-restaurante', cat: 'hosteleria', nombre: 'Reservas de mesa online', p: [149, 299], plazo: '3 días',
     resumen: 'Sistema propio de reservas sin pagar comisión por comensal a plataformas.',
     recibes: ['Página de reservas', 'Panel para ver y confirmar reservas', 'Avisos al cliente', 'Control de aforo por turno'],
-    campos: ['Turnos y aforo', 'Mesas', 'Días de cierre', 'Email / teléfono de avisos'],
+    campos: ['Turnos y aforo', 'Mesas', 'Días de cierre', 'Correo o teléfono de avisos'],
     ejemplo: 'Restaurante El Puerto: el cliente reserva para 4 el sábado a las 14:30 y tú lo ves en el panel.',
     repos: ['RamtinBabaei/quickdine-platform'],
   },
@@ -116,7 +116,7 @@ export const productos = [
     slug: 'pagina-citas', cat: 'reservas', nombre: 'Página de citas tipo Calendly', p: [79, 179], plazo: '48 h',
     resumen: 'Comparte un enlace y tus clientes reservan hueco en tu agenda. Sin cuotas por usuario.',
     recibes: ['Página de reserva con tus huecos', 'Tipos de cita (15, 30, 60 min…)', 'Confirmación y recordatorio por email', 'Enlace para tu web, Instagram o firma'],
-    campos: ['Tipos de cita y duración', 'Horario disponible', 'Email de avisos', 'Preguntas previas al cliente'],
+    campos: ['Tipos de cita y duración', 'Horario disponible', 'Correo de avisos', 'Preguntas previas al cliente'],
     ejemplo: 'Coach Ana: enlace «Reserva tu sesión de 30 min» en su Instagram; las citas caen solas en su agenda.',
     repos: ['CCCrafts/punctual'],
   },
@@ -133,7 +133,7 @@ export const productos = [
   {
     slug: 'web-boda-rsvp', cat: 'bodas', nombre: 'Web de boda con confirmación de asistencia', p: [99, 249], plazo: '3 días',
     resumen: 'Toda la información de la boda en una web y los invitados confirman asistencia y menú.',
-    recibes: ['Web con historia, programa, cómo llegar y alojamiento', 'Formulario RSVP con menú y alergias', 'Lista de confirmados descargable', 'Preguntas frecuentes'],
+    recibes: ['Web con historia, programa, cómo llegar y alojamiento', 'Formulario de confirmación de asistencia con menú y alergias', 'Lista de confirmados descargable', 'Preguntas frecuentes'],
     campos: ['Nombres y fecha', 'Lugar de ceremonia y banquete', 'Programa del día', 'Fotos', 'Opciones de menú'],
     ejemplo: 'Lucía & Pablo: 140 invitados confirman desde el móvil y descargáis el Excel para el catering.',
     repos: ['Holojerm/nuxt-wedding-template', 'kbichave/wedding-invite', 'zachspiel/wedding-rsvp', 'sotomaque/wedding-website', '1molehayo/wedding-website-builder'],
@@ -181,9 +181,9 @@ export const productos = [
     repos: ['MrDemonWolf/linkden', 'Mrbarnx/Open-Link-Hub', 'dimasmong/MoBio'],
   },
   {
-    slug: 'cv-profesional', cat: 'identidad', nombre: 'Currículum profesional ATS en PDF', p: [29, 79], plazo: '48 h',
+    slug: 'cv-profesional', cat: 'identidad', nombre: 'Currículum profesional en PDF que pasa los filtros de empresas', p: [29, 79], plazo: '48 h',
     resumen: 'CV preparado para pasar los filtros automáticos de selección, en PDF y Word.',
-    recibes: ['CV en PDF y Word', 'Plantilla a elegir', 'Revisión de palabras clave ATS', 'Versión web opcional'],
+    recibes: ['CV en PDF y Word', 'Plantilla a elegir', 'Palabras clave para pasar los filtros automáticos de selección', 'Versión web opcional'],
     campos: ['Experiencia', 'Formación', 'Habilidades', 'Puesto al que aspiras'],
     ejemplo: 'Elena, enfermera: CV de 1 página con las palabras clave de la oferta del hospital.',
     repos: ['gianfrancodemarco/resume-builder', 'samuelbelo/cvfree', 'akhil-dara/CVAurum'],
@@ -209,13 +209,13 @@ export const productos = [
   {
     slug: 'lista-espera', cat: 'captacion', nombre: 'Lista de espera con referidos', p: [79, 179], plazo: '48 h',
     resumen: 'Para lanzamientos: la gente se apunta, comparte su enlace y sube puestos en la lista.',
-    recibes: ['Página de lista de espera', 'Enlace de referido por persona', 'Ranking y exportación', 'Email de bienvenida'],
+    recibes: ['Página de lista de espera', 'Enlace de referido por persona', 'Ranking y exportación', 'Correo de bienvenida'],
     campos: ['Nombre del producto', 'Fecha de lanzamiento', 'Premio por referidos'],
     ejemplo: 'Nueva app de recetas: 1.200 apuntados antes de abrir, 40 % llegados por referidos.',
     repos: ['d4mr/0list', 'Metareignity/waitlist-cloudflare'],
   },
   {
-    slug: 'avisos-multicanal', cat: 'captacion', nombre: 'Avisos automáticos multicanal (webhooks)', p: [59, 129], plazo: '48 h',
+    slug: 'avisos-multicanal', cat: 'captacion', nombre: 'Avisos automáticos por varios canales', p: [59, 129], plazo: '48 h',
     resumen: 'Cualquier evento de tus herramientas (pago, formulario, pedido) avisa a Slack, Telegram, Discord o email.',
     recibes: ['Bandeja de eventos', 'Reglas de aviso por canal', 'Histórico consultable'],
     campos: ['Herramientas que envían eventos', 'Canales de aviso', 'Qué eventos interesan'],
@@ -253,7 +253,7 @@ export const productos = [
   {
     slug: 'auto-captacion-leads', cat: 'automatizaciones', nombre: 'Captación de clientes automática', p: [149, 299], plazo: '3 días',
     resumen: 'Formulario → hoja de cálculo → email de bienvenida → aviso a tu móvil. Sin copiar y pegar.',
-    recibes: ['Flujo n8n importado y probado', 'Registro en Google Sheets', 'Email automático al cliente', 'Aviso a Telegram'],
+    recibes: ['Flujo n8n importado y probado', 'Registro en Google Sheets', 'Correo automático al cliente', 'Aviso a Telegram'],
     campos: ['Formulario de origen', 'Hoja de destino', 'Texto del email', 'Canal de aviso'],
     ejemplo: 'Academia: cada interesado queda en la hoja, recibe el temario y tú te enteras al momento.',
     repos: ['yusizer/n8n-lead-automation', 'n8n-io/n8n'],
@@ -262,7 +262,7 @@ export const productos = [
     slug: 'auto-facturas', cat: 'automatizaciones', nombre: 'Facturas recibidas a hoja de cálculo', p: [149, 299], plazo: '4 días',
     resumen: 'Las facturas que llegan al email se leen solas y se apuntan en tu hoja: proveedor, fecha, importe, IVA.',
     recibes: ['Flujo que vigila tu email', 'Extracción automática de datos', 'Hoja de cálculo ordenada', 'Copia del PDF en tu nube'],
-    campos: ['Email donde llegan las facturas', 'Hoja de destino', 'Campos a extraer'],
+    campos: ['Correo donde llegan las facturas', 'Hoja de destino', 'Campos a extraer'],
     ejemplo: 'Autónomo: a final de trimestre tiene todas las facturas apuntadas para la gestoría.',
     repos: ['vixonoffice/n8n-automation-templates', 'enescingoz/awesome-n8n-templates'],
   },
@@ -270,7 +270,7 @@ export const productos = [
     slug: 'auto-resenas', cat: 'automatizaciones', nombre: 'Resumen semanal de reseñas', p: [99, 199], plazo: '3 días',
     resumen: 'Cada lunes recibes un resumen con IA de lo que dicen tus clientes: lo bueno, lo malo y qué responder.',
     recibes: ['Flujo semanal programado', 'Resumen con IA', 'Borradores de respuesta', 'Envío por email o Telegram'],
-    campos: ['Dónde están tus reseñas', 'Email/Telegram de destino'],
+    campos: ['Dónde están tus reseñas', 'Correo o Telegram de destino'],
     ejemplo: 'Hotel rural: «Esta semana 12 reseñas, 2 quejas por el wifi», con respuesta sugerida.',
     repos: ['vixonoffice/n8n-automation-templates', 'enescingoz/awesome-n8n-templates'],
   },
@@ -312,7 +312,7 @@ export const productos = [
     slug: 'analitica-sin-cookies', cat: 'enlaces', nombre: 'Analítica web sin cookies', p: [49, 99], plazo: '24 h',
     resumen: 'Sabe cuántas visitas tienes y de dónde vienen, sin banner de cookies molesto.',
     recibes: ['Panel de analítica privado', 'Instalación en tu web', 'Informe mensual por email (con plan)'],
-    campos: ['Web(s) a medir', 'Email para informes'],
+    campos: ['Web(s) a medir', 'Correo para informes'],
     ejemplo: 'Tienda local: «este mes 2.300 visitas, 40 % desde Instagram, la página más vista es Ofertas».',
     repos: ['umami-software/umami'],
   },
@@ -321,7 +321,7 @@ export const productos = [
   {
     slug: 'tienda-productos-digitales', cat: 'tiendas', nombre: 'Tienda de productos digitales', p: [299, 599], plazo: '5 días',
     resumen: 'Vende ebooks, plantillas, cursos o presets: el cliente paga y descarga al momento.',
-    recibes: ['Tienda con pago online', 'Entrega automática del archivo', 'Panel de pedidos', 'Emails de compra'],
+    recibes: ['Tienda con pago online', 'Entrega automática del archivo', 'Panel de pedidos', 'Correos de compra'],
     campos: ['Productos y precios', 'Archivos a entregar', 'Cuenta de cobro (Stripe)'],
     ejemplo: 'Diseñadora vende packs de plantillas de Canva a 9 € con descarga instantánea.',
     repos: ['ddyy/minshop', 'Vojislav77/digital-downloads-website', 'fengyiqicoder/astro-ai-shop', 'Paymug/paymug'],
@@ -345,7 +345,7 @@ export const productos = [
 
   // ── Portales ───────────────────────────────────────────
   {
-    slug: 'portal-cliente', cat: 'portales', nombre: 'Portal de clientes para agencias y freelancers', p: [299, 599], plazo: '7 días',
+    slug: 'portal-cliente', cat: 'portales', nombre: 'Portal de clientes para agencias y autónomos', p: [299, 599], plazo: '7 días',
     resumen: 'Tus clientes entran con su usuario y ven proyectos, archivos, facturas y avances.',
     recibes: ['Portal con tu marca', 'Proyectos y tareas', 'Archivos compartidos', 'Facturas y presupuestos'],
     campos: ['Logo y colores', 'Clientes y proyectos iniciales', 'Servicios que facturas'],
@@ -373,7 +373,7 @@ export const productos = [
   {
     slug: 'plan-hosting-dominio', cat: 'planes', nombre: 'Alojamiento + dominio gestionado (mes)', p: [9], plazo: 'Mensual',
     resumen: 'Tu web publicada con candado de seguridad (https) y tu dominio, sin preocuparte de renovaciones.',
-    recibes: ['Alojamiento rápido con SSL', 'Gestión del dominio', 'Email de reenvío'],
+    recibes: ['Alojamiento rápido con SSL', 'Gestión del dominio', 'Correo de reenvío'],
     campos: ['Dominio deseado', 'Web a alojar'],
     ejemplo: 'tunegocio.es apuntando a tu web, renovado cada año sin que tengas que hacer nada.',
     repos: ['coollabsio/coolify'],
@@ -416,7 +416,7 @@ export const productos = [
     slug: 'certificados-automaticos', cat: 'documentos', nombre: 'Diplomas y certificados en PDF automáticos', p: [99, 229], plazo: '3 días',
     resumen: 'Para academias, cursos y eventos: subes la lista de alumnos y cada uno recibe su certificado personalizado.',
     recibes: ['Plantilla de diploma con tu diseño', 'Generación masiva desde una hoja de cálculo', 'Envío automático por email', 'Código QR de verificación'],
-    campos: ['Logo y firma', 'Texto del certificado', 'Hoja con nombres, emails y horas', 'Email remitente'],
+    campos: ['Logo y firma', 'Texto del certificado', 'Hoja con nombres, correos y horas', 'Correo remitente'],
     ejemplo: 'Academia de inglés: 120 alumnos terminan el curso y en 5 minutos cada uno tiene su diploma con QR en el correo.',
     repos: ['pdfme/pdfme'],
   },
@@ -432,7 +432,7 @@ export const productos = [
     slug: 'chat-ia-web', cat: 'bots', nombre: 'Chat con IA en tu web que responde con tus datos', p: [199, 449], plazo: '5 días',
     resumen: 'Un asistente en tu web que contesta horarios, precios y dudas frecuentes usando tu información, y te pasa los contactos.',
     recibes: ['Chat en tu web o en una página propia', 'Entrenado con tus textos, PDFs y preguntas frecuentes', 'Aviso cuando alguien deja sus datos', 'Panel para revisar conversaciones'],
-    campos: ['Web donde va el chat', 'Documentos o FAQ', 'Tono (cercano / formal)', 'Email o Telegram para avisos'],
+    campos: ['Web donde va el chat', 'Documentos o FAQ', 'Tono (cercano / formal)', 'Correo o Telegram para avisos'],
     ejemplo: 'Clínica dental: «¿Abrís el sábado?» → «Sí, de 10 a 14. ¿Te reservo una revisión?» y llega el contacto al móvil.',
     repos: ['mckaywrigley/chatbot-ui'],
   },
@@ -505,7 +505,7 @@ export const productos = [
     slug: 'vigilancia-precios', cat: 'planes', nombre: 'Vigilancia de precios de la competencia (mes)', p: [12], plazo: 'Mensual',
     resumen: 'Te avisamos por email o Telegram cuando un competidor cambia el precio, se queda sin stock o vuelve a tenerlo.',
     recibes: ['Hasta 25 productos vigilados', 'Aviso por email o Telegram', 'Historial de precios de cada producto', 'Cambio de la lista cuando quieras'],
-    campos: ['Enlaces de los productos', 'Precio a partir del cual avisar', 'Frecuencia (diaria, cada hora)', 'Email o Telegram'],
+    campos: ['Enlaces de los productos', 'Precio a partir del cual avisar', 'Frecuencia (diaria, cada hora)', 'Correo o Telegram'],
     ejemplo: 'Tienda de bicis: «La Orbea X de la competencia ha bajado de 1.299 € a 1.149 €» llega al móvil a las 9:00.',
     repos: ['dgtlmoon/changedetection.io'],
   },
@@ -513,7 +513,7 @@ export const productos = [
     slug: 'aviso-cambios-web', cat: 'planes', nombre: 'Aviso de cambios en webs que te interesan (mes)', p: [9], plazo: 'Mensual',
     resumen: 'Vigilamos boletines oficiales, licitaciones, convocatorias o webs de proveedores y te avisamos cuando cambian.',
     recibes: ['Hasta 15 páginas vigiladas', 'Solo te avisa si cambia la parte que te importa', 'Resumen del cambio en el aviso'],
-    campos: ['Páginas a vigilar', 'Qué parte vigilar (p. ej. «tabla de convocatorias»)', 'Frecuencia', 'Email o Telegram'],
+    campos: ['Páginas a vigilar', 'Qué parte vigilar (p. ej. «tabla de convocatorias»)', 'Frecuencia', 'Correo o Telegram'],
     ejemplo: 'Gestoría: aviso cada vez que el ayuntamiento publica una nueva ayuda para autónomos.',
     repos: ['dgtlmoon/changedetection.io'],
   },
@@ -600,8 +600,8 @@ export const productos = [
   {
     slug: 'web-wordpress', cat: 'webs', nombre: 'Web WordPress llave en mano', p: [249, 549], plazo: '5 días',
     resumen: 'Si prefieres WordPress: instalada, con tema ligero, tus páginas, formulario, copias automáticas y seguridad básica.',
-    recibes: ['WordPress instalado en tu hosting', '5 páginas con tus textos y fotos', 'Formulario de contacto y aviso legal', 'Copias de seguridad y actualizaciones automáticas', 'Vídeo de 10 minutos para editarla tú'],
-    campos: ['Dominio y hosting (o te recomendamos uno)', 'Textos de las 5 páginas', 'Logo y fotos', 'Colores'],
+    recibes: ['WordPress instalado en tu alojamiento web', '5 páginas con tus textos y fotos', 'Formulario de contacto y aviso legal', 'Copias de seguridad y actualizaciones automáticas', 'Vídeo de 10 minutos para editarla tú'],
+    campos: ['Dominio y alojamiento web (o te recomendamos uno)', 'Textos de las 5 páginas', 'Logo y fotos', 'Colores'],
     ejemplo: 'Academia de música: inicio, profesores, horarios, precios y contacto; la dueña cambia los horarios ella misma.',
     repos: ['WordPress/wordpress-develop'],
   },
@@ -615,7 +615,7 @@ export const productos = [
   },
   {
     slug: 'plataforma-agencia', cat: 'portales', nombre: 'Plataforma para tu agencia: clientes, webs y CRM', p: [490, 990], plazo: '10 días',
-    resumen: 'Para agencias y freelancers: un panel donde cada cliente tiene su web, su portal y su ficha en el CRM, con cobros automáticos.',
+    resumen: 'Para agencias y autónomos: un panel donde cada cliente tiene su web, su portal y su ficha en el CRM, con cobros automáticos.',
     recibes: ['Panel multi-cliente propio', 'Portal privado para cada cliente', 'CRM con fichas y tareas', 'Cobros recurrentes con Stripe (con tus claves)'],
     campos: ['Nombre de la agencia y logo', 'Servicios que vendes', 'Primeros clientes a dar de alta', 'Dominio'],
     ejemplo: 'Diseñadora freelance con 12 clientes: cada uno entra a su portal, ve facturas y pide cambios sin escribir al WhatsApp personal.',
@@ -715,7 +715,7 @@ Lo que montamos funciona con estas herramientas. Algunas tienen plan gratuito y 
 - **Elementor**: maquetador visual si tu web es WordPress.
 - **Unsplash / Pexels**: fotos libres de derechos.
 
-### Hosting tradicional (si necesitas WordPress o correo con tu dominio)
+### Alojamiento web tradicional (si necesitas WordPress o correo con tu dominio)
 - **Raiola Networks** y **Webempresa**: hosting en España con soporte en español.
 - **Hostinger**: hosting y correo económicos.
 - **Kinsta**: hosting WordPress gestionado para webs con mucho tráfico.

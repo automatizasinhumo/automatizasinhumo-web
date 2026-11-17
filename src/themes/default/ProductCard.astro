@@ -48,7 +48,15 @@ const Heading = headingLevel;
     <div class="flex flex-1 flex-col p-5">
       <Heading class="font-serif text-lg font-semibold leading-snug tracking-tight">{card.name}</Heading>
       <div class="mt-auto flex items-center justify-between pt-4">
-        <p class="text-base font-semibold tabular-nums text-ink">{card.formattedPrice}</p>
+        {card.formattedMaxPrice ? (
+          <p class="text-sm leading-snug tabular-nums text-ink">
+            <b class="text-base">{card.formattedPrice}</b> <span class="text-muted">la publicas tú</span>
+            <br />
+            <b class="text-base">{card.formattedMaxPrice}</b> <span class="text-muted">te la montamos</span>
+          </p>
+        ) : (
+          <p class="text-base font-semibold tabular-nums text-ink">{card.formattedPrice}</p>
+        )}
         <span class="text-sm font-medium text-brand">Ver servicio <span class="text-accent">→</span></span>
       </div>
     </div>

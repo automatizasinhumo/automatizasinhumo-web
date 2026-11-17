@@ -324,7 +324,7 @@
 .markdown-content blockquote {
   border-left: 3px solid var(--color-line, #e5e5e5);
   padding-left: 1rem;
-  color: #6b7280;
+  color: #4b5563;
   font-style: italic;
 }
 .markdown-content code {

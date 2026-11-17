@@ -77,7 +77,9 @@ const MIGRATION = readFileSync(new URL('../../migrations/0028_nav_menus.sql', im
  */
 const statements = (sql) =>
   sql
-    .split('\n')
+    // /\r?\n/: a Windows checkout (core.autocrlf) leaves '\r' on each line, and
+    // '.' never matches '\r', so the comment strip below would silently fail.
+    .split(/\r?\n/)
     .map((line) => line.replace(/^\s*--.*$/, ''))
     .join('\n')
     .split(';')

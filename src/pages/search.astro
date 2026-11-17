@@ -5,6 +5,7 @@ import { getSearchProvider } from '../features/search';
 import { productsInSharedCategories } from '../features/categories/db';
 import ProductCard from '#theme/ProductCard.astro';
 import { buildProductCard } from '../features/storefront/productCard';
+import { maxVariantPrices } from '../features/products/db';
 import { getConfig } from '../config';
 import { MAX_PUBLIC_PAGE, paginate, queryHref, requestedPage } from '../pagination';
 import Pagination from '../components/Pagination.astro';
@@ -61,18 +62,21 @@ const cardOptions = {
   delivery: Astro.locals.settings?.imageDelivery,
   sizes: '(min-width: 1024px) 352px, calc(50vw - 36px)',
 };
+const maxPrices = await maxVariantPrices(env.DB, [...products, ...fillers].map((product) => product.id));
 const cards = products.map((product, i) =>
-  buildProductCard(product, { ...cardOptions, priority: i === 0 }),
+  buildProductCard(product, { ...cardOptions, maxPriceCents: maxPrices.get(product.id), priority: i === 0 }),
 );
 const cats = !q || products.length === 0 ? childrenOf(await listCategories(env.DB), null) : [];
-const fillerCards = fillers.map((product) => buildProductCard(product, cardOptions));
+const fillerCards = fillers.map((product) =>
+  buildProductCard(product, { ...cardOptions, maxPriceCents: maxPrices.get(product.id) }),
+);
 ---
 
 <Layout title={q ? `Búsqueda: ${q}` : 'Buscar servicios'} description="Busca entre webs, reservas, cartas QR, bots y automatizaciones con precio cerrado.">
   <section class="fondo-tecnico mb-10 rounded-3xl border border-line px-6 py-8 sm:px-10 sm:py-10">
     <p class="etiqueta">Buscar</p>
     <h1 class="mt-3 text-3xl font-bold text-ink sm:text-4xl">
-      {q ? <>Resultados para <span class="text-brand">“{q}”</span></> : '¿Qué necesita tu negocio?'}
+      {q ? <>Resultados para <span class="text-brand">“{q}”</span></> : '¿Qué necesitas resolver?'}
     </h1>
     <form method="GET" action="/search" class="mt-6 flex max-w-2xl items-center gap-2 rounded-full border border-line bg-surface p-1.5 pl-5 shadow-sm focus-within:border-brand" role="search">
       <Icono name="search" class="h-5 w-5 shrink-0 text-muted" />

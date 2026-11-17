@@ -1,7 +1,7 @@
 ---
 import { env } from 'cloudflare:workers';
 import Layout from '../../layouts/Layout.astro';
-import { getProductBySlug } from '../../features/products/db';
+import { getProductBySlug, maxVariantPrices } from '../../features/products/db';
 import { camposDeDescripcion, nombreCampo, LIMITES } from '../../features/solicitudes';
 import { formatPrice } from '../../config';
 
@@ -18,6 +18,12 @@ if (!consulta && !producto) {
 
 const campos = producto ? camposDeDescripcion(producto.description) : [];
 const conModalidad = Boolean(producto?.variant_label);
+// Precio exacto de cada modalidad: el cliente ve lo que pagará en la opción que marca.
+const precioMontado = producto && conModalidad
+  ? (await maxVariantPrices(env.DB, [producto.id])).get(producto.id) ?? null
+  : null;
+const precioDe = (valor: string) =>
+  producto ? formatPrice(valor === 'Te lo montamos' && precioMontado ? precioMontado : producto.price_cents, producto.currency) : '';
 const q = Astro.url.searchParams;
 const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Plantilla + guía';
 const ERRORES: Record<string, string> = {
@@ -125,7 +131,7 @@ const label = 'block text-sm font-medium text-ink';
                     <label class="flex cursor-pointer gap-3 rounded-xl border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand/5">
                       <input type="radio" name="modalidad" value={valor} checked={valor === modalidadInicial} class="mt-1 accent-[var(--color-brand)]" />
                       <span>
-                        <span class="block font-semibold text-ink">{valor}</span>
+                        <span class="flex flex-wrap items-baseline justify-between gap-x-2 font-semibold text-ink">{valor} <span class="tabular-nums">{precioDe(valor)}</span></span>
                         <span class="block text-sm text-muted">{texto}</span>
                       </span>
                     </label>
@@ -195,7 +201,11 @@ const label = 'block text-sm font-medium text-ink';
               <p class="text-xs uppercase tracking-widest text-faint">Servicio</p>
               <p class="mt-1 font-semibold text-ink">{producto.name}</p>
               <p class="mt-1 text-sm text-muted">
-                Precio cerrado {conModalidad ? 'desde ' : ''}<strong class="text-ink">{formatPrice(producto.price_cents, producto.currency)}</strong>{pedido ? ' · Pagado.' : '. Solo si apruebas la vista previa.'}
+                {precioMontado ? (
+                  <Fragment>Precio cerrado: <strong class="text-ink">{precioDe('Plantilla + guía')}</strong> la publicas tú · <strong class="text-ink">{precioDe('Te lo montamos')}</strong> te lo montamos.{pedido ? ' Pagado.' : ' Solo pagas si apruebas la vista previa.'}</Fragment>
+                ) : (
+                  <Fragment>Precio cerrado <strong class="text-ink">{formatPrice(producto.price_cents, producto.currency)}</strong>{pedido ? ' · Pagado.' : '. Solo si apruebas la vista previa.'}</Fragment>
+                )}
               </p>
             </div>
           )
