@@ -2,6 +2,7 @@
 import { env } from 'cloudflare:workers';
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import {
+  CAMPO_PEDIDO,
   ESTADOS,
   ESTADO_LABEL,
   cambiarEstado,
@@ -9,23 +10,115 @@ import {
   esEstado,
   listarSolicitudes,
 } from '../../features/solicitudes';
+import {
+  TIPOS_CORREO,
+  TIPO_CORREO_LABEL,
+  correoDeEstado,
+  correoHtml,
+  esTipoCorreo,
+  prepararCorreo,
+  type DatosCorreo,
+} from '../../features/solicitudes/correos';
+import { getEmailProvider } from '../../features/email';
+import { getStoreSettings } from '../../features/settings/db';
 
 export const prerender = false;
 
-// Seguimiento de «Empieza gratis»: nueva → preparando → vista previa enviada →
-// aprobada → pagada → entregada (o descartada). Solo se cobra tras «aprobada».
+// Seguimiento de solicitudes: nueva → preparando → vista previa enviada →
+// (cambios / en espera) → aprobada → pagada → entregada (o descartada).
+// Correos al cliente: envío asistido. Guardar un estado que avisa abre la vista
+// previa del correo; David la revisa y pulsa «Enviar». La fila de
+// `notificaciones` (solicitud, tipo, versión) es única, así que un doble clic o
+// repetir el estado no duplica el envío; reenviar exige marcarlo a propósito.
+const ID_RE = /^S-[A-Z0-9]{6,12}$/;
+type Fila = { nombre: string; email: string; producto: string | null; slug: string; campos: string; pedido_public_id: string | null };
+async function datosDe(id: string, enlace: string, pendientes: string): Promise<(DatosCorreo & { email: string }) | null> {
+  const r = await env.DB.prepare('SELECT nombre, email, producto, slug, campos, pedido_public_id FROM solicitudes WHERE public_id = ?')
+    .bind(id)
+    .first<Fila>();
+  if (!r) return null;
+  let pedido: string | null = null;
+  try {
+    pedido = (JSON.parse(r.campos) as Record<string, string>)[CAMPO_PEDIDO] ?? null;
+  } catch {
+    // campos corruptos: sin número de pedido
+  }
+  return { email: r.email, nombre: r.nombre, servicio: r.producto ?? r.slug, esPedido: !!r.pedido_public_id, pedido, enlace, datosPendientes: pendientes };
+}
+
 if (Astro.request.method === 'POST') {
   const f = await Astro.request.formData();
   const id = String(f.get('public_id') ?? '');
+  const filtroPost = String(f.get('filtro') ?? '');
+  const qs = new URLSearchParams(filtroPost && esEstado(filtroPost) ? { estado: filtroPost } : {});
+  const tipo = f.get('tipo');
+  if (f.get('accion') === 'enviar' && esTipoCorreo(tipo)) {
+    const version = Math.min(Math.max(Number(f.get('version')) || 1, 1), 20);
+    const enlace = String(f.get('enlace') ?? '').trim().slice(0, 500);
+    const pendientes = String(f.get('pendientes') ?? '').trim().slice(0, 2000);
+    const reenviar = f.get('reenviar') === 'si';
+    let msg = 'Correo no enviado: datos no válidos.';
+    const d = ID_RE.test(id) ? await datosDe(id, enlace, pendientes) : null;
+    const c = d ? prepararCorreo(tipo, d) : null;
+    if (c && !c.ok) msg = c.error;
+    if (d && c?.ok) {
+      await env.DB.prepare(
+        'INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo) VALUES (?, ?, ?, ?, ?) ON CONFLICT (solicitud_public_id, tipo, version) DO NOTHING',
+      )
+        .bind(id, tipo, version, c.asunto, c.texto)
+        .run();
+      // Reserva atómica: solo una petición pasa la fila a 'enviando'.
+      const permitidos = reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
+      const reserva = await env.DB.prepare(
+        `UPDATE notificaciones SET estado_envio = 'enviando', asunto = ?, cuerpo = ?, intentos = intentos + 1
+         WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio IN (${permitidos})
+         RETURNING id, intentos`,
+      )
+        .bind(c.asunto, c.texto, id, tipo, version)
+        .first<{ id: number; intentos: number }>();
+      if (!reserva) {
+        msg = `Ese correo (${TIPO_CORREO_LABEL[tipo]}, versión ${version}) ya se envió. Marca «Reenviar» o sube la versión.`;
+      } else {
+        const mail = await getEmailProvider(await getStoreSettings(env.DB));
+        let error: string | null = mail ? null : 'No hay proveedor de correo configurado (Ajustes → Email).';
+        if (mail) {
+          try {
+            await mail.send({
+              to: d.email,
+              subject: c.asunto,
+              text: c.texto,
+              html: correoHtml(c.texto),
+              idempotencyKey: `notif-${reserva.id}-${reserva.intentos}`,
+            });
+          } catch (e) {
+            error = String((e as Error)?.message ?? e).slice(0, 300);
+          }
+        }
+        await env.DB.prepare(
+          `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END WHERE id = ?`,
+        )
+          .bind(error ? 'error' : 'enviado', error, error, reserva.id)
+          .run();
+        msg = error ? `Correo NO enviado: ${error}` : `Correo «${TIPO_CORREO_LABEL[tipo]}» enviado a ${d.email}.`;
+      }
+    }
+    qs.set('aviso', msg);
+    return Astro.redirect(`/admin/solicitudes?${qs}#${id}`, 303);
+  }
   const estado = f.get('estado');
   const nota = String(f.get('nota') ?? '').trim().slice(0, 2000) || null;
-  const filtro = String(f.get('filtro') ?? '');
-  const ok = esEstado(estado) && /^S-[A-Z0-9]{6,12}$/.test(id) && (await cambiarEstado(env.DB, id, estado, nota));
-  const qs = new URLSearchParams({ ...(filtro && esEstado(filtro) ? { estado: filtro } : {}), [ok ? 'ok' : 'err']: id });
+  const ok = esEstado(estado) && ID_RE.test(id) && (await cambiarEstado(env.DB, id, estado, nota));
+  qs.set(ok ? 'ok' : 'err', id);
+  const sugerido = ok && esEstado(estado) ? correoDeEstado(estado) : null;
+  if (sugerido) {
+    qs.set('correo', id);
+    qs.set('tipo', sugerido);
+  }
   return Astro.redirect(`/admin/solicitudes?${qs}#${id}`, 303);
 }
 
-const filtroRaw = Astro.url.searchParams.get('estado');
+const sp = Astro.url.searchParams;
+const filtroRaw = sp.get('estado');
 const filtro = esEstado(filtroRaw) ? filtroRaw : undefined;
 let filas: Awaited<ReturnType<typeof listarSolicitudes>> = [];
 let conteo: Record<string, number> = {};
@@ -36,8 +129,39 @@ try {
   sinTabla = true; // migración 0040 sin aplicar
 }
 const total = Object.values(conteo).reduce((a, b) => a + b, 0);
-const okId = Astro.url.searchParams.get('ok');
-const errId = Astro.url.searchParams.get('err');
+const okId = sp.get('ok');
+const errId = sp.get('err');
+const aviso = sp.get('aviso');
+
+// Vista previa del correo (GET: «Actualizar vista previa» no escribe nada).
+const correoId = ID_RE.test(sp.get('correo') ?? '') ? sp.get('correo')! : null;
+const tipoRaw = sp.get('tipo');
+const correoTipo = esTipoCorreo(tipoRaw) ? tipoRaw : 'revision';
+const correoVersion = Math.min(Math.max(Number(sp.get('version')) || 1, 1), 20);
+const correoEnlace = (sp.get('enlace') ?? '').slice(0, 500);
+const correoPendientes = (sp.get('pendientes') ?? '').slice(0, 2000);
+let vista: ReturnType<typeof prepararCorreo> | null = null;
+if (correoId && !sinTabla) {
+  const d = await datosDe(correoId, correoEnlace, correoPendientes);
+  vista = d ? prepararCorreo(correoTipo, d) : null;
+}
+
+type Notif = { solicitud_public_id: string; tipo: string; version: number; estado_envio: string; intentos: number; enviado_at: string | null; error: string | null };
+const historial = new Map<string, Notif[]>();
+try {
+  const ids = filas.map((x) => x.public_id);
+  if (ids.length) {
+    const { results } = await env.DB.prepare(
+      `SELECT solicitud_public_id, tipo, version, estado_envio, intentos, enviado_at, error FROM notificaciones WHERE solicitud_public_id IN (${ids.map(() => '?').join(',')}) ORDER BY id DESC`,
+    )
+      .bind(...ids)
+      .all<Notif>();
+    for (const n of results ?? []) historial.set(n.solicitud_public_id, [...(historial.get(n.solicitud_public_id) ?? []), n]);
+  }
+} catch {
+  // migración 0042 sin aplicar: sin historial
+}
+
 const campos = (json: string): [string, string][] => {
   try {
     return Object.entries(JSON.parse(json) as Record<string, string>);
@@ -50,6 +174,8 @@ const COLOR: Record<string, string> = {
   nueva: 'bg-amber-100 text-amber-900',
   en_preparacion: 'bg-sky-100 text-sky-900',
   vista_previa_enviada: 'bg-indigo-100 text-indigo-900',
+  cambios_pedidos: 'bg-violet-100 text-violet-900',
+  en_espera_cliente: 'bg-orange-100 text-orange-900',
   aprobada: 'bg-emerald-100 text-emerald-900',
   pagada: 'bg-emerald-600 text-white',
   entregada: 'bg-gray-800 text-white',
@@ -60,9 +186,10 @@ const COLOR: Record<string, string> = {
 <AdminLayout title="Solicitudes" active="solicitudes">
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold">Solicitudes «Empieza gratis»</h1>
+      <h1 class="text-2xl font-semibold">Solicitudes</h1>
       <p class="mt-1 text-sm text-gray-600">
-        El cliente no ha pagado. Prepara la vista previa, envíala y manda el enlace de pago solo cuando la apruebe.
+        Pruebas gratis y pedidos pagados. Al guardar un estado que avisa al cliente se abre la vista previa del correo: revísala y envíala.
+        El silencio del cliente nunca aprueba ni entrega nada.
       </p>
     </div>
 
@@ -71,6 +198,7 @@ const COLOR: Record<string, string> = {
     )}
     {okId && <p class="rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm">Guardado {okId}.</p>}
     {errId && <p class="rounded-md border border-red-300 bg-red-50 p-3 text-sm">No se pudo guardar {errId}.</p>}
+    {aviso && <p class="rounded-md border border-sky-300 bg-sky-50 p-3 text-sm" role="status">{aviso}</p>}
 
     <nav class="flex flex-wrap gap-2 text-sm" aria-label="Filtrar por estado">
       <a href="/admin/solicitudes" class:list={['rounded-full border px-3 py-1', !filtro ? 'border-black bg-black text-white' : 'border-line']}>
@@ -102,7 +230,7 @@ const COLOR: Record<string, string> = {
             <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
               <dt class="text-xs uppercase tracking-widest text-gray-500">Nombre</dt><dd>{s.nombre}</dd>
               <dt class="text-xs uppercase tracking-widest text-gray-500">Email</dt>
-              <dd><a class="underline" href={`mailto:${s.email}?subject=${encodeURIComponent(`Tu vista previa ${s.public_id}`)}`}>{s.email}</a></dd>
+              <dd><a class="underline" href={`mailto:${s.email}?subject=${encodeURIComponent(`Tu solicitud ${s.public_id}`)}`}>{s.email}</a></dd>
               {s.telefono && (<><dt class="text-xs uppercase tracking-widest text-gray-500">Tel.</dt><dd>{s.telefono}</dd></>)}
               {s.modalidad && (<><dt class="text-xs uppercase tracking-widest text-gray-500">Modalidad</dt><dd>{s.modalidad}</dd></>)}
               {(s.utm_source || s.referrer) && (
@@ -129,7 +257,59 @@ const COLOR: Record<string, string> = {
               <input name="nota" value={s.nota ?? ''} maxlength="2000" class="mt-1 block w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm normal-case tracking-normal text-black" placeholder="Enlace a la vista previa, pago enviado…" />
             </label>
             <button class="rounded-md bg-black px-4 py-2 text-sm font-medium text-white">Guardar</button>
+            <a href={`/admin/solicitudes?correo=${s.public_id}&tipo=${correoDeEstado(s.estado) ?? 'revision'}${filtro ? `&estado=${filtro}` : ''}#${s.public_id}`} class="text-sm underline">Preparar correo…</a>
           </form>
+          {correoId === s.public_id && (
+            <section class="mt-4 rounded-md border border-indigo-200 bg-indigo-50/50 p-3" aria-label="Correo al cliente">
+              <form method="GET" action={`/admin/solicitudes#${s.public_id}`} class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="correo" value={s.public_id} />
+                {filtro && <input type="hidden" name="estado" value={filtro} />}
+                <label class="text-xs uppercase tracking-widest text-gray-500">Correo
+                  <select name="tipo" class="mt-1 block rounded-md border border-line bg-white px-2 py-1.5 text-sm normal-case tracking-normal text-black">
+                    {TIPOS_CORREO.map((t) => <option value={t} selected={t === correoTipo}>{TIPO_CORREO_LABEL[t]}</option>)}
+                  </select>
+                </label>
+                <label class="text-xs uppercase tracking-widest text-gray-500">Versión
+                  <input name="version" type="number" min="1" max="20" value={correoVersion} class="mt-1 block w-20 rounded-md border border-line bg-white px-2 py-1.5 text-sm text-black" />
+                </label>
+                <label class="min-w-[14rem] flex-1 text-xs uppercase tracking-widest text-gray-500">Enlace (versión o entrega)
+                  <input name="enlace" type="url" value={correoEnlace} placeholder="https://…" class="mt-1 block w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm normal-case tracking-normal text-black" />
+                </label>
+                <label class="w-full text-xs uppercase tracking-widest text-gray-500">Datos que faltan (solo «Falta información»)
+                  <textarea name="pendientes" rows="2" class="mt-1 block w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm normal-case tracking-normal text-black">{correoPendientes}</textarea>
+                </label>
+                <button class="rounded-md border border-black px-3 py-1.5 text-sm">Actualizar vista previa</button>
+              </form>
+              {vista && !vista.ok && <p class="mt-3 text-sm text-red-700">{vista.error}</p>}
+              {vista && vista.ok && (
+                <form method="POST" class="mt-3 space-y-2">
+                  <p class="text-sm"><span class="text-gray-500">Para:</span> {s.email} · <span class="text-gray-500">Asunto:</span> <strong>{vista.asunto}</strong></p>
+                  <pre class="whitespace-pre-wrap rounded-md border border-line bg-white p-3 font-sans text-sm">{vista.texto}</pre>
+                  <input type="hidden" name="accion" value="enviar" />
+                  <input type="hidden" name="public_id" value={s.public_id} />
+                  <input type="hidden" name="filtro" value={filtro ?? ''} />
+                  <input type="hidden" name="tipo" value={correoTipo} />
+                  <input type="hidden" name="version" value={correoVersion} />
+                  <input type="hidden" name="enlace" value={correoEnlace} />
+                  <input type="hidden" name="pendientes" value={correoPendientes} />
+                  <div class="flex flex-wrap items-center gap-4">
+                    <button class="rounded-md bg-indigo-700 px-4 py-2 text-sm font-medium text-white">Enviar correo</button>
+                    <label class="text-sm"><input type="checkbox" name="reenviar" value="si" /> Reenviar aunque ya se haya enviado</label>
+                  </div>
+                </form>
+              )}
+            </section>
+          )}
+          {(historial.get(s.public_id)?.length ?? 0) > 0 && (
+            <ul class="mt-3 space-y-1 text-xs text-gray-600" aria-label="Correos enviados">
+              {historial.get(s.public_id)!.map((n) => (
+                <li>
+                  ✉ {esTipoCorreo(n.tipo) ? TIPO_CORREO_LABEL[n.tipo] : n.tipo} v{n.version} · {n.estado_envio}
+                  {n.enviado_at ? ` · ${fecha(n.enviado_at)}` : ''}{n.intentos > 1 ? ` · ${n.intentos} intentos` : ''}{n.error ? ` · ${n.error}` : ''}
+                </li>
+              ))}
+            </ul>
+          )}
         </li>
       ))}
     </ul>

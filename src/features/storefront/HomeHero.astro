@@ -13,9 +13,9 @@ const destacados = [
   { href: '/categories/planes', titulo: 'Planes mensuales', desde: 'desde 9 €/mes', icono: 'calendar-repeat' },
 ];
 const pasos = [
-  ['01', 'Solicitas', 'Eliges un servicio con precio cerrado y rellenas un formulario corto (2–3 minutos). Sin tarjeta.', 'pencil'],
-  ['02', 'Recibes la vista previa', 'David Porto Díaz la prepara con tus datos reales y te la envía en 24-72 h laborables.', 'eye'],
-  ['03', 'Lo recibes funcionando', 'Si lo contrataste directamente, ya está pagado. Si empezaste gratis, pagas solo si te gusta.', 'cash'],
+  ['01', 'Eliges cómo empezar', 'Compra directamente o pide una muestra gratis, sin tarjeta.', 'pencil'],
+  ['02', 'Recibes una primera versión', 'Nos das tus datos y la preparamos en 24–72 h laborables desde que estén completos.', 'eye'],
+  ['03', 'Lo revisas y lo recibes', 'Publicado o con una guía para publicarlo tú, según la modalidad. Si empezaste gratis, pagas solo si te gusta.', 'cash'],
 ];
 // Nivel A de manual/catalogo/entrega.mjs: salen con un prompt y se entregan el mismo día.
 const rapidos = [
@@ -27,13 +27,13 @@ const ventajas = [
   ['Precio cerrado', 'Ves el precio antes de pagar. No hay presupuestos que crecen ni horas extra.', 'receipt-euro'],
   ['Lo ves antes de comprar', 'Puedes tocar demos reales de nuestros servicios. Y si prefieres, pides una vista previa gratis con tus datos.', 'eye'],
   ['Una persona detrás', 'Te atiende David Porto Díaz, no un robot. Te responde cualquier duda, rápido y sin tecnicismos.', 'mood-smile'],
-  ['Es tuyo', 'Accesos a tu nombre y sin cuotas obligatorias. Sin permanencia.', 'lock-open'],
+  ['Es tuyo', 'Los servicios de pago único no tienen cuota con nosotros. Si hay costes externos, se indican antes de comprar.', 'lock-open'],
 ];
 const faq = [
   ['¿Tengo que pagar antes?', 'Tú eliges. Puedes contratarlo directamente con tarjeta (con garantía de devolución de 7 días) o pedir una vista previa gratis y pagar solo si te gusta.'],
   ['¿Es solo para empresas?', 'No. También para particulares: bodas, cumpleaños, eventos, asociaciones o un proyecto personal.'],
   ['¿Qué diferencia hay entre «Plantilla + guía» y «Te lo montamos»?', 'Con «Plantilla + guía» recibes la plantilla rellenada y una guía paso a paso para publicarla. Con «Te lo montamos» te la entregamos publicada y funcionando.'],
-  ['¿Y si necesito cambios?', 'Los ajustes sobre lo que has pedido están incluidos. Contesta al email de entrega y los hacemos.'],
+  ['¿Y si necesito cambios?', 'Tienes una ronda de ajustes incluida, que puedes solicitar durante los siete días siguientes a la primera versión.'],
   ['¿Tengo que pagar algo cada mes?', 'No. Casi todo se publica en planes gratuitos. Si algo necesita una cuenta de pago, lo verás en la ficha antes de comprar.'],
 ];
 // Capturas reales de plantillas publicadas en el worker de demos.
@@ -47,13 +47,13 @@ const muestras = [
 <section class="fondo-tecnico mb-16 rounded-3xl border border-line px-6 py-10 sm:px-10 sm:py-14">
   <div class="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
     <div>
-      <span class="etiqueta">Webs y automatizaciones a precio cerrado</span>
+      <span class="etiqueta">Webs, reservas y automatizaciones a precio cerrado</span>
       <h1 class="mt-4 max-w-2xl text-4xl font-bold leading-[1.05] text-ink sm:text-[3.4rem]">
-        Tu web, tus reservas y tus tareas repetitivas, <span class="text-brand">resueltas sin humo.</span>
+        Tu negocio, tu evento o tu idea, <span class="text-brand">en marcha sin complicaciones.</span>
       </h1>
       <p class="mt-5 max-w-xl text-lg text-muted">
-        Más de 70 servicios para negocios, autónomos y particulares (bodas, eventos, asociaciones…).
-        Sin complicaciones, rápido y con una persona que te responde. Tú eliges: contrata directamente o solicita una muestra gratis sin tarjeta. También para proyectos personales.
+        Soluciones digitales para tu negocio, tu evento o tu proyecto: webs, reservas, cartas QR, invitaciones y automatizaciones a precio cerrado.
+        Elige entre hacerlo con nuestra guía o recibirlo listo para usar. Compra directamente o pide una muestra gratis. Te atiende una persona.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="#catalogo" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Elegir servicio</a>
@@ -155,7 +155,7 @@ const muestras = [
             </span>
             <span class="mt-1.5 flex-1 text-sm text-muted">{p.texto}</span>
             <span class="mt-4 flex items-center justify-between text-sm">
-              <span class="text-ink"><b>{p.precio} €</b> <span class="text-muted">la publicas tú</span> · <b>{p.montado} €</b> <span class="text-muted">lista</span></span>
+              <span class="text-ink"><b>{p.precio} €</b> <span class="text-muted">la publicas tú</span> · <b>{p.montado} €</b> <span class="text-muted">te la entregamos publicada</span></span>
               <span class="inline-flex items-center gap-1 font-semibold text-brand">Ver ficha <Icono name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
             </span>
           </span>

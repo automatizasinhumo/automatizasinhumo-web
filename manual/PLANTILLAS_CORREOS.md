@@ -1,21 +1,28 @@
 # Plantillas de correos al cliente
 
-Cinco correos para todo el recorrido, desde el pago hasta la entrega. Los campos `{{…}}` se rellenan a mano o los rellena el sistema.
-Los envía David desde hola@ y van firmados «David · Automatiza sin humo».
-Los correos 1 y 2 ya salen solos: el recibo del pedido y el aviso de «datos recibidos» los manda `/api/solicitudes`.
-Los correos 3, 4 y 5 se mandan a mano al cambiar el estado en Admin → Solicitudes, hasta que se automaticen.
+Correos para todo el recorrido, desde el pago hasta la entrega. Los campos `{{…}}` se rellenan a mano o los rellena el sistema.
+Los envía David y van firmados «— David · Automatiza sin humo».
+Los correos 1 y 2 salen solos: el recibo del pedido y el aviso de «datos recibidos» los manda `/api/solicitudes`.
+El resto se envía de forma **asistida** desde Admin → Solicitudes: al cambiar el estado, el panel propone el correo que toca con los datos reales (nombre, servicio, enlace), David lo revisa en la vista previa y pulsa «Enviar correo». Cada envío queda registrado en la tabla `notificaciones` (migración 0042) y no se duplica por doble clic; «Reenviar» lo repite a propósito. Los textos viven en `src/features/solicitudes/correos.ts`.
 
 Estado del pedido que ve el cliente en `/order/<token>` y en `/empezar/estado`:
 
-| Estado en admin | Lo que ve el cliente |
-|---|---|
-| (sin solicitud) | 1 · Pendiente de datos |
-| nueva / en_preparacion | 2 · En preparación |
-| vista_previa_enviada | 3 · Listo para revisar |
-| aprobada / pagada | 4 · Ajustes finales |
-| entregada | 5 · Entregado |
+| Estado en admin | Lo que ve el cliente | Correo que propone el panel |
+|---|---|---|
+| (sin solicitud) | 1 · Pendiente de datos | — |
+| nueva / en_preparacion | 2 · En preparación | — (o «Falta información») |
+| vista_previa_enviada | 3 · Listo para revisar | Listo para revisar |
+| en_espera_cliente | 3 · Listo para revisar, «esperando tu respuesta» | En espera (día 7) |
+| cambios_pedidos | 4 · Finalizando, sin decir «aprobado» | Cambios recibidos |
+| aprobada / pagada | 4 · Finalizando | — |
+| entregada | 5 · Entregado | Entregado |
+| descartada | «Este pedido está cerrado» | — |
 
-Si el cliente aprueba sin cambios, el pedido pasa directamente de `vista_previa_enviada` a `entregada`. Cuando falta información, el estado no cambia y se envía el correo 4.
+Otros correos manuales en el mismo selector: «Recordatorio (día 3)» y «Confirmar aprobación» (cuando el cliente dice algo como «me encanta» sin escribir «Aprobado»).
+
+**El silencio nunca aprueba.** Sin respuesta, el día 3 se manda el recordatorio y el día 7 el pedido pasa a `en_espera_cliente`: no se hacen más cambios ni se da por aprobado sin confirmación expresa.
+
+Si el cliente aprueba sin cambios, el pedido pasa directamente de `vista_previa_enviada` a `entregada`. Cuando falta información, el estado no cambia y se envía «Falta información» (el panel exige escribir qué falta).
 
 Regla única de plazos: primera versión en 24-72 h laborables desde que tenemos los datos. Incluye una ronda de ajustes que el cliente puede pedir en los 7 días siguientes. La entrega definitiva llega tras su aprobación.
 

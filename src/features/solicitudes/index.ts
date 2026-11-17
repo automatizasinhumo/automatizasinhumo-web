@@ -10,6 +10,8 @@ export const ESTADOS = [
   'nueva',
   'en_preparacion',
   'vista_previa_enviada',
+  'cambios_pedidos',
+  'en_espera_cliente',
   'aprobada',
   'pagada',
   'entregada',
@@ -21,6 +23,8 @@ export const ESTADO_LABEL: Record<Estado, string> = {
   nueva: 'Nueva',
   en_preparacion: 'Preparando vista previa',
   vista_previa_enviada: 'Vista previa enviada',
+  cambios_pedidos: 'Cambios pedidos',
+  en_espera_cliente: 'En espera del cliente',
   aprobada: 'Aprobada (pendiente de pago)',
   pagada: 'Pagada',
   entregada: 'Entregada',
@@ -222,6 +226,8 @@ export function pasoCliente(estado: Estado): number {
     case 'nueva': return 0;
     case 'en_preparacion': return 1;
     case 'vista_previa_enviada': return 2;
+    case 'cambios_pedidos': return 2;
+    case 'en_espera_cliente': return 2;
     case 'aprobada': return 3;
     case 'pagada': return 3;
     case 'entregada': return 4;
@@ -291,11 +297,11 @@ export function resumenSolicitud(s: SolicitudInput, publicId: string): { text: s
  * «Pago»). Mismo texto en /order/<token> y en /empezar/estado.
  */
 export const PASOS_PEDIDO = [
-  { titulo: 'Pendiente de datos', texto: 'Tu pedido está confirmado. Necesitamos tus datos para empezar.' },
-  { titulo: 'En preparación', texto: 'Ya tenemos tus datos y estamos preparando tu encargo. Te avisaremos cuando puedas revisarlo.' },
-  { titulo: 'Listo para revisar', texto: 'Tu primera versión está lista. Revísala y dinos si la apruebas o necesitas ajustes.' },
-  { titulo: 'Ajustes finales', texto: 'Hemos recibido tus cambios y estamos aplicándolos. Te avisaremos cuando estén listos.' },
-  { titulo: 'Entregado', texto: 'Tu trabajo está entregado. Tienes el acceso y las instrucciones en tu correo.' },
+  { titulo: 'Pendiente de datos', texto: 'Necesitamos tus datos para empezar.' },
+  { titulo: 'En preparación', texto: 'Estamos preparando tu primera versión.' },
+  { titulo: 'Listo para revisar', texto: 'Revisa el resultado y dinos si lo apruebas o necesitas cambios.' },
+  { titulo: 'Finalizando', texto: 'Has aprobado el resultado. Estamos preparando la entrega definitiva.' },
+  { titulo: 'Entregado', texto: 'Tu trabajo está listo para utilizarlo.' },
 ] as const;
 
 /** Paso del pedido pagado según su solicitud (null = aún no ha mandado datos; -1 = cerrada). */
@@ -308,7 +314,9 @@ export function pasoPedido(estado: Estado | null | undefined): number {
     case 'en_preparacion':
       return 1;
     case 'vista_previa_enviada':
+    case 'en_espera_cliente':
       return 2;
+    case 'cambios_pedidos':
     case 'aprobada':
     case 'pagada':
       return 3;
@@ -317,6 +325,18 @@ export function pasoPedido(estado: Estado | null | undefined): number {
     default:
       return -1;
   }
+}
+
+/**
+ * Texto de estado de un pedido pagado. «Cambios pedidos» comparte paso con
+ * «Finalizando» pero no dice que el cliente haya aprobado; «En espera» recuerda
+ * que el trabajo no avanza sin su respuesta (el silencio nunca aprueba).
+ */
+export function textoPedido(estado: Estado | null | undefined): string {
+  if (estado === 'cambios_pedidos') return 'Estamos aplicando los cambios que nos has pedido.';
+  if (estado === 'en_espera_cliente') return `${PASOS_PEDIDO[2].texto} Estamos esperando tu respuesta.`;
+  const p = pasoPedido(estado);
+  return p < 0 ? 'Este pedido está cerrado.' : PASOS_PEDIDO[p]!.texto;
 }
 
 export interface SolicitudDePedido {

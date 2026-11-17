@@ -3,6 +3,7 @@ import {
   CAMPO_PEDIDO,
   PASOS_PEDIDO,
   pasoPedido,
+  textoPedido,
   camposDeDescripcion,
   esEstado,
   nombreCampo,
@@ -95,5 +96,15 @@ describe('pasoPedido', () => {
     expect(pasoPedido('descartada')).toBe(-1);
     expect(PASOS_PEDIDO).toHaveLength(5);
     expect(PASOS_PEDIDO.some((p) => /pago/i.test(p.titulo))).toBe(false);
+  });
+});
+
+describe('estados nuevos del pedido', () => {
+  it('cambios y espera caen en su paso y su texto', () => {
+    expect(pasoPedido('cambios_pedidos')).toBe(3);
+    expect(pasoPedido('en_espera_cliente')).toBe(2);
+    expect(textoPedido('cambios_pedidos')).not.toMatch(/aprobado/i);
+    expect(textoPedido('en_espera_cliente')).toContain('esperando');
+    expect(textoPedido('descartada')).toContain('cerrado');
   });
 });
