@@ -9,22 +9,21 @@
 - Aplicar las ideas de la auditoría de ChatGPT, consultado en el navegador integrado sin iniciar sesión.
 
 ## Hecho (todo en staging y en origin/main)
-- Último commit: `e8f45a7` «Compra directa visible y datos tras el pago; modalidad «Plantilla + guía»». Staging: versión 963cbb24. Seed aplicado en D1 staging.
-- **Ficha** (`src/themes/default/ProductDetail.astro`): dos opciones visibles.
-  - Opción 1 · Compra directa: el formulario de compra («Añadir al carrito» / «Contratar ahora»). Es la principal.
-  - Opción 2 · Empieza gratis: botón secundario (con borde) que lleva a la vista previa sin tarjeta.
-- **Tras pagar** (`src/pages/order/[token].astro`): página en español con la tarjeta «Siguiente paso · Envíanos tus datos». Enlaza a `/empezar/<slug>?pedido=<ref>`.
-- **Formulario con `?pedido=`**: textos de pedido pagado. El número se guarda en la solicitud como campo «Pedido pagado» (sin cambiar el esquema). El email al cliente y el aviso a David («Datos de pedido pagado») cambian en consecuencia.
-- **Modalidades**: «Lo montas tú» pasa a llamarse «Plantilla + guía» (la publicas tú). La otra sigue siendo «Te lo montamos».
-- **Demos**: galería «Demos en vivo» con filtro por categoría. Etiquetas «Demo interactiva» y «Diseño de ejemplo», en lugar de Brightline/Meridian.
-- **Pruebas**: `npx vitest run` 922 en verde (nuevo test del n.º de pedido); `npx astro check` 0 errores.
+- Último commit: `fb9f428` «Compra directa clara: demo en la ficha, doble camino y contacto humano». Staging: versión a2d6818b. Seed aplicado en D1 staging.
+- **Ficha**: visor de demo dentro (iframe, `#demo`), bloque `#comprar` con garantía de 7 días y «¿Lo tienes que montar tú?». Datos en `src/data/demos-producto.json` (lo genera `manual/demos/gen-galeria.mjs`).
+- **Un solo mensaje de pago** en portada, Cómo funciona, FAQ, pie, catálogo y barra de aviso: «Contrátalo directamente con garantía o pruébalo gratis».
+- **Catálogo**: orden curado por datos (`created_at` escalonado en `gen-sql.mjs`), «desde 149 €», sin jerga (Cloudflare solo en privacidad y herramientas), carrito en español.
+- **Tarjetas**: marco de color mientras carga la imagen (ya no se ven en blanco).
+- **Contacto flotante** «¿Dudas? Habla con una persona» (sin JS, `<details>`): WhatsApp, Telegram y email en Admin → Ajustes (`save_contact`). Solo salen los canales rellenados; hoy no hay ninguno en staging, así que no se ve. Probado en móvil con un email temporal, ya borrado.
+- **QA** (`qa/smoke.sh`, workflow `empleados-qa.yml`): ahora comprueba la ficha (compra + demo + iframe), el formulario y que la portada no tenga jerga. La ficha se añade a Lighthouse y pa11y.
+- **Pruebas**: vitest 922 en verde; astro check 0 errores; smoke contra staging en verde.
 
 ## Falta
-1. **Probar el flujo de pago completo** cuando David conecte Stripe en modo test: comprar → página del pedido → «Rellenar mis datos» → solicitud con «Pedido pagado» en Admin. No se ha podido probar sin pago.
-2. **Admin → Solicitudes**: destacar con una etiqueta las que traen «Pedido pagado» (hoy se ven como un campo más).
-3. **Imágenes**: retomar `public/images/demos/editor-bloques.png` y revisar las imágenes de producto en `gen-imagenes.mjs`.
-4. **Comparador antes/después** y **contador de proyectos entregados**, cuando haya casos y datos reales.
-5. **Pendiente de David** (ver ESTADO.md): dominio de producción con `CANONICAL_ORIGIN`, conectar Stripe, alta en afiliados y, opcional, Cloudflare Access en staging.
+1. **David**: rellenar WhatsApp, Telegram y email en Admin → Ajustes (botón de contacto); conectar la pasarela (claves en Admin → Ajustes); MX del email; NIF y domicilio en el aviso legal; dominio de producción con `CANONICAL_ORIGIN`.
+2. **Probar el flujo de pago completo** con Stripe en modo test: comprar → pedido → «Rellenar mis datos» → solicitud con «Pedido pagado».
+3. **Admin → Solicitudes**: etiqueta destacada para las que traen «Pedido pagado».
+4. **Imágenes**: `public/images/demos/editor-bloques.png` y repaso de `gen-imagenes.mjs`.
+5. Comparador antes/después y contador de proyectos, cuando haya datos reales.
 
 ## Estado vivo
 - Rama `main` limpia y subida a `origin`. Repo: `davidpd89/automatizasinhumo-web`.

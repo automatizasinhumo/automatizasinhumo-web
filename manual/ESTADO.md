@@ -110,8 +110,15 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
 - Modalidades: **Plantilla + guía** (la publicas tú) y **Te lo montamos** (te lo entregamos publicado).
 - Falta probar el pago de punta a punta con Stripe en modo test.
 
+## Recorrido claro y contacto humano (17-11-2026)
+- La demo se ve dentro de la ficha (visor con iframe); debajo, el bloque de compra con garantía de 7 días.
+- Un solo mensaje en toda la web: contrátalo directamente o pruébalo gratis.
+- Contacto flotante «¿Dudas? Habla con una persona»: se configura en Admin → Ajustes (WhatsApp con prefijo y solo cifras, usuario de Telegram, email). Sin datos no se muestra.
+- El QA de GitHub comprueba en staging la ficha con demo y compra, el formulario y que la portada no tenga jerga técnica.
+
 ## Pendiente de David (al final, por orden)
 1. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.
 2. **Pagos**: conectar Stripe desde el admin con tus claves (no lo he hecho: no introduzco datos de pago).
 3. **Afiliados**: darte de alta en los programas (Hostinger, Raiola, Webempresa, Kinsta, Elementor, MailerLite/Brevo, GetResponse, Systeme.io, Holded) y cambiar los nombres de "Herramientas recomendadas" por tus enlaces.
-4. Opcional: proteger staging con Cloudflare Access (Zero Trust). Hoy no está enlazado ni indexado.
+4. **Contacto**: rellenar WhatsApp, Telegram y email en Admin → Ajustes. También el MX del email y el NIF y domicilio en el aviso legal.
+5. Opcional: proteger staging con Cloudflare Access (Zero Trust). Hoy no está enlazado ni indexado.
