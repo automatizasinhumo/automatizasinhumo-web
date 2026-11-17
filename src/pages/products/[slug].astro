@@ -48,7 +48,7 @@ if (loaded.backfillRelated) {
     if (form instanceof HTMLFormElement && out instanceof HTMLElement) {
       const currency = (out.dataset.currency || 'usd').toUpperCase();
       const base = Number(out.dataset.base || '0');
-      const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency });
+      const fmt = new Intl.NumberFormat('es-ES', { style: 'currency', currency });
       const divisor = 10 ** (fmt.resolvedOptions().maximumFractionDigits ?? 2);
 
       // Scroll the gallery carousel to the variant's linked image (if any). The
@@ -104,7 +104,7 @@ if (loaded.backfillRelated) {
           await navigator.clipboard.writeText(url);
           if (label) {
             const prev = label.textContent;
-            label.textContent = 'Link copied';
+            label.textContent = 'Enlace copiado';
             setTimeout(() => {
               label.textContent = prev;
             }, 1500);

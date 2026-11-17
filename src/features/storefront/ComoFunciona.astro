@@ -34,7 +34,7 @@ const faq = [
   ['¿Pago antes de ver nada?', 'No. Empiezas gratis, ves una vista previa con tus datos y solo pagas si te gusta. Si no te convence, no pagas nada.'],
   ['¿Es también para particulares?', 'Sí. Webs de boda, invitaciones, eventos, asociaciones o proyectos personales. El proceso es igual de sencillo.'],
   ['¿Con quién hablo si tengo dudas?', 'Con David Porto Díaz, una persona de verdad. Escríbele desde el formulario y te responde.'],
-  ['¿Tengo que saber de informática?', 'No. Solo rellenas un formulario con tus textos, fotos y datos. Si eliges «Lo montas tú», la guía explica cada paso con capturas.'],
+  ['¿Tengo que saber de informática?', 'No. Solo rellenas un formulario con tus textos, fotos y datos. Si eliges «Plantilla + guía», la guía explica cada paso con capturas.'],
   ['¿Qué pasa si no tengo fotos o textos?', 'Lo marcas en el formulario y usamos imágenes libres de derechos y textos de partida que luego puedes cambiar.'],
   ['¿Puedo pedir cambios después?', 'Sí. Los ajustes sobre lo que has pedido están incluidos. Contesta al email de entrega y los hacemos.'],
   ['¿Hay cuotas mensuales?', 'No son obligatorias. Casi todo se publica en planes gratuitos. Los planes mensuales son opcionales, por si quieres que lo mantengamos nosotros.'],
@@ -76,11 +76,11 @@ const ld = JSON.stringify([
 
 <section class="mt-16" aria-labelledby="modalidades">
   <span class="etiqueta">Dos modalidades</span>
-  <h2 id="modalidades" class="mt-3 text-3xl font-bold text-ink">Lo montas tú o te lo montamos</h2>
+  <h2 id="modalidades" class="mt-3 text-3xl font-bold text-ink">Plantilla + guía o te lo montamos</h2>
   <p class="mt-2 max-w-2xl text-muted">Muchos servicios tienen las dos opciones. El precio de cada una está en la ficha.</p>
   <div class="mt-6 grid gap-5 md:grid-cols-2">
     {[
-      { t: 'Lo montas tú', ico: 'tool', sub: 'Plantilla + guía', destacado: false, col: 1 },
+      { t: 'Plantilla + guía', ico: 'tool', sub: 'La publicas tú, con nuestra guía', destacado: false, col: 1 },
       { t: 'Te lo montamos', ico: 'sparkles', sub: 'Publicado y funcionando', destacado: true, col: 2 },
     ].map((m) => (
       <div class={`tarjeta p-6 ${m.destacado ? 'ring-2 ring-brand' : ''}`}>

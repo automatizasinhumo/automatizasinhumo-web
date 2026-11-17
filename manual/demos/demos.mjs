@@ -13,7 +13,12 @@ export const DEMOS = [
   ['testimonios', 'jhodges3401-code__kudoshelf-lite', 'Muro de testimonios', 'muro-testimonios'],
   ['plantillas-negocio', 'mmrahmanbappi__100-free-html-templates', '100 plantillas por sector', 'web-corporativa-5-secciones'],
   ['plantillas-bootstrap', 'ColorlibHQ__bootstrap-templates', 'Plantillas Bootstrap (Colorlib)', 'web-corporativa-5-secciones'],
+  ['editor-bloques', 'givanz__VvvebJs', 'Editor de bloques: pruébalo en el navegador', 'web-editable-visual'],
 ];
+
+// Demos que se pueden usar de verdad (no solo mirar). El resto son «diseños de ejemplo»:
+// enseñan un estilo, no la funcionalidad. La ficha las separa para no confundir.
+export const INTERACTIVAS = new Set(['editor-bloques', 'carta-whatsapp', 'testimonios']);
 
 // Demos adicionales por producto: [ruta dentro del worker de demos, título].
 const N = 'plantillas-negocio', E = 'plantillas-eventos/templates', BS = 'plantillas-bootstrap';
@@ -37,18 +42,17 @@ export const EXTRA = {
   'galeria-privada-evento': [[`${N}/portfolio/photographer-portfolio`, 'Galería de fotógrafo']],
   'tienda-online': [[`${N}/ecommerce/fashion-store`, 'Tienda de moda'], [`${N}/ecommerce/cosmetics-skincare-store`, 'Cosmética'], [`${N}/ecommerce/single-product-store`, 'Tienda de un producto']],
   'tienda-productos-digitales': [[`${N}/landing-pages/ebook-download`, 'Descarga de ebook']],
-  'web-editable-visual': [[`${BS}/meridian`, 'Meridian (Bootstrap)'], [`${BS}/northstar`, 'Northstar (Bootstrap)']],
   'web-wordpress': [[`${N}/business/corporate-company`, 'Empresa'], [`${N}/portfolio/writer-blogger`, 'Blog personal']],
   'web-blog-astro': [[`${N}/portfolio/writer-blogger`, 'Blog personal']],
   'web-multidioma': [[`${N}/real-estate-travel/hotel-resort`, 'Hotel'], [`${N}/real-estate-travel/tour-guide`, 'Guía turístico']],
-  'auto-plantilla-medida': [['plantillas-negocio', 'Catálogo de 100 plantillas por sector']],
   'auto-resenas': [['testimonios', 'Muro de testimonios']],
-  'plataforma-agencia': [[`${N}/business/digital-marketing-agency`, 'Agencia de marketing']],
-  'web-arrastrar-soltar': [[`${BS}`, 'Galería de 40 diseños Bootstrap']],
+  'web-arrastrar-soltar': [['editor-bloques', 'Editor de bloques: pruébalo en el navegador']],
 };
 
+// tipo: 'interactiva' (se usa) | 'diseno' (se mira). La raíz de la ruta decide.
+const tipo = (path) => (INTERACTIVAS.has(path.split('/')[0]) ? 'interactiva' : 'diseno');
 export function demosDe(slugProducto) {
-  const out = DEMOS.filter((d) => d[3] === slugProducto).map((d) => ({ url: `${DEMOS_URL}/${d[0]}/`, titulo: d[2] }));
-  for (const [path, titulo] of EXTRA[slugProducto] ?? []) out.push({ url: `${DEMOS_URL}/${path}/`, titulo });
+  const out = DEMOS.filter((d) => d[3] === slugProducto).map((d) => ({ url: `${DEMOS_URL}/${d[0]}/`, titulo: d[2], tipo: tipo(d[0]) }));
+  for (const [path, titulo] of EXTRA[slugProducto] ?? []) out.push({ url: `${DEMOS_URL}/${path}/`, titulo, tipo: tipo(path) });
   return out;
 }

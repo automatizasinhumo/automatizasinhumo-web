@@ -18,9 +18,9 @@ const ld = JSON.stringify({
 <script is:inline type="application/ld+json" set:html={ld}></script>
 
 <section class="fondo-tecnico rounded-3xl border border-line px-6 py-10 sm:px-10 sm:py-12">
-  <span class="etiqueta">{items.length} demos reales</span>
+  <span class="etiqueta">{items.length} demos y diseños</span>
   <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">Mira lo que recibes <span class="text-brand">antes de comprar.</span></h1>
-  <p class="mt-5 max-w-2xl text-lg text-muted">Son webs funcionando, no maquetas. Cambiamos textos, fotos y colores por los tuyos. Pulsa cualquiera para abrirla en vivo.</p>
+  <p class="mt-5 max-w-2xl text-lg text-muted">Las <b class="text-ink">demos interactivas</b> se usan ya, con datos de ejemplo (no se guarda nada). Los <b class="text-ink">diseños de ejemplo</b> enseñan estilos: tu versión lleva tus textos, fotos y colores, en español.</p>
 </section>
 
 <div class="sticky top-0 z-10 -mx-4 mt-8 bg-paper/90 px-4 py-3 backdrop-blur" role="toolbar" aria-label="Filtrar demos por categoría">
@@ -37,15 +37,18 @@ const ld = JSON.stringify({
 <ul class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="galeria-demos">
   {items.map((d) => (
     <li data-cat={d.cat} class="tarjeta group flex flex-col overflow-hidden">
-      <a href={d.url} target="_blank" rel="noopener" class="fondo-tecnico relative block border-b border-line px-4 pt-4" aria-label={`Abrir demo en vivo: ${d.titulo}`}>
+      <a href={d.url} target="_blank" rel="noopener" class="fondo-tecnico relative block border-b border-line px-4 pt-4" aria-label={`${d.tipo === 'interactiva' ? 'Probar demo interactiva' : 'Ver diseño de ejemplo'}: ${d.titulo}`}>
         <span class="block overflow-hidden rounded-t-lg border border-b-0 border-line bg-surface shadow-[0_12px_26px_-18px_rgba(23,45,45,0.55)] transition-transform duration-300 group-hover:-translate-y-1">
           <span class="flex gap-1.5 border-b border-line bg-paper px-3 py-1.5" aria-hidden="true">
             <span class="h-2 w-2 rounded-full bg-accent/70"></span><span class="h-2 w-2 rounded-full bg-line"></span><span class="h-2 w-2 rounded-full bg-line"></span>
           </span>
           <img src={`/images/demos/${d.img}.png`} alt={`Captura de la demo ${d.titulo}`} width="1280" height="860" loading="lazy" class="aspect-[16/10] w-full object-cover object-top" />
         </span>
+        <span class:list={['absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold', d.tipo === 'interactiva' ? 'bg-brand text-on-brand' : 'bg-surface/95 text-ink border border-line']}>
+          {d.tipo === 'interactiva' ? 'Demo interactiva' : 'Diseño de ejemplo'}
+        </span>
         <span class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-ink/85 px-2.5 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
-          En vivo <Icono name="external-link" class="h-3.5 w-3.5" />
+          {d.tipo === 'interactiva' ? 'Probar' : 'Ver'} <Icono name="external-link" class="h-3.5 w-3.5" />
         </span>
       </a>
       <div class="flex flex-1 flex-col p-4">

@@ -4,7 +4,7 @@ import { getProductBySlug } from '../../features/products/db';
 import { getStoreSettings } from '../../features/settings/db';
 import { getEmailProvider } from '../../features/email';
 import { getConfig } from '../../config';
-import { camposDeDescripcion, crearSolicitud, resumenSolicitud, validarSolicitud } from '../../features/solicitudes';
+import { CAMPO_PEDIDO, camposDeDescripcion, crearSolicitud, resumenSolicitud, validarSolicitud } from '../../features/solicitudes';
 
 export const prerender = false;
 
@@ -53,19 +53,23 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     if (mail) {
       const r = resumenSolicitud(v.data, publicId);
       const tienda = s.storeName ?? getConfig().storeName;
+      const pagado = v.data.campos[CAMPO_PEDIDO];
+      const intro = pagado
+        ? `Gracias. Tenemos tus datos para el pedido ${pagado}. David Porto Díaz se pone con ello y te envía el resultado para que lo revises antes de entregarlo.`
+        : 'Gracias. No has pagado nada. David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.';
       const seguimiento = new URL(`/empezar/estado?id=${encodeURIComponent(publicId)}`, request.url).toString();
       await mail.send({
         to: v.data.email,
         subject: `Hemos recibido tu solicitud ${publicId} · ${tienda}`,
-        text: `Hola ${v.data.nombre}:\n\nGracias. No has pagado nada. David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.\n\nSigue tu solicitud: ${seguimiento}\n\n${r.text}\n\nSi quieres añadir algo, responde a este email.`,
-        html: `<p>Hola ${escapar(v.data.nombre)}:</p><p>Gracias. <strong>No has pagado nada.</strong> David Porto Díaz revisa tus datos y te envía una vista previa en 24-72 h laborables. Solo si te gusta, te mandamos el enlace de pago.</p><p><a href="${escapar(seguimiento)}">Sigue tu solicitud</a></p>${r.html}<p>Si quieres añadir algo, responde a este email.</p>`,
+        text: `Hola ${v.data.nombre}:\n\n${intro}\n\nSigue tu solicitud: ${seguimiento}\n\n${r.text}\n\nSi quieres añadir algo, responde a este email.`,
+        html: `<p>Hola ${escapar(v.data.nombre)}:</p><p>${escapar(intro)}</p><p><a href="${escapar(seguimiento)}">Sigue tu solicitud</a></p>${r.html}<p>Si quieres añadir algo, responde a este email.</p>`,
         idempotencyKey: `solicitud-cliente-${publicId}`,
       });
       const aviso = s.emailNotifyTo || getConfig().email.notifyTo;
       if (aviso) {
         await mail.send({
           to: aviso,
-          subject: `Nueva solicitud ${publicId}: ${v.data.producto ?? slug}`,
+          subject: `${pagado ? 'Datos de pedido pagado' : 'Nueva solicitud'} ${publicId}: ${v.data.producto ?? slug}`,
           text: `${r.text}\n\nPanel: /admin/solicitudes`,
           html: `${r.html}<p><a href="${new URL('/admin/solicitudes', request.url)}">Abrir panel de solicitudes</a></p>`,
           idempotencyKey: `solicitud-aviso-${publicId}`,

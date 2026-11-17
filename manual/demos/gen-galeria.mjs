@@ -14,9 +14,11 @@ for (const p of productos) {
     const img = new URL(d.url).pathname.split('/').filter(Boolean).pop();
     if (!img || vistos.has(img) || !existsSync(new URL(`public/images/demos/${img}.png`, ROOT))) continue;
     vistos.add(img);
-    items.push({ img, url: d.url, titulo: d.titulo, producto: p.slug, nombre: p.nombre, precio: p.p[0], plazo: p.plazo, cat: p.cat });
+    items.push({ img, url: d.url, titulo: d.titulo, tipo: d.tipo, producto: p.slug, nombre: p.nombre, precio: p.p[0], plazo: p.plazo, cat: p.cat });
   }
 }
+// Primero lo que se puede tocar.
+items.sort((a, b) => (b.tipo === 'interactiva') - (a.tipo === 'interactiva'));
 const cats = categorias.filter((c) => items.some((i) => i.cat === c.slug)).map((c) => ({ slug: c.slug, nombre: c.corto ?? c.nombre }));
 mkdirSync(new URL('src/data/', ROOT), { recursive: true });
 writeFileSync(fileURLToPath(new URL('src/data/galeria-demos.json', ROOT)), JSON.stringify({ cats, items }, null, 1) + '\n');

@@ -4,7 +4,7 @@
 // para D1 (staging) y cruza cada repo con repos_meta.csv (licencia y demo).
 //
 // Precios en EUR. Cada producto tiene dos modalidades (variantes):
-//   - "Lo montas tú": plantilla + guía paso a paso.
+//   - "Plantilla + guía": plantilla rellenada + guía paso a paso (la publica el cliente).
 //   - "Te lo montamos": nosotros lo publicamos con tus datos.
 
 export const categorias = [
@@ -24,7 +24,7 @@ export const categorias = [
   { slug: 'planes', nombre: 'Planes mensuales', menu: 'footer' },
 ];
 
-// p = [precio "Lo montas tú", precio "Te lo montamos"] en euros.
+// p = [precio "Plantilla + guía", precio "Te lo montamos"] en euros.
 // Si p tiene un solo valor, el producto no tiene modalidades.
 export const productos = [
   // ── Webs ───────────────────────────────────────────────
@@ -353,7 +353,7 @@ export const productos = [
     repos: ['directus-labs/agency-os', 'Vibra-Labs/Atrium', 'onlineprfoundation/pr-agency-platform'],
   },
   {
-    slug: 'web-editable-visual', cat: 'portales', nombre: 'Web que editas arrastrando bloques', p: [399, 799], plazo: '7 días',
+    slug: 'web-editable-visual', cat: 'portales', nombre: 'Web a medida con editor visual completo', p: [399, 799], plazo: '7 días',
     resumen: 'Web con editor visual: cambias textos, imágenes y secciones arrastrando, como en Wix, pero tuya.',
     recibes: ['Web con editor visual', 'Bloques prediseñados', 'Formación de 30 min', 'Alojamiento propio'],
     campos: ['Secciones que necesitas', 'Contenido inicial', 'Quién la editará'],
@@ -606,7 +606,7 @@ export const productos = [
     repos: ['WordPress/wordpress-develop'],
   },
   {
-    slug: 'web-arrastrar-soltar', cat: 'portales', nombre: 'Web que editas arrastrando bloques', p: [199, 449], plazo: '5 días',
+    slug: 'web-arrastrar-soltar', cat: 'portales', nombre: 'Web de 4 páginas que editas arrastrando bloques', p: [199, 449], plazo: '5 días',
     resumen: 'Tu web en un editor visual muy sencillo: cambias textos, fotos y secciones arrastrando, sin tocar código ni pagar cuota.',
     recibes: ['Editor visual instalado y configurado', 'Web inicial de 4 páginas con tus datos', 'Bloques de tu sector listos para usar', 'Formación de 30 minutos'],
     campos: ['Sector', 'Páginas que necesitas', 'Logo, colores y fotos', 'Dominio'],
@@ -644,7 +644,7 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
 
 ## Dos modalidades
 
-| | Lo montas tú | Te lo montamos |
+| | Plantilla + guía | Te lo montamos |
 |---|---|---|
 | Qué recibes | Plantilla + guía paso a paso | Servicio publicado con tus datos |
 | Para quién | Quien quiere ahorrar y se maneja | Quien quiere olvidarse |
@@ -734,7 +734,7 @@ _Si quieres que configuremos alguna, está incluido en «Te lo montamos»._
     slug: 'demos', titulo: 'Demos en vivo', corto: 'Demos', menu: 'header',
     md: `## Mira lo que recibes antes de comprar
 
-Estas demos son webs reales funcionando. Cambiamos textos, fotos y colores por los tuyos.
+Hay dos tipos. Las **demos interactivas** se pueden usar ya (editar una web, pedir de una carta…) con datos de ejemplo. Los **diseños de ejemplo** enseñan estilos: tu versión lleva tus textos, fotos y colores, en español.
 
 DEMOS_LISTA
 

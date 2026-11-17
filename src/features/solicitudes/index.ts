@@ -85,6 +85,10 @@ function opcional(form: FormData, k: string, max: number): string | null {
  * servicio (en el orden de `campo_0..n`). El honeypot `web` lleno = bot:
  * se responde como si todo fuera bien pero no se guarda nada.
  */
+/** Campo con el número de pedido cuando la solicitud llega tras una compra directa. */
+export const CAMPO_PEDIDO = 'Pedido pagado';
+const PEDIDO_RE = /^[A-Za-z0-9_-]{4,40}$/;
+
 export function validarSolicitud(form: FormData, etiquetas: string[]): Validacion {
   if (texto(form, 'web', 200) !== '') return { ok: true, spam: true };
 
@@ -102,6 +106,9 @@ export function validarSolicitud(form: FormData, etiquetas: string[]): Validacio
     errores.consentimiento = 'Necesitamos tu permiso para usar estos datos y preparar la vista previa.';
 
   const campos: Record<string, string> = {};
+  // Compra directa: el cliente ya pagó y llega desde /order/<token> con su número de pedido.
+  const pedido = opcional(form, 'pedido', 40);
+  if (pedido && PEDIDO_RE.test(pedido)) campos[CAMPO_PEDIDO] = pedido;
   etiquetas.forEach((etiqueta, i) => {
     const v = texto(form, nombreCampo(i), LIMITES.campo);
     if (v) campos[etiqueta] = v;

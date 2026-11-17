@@ -71,10 +71,18 @@ const { model, purchase } = Astro.props;
       {model.formattedPrice}
     </p>
 
-    {/* Pruébalo antes de pagar: CTA principal. El pago directo queda como secundario. */}
-    <div class="mt-6 rounded-2xl border-2 border-brand bg-brand/5 p-5" data-empieza-gratis>
-      <p class="text-xs font-semibold uppercase tracking-widest text-brand">Sin tarjeta · sin compromiso</p>
-      <p class="mt-1 text-lg font-bold text-ink">Pruébalo antes de pagar</p>
+    {/* Dos caminos visibles, sin desplegables: compra directa (precio cerrado) y,
+        para quien duda, la vista previa gratis. */}
+    <div class="mt-6 rounded-2xl border-2 border-brand bg-surface p-5" data-compra-directa>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand">Opción 1 · Compra directa</p>
+      <p class="mt-1 text-lg font-bold text-ink">Contrátalo ya, a precio cerrado</p>
+      <p class="mt-1 text-sm text-muted">Eliges la modalidad, pagas y empezamos. Te pedimos tus datos después del pago y te enseñamos el resultado antes de entregarlo, con una ronda de ajustes incluida.</p>
+      <ProductPurchaseForm model={purchase} />
+    </div>
+
+    <div class="mt-4 rounded-2xl border border-line bg-brand/5 p-5" data-empieza-gratis>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand">Opción 2 · Sin tarjeta · sin compromiso</p>
+      <p class="mt-1 text-lg font-bold text-ink">¿Prefieres verlo antes de pagar?</p>
       <ol class="relative mt-4 space-y-3 border-l-2 border-dashed border-brand/30 pl-5 text-sm">
         {[
           ['1', 'Solicitas', 'Rellenas tus datos en 2-3 minutos. Sin tarjeta.'],
@@ -90,7 +98,7 @@ const { model, purchase } = Astro.props;
       </ol>
       <a
         href={model.startHref}
-        class="mt-4 flex w-full items-center justify-center rounded-full bg-brand px-6 py-3.5 text-base font-semibold text-on-brand shadow-sm transition hover:bg-brand-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        class="mt-4 flex w-full items-center justify-center rounded-full border-2 border-brand bg-surface px-6 py-3 text-base font-semibold text-brand transition hover:bg-brand hover:text-on-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         Empieza gratis →
       </a>
@@ -145,11 +153,6 @@ const { model, purchase } = Astro.props;
       )
     }
 
-    <details class="mt-8 rounded-xl border border-line p-4">
-      <summary class="cursor-pointer text-sm font-semibold text-ink">¿Ya lo tienes claro? Compra directa</summary>
-      <p class="mt-2 text-xs text-faint">Si prefieres saltarte la vista previa, puedes contratarlo ya. Te recomendamos empezar gratis: así ves el resultado antes de pagar.</p>
-      <ProductPurchaseForm model={purchase} />
-    </details>
 
     {/* Share — hidden until JS confirms the browser can share or copy. Uses the
         Web Share API (mobile/native sheet) with a clipboard-copy fallback. */}

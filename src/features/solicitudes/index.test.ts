@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CAMPO_PEDIDO,
   camposDeDescripcion,
   esEstado,
   nombreCampo,
@@ -35,6 +36,12 @@ describe('validarSolicitud', () => {
       expect(r.data.campos).toEqual({ Negocio: 'Peluquería Ana' });
       expect(r.data.telefono).toBeNull();
     }
+  });
+  it('compra directa: guarda el n.º de pedido válido y descarta uno raro', () => {
+    const ok = validarSolicitud(fd({ ...base, pedido: 'AB12cd34' }), ['Negocio']);
+    expect(ok.ok && !ok.spam && ok.data.campos[CAMPO_PEDIDO]).toBe('AB12cd34');
+    const raro = validarSolicitud(fd({ ...base, pedido: '<script>' }), ['Negocio']);
+    expect(raro.ok && !raro.spam && raro.data.campos[CAMPO_PEDIDO]).toBeUndefined();
   });
   it('honeypot lleno = spam, sin errores', () => {
     expect(validarSolicitud(fd({ web: 'http://x' }), [])).toEqual({ ok: true, spam: true });

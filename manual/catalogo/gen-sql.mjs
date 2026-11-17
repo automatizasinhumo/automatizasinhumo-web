@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { categorias, productos, paginas } from './catalogo.mjs';
-import { DEMOS, DEMOS_URL, demosDe } from '../demos/demos.mjs';
+import { DEMOS, DEMOS_URL, INTERACTIVAS, demosDe } from '../demos/demos.mjs';
 
 const ALPHA = '0123456789abcdefghjkmnpqrstvwxyz';
 const pid = (p) => `${p}_${Array.from({ length: 10 }, () => ALPHA[randomInt(32)]).join('')}`;
@@ -16,11 +16,14 @@ function descripcion(p) {
   l.push('### Campos que rellenas', ...p.campos.map((x) => `- ${x}`), '');
   l.push('### Ejemplo', `> ${p.ejemplo}`, '');
   const demos = demosDe(p.slug);
-  if (demos.length) l.push('### Demo en vivo', ...demos.map((d) => `- [${d.titulo}](${d.url})`), '');
+  // Separamos lo que se usa (demo interactiva) de lo que solo enseña un estilo.
+  const usa = demos.filter((d) => d.tipo === 'interactiva'), mira = demos.filter((d) => d.tipo !== 'interactiva');
+  if (usa.length) l.push('### Pruébalo ahora', 'Demo interactiva con datos de ejemplo: puedes tocarla, no se guarda nada.', ...usa.map((d) => `- [${d.titulo}](${d.url})`), '');
+  if (mira.length) l.push('### Diseños de ejemplo', 'Plantillas de estilo. Tu versión lleva tus textos, fotos y colores, en español.', ...mira.map((d) => `- [${d.titulo}](${d.url})`), '');
   l.push(`**Plazo:** ${p.plazo}`, '');
   if (p.p.length === 2) {
-    l.push('### Lo montas tú o te lo montamos',
-      '| | Lo montas tú | Te lo montamos |',
+    l.push('### Plantilla + guía o te lo montamos',
+      '| | Plantilla + guía | Te lo montamos |',
       '|---|---|---|',
       `| Precio | **${p.p[0]} €** | **${p.p[1]} €** |`,
       '| Plantilla rellenada con tus datos | Sí | Sí |',
@@ -69,13 +72,13 @@ for (const p of productos) {
     out.push(`INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, ${q(key)}, ${n++}, ${q(pid('pimg'))} FROM products WHERE slug=${q(p.slug)};`);
   }
   if (varios) {
-    [['Lo montas tú (plantilla + guía)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
+    [['Plantilla + guía (la publicas tú)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(label)}, ${eur * 100}, 999, ${q(`${p.slug}-${i ? 'pro' : 'diy'}`)}, ${i}, 1, ${q(pid('var'))} FROM products WHERE slug=${q(p.slug)};`));
   }
 }
 
 // Páginas
-const lista = DEMOS.map(([slug, , t, prod]) => `- **[${t}](${DEMOS_URL}/${slug}/)** · servicio: [${productos.find((x) => x.slug === prod)?.nombre ?? prod}](/products/${prod})`).join('\n');
+const lista = DEMOS.map(([slug, , t, prod]) => `- **[${t}](${DEMOS_URL}/${slug}/)** · ${INTERACTIVAS.has(slug) ? 'demo interactiva' : 'diseño de ejemplo'} · servicio: [${productos.find((x) => x.slug === prod)?.nombre ?? prod}](/products/${prod})`).join('\n');
 for (const pg of paginas)
   out.push(`INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES (${q(pg.titulo)}, ${q(pg.slug)}, ${q(pg.md.replace('DEMOS_LISTA', lista))}, 1, 'standard', ${q(pid('page'))});`);
 

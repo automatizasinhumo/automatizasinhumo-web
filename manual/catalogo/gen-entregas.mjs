@@ -45,7 +45,7 @@ export function prompt(p, modalidad = 'Te lo montamos') {
     'revisa móvil y accesibilidad (pa11y) y publícalo en un Worker propio <slug-cliente>.workers.dev.',
     'Devuélveme el enlace, una captura y el email de entrega para el cliente.',
   ];
-  if (modalidad === 'Lo montas tú') lineas.push('Genera además un ZIP con la plantilla rellenada y una guía paso a paso (con capturas) para publicarla él.');
+  if (modalidad === 'Plantilla + guía' || modalidad === 'Lo montas tú') lineas.push('Genera además un ZIP con la plantilla rellenada y una guía paso a paso (con capturas) para publicarla él.');
   if (e.n === 'B') lineas.push('Si falta algún acceso, prepárame la guía de 3 pasos para pedírselo y para con lo que no lo necesite.');
   if (e.n === 'C') lineas.push('Haz primero un plan de entrega por fases (máx. 3) y entrega la fase 1 funcionando.');
   return lineas.join('\n');
@@ -86,7 +86,7 @@ function guia(p) {
   const e = ENTREGA[p.slug];
   const cat = categorias.find((c) => c.slug === p.cat)?.nombre ?? p.cat;
   const demos = demosDe(p.slug);
-  const precios = p.p.length === 2 ? `Lo montas tú ${p.p[0]} € · Te lo montamos ${p.p[1]} €` : `${p.p[0]} €`;
+  const precios = p.p.length === 2 ? `Plantilla + guía ${p.p[0]} € · Te lo montamos ${p.p[1]} €` : `${p.p[0]} €`;
   const l = [
     `# ${p.nombre}`,
     '',
@@ -119,7 +119,7 @@ function guia(p) {
     '',
     '```text', prompt(p), '```',
     '',
-    ...(p.p.length === 2 ? ['Para la modalidad **Lo montas tú**: `node manual/catalogo/gen-entregas.mjs ' + p.slug + ' tu`.', ''] : []),
+    ...(p.p.length === 2 ? ['Para la modalidad **Plantilla + guía**: `node manual/catalogo/gen-entregas.mjs ' + p.slug + ' tu`.', ''] : []),
     ...(e.nota ? [`> **Ojo:** ${e.nota}`, ''] : []),
     '## 3. Qué entregas',
     '',
@@ -142,7 +142,7 @@ const [slug, mod] = process.argv.slice(2);
 if (slug) {
   const p = productos.find((x) => x.slug === slug);
   if (!p) { console.error(`No existe el producto «${slug}». Mira manual/entregas/README.md`); process.exit(1); }
-  console.log(prompt(p, mod === 'tu' ? 'Lo montas tú' : 'Te lo montamos'));
+  console.log(prompt(p, mod === 'tu' ? 'Plantilla + guía' : 'Te lo montamos'));
 } else {
   const dir = new URL('../entregas/', here);
   mkdirSync(dir, { recursive: true });
