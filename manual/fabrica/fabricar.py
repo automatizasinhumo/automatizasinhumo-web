@@ -17,6 +17,7 @@ CLOUDFLARE_ACCOUNT_ID.
 import html as H, json, os, re, shutil, subprocess, sys, tempfile, urllib.parse, urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup, NavigableString, Comment
+import fastjsonschema  # BSD-3-Clause, https://github.com/horejsek/python-fastjsonschema
 
 DEMOS = Path(os.environ.get('DEMOS_DIR', 'C:/GIT/automatizasinhumo-demos'))
 DEMOS_URL = 'https://automatizasinhumo-demos.davidpd89.workers.dev'
@@ -25,6 +26,22 @@ PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))
 MODELO = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 OMITIR_TAGS = {'script', 'style', 'code', 'pre', 'svg', 'template', 'textarea'}
 LOTE = 25
+
+# Respuesta de la IA por lote: claves numéricas y textos no vacíos. Lo que no cumpla cuenta como intento fallido.
+validar_respuesta = fastjsonschema.compile({
+    'type': 'object',
+    'propertyNames': {'pattern': '^[0-9]+$'},
+    'additionalProperties': {'type': 'string', 'minLength': 1, 'maxLength': 2000, 'pattern': '\\S'},
+})
+# Un texto de la plantilla de esta longitud que la IA no adapta bloquea la publicación;
+# los cortos (un botón, un «OK») se toleran hasta TOLERANCIA_SIN_ADAPTAR del total.
+LARGO_OBLIGATORIO = 15
+TOLERANCIA_SIN_ADAPTAR = 0.2
+RESTOS = re.compile(r'lorem ipsum|dolor sit amet', re.I)
+
+
+class FabricaBloqueada(RuntimeError):
+    """La vista previa saldría con textos de la plantilla o datos de otro negocio: no se publica."""
 
 
 def credenciales():
@@ -102,10 +119,12 @@ def reescribir(textos, p, cred):
             try:
                 r = ia(*cred, sistema, f'{datos}\n\nNodos de la página (orden de lectura):\n'
                        f'{json.dumps(pend, ensure_ascii=False)}')
-                nuevo = json.loads(r[r.index('{'): r.rindex('}') + 1])
-                for k in [k for k in pend if isinstance(nuevo.get(k), str) and nuevo[k].strip()]:
+                nuevo = validar_respuesta(json.loads(r[r.index('{'): r.rindex('}') + 1]))
+                for k in [k for k in pend if k in nuevo]:
                     salida[k] = nuevo[k]
-                    del pend[k]
+                    # Devuelto tal cual: se guarda, pero sigue pendiente para otro intento.
+                    if ' '.join(nuevo[k].split()) != ' '.join(pend[k]['texto'].split()):
+                        del pend[k]
             except Exception as e:  # noqa: BLE001 — lo que no se adapte conserva el texto de la plantilla
                 print('  lote', i // LOTE, 'intento', intento + 1, type(e).__name__)
         print(f'  textos {min(i + LOTE, len(textos))}/{len(textos)} (sin adaptar: {len(pend)})', flush=True)
@@ -169,12 +188,17 @@ def fabricar(ruta_pedido, desplegar=True):
     print(f"  {len(textos)} textos a adaptar" if PUBLICO else
           f"{p['id']}: {len(textos)} textos a adaptar (marca de la plantilla: {marca or '?'})")
     nuevos = reescribir(textos, p, credenciales())
+    comprobar_adaptacion(textos, nuevos, marca)
     for i, n in enumerate(nodos):
         t = nuevos.get(str(i))
         if t:
             n.replace_with(n[: len(n) - len(n.lstrip())] + t + n[len(n.rstrip()):])
 
-    idx.write_text(poner_datos(str(sopa), p, marca), encoding='utf-8')
+    final = poner_datos(str(sopa), p, marca)
+    restos = restos_de_plantilla(final, marca, nombre_publico(p))
+    if restos:
+        raise FabricaBloqueada('restos de la plantilla: ' + ', '.join(restos))
+    idx.write_text(final, encoding='utf-8')
     # Una vista previa no es la web del cliente: que ningún buscador la indexe.
     (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
 
@@ -191,6 +215,38 @@ def fabricar(ruta_pedido, desplegar=True):
             print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
         return url.group(0) if url else None
     print('generada sin publicar en', site)
+
+
+def comprobar_adaptacion(textos, nuevos, marca=''):
+    """Un fallo de la IA no publica la plantilla a medias: bloquea la vista previa."""
+    # Sin respuesta o devuelto tal cual: los dos casos son la plantilla sin adaptar.
+    # Un texto con la marca devuelto igual sí vale: poner_datos() pone ahí el nombre del cliente.
+    sin = [t['texto'] for i, t in enumerate(textos)
+           if ' '.join(nuevos.get(str(i), '').split()) in ('', ' '.join(t['texto'].split()))
+           and not (str(i) in nuevos and marca and marca in t['texto'])]
+    largos = [t for t in sin if len(t) >= LARGO_OBLIGATORIO]
+    if largos or (textos and len(sin) > TOLERANCIA_SIN_ADAPTAR * len(textos)):
+        raise FabricaBloqueada(f'la IA dejó {len(sin)} de {len(textos)} textos sin adaptar')
+
+
+def restos_de_plantilla(html, marca, nombre):
+    """Lo que el cliente vería de la plantilla original: su marca (en cualquier mayúscula) o texto de relleno."""
+    sopa = BeautifulSoup(html, 'html.parser')
+    for el in sopa(['script', 'style', 'template']):
+        el.decompose()
+    visible = ' '.join([sopa.get_text(' ')] + [
+        el.get(a, '') for el in sopa.find_all(True) for a in ('alt', 'title', 'aria-label', 'placeholder', 'content')
+        if el.get(a)])
+    restos = []
+    # El nombre del cliente puede contener la marca («Lumen Ana»): se quitan sus apariciones
+    # y se busca la marca en lo que queda.
+    resto = re.sub(re.escape(nombre), ' ', visible, flags=re.I) if nombre else visible
+    # Palabra entera: con la marca «Lumen», «volumen» no es un resto; «ESTUDIO_LUMEN» sí (el _ separa).
+    if marca and len(marca) >= 3 and re.search(rf'(?<![^\W_]){re.escape(marca)}(?![^\W_])', resto, re.I):
+        restos.append('marca de la plantilla')
+    if RESTOS.search(visible):
+        restos.append('texto de relleno')
+    return restos
 
 
 # Correo admitido en el HTML: sin comillas, espacios ni signos que cierren un atributo o una etiqueta.
