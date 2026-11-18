@@ -179,14 +179,15 @@ describe('enviarNotificacion', () => {
     expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'enviado' });
   });
 
-  it('al reclamar reutiliza el asunto y cuerpo de la reserva, aunque el enlace haya cambiado', async () => {
+  it('al reclamar con otro enlace manda el correo actual con un intento nuevo, no el guardado', async () => {
     const db = d1();
     solicitud(db, 'S-AAAAAA', 'nueva', null);
     reservada(db, 1, (db.sql.prepare("SELECT datetime('now', '-20 minutes') AS h").get() as { h: string }).h);
     const mail = correo();
     const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'otro', texto: 'nuevo enlace' };
     expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'enviado' });
-    expect(mail.send.mock.calls[0][0 as never]).toMatchObject({ subject: 'a', text: 't' });
+    expect(mail.send.mock.calls[0][0 as never]).toMatchObject({ subject: 'otro', text: 'nuevo enlace', idempotencyKey: expect.stringMatching(/-2$/) });
+    expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviado', intentos: 2 });
   });
 
   it('un envío lento cuya reserva reclamó otro no sobrescribe el resultado', async () => {

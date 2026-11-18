@@ -74,19 +74,19 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
     .bind(e.id, e.tipo, e.version, e.asunto, e.texto, ...condicion)
     .run();
   // Reserva atómica: solo una petición pasa la fila a 'enviando'. Una reserva
-  // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento y
-  // con el mismo asunto y cuerpo guardados: misma clave de idempotencia y misma carga,
-  // así el proveedor no duplica (ni rechaza) un correo que ya aceptó.
+  // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento si
+  // la carga es la misma: misma clave de idempotencia, así el proveedor no duplica un
+  // correo que ya aceptó. Si la carga cambió (otro enlace u otra nota), se manda la
+  // actual con un intento nuevo: nunca se marca como enviado un correo que no es este.
   const token = crypto.randomUUID();
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
   const exigir = e.exigirNota === undefined ? '' : `AND ${sigueIgual}`;
   const reserva = await db
     .prepare(
       `UPDATE notificaciones SET
-         asunto = CASE WHEN estado_envio = 'enviando' THEN asunto ELSE ? END,
-         cuerpo = CASE WHEN estado_envio = 'enviando' THEN cuerpo ELSE ? END,
+         asunto = ?, cuerpo = ?,
          estado_envio = 'enviando', reservado_at = datetime('now'), reserva = ?,
-         intentos = intentos + CASE WHEN estado_envio = 'enviando' THEN 0 ELSE 1 END
+         intentos = intentos + CASE WHEN estado_envio = 'enviando' AND asunto = ? AND cuerpo = ? THEN 0 ELSE 1 END
        WHERE solicitud_public_id = ? AND tipo = ? AND version = ?
          AND ((estado_envio IN (${permitidos}) AND intentos < ?)
            OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')))
@@ -97,6 +97,8 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
       e.asunto,
       e.texto,
       token,
+      e.asunto,
+      e.texto,
       e.id,
       e.tipo,
       e.version,
