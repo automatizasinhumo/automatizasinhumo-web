@@ -1,5 +1,7 @@
+import type { D1Database } from '@cloudflare/workers-types';
 import demosPorProducto from '../../data/demos-producto.json';
-import galeria from '../../data/galeria-demos.json';
+import { getProductBySlug } from '../products/db';
+import { formatMoney } from '../../money';
 
 type ServiceSlug = keyof typeof demosPorProducto;
 
@@ -89,9 +91,9 @@ export interface SectorDemo {
 
 export interface SectorService {
   slug: ServiceSlug;
+  publicId: string | null;
   name: string;
-  price: number;
-  deliveryTime: string;
+  formattedPrice: string;
   demos: SectorDemo[];
 }
 
@@ -99,20 +101,34 @@ export function getSector(slug: string | undefined): SectorPage | undefined {
   return SECTORS.find((sector) => sector.slug === slug);
 }
 
-export function servicesForSector(sector: SectorPage): SectorService[] {
-  return sector.serviceSlugs.map((slug) => {
-    const catalogEntry = galeria.items.find((item) => item.producto === slug);
-    const demos = demosPorProducto[slug];
-    if (!catalogEntry || !demos || demos.length === 0) {
-      throw new Error(`Missing published service or demo data for "${slug}".`);
-    }
+export function demosForService(slug: ServiceSlug): SectorDemo[] {
+  const demos = demosPorProducto[slug];
+  if (!demos || demos.length === 0) {
+    throw new Error(`Missing published demo data for "${slug}".`);
+  }
+  return demos.slice(0, 3);
+}
 
-    return {
-      slug,
-      name: catalogEntry.nombre,
-      price: catalogEntry.precio,
-      deliveryTime: catalogEntry.plazo,
-      demos: demos.slice(0, 3),
-    };
-  });
+export async function servicesForSector(
+  db: D1Database,
+  sector: SectorPage,
+  currency: string,
+): Promise<SectorService[]> {
+  return Promise.all(
+    sector.serviceSlugs.map(async (slug) => {
+      const product = await getProductBySlug(db, slug);
+      if (!product || !product.active) {
+        throw new Error(`Missing active product for sector service "${slug}".`);
+      }
+
+      const demos = demosForService(slug);
+      return {
+        slug,
+        publicId: product.public_id,
+        name: product.name,
+        formattedPrice: formatMoney(product.price_cents, currency),
+        demos,
+      };
+    }),
+  );
 }
