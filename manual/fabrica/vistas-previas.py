@@ -24,7 +24,8 @@ SECO = '--dry' in args
 
 def d1(sql):
     r = subprocess.run(['npx', 'wrangler', 'd1', 'execute', 'DB', '--remote', '--json', '--config', CONFIG, '--command', sql],
-                       cwd=RAIZ, capture_output=True, text=True, encoding='utf-8', shell=sys.platform == 'win32')
+                       cwd=RAIZ, capture_output=True, text=True, encoding='utf-8', shell=sys.platform == 'win32',
+                       timeout=300, stdin=subprocess.DEVNULL)  # nunca esperar respuesta por consola
     salida = r.stdout[r.stdout.find('['):]
     return json.loads(salida)[0]['results']
 

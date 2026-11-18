@@ -116,7 +116,8 @@ def fabricar(ruta_pedido, desplegar=True):
     (base / 'wrangler.jsonc').write_text(json.dumps(
         {'name': nombre, 'compatibility_date': '2026-11-01', 'assets': {'directory': './site'}}, indent=2), encoding='utf-8')
     if desplegar:
-        r = subprocess.run('npx wrangler deploy', shell=True, cwd=base, capture_output=True, text=True, encoding='utf-8')
+        r = subprocess.run('npx wrangler deploy', shell=True, cwd=base, capture_output=True, text=True, encoding='utf-8',
+                           timeout=600, stdin=subprocess.DEVNULL)
         url = re.search(r'https://\S+\.workers\.dev', r.stdout + r.stderr)
         print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
         return url.group(0) if url else None
