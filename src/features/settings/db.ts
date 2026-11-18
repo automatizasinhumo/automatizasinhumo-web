@@ -46,6 +46,7 @@ export type SettingKey =
   | 'contact_telegram' // contacto flotante: usuario de Telegram sin @
   | 'contact_email' // contacto flotante: email de contacto
   | 'email_from' // sender address; absent = build-time default
+  | 'cron_dispatch_slot' // last cron slot (UTC 'YYYY-MM-DDTHH:MM') that dispatched GitHub workflows
   | 'store_url' // origin last seen serving a settlement, so the cron can build order links
   | 'email_from_name' // sender display name; absent = store name
   | 'email_notify_to' // owner "new order" alert recipient; absent = store.config.ts notifyTo

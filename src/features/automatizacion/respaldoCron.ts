@@ -11,9 +11,12 @@
  * fine-grained con Actions: write en un único repo) y `GITHUB_DISPATCH_REPO`
  * (`dueño/repo`). Sin ellos no hace nada: cualquier otra tienda minshop queda igual.
  *
- * Si los cron de GitHub vuelven, un workflow puede correr dos veces en la misma
- * franja; la fábrica tiene `concurrency` y los semanales son idempotentes.
+ * Cada franja se reclama una sola vez en D1 (`reclamarFranja`), por si Cloudflare
+ * repite un tick. Si los cron de GitHub vuelven, un workflow puede correr dos veces;
+ * la fábrica tiene `concurrency` y los semanales son idempotentes.
  */
+
+import type { D1Database } from '@cloudflare/workers-types';
 
 export interface Programado {
   workflow: string;
@@ -45,6 +48,29 @@ export function programadosEn(cuando: Date): Programado[] {
   return debidos;
 }
 
+/** Franja de 5 minutos del tick, en UTC: `YYYY-MM-DDTHH:MM`. Ordena como texto. */
+export function franja(cuando: Date): string {
+  const d = new Date(cuando);
+  d.setUTCMinutes(Math.floor(d.getUTCMinutes() / 5) * 5, 0, 0);
+  return d.toISOString().slice(0, 16);
+}
+
+/**
+ * Reclama la franja de forma atómica: solo gana quien la escribe primero.
+ * El upsert condicional no toca la fila si ya guarda esa franja o una posterior.
+ */
+export async function reclamarFranja(db: D1Database, valor: string): Promise<boolean> {
+  const r = await db
+    .prepare(
+      `INSERT INTO settings (key, value) VALUES ('cron_dispatch_slot', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+       WHERE settings.value < excluded.value`,
+    )
+    .bind(valor)
+    .run();
+  return (r.meta?.changes ?? 0) === 1;
+}
+
 const REPO_VALIDO = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/;
 
 export async function lanzarProgramados(
@@ -52,6 +78,7 @@ export async function lanzarProgramados(
   token: string | undefined,
   repo: string | undefined,
   pedir: typeof fetch = fetch,
+  reclamar: (franja: string) => Promise<boolean> = async () => true,
 ): Promise<{ lanzados: string[]; fallidos: string[] }> {
   const resultado = { lanzados: [] as string[], fallidos: [] as string[] };
   if (!token || !repo) return resultado;
@@ -59,7 +86,10 @@ export async function lanzarProgramados(
     console.error('GITHUB_DISPATCH_REPO no tiene la forma dueño/repo');
     return resultado;
   }
-  for (const { workflow, inputs } of programadosEn(cuando)) {
+  const debidos = programadosEn(cuando);
+  // Solo se reclama la franja si hay algo que lanzar: tres de cada cuatro ticks no escriben.
+  if (debidos.length === 0 || !(await reclamar(franja(cuando)))) return resultado;
+  for (const { workflow, inputs } of debidos) {
     try {
       const r = await pedir(
         `https://api.github.com/repos/${repo}/actions/workflows/${workflow}/dispatches`,

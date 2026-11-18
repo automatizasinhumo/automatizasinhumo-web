@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { lanzarProgramados, programadosEn } from './respaldoCron';
+import { franja, lanzarProgramados, programadosEn } from './respaldoCron';
 
 const nombres = (d: string) => programadosEn(new Date(d)).map((p) => p.workflow);
 
@@ -58,6 +58,25 @@ describe('lanzarProgramados', () => {
     expect(url).toBe('https://api.github.com/repos/org/repo/actions/workflows/fabrica-vistas-previas.yml/dispatches');
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer secreto');
     expect(JSON.parse(init.body as string)).toEqual({ ref: 'main', inputs: { max: '3' } });
+  });
+
+  it('franja redondea a 5 minutos en UTC', () => {
+    expect(franja(new Date('2026-11-18T10:07:40Z'))).toBe('2026-11-18T10:05');
+  });
+
+  it('si la franja ya está reclamada no lanza nada', async () => {
+    const pedir = vi.fn();
+    const reclamar = vi.fn(async () => false);
+    const r = await lanzarProgramados(tick, 't', 'org/repo', pedir, reclamar);
+    expect(r).toEqual({ lanzados: [], fallidos: [] });
+    expect(reclamar).toHaveBeenCalledWith('2026-11-18T10:05');
+    expect(pedir).not.toHaveBeenCalled();
+  });
+
+  it('sin nada debido no reclama la franja', async () => {
+    const reclamar = vi.fn(async () => true);
+    await lanzarProgramados(new Date('2026-11-18T10:00:00Z'), 't', 'org/repo', vi.fn(), reclamar);
+    expect(reclamar).not.toHaveBeenCalled();
   });
 
   it('un fallo HTTP se anota sin registrar el token', async () => {
