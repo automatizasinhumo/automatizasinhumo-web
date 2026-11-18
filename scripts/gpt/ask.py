@@ -76,9 +76,10 @@ def main():
     cerrar = "--no-cerrar" not in a
     abrir_edge()
     with sync_playwright() as p:
-        br = p.chromium.connect_over_cdp(f"http://127.0.0.1:{PUERTO}")
-        pg = br.contexts[0].new_page()
+        br, pg = None, None
         try:
+            br = p.chromium.connect_over_cdp(f"http://127.0.0.1:{PUERTO}")
+            pg = br.contexts[0].new_page()
             pg.goto(chat or PROJECT, wait_until="domcontentloaded", timeout=60000)
             try:  # un chat largo tarda en pintarse: esperar al cuadro de texto, no un tiempo fijo
                 pg.locator('[contenteditable="true"]').first.wait_for(timeout=45000)
@@ -112,15 +113,23 @@ def main():
                     text = pg.locator(ASSISTANT).last.inner_text(timeout=5000) if n > before or (n and chat is None) or leer else ""
                 except Exception:
                     text = ""
-                stable = stable + 1 if (len(text) == last and not gen and len(text) > 20) else 0
+                minimo = 0 if leer else 20  # en --leer vale una respuesta corta («Sí.») ya terminada
+                stable = stable + 1 if (len(text) == last and not gen and len(text) > minimo) else 0
                 last = len(text)
                 if stable >= 12:  # 60 s sin cambios: GPT hace pausas largas al buscar en internet
                     break
+            if not text:  # no pisar una salida anterior con un fichero vacío
+                print("SIN_RESPUESTA", pg.url)
+                sys.exit(4)
             open(out, "w", encoding="utf-8").write(text)
             print("OK", len(text), "chars", pg.url)
         finally:
-            pg.close()
-            if cerrar:
+            try:
+                if pg:
+                    pg.close()
+            except Exception:
+                pass
+            if cerrar and br:
                 cerrar_edge(br)
 
 

@@ -9,7 +9,7 @@ Funcionamiento:
 3. CodeRabbit y la CI revisan la PR. Claude la revisa y la fusiona o la devuelve con comentarios.
 
 Reglas para Copilot:
-- Reutilizar código de repos públicos (MIT/Apache) en vez de escribirlo desde cero.
+- Reutilizar código de repos públicos (MIT/Apache) en vez de escribirlo desde cero, conservando su aviso de copyright y su licencia: cabecera en cada fichero copiado y el texto completo en `licencias/<repo>.txt`.
 - Ficheros con CRLF.
 - Textos visibles en español de España.
 - Push solo a `origin`, nunca a `upstream`.
@@ -29,7 +29,7 @@ Clona fulldotdev/ui (MIT) y konstantinWDK/astro-components (MIT) en una carpeta 
 Adáptalos a los tokens y clases Tailwind v4 del tema actual (sin añadir dependencias nuevas salvo que sean imprescindibles), con datos del catálogo real. Úsalos en la portada y en las fichas donde la comparación aporte información. Prueba: `npx astro build` sin errores y capturas a 360 y 1280 px de la portada y de tres fichas, adjuntas a la PR.
 
 ### C2 · Blog y páginas por sector en el sitemap (mapa ronda 07, adopción 9) — PENDIENTE
-Clona mearashadowfax/ScrewFast (MIT). Copia src/views/BlogIndexView.astro, src/views/BlogPostView.astro, src/components/ui/cards/CardBlog.astro, src/utils/content.ts y src/utils/metadata.ts a src/features/blog/ y src/features/seo/metadata.ts. Crea src/pages/blog/ y src/pages/webs/[sector].astro (peluquerías, fontaneros, restaurantes, abogados, fisioterapeutas) enlazando a los servicios y demos reales. Añade las rutas a src/pages/sitemap.xml.ts. Prueba: build sin errores; cada página con title y description únicos; las rutas aparecen en /sitemap.xml.
+Clona mearashadowfax/ScrewFast (MIT). Copia src/views/BlogIndexView.astro, src/views/BlogPostView.astro, src/components/ui/cards/CardBlog.astro, src/utils/content.ts y src/utils/metadata.ts a src/features/blog/ y src/features/seo/metadata.ts. Crea src/pages/blog/ y src/pages/webs/[sector].astro (peluquerías, fontaneros, restaurantes, abogados, fisioterapeutas) enlazando a los servicios y demos reales. Publica además tres artículos en el blog: «Cuánto cuesta una web para un negocio local», «Web o solo redes sociales» y «Qué necesita una web para salir en Google». Añade las rutas a src/pages/sitemap.xml.ts. Prueba: build sin errores; las cinco páginas de sector y los tres artículos con title y description únicos; todas las rutas aparecen en /sitemap.xml.
 
 ### C3 · Correo de vista previa y recordatorios automáticos (mapa ronda 07, adopción 4) — PENDIENTE
 Hoy el envío de correos a clientes vive dentro de src/pages/admin/solicitudes.astro (bloque `accion === 'enviar'`: fila única en `notificaciones`, `getEmailProvider().send`, estado_envio). Tarea:
