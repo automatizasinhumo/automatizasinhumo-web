@@ -5,10 +5,11 @@ Uso:
 
 Por cada solicitud en estado «nueva» cuyo servicio tiene un diseño de ejemplo (EXTRA de
 manual/demos/demos.mjs), monta el pedido con sus campos, llama a fabricar.py y deja la solicitud
-en «en_preparacion» con la URL de la vista previa en la nota. Desde Admin -> Solicitudes se marca
-«vista previa enviada», que manda el correo al cliente.
+en «en_preparacion» con la URL de la vista previa en la nota. La web pasa una puerta de QA (responde,
+nombre del negocio, sin correos/teléfonos de la plantilla, sin imágenes rotas); si la pasa, la nota
+lleva «QA ok» y el cron del Worker manda el correo de revisión. Si no, queda para revisar a mano.
 """
-import json, re, subprocess, sys, tempfile
+import html as H, json, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -59,6 +60,52 @@ def ciudad_de(campos):
     return re.sub(r'\b\d{5}\b', '', con_cp).strip(' .()')[:40] or 'España'
 
 
+def bajar(url):
+    req = urllib.request.Request(url, headers={'User-Agent': 'automatizasinhumo-qa'})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return r.status, r.read().decode('utf-8', 'replace')
+
+
+def qa(url, p):
+    """Puerta de calidad de la web publicada: lista de problemas (vacía = QA ok)."""
+    html = ''
+    for _ in range(6):  # el Worker recién desplegado tarda unos segundos en responder
+        try:
+            estado, html = bajar(url)
+            if estado == 200:
+                break
+        except Exception:
+            pass
+        time.sleep(5)
+    if not html:
+        return ['la web no responde con 200']
+    problemas = []
+    texto = re.sub(r'<script.*?</script>|<style.*?</style>|<[^>]+>', ' ', html, flags=re.S)
+    if p['negocio'].lower() not in H.unescape(texto).lower():
+        problemas.append('no aparece el nombre del negocio')
+    ajenos = set(re.findall(r'[\w.+-]+@[\w-]+\.[a-z]{2,}', html, re.I)) - {p['email']}
+    if ajenos:
+        problemas.append('correos de la plantilla: ' + ', '.join(sorted(ajenos)[:3]))
+    propio = re.sub(r'\D', '', p['telefono'])[-9:]
+    for tel in re.findall(r'\+?\d[\d\s().-]{7,}\d', texto):
+        digitos = re.sub(r'\D', '', tel)
+        if len(digitos) >= 9 and (not propio or propio not in digitos):
+            problemas.append('teléfono de la plantilla: ' + tel.strip())
+            break
+    rotas = []
+    for src in list(dict.fromkeys(re.findall(r'<img[^>]+src="([^"]+)"', html)))[:12]:
+        if src.startswith('data:'):
+            continue
+        try:
+            if bajar(urllib.parse.urljoin(url + '/', src))[0] != 200:
+                rotas.append(src)
+        except Exception:
+            rotas.append(src)
+    if rotas:
+        problemas.append(f'{len(rotas)} imágenes rotas: ' + ', '.join(rotas[:3]))
+    return problemas
+
+
 def pedido_de(fila, plantilla):
     campos = json.loads(fila.get('campos') or '{}')
     negocio = primero(campos, 'nombre del', 'nombre de la', 'nombre y', 'datos de la empresa') or fila['nombre']
@@ -95,7 +142,11 @@ def main():
                 json.dump(p, t, ensure_ascii=False)
             url = fabricar(t.name)
             if url:
-                nota = f'Vista previa automática: {url} (revisar y marcar «vista previa enviada»)'
+                problemas = qa(url, p)
+                print('  QA:', '; '.join(problemas) or 'ok')
+                # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
+                nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
+                        f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')
                 d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(nota)}, updated_at = datetime('now') "
                    f"WHERE public_id = {sql_txt(f['public_id'])} AND estado = 'nueva'")
         hechas += 1

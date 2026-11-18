@@ -30,3 +30,14 @@ Adáptalos a los tokens y clases Tailwind v4 del tema actual (sin añadir depend
 
 ### C2 · Blog y páginas por sector en el sitemap (mapa ronda 07, adopción 9) — PENDIENTE
 Clona mearashadowfax/ScrewFast (MIT). Copia src/views/BlogIndexView.astro, src/views/BlogPostView.astro, src/components/ui/cards/CardBlog.astro, src/utils/content.ts y src/utils/metadata.ts a src/features/blog/ y src/features/seo/metadata.ts. Crea src/pages/blog/ y src/pages/webs/[sector].astro (peluquerías, fontaneros, restaurantes, abogados, fisioterapeutas) enlazando a los servicios y demos reales. Añade las rutas a src/pages/sitemap.xml.ts. Prueba: build sin errores; cada página con title y description únicos; las rutas aparecen en /sitemap.xml.
+
+### C3 · Correo de vista previa y recordatorios automáticos (mapa ronda 07, adopción 4) — PENDIENTE
+Hoy el envío de correos a clientes vive dentro de src/pages/admin/solicitudes.astro (bloque `accion === 'enviar'`: fila única en `notificaciones`, `getEmailProvider().send`, estado_envio). Tarea:
+1. Extraer ese bloque, sin cambiar su comportamiento, a `src/features/solicitudes/envio.ts` → `enviarCorreoSolicitud(db, id, tipo, version, enlace, pendientes, reenviar)`. La página de Admin pasa a llamarla.
+2. Añadir `sweepVistasPrevias(db)` en el mismo fichero y llamarla desde `runScheduledSweeps` de src/worker.ts (con su propio try/catch, como los demás sweeps). Debe hacer lo siguiente:
+   - Solicitudes en `en_preparacion` cuya nota empiece por «Vista previa automática: https://» y contenga «QA ok» → enviar el correo `revision` (versión 1) con esa URL y pasarlas a `vista_previa_enviada` con `cambiarEstado`.
+   - Solicitudes en `vista_previa_enviada` desde hace 3 días o más, sin correo `recordatorio` → enviar el `recordatorio`.
+   - Solicitudes en `vista_previa_enviada` desde hace 7 días o más → pasarlas a `en_espera_cliente` y enviar el correo `espera`.
+   Límite de 20 por pasada. Es idempotente gracias a la clave única de `notificaciones`.
+3. Tests con vitest junto a los existentes (correos.test.ts como modelo): no envía dos veces el mismo correo; no envía sin «QA ok»; las fechas de 3 y 7 días se cumplen.
+Prueba: `npx vitest run src/features/solicitudes` en verde y `npx astro build` sin errores.
