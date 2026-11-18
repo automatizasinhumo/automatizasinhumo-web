@@ -12,7 +12,7 @@ name: Empleados semanales (staging)
 
 on:
   schedule:
-    - cron: '41 6 * * 1'
+    - cron: '43 6 * * 1'
   workflow_dispatch:
 
 permissions:
