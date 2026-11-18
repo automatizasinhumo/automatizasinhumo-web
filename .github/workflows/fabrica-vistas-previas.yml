@@ -73,6 +73,15 @@ jobs:
           npm ci --ignore-scripts
           pip install --only-binary :all: --require-hashes -r manual/fabrica/requirements-ci.txt
 
+      - name: Instalar el navegador de la prueba funcional
+        if: steps.cred.outputs.listo == '1'
+        run: |
+          # Paquete aparte con su propio lockfile (qa/navegador). qa/node_modules hace que
+          # qa/demo-funcional.mjs lo encuentre antes que el node_modules de la raíz (Wrangler).
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          ln -s navegador/node_modules qa/node_modules
+          qa/navegador/node_modules/.bin/playwright install --with-deps chromium
+
       - name: Configuración de Wrangler con la D1
         if: steps.cred.outputs.listo == '1'
         run: |
