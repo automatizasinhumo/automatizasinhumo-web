@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { Miniflare } from 'miniflare';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { crearSolicitud, validarSolicitud, type SolicitudInput } from './index';
+import { crearSolicitud, liberarCorreos, reclamarCorreos, validarSolicitud, type SolicitudInput } from './index';
 
 const MIGRACIONES = ['0040_solicitudes.sql', '0041_solicitudes_pedido.sql', '0044_solicitudes_envio.sql'];
 
@@ -67,6 +67,20 @@ describe('idempotencia de solicitudes', () => {
     const b = await crearSolicitud(db, datos(null));
     expect(a).not.toBe(b);
     expect(await contar()).toBe(antes + 2);
+  });
+
+  it('los correos se reclaman una sola vez, también con dos envíos a la vez', async () => {
+    const id = await crearSolicitud(db, datos(crypto.randomUUID()));
+    const [a, b] = await Promise.all([reclamarCorreos(db, id), reclamarCorreos(db, id)]);
+    expect([a, b].filter(Boolean)).toHaveLength(1);
+    expect(await reclamarCorreos(db, id)).toBe(false);
+  });
+
+  it('si el envío falla, el reclamo se libera y el reintento manda los correos', async () => {
+    const id = await crearSolicitud(db, datos(crypto.randomUUID()));
+    expect(await reclamarCorreos(db, id)).toBe(true);
+    await liberarCorreos(db, id);
+    expect(await reclamarCorreos(db, id)).toBe(true);
   });
 
   it('un token con forma rara se descarta en vez de guardarse', () => {

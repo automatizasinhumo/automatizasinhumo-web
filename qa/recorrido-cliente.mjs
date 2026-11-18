@@ -53,12 +53,13 @@ async function recorrido(ctx, ancho) {
     });
 
     await paso('«Contratar ahora» abre el pago', async () => {
+      // Solo cuenta si llega a la página de pago (/express) y esta trae su formulario de cobro:
+      // una redirección a otra página con título normal no vale como éxito.
       await Promise.all([
-        pg.waitForURL((u) => !u.pathname.startsWith('/products/'), { timeout: 30000 }),
+        pg.waitForURL((u) => u.pathname === '/express', { timeout: 30000 }),
         pg.getByRole('button', { name: /Contratar/i }).first().click(),
       ]);
-      const r = await pg.waitForLoadState('load').then(() => pg.evaluate(() => document.title));
-      if (/error|no encontrad/i.test(r)) throw new Error(`página de pago con título «${r}»`);
+      await pg.locator('form[action="/api/checkout"]').first().waitFor({ state: 'visible', timeout: 30000 });
       await pg.screenshot({ path: `capturas/recorrido-${ancho}-pago.png` });
     });
 
@@ -106,7 +107,13 @@ async function recorrido(ctx, ancho) {
 
     await paso('el mismo envío repetido no crea otra solicitud', async () => {
       if (!enviado?.envio) throw new Error('el formulario no lleva token de envío');
-      const r = await pg.request.post(new URL('/api/solicitudes', base).toString(), { form: enviado, maxRedirects: 0 });
+      // Origin explícito: el middleware rechaza (403) el POST de formulario sin origen coincidente.
+      const r = await pg.request.post(new URL('/api/solicitudes', base).toString(), {
+        form: enviado,
+        maxRedirects: 0,
+        headers: { Origin: new URL(base).origin },
+      });
+      if (r.status() !== 303) throw new Error(`el reenvío respondió HTTP ${r.status()} en vez de 303`);
       const otra = new URL(r.headers().location ?? '', base).searchParams.get('id');
       if (otra !== id) throw new Error(`el reenvío creó ${otra} en vez de devolver ${id}`);
     });

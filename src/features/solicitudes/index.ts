@@ -201,6 +201,23 @@ export async function crearSolicitud(
   return publicId;
 }
 
+/**
+ * Reclama de forma atómica el envío de los correos de una solicitud. Devuelve false si
+ * otro envío (reenvío del mismo token, doble clic) ya los reclamó o mandó.
+ */
+export async function reclamarCorreos(db: D1Database, publicId: string): Promise<boolean> {
+  const r = await db
+    .prepare("UPDATE solicitudes SET correos_at = datetime('now') WHERE public_id = ? AND correos_at IS NULL")
+    .bind(publicId)
+    .run();
+  return r.meta.changes > 0;
+}
+
+/** Libera el reclamo si el envío falló, para que el reintento del formulario los mande. */
+export async function liberarCorreos(db: D1Database, publicId: string): Promise<void> {
+  await db.prepare('UPDATE solicitudes SET correos_at = NULL WHERE public_id = ?').bind(publicId).run();
+}
+
 export async function listarSolicitudes(db: D1Database, estado?: Estado): Promise<SolicitudRow[]> {
   const sql = estado
     ? 'SELECT * FROM solicitudes WHERE estado = ? ORDER BY created_at DESC, id DESC LIMIT 300'

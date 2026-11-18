@@ -5,7 +5,15 @@ import { getStoreSettings } from '../../features/settings/db';
 import { getEmailProvider } from '../../features/email';
 import { getConfig } from '../../config';
 import { resolverPedido } from '../../features/solicitudes/pedido';
-import { CAMPO_PEDIDO, camposDeDescripcion, crearSolicitud, resumenSolicitud, validarSolicitud } from '../../features/solicitudes';
+import {
+  CAMPO_PEDIDO,
+  camposDeDescripcion,
+  crearSolicitud,
+  liberarCorreos,
+  reclamarCorreos,
+  resumenSolicitud,
+  validarSolicitud,
+} from '../../features/solicitudes';
 
 export const prerender = false;
 
@@ -59,10 +67,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   }
 
   // Emails: mejor esfuerzo. Si fallan, la solicitud ya está guardada en el panel.
+  // Un solo envío por solicitud: un reenvío del mismo formulario no los repite.
+  let reclamado = false;
   try {
     const s = await getStoreSettings(env.DB);
     const mail = await getEmailProvider(s);
-    if (mail) {
+    if (mail && (reclamado = await reclamarCorreos(env.DB, publicId))) {
       const r = resumenSolicitud(v.data, publicId);
       const tienda = s.storeName ?? getConfig().storeName;
       const pagado = v.data.campos[CAMPO_PEDIDO];
@@ -91,6 +101,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   } catch (e) {
     // La solicitud ya está guardada; el aviso queda en los logs del Worker para revisarlo.
     console.error(`solicitudes: email no enviado (${publicId})`, e);
+    if (reclamado) await liberarCorreos(env.DB, publicId).catch(() => undefined);
   }
 
   return redirect(`/empezar/gracias?id=${encodeURIComponent(publicId)}&tipo=${tipo}`, 303);
