@@ -29,6 +29,9 @@ EN_CURSO = 'Vista previa automática: fabricando'
 CADUCA = "datetime('now', '-60 minutes')"
 # Cada reserva lleva su propio identificador en la nota («... fabricando #<uuid>»): solo quien la tiene
 # puede cerrarla, así un proceso cuya reserva ya caducó y otro reclamó no pisa el resultado nuevo.
+# Un fallo antes de tener la web (descarga de la plantilla, wrangler) se reintenta tras CADUCA, hasta
+# REINTENTOS veces; volver a fabricar solo redespliega el mismo Worker. Fallos de QA: revisión a mano.
+REINTENTOS = 3
 DISPONIBLE = (f"(estado = 'nueva' OR (estado = 'en_preparacion' AND nota LIKE {{en_curso}} "
               f"AND updated_at < {CADUCA}))")
 
@@ -142,7 +145,7 @@ def pedido_de(fila, plantilla):
     }
 
 
-def procesar(public_id, p):
+def procesar(public_id, p, intentos=0):
     """Reclama la solicitud y solo entonces la fabrica: dos procesos a la vez (la tarea del PC y Actions)
     no fabrican la misma. Devuelve True si la ha intentado. Ningún fallo (D1 incluido) tumba el lote:
     si no se puede guardar la nota, la reserva caduca y otra pasada la recupera."""
@@ -159,6 +162,7 @@ def procesar(public_id, p):
     if not reclamada:
         print('  ya la ha reclamado otro proceso')
         return False
+    url = None
     try:
         with tempfile.TemporaryDirectory() as tmp:  # el pedido lleva datos de contacto: se borra al salir
             ruta = Path(tmp, 'pedido.json')
@@ -173,7 +177,11 @@ def procesar(public_id, p):
                 f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')
     except Exception as e:  # noqa: BLE001 — una solicitud fallida no para las demás
         print('  fallo:', type(e).__name__ if PUBLICO else f'{type(e).__name__}: {e}')
-        nota = f'Vista previa automática: falló ({type(e).__name__}, revisar a mano)'
+        if url is None and intentos < REINTENTOS:
+            nota = f'{EN_CURSO} · reintento {intentos + 1} #{uuid.uuid4().hex}'
+            print(f'  se reintentará (intento {intentos + 1} de {REINTENTOS})')
+        else:
+            nota = f'Vista previa automática: falló ({type(e).__name__}, revisar a mano)'
     try:
         if not d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
                   f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(reserva)} RETURNING public_id"):
@@ -194,7 +202,7 @@ def main():
         return
     # Solo servicios con plantilla: las solicitudes sin plantilla no ocupan el LIMIT.
     slugs = ', '.join(sql_txt(s) for s in sorted(mapa))
-    filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje FROM solicitudes "
+    filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje, nota FROM solicitudes "
                f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO + '%'))} AND slug IN ({slugs}) "
                "ORDER BY created_at LIMIT 50")
     hechas = 0
@@ -208,7 +216,7 @@ def main():
               f"{f['public_id']} ({f['slug']}) -> {p['plantilla']} · {p['negocio']}")
         if SECO:
             print('  simulación: no se fabrica' if PUBLICO else json.dumps(p, ensure_ascii=False, indent=1))
-        elif not procesar(f['public_id'], p):
+        elif not procesar(f['public_id'], p, int((re.search(r'reintento (\d+)', f.get('nota') or '') or [0, 0])[1])):
             continue  # reclamación perdida: no consume el límite
         hechas += 1
         if hechas >= MAXIMO:
