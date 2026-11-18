@@ -106,7 +106,7 @@ jobs:
       - name: Instalar Playwright (fuera del package.json de la tienda)
         run: |
           # Paquete aparte con su propio lockfile (qa/navegador): versión e integridad fijadas.
-          npm ci --prefix qa/navegador --no-audit --no-fund
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
           ln -s qa/navegador/node_modules node_modules
           qa/navegador/node_modules/.bin/playwright install --with-deps chromium firefox webkit
       - run: node qa/navegadores.mjs "$BASE" qa/urls-navegadores.txt
