@@ -42,10 +42,24 @@ const sinEtiquetas = (s) => s.replace(/<[^>]+>/g, ' ');
 // Restos de un razonamiento en vez de la traducción: «X -> Y», «por ejemplo», «Entonces:».
 const NO_FINAL = /->|\bpor ejemplo\b|\bEntonces:|\bo bien\b/i;
 
-/** Una traducción lista para publicar: sin instrucciones, sin alargarse y con las mismas etiquetas. */
+// Importe en euros con su multiplicador: «1.250,50 €», «40 €», «4,2 mil millones de €».
+const IMPORTE_EUROS = /(\d[\d.]*(?:,\d+)?)\s?(?:(mil millones de|millones de|mil)\s)?€/g;
+
+/** Importes en euros de un texto, normalizados («1.250 €» y «1250 €» son el mismo) y ordenados. */
+function importes(texto) {
+  return [...aEuros(texto).matchAll(IMPORTE_EUROS)]
+    .map(([, n, mult]) => `${n.replaceAll('.', '').replace(',', '.')}${mult ? ` ${mult}` : ''}`)
+    .sort();
+}
+
+/**
+ * Una traducción lista para publicar: sin instrucciones, sin alargarse, con las mismas
+ * etiquetas y los mismos importes (en $, £ o € en el original; teléfonos y horas sí cambian).
+ */
 export function esFinal(original, v) {
   if (NO_FINAL.test(v) && !NO_FINAL.test(original)) return false;
   if (v.length > original.length * 3 + 40) return false;
+  if (importes(original).join('|') !== importes(v).join('|')) return false;
   return etiquetas(v) === etiquetas(original) && !problemas(sinEtiquetas(v)).length;
 }
 
@@ -186,14 +200,28 @@ async function ia({ tok, acc }, contexto, pedido) {
   return JSON.parse(texto.slice(texto.indexOf('{'), texto.lastIndexOf('}') + 1));
 }
 
-/** Puntos de una página que el vigilante marca: [{texto, poner(nuevo)}]. */
+/**
+ * Puntos de una página que el vigilante marca: [{texto, poner(nuevo)}]. Los atributos van
+ * al final: una frase entera reescribe su HTML y después se traducen los atributos de sus
+ * elementos (buscados por posición dentro de la frase, que conserva las mismas etiquetas).
+ */
 export function marcados($) {
   const out = [];
+  const attrs = [];
   const enteros = new Set();
   $('body *, title').each((_, el) => {
     if ($(el).closest(OMITIR).length) return;
-    // Dentro de una frase que ya va entera (con sus etiquetas) no se toca nada más.
-    if ($(el).parents().toArray().some((p) => enteros.has(p))) return;
+    // Dentro de una frase que ya va entera (con sus etiquetas) el texto va con ella, pero
+    // los atributos (title, aria-label…) de sus elementos se revisan igual.
+    const grupo = $(el).parents().toArray().find((p) => enteros.has(p));
+    if (grupo) {
+      const k = $(grupo).find('*').index(el);
+      for (const a of atributos($, el)) {
+        const v = $(el).attr(a);
+        if (v && problemas(v).length) attrs.push({ texto: v.trim(), poner: (nuevo) => $(grupo).find('*').eq(k).attr(a, nuevo) });
+      }
+      return;
+    }
     const partido = $(el).children().length > 0 && soloEnLinea(el);
     const frase = partido ? limpiar(sinEtiquetas($(el).html() ?? '')) : '';
     if (frase && problemas(frase).length) {
@@ -208,10 +236,10 @@ export function marcados($) {
     }
     for (const a of atributos($, el)) {
       const v = $(el).attr(a);
-      if (v && problemas(v).length) out.push({ texto: v.trim(), poner: (nuevo) => $(el).attr(a, nuevo) });
+      if (v && problemas(v).length) attrs.push({ texto: v.trim(), poner: (nuevo) => $(el).attr(a, nuevo) });
     }
   });
-  return out;
+  return [...out, ...attrs];
 }
 
 async function main() {

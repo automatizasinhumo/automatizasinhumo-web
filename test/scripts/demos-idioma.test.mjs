@@ -68,6 +68,15 @@ describe('localizador', () => {
     expect(esFinal('Travel <span>and</span> Stay', 'Viaje y alojamiento')).toBe(false);
   });
 
+  it('rechaza traducciones que cambian un importe; acepta el formato español y otros números', () => {
+    expect(esFinal('Travel and Stay 40 €', 'Viaje y alojamiento 400 €')).toBe(false);
+    expect(esFinal('Travel and Stay 40 €', 'Viaje y alojamiento 40 €')).toBe(true);
+    expect(esFinal('Total 1250 €', 'Total: 1.250 €')).toBe(true);
+    expect(esFinal('Rooms from $1,250.50', 'Habitaciones desde 1250,50 €')).toBe(true);
+    expect(esFinal('Rooms from $1,250.50', 'Habitaciones desde 1250 €')).toBe(false);
+    expect(esFinal('Call 555-0100 from 9am to 5pm', 'Llama al 912 345 678 de 9:00 a 17:00')).toBe(true);
+  });
+
   it('la caché solo guarda traducciones finales', () => {
     const cache = JSON.parse(readFileSync(new URL('../../manual/demos/localizaciones-cache.json', import.meta.url), 'utf8'));
     const malas = Object.entries(cache).filter(([o, v]) => /->|\bpor ejemplo\b|\bEntonces:/i.test(v) && !/->/.test(o));
@@ -85,5 +94,15 @@ describe('localizador', () => {
     expect(textos).not.toContain('Send');
     puntos.find((p) => p.texto.startsWith('Travel')).poner('Viaje <span class="x">y</span> alojamiento');
     expect($('h2').html()).toBe('Viaje <span class="x">y</span> alojamiento');
+  });
+
+  it('dentro de una frase entera revisa también los atributos de sus elementos', () => {
+    const $ = load('<html><body><h2>Travel <span title="Book your stay now">and</span> Stay</h2></body></html>');
+    const puntos = marcados($);
+    const textos = puntos.map((p) => p.texto);
+    expect(textos).toEqual(['Travel <span title="Book your stay now">and</span> Stay', 'Book your stay now']);
+    const trad = { [textos[0]]: 'Viaje <span title="Book your stay now">y</span> alojamiento', 'Book your stay now': 'Reserva ya tu estancia' };
+    for (const p of puntos) p.poner(trad[p.texto]);
+    expect($('h2').html()).toBe('Viaje <span title="Reserva ya tu estancia">y</span> alojamiento');
   });
 });
