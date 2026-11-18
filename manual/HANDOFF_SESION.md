@@ -53,6 +53,7 @@
   - **Nunca** usar `git reset` ni `git checkout` en ese worktree.
 
 ## Reglas del proyecto
+- **Norma de trabajo** (`.github/copilot-instructions.md`, cargada también en `CLAUDE.md`): ante cualquier fallo, hueco o necesidad, se busca un repo público que ya funcione, se clona, se adapta, se prueba y se sube por PR. Si no encaja, se usa otro repo; no se desarrolla desde cero ni se parchea.
 - **Repos**:
   - No tocar `davidpd89/saas-automation-lab` (producción).
   - `C:\GIT\new-website` es de solo lectura.
