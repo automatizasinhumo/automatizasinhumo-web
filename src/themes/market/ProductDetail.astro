@@ -95,7 +95,7 @@ const { model, purchase } = Astro.props;
           class="mt-2 inline-block px-2 py-1 text-[11px] font-bold uppercase tracking-wide"
           style="background:#e6f4ea;color:var(--market-stock-in)"
         >
-          In stock
+          Disponible
         </p>
       )
     }
@@ -120,7 +120,7 @@ const { model, purchase } = Astro.props;
     model.descriptionHtml && (
       <section class="lg:order-2">
         <h2 class="mb-2 text-xs font-bold uppercase tracking-wider text-[color:var(--market-muted)]">
-          Details
+          Detalles
         </h2>
         <div class="markdown-content text-sm leading-relaxed" set:html={model.descriptionHtml} />
       </section>
@@ -134,7 +134,7 @@ const { model, purchase } = Astro.props;
   model.related.length > 0 && (
     <section class="mt-8 border-t border-line pt-6">
       <h2 class="mb-3 text-xs font-bold uppercase tracking-wider text-[color:var(--market-muted)]">
-        Related
+        También te puede interesar
       </h2>
       <ul class="-mx-4 grid grid-cols-2 gap-px border-y border-line bg-line sm:grid-cols-4">
         {model.related.map((card, i) => (

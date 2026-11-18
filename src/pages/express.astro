@@ -58,8 +58,11 @@ if (isBuyNow && productPublicId) {
       ? (variants.find((v) => v.public_id === variantPublicId) ?? null)
       : null;
   if (variants.length > 0 && !variant) {
+    const option = product.variant_label
+      ? `Selecciona una opción (${product.variant_label}).`
+      : 'Selecciona una opción.';
     return Astro.redirect(
-      `/products/${product.slug}?error=${encodeURIComponent(`Please choose a ${product.variant_label || 'option'}.`)}`,
+      `/products/${product.slug}?error=${encodeURIComponent(option)}`,
       303,
     );
   }
@@ -99,7 +102,7 @@ if (isBuyNow && productPublicId) {
   if (short) {
     return Astro.redirect(
       `/cart?error=${encodeURIComponent(
-        'Some items are no longer available in the quantity you selected. Please review your cart.',
+        'Algunos artículos ya no están disponibles en la cantidad seleccionada. Revisa el carrito.',
       )}`,
       303,
     );
@@ -132,18 +135,21 @@ const destination = stripeDestination(
   Astro.request.headers.get('cf-ipcountry'),
 );
 
-const heading = isBuyNow ? 'Buy now' : 'Checkout';
+const heading = isBuyNow ? 'Contratar ahora' : 'Finalizar compra';
 const METHOD: Record<string, { label: string; hint: string }> = {
-  stripe: { label: 'Pay with card', hint: 'Visa, Mastercard, Apple Pay & more' },
-  lightning: { label: 'Pay with Lightning ⚡', hint: 'Instant — from any Lightning wallet' },
-  opennode: { label: 'Pay with Bitcoin', hint: 'On-chain or Lightning (OpenNode)' },
-  demo: { label: 'Demo checkout', hint: 'Simulated — places a real test order, no charge' },
+  stripe: { label: 'Pagar con tarjeta', hint: 'Visa, Mastercard, Apple Pay y otros medios' },
+  lightning: { label: 'Pagar con Lightning ⚡', hint: 'Al instante, desde cualquier cartera Lightning' },
+  opennode: { label: 'Pagar con Bitcoin', hint: 'En cadena o Lightning (OpenNode)' },
+  demo: {
+    label: 'Pago de prueba (sin cargo)',
+    hint: 'Simulado: se crea un pedido real de prueba, sin cobrar nada.',
+  },
 };
 ---
 
 <Layout title="Pago rápido" description="Pago rápido.">
   <div class="mx-auto max-w-md">
-    <p class="text-xs uppercase tracking-[0.25em] text-muted">Express checkout</p>
+    <p class="text-xs uppercase tracking-[0.25em] text-muted">Pago rápido</p>
     <h1 class="mt-2 mb-6 font-serif text-3xl tracking-tight sm:text-4xl">{heading}</h1>
 
     <ul class="divide-y divide-line border-y border-line">
@@ -159,7 +165,7 @@ const METHOD: Record<string, { label: string; hint: string }> = {
             />
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium">{l.name}</p>
-              <p class="text-xs text-muted">Qty {l.qty}</p>
+              <p class="text-xs text-muted">Cantidad {l.qty}</p>
             </div>
             <span class="tabular-nums">{formatPrice(l.unitPriceCents * l.qty)}</span>
           </li>
@@ -188,7 +194,7 @@ const METHOD: Record<string, { label: string; hint: string }> = {
                 zone — possibly the very country the Stripe filter removed. */}
             {m === 'stripe' && destination.showSelect && (
               <label class="mb-2 flex items-center justify-between gap-2 text-xs uppercase tracking-widest text-muted">
-                Ship to
+                Enviar a
                 <select
                   name="country"
                   class="rounded-md border border-line px-2 py-1.5 text-sm normal-case tracking-normal text-ink"
@@ -231,7 +237,7 @@ const METHOD: Record<string, { label: string; hint: string }> = {
       href={backHref}
       class="mt-6 inline-block text-xs uppercase tracking-widest text-faint hover:text-brand"
     >
-      &larr; Back
+      &larr; Volver
     </a>
   </div>
 </Layout>

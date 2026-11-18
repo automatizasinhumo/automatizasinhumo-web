@@ -206,7 +206,7 @@ if (submitted) {
   if (!addr.line1) errors.push('La dirección es obligatoria.');
   if (!addr.city) errors.push('La ciudad es obligatoria.');
   if (!addr.postal) errors.push('El código postal es obligatorio.');
-  if (addr.country.length !== 2) errors.push('Use a 2-letter country code (e.g. US).');
+  if (addr.country.length !== 2) errors.push('El código del país debe tener dos letras (por ejemplo, ES).');
 
   if (errors.length === 0) {
     const quote = quoteShipping(effectiveShipping, {
@@ -233,10 +233,10 @@ if (submitted) {
           }),
         );
         errors.push(
-          `We can't calculate shipping for ${quote.missingWeight.map((m) => m.name).join(', ')} right now. Please contact us to complete this order.`,
+          `No podemos calcular ahora el envío de ${quote.missingWeight.map((m) => m.name).join(', ')}. Contacta con nosotros para completar el pedido.`,
         );
       } else if (overweight) {
-        errors.push('This order is too heavy for the available shipping services.');
+        errors.push('El pedido supera el peso admitido por las opciones de envío disponibles.');
       } else {
         errors.push(`Lo sentimos, aún no enviamos a ${addr.country}.`);
       }
@@ -270,7 +270,7 @@ if (submitted) {
           );
           if (!reserved) {
             await deleteGuestAccessIfUnsettled(env.DB, publicId);
-            errors.push('Some inventory just sold out — please review your cart.');
+            errors.push('Algunos productos se han agotado. Revisa el carrito.');
           } else {
             const shippingAddress = {
               name: addr.name,
@@ -347,7 +347,7 @@ if (submitted) {
               );
               errors.push(
                 rail === 'lightning'
-                  ? 'Lightning is temporarily unavailable. Please try again in a moment, or choose another payment method.'
+                  ? 'Lightning no está disponible temporalmente. Vuelve a intentarlo dentro de un momento o elige otro método de pago.'
                   : 'Ese método de pago no está disponible ahora mismo. Inténtalo en un momento o elige otro.',
               );
             }
@@ -367,7 +367,7 @@ const hasErrors = errors.length > 0;
     {
       rail === 'demo' && (
         <div class="mb-6 rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-4 text-center text-amber-900">
-          <p class="text-base font-bold uppercase tracking-wide">⚠️ Pago de prueba: no se cobra nada</p>
+          <p class="text-base font-bold uppercase tracking-wide">⚠️ Esta compra es una prueba: no se te cobrará nada.</p>
           <p class="mt-1 text-sm">
             No se cobra ninguna tarjeta. Al completarlo se crea un pedido real marcado como
             <code class="rounded bg-amber-100 px-1">demo</code> para que veas el flujo completo.
@@ -377,7 +377,7 @@ const hasErrors = errors.length > 0;
     }
     <h1 class="mb-1 font-serif text-3xl tracking-tight sm:text-4xl">Finalizar compra</h1>
     <p class="mb-6 text-sm text-muted">
-      Subtotal {formatPrice(subtotalCents, currency)} · {lines.length} item{lines.length === 1 ? '' : 's'}
+      Subtotal del pedido: {formatPrice(subtotalCents, currency)} · {lines.length} artículo{lines.length === 1 ? '' : 's'}
     </p>
 
     {
@@ -428,7 +428,7 @@ const hasErrors = errors.length > 0;
                   {o.label}
                 </span>
                 <span class="text-muted">
-                  {o.amountCents === 0 ? 'Free' : formatPrice(o.amountCents, currency)} · total{' '}
+                  {o.amountCents === 0 ? 'Gratis' : formatPrice(o.amountCents, currency)} · importe{' '}
                   {formatPrice(subtotalCents + o.amountCents, currency)}
                 </span>
               </label>
@@ -451,7 +451,7 @@ const hasErrors = errors.length > 0;
             <input type="hidden" name="extra" value={id} />
           ))}
           <label class="block text-sm">
-            <span class="mb-1 block font-medium">Email</span>
+            <span class="mb-1 block font-medium">Correo electrónico</span>
             <input
               type="email"
               name="email"
@@ -507,7 +507,7 @@ const hasErrors = errors.length > 0;
           </div>
           {
             knownCountries.length > 0 && (
-              <p class="text-xs text-faint">Ships to: {knownCountries.join(', ')}</p>
+              <p class="text-xs text-faint">Enviamos a: {knownCountries.join(', ')}</p>
             )
           }
           <button
