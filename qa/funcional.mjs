@@ -34,7 +34,8 @@ export async function revisarPagina(ctx, url, { ancho, captura, comprobados } = 
     const r = await pg.goto(url, { waitUntil: 'load', timeout: 45000 });
     if (!r || r.status() >= 400) problemas.push(`HTTP ${r?.status()}`);
     await pg.waitForTimeout(800);
-    await cargarDiferidas(pg);
+    const pendientes = await cargarDiferidas(pg);
+    for (const s of pendientes.slice(0, 5)) problemas.push('imagen sin terminar de cargar en 10 s: ' + s.slice(0, 150));
     // Imágenes que el navegador no pudo pintar (también las de CSS en línea que fallan arriba).
     const rotas = await pg.$$eval('img', (is) => is.filter((i) => i.complete && i.currentSrc && i.naturalWidth === 0).map((i) => i.currentSrc));
     for (const s of rotas.slice(0, 5)) problemas.push('imagen rota: ' + s.slice(0, 150));
@@ -55,11 +56,12 @@ export async function revisarPagina(ctx, url, { ancho, captura, comprobados } = 
 
 /**
  * Fuerza la carga de las imágenes diferidas (loading="lazy" o por IntersectionObserver):
- * recorre la página hasta abajo y espera a la red, para que una imagen rota bajo el
- * pliegue también se vea. Vuelve arriba para la captura.
+ * recorre la página hasta abajo y espera a que cada imagen termine (carga o error), para
+ * que una imagen rota bajo el pliegue también se vea. Vuelve arriba para la captura.
+ * Devuelve las que siguen sin terminar pasado el límite (no se da por buena la página).
  */
-async function cargarDiferidas(pg) {
-  await pg.evaluate(async () => {
+async function cargarDiferidas(pg, limiteMs = 10000) {
+  return pg.evaluate(async (limite) => {
     for (const i of document.querySelectorAll('img[loading="lazy"]')) i.loading = 'eager';
     const paso = Math.max(200, window.innerHeight * 0.8);
     for (let y = 0, n = 0; y < document.documentElement.scrollHeight && n < 60; y += paso, n++) {
@@ -67,12 +69,17 @@ async function cargarDiferidas(pg) {
       await new Promise((r) => setTimeout(r, 60));
     }
     window.scrollTo(0, 0);
-  });
-  await pg.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+    // networkidle no sirve: puede haberse alcanzado antes de activar estas cargas.
+    const abiertas = () => [...document.images].filter((i) => (i.currentSrc || i.getAttribute('src')) && !i.complete);
+    const fin = Date.now() + limite;
+    while (abiertas().length && Date.now() < fin) await new Promise((r) => setTimeout(r, 100));
+    return abiertas().map((i) => i.currentSrc || i.getAttribute('src'));
+  }, limiteMs);
 }
 
 /**
- * ¿Hay un manejador «submit» para el formulario nº `k` (en él, en document o en window)?
+ * ¿Hay un manejador «submit» para el formulario nº `k`? El evento sube por todos sus
+ * ancestros hasta document y window, así que se mira en cada uno.
  * Solo Chromium expone los listeners (CDP); en otros motores devuelve null (no se sabe).
  */
 async function tieneSubmitJs(pg, k) {
@@ -83,7 +90,15 @@ async function tieneSubmitJs(pg, k) {
     return null;
   }
   try {
-    for (const expr of [`document.querySelectorAll('form')[${k}]`, 'document', 'window']) {
+    const nodo = (d) => `(() => { let e = document.querySelectorAll('form')[${k}]; for (let i = 0; i < ${d} && e; i++) e = e.parentNode; return e; })()`;
+    // El formulario, sus ancestros (parentNode de <html> es document) y por último window.
+    for (let d = 0; d < 200; d++) {
+      const { result } = await cdp.send('Runtime.evaluate', { expression: nodo(d) });
+      if (!result.objectId) break;
+      const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
+      if (listeners.some((l) => l.type === 'submit')) return true;
+    }
+    for (const expr of ['window']) {
       const { result } = await cdp.send('Runtime.evaluate', { expression: expr });
       if (!result.objectId) continue;
       const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
