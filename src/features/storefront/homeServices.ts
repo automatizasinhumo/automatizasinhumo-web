@@ -28,26 +28,28 @@ export interface HomeServiceOptions {
   currency: string;
   imageBaseUrl: string;
   delivery?: ImageDelivery;
-  /** Se llama si falla la carga de algún destacado (p. ej. para no cachear la portada parcial). */
-  onFailure?: () => void;
 }
 
 export async function loadHomeServices(
   db: D1Database,
   options: HomeServiceOptions,
-): Promise<HomeService[]> {
+): Promise<{ services: HomeService[]; failed: boolean }> {
+  let failed = false;
   const services: (HomeService | null)[] = await Promise.all(
     FEATURED_SERVICES.map(({ slug, need }) =>
       loadHomeService(db, options, slug, need).catch((error: unknown) => {
         // Un destacado que falla no tumba los demás ni la portada.
         console.error(`Home service ${slug} failed to load:`, error);
-        options.onFailure?.();
+        failed = true;
         return null;
       }),
     ),
   );
 
-  return services.filter((service): service is HomeService => service !== null);
+  return {
+    services: services.filter((service): service is HomeService => service !== null),
+    failed,
+  };
 }
 
 async function loadHomeService(
@@ -59,11 +61,12 @@ async function loadHomeService(
   const product = await getProductBySlug(db, slug);
   if (!product || !product.active) return null;
 
-  const [variants] = await Promise.all([listVariants(db, product.id)]);
+  const variants = await listVariants(db, product.id);
   const card = buildProductCard(product, {
     currency: options.currency,
     baseUrl: options.imageBaseUrl,
     delivery: options.delivery,
+    sizes: '(max-width: 767px) 100vw, 33vw',
     maxPriceCents:
       variants.length > 0
         ? Math.max(...variants.map((variant) => variant.price_cents))

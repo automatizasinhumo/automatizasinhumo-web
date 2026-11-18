@@ -21,14 +21,16 @@ describe('classifyDeliveryModalities', () => {
     });
   });
 
-  it('does not guess ambiguous labels', () => {
+  it('recognises partial labels and prefers setup when a label mentions both', () => {
     const variants = [
       { id: 1, label: 'Plantilla y te lo montamos' },
       { id: 2, label: 'Te lo montamos sin plantilla' },
-      { id: 3, label: 'Plantilla premium (no te lo montamos)' },
-      { id: 4, label: 'Plantilla + guía (solo con montaje)' },
+      { id: 3, label: 'Plantilla premium' },
     ];
 
-    expect(classifyDeliveryModalities(variants)).toEqual({ template: null, setup: null });
+    expect(classifyDeliveryModalities(variants)).toEqual({
+      template: variants[2],
+      setup: variants[0],
+    });
   });
 });

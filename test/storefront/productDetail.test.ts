@@ -353,6 +353,31 @@ describe('the store-owned product detail', () => {
     expect(html).not.toContain('No. Lo montamos nosotros; tú solo nos das los datos.');
   });
 
+  it.skipIf(!isDefaultTheme)('shows delivery modalities when purchasing is disabled', async () => {
+    const html = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({
+        showAddToCart: false,
+        showBuyNow: false,
+        variants: [
+          {
+            id: 'var_template0001',
+            label: 'Plantilla + guía',
+            formattedPrice: '149 €',
+            priceCents: 14900,
+            soldOut: false,
+            defaultSelected: true,
+            imageAnchor: '',
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain('¿Lo tienes que montar tú?');
+    expect(html).toContain('Sí. Tú la publicas siguiendo la guía paso a paso.');
+    expect(html).not.toContain('<form');
+  });
+
   it('marks low stock without pinning the wording', async () => {
     const without = await render(ProductDetail, { model: detail(), purchase: purchase() });
     const withNudge = await render(ProductDetail, {
