@@ -36,7 +36,10 @@ const hasWebPageProductLink = [
   'web-o-redes-sociales',
 ].includes(post.id);
 const webPageProduct = hasWebPageProductLink
-  ? await getProductBySlug(env.DB, 'web-una-pagina')
+  ? await getProductBySlug(env.DB, 'web-una-pagina').catch((error) => {
+      console.error('blog: no se pudo consultar web-una-pagina en D1', error);
+      return null;
+    })
   : null;
 const webPageLink = hasWebPageProductLink
   ? webPageProduct?.active

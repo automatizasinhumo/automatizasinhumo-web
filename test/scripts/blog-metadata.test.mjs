@@ -9,7 +9,7 @@ const articleFiles = [
 ];
 
 function frontmatterValue(source, key) {
-  const frontmatter = source.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*$/m)?.[1];
+  const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/)?.[1];
   if (!frontmatter) throw new Error('Falta el bloque YAML de metadatos del artículo.');
   const value = parse(frontmatter)?.[key];
   if (typeof value !== 'string' || value.length === 0) {
