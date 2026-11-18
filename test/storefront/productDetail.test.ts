@@ -283,6 +283,42 @@ describe('the store-owned product detail', () => {
     expect(html).toContain('href="/categories/apparel"');
   });
 
+  it('compares delivery modalities only when both are available', async () => {
+    const variants: ProductPurchaseModel['variants'] = [
+      {
+        id: 'var_template0001',
+        label: 'Plantilla + guía (la publicas tú)',
+        formattedPrice: '149 €',
+        priceCents: 14900,
+        soldOut: false,
+        defaultSelected: true,
+        imageAnchor: '',
+      },
+      {
+        id: 'var_setup000001',
+        label: 'Te lo montamos',
+        formattedPrice: '349 €',
+        priceCents: 34900,
+        soldOut: false,
+        defaultSelected: false,
+        imageAnchor: '',
+      },
+    ];
+    const comparable = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({ variants }),
+    });
+    const incomplete = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({ variants: variants.slice(0, 1) }),
+    });
+
+    expect(comparable).toContain('Elige cómo quieres recibirlo');
+    expect(comparable).toContain('149 €');
+    expect(comparable).toContain('349 €');
+    expect(incomplete).not.toContain('Elige cómo quieres recibirlo');
+  });
+
   it('marks low stock without pinning the wording', async () => {
     const without = await render(ProductDetail, { model: detail(), purchase: purchase() });
     const withNudge = await render(ProductDetail, {

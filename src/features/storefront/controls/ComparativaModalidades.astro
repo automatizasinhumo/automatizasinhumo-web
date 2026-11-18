@@ -1,0 +1,13 @@
+---
+// Exposes the shared comparison section through the storefront control boundary.
+import ComparativaModalidadesSection from '../sections/ComparativaModalidades.astro';
+import type { StorefrontVariant } from '../models';
+
+interface Props {
+  variants: StorefrontVariant[];
+}
+
+const { variants } = Astro.props;
+---
+
+<ComparativaModalidadesSection variants={variants} />

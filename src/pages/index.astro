@@ -3,7 +3,9 @@ import { env } from 'cloudflare:workers';
 import Layout from '../layouts/Layout.astro';
 import ProductList from '../features/products/ProductList.astro';
 import HomeHero from '../features/storefront/HomeHero.astro';
+import { loadHomeServices } from '../features/storefront/homeServices';
 import { resolveHomePath } from '../features/settings/home';
+import { getConfig } from '../config';
 
 // A store can point `/` at a page or a single product instead of the catalog.
 // Rewriting rather than duplicating those templates keeps one implementation of
@@ -15,9 +17,17 @@ const homePath = await resolveHomePath(env.DB, Astro.locals.settings?.homePage);
 if (homePath) return Astro.rewrite(homePath);
 // La portada solo en la primera vista del catálogo, no al ordenar ni paginar.
 const showHero = Astro.url.searchParams.size === 0;
+const config = getConfig();
+const homeServices = showHero
+  ? await loadHomeServices(env.DB, {
+      currency: config.currency,
+      imageBaseUrl: config.images.baseUrl,
+      delivery: Astro.locals.settings?.imageDelivery,
+    })
+  : [];
 ---
 
 <Layout>
-  {showHero && <HomeHero />}
+  {showHero && <HomeHero services={homeServices} />}
   <ProductList belowHero={showHero} />
 </Layout>
