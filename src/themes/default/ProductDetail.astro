@@ -4,6 +4,7 @@ import ProductCard from './ProductCard.astro';
 import { REGLA_PLAZOS } from './plazos';
 import ProductGallery from '../../features/storefront/controls/ProductGallery.astro';
 import ProductPurchaseForm from '../../features/storefront/controls/ProductPurchaseForm.astro';
+import ComparativaModalidades from '../../features/storefront/controls/ComparativaModalidades.astro';
 
 /**
  * STORE-OWNED. Edit freely — this file belongs to your store.
@@ -81,13 +82,9 @@ const { model, purchase } = Astro.props;
       )
     }
 
-    {/* ¿Lo puedes montar tú? Respuesta directa antes de las opciones de pago. */}
-    <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-quien-monta>
-      <strong class="text-ink">¿Lo tienes que montar tú?</strong>{' '}
-      {purchase.variants.length >= 2
-        ? 'Tú eliges: «Te lo montamos» (lo dejamos publicado y funcionando) o «Plantilla + guía» (te lo damos preparado con tus datos y lo publicas tú siguiendo la guía).'
-        : 'No. Lo montamos nosotros; tú solo nos das los datos.'}
-    </p>
+    <ComparativaModalidades
+      variants={purchase.variants.filter((variant) => !variant.soldOut)}
+    />
 
     <p class="mt-5 text-sm font-semibold text-ink">Dos formas de empezar: contrátalo directamente, o pruébalo gratis y paga solo si te gusta.</p>
 
