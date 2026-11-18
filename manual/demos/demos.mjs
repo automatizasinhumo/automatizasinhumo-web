@@ -49,6 +49,19 @@ export const EXTRA = {
   'web-arrastrar-soltar': [['editor-bloques', 'Editor de bloques: pruébalo en el navegador']],
 };
 
+// Portadas de catálogo del autor que se sustituyen por un índice propio (/* = cada subcarpeta).
+export const CATALOGOS = ['plantillas-negocio', 'plantillas-negocio/*', 'plantillas-eventos', 'plantillas-eventos/templates', 'plantillas-bootstrap'];
+
+// Nombres en español para los índices: los de EXTRA y las categorías de las colecciones.
+export const TITULOS = {
+  'admin-dashboard': 'Paneles de gestión', business: 'Empresas y servicios profesionales', ecommerce: 'Tiendas online',
+  education: 'Formación y academias', 'events-community': 'Eventos y comunidad', 'health-fitness': 'Salud, belleza y deporte',
+  'landing-pages': 'Páginas de presentación', 'local-services': 'Servicios locales', portfolio: 'Portfolios y profesionales',
+  'real-estate-travel': 'Inmobiliaria y turismo', restaurant: 'Restaurantes y hostelería', 'saas-landing': 'Software y aplicaciones',
+  templates: 'Plantillas de eventos',
+  ...Object.fromEntries(Object.values(EXTRA).flat().map(([ruta, t]) => [ruta.split('/').pop(), t])),
+};
+
 // tipo: 'interactiva' (se usa) | 'diseno' (se mira). La raíz de la ruta decide.
 const tipo = (path) => (INTERACTIVAS.has(path.split('/')[0]) ? 'interactiva' : 'diseno');
 export function demosDe(slugProducto) {

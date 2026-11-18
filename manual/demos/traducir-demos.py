@@ -18,7 +18,7 @@ OMITIR_RUTAS = ('editor-bloques/resources/', 'editor-bloques/libs/', 'node_modul
 OMITIR_TAGS = {'script', 'style', 'code', 'pre', 'svg', 'math', 'template', 'textarea'}
 ATRIBUTOS = ('alt', 'title', 'placeholder', 'aria-label')
 LETRAS = re.compile(r'[A-Za-z]{2,}')
-YA_ES = re.compile(r'[áéíóúñ¿¡ÁÉÍÓÚÑ]')  # traducido a mano (traducciones.mjs) o propio
+YA_ES = re.compile(r'[áéíóúñ¿¡ÁÉÍÓÚÑ]|Automatiza sin humo')  # traducido a mano, propio o con la marca (Argos la vuelve «humor»)
 
 cache = json.loads(CACHE.read_text(encoding='utf-8')) if CACHE.exists() else {}
 _motor = None
