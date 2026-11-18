@@ -164,15 +164,19 @@ describe('the store-owned header', () => {
   it('opens search in place on narrow screens, without JavaScript', async () => {
     const html = await render(Header, buildShellModel(input({ searchQuery: 'boda' })));
 
-    // A native disclosure: <summary> is the button, and its name is «Buscar».
-    const disclosure = html.match(/<details[^>]*data-search-disclosure[\s\S]*?<\/details>/)?.[0] ?? '';
-    expect(disclosure).toContain('<summary');
-    expect(disclosure).toMatch(/<summary[\s\S]*Buscar[\s\S]*<\/summary>/);
-    // Inside it, the same real GET form: Enter goes to /search?q= with scripts blocked.
-    expect(disclosure).toContain('method="GET"');
-    expect(disclosure).toContain('action="/search"');
-    expect(disclosure).toContain('name="q"');
-    expect(disclosure).toContain('value="boda"');
+    // Either the theme keeps its search form visible at every width (market), or
+    // narrow screens get a native disclosure: <summary> is the button, named «Buscar».
+    const disclosure = html.match(/<details[^>]*data-search-disclosure[\s\S]*?<\/details>/)?.[0];
+    const forms = html.match(/<form\b[^>]*action="\/search"[\s\S]*?<\/form>/g) ?? [];
+    const visibleForm = forms.find((f) => !/^<form\b[^>]*class="[^"]*\bhidden\b/.test(f));
+    const search = disclosure ?? visibleForm ?? '';
+    if (disclosure) expect(disclosure).toMatch(/<summary[\s\S]*Buscar[\s\S]*<\/summary>/);
+    else expect(html).not.toMatch(/<[^>]*class="[^"]*\bhidden sm:[^"]*"[^>]*>\s*<form\b[^>]*action="\/search"/);
+    // The same real GET form: Enter goes to /search?q= with scripts blocked.
+    expect(search).toContain('method="GET"');
+    expect(search).toContain('action="/search"');
+    expect(search).toContain('name="q"');
+    expect(search).toContain('value="boda"');
     // No longer a plain link that makes mobile users load /search first.
     expect(html).not.toMatch(/<a [^>]*href="\/search"[^>]*>\s*Buscar\s*<\/a>/);
   });
