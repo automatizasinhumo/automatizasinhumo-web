@@ -10,6 +10,9 @@ export function createResendEmail(
   from: { email: string; name: string },
 ): EmailProvider {
   const fromHeader = from.name ? `${from.name} <${from.email}>` : from.email;
+  // Con tope: un fetch colgado no puede bloquear a quien envía (el cron, que
+  // después tiene más trabajos). Muy por debajo de RESERVA_CADUCA (15 min).
+  const LIMITE_MS = 15_000;
   return {
     async send(msg: EmailMessage): Promise<void> {
       const res = await fetch('https://api.resend.com/emails', {
@@ -21,6 +24,7 @@ export function createResendEmail(
           // already-delivered send becomes a no-op instead of a duplicate.
           ...(msg.idempotencyKey ? { 'idempotency-key': msg.idempotencyKey } : {}),
         },
+        signal: AbortSignal.timeout(LIMITE_MS),
         body: JSON.stringify({
           from: fromHeader,
           to: [msg.to],
