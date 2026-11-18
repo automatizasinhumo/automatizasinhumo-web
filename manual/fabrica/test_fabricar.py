@@ -248,6 +248,18 @@ class BloqueoDePublicacion(unittest.TestCase):
     def test_la_marca_dentro_de_otra_palabra_no_bloquea(self):
         self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Aumentamos el volumen de tu cabello</p>', 'Lumen', 'Ana'), [])
 
+    def test_la_marca_unida_con_guion_bajo_bloquea(self):
+        self.assertEqual(modulo_fabricar.restos_de_plantilla('<img alt="ESTUDIO_LUMEN">', 'Lumen', 'Ana'),
+                         ['marca de la plantilla'])
+
+    def test_un_texto_devuelto_tal_cual_se_reintenta(self):
+        textos = [{'texto': 'Bienvenido a nuestro estudio creativo'}]
+        respuestas = iter(['{"0": "Bienvenido a nuestro estudio creativo"}', '{"0": "Bienvenida a la peluquería de Ana"}'])
+        with patch.object(modulo_fabricar, 'ia', side_effect=lambda *a: next(respuestas)), \
+                patch.object(modulo_fabricar, 'validar_respuesta', side_effect=lambda d: d):
+            salida = modulo_fabricar.reescribir(textos, pedido(), ('t', 'a'))
+        self.assertEqual(salida, {'0': 'Bienvenida a la peluquería de Ana'})
+
     def test_la_marca_suelta_bloquea_aunque_el_nombre_la_contenga(self):
         self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Lumen Ana</p><p>ESTUDIO LUMEN</p>', 'Lumen', 'Lumen Ana'),
                          ['marca de la plantilla'])

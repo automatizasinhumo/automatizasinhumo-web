@@ -122,7 +122,9 @@ def reescribir(textos, p, cred):
                 nuevo = validar_respuesta(json.loads(r[r.index('{'): r.rindex('}') + 1]))
                 for k in [k for k in pend if k in nuevo]:
                     salida[k] = nuevo[k]
-                    del pend[k]
+                    # Devuelto tal cual: se guarda, pero sigue pendiente para otro intento.
+                    if ' '.join(nuevo[k].split()) != ' '.join(pend[k]['texto'].split()):
+                        del pend[k]
             except Exception as e:  # noqa: BLE001 — lo que no se adapte conserva el texto de la plantilla
                 print('  lote', i // LOTE, 'intento', intento + 1, type(e).__name__)
         print(f'  textos {min(i + LOTE, len(textos))}/{len(textos)} (sin adaptar: {len(pend)})', flush=True)
@@ -239,8 +241,8 @@ def restos_de_plantilla(html, marca, nombre):
     # El nombre del cliente puede contener la marca («Lumen Ana»): se quitan sus apariciones
     # y se busca la marca en lo que queda.
     resto = re.sub(re.escape(nombre), ' ', visible, flags=re.I) if nombre else visible
-    # Palabra entera: con la marca «Lumen», «volumen» no es un resto de la plantilla.
-    if marca and len(marca) >= 3 and re.search(rf'(?<!\w){re.escape(marca)}(?!\w)', resto, re.I):
+    # Palabra entera: con la marca «Lumen», «volumen» no es un resto; «ESTUDIO_LUMEN» sí (el _ separa).
+    if marca and len(marca) >= 3 and re.search(rf'(?<![^\W_]){re.escape(marca)}(?![^\W_])', resto, re.I):
         restos.append('marca de la plantilla')
     if RESTOS.search(visible):
         restos.append('texto de relleno')
