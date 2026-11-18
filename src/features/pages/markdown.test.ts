@@ -252,6 +252,10 @@ describe('markdownExcerpt', () => {
 });
 
 describe('markdownFirstParagraphExcerpt', () => {
+  it('keeps the space at a line break inside the paragraph', () => {
+    expect(markdownFirstParagraphExcerpt('Se entrega\npublicada.')).toBe('Se entrega publicada.');
+  });
+
   it('uses the first paragraph without adding later headings or sections', () => {
     expect(
       markdownFirstParagraphExcerpt(

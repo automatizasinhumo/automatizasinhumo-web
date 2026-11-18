@@ -157,8 +157,8 @@ function excerptFromTokens(tokens: Token[], maxLength: number): string {
     .filter((token) => token.type === 'inline')
     .map((token) =>
       (token.children ?? [])
-        .filter((child) => child.type === 'text' || child.type === 'code_inline')
-        .map((child) => child.content)
+        .filter((child) => child.type === 'text' || child.type === 'code_inline' || child.type.endsWith('break'))
+        .map((child) => (child.type.endsWith('break') ? ' ' : child.content))
         .join(''),
     )
     .join(' ')

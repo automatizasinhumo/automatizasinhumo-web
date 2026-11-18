@@ -28,6 +28,8 @@ if (showHero) {
     });
   } catch (error) {
     console.error('Home services failed to load:', error);
+    // Portada sin destacados: que ninguna caché compartida la guarde.
+    Astro.response.headers.set('cache-control', 'no-store');
   }
 }
 ---

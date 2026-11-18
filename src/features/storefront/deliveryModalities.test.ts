@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { classifyDeliveryModalities } from './deliveryModalities';
 
 describe('classifyDeliveryModalities', () => {
-  it('uses distinct variants for the template and setup modalities', () => {
+  it('recognises the two catalogue labels', () => {
     const variants = [
-      { id: 'one', label: 'Plantilla y te lo montamos' },
+      { id: 'one', label: 'Plantilla + guía (la publicas tú)' },
       { id: 'two', label: 'Te lo montamos' },
     ];
 
@@ -19,5 +19,15 @@ describe('classifyDeliveryModalities', () => {
       template: { id: 1, label: 'Plantilla + guía' },
       setup: null,
     });
+  });
+
+  it('does not guess ambiguous labels', () => {
+    const variants = [
+      { id: 1, label: 'Plantilla y te lo montamos' },
+      { id: 2, label: 'Te lo montamos sin plantilla' },
+      { id: 3, label: 'Plantilla premium (no te lo montamos)' },
+    ];
+
+    expect(classifyDeliveryModalities(variants)).toEqual({ template: null, setup: null });
   });
 });

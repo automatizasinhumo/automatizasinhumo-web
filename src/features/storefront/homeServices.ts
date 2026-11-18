@@ -35,35 +35,48 @@ export async function loadHomeServices(
   options: HomeServiceOptions,
 ): Promise<HomeService[]> {
   const services: (HomeService | null)[] = await Promise.all(
-    FEATURED_SERVICES.map(async ({ slug, need }) => {
-      const product = await getProductBySlug(db, slug);
-      if (!product || !product.active) return null;
-
-      const [variants] = await Promise.all([listVariants(db, product.id)]);
-      const card = buildProductCard(product, {
-        currency: options.currency,
-        baseUrl: options.imageBaseUrl,
-        delivery: options.delivery,
-        maxPriceCents:
-          variants.length > 0
-            ? Math.max(...variants.map((variant) => variant.price_cents))
-            : undefined,
-      });
-      const { template, setup } = classifyDeliveryModalities(variants);
-
-      return {
-        need,
-        name: card.name,
-        href: card.href,
-        description: product.description
-          ? markdownFirstParagraphExcerpt(product.description, 150)
-          : '',
-        image: card.image,
-        templatePrice: template ? formatMoney(template.price_cents, options.currency) : null,
-        setupPrice: setup ? formatMoney(setup.price_cents, options.currency) : null,
-      };
-    }),
+    FEATURED_SERVICES.map(({ slug, need }) =>
+      loadHomeService(db, options, slug, need).catch((error: unknown) => {
+        // Un destacado que falla no tumba los demás ni la portada.
+        console.error(`Home service ${slug} failed to load:`, error);
+        return null;
+      }),
+    ),
   );
 
   return services.filter((service): service is HomeService => service !== null);
+}
+
+async function loadHomeService(
+  db: D1Database,
+  options: HomeServiceOptions,
+  slug: string,
+  need: HomeService['need'],
+): Promise<HomeService | null> {
+  const product = await getProductBySlug(db, slug);
+  if (!product || !product.active) return null;
+
+  const [variants] = await Promise.all([listVariants(db, product.id)]);
+  const card = buildProductCard(product, {
+    currency: options.currency,
+    baseUrl: options.imageBaseUrl,
+    delivery: options.delivery,
+    maxPriceCents:
+      variants.length > 0
+        ? Math.max(...variants.map((variant) => variant.price_cents))
+        : undefined,
+  });
+  const { template, setup } = classifyDeliveryModalities(variants);
+
+  return {
+    need,
+    name: card.name,
+    href: card.href,
+    description: product.description
+      ? markdownFirstParagraphExcerpt(product.description, 150)
+      : '',
+    image: card.image,
+    templatePrice: template ? formatMoney(template.price_cents, options.currency) : null,
+    setupPrice: setup ? formatMoney(setup.price_cents, options.currency) : null,
+  };
 }
