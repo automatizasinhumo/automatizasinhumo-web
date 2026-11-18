@@ -61,8 +61,9 @@ def disenos():
 
 def primero(campos, *claves):
     for k, v in campos.items():
+        v = str(v or '').strip()
         if v and any(c in k.lower() for c in claves):
-            return str(v).strip()
+            return v
     return ''
 
 
@@ -70,16 +71,17 @@ def nombre_negocio_evento(campos):
     excluidos = ('contacto', 'persona', 'cliente', 'responsable', 'apellidos')
     for clave, valor in campos.items():
         etiqueta = clave.lower()
+        valor = str(valor or '').strip()  # un valor de solo espacios no tapa el siguiente campo
         if not valor or any(palabra in etiqueta for palabra in excluidos):
             continue
         if etiqueta.strip() in ('evento', 'boda'):
-            return str(valor).strip()
+            return valor
         if 'nombre' in etiqueta and any(palabra in etiqueta for palabra in (
-                'negocio', 'empresa', 'local', 'marca', 'evento', 'boda', 'pareja', 'novio', 'celebración',
-                'celebracion', 'salón', 'salon')):
-            return str(valor).strip()
+                'negocio', 'empresa', 'comercial', 'local', 'marca', 'evento', 'boda', 'pareja', 'novio',
+                'celebración', 'celebracion', 'salón', 'salon')):
+            return valor
         if 'datos de la empresa' in etiqueta or 'nombre del' in etiqueta or 'nombre de la' in etiqueta:
-            return str(valor).strip()
+            return valor
     return ''
 
 

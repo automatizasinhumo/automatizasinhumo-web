@@ -182,6 +182,11 @@ class ContextoDePagina(unittest.TestCase):
             'contacto': 'Contacto Demo',
         }), 'Contacto Demo')
 
+    def test_nombre_de_espacios_no_tapa_el_evento_y_vale_nombre_comercial(self):
+        elegir = VISTAS['nombre_negocio_evento']
+        self.assertEqual(elegir({'Nombre del negocio': '   ', 'evento': 'Boda Demo'}), 'Boda Demo')
+        self.assertEqual(elegir({'Nombre comercial y logo': 'Peluquería Ana'}), 'Peluquería Ana')
+
 
 if __name__ == '__main__':
     unittest.main()
