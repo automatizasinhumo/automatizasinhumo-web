@@ -1,0 +1,12 @@
+{
+  "id": "prueba-fontaneria-lois",
+  "plantilla": "plantillas-negocio/local-services/plumber-home-services",
+  "negocio": "Fontanería Lois",
+  "actividad": "Fontanería y reformas de baño",
+  "ciudad": "Vigo",
+  "telefono": "+34 600 000 000",
+  "email": "hola@fontanerialois.example",
+  "whatsapp": "+34 600 000 000",
+  "descripcion": "Somos dos fontaneros con furgoneta propia. Atendemos urgencias el mismo día en Vigo y alrededores, cambiamos bañeras por platos de ducha y damos presupuesto sin compromiso.",
+  "servicios": ["Urgencias y averías", "Cambio de bañera por plato de ducha", "Calentadores y termos", "Desatascos"]
+}

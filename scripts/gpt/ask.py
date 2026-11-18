@@ -7,7 +7,8 @@ from playwright.sync_api import sync_playwright
 PROJECT = "https://chatgpt.com/g/g-p-6afb191fd7e08191a093ea57adc7d51d/project"
 HERE = os.path.dirname(os.path.abspath(__file__))
 LAST = os.path.join(HERE, "last_chat.txt")
-ASSISTANT = '[data-message-author-role="assistant"], [class*="MarkdownRoot"]'
+# 11/2026: ChatGPT quitó data-message-author-role; cada turno lleva data-content-search-unit-key="…:assistant".
+ASSISTANT = '[data-content-search-unit-key$=":assistant"], [data-message-author-role="assistant"]'
 STOP = 'button[data-testid="stop-button"], button[aria-label*="Detener"], button[aria-label*="Stop"]'
 SEND = 'button[data-testid="send-button"], button[type="submit"][aria-label="Enviar"], button[type="submit"][aria-label*="Send"]'
 
@@ -49,7 +50,10 @@ def main():
                 print("LOGIN_REQUERIDO", pg.url)
                 sys.exit(3)
             before = pg.locator(ASSISTANT).count()
-            pg.locator('[contenteditable="true"]').first.fill(q, timeout=120000)
+            # 11/2026: hay un contenteditable oculto; fill() esperaba a que fuera visible y caducaba.
+            box = pg.locator('[contenteditable="true"]:visible').first
+            box.click(timeout=60000)
+            pg.keyboard.insert_text(q)
             pg.wait_for_timeout(2000)
             send(pg)
             pg.wait_for_timeout(8000)
