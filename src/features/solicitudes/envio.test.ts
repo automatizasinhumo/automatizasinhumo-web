@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { describe, expect, it, vi } from 'vitest';
 import type { D1Database } from '@cloudflare/workers-types';
 import type { EmailProvider } from '../email/provider';
-import { enviarNotificacion, enviarVistasPreviasListas } from './envio';
+import { enviarNotificacion, enviarSeguimientos, enviarVistasPreviasListas } from './envio';
 
 /** D1 mínimo sobre SQLite de Node con las migraciones reales: el SQL se ejecuta de verdad. */
 function d1(): D1Database & { sql: DatabaseSync } {
@@ -245,5 +245,111 @@ describe('enviarNotificacion', () => {
     solicitud(db, 'S-AAAAAA', 'nueva', null);
     const r = await enviarNotificacion(db, null, { id: 'S-AAAAAA', tipo: 'revision', version: 1, email: 'x@y.es', asunto: 'a', texto: 't' });
     expect(r).toEqual({ estado: 'error', error: 'No hay proveedor de correo configurado (Ajustes → Email).' });
+  });
+});
+
+describe('enviarSeguimientos', () => {
+  const T0 = new Date('2026-11-18T10:00:00Z');
+  const dias = (n: number) => new Date(T0.getTime() + n * 24 * 3600 * 1000);
+  const RESENA = 'https://g.page/r/resena';
+  /** Solicitud a la que se envió `tipo` (versión `version`) en T0, en el estado que deja ese correo. */
+  function enviada(db: ReturnType<typeof d1>, id: string, est: string, tipo = 'revision', version = 1, enlace = URL_OK) {
+    if (!db.sql.prepare('SELECT 1 FROM solicitudes WHERE public_id = ?').get(id)) solicitud(db, id, est, null);
+    db.sql
+      .prepare(
+        "INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo, estado_envio, intentos, enviado_at) VALUES (?, ?, ?, 'a', ?, 'enviado', 1, '2026-11-18 10:00:00')",
+      )
+      .run(id, tipo, version, `Hola. Revísalo aquí: ${enlace}\n\nGracias.`);
+  }
+  const tipos = (db: ReturnType<typeof d1>, id: string) =>
+    (db.sql.prepare("SELECT tipo || ':' || version || ':' || estado_envio AS t FROM notificaciones WHERE solicitud_public_id = ? ORDER BY id").all(id) as {
+      t: string;
+    }[]).map((r) => r.t);
+
+  it('recordatorio al día 3 con el enlace de la versión, una sola vez', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    const mail = correo();
+    expect(await enviarSeguimientos(db, mail, dias(2.9), null)).toEqual({ enviadas: [], fallidas: [] });
+    expect(await enviarSeguimientos(db, mail, dias(3), null)).toEqual({ enviadas: ['S-AAAAAA:recordatorio'], fallidas: [] });
+    await enviarSeguimientos(db, mail, dias(4), null);
+    expect(mail.send).toHaveBeenCalledTimes(1);
+    expect((mail.send.mock.calls[0][0 as never] as { text: string }).text).toContain(URL_OK);
+    expect(estado(db, 'S-AAAAAA')).toBe('vista_previa_enviada');
+  });
+
+  it('al día 7 manda la espera y la deja «en espera»; no manda ya el recordatorio', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    const mail = correo();
+    expect((await enviarSeguimientos(db, mail, dias(8), null)).enviadas).toEqual(['S-AAAAAA:espera']);
+    expect(estado(db, 'S-AAAAAA')).toBe('en_espera_cliente');
+    await enviarSeguimientos(db, mail, dias(9), null);
+    expect(tipos(db, 'S-AAAAAA')).toEqual(['revision:1:enviado', 'espera:1:enviado']);
+  });
+
+  it('una versión nueva vuelve a contar desde su envío', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    const mail = correo();
+    await enviarSeguimientos(db, mail, dias(3), null);
+    db.sql.prepare("UPDATE notificaciones SET enviado_at = '2026-11-22 10:00:00' WHERE tipo = 'revision'").run();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada', 'revision', 2, 'https://vista-v2.pages.dev');
+    db.sql.prepare("UPDATE notificaciones SET enviado_at = '2026-11-22 10:00:00' WHERE version = 2").run();
+    expect((await enviarSeguimientos(db, mail, dias(6), null)).enviadas).toEqual([]);
+    expect((await enviarSeguimientos(db, mail, dias(7), null)).enviadas).toEqual(['S-AAAAAA:recordatorio']);
+    expect((mail.send.mock.calls[1][0 as never] as { text: string }).text).toContain('https://vista-v2.pages.dev');
+  });
+
+  it('si el cliente respondió (David la movió) no sale nada', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'cambios_pedidos');
+    enviada(db, 'S-BBBBBB', 'aprobada');
+    const mail = correo();
+    await enviarSeguimientos(db, mail, dias(10), RESENA);
+    expect(mail.send).not.toHaveBeenCalled();
+  });
+
+  it('movida entre la lectura y el envío: ni correo ni cambio de estado', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    const mail = correo();
+    const orig = db.prepare.bind(db);
+    // La lectura ve «vista previa enviada»; justo después David la marca como aprobada.
+    (db as { prepare: unknown }).prepare = (q: string) => {
+      if (q.startsWith('INSERT INTO notificaciones')) db.sql.prepare("UPDATE solicitudes SET estado = 'aprobada'").run();
+      return orig(q);
+    };
+    expect((await enviarSeguimientos(db, mail, dias(8), null)).enviadas).toEqual([]);
+    expect(mail.send).not.toHaveBeenCalled();
+    expect(estado(db, 'S-AAAAAA')).toBe('aprobada');
+  });
+
+  it('reseña a los 7 días de entregar, solo con resena_url', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'entregada', 'entregado');
+    const mail = correo();
+    expect((await enviarSeguimientos(db, mail, dias(30), null)).enviadas).toEqual([]);
+    expect((await enviarSeguimientos(db, mail, dias(6), RESENA)).enviadas).toEqual([]);
+    expect((await enviarSeguimientos(db, mail, dias(7), RESENA)).enviadas).toEqual(['S-AAAAAA:resena']);
+    await enviarSeguimientos(db, mail, dias(8), RESENA);
+    expect(mail.send).toHaveBeenCalledTimes(1);
+    expect((mail.send.mock.calls[0][0 as never] as { text: string }).text).toContain(RESENA);
+  });
+
+  it('un fallo se reintenta hasta 3 veces y luego queda en Admin', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    const mail = correo(true);
+    for (let k = 0; k < 5; k++) await enviarSeguimientos(db, mail, dias(3 + k * 0.01), null);
+    expect(mail.send).toHaveBeenCalledTimes(3);
+    expect(tipos(db, 'S-AAAAAA')).toEqual(['revision:1:enviado', 'recordatorio:1:error']);
+  });
+
+  it('sin proveedor de correo no hace nada', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    expect(await enviarSeguimientos(db, null, dias(8), null)).toEqual({ enviadas: [], fallidas: [] });
+    expect(estado(db, 'S-AAAAAA')).toBe('vista_previa_enviada');
   });
 });

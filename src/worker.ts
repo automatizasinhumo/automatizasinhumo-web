@@ -4,7 +4,7 @@ import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting, getStoreSettings } from './features/settings/db';
 import { getEmailProvider } from './features/email';
-import { enviarVistasPreviasListas } from './features/solicitudes/envio';
+import { enviarSeguimientos, enviarVistasPreviasListas } from './features/solicitudes/envio';
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 
 /**
@@ -58,6 +58,15 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     await enviarVistasPreviasListas(db, await getEmailProvider(await getStoreSettings(db)));
   } catch (err) {
     console.error('Scheduled preview email sweep failed:', err);
+  }
+
+  // Seguimiento sin respuesta: recordatorio al día 3, espera al día 7 y reseña a la
+  // semana de entregar (solo con `resena_url`). Ver enviarSeguimientos.
+  try {
+    const ajustes = await getStoreSettings(db);
+    await enviarSeguimientos(db, await getEmailProvider(ajustes), new Date(), await getSetting(db, 'resena_url'));
+  } catch (err) {
+    console.error('Scheduled follow-up email sweep failed:', err);
   }
 
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
