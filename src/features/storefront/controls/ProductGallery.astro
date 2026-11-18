@@ -66,14 +66,13 @@ const hasGallery = images.length > 1;
         {images.map((image, i) => (
           <a
             href={`#pi-${image.anchor}`}
-            aria-label={`Ver imagen ${i + 1} de ${images.length}`}
             class="shrink-0 overflow-hidden rounded border border-line bg-surface transition hover:border-brand"
           >
             <img
               src={image.thumbnail.src}
               srcset={image.thumbnail.srcset}
               sizes={image.thumbnail.sizes}
-              alt=""
+              alt={`Ver imagen ${i + 1} de ${images.length}`}
               width="64"
               height="64"
               loading="lazy"

@@ -1,0 +1,11 @@
+/
+/products
+/pages/como-funciona
+/pages/preguntas-frecuentes
+/pages/aviso-legal
+/products/web-una-pagina
+/pages/demos
+/empezar/web-una-pagina
+/empezar/consulta
+/cart
+/products/web-corporativa-5-secciones

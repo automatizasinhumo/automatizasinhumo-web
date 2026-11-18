@@ -201,7 +201,7 @@ const errors: string[] = [];
 // Demo submits itself: the sample address on the first GET, no typing.
 const submitted = isPost || rail === 'demo';
 if (submitted) {
-  if (!/.+@.+\..+/.test(addr.email)) errors.push('A valid email is required.');
+  if (!/.+@.+\..+/.test(addr.email)) errors.push('Escribe un email válido.');
   if (!addr.name) errors.push('El nombre es obligatorio.');
   if (!addr.line1) errors.push('La dirección es obligatoria.');
   if (!addr.city) errors.push('La ciudad es obligatoria.');

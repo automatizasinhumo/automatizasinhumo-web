@@ -46,7 +46,7 @@ export async function settleDemoCheckout(
   }
   const outcome = String(form.get('outcome') ?? 'approve');
   const email = resolveRequiredOrderEmail(String(form.get('email') ?? ''), pending.email);
-  if (!email) return { declined: 'A valid email is required.' };
+  if (!email) return { declined: 'Escribe un email válido.' };
   if (outcome === 'approve') {
     const order = { ...pendingToPaidOrder(pending), email };
     // pendingToPaidOrder carries settlePaymentHash, so the pending row settles

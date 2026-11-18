@@ -540,7 +540,7 @@ originless_status="$(curl --max-time 30 --silent --output "$originless_decline" 
   -H 'content-type: application/x-www-form-urlencoded' \
   --data 'outcome=decline&email=integration%40example.com' \
   "http://127.0.0.1:$test_port$pay_path")"
-if [[ "$originless_status" != "200" ]] || ! grep -q 'Payment declined' "$originless_decline"; then
+if [[ "$originless_status" != "200" ]] || ! grep -q 'Pago rechazado' "$originless_decline"; then
   echo "D1 integration failed: originless capability payment returned HTTP $originless_status" >&2
   exit 1
 fi

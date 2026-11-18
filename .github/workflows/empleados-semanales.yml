@@ -1,0 +1,116 @@
+name: Empleados semanales (staging)
+
+# Revisores gratuitos que corren cada lunes y a mano. Cada uno reutiliza una
+# herramienta pública mantenida; aquí solo está el pegamento. Ficha de cada
+# empleado (qué mira, qué hacer con el aviso): manual/EMPLEADOS.md.
+#   - unlighthouse  (harlan-zw/unlighthouse, MIT): Lighthouse de TODA la web, no solo 6 URLs
+#   - observatory   (mdn/mdn-http-observatory, MPL-2.0): nota de cabeceras de seguridad
+#   - corrector     (LanguageTool, LGPL): erratas en todas las fichas (llms-full.txt)
+#   - navegadores   (microsoft/playwright, Apache-2.0): Chromium + Firefox + WebKit, 360/1280 px
+# Solo «navegadores» puede poner el run en rojo; el resto avisa en el resumen.
+
+on:
+  schedule:
+    - cron: '41 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: empleados-semanales
+  cancel-in-progress: true
+
+env:
+  BASE: https://automatizasinhumo-staging.davidpd89.workers.dev
+  HOST: automatizasinhumo-staging.davidpd89.workers.dev
+
+jobs:
+  unlighthouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Lighthouse de toda la web (muestreo por plantilla de URL)
+        run: |
+          # staging tiene robots «Disallow: /» a propósito: se ignora y se usa el sitemap.
+          npx --yes unlighthouse-ci@0.19.1 --site "$BASE" --disable-robots-txt \
+            --sitemaps "$BASE/sitemap.xml" --samples 1 --reporter jsonExpanded \
+            --build-static --output-path ul || true
+          node -e '
+            const fs=require("fs"); const f=["ul/ci-result.json"].find(fs.existsSync);
+            if(!f){console.log("sin resultados");process.exit(0)}
+            const r=JSON.parse(fs.readFileSync(f,"utf8")); const rows=(r.routes||r).map(x=>[x.path,x.score,...["performance","accessibility","best-practices","seo"].map(k=>x.categories?.[k]?.score)]);
+            rows.sort((a,b)=>(a[1]??1)-(b[1]??1));
+            const md=["## Unlighthouse: "+rows.length+" páginas (peores primero)","","| Ruta | Total | Rend. | Acces. | Buenas pr. | SEO |","|---|---|---|---|---|---|",...rows.slice(0,40).map(r=>"| "+r.map(v=>typeof v==="number"?Math.round(v*100):v).join(" | ")+" |")].join("\n");
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md+"\n"); console.log(md)'
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: unlighthouse
+          path: ul/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  observatory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Cabeceras de seguridad (Mozilla HTTP Observatory)
+        run: |
+          npx --yes -p @mdn/mdn-http-observatory@1.7.2 mdn-http-observatory-scan "$HOST" > obs.json || true
+          node -e '
+            const fs=require("fs"); let r; try{r=JSON.parse(fs.readFileSync("obs.json","utf8"))}catch{console.log(fs.readFileSync("obs.json","utf8"));process.exit(0)}
+            const s=r.scan||r; const t=Object.values(r.tests||{}).filter(x=>!x.pass);
+            const md=["## Observatory: nota "+s.grade+" ("+s.score+"/100)","",...t.map(x=>"- **"+x.name+"**: "+x.result+" ("+x.scoreModifier+")")].join("\n");
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md+"\n"); console.log(md)'
+
+  corrector:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      languagetool:
+        image: erikvl87/languagetool:latest
+        ports:
+          - 8010:8010
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Esperar a LanguageTool
+        run: for i in $(seq 1 60); do curl -sf "http://localhost:8010/v2/languages" > /dev/null && break; sleep 2; done
+      - run: node qa/ortografia.mjs "$BASE" http://localhost:8010
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: ortografia
+          path: ortografia.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  navegadores:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Instalar Playwright (fuera del package.json de la tienda)
+        run: |
+          npm i --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium firefox webkit
+      - run: node qa/navegadores.mjs "$BASE" qa/urls-navegadores.txt
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: capturas
+          path: capturas/
+          if-no-files-found: ignore
+          retention-days: 14
