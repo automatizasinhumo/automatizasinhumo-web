@@ -5,7 +5,7 @@ import ContentPage from '#theme/ContentPage.astro';
 import { getConfig } from '../../config';
 import { getPublishedPageBySlug } from '../../features/pages/db';
 import { pageImageDimensions } from '../../features/media/db';
-import { renderMarkdown, markdownExcerpt } from '../../features/pages/markdown';
+import { renderMarkdown, markdownExcerpt, markdownFaq } from '../../features/pages/markdown';
 import { normalizePageLayout, pageLayoutStyle } from '../../features/pages/layouts';
 import ComoFunciona from '../../features/storefront/ComoFunciona.astro';
 import DemosGaleria from '../../features/storefront/DemosGaleria.astro';
@@ -34,6 +34,17 @@ const html = renderMarkdown(page.body_markdown, {
 });
 const description = markdownExcerpt(page.body_markdown);
 const layout = normalizePageLayout(page.layout);
+// Una página escrita como preguntas (encabezados con «?») publica su FAQPage. La de
+// «Cómo funciona» ya trae la suya en el componente propio.
+const faq = slug === 'como-funciona' ? [] : markdownFaq(page.body_markdown);
+const faqLd =
+  faq.length >= 2
+    ? JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faq.map((p) => ({ '@type': 'Question', name: p.question, acceptedAnswer: { '@type': 'Answer', text: p.answer } })),
+      }).replace(/</g, '\\u003c')
+    : null;
 // Páginas con maquetación propia: el markdown de la BD queda como respaldo y fuente del extracto.
 const Propia = slug === 'como-funciona' ? ComoFunciona : slug === 'demos' ? DemosGaleria : null;
 ---
@@ -46,4 +57,5 @@ const Propia = slug === 'como-funciona' ? ComoFunciona : slug === 'demos' ? Demo
       model={{ title: page.title, html, layout, layoutStyle: pageLayoutStyle(layout) }}
     />
   )}
+  {faqLd && <script is:inline type="application/ld+json" set:html={faqLd} />}
 </Layout>
