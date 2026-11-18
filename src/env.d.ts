@@ -71,6 +71,10 @@ declare namespace Cloudflare {
     IMAGE_BASE_URL?: string;
     /** This store's MCP endpoint, advertised in llms.txt. Unset = not advertised. */
     MCP_URL?: string;
+    // Respaldo de los cron de GitHub Actions (respaldoCron.ts): token fine-grained
+    // con Actions: write en un solo repo, y ese repo como dueño/repo. Sin ellos, nada.
+    GITHUB_DISPATCH_TOKEN?: string;
+    GITHUB_DISPATCH_REPO?: string;
     // Stable HTTPS origin for absolute URLs embedded in public cached responses.
     // Set when a custom domain is the sole ingress; fresh workers.dev instances
     // omit it and use their request origin until a custom domain is attached.

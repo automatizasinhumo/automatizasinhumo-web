@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers';
 import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting } from './features/settings/db';
+import { lanzarProgramados } from './features/automatizacion/respaldoCron';
 
 /**
  * Worker entrypoint.
@@ -24,7 +25,7 @@ import { getSetting } from './features/settings/db';
  * and reservation release is guarded per row. Nothing below is exclusive to the
  * cron — it is the same code the request paths call, just on a clock.
  */
-async function runScheduledSweeps(): Promise<void> {
+async function runScheduledSweeps(cuando: Date): Promise<void> {
   const db = env.DB;
 
   // Inventory first: it needs no configuration and it is the one that silently
@@ -48,6 +49,14 @@ async function runScheduledSweeps(): Promise<void> {
   } catch (err) {
     console.error('Scheduled notification sweep failed:', err);
   }
+
+  // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
+  // No-op sin GITHUB_DISPATCH_TOKEN y GITHUB_DISPATCH_REPO (ver respaldoCron.ts).
+  try {
+    await lanzarProgramados(cuando, env.GITHUB_DISPATCH_TOKEN, env.GITHUB_DISPATCH_REPO);
+  } catch (err) {
+    console.error('Scheduled workflow dispatch failed:', err);
+  }
 }
 
 export default {
@@ -55,8 +64,8 @@ export default {
 
   // Each sweep catches its own errors, so one failing job never strands the
   // others. waitUntil keeps the invocation alive for the whole pass.
-  scheduled(_controller, _env, ctx) {
-    ctx.waitUntil(runScheduledSweeps());
+  scheduled(controller, _env, ctx) {
+    ctx.waitUntil(runScheduledSweeps(new Date(controller.scheduledTime)));
   },
   // Bindings are reached through the `cloudflare:workers` env import (as every
   // other module here does), so the handler itself needs no Env generic.
