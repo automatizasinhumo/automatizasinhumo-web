@@ -11,9 +11,11 @@
  * fine-grained con Actions: write en un único repo) y `GITHUB_DISPATCH_REPO`
  * (`dueño/repo`). Sin ellos no hace nada: cualquier otra tienda minshop queda igual.
  *
- * Cada franja se reclama una sola vez en D1 (`reclamarFranja`), por si Cloudflare
- * repite un tick. Si los cron de GitHub vuelven, un workflow puede correr dos veces;
- * la fábrica tiene `concurrency` y los semanales son idempotentes.
+ * Cada workflow tiene un periodo (la franja de 15 minutos de la fábrica, la semana
+ * de los semanales) y una marca en D1 con el último periodo lanzado. Antes de
+ * lanzar se reclama la marca de forma atómica, así un tick repetido no despacha
+ * dos veces. Si GitHub rechaza el envío se suelta la marca y el siguiente tick
+ * lo reintenta; los workflows ya aceptados no se repiten.
  */
 
 import type { D1Database } from '@cloudflare/workers-types';
@@ -21,31 +23,8 @@ import type { D1Database } from '@cloudflare/workers-types';
 export interface Programado {
   workflow: string;
   inputs?: Record<string, string>;
-}
-
-/** Ticks del cron del Worker: minutos múltiplos de 5 (`*\/5 * * * *`). */
-const FABRICA: Programado = { workflow: 'fabrica-vistas-previas.yml', inputs: { max: '3' } };
-const SEMANALES: Programado[] = [
-  { workflow: 'empleados-qa.yml' },
-  { workflow: 'seguridad.yml' },
-  { workflow: 'empleados-semanales.yml' },
-  { workflow: 'vigilantes-cadena.yml' },
-];
-
-/**
- * Workflows que tocan en este tick. Un tick se identifica por su minuto
- * redondeado a 5, así un cron que llega con algo de retraso cae en su franja.
- */
-export function programadosEn(cuando: Date): Programado[] {
-  const minuto = Math.floor(cuando.getUTCMinutes() / 5) * 5;
-  const debidos: Programado[] = [];
-  // Cada 15 minutos (05, 20, 35, 50), como `7-59/15` en el workflow.
-  if (minuto % 15 === 5) debidos.push(FABRICA);
-  // Lunes a las 06:20 UTC, junto a los cron semanales del repo (06:19 y 06:43).
-  if (cuando.getUTCDay() === 1 && cuando.getUTCHours() === 6 && minuto === 20) {
-    debidos.push(...SEMANALES);
-  }
-  return debidos;
+  /** Periodo al que pertenece este tick, o null si en este tick no toca. */
+  periodo: (cuando: Date) => string | null;
 }
 
 /** Franja de 5 minutos del tick, en UTC: `YYYY-MM-DDTHH:MM`. Ordena como texto. */
@@ -55,20 +34,89 @@ export function franja(cuando: Date): string {
   return d.toISOString().slice(0, 16);
 }
 
+const LUNES_0620_MS = (6 * 60 + 20) * 60 * 1000;
+const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
+
 /**
- * Reclama la franja de forma atómica: solo gana quien la escribe primero.
- * El upsert condicional no toca la fila si ya guarda esa franja o una posterior.
+ * Semana del tick: el último lunes a las 06:20 UTC (junto a los cron semanales del
+ * repo, 06:19 y 06:43). Toda la semana pertenece a ese periodo, así un fallo del
+ * lunes se reintenta en los ticks siguientes en vez de esperar siete días.
  */
-export async function reclamarFranja(db: D1Database, valor: string): Promise<boolean> {
-  const r = await db
-    .prepare(
-      `INSERT INTO settings (key, value) VALUES ('cron_dispatch_slot', ?)
-       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
-       WHERE settings.value < excluded.value`,
-    )
-    .bind(valor)
-    .run();
-  return (r.meta?.changes ?? 0) === 1;
+export function semana(cuando: Date): string {
+  const dia = new Date(Date.UTC(cuando.getUTCFullYear(), cuando.getUTCMonth(), cuando.getUTCDate()));
+  dia.setUTCDate(dia.getUTCDate() - ((dia.getUTCDay() + 6) % 7)); // lunes de esta semana
+  let inicio = dia.getTime() + LUNES_0620_MS;
+  if (cuando.getTime() < inicio) inicio -= SEMANA_MS;
+  return new Date(inicio).toISOString().slice(0, 16);
+}
+
+/** Cada 15 minutos (05, 20, 35, 50), como `7-59/15` en el workflow. */
+const cadaQuinceMinutos = (cuando: Date) => {
+  const f = franja(cuando);
+  return Number(f.slice(14)) % 15 === 5 ? f : null;
+};
+
+export const PROGRAMADOS: Programado[] = [
+  { workflow: 'fabrica-vistas-previas.yml', inputs: { max: '3' }, periodo: cadaQuinceMinutos },
+  { workflow: 'empleados-qa.yml', periodo: semana },
+  { workflow: 'seguridad.yml', periodo: semana },
+  { workflow: 'empleados-semanales.yml', periodo: semana },
+  { workflow: 'vigilantes-cadena.yml', periodo: semana },
+];
+
+/** Marcas por workflow: último periodo lanzado. */
+export interface Marcas {
+  leer(): Promise<Record<string, string>>;
+  /** true solo para quien escribe primero un periodo posterior al guardado. */
+  reclamar(workflow: string, periodo: string): Promise<boolean>;
+  /** Deshace un reclamo propio tras un envío fallido. */
+  soltar(workflow: string, periodo: string, anterior: string | undefined): Promise<void>;
+}
+
+/** Workflows que tocan en este tick y aún no se han lanzado en su periodo. */
+export function pendientes(cuando: Date, hechos: Record<string, string>) {
+  const lista: { programado: Programado; periodo: string }[] = [];
+  for (const programado of PROGRAMADOS) {
+    const periodo = programado.periodo(cuando);
+    const hecho = hechos[programado.workflow];
+    if (periodo && (!hecho || hecho < periodo)) lista.push({ programado, periodo });
+  }
+  return lista;
+}
+
+const PREFIJO = 'cron_dispatch:';
+
+/** Marcas en la tabla `settings` (claves `cron_dispatch:<workflow>`), sin migración. */
+export function marcasD1(db: D1Database): Marcas {
+  return {
+    async leer() {
+      const { results } = await db
+        .prepare("SELECT key, value FROM settings WHERE key LIKE 'cron\\_dispatch:%' ESCAPE '\\'")
+        .all<{ key: string; value: string }>();
+      return Object.fromEntries(results.map((r) => [r.key.slice(PREFIJO.length), r.value]));
+    },
+    async reclamar(workflow, periodo) {
+      const r = await db
+        .prepare(
+          `INSERT INTO settings (key, value) VALUES (?, ?)
+           ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+           WHERE settings.value < excluded.value`,
+        )
+        .bind(PREFIJO + workflow, periodo)
+        .run();
+      return (r.meta?.changes ?? 0) === 1;
+    },
+    async soltar(workflow, periodo, anterior) {
+      // Solo si la marca sigue siendo la nuestra: no pisar un periodo posterior.
+      const q =
+        anterior === undefined
+          ? db.prepare('DELETE FROM settings WHERE key = ? AND value = ?').bind(PREFIJO + workflow, periodo)
+          : db
+              .prepare('UPDATE settings SET value = ? WHERE key = ? AND value = ?')
+              .bind(anterior, PREFIJO + workflow, periodo);
+      await q.run();
+    },
+  };
 }
 
 const REPO_VALIDO = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/;
@@ -77,8 +125,8 @@ export async function lanzarProgramados(
   cuando: Date,
   token: string | undefined,
   repo: string | undefined,
+  marcas: Marcas,
   pedir: typeof fetch = fetch,
-  reclamar: (franja: string) => Promise<boolean> = async () => true,
 ): Promise<{ lanzados: string[]; fallidos: string[] }> {
   const resultado = { lanzados: [] as string[], fallidos: [] as string[] };
   if (!token || !repo) return resultado;
@@ -86,10 +134,14 @@ export async function lanzarProgramados(
     console.error('GITHUB_DISPATCH_REPO no tiene la forma dueño/repo');
     return resultado;
   }
-  const debidos = programadosEn(cuando);
-  // Solo se reclama la franja si hay algo que lanzar: tres de cada cuatro ticks no escriben.
-  if (debidos.length === 0 || !(await reclamar(franja(cuando)))) return resultado;
-  for (const { workflow, inputs } of debidos) {
+  // Solo los ticks de la fábrica (uno de cada tres) leen las marcas; los semanales
+  // pendientes se recogen en ellos. El lunes 06:20 también es tick de la fábrica.
+  if (!cadaQuinceMinutos(cuando)) return resultado;
+  const hechos = await marcas.leer();
+  for (const { programado, periodo } of pendientes(cuando, hechos)) {
+    const { workflow, inputs } = programado;
+    if (!(await marcas.reclamar(workflow, periodo))) continue; // otro tick ya lo lanzó
+    let ok = false;
     try {
       const r = await pedir(
         `https://api.github.com/repos/${repo}/actions/workflows/${workflow}/dispatches`,
@@ -106,15 +158,16 @@ export async function lanzarProgramados(
         },
       );
       // 204 sin cuerpo; 200 con el id del run en versiones recientes de la API.
-      if (r.ok) resultado.lanzados.push(workflow);
-      else {
-        resultado.fallidos.push(workflow);
-        // Solo el estado: el cuerpo de error no aporta y nunca se registra el token.
-        console.error(`workflow_dispatch ${workflow}: HTTP ${r.status}`);
-      }
+      ok = r.ok;
+      // Solo el estado: el cuerpo de error no aporta y nunca se registra el token.
+      if (!ok) console.error(`workflow_dispatch ${workflow}: HTTP ${r.status}`);
     } catch (err) {
-      resultado.fallidos.push(workflow);
       console.error(`workflow_dispatch ${workflow} falló:`, err instanceof Error ? err.message : 'error');
+    }
+    if (ok) resultado.lanzados.push(workflow);
+    else {
+      resultado.fallidos.push(workflow);
+      await marcas.soltar(workflow, periodo, hechos[workflow]);
     }
   }
   return resultado;

@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers';
 import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting } from './features/settings/db';
-import { lanzarProgramados, reclamarFranja } from './features/automatizacion/respaldoCron';
+import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 
 /**
  * Worker entrypoint.
@@ -53,9 +53,7 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
   // No-op sin GITHUB_DISPATCH_TOKEN y GITHUB_DISPATCH_REPO (ver respaldoCron.ts).
   try {
-    await lanzarProgramados(cuando, env.GITHUB_DISPATCH_TOKEN, env.GITHUB_DISPATCH_REPO, fetch, (f) =>
-      reclamarFranja(db, f),
-    );
+    await lanzarProgramados(cuando, env.GITHUB_DISPATCH_TOKEN, env.GITHUB_DISPATCH_REPO, marcasD1(db));
   } catch (err) {
     console.error('Scheduled workflow dispatch failed:', err);
   }
