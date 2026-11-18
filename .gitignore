@@ -53,3 +53,12 @@ manual/CREDENCIALES*
 scripts/gpt/last_chat.txt
 ortografia.json
 __pycache__/
+
+# Documentación interna: solo en local (copia en C:/GIT/automatizasinhumo-docs)
+manual/*.md
+manual/*.xlsx
+manual/auditorias-gpt/
+manual/entregas/
+manual/equipo/
+manual/catalogo/gen-entregas.mjs
+manual/catalogo/entrega.mjs
