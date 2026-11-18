@@ -34,9 +34,11 @@ const html = renderMarkdown(page.body_markdown, {
 });
 const description = markdownExcerpt(page.body_markdown);
 const layout = normalizePageLayout(page.layout);
-// Una página escrita como preguntas (encabezados con «?») publica su FAQPage. La de
-// «Cómo funciona» ya trae la suya en el componente propio.
-const faq = slug === 'como-funciona' ? [] : markdownFaq(page.body_markdown);
+// Páginas con maquetación propia: el markdown de la BD queda como respaldo y fuente del extracto.
+const Propia = slug === 'como-funciona' ? ComoFunciona : slug === 'demos' ? DemosGaleria : null;
+// Una página escrita como preguntas (encabezados con «?») publica su FAQPage, solo si ese
+// markdown es lo que se ve: las de maquetación propia no lo pintan («Cómo funciona» trae su FAQ).
+const faq = Propia ? [] : markdownFaq(page.body_markdown);
 const faqLd =
   faq.length >= 2
     ? JSON.stringify({
@@ -45,8 +47,6 @@ const faqLd =
         mainEntity: faq.map((p) => ({ '@type': 'Question', name: p.question, acceptedAnswer: { '@type': 'Answer', text: p.answer } })),
       }).replace(/</g, '\\u003c')
     : null;
-// Páginas con maquetación propia: el markdown de la BD queda como respaldo y fuente del extracto.
-const Propia = slug === 'como-funciona' ? ComoFunciona : slug === 'demos' ? DemosGaleria : null;
 ---
 
 <Layout title={page.title} description={description}>

@@ -89,8 +89,10 @@ const orgLd = JSON.stringify({
   description: 'Webs, automatizaciones y servicios digitales a precio cerrado.',
 }).replace(/</g, '\\u003c');
 // En la portada, WebSite con su buscador (SearchAction) para el cuadro de búsqueda de Google.
+// originPathname: si la portada es una página o ficha configurada, index.astro la reescribe
+// y Astro.url ya trae la ruta destino.
 const websiteLd =
-  Astro.url.pathname === '/'
+  Astro.originPathname === '/'
     ? JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
