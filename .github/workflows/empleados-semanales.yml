@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: actions/setup-node@v5
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: actions/setup-node@v5
@@ -167,7 +167,9 @@ jobs:
           mapfile -t urls < <(curl -s "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+' | cut -c6- | sort -u)
           npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
           npm rebuild --prefix qa/herramientas puppeteer
-          set +e; qa/herramientas/node_modules/.bin/pa11y-ci --config .pa11yci --runner axe "${urls[@]}" > axe.txt 2>&1; set -e
+          # pa11y-ci 5 ya no tiene --runner: el motor va en la configuración (copia de .pa11yci con axe).
+          node -e 'const f=require("fs");const c=JSON.parse(f.readFileSync(".pa11yci","utf8"));c.defaults.runners=["axe"];f.writeFileSync("pa11yci-axe.json",JSON.stringify(c))'
+          set +e; qa/herramientas/node_modules/.bin/pa11y-ci --config pa11yci-axe.json "${urls[@]}" > axe.txt 2>&1; set -e
           { echo "## axe-core: ${#urls[@]} páginas"; echo; echo '```'; grep -vE '^\s*$' axe.txt | tail -80; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
 
   knip:
