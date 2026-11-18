@@ -126,14 +126,6 @@ jobs:
         run: |
           if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] && [ -n "$D1_DATABASE_ID" ]; then
             echo "disponible=1" >> "$GITHUB_OUTPUT"
-            echo "WRANGLER_CONFIG=$RUNNER_TEMP/fabrica-vigilancia.wrangler.jsonc" >> "$GITHUB_ENV"
-            cat > "$RUNNER_TEMP/fabrica-vigilancia.wrangler.jsonc" <<EOF
-          {
-            "name": "automatizasinhumo-staging",
-            "compatibility_date": "2026-11-01",
-            "d1_databases": [{ "binding": "DB", "database_name": "automatizasinhumo-staging-db", "database_id": "$D1_DATABASE_ID" }]
-          }
-          EOF
           else
             echo "disponible=0" >> "$GITHUB_OUTPUT"
           fi
@@ -162,7 +154,7 @@ jobs:
           D1_DISPONIBLE: ${{ steps.credenciales.outputs.disponible }}
         run: |
           if [ "$D1_DISPONIBLE" = '1' ]; then
-            python -X utf8 manual/fabrica/vigilancia.py --config "$WRANGLER_CONFIG" --staging "$ESTADO_STAGING"
+            python -X utf8 manual/fabrica/vigilancia.py --d1 --staging "$ESTADO_STAGING"
           else
             echo "::warning::Se omite la vigilancia de solicitudes porque faltan las credenciales de Cloudflare."
             python -X utf8 manual/fabrica/vigilancia.py --staging "$ESTADO_STAGING"

@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -124,6 +125,27 @@ def reconciliar_issue(repositorio: str, tipo: str, activo: bool, titulo: str, cu
         ejecutar_gh("issue", "close", str(issue["number"]), "--repo", repositorio, "--comment", recuperado)
 
 
+UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+
+
+def configuracion_d1(database_id: str) -> str:
+    """Escribe una configuración de Wrangler mínima y devuelve su ruta.
+
+    La ruta la crea el propio script: ningún dato de fuera llega como argumento
+    de un comando, solo el id de la base (validado) dentro del fichero.
+    """
+    if not UUID.fullmatch(database_id):
+        raise RuntimeError("D1_DATABASE_ID no es un UUID")
+    contenido = {
+        "name": "automatizasinhumo-staging",
+        "compatibility_date": "2026-11-01",
+        "d1_databases": [{"binding": "DB", "database_name": "automatizasinhumo-staging-db", "database_id": database_id}],
+    }
+    with tempfile.NamedTemporaryFile("w", suffix=".wrangler.json", delete=False, encoding="utf-8") as fichero:
+        json.dump(contenido, fichero)
+    return fichero.name
+
+
 def consultar_ids(configuracion: str) -> list[int]:
     salida = ejecutar_comando(
         [
@@ -178,16 +200,13 @@ def vigilar_staging(repositorio: str, estado: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config")
+    parser.add_argument("--d1", action="store_true", help="consultar D1 (usa D1_DATABASE_ID)")
     parser.add_argument("--staging", choices=("arriba", "caido"), required=True)
     args = parser.parse_args(argv)
     repositorio = os.environ.get("GITHUB_REPOSITORY", "")
     # Solo «dueño/repo»: nada que gh pueda leer como opción.
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+", repositorio):
         print("::error::GITHUB_REPOSITORY falta o no tiene la forma dueño/repo.")
-        return 1
-    if args.config and not Path(args.config).is_file():
-        print("::error::--config no es un fichero.")
         return 1
 
     errores = []
@@ -196,9 +215,13 @@ def main(argv: list[str] | None = None) -> int:
     except RuntimeError as error:
         errores.append(str(error))
 
-    if args.config:
+    if args.d1:
         try:
-            vigilar_fabrica(repositorio, consultar_ids(args.config))
+            configuracion = configuracion_d1(os.environ.get("D1_DATABASE_ID", "").strip().lower())
+            try:
+                vigilar_fabrica(repositorio, consultar_ids(configuracion))
+            finally:
+                Path(configuracion).unlink(missing_ok=True)
         except RuntimeError as error:
             errores.append(str(error))
 
