@@ -85,7 +85,7 @@ jobs:
         with:
           node-version: '22'
       - name: Esperar a LanguageTool
-        run: for i in $(seq 1 60); do curl -sf "http://localhost:8010/v2/languages" > /dev/null && break; sleep 2; done
+        run: for _ in $(seq 1 60); do curl -sf "http://localhost:8010/v2/languages" > /dev/null && break; sleep 2; done
       - run: node qa/ortografia.mjs http://localhost:8010
       - uses: actions/upload-artifact@v6
         if: always()
