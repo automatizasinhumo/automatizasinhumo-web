@@ -161,6 +161,22 @@ describe('the store-owned header', () => {
     expect(html).toContain('aria-label="Buscar servicios"');
   });
 
+  it('opens search in place on narrow screens, without JavaScript', async () => {
+    const html = await render(Header, buildShellModel(input({ searchQuery: 'boda' })));
+
+    // A native disclosure: <summary> is the button, and its name is «Buscar».
+    const disclosure = html.match(/<details[^>]*data-search-disclosure[\s\S]*?<\/details>/)?.[0] ?? '';
+    expect(disclosure).toContain('<summary');
+    expect(disclosure).toMatch(/<summary[\s\S]*Buscar[\s\S]*<\/summary>/);
+    // Inside it, the same real GET form: Enter goes to /search?q= with scripts blocked.
+    expect(disclosure).toContain('method="GET"');
+    expect(disclosure).toContain('action="/search"');
+    expect(disclosure).toContain('name="q"');
+    expect(disclosure).toContain('value="boda"');
+    // No longer a plain link that makes mobile users load /search first.
+    expect(html).not.toMatch(/<a [^>]*href="\/search"[^>]*>\s*Buscar\s*<\/a>/);
+  });
+
   it('renders the announcement link only when one is set', async () => {
     const plain = await render(Header, buildShellModel(input({ announcement: 'Sale' })));
     const linked = await render(

@@ -2,6 +2,7 @@
 import type { StorefrontShellModel } from '../../features/storefront/models';
 import StoreNav from '../../features/storefront/controls/StoreNav.astro';
 import StoreSearch from '../../features/storefront/controls/StoreSearch.astro';
+import StoreSearchToggle from '../../features/storefront/controls/StoreSearchToggle.astro';
 import StoreCartControl from '../../features/storefront/controls/StoreCartControl.astro';
 import StoreAccountControl from '../../features/storefront/controls/StoreAccountControl.astro';
 import Logo from './Logo.astro';
@@ -72,8 +73,15 @@ const { model } = Astro.props;
       class="ml-auto flex min-w-0 items-center gap-2 text-sm font-medium text-ink min-[400px]:gap-3 sm:gap-6"
     >
       <StoreNav links={model.headerLinks} />
-      {/* Search input is desktop-only; give mobile a link to the search page. */}
-      <a href={model.search.action} class="hover:text-brand sm:hidden">Buscar</a>
+      {/* The inline field is hidden below sm; the magnifier opens it in place.
+          The panel hangs from the sticky header (its positioned ancestor), full
+          width minus the gutters, because the magnifier is not at the edge. */}
+      <StoreSearchToggle
+        action={model.search.action}
+        query={model.search.query}
+        class="sm:hidden"
+        panelClass="absolute inset-x-4 top-full z-40 mt-1 border border-line bg-surface p-3 shadow-lg"
+      />
       {model.cart.enabled && <StoreCartControl href={model.cart.href} />}
       {model.account.enabled && <StoreAccountControl href={model.account.href} />}
     </nav>

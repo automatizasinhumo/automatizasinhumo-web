@@ -2,6 +2,7 @@
 import type { StorefrontShellModel } from '../../features/storefront/models';
 import StoreNav from '../../features/storefront/controls/StoreNav.astro';
 import StoreSearch from '../../features/storefront/controls/StoreSearch.astro';
+import StoreSearchToggle from '../../features/storefront/controls/StoreSearchToggle.astro';
 import StoreCartControl from '../../features/storefront/controls/StoreCartControl.astro';
 import StoreAccountControl from '../../features/storefront/controls/StoreAccountControl.astro';
 
@@ -57,7 +58,7 @@ const small =
         class={`hidden min-w-0 items-center gap-6 xl:flex ${small}`}
         disclosureClass={`relative order-last xl:hidden ${small}`}
       />
-      <a href={model.search.action} class={`${small} sm:hidden`}>Buscar</a>
+      <StoreSearchToggle action={model.search.action} query={model.search.query} class={`relative sm:hidden ${small}`} />
       {model.account.enabled && <StoreAccountControl href={model.account.href} class={small} />}
       {
         model.cart.enabled && (
