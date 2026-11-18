@@ -8,7 +8,8 @@ name: Empleados semanales (staging)
 #   - corrector     (LanguageTool, LGPL): erratas en los textos del catálogo (manual/catalogo)
 #   - navegadores   (microsoft/playwright, Apache-2.0): Chromium + Firefox + WebKit, 360/1280 px
 #   - html          (html-validate, MIT): HTML válido y accesible en todas las URL del sitemap
-# Solo «navegadores» y «html» pueden poner el run en rojo; el resto avisa en el resumen.
+#   - idioma-demos  (cheerio, MIT): las demos públicas en español de España (C20)
+# Solo «navegadores», «html» e «idioma-demos» pueden poner el run en rojo; el resto avisa en el resumen.
 
 on:
   schedule:
@@ -169,3 +170,22 @@ jobs:
         run: |
           set +e; npx --yes knip@5 --no-progress --reporter markdown > knip.md 2>&1; set -e
           { echo "## knip (código muerto)"; echo; head -150 knip.md; } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  idioma-demos:
+    # Si falla: node manual/demos/localizar-demos.mjs y desplegar las demos (manual/demos).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: node scripts/demos/idioma.mjs --json idioma-demos.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: idioma-demos
+          path: idioma-demos.json
+          if-no-files-found: ignore
+          retention-days: 14
