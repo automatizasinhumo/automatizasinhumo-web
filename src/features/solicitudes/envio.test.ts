@@ -8,7 +8,7 @@ import { enviarNotificacion, enviarVistasPreviasListas } from './envio';
 /** D1 mínimo sobre SQLite de Node con las migraciones reales: el SQL se ejecuta de verdad. */
 function d1(): D1Database & { sql: DatabaseSync } {
   const sql = new DatabaseSync(':memory:');
-  for (const m of ['0040_solicitudes.sql', '0041_solicitudes_pedido.sql', '0042_notificaciones.sql']) {
+  for (const m of ['0040_solicitudes.sql', '0041_solicitudes_pedido.sql', '0042_notificaciones.sql', '0043_notificaciones_reserva.sql']) {
     sql.exec(readFileSync(new URL(`../../../migrations/${m}`, import.meta.url), 'utf8'));
   }
   const prep = (q: string, args: unknown[] = []) => {
@@ -112,9 +112,73 @@ describe('enviarVistasPreviasListas', () => {
     expect(await enviarVistasPreviasListas(db, null)).toEqual({ enviadas: [], fallidas: [] });
     expect(notif(db, 'S-AAAAAA')).toBeUndefined();
   });
+
+  it('las agotadas no ocupan el límite de la pasada', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'en_preparacion', `Vista previa automática: ${URL_OK} · QA ok`, 'rebota@example.es');
+    solicitud(db, 'S-BBBBBB', 'en_preparacion', `Vista previa automática: ${URL_OK} · QA ok`);
+    const send = vi.fn(async (m: { to: string }) => {
+      if (m.to === 'rebota@example.es') throw new Error('rebote');
+    });
+    for (let i = 0; i < 3; i++) await enviarVistasPreviasListas(db, { send }, 1);
+    expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'error', intentos: 3 });
+    expect(await enviarVistasPreviasListas(db, { send }, 1)).toEqual({ enviadas: ['S-BBBBBB'], fallidas: [] });
+    error.mockRestore();
+  });
+
+  it('una solicitud movida entre la lectura y la reserva no recibe el correo', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'en_preparacion', `Vista previa automática: ${URL_OK} · QA ok`);
+    const mail = correo();
+    const original = db.prepare.bind(db);
+    let movida = false;
+    // David la mueve justo antes de que el cron reserve el envío.
+    (db as unknown as { prepare: (q: string) => unknown }).prepare = (q: string) => {
+      if (!movida && q.startsWith("UPDATE notificaciones SET estado_envio = 'enviando'")) {
+        movida = true;
+        db.sql.prepare("UPDATE solicitudes SET estado = 'cambios_pedidos' WHERE public_id = 'S-AAAAAA'").run();
+      }
+      return original(q);
+    };
+    expect(await enviarVistasPreviasListas(db, mail)).toEqual({ enviadas: [], fallidas: [] });
+    expect(mail.send).not.toHaveBeenCalled();
+    expect(notif(db, 'S-AAAAAA')?.estado_envio).toBe('pendiente');
+  });
 });
 
 describe('enviarNotificacion', () => {
+  const reservada = (db: ReturnType<typeof d1>, intentos: number, hora: string | null) =>
+    db.sql
+      .prepare(
+        "INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo, estado_envio, intentos, reservado_at) VALUES ('S-AAAAAA', 'revision', 1, 'a', 't', 'enviando', ?, ?)",
+      )
+      .run(intentos, hora);
+
+  it('una reserva caducada se reclama con la misma clave de idempotencia; una reciente no', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'nueva', null);
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'a', texto: 't' };
+    // El Worker murió tras reservar: fila en 'enviando' con el intento 1.
+    reservada(db, 1, (db.sql.prepare("SELECT datetime('now', '-5 minutes') AS h").get() as { h: string }).h);
+    const mail = correo();
+    expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'ocupado' });
+    db.sql.prepare("UPDATE notificaciones SET reservado_at = datetime('now', '-20 minutes')").run();
+    expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'enviado' });
+    const clave = (mail.send.mock.calls[0][0 as never] as { idempotencyKey: string }).idempotencyKey;
+    expect(clave).toMatch(/^notif-\d+-1$/);
+    expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviado', intentos: 1 });
+  });
+
+  it('una fila antigua en «enviando» sin hora de reserva se puede reclamar aunque agotara intentos', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'nueva', null);
+    reservada(db, 2, null);
+    const mail = correo();
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'a', texto: 't', maxIntentos: 2 };
+    expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'enviado' });
+  });
+
   it('no reenvía uno enviado salvo con «reenviar»', async () => {
     const db = d1();
     solicitud(db, 'S-AAAAAA', 'nueva', null);

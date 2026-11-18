@@ -51,7 +51,15 @@ export interface Envio {
   reenviar?: boolean;
   /** Tope de intentos (el cron no reintenta sin fin un correo que rebota). */
   maxIntentos?: number;
+  /**
+   * Solo reservar si la solicitud sigue en `nueva`/`en_preparacion` con esta nota
+   * exacta (cron): si David la movió o reescribió la nota tras la lectura, no se envía.
+   */
+  exigirNota?: string;
 }
+
+/** Una reserva 'enviando' más antigua que esto se da por muerta y se puede reclamar. */
+const RESERVA_CADUCA = '-15 minutes';
 
 export async function enviarNotificacion(db: D1Database, mail: EmailProvider | null, e: Envio): Promise<ResultadoEnvio> {
   await db
@@ -60,15 +68,34 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
     )
     .bind(e.id, e.tipo, e.version, e.asunto, e.texto)
     .run();
-  // Reserva atómica: solo una petición pasa la fila a 'enviando'.
+  // Reserva atómica: solo una petición pasa la fila a 'enviando'. Una reserva
+  // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento:
+  // la misma clave de idempotencia evita duplicar un correo que el proveedor ya aceptó.
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
+  const exigir =
+    e.exigirNota === undefined
+      ? ''
+      : `AND EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = notificaciones.solicitud_public_id
+           AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`;
   const reserva = await db
     .prepare(
-      `UPDATE notificaciones SET estado_envio = 'enviando', asunto = ?, cuerpo = ?, intentos = intentos + 1
-       WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio IN (${permitidos}) AND intentos < ?
+      `UPDATE notificaciones SET estado_envio = 'enviando', asunto = ?, cuerpo = ?, reservado_at = datetime('now'),
+         intentos = intentos + CASE WHEN estado_envio = 'enviando' THEN 0 ELSE 1 END
+       WHERE solicitud_public_id = ? AND tipo = ? AND version = ?
+         AND ((estado_envio IN (${permitidos}) AND intentos < ?)
+           OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')))
+         ${exigir}
        RETURNING id, intentos`,
     )
-    .bind(e.asunto, e.texto, e.id, e.tipo, e.version, e.maxIntentos ?? 1_000_000)
+    .bind(
+      e.asunto,
+      e.texto,
+      e.id,
+      e.tipo,
+      e.version,
+      e.maxIntentos ?? 1_000_000,
+      ...(e.exigirNota === undefined ? [] : [e.exigirNota]),
+    )
     .first<{ id: number; intentos: number }>();
   if (!reserva) return { estado: 'ocupado' };
 
@@ -121,9 +148,12 @@ export async function enviarVistasPreviasListas(
     .prepare(
       `SELECT public_id, nota FROM solicitudes
        WHERE estado IN ('nueva', 'en_preparacion') AND nota LIKE 'Vista previa automática: https://% · QA ok'
+         -- Las agotadas (error tras MAX_INTENTOS_CRON) esperan en Admin y no ocupan el LIMIT.
+         AND NOT EXISTS (SELECT 1 FROM notificaciones n WHERE n.solicitud_public_id = solicitudes.public_id
+           AND n.tipo = 'revision' AND n.version = 1 AND n.estado_envio = 'error' AND n.intentos >= ?)
        ORDER BY id LIMIT ?`,
     )
-    .bind(limite)
+    .bind(MAX_INTENTOS_CRON, limite)
     .all<{ public_id: string; nota: string }>();
   for (const { public_id: id, nota } of results ?? []) {
     const enlace = NOTA_QA_OK.exec(nota)?.[1];
@@ -138,6 +168,7 @@ export async function enviarVistasPreviasListas(
       asunto: c.asunto,
       texto: c.texto,
       maxIntentos: MAX_INTENTOS_CRON,
+      exigirNota: nota,
     });
     let enviado = r.estado === 'enviado';
     if (r.estado === 'ocupado') {
