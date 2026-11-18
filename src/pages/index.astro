@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import ProductList from '../features/products/ProductList.astro';
 import HomeHero from '../features/storefront/HomeHero.astro';
 import { loadHomeServices } from '../features/storefront/homeServices';
+import { hasCatalogParams } from '../features/storefront/campaignParams';
 import { resolveHomePath } from '../features/settings/home';
 import { getConfig } from '../config';
 
@@ -16,7 +17,8 @@ import { getConfig } from '../config';
 const homePath = await resolveHomePath(env.DB, Astro.locals.settings?.homePage);
 if (homePath) return Astro.rewrite(homePath);
 // La portada solo en la primera vista del catálogo, no al ordenar ni paginar.
-const showHero = Astro.url.searchParams.size === 0;
+// Los parámetros de campañas (utm_*, gclid, fbclid...) no cuentan: el anuncio debe aterrizar en la portada.
+const showHero = !hasCatalogParams(Astro.url.searchParams);
 const config = getConfig();
 let homeServices: Awaited<ReturnType<typeof loadHomeServices>>['services'] = [];
 // Portada incompleta por un fallo de D1: que ninguna caché compartida la guarde.
