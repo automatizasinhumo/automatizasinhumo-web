@@ -150,6 +150,7 @@ def procesar(public_id, p):
                        f"{DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} RETURNING public_id")
     except RuntimeError as e:
         print('  sin reclamar:', e)
+        FALLOS_D1.append(1)
         return False
     if not reclamada:
         print('  ya la ha reclamado otro proceso')
@@ -174,13 +175,23 @@ def procesar(public_id, p):
            f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(EN_CURSO)}")
     except RuntimeError as e:
         print('  nota sin guardar (la reserva caduca y se reintenta):', e)
+        FALLOS_D1.append(1)
     return True
 
 
+FALLOS_D1 = []  # el lote sigue, pero la ejecución termina en rojo para que se vea
+
+
 def main():
-    mapa = disenos()
+    mapa = {slug: ps for slug, ps in disenos().items() if ps}
+    if not mapa:
+        print('vistas previas intentadas: 0 (ningún servicio con plantilla)')
+        return
+    # Solo servicios con plantilla: las solicitudes sin plantilla no ocupan el LIMIT.
+    slugs = ', '.join(sql_txt(s) for s in sorted(mapa))
     filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje FROM solicitudes "
-               f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} ORDER BY created_at LIMIT 50")
+               f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} AND slug IN ({slugs}) "
+               "ORDER BY created_at LIMIT 50")
     hechas = 0
     for n, f in enumerate(filas, 1):
         plantillas = mapa.get(f['slug'])
@@ -198,6 +209,8 @@ def main():
         if hechas >= MAXIMO:
             break
     print('vistas previas intentadas:', hechas)
+    if FALLOS_D1:
+        sys.exit(f'D1 falló {len(FALLOS_D1)} veces: revisar la ejecución')
 
 
 if __name__ == '__main__':
