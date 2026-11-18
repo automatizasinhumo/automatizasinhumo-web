@@ -86,7 +86,7 @@ jobs:
           # Aparte: «npm i --no-save» dentro del repo choca con su lockfile.
           npm i --prefix "$RUNNER_TEMP/pw" --no-audit --no-fund playwright@1.56.1
           ln -s "$RUNNER_TEMP/pw/node_modules" node_modules
-          npx playwright install --with-deps chromium
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Recorrido del cliente
         run: node qa/recorrido-cliente.mjs "$BASE"
