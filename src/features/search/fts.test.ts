@@ -17,68 +17,21 @@ const CATEGORIES = [
   { id: 5, slug: 'contacto', name: 'Contacto' },
 ];
 
-const PRODUCTS = [
-  {
-    slug: 'web-boda-rsvp',
-    name: 'Web de boda con confirmación de asistencia',
-    description: 'Toda la información de la boda en una web.',
-    category: 'bodas',
-  },
-  {
-    slug: 'invitacion-digital',
-    name: 'Invitación digital animada',
-    description: 'Invitación web para enviar por WhatsApp y confirmar asistencia.',
-    category: 'bodas',
-  },
-  {
-    slug: 'galeria-privada-evento',
-    name: 'Galería privada de fotos del evento',
-    description: 'Álbum privado para una boda con las fotos de los invitados.',
-    category: 'bodas',
-  },
-  {
-    slug: 'gestion-invitados-mesas',
-    name: 'Gestión de invitados y plano de mesas',
-    description: 'Lista de invitados, confirmaciones y plano de mesas.',
-    category: 'bodas',
-  },
-  {
-    slug: 'reservas-salon',
-    name: 'Reservas para peluquería, estética o clínica',
-    description: 'Motor de reservas por servicio y profesional.',
-    category: 'reservas',
-  },
-  {
-    slug: 'dossier-comercial',
-    name: 'Dossier comercial en PDF',
-    description: 'Un dossier con información útil para organizar bodas.',
-    category: 'documentos',
-  },
-  {
-    slug: 'avisos-automaticos',
-    name: 'Avisos automáticos por varios canales',
-    description: 'Cualquier evento de tus herramientas avisa al equipo.',
-    category: 'automatizaciones',
-  },
-  {
-    slug: 'diplomas-eventos',
-    name: 'Diplomas para eventos',
-    description: 'Crea diplomas para los asistentes a cada evento.',
-    category: 'documentos',
-  },
-  {
-    slug: 'correo-contacto',
-    name: 'Correo de contacto',
-    description: 'Dirección para recibir consultas de clientes.',
-    category: 'contacto',
-  },
-  {
-    slug: 'newsletter-email',
-    name: 'Newsletter por email',
-    description: 'Envía boletines y novedades a tus clientes.',
-    category: 'contacto',
-  },
-];
+// [slug, nombre, descripción, categoría]
+const PRODUCTS = (
+  [
+    ['web-boda-rsvp', 'Web de boda con confirmación de asistencia', 'Toda la información de la boda en una web.', 'bodas'],
+    ['invitacion-digital', 'Invitación digital animada', 'Invitación web para enviar por WhatsApp y confirmar asistencia.', 'bodas'],
+    ['galeria-privada-evento', 'Galería privada de fotos del evento', 'Álbum privado para una boda con las fotos de los invitados.', 'bodas'],
+    ['gestion-invitados-mesas', 'Gestión de invitados y plano de mesas', 'Lista de invitados, confirmaciones y plano de mesas.', 'bodas'],
+    ['reservas-salon', 'Reservas para peluquería, estética o clínica', 'Motor de reservas por servicio y profesional.', 'reservas'],
+    ['dossier-comercial', 'Dossier comercial en PDF', 'Un dossier con información útil para organizar bodas.', 'documentos'],
+    ['avisos-automaticos', 'Avisos automáticos por varios canales', 'Cualquier evento de tus herramientas avisa al equipo.', 'automatizaciones'],
+    ['diplomas-eventos', 'Diplomas para eventos', 'Crea diplomas para los asistentes a cada evento.', 'documentos'],
+    ['correo-contacto', 'Correo de contacto', 'Dirección para recibir consultas de clientes.', 'contacto'],
+    ['newsletter-email', 'Newsletter por email', 'Envía boletines y novedades a tus clientes.', 'contacto'],
+  ] as const
+).map(([slug, name, description, category]) => ({ slug, name, description, category }));
 
 let miniflare: Miniflare;
 let search: ReturnType<typeof createFtsSearch>;
