@@ -190,3 +190,57 @@ class ContextoDePagina(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+PEDIDO_BLOQUEO = {
+    'id': 'bloqueo-demo', 'plantilla': 'plantilla-demo', 'negocio': 'Peluquería Ana', 'actividad': 'peluquería',
+    'ciudad': 'Vigo', 'telefono': '600000000', 'email': 'ana@example.es', 'descripcion': '', 'servicios': [],
+}
+PLANTILLA_BLOQUEO = ('<html><head><title>Inicio | Lumen</title></head><body><main>'
+                     '<h1>Bienvenido a nuestro estudio creativo</h1><p>Contacta</p></main></body></html>')
+
+
+def ia_que_adapta(texto=lambda nodo: 'Tu peluquería de confianza en Vigo'):
+    def ia_simulada(_t, _c, _s, usuario):
+        return json.dumps({k: texto(n) for k, n in extraer_lote(usuario).items()}, ensure_ascii=False)
+    return ia_simulada
+
+
+class BloqueoDePublicacion(unittest.TestCase):
+    def test_la_ia_caida_bloquea_la_publicacion(self):
+        def ia_caida(*_):
+            raise OSError('sin red')
+        with self.assertRaises(modulo_fabricar.FabricaBloqueada):
+            renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_caida)
+
+    def test_respuesta_fuera_de_esquema_cuenta_como_fallo(self):
+        respuestas = iter([json.dumps({'0': ''}), json.dumps({'0': 5}), json.dumps({'x': 'hola'})])
+        with self.assertRaises(modulo_fabricar.FabricaBloqueada):
+            renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, lambda *_: next(respuestas))
+
+    def test_un_texto_largo_sin_adaptar_bloquea(self):
+        def ia_parcial(_t, _c, _s, usuario):
+            return json.dumps({k: 'Llámanos' for k, n in extraer_lote(usuario).items() if n['texto'] == 'Contacta'})
+        with self.assertRaises(modulo_fabricar.FabricaBloqueada):
+            renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_parcial)
+
+    def test_la_marca_en_mayusculas_bloquea(self):
+        with self.assertRaises(modulo_fabricar.FabricaBloqueada):
+            renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_que_adapta(lambda n: 'ESTUDIO LUMEN'))
+
+    def test_texto_de_relleno_bloquea(self):
+        with self.assertRaises(modulo_fabricar.FabricaBloqueada):
+            renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_que_adapta(lambda n: 'Lorem ipsum dolor'))
+
+    def test_html_de_la_ia_queda_como_texto(self):
+        html = renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_que_adapta(lambda n: '<script>alert(1)</script> Hola'))
+        self.assertNotIn('<script>alert', html)
+        self.assertIn('&lt;script&gt;', html)
+
+    def test_pedido_completo_se_publica(self):
+        html = renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_que_adapta())
+        self.assertIn('Tu peluquería de confianza en Vigo', html)
+        self.assertNotIn('Lumen', html)
+
+    def test_un_nombre_que_contiene_la_marca_no_bloquea(self):
+        self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Lumen Ana</p>', 'Lumen', 'Lumen Ana'), [])
