@@ -53,6 +53,9 @@ jobs:
           # Resumen siempre en la PR: las licencias sin identificar (NOASSERTION) no hacen fallar la
           # acción, así quedan a la vista para revisarlas antes de fusionar.
           comment-summary-in-pr: always
+          # GHSA-fc5q-39xc-vjpf (picomatch <= 4.0.7) lo retiró GitHub el 18-11-2026; la acción aún lo
+          # marca. Quitar esta línea cuando deje de aparecer en «Vulnerabilities».
+          allow-ghsas: GHSA-fc5q-39xc-vjpf
 
   scorecard:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
