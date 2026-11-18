@@ -19,6 +19,7 @@ Presupuesto: el repo es privado y tiene 2.000 min/mes gratis de Actions. Lo pesa
 | Cabeceras de seguridad | Mozilla HTTP Observatory (MPL-2.0) | lunes y a mano | `empleados-semanales.yml` | No | Nota y tests fallidos; se arregla en `src/middleware.ts` |
 | Corrector | LanguageTool en Docker (LGPL) | lunes y a mano | `empleados-semanales.yml` + `qa/ortografia.mjs` | No | Tabla «Dónde · Texto · Propuesta». Se corrige en `manual/catalogo/catalogo.mjs` y se aplica con `gen-update.mjs`. Las marcas nuevas van a `PROPIAS` |
 | Multinavegador | Playwright: Chromium, Firefox y WebKit a 360 y 1280 px (Apache-2.0) | lunes y a mano | `empleados-semanales.yml` + `qa/navegadores.mjs` | Sí | Errores de JS o consola, HTTP ≥400 o desborde en móvil. Capturas en el artefacto `capturas`. Rutas en `qa/urls-navegadores.txt` |
+| HTML válido | html-validate (MIT), todas las URL del sitemap | lunes y a mano | `empleados-semanales.yml` + `qa/htmlvalidate.json` | Sí | `001.html:línea:col regla`; el número se traduce a URL en el desplegable del resumen. Apagadas a propósito: estilos en línea, `role="list"` (Safari lo necesita con `list-style:none`) y la barra de progreso propia |
 | Secretos | gitleaks (MIT), todo el historial | push a main y lunes | `seguridad.yml` | Sí | Si es real: rotar la clave YA y luego limpiar. Si es falso: su huella a `.gitleaksignore` |
 | Dependencias | npm audit (producción, altas y críticas) | push a main y lunes | `seguridad.yml` | No | Esperar a la PR de Dependabot o `npm audit fix` (nunca `--force` sin revisar) |
 | Actualizador | Dependabot (GitHub) | mensual, agrupado | `.github/dependabot.yml` | — | PR con el verificador en verde → fusionar. Las versiones mayores, una a una |
@@ -51,7 +52,6 @@ en CI se usan por su paquete o binario publicado y con versión fija.
 
 | Qué | Herramienta | Para qué nos sirve |
 |---|---|---|
-| HTML válido | html-validate (MIT) | Etiquetas mal cerradas, ids repetidos, atributos inválidos en las plantillas |
 | Código muerto | knip (ISC) | Ficheros, exports y dependencias que ya no usa nadie |
 | Accesibilidad 2.º motor | @axe-core/cli (MPL-2.0) | Complementa pa11y; reglas distintas |
 | Rendimiento real | sitespeed.io (MIT) | Vídeo de carga, métricas y comparación entre semanas |

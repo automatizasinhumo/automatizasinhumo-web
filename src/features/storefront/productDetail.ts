@@ -92,7 +92,8 @@ export async function loadProductDetail(
   options: ProductDetailOptions,
 ): Promise<LoadedProductDetail> {
   const product = options.slug ? await getProductBySlug(db, options.slug) : null;
-  if (!product) return { status: 'not_found' };
+  // Desactivado = fuera de la tienda (checkout y API ya lo rechazan): 404, no una ficha comprable.
+  if (!product || !product.active) return { status: 'not_found' };
 
   // Independent once the product is known. Run together so an uncached render
   // pays one concurrent wait instead of a serial chain.

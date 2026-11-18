@@ -162,4 +162,10 @@ describe('loadProductDetail public-ID policy', () => {
 
     await expect(load()).resolves.toEqual({ status: 'not_found' });
   });
+
+  it('reports not_found for a deactivated product (no purchasable page)', async () => {
+    rows.product = { ...rows.product, active: 0 };
+
+    await expect(load()).resolves.toEqual({ status: 'not_found' });
+  });
 });

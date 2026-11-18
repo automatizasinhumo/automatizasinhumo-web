@@ -8,6 +8,11 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
+    ignore:
+      # TS 7 rompe npm ci: @astrojs/check 0.9 pide typescript ^5 || ^6 (PR #3, 18/11/2026).
+      # Quitar cuando @astrojs/check acepte la 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       minor-and-patch:
         update-types:

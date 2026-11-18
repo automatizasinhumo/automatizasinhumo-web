@@ -33,6 +33,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     // Compra directa: el token del pedido se vuelve a comprobar aquí; un ?pedido= inventado no cuenta.
     const token = String(form.get('pedido') ?? '').slice(0, 80);
     if (token) pedido = await resolverPedido(env.DB, token, p.slug);
+    // Servicio desactivado: solo quien ya lo pagó puede seguir mandando sus datos.
+    if (!p.active && !pedido) return redirect('/empezar/consulta?error=servicio', 303);
   }
   form.set('producto', producto ?? 'Consulta general');
 

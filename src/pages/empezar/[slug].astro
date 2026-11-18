@@ -12,7 +12,9 @@ export const prerender = false;
 // previa y solo si le gusta se le envía el enlace de pago.
 const { slug = 'consulta' } = Astro.params;
 const consulta = slug === 'consulta';
-const producto = consulta ? null : await getProductBySlug(env.DB, slug);
+const encontrado = consulta ? null : await getProductBySlug(env.DB, slug);
+// Desactivado: 404 salvo que llegue con ?pedido= (ya pagado; se verifica abajo con resolverPedido).
+const producto = encontrado && (encontrado.active || Astro.url.searchParams.has('pedido')) ? encontrado : null;
 if (!consulta && !producto) {
   return new Response('Not found', { status: 404, headers: { 'cache-control': 'no-store' } });
 }
@@ -130,7 +132,7 @@ const label = 'block text-sm font-medium text-ink';
             <legend class="px-1 text-sm font-semibold text-ink">1. Tus datos de contacto</legend>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class={label}>Nombre *
-                <input class={input} name="nombre" required minlength="2" maxlength={LIMITES.nombre} autocomplete="name" />
+                <input class={input} type="text" name="nombre" required minlength="2" maxlength={LIMITES.nombre} autocomplete="name" />
               </label>
               <label class={label}>Email *
                 <input class={input} type="email" name="email" required maxlength={LIMITES.email} autocomplete="email" inputmode="email" />
@@ -230,7 +232,7 @@ const label = 'block text-sm font-medium text-ink';
         </form>
       </div>
 
-      <aside class="space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <aside class="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="Resumen de tu solicitud">
         {
           producto && (
             <div class="rounded-2xl border border-line bg-surface p-5">

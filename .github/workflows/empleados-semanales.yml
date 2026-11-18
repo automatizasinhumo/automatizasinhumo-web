@@ -5,9 +5,10 @@ name: Empleados semanales (staging)
 # empleado (qué mira, qué hacer con el aviso): manual/EMPLEADOS.md.
 #   - unlighthouse  (harlan-zw/unlighthouse, MIT): Lighthouse de TODA la web, no solo 6 URLs
 #   - observatory   (mdn/mdn-http-observatory, MPL-2.0): nota de cabeceras de seguridad
-#   - corrector     (LanguageTool, LGPL): erratas en todas las fichas (llms-full.txt)
+#   - corrector     (LanguageTool, LGPL): erratas en los textos del catálogo (manual/catalogo)
 #   - navegadores   (microsoft/playwright, Apache-2.0): Chromium + Firefox + WebKit, 360/1280 px
-# Solo «navegadores» puede poner el run en rojo; el resto avisa en el resumen.
+#   - html          (html-validate, MIT): HTML válido y accesible en todas las URL del sitemap
+# Solo «navegadores» y «html» pueden poner el run en rojo; el resto avisa en el resumen.
 
 on:
   schedule:
@@ -116,3 +117,23 @@ jobs:
           path: capturas/
           if-no-files-found: ignore
           retention-days: 14
+
+  html:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: HTML de todas las URL del sitemap
+        run: |
+          mkdir -p html && i=0
+          for u in $(curl -s "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+' | cut -c6- | sort -u); do
+            i=$((i+1)); curl -s "$u" > "html/$(printf %03d $i).html"; echo "$(printf %03d $i) $u" >> html/urls.txt
+          done
+          echo "$i páginas"
+          set +e; npx --yes html-validate@11.21.1 -c qa/htmlvalidate.json -f text html/*.html > hv.txt; rc=$?; set -e
+          { echo "## html-validate: $i páginas, $(grep -c ' error ' hv.txt) errores"; echo; echo '```'
+            sed -E 's#^html/##' hv.txt | head -60; echo '```'; echo; echo '<details><summary>Número → URL</summary>'; echo; sed 's/^/    /' html/urls.txt; echo '</details>'; } | tee -a "$GITHUB_STEP_SUMMARY"
+          exit $rc
