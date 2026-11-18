@@ -94,7 +94,7 @@ export function hallazgos(html) {
 export function rutasDeDemos() {
   const rutas = new Set(DEMOS.map(([slug]) => slug));
   for (const lista of Object.values(EXTRA)) for (const [ruta] of lista) rutas.add(ruta);
-  return [...rutas].sort();
+  return [...rutas].sort((x, y) => x.localeCompare(y));
 }
 
 async function main() {

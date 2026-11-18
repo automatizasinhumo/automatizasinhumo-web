@@ -10,7 +10,8 @@
 // Solo se guarda una respuesta que el vigilante da por buena. Caché:
 // manual/demos/localizaciones-cache.json (original -> español); una reconstrucción solo
 // pide a la IA las frases nuevas, y una traducción se corrige a mano editando la caché.
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { load } from 'cheerio';
@@ -32,23 +33,28 @@ export const SISTEMA =
   'son un nombre propio corto. Conserva emojis, flechas y signos del principio y del final. ' +
   'Recibes un objeto JSON con claves numeradas; responde SOLO con un objeto JSON con las mismas claves.';
 
-const MONEDA = /(?:US)?\$\s?(\d[\d,]*(?:\.\d+)?)\s?(k|m|bn)?\b|£\s?(\d[\d,]*(?:\.\d+)?)\s?(k|m|bn)?\b|(\d[\d,]*(?:\.\d+)?)\s?(?:USD|GBP)\b/gi;
+// Símbolo delante («$40», «US$ 5», «£4.2bn») o código detrás («12000 USD»). El código detrás
+// exige que no haya cifra antes (lookbehind) para no reintentar desde cada dígito.
+const MONEDA_DELANTE = /(?:US\$|\$|£) ?(\d[\d,]*(?:\.\d+)?) ?(k|m|bn)?\b/gi;
+const MONEDA_DETRAS = /(?<![\d,.])(\d[\d,]*(?:\.\d+)?) ?(?:USD|GBP)\b/gi;
+const MILES = new Intl.NumberFormat('es-ES'); // 1250 → «1250», 12000 → «12.000» (norma RAE)
 
 function cifra(n) {
-  const [ent, dec] = n.replace(/,/g, '').split('.');
-  const miles = ent.length > 4 ? ent.replace(/\B(?=(\d{3})+$)/g, '.') : ent;
+  const [ent, dec] = n.replaceAll(',', '').split('.');
+  const miles = MILES.format(BigInt(ent));
   return dec === undefined ? miles : `${miles},${dec}`;
 }
 
 /** Importes en $, US$, £, USD o GBP a euros con la misma cifra: «$1,250.50» → «1250,50 €», «£4.2bn» → «4,2 mil millones de €». */
 export function aEuros(texto) {
   return texto
-    .replace(MONEDA, (_, a, sa, b, sb, c) => {
-      const n = cifra(a ?? b ?? c);
-      const s = (sa ?? sb ?? '').toLowerCase();
+    .replace(MONEDA_DELANTE, (_, num, suf) => {
+      const n = cifra(num);
+      const s = (suf ?? '').toLowerCase();
       return s === 'k' ? `${n} mil €` : s === 'm' ? `${n} millones de €` : s === 'bn' ? `${n} mil millones de €` : `${n} €`;
     })
-    .replace(/€\s?\/\s?mo\b/g, '€/mes');
+    .replace(MONEDA_DETRAS, (_, num) => `${cifra(num)} €`)
+    .replace(/€ ?\/ ?mo\b/g, '€/mes');
 }
 
 /** En los scripts de la página: `£${x}` o `$${x}` → `${x} €`. */
@@ -115,7 +121,9 @@ function credenciales() {
   let tok = process.env.CLOUDFLARE_API_TOKEN;
   let acc = process.env.CLOUDFLARE_ACCOUNT_ID;
   // whoami también renueva el token OAuth de wrangler si ha caducado (por eso va antes de leerlo).
-  const quien = acc && tok ? '' : execSync('npx wrangler whoami', { encoding: 'utf8' });
+  // El wrangler del proyecto con el node actual: sin depender de lo que haya en el PATH.
+  const wrangler = createRequire(import.meta.url).resolve('wrangler/bin/wrangler.js');
+  const quien = acc && tok ? '' : execFileSync(process.execPath, [wrangler, 'whoami'], { encoding: 'utf8' });
   acc ||= quien.match(/[0-9a-f]{32}/)?.[0];
   if (!tok) {
     const cfg = join(process.env.APPDATA ?? '', 'xdg.config/.wrangler/config/default.toml');
@@ -155,8 +163,8 @@ export function marcados($) {
     if ($(el).closest(OMITIR).length) return;
     for (const n of $(el).contents().toArray()) {
       if (n.type !== 'text' || !n.data.trim() || !problemas(n.data).length) continue;
-      const ini = n.data.match(/^\s*/)[0];
-      const fin = n.data.match(/\s*$/)[0];
+      const ini = n.data.slice(0, n.data.length - n.data.trimStart().length);
+      const fin = n.data.slice(n.data.trimEnd().length);
       out.push({ texto: n.data.trim(), poner: (v) => (n.data = ini + v + fin) });
     }
     for (const a of ATRIBUTOS) {
