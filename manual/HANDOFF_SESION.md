@@ -1,57 +1,72 @@
-# Traspaso de sesión — Automatiza sin humo (17-11-2026)
+# Traspaso de sesión — Automatiza sin humo (18-11-2026)
 
 ## Pedido
-- Seguir montando la tienda (`C:\GIT\automatizasinhumo`: Astro SSR + Cloudflare Workers + D1 + Tailwind v4, 71 servicios a precio cerrado).
-- Mejorar el diseño, la UX y el SEO. Imágenes nítidas, sin plagio ni logos de terceros.
-- Textos de marketing centrados en el resultado y el plazo. No decir nunca «código abierto».
-- Mostrar el lado humano: atiende David Porto Díaz.
-- «Empieza gratis»: el cliente paga después de ver la vista previa. Seguimiento para el cliente.
-- Aplicar las ideas de la auditoría de ChatGPT, consultado en el navegador integrado sin iniciar sesión.
+- Tienda 100 % automatizada y gratuita, con el mínimo de tokens.
+- Claude hace de **arquitecto**: adopta repos públicos (MIT/Apache) en vez de desarrollar de cero y homogeneiza en lugar de parchear.
+- El equipo:
+  - GPT (Edge 9241) busca.
+  - Copilot (chat de VS Code) programa.
+  - CodeRabbit y SonarCloud revisan.
+  - Claude reparte el trabajo, revisa y fusiona.
+- Todo cambio va por PR.
+- El Edge 9241 se cierra cuando no se usa, porque gasta mucha RAM.
 
-## Hecho (todo en staging y en origin/main)
-- Último commit: `fb9f428` «Compra directa clara: demo en la ficha, doble camino y contacto humano». Staging: versión a2d6818b. Seed aplicado en D1 staging.
-- **Ficha**: visor de demo dentro (iframe, `#demo`), bloque `#comprar` con garantía de 7 días y «¿Lo tienes que montar tú?». Datos en `src/data/demos-producto.json` (lo genera `manual/demos/gen-galeria.mjs`).
-- **Un solo mensaje de pago** en portada, Cómo funciona, FAQ, pie, catálogo y barra de aviso: «Contrátalo directamente con garantía o pruébalo gratis».
-- **Catálogo**: orden curado por datos (`created_at` escalonado en `gen-sql.mjs`), «desde 149 €», sin jerga (Cloudflare solo en privacidad y herramientas), carrito en español.
-- **Tarjetas**: marco de color mientras carga la imagen (ya no se ven en blanco).
-- **Contacto flotante** «¿Dudas? Habla con una persona» (sin JS, `<details>`): WhatsApp, Telegram y email en Admin → Ajustes (`save_contact`). Solo salen los canales rellenados; hoy no hay ninguno en staging, así que no se ve. Probado en móvil con un email temporal, ya borrado.
-- **QA** (`qa/smoke.sh`, workflow `empleados-qa.yml`): ahora comprueba la ficha (compra + demo + iframe), el formulario y que la portada no tenga jerga. La ficha se añade a Lighthouse y pa11y.
-- **Pruebas**: vitest 922 en verde; astro check 0 errores; smoke contra staging en verde.
+## Hecho hoy
+- **Mapa de adopción** (GPT, ronda 07): `manual/auditorias-gpt/ronda-07-respuesta.md`, con 10 adopciones priorizadas y los repos comprobados.
+- **PR #7 fusionada** (`e723ea9`):
+  - Demos sin `#template-bar` y con las 309 páginas traducidas. El worker de demos está desplegado.
+  - Ciudad limpia en las vistas previas.
+  - **Puerta de QA** en `manual/fabrica/vistas-previas.py`: la web responde, aparece el nombre del negocio, no quedan correos ni teléfonos de la plantilla y no hay imágenes rotas. Si la pasa, la nota lleva «QA ok».
+  - **Tarea programada** `automatizasinhumo-vistas-previas` (cada 15 min). Se colgaba porque wrangler esperaba una respuesta por consola; ahora usa `CI=1`, `timeout` y `stdin` a DEVNULL. Comprobado: termina en 12 s.
+  - `scripts/gpt/ask.py`:
+    - Abre y cierra el Edge 9241 por su cuenta. El perfil se ha movido a `%LOCALAPPDATA%\automatizasinhumo\edge-9241`.
+    - No pisa la salida si no hay respuesta, y `--leer` acepta respuestas cortas.
+- **SonarCloud** importado: `davidpd89_automatizasinhumo-web`. Revisa cada PR y la #7 quedó en verde.
+- **Dependabot**: #2 (vitest 5) y #4 (stripe 23) fusionadas. Verify de main en verde.
+- Borrados los workers de prueba `web-prueba-fontaneria-lois` y `web-s-gh2qc2aw`.
+- **Cola de Copilot** en `manual/equipo/copilot.md`:
+  - C1: componentes.
+  - C2: blog y sectores, con 3 artículos.
+  - C3: correo de vista previa y recordatorios a 3 y 7 días desde el cron.
+  - C4: hallazgos reales de Sonar.
+  - C5 y C6 (aprobación → pago y versiones): en la PR #8.
 
 ## Falta
-1. **David**: rellenar WhatsApp, Telegram y email en Admin → Ajustes (botón de contacto); conectar la pasarela (claves en Admin → Ajustes); MX del email; NIF y domicilio en el aviso legal; dominio de producción con `CANONICAL_ORIGIN`.
-2. **Probar el flujo de pago completo** con Stripe en modo test: comprar → pedido → «Rellenar mis datos» → solicitud con «Pedido pagado».
-3. **Admin → Solicitudes**: etiqueta destacada para las que traen «Pedido pagado».
-4. **Imágenes**: `public/images/demos/editor-bloques.png` y repaso de `gen-imagenes.mjs`.
-5. Comparador antes/después y contador de proyectos, cuando haya datos reales.
+1. **Copilot, C1**: está a medias en `C:\GIT\automatizasinhumo-copilot`, rama `copilot/c1-componentes`. Tiene `homeServices.ts` y `sections/` sin commit.
+   - Un `git reset --hard` mío deshizo sus cambios en `HomeHero.astro`, `index.astro`, `products/[slug].astro` y `ProductDetail.astro`. Ya le he pedido que los vuelva a aplicar.
+   - **David**: mira la ventana de VS Code del worktree por si Copilot espera confirmación.
+   - Después: revisar la PR, fusionarla y encargar C2, C3, C4…
+2. **PR #8** (cola C5 y C6): fusionar cuando esté en verde.
+3. **Traducción de las demos**: quedan restos como «Skip to content», «Check», «£» y algún calco («Tratos»). Hace falta un glosario o una pasada final.
+4. Hacerlo por adopción, no a mano:
+   - 10.1: fábrica en GitHub Actions con wrangler-action.
+   - 10.2: solicitud → fábrica sin el PC encendido.
+5. Sonar en main: 24 bugs y 29 vulnerabilidades. Copilot arregla los reales (C4); el resto es ruido (migraciones, `npx`), que se puede marcar en Sonar con la sesión de David.
+6. Pendientes de David del 17/11 (contacto en Ajustes, pasarela, MX, aviso legal, dominio).
 
 ## Estado vivo
-- Rama `main` limpia y subida a `origin`. Repo: `davidpd89/automatizasinhumo-web`.
-- **Staging**: https://automatizasinhumo-staging.davidpd89.workers.dev
-- **Desplegar staging** (desde la raíz del repo, en Git Bash):
-
-      cp wrangler.jsonc "$TMP/wrangler.jsonc.orig" && cp .instances/automatizasinhumo-staging.wrangler.jsonc wrangler.jsonc && npx astro build > "$TMP/build.log" 2>&1 && npx wrangler deploy 2>&1 | grep "Version ID"; cp "$TMP/wrangler.jsonc.orig" wrangler.jsonc
-
-- **Si una página sale sin estilos justo después de desplegar**: recarga con `?v=N`. Si sigue igual, compara el hash de `Layout.*.css` en `dist/server/entry.mjs` con el de `dist/client/_astro/`.
+- `main` = `origin/main`.
+- Árbol principal en la rama `docs/cola-copilot-c5-c6` (PR #8).
+- La tarea programada ejecuta el `.py` del árbol principal: dejarlo en main o en una rama derivada de main.
+- Edge 9241 cerrado. Lo abre `scripts/gpt/ask.py` cuando hace falta.
+- Encargar a Copilot desde su worktree: `cd C:/GIT/automatizasinhumo-copilot && code chat -r -m agent "<tarea>"`.
+  - **Nunca** usar `git reset` ni `git checkout` en ese worktree.
 
 ## Reglas del proyecto
 - **Repos**:
   - No tocar `davidpd89/saas-automation-lab` (producción).
   - `C:\GIT\new-website` es de solo lectura.
-  - Push solo a `origin main`, nunca a `upstream` (ddyy/minshop).
+  - Push solo a `origin`, nunca a `upstream`.
   - Con `gh`, siempre `-R davidpd89/automatizasinhumo-web`.
   - Sin `git stash`.
 - **Datos y dinero**:
-  - Nunca mostrar secretos (están en `manual/CREDENCIALES_STAGING.local`).
-  - Nada de pagos, planes de pago ni tarjetas.
+  - Nunca mostrar secretos (`manual/CREDENCIALES_STAGING.local`).
+  - Nada de pagos ni tarjetas.
   - Datos personales: el nombre sí, la dirección no.
-- **Repos de terceros**:
-  - Clonar en un directorio vacío y no ejecutarlos nunca.
-  - Copiar solo estáticos.
-  - Los repos sin licencia son solo de referencia. Excluido Kahaan83.
-- **Herramientas**:
-  - No molestar a Edge en el puerto 9241.
-  - En Git Bash, prefijar cada comando con `cd /c/GIT/automatizasinhumo && ...`.
-  - Los ficheros usan CRLF.
-  - Los componentes del tema no pueden usar `Astro.url`.
-- **Commits**: terminan con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- **Estilo y commits**:
+  - CRLF.
+  - Nunca decir «código abierto».
+  - Commits con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
+## Prompt para continuar
+> Automatiza sin humo (`C:\GIT\automatizasinhumo`). Lee `manual/HANDOFF_SESION.md` y sigue desde «Falta»: revisa el avance de Copilot en C1 (worktree `C:\GIT\automatizasinhumo-copilot`, sin resetearlo), fusiona la PR #8 si está en verde y encarga la siguiente tarea de `manual/equipo/copilot.md`. Eres el arquitecto: adopción de repos, no desarrollo de cero; todo por PR.
