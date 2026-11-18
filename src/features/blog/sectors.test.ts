@@ -5,10 +5,16 @@ import demosPorProducto from '../../data/demos-producto.json';
 import sectoresData from '../../data/sectores.json';
 import { demosForService, SECTORS, servicesForSector, type SectorPage } from './sectors';
 
-function fakeDb(findProduct: (slug: string) => Promise<Product | null>): D1Database {
+function fakeDb(
+  findProduct: (slug: string) => Promise<Product | null>,
+  variantPrices: number[] = [],
+): D1Database {
   return {
     prepare: () => ({
-      bind: (slug: string) => ({ first: () => findProduct(slug) }),
+      bind: (slug: string) => ({
+        first: () => findProduct(slug),
+        all: async () => ({ results: variantPrices.map((price_cents) => ({ price_cents })) }),
+      }),
     }),
   } as unknown as D1Database;
 }
@@ -89,6 +95,17 @@ describe('sector pages', () => {
 
     expect(services.map((service) => service.slug)).toEqual(['web-una-pagina']);
     expect(services[0].name).toBe('web-una-pagina');
+  });
+
+  it('shows the same starting price as the product page when there are variants', async () => {
+    const active = product('web-una-pagina', 1);
+    const services = await servicesForSector(
+      fakeDb(async (slug) => (slug === active.slug ? active : null), [24900, 39900]),
+      sectorWithTwoServices,
+      'EUR',
+    );
+    expect(services[0].formattedPrice).toMatch(/249/);
+    expect(services[0].formattedPrice).not.toMatch(/149/);
   });
 
   it('propagates database failures', async () => {

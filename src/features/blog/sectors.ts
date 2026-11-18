@@ -2,6 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 import demosPorProducto from '../../data/demos-producto.json';
 import sectoresData from '../../data/sectores.json';
 import { getProductBySlug } from '../products/db';
+import { listVariants } from '../products/variants';
 import { formatMoney } from '../../money';
 
 type ServiceSlug = keyof typeof demosPorProducto;
@@ -56,12 +57,15 @@ export async function servicesForSector(
         return null;
       }
 
+      // Mismo «Desde» que la ficha: con variantes, el precio mínimo de las activas.
+      const variants = await listVariants(db, product.id);
+      const fromCents = variants.length > 0 ? Math.min(...variants.map((v) => v.price_cents)) : product.price_cents;
       const demos = demosForService(slug);
       return {
         slug,
         publicId: product.public_id,
         name: product.name,
-        formattedPrice: formatMoney(product.price_cents, currency),
+        formattedPrice: formatMoney(fromCents, currency),
         demos,
       };
     }),
