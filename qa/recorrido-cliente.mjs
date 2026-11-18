@@ -1,0 +1,152 @@
+// Empleado «recorrido del cliente» (C22): hace en un navegador real lo que hace un cliente,
+// a 390 px (móvil) y a 1280 px:
+//   portada → ficha del servicio → «Contratar ahora» abre el pago (sin pagar)
+//   → «Empieza gratis» → formulario por pasos → gracias con su número → página de estado
+//   → el mismo formulario enviado otra vez devuelve la misma solicitud (no crea otra).
+// Falla si falta un botón, si una página da error o si salta un error de JavaScript.
+// El correo es la dirección de pruebas de Resend (delivered@resend.dev): no escribe a nadie real.
+// uso: node qa/recorrido-cliente.mjs <base> [slug=web-una-pagina]
+import { appendFileSync, mkdirSync } from 'node:fs';
+import { chromium } from 'playwright';
+
+const [base, slug = 'web-una-pagina'] = process.argv.slice(2);
+if (!base) throw new Error('uso: node qa/recorrido-cliente.mjs <base> [slug]');
+const ANCHOS = [390, 1280];
+const IGNORAR = [/cloudflareinsights/i, /favicon/i, /Failed to load resource.*\b(404|net::ERR_BLOCKED)/i];
+mkdirSync('capturas', { recursive: true });
+
+const fallos = [];
+const pasos = [];
+
+async function recorrido(ctx, ancho) {
+  const pg = await ctx.newPage();
+  const errores = [];
+  pg.on('pageerror', (e) => errores.push('JS: ' + e.message));
+  pg.on('console', (m) => {
+    if (m.type() === 'error' && !IGNORAR.some((r) => r.test(m.text()))) errores.push('consola: ' + m.text());
+  });
+  const paso = async (nombre, fn) => {
+    try {
+      await fn();
+      pasos.push(`${ancho}px ✔ ${nombre}`);
+    } catch (e) {
+      fallos.push(`${ancho}px ${nombre} → ${e.message.split('\n')[0]}`);
+      await pg.screenshot({ path: `capturas/recorrido-${ancho}-fallo.png`, fullPage: true }).catch(() => {});
+      throw e;
+    }
+  };
+  const ir = async (url) => {
+    const r = await pg.goto(new URL(url, base).toString(), { waitUntil: 'load', timeout: 45000 });
+    if (!r || r.status() >= 400) throw new Error(`HTTP ${r?.status()} en ${url}`);
+  };
+
+  try {
+    await paso('la portada enlaza el servicio', async () => {
+      await ir('/');
+      if (!(await pg.locator(`a[href="/products/${slug}"]`).count())) throw new Error(`sin enlace a /products/${slug}`);
+    });
+
+    await paso('la ficha tiene «Contratar ahora» y «Empieza gratis»', async () => {
+      await ir(`/products/${slug}`);
+      await pg.getByRole('button', { name: /Contratar/i }).first().waitFor({ state: 'visible', timeout: 10000 });
+      await pg.getByRole('link', { name: /Empieza gratis/i }).first().waitFor({ state: 'visible', timeout: 10000 });
+    });
+
+    await paso('«Contratar ahora» abre el pago', async () => {
+      // Solo cuenta si llega a la página de pago (/express) y esta trae su formulario de cobro:
+      // una redirección a otra página con título normal no vale como éxito.
+      await Promise.all([
+        pg.waitForURL((u) => u.pathname === '/express', { timeout: 30000 }),
+        pg.getByRole('button', { name: /Contratar/i }).first().click(),
+      ]);
+      await pg.locator('form[action="/api/checkout"]').first().waitFor({ state: 'visible', timeout: 30000 });
+      await pg.screenshot({ path: `capturas/recorrido-${ancho}-pago.png` });
+    });
+
+    await paso('«Empieza gratis» abre el formulario', async () => {
+      await ir(`/products/${slug}`);
+      await Promise.all([
+        pg.waitForURL(`**/empezar/${slug}**`, { timeout: 30000 }),
+        pg.getByRole('link', { name: /Empieza gratis/i }).first().click(),
+      ]);
+      await pg.locator('#solicitud-form').waitFor();
+    });
+
+    let enviado;
+    await paso('el formulario por pasos se rellena y se envía', async () => {
+      const f = pg.locator('#solicitud-form');
+      const valores = {
+        nombre: 'Prueba automática',
+        email: 'delivered@resend.dev',
+        campo_0: 'Peluquería de prueba (recorrido automático)',
+        mensaje: 'Solicitud de prueba del recorrido automático. Se puede borrar.',
+      };
+      const enviar = f.locator('button[type=submit]');
+      for (let i = 0; i < 8 && !(await enviar.isVisible()); i++) {
+        await rellenarVisibles(f, valores);
+        await f.locator('[data-siguiente]').click();
+      }
+      await rellenarVisibles(f, valores);
+      await f.locator('input[name=consentimiento]').check();
+      enviado = await f.evaluate((form) => Object.fromEntries(new FormData(form)));
+      await pg.screenshot({ path: `capturas/recorrido-${ancho}-formulario.png` });
+      await Promise.all([pg.waitForURL('**/empezar/gracias**', { timeout: 30000 }), enviar.click()]);
+    });
+
+    const id = new URL(pg.url()).searchParams.get('id');
+    await paso('la página de gracias da el número de solicitud', async () => {
+      if (!/^S-[A-Z0-9]{8}$/.test(id ?? '')) throw new Error(`número de solicitud raro: ${id}`);
+      await pg.getByText(id).first().waitFor({ timeout: 10000 });
+    });
+
+    await paso('la página de estado encuentra la solicitud', async () => {
+      await ir(`/empezar/estado?id=${encodeURIComponent(id)}`);
+      await pg.getByText(id).first().waitFor({ timeout: 10000 });
+      await pg.screenshot({ path: `capturas/recorrido-${ancho}-estado.png` });
+    });
+
+    await paso('el mismo envío repetido no crea otra solicitud', async () => {
+      if (!enviado?.envio) throw new Error('el formulario no lleva token de envío');
+      // Origin explícito: el middleware rechaza (403) el POST de formulario sin origen coincidente.
+      const r = await pg.request.post(new URL('/api/solicitudes', base).toString(), {
+        form: enviado,
+        maxRedirects: 0,
+        headers: { Origin: new URL(base).origin },
+      });
+      if (r.status() !== 303) throw new Error(`el reenvío respondió HTTP ${r.status()} en vez de 303`);
+      const otra = new URL(r.headers().location ?? '', base).searchParams.get('id');
+      if (otra !== id) throw new Error(`el reenvío creó ${otra} en vez de devolver ${id}`);
+    });
+  } catch {
+    // El fallo ya está anotado en su paso; los siguientes dependen de él.
+  } finally {
+    for (const e of errores) fallos.push(`${ancho}px ${e}`);
+    await pg.close();
+  }
+}
+
+/** Rellena los campos conocidos que se ven y están vacíos (el formulario muestra un paso cada vez). */
+async function rellenarVisibles(form, valores) {
+  for (const [nombre, valor] of Object.entries(valores)) {
+    const campo = form.locator(`[name="${nombre}"]`);
+    if ((await campo.count()) && (await campo.isVisible()) && !(await campo.inputValue())) await campo.fill(valor);
+  }
+}
+
+const br = await chromium.launch();
+for (const ancho of ANCHOS) {
+  const ctx = await br.newContext({ viewport: { width: ancho, height: 850 }, locale: 'es-ES' });
+  await recorrido(ctx, ancho);
+  await ctx.close();
+}
+await br.close();
+
+const resumen = [
+  `## Recorrido del cliente: ${fallos.length ? `${fallos.length} fallos` : 'completo'} (${ANCHOS.join(' y ')} px)`,
+  '',
+  ...pasos.map((p) => `- ${p}`),
+  ...fallos.map((f) => `- ✘ ${f}`),
+].join('\n');
+console.log(resumen);
+if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, resumen + '\n');
+process.exit(fallos.length ? 1 : 0);
