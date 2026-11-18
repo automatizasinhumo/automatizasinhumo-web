@@ -43,7 +43,7 @@ for (const [nombre, tipo] of [['chromium', chromium], ['firefox', firefox], ['we
       let errores = await revisar(ctx, ancho, nombre, ruta);
       // Un corte de red puntual (reset, timeout) entre el runner y Cloudflare no es un fallo de
       // la web: se repite la página una vez y solo cuenta si vuelve a fallar.
-      if (errores.length && errores.every((e) => RED.test(e))) {
+      if (errores.length && errores.every((e) => /^(consola|carga): /.test(e) && RED.test(e))) {
         const segundo = await revisar(ctx, ancho, nombre, ruta);
         if (!segundo.length) console.log(`aviso: ${nombre} ${ancho}px ${ruta} falló por red y pasó al repetir (${errores[0]})`);
         errores = segundo;
