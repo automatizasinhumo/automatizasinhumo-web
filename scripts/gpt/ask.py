@@ -2,7 +2,7 @@
 uso: python ask.py <prompt.txt> <salida.md> [--new | --chat URL] [--wait MIN] [--leer] [--no-cerrar]
 Por defecto sigue en el último chat (last_chat.txt); --new abre uno nuevo en el proyecto.
 Edge 9241 se abre solo si está cerrado y se cierra al terminar (ChatGPT consume mucha RAM);
---no-cerrar lo deja abierto. Perfil con la sesión: C:\Temp\automatizasinhumo-edge-9241."""
+--no-cerrar lo deja abierto. Perfil con la sesión: %LOCALAPPDATA%\automatizasinhumo\edge-9241."""
 import os, re, subprocess, sys, time, urllib.request
 from playwright.sync_api import sync_playwright
 
@@ -17,7 +17,8 @@ SEND = 'button[data-testid="send-button"], button[type="submit"][aria-label="Env
 
 PUERTO = 9241
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-PERFIL = r"C:\Temp\automatizasinhumo-edge-9241"
+# Perfil con la sesión de ChatGPT, en la carpeta del usuario (no en un temporal compartido).
+PERFIL = os.path.join(os.environ["LOCALAPPDATA"], "automatizasinhumo", "edge-9241")
 
 
 def edge_vivo():

@@ -83,11 +83,13 @@ def qa(url, p):
     texto = re.sub(r'<script.*?</script>|<style.*?</style>|<[^>]+>', ' ', html, flags=re.S)
     if p['negocio'].lower() not in H.unescape(texto).lower():
         problemas.append('no aparece el nombre del negocio')
-    ajenos = set(re.findall(r'[\w.+-]+@[\w-]+\.[a-z]{2,}', html, re.I)) - {p['email']}
+    # Correos por tokens (sin regex con retroceso): «usuario@dominio.tld» que no sea el del cliente.
+    tokens = (x.strip('.,;:!?') for x in re.split(r"[\s\"'<>()=]", html))
+    ajenos = {x.removeprefix('mailto:') for x in tokens if x.count('@') == 1 and '.' in x.split('@')[1]} - {p['email']}
     if ajenos:
         problemas.append('correos de la plantilla: ' + ', '.join(sorted(ajenos)[:3]))
     propio = re.sub(r'\D', '', p['telefono'])[-9:]
-    for tel in re.findall(r'\+?\d[\d\s().-]{7,}\d', texto):
+    for tel in re.findall(r'[\d\s().+-]{9,}', texto):  # una sola clase: lineal
         digitos = re.sub(r'\D', '', tel)
         if len(digitos) >= 9 and (not propio or propio not in digitos):
             problemas.append('teléfono de la plantilla: ' + tel.strip())
