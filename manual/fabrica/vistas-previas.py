@@ -9,7 +9,7 @@ en «en_preparacion» con la URL de la vista previa en la nota. La web pasa una 
 nombre del negocio, sin correos/teléfonos de la plantilla, sin imágenes rotas); si la pasa, la nota
 lleva «QA ok» y el cron del Worker manda el correo de revisión. Si no, queda para revisar a mano.
 """
-import html as H, json, os, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request
+import html as H, json, os, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request, uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -27,7 +27,10 @@ EN_CURSO = 'Vista previa automática: fabricando'
 # Reserva con caducidad: una reclamación sin terminar (proceso cancelado) se puede volver a reclamar
 # pasado este plazo. Fabricar dos veces la misma solicitud solo vuelve a desplegar el mismo Worker.
 CADUCA = "datetime('now', '-60 minutes')"
-DISPONIBLE = f"(estado = 'nueva' OR (estado = 'en_preparacion' AND nota = {{en_curso}} AND updated_at < {CADUCA}))"
+# Cada reserva lleva su propio identificador en la nota («... fabricando #<uuid>»): solo quien la tiene
+# puede cerrarla, así un proceso cuya reserva ya caducó y otro reclamó no pisa el resultado nuevo.
+DISPONIBLE = (f"(estado = 'nueva' OR (estado = 'en_preparacion' AND nota LIKE {{en_curso}} "
+              f"AND updated_at < {CADUCA}))")
 
 
 def d1(sql):
@@ -144,10 +147,11 @@ def procesar(public_id, p):
     no fabrican la misma. Devuelve True si la ha intentado. Ningún fallo (D1 incluido) tumba el lote:
     si no se puede guardar la nota, la reserva caduca y otra pasada la recupera."""
     donde = f"public_id = {sql_txt(public_id)}"
+    reserva = f'{EN_CURSO} #{uuid.uuid4().hex}'
     try:
-        reclamada = d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(EN_CURSO)}, "
+        reclamada = d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(reserva)}, "
                        f"updated_at = datetime('now') WHERE {donde} AND "
-                       f"{DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} RETURNING public_id")
+                       f"{DISPONIBLE.format(en_curso=sql_txt(EN_CURSO + '%'))} RETURNING public_id")
     except RuntimeError as e:
         print('  sin reclamar:', e)
         FALLOS_D1.append(1)
@@ -171,8 +175,9 @@ def procesar(public_id, p):
         print('  fallo:', type(e).__name__ if PUBLICO else f'{type(e).__name__}: {e}')
         nota = f'Vista previa automática: falló ({type(e).__name__}, revisar a mano)'
     try:
-        d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
-           f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(EN_CURSO)}")
+        if not d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
+                  f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(reserva)} RETURNING public_id"):
+            print('  reserva sustituida por otro proceso: este resultado no se guarda')
     except RuntimeError as e:
         print('  nota sin guardar (la reserva caduca y se reintenta):', e)
         FALLOS_D1.append(1)
@@ -190,7 +195,7 @@ def main():
     # Solo servicios con plantilla: las solicitudes sin plantilla no ocupan el LIMIT.
     slugs = ', '.join(sql_txt(s) for s in sorted(mapa))
     filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje FROM solicitudes "
-               f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} AND slug IN ({slugs}) "
+               f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO + '%'))} AND slug IN ({slugs}) "
                "ORDER BY created_at LIMIT 50")
     hechas = 0
     for n, f in enumerate(filas, 1):
