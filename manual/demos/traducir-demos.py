@@ -33,7 +33,7 @@ def motor():
     return _motor
 
 
-EMAIL = re.compile(r'([\w.+-]+@[\w-]+(?:\.[\w-]+)+)')  # un correo no se traduce (hello@ -> hola@ es otra dirección)
+EMAIL = re.compile(r'([^\s@]+@[^\s@]+)')  # un correo no se traduce (hello@ -> hola@ es otra dirección)
 ES = re.compile(r'\b(y|de|del|para|con|tu|tus|las|los|una|por|sin)\b', re.I)
 EN = re.compile(r'\b(the|and|of|for|with|your|to|an|by|in|on|is|are|we|you|our)\b', re.I)
 # Errores conocidos de Argos en nombres de demo (revisión de la PR #29).
@@ -68,7 +68,7 @@ def traducir(texto):
         cache[nucleo] = ''.join(p if i % 2 else traducir(p) for i, p in enumerate(partes))
     if nucleo not in cache:
         # Argos convierte «&» en «&quot;»: se le da «and», que traduce a «y».
-        cache[nucleo] = motor().translate(re.sub(r'\s*&(?:amp;)?\s*', ' and ', nucleo))
+        cache[nucleo] = motor().translate(' '.join(re.sub(r'&(?:amp;)?', ' and ', nucleo).split()))
     ini = texto[: len(texto) - len(texto.lstrip())]
     fin = texto[len(texto.rstrip()):]
     return ini + cache[nucleo] + fin

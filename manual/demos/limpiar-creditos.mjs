@@ -39,7 +39,7 @@ export function limpiarCreditos(html, titulo = 'Diseño de ejemplo') {
     const t = $(el).text().trim();
     if (t.length <= MAX && CREDITO.test(t) && $(el).find('a, button, form, input').length === 0) {
       // Conserva el «© año Negocio» si va en el mismo párrafo.
-      const copy = t.match(/^©[^.—–·|]{0,80}?(?=\s*[.—–·|]|\s+(?:una?|a|plantilla|fotos?|photos?|template))/i);
+      const copy = t.match(/^©[^.—–·|]{0,80}?(?=\s*[.—–·|]|\s+(?:una?|a|plantilla|fotos?|photos?|template)\b)/i);
       if (copy) $(el).text(copy[0].trim()); else $(el).remove();
     }
   });
