@@ -103,44 +103,64 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
   // Un reenvío puede fallar sobre un correo que ya se entregó: entonces se conserva la
   // última entrega aceptada (estado, fecha y contenido) y el fallo solo queda anotado, para
   // que los seguimientos sigan viendo esa versión como enviada.
-  const previo = e.reenviar
-    ? await db
-        .prepare("SELECT asunto, cuerpo FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio = 'enviado'")
-        .bind(e.id, e.tipo, e.version)
-        .first<{ asunto: string; cuerpo: string }>()
-    : null;
+  // La reserva exige que esa entrega siga siendo la leída: si otro reenvío la cambió entre
+  // medias, restaurar la vieja mezclaría su contenido con la fecha nueva. Se vuelve a leer.
+  type Previo = { asunto: string; cuerpo: string; enviado_at: string | null };
+  const leerPrevio = () =>
+    db
+      .prepare("SELECT asunto, cuerpo, enviado_at FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio = 'enviado'")
+      .bind(e.id, e.tipo, e.version)
+      .first<Previo>();
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
   const exigir = sigueIgual ? `AND ${sigueIgual}` : '';
-  const reserva = await db
-    .prepare(
-      `UPDATE notificaciones SET
-         asunto = ?, cuerpo = ?,
-         estado_envio = 'enviando', reservado_at = datetime('now'), reserva = ?,
-         intentos = intentos + CASE WHEN estado_envio = 'enviando' AND asunto = ? AND cuerpo = ? THEN 0 ELSE 1 END
-       WHERE solicitud_public_id = ? AND tipo = ? AND version = ?
-         AND ((estado_envio IN (${permitidos}) AND intentos < ?)
-           OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')
-               AND ((asunto = ? AND cuerpo = ?) OR intentos < ?)))
-         ${exigir}
-       RETURNING id, intentos, asunto, cuerpo`,
-    )
-    .bind(
-      e.asunto,
-      e.texto,
-      token,
-      e.asunto,
-      e.texto,
-      e.id,
-      e.tipo,
-      e.version,
-      e.maxIntentos ?? 1_000_000,
-      e.asunto,
-      e.texto,
-      e.maxIntentos ?? 1_000_000,
-      ...condicion,
-    )
-    .first<{ id: number; intentos: number; asunto: string; cuerpo: string }>();
+  let previo: Previo | null = e.reenviar ? await leerPrevio() : null;
+  let reserva = await reservar(previo);
+  for (let i = 0; !reserva && e.reenviar && i < 2; i++) {
+    const ahora = await leerPrevio();
+    if (JSON.stringify(ahora) === JSON.stringify(previo)) break;
+    previo = ahora;
+    reserva = await reservar(previo);
+  }
   if (!reserva) return { estado: 'ocupado' };
+
+  function reservar(leido: Previo | null) {
+    const mismaEntrega = !e.reenviar
+      ? ''
+      : leido
+        ? `AND (estado_envio <> 'enviado' OR (asunto = ? AND cuerpo = ? AND enviado_at IS ?))`
+        : `AND estado_envio <> 'enviado'`;
+    const entrega = e.reenviar && leido ? [leido.asunto, leido.cuerpo, leido.enviado_at] : [];
+    return db
+      .prepare(
+        `UPDATE notificaciones SET
+           asunto = ?, cuerpo = ?,
+           estado_envio = 'enviando', reservado_at = datetime('now'), reserva = ?,
+           intentos = intentos + CASE WHEN estado_envio = 'enviando' AND asunto = ? AND cuerpo = ? THEN 0 ELSE 1 END
+         WHERE solicitud_public_id = ? AND tipo = ? AND version = ?
+           AND ((estado_envio IN (${permitidos}) AND intentos < ?)
+             OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')
+                 AND ((asunto = ? AND cuerpo = ?) OR intentos < ?)))
+           ${exigir} ${mismaEntrega}
+         RETURNING id, intentos, asunto, cuerpo`,
+      )
+      .bind(
+        e.asunto,
+        e.texto,
+        token,
+        e.asunto,
+        e.texto,
+        e.id,
+        e.tipo,
+        e.version,
+        e.maxIntentos ?? 1_000_000,
+        e.asunto,
+        e.texto,
+        e.maxIntentos ?? 1_000_000,
+        ...condicion,
+        ...entrega,
+      )
+      .first<{ id: number; intentos: number; asunto: string; cuerpo: string }>();
+  }
 
   let error: string | null = mail ? null : 'No hay proveedor de correo configurado (Ajustes → Email).';
   if (mail) {

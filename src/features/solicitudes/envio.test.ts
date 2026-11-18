@@ -240,6 +240,28 @@ describe('enviarNotificacion', () => {
     expect(mail.send).toHaveBeenCalledTimes(2);
   });
 
+  it('un reenvío fallido no restaura una entrega que otro reenvío cambió entre medias', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'nueva', null);
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', reenviar: true };
+    expect(await enviarNotificacion(db, correo(), { ...e, asunto: 'a', texto: 'v1' })).toEqual({ estado: 'enviado' });
+    db.sql.prepare("UPDATE notificaciones SET enviado_at = '2026-01-01 10:00:00'").run();
+    const original = db.prepare.bind(db);
+    let cruzado = false;
+    // Otro reenvío entrega «v2» justo después de que este lea la entrega anterior.
+    (db as unknown as { prepare: (q: string) => unknown }).prepare = (q: string) => {
+      if (!cruzado && q.includes("estado_envio = 'enviando', reservado_at")) {
+        cruzado = true;
+        db.sql.prepare("UPDATE notificaciones SET cuerpo = 'v2', enviado_at = '2026-01-02 10:00:00'").run();
+      }
+      return original(q);
+    };
+    expect(await enviarNotificacion(db, correo(true), { ...e, asunto: 'a', texto: 'v3' })).toMatchObject({ estado: 'error' });
+    const fila = db.sql.prepare('SELECT estado_envio, cuerpo, enviado_at FROM notificaciones').get();
+    // Se vuelve a leer y se conserva la entrega real: «v2» con su fecha, no «v1» con la de «v2».
+    expect(fila).toEqual({ estado_envio: 'enviado', cuerpo: 'v2', enviado_at: '2026-01-02 10:00:00' });
+  });
+
   it('sin proveedor deja la fila en error con el motivo', async () => {
     const db = d1();
     solicitud(db, 'S-AAAAAA', 'nueva', null);
