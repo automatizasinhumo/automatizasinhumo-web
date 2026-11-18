@@ -393,6 +393,68 @@ describe('enviarSeguimientos', () => {
     expect(c).toHaveBeenCalledTimes(1);
   });
 
+  it('el recordatorio conserva un enlace http admitido', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada', 'revision', 1, 'http://example.es/v1');
+    const mail = correo();
+    await enviarSeguimientos(db, mail, dias(3), null);
+    expect((mail.send.mock.calls[0][0 as never] as { text: string }).text).toContain('http://example.es/v1');
+  });
+
+  it('misma marca de tiempo que la espera: no se repara (David pudo moverla después)', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada', 'espera');
+    db.sql.prepare("UPDATE notificaciones SET enviado_at = '2026-11-25 10:00:00' WHERE tipo = 'espera'").run();
+    db.sql.prepare("UPDATE solicitudes SET updated_at = '2026-11-25 10:00:00'").run();
+    await enviarSeguimientos(db, correo(), dias(9), null);
+    expect(estado(db, 'S-AAAAAA')).toBe('vista_previa_enviada');
+  });
+
+  it('una versión posterior enviada durante el barrido anula el seguimiento de la anterior', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada');
+    const mail = correo();
+    const r = await enviarNotificacion(db, mail, {
+      id: 'S-AAAAAA',
+      tipo: 'recordatorio',
+      version: 1,
+      email: 'x@y.es',
+      asunto: 'a',
+      texto: 't',
+      exigirEstado: 'vista_previa_enviada',
+      exigirUltima: { tipo: 'revision', version: 1 },
+    });
+    expect(r.estado).toBe('enviado');
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada', 'revision', 2);
+    const r2 = await enviarNotificacion(db, mail, {
+      id: 'S-AAAAAA',
+      tipo: 'espera',
+      version: 1,
+      email: 'x@y.es',
+      asunto: 'a',
+      texto: 't',
+      exigirEstado: 'vista_previa_enviada',
+      exigirUltima: { tipo: 'revision', version: 1 },
+    });
+    expect(r2.estado).toBe('ocupado');
+    expect(mail.send).toHaveBeenCalledTimes(1);
+  });
+
+  it('una reserva caducada con otra carga en el último intento pasa a error y no ocupa el lote', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'entregada', 'entregado');
+    db.sql
+      .prepare(
+        "INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo, estado_envio, intentos, reservado_at) VALUES ('S-AAAAAA', 'resena', 1, 'viejo', 'viejo', 'enviando', 3, '2026-11-01 00:00:00')",
+      )
+      .run();
+    const mail = correo();
+    await enviarSeguimientos(db, mail, dias(8), RESENA);
+    expect(mail.send).not.toHaveBeenCalled();
+    expect(tipos(db, 'S-AAAAAA')).toEqual(['entregado:1:enviado', 'resena:1:error']);
+  });
+
   it('sin proveedor de correo no hace nada', async () => {
     const db = d1();
     enviada(db, 'S-AAAAAA', 'vista_previa_enviada');

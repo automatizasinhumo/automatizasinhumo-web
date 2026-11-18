@@ -58,6 +58,11 @@ export interface Envio {
   exigirNota?: string;
   /** Solo reservar si la solicitud sigue en este estado (seguimientos del cron). */
   exigirEstado?: Estado;
+  /**
+   * Solo reservar si no se ha enviado una versión posterior de este correo base
+   * (seguimientos: si David mandó la v2 durante el barrido, el de la v1 ya no sale).
+   */
+  exigirUltima?: { tipo: TipoCorreo; version: number };
 }
 
 /** Una reserva 'enviando' más antigua que esto se da por muerta y se puede reclamar. */
@@ -74,6 +79,10 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
   if (e.exigirEstado !== undefined) {
     partes.push('EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado = ?)');
     condicion.push(e.id, e.exigirEstado);
+  }
+  if (e.exigirUltima !== undefined) {
+    partes.push(`NOT EXISTS (SELECT 1 FROM notificaciones b WHERE b.solicitud_public_id = ? AND b.tipo = ? AND b.estado_envio = 'enviado' AND b.version > ?)`);
+    condicion.push(e.id, e.exigirUltima.tipo, e.exigirUltima.version);
   }
   const sigueIgual = partes.join(' AND ');
   await db
@@ -235,8 +244,8 @@ export const DIAS_RECORDATORIO = 3;
 export const DIAS_ESPERA = 7;
 export const DIAS_RESENA = 7;
 
-/** Primer enlace https de un correo ya enviado (el de la versión que se está revisando). */
-const enlaceDe = (cuerpo: string) => /https:\/\/[^\s<>]+/.exec(cuerpo)?.[0] ?? '';
+/** Primer enlace http(s) de un correo ya enviado (el de la versión que se está revisando; mismos protocolos que admite prepararCorreo). */
+const enlaceDe = (cuerpo: string) => /https?:\/\/[^\s<>]+/.exec(cuerpo)?.[0] ?? '';
 
 interface Paso {
   tipo: TipoCorreo;
@@ -285,14 +294,15 @@ export async function enviarSeguimientos(
   for (const p of pasos) {
     if (p.despues) {
       // Reparación: correo enviado pero el cambio de estado no llegó a guardarse (el Worker
-      // murió entre los dos). Solo si nadie tocó la solicitud después del correo y es el de
-      // la última versión enviada del correo base.
+      // murió entre los dos). Solo si nadie tocó la solicitud después del correo (estrictamente
+      // después: con la misma marca no se sabe quién fue antes y no se repara) y es el de la
+      // última versión enviada del correo base.
       await db
         .prepare(
           `UPDATE solicitudes SET estado = ?, updated_at = datetime('now')
            WHERE estado = ? AND EXISTS (SELECT 1 FROM notificaciones x
              WHERE x.solicitud_public_id = solicitudes.public_id AND x.tipo = ? AND x.estado_envio = 'enviado'
-               AND x.enviado_at >= solicitudes.updated_at
+               AND x.enviado_at > solicitudes.updated_at
                AND x.version = (SELECT MAX(m.version) FROM notificaciones m WHERE m.solicitud_public_id = x.solicitud_public_id
                  AND m.tipo = ? AND m.estado_envio = 'enviado'))`,
         )
@@ -329,7 +339,20 @@ export async function enviarSeguimientos(
         texto: c.texto,
         maxIntentos: MAX_INTENTOS_CRON,
         exigirEstado: p.estado,
+        exigirUltima: { tipo: p.base, version },
       });
+      if (r.estado === 'ocupado') {
+        // Reserva del último intento caducada que no se puede reclamar (la carga cambió, p. ej.
+        // otra resena_url): pasa a error agotado para que Admin la vea y no ocupe el lote siempre.
+        await db
+          .prepare(
+            `UPDATE notificaciones SET estado_envio = 'error', error = 'Reserva caducada con otra carga: revisar y reenviar a mano'
+             WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio = 'enviando' AND intentos >= ?
+               AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')`,
+          )
+          .bind(id, p.tipo, version, MAX_INTENTOS_CRON)
+          .run();
+      }
       if (r.estado === 'error') {
         res.fallidas.push(`${id}:${p.tipo}`);
         console.error(`Seguimiento ${p.tipo} de ${id}: correo no enviado (${r.error})`);
@@ -338,8 +361,11 @@ export async function enviarSeguimientos(
       if (p.despues) {
         // Condicional: si David la movió mientras salía el correo, manda su estado.
         await db
-          .prepare("UPDATE solicitudes SET estado = ?, updated_at = datetime('now') WHERE public_id = ? AND estado = ?")
-          .bind(p.despues, id, p.estado)
+          .prepare(
+            `UPDATE solicitudes SET estado = ?, updated_at = datetime('now') WHERE public_id = ? AND estado = ?
+               AND NOT EXISTS (SELECT 1 FROM notificaciones b WHERE b.solicitud_public_id = ? AND b.tipo = ? AND b.estado_envio = 'enviado' AND b.version > ?)`,
+          )
+          .bind(p.despues, id, p.estado, id, p.base, version)
           .run();
       }
       res.enviadas.push(`${id}:${p.tipo}`);
