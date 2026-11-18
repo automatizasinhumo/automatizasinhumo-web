@@ -35,7 +35,7 @@ jobs:
 
       - name: Dependencias
         run: |
-          npm ci
+          npm ci --ignore-scripts --no-audit --no-fund
           python3 -m venv .venv-busqueda
           .venv-busqueda/bin/pip install --quiet ir-measures==0.4.3
 
