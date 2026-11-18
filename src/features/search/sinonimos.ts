@@ -1,8 +1,9 @@
+import { stemSpanishTerm, tokenizeSearchTerms } from './stemmer';
+
 // Sinónimos de búsqueda: cómo lo dice el cliente → palabra que aparece en las fichas.
-// Se usan solo cuando la búsqueda literal no da resultados (antes de la corrección de erratas).
 const SINONIMOS: Record<string, string> = {
-  restaurante: 'carta', bar: 'carta', cafeteria: 'carta', menu: 'carta', hosteleria: 'carta',
-  peluqueria: 'reservas', estetica: 'reservas', clinica: 'reservas', dentista: 'reservas', fisio: 'reservas',
+  restaurante: 'carta', bar: 'carta', cafeteria: 'carta', cafetería: 'carta', menu: 'carta', hosteleria: 'carta', hostelería: 'carta',
+  peluqueria: 'reservas', peluquería: 'reservas', estetica: 'reservas', clínica: 'reservas', clinica: 'reservas', dentista: 'reservas', fisio: 'reservas',
   cita: 'citas', agenda: 'citas', calendly: 'citas', turnos: 'citas',
   boda: 'boda', invitados: 'boda', evento: 'evento', bautizo: 'evento', comunion: 'evento',
   chatbot: 'bot', chat: 'bot', ia: 'IA', gpt: 'IA', chatgpt: 'IA', inteligencia: 'IA',
@@ -21,14 +22,17 @@ const SINONIMOS: Record<string, string> = {
   telegram: 'Telegram', whatsapp: 'WhatsApp',
 };
 
-const plano = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const SINONIMOS_POR_LEMA = new Map(
+  Object.entries(SINONIMOS).map(([term, synonym]) => [stemSpanishTerm(term), synonym]),
+);
 
 /** Devuelve la consulta con sinónimos sustituidos, o null si no cambia nada. */
 export function expandirSinonimos(q: string): string | null {
   let cambia = false;
   const out = q.split(/\s+/).map((w) => {
-    const s = SINONIMOS[plano(w).replace(/s$/, '')] ?? SINONIMOS[plano(w)];
-    if (s && plano(s) !== plano(w)) { cambia = true; return s; }
+    const lema = stemSpanishTerm(w);
+    const s = SINONIMOS_POR_LEMA.get(lema);
+    if (s && stemSpanishTerm(s) !== lema) { cambia = true; return s; }
     return w;
   });
   return cambia ? out.join(' ') : null;
@@ -41,8 +45,8 @@ export const POPULARES = ['web', 'carta QR', 'reservas', 'boda', 'bot IA', 'tien
 // los resultados («boda» lleva a Bodas y eventos aunque un dossier mencione bodas).
 const CATEGORIA_DE: Record<string, string> = {
   boda: 'bodas', evento: 'bodas', invitado: 'bodas', bautizo: 'bodas', comunion: 'bodas', fiesta: 'bodas',
-  restaurante: 'hosteleria', bar: 'hosteleria', cafeteria: 'hosteleria', carta: 'hosteleria', menu: 'hosteleria', hosteleria: 'hosteleria',
-  reserva: 'reservas', cita: 'reservas', peluqueria: 'reservas', estetica: 'reservas', clinica: 'reservas', agenda: 'reservas',
+  restaurante: 'hosteleria', bar: 'hosteleria', cafeteria: 'hosteleria', cafetería: 'hosteleria', carta: 'hosteleria', menu: 'hosteleria', hosteleria: 'hosteleria', hostelería: 'hosteleria',
+  reserva: 'reservas', cita: 'reservas', peluqueria: 'reservas', peluquería: 'reservas', estetica: 'reservas', clinica: 'reservas', agenda: 'reservas',
   web: 'webs', pagina: 'webs', landing: 'webs',
   bot: 'bots', chatbot: 'bots', ia: 'bots',
   tienda: 'tiendas', vender: 'tiendas',
@@ -54,12 +58,15 @@ const CATEGORIA_DE: Record<string, string> = {
   qr: 'enlaces', enlace: 'enlaces',
 };
 
+const CATEGORIA_POR_LEMA = new Map(
+  Object.entries(CATEGORIA_DE).map(([term, slug]) => [stemSpanishTerm(term), slug]),
+);
+
 /** Slugs de categoría que encajan con la consulta, sin repetir y en orden de aparición. */
 export function categoriasPara(q: string): string[] {
   const out: string[] = [];
-  for (const w of q.split(/\s+/)) {
-    const s = plano(w);
-    const slug = CATEGORIA_DE[s] ?? CATEGORIA_DE[s.replace(/s$/, '')] ?? CATEGORIA_DE[s.replace(/es$/, '')];
+  for (const word of tokenizeSearchTerms(q)) {
+    const slug = CATEGORIA_POR_LEMA.get(stemSpanishTerm(word));
     if (slug && !out.includes(slug)) out.push(slug);
   }
   return out;
