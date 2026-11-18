@@ -28,6 +28,8 @@ export interface HomeServiceOptions {
   currency: string;
   imageBaseUrl: string;
   delivery?: ImageDelivery;
+  /** Se llama si falla la carga de algún destacado (p. ej. para no cachear la portada parcial). */
+  onFailure?: () => void;
 }
 
 export async function loadHomeServices(
@@ -39,6 +41,7 @@ export async function loadHomeServices(
       loadHomeService(db, options, slug, need).catch((error: unknown) => {
         // Un destacado que falla no tumba los demás ni la portada.
         console.error(`Home service ${slug} failed to load:`, error);
+        options.onFailure?.();
         return null;
       }),
     ),

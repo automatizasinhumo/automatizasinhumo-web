@@ -26,6 +26,7 @@ describe('classifyDeliveryModalities', () => {
       { id: 1, label: 'Plantilla y te lo montamos' },
       { id: 2, label: 'Te lo montamos sin plantilla' },
       { id: 3, label: 'Plantilla premium (no te lo montamos)' },
+      { id: 4, label: 'Plantilla + guía (solo con montaje)' },
     ];
 
     expect(classifyDeliveryModalities(variants)).toEqual({ template: null, setup: null });
