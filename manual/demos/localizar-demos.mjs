@@ -41,6 +41,15 @@ function soloEnLinea(nodo) {
 const ETIQUETA = /<[^<>]*>/g;
 const etiquetas = (s) => (s.match(ETIQUETA) ?? []).join('');
 const sinEtiquetas = (s) => s.replace(ETIQUETA, ' ');
+// Etiquetas de formato en línea: no cortan una cifra («<b>40</b> €»). Cualquier otra
+// (<br>, bloques, desconocidas) separa, para que «2<br>40 €» no se lea como 240 €.
+const UNE_CIFRAS = /^<\/?(?:a|abbr|b|bdi|bdo|cite|code|data|em|i|kbd|mark|q|s|samp|small|span|strong|sub|sup|time|u|var)\b/i;
+/** Texto para comparar importes (no para mostrar): troceado por etiquetas, sin reemplazos. */
+const textoDeImportes = (s) =>
+  s
+    .split(/(<[^<>]*>)/)
+    .map((t, k) => (k % 2 === 0 ? t : UNE_CIFRAS.test(t) ? '' : ' '))
+    .join('');
 // Restos de un razonamiento en vez de la traducción: «X -> Y», «por ejemplo», «Entonces:».
 const NO_FINAL = /->|\bpor ejemplo\b|\bEntonces:|\bo bien\b/i;
 
@@ -60,7 +69,7 @@ function canonica(n) {
  * y ordenados. Las etiquetas se quitan antes: «<span>40</span> €» también es un importe.
  */
 function importes(texto) {
-  return [...aEuros(texto.replace(ETIQUETA, '')).matchAll(IMPORTE_EUROS)]
+  return [...aEuros(textoDeImportes(texto)).matchAll(IMPORTE_EUROS)]
     .map(([, n, mult]) => `${canonica(n)}${mult ? ` ${mult}` : ''}`)
     .sort((a, b) => a.localeCompare(b));
 }

@@ -81,6 +81,9 @@ describe('localizador', () => {
     // Importe partido por etiquetas: también se compara.
     expect(esFinal('From <span>40</span> €', 'Desde <span>400</span> €')).toBe(false);
     expect(esFinal('From <span>40</span> €', 'Desde <span>40</span> €')).toBe(true);
+    // Un salto de línea separa cifras: mover un dígito al otro lado cambia el importe.
+    expect(esFinal('Travel and Stay 2<br>40 €', 'Viaje y alojamiento 24<br>0 €')).toBe(false);
+    expect(esFinal('Rooms 2<br>40 €', 'Habitaciones 2<br>40 €')).toBe(true);
   });
 
   it('la caché solo guarda traducciones finales', () => {
