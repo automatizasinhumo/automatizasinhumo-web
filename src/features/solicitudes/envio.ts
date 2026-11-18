@@ -71,7 +71,7 @@ const RESERVA_CADUCA = '-15 minutes';
 export async function enviarNotificacion(db: D1Database, mail: EmailProvider | null, e: Envio): Promise<ResultadoEnvio> {
   // Con exigirNota/exigirEstado, ni siquiera se crea la fila si la solicitud ya no está como la leyó el cron.
   const partes: string[] = [];
-  const condicion: string[] = [];
+  const condicion: (string | number)[] = [];
   if (e.exigirNota !== undefined) {
     partes.push(`EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`);
     condicion.push(e.id, e.exigirNota);
