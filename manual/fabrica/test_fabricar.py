@@ -49,6 +49,16 @@ class PonerDatos(unittest.TestCase):
         self.assertEqual(out.count('name="robots"'), 1)
         self.assertIn('<head><meta name="robots" content="noindex">', out)
 
+    def test_nombre_que_contiene_la_marca_no_se_duplica(self):
+        out = poner_datos(PLANTILLA, pedido(negocio='Lumen Ana'), 'Lumen')
+        self.assertIn('class="logo">Lumen Ana<', out)
+        self.assertNotIn('Ana Ana', out)
+
+    def test_correo_que_contiene_el_de_la_plantilla(self):
+        out = poner_datos(PLANTILLA, pedido(email='xhola@lumen.test'), 'Lumen')
+        self.assertIn('>xhola@lumen.test<', out)
+        self.assertNotIn('xxhola', out)
+
     def test_telefono_solo_digitos(self):
         out = poner_datos(PLANTILLA, pedido(telefono='600"><img src=x>'), 'Lumen')
         self.assertIn('href="tel:600"', out)

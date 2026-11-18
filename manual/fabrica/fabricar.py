@@ -168,15 +168,17 @@ def poner_datos(out, p, marca):
         raise ValueError('correo del pedido no válido')
     correo = H.escape(correo)
     if marca:
-        out = out.replace(H.escape(marca), negocio).replace(marca, negocio)
+        # Una sola pasada: un nombre que contenga la marca («Lumen Ana») no se vuelve a sustituir.
+        formas = sorted({H.escape(marca), marca}, key=len, reverse=True)
+        out = re.sub('|'.join(map(re.escape, formas)), lambda _: negocio, out)
     out = re.sub(r'href="mailto:[^"]*"', lambda _: f'href="mailto:{correo}"', out)
     tel = re.sub(r'[^0-9+]', '', p['telefono'])
     out = re.sub(r'href="tel:[^"]*"', lambda _: f'href="tel:{tel}"', out)
     if p.get('whatsapp'):
         wa = re.sub(r'\D', '', p['whatsapp'])
         out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
-    for viejo in set(CORREO_VALIDO.findall(out)) - {correo}:
-        out = out.replace(viejo, correo)
+    # Igual con los correos sueltos de la plantilla: una pasada, sin tocar el ya puesto.
+    out = CORREO_VALIDO.sub(lambda _: correo, out)
     titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"
     out = re.sub(r'<title>[^<]*</title>', lambda _: titulo, out, count=1)
     out = re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:(url|image)[^>]*>|<meta name="robots"[^>]*>', '', out)
