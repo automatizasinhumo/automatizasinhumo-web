@@ -13,7 +13,7 @@
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { load } from 'cheerio';
 import { problemas, rutasDeDemos } from '../../scripts/demos/idioma.mjs';
 
@@ -63,8 +63,8 @@ export const SISTEMA =
 // Símbolo delante («$40», «US$ 5», «£4.2bn») o código detrás («12000 USD»). El código detrás
 // exige que no haya cifra antes (lookbehind) para no reintentar desde cada dígito.
 // El espacio antes del sufijo va dentro de su grupo: «$40 por persona» conserva el espacio.
-const MONEDA_DELANTE = /(?:US\$|\$|£) ?(\d[\d,]*(?:\.\d+)?)(?: ?(k|m|bn)\b)?/gi;
-const MONEDA_DETRAS = /(?<![\d,.])(\d[\d,]*(?:\.\d+)?) ?(?:USD|GBP)\b/gi;
+const MONEDA_DELANTE = /(?:US\$|\$|£)\s?(\d[\d,]*(?:\.\d+)?)(?:\s?(k|m|bn)\b)?/gi;
+const MONEDA_DETRAS = /(?<![\d,.])(\d[\d,]*(?:\.\d+)?)\s?(?:USD|GBP)\b/gi;
 const MILES = new Intl.NumberFormat('es-ES'); // 1250 → «1250», 12000 → «12.000» (norma RAE)
 
 function cifra(n) {
@@ -152,7 +152,7 @@ function credenciales() {
   let acc = process.env.CLOUDFLARE_ACCOUNT_ID;
   // whoami también renueva el token OAuth de wrangler si ha caducado (por eso va antes de leerlo).
   // El wrangler del proyecto con el node actual: sin depender de lo que haya en el PATH.
-  const wrangler = createRequire(import.meta.url).resolve('wrangler/bin/wrangler.js');
+  const wrangler = join(dirname(createRequire(import.meta.url).resolve('wrangler/package.json')), 'bin', 'wrangler.js');
   const quien = acc && tok ? '' : execFileSync(process.execPath, [wrangler, 'whoami'], { encoding: 'utf8' });
   acc ||= quien.match(/[0-9a-f]{32}/)?.[0];
   if (!tok) {

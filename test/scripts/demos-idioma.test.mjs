@@ -41,6 +41,8 @@ describe('localizador', () => {
     expect(aEuros('Total: £1,250.50')).toBe('Total: 1250,50 €');
     expect(aEuros('Ventas de £4.2bn')).toBe('Ventas de 4,2 mil millones de €');
     expect(aEuros('Ganamos 12000 USD')).toBe('Ganamos 12.000 €');
+    expect(aEuros('Ganamos 12000\u00a0USD')).toBe('Ganamos 12.000 €');
+    expect(aEuros('Desde $\u00a040')).toBe('Desde 40 €');
     expect(aEuros('Desde $40 por persona')).toBe('Desde 40 € por persona');
     expect(aEuros('Desde $40 kilos')).toBe('Desde 40 € kilos');
     expect(eurosEnScript('x=`£${p.toFixed(2)}`')).toBe('x=`${p.toFixed(2)} €`');
