@@ -1,0 +1,16 @@
+---
+import { getEntry } from 'astro:content';
+import BlogPostView from '../../features/blog/BlogPostView.astro';
+
+const slug = Astro.params.slug;
+const post = slug ? await getEntry('blog', slug) : undefined;
+
+if (!post) {
+  return new Response('Artículo no encontrado', {
+    status: 404,
+    headers: { 'cache-control': 'no-store' },
+  });
+}
+---
+
+<BlogPostView post={post} />

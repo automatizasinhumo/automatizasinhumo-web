@@ -1,0 +1,134 @@
+---
+// Copyright (c) 2024 Emil Gulamov
+// Adaptado de mearashadowfax/ScrewFast (MIT)
+import { env } from 'cloudflare:workers';
+import { render, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { publicOrigin } from '../http/origin';
+import { getProductBySlug } from '../products/db';
+import { absoluteUrl, buildPageMetadata } from '../seo/metadata';
+import { entriesFor, formatDate } from './content';
+import CardBlog from './CardBlog.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
+const canonical = absoluteUrl(Astro.url.pathname, origin);
+const metadata = buildPageMetadata({
+  title: post.data.title,
+  description: post.data.description,
+  canonical,
+  kind: {
+    type: 'BlogPosting',
+    image: post.data.cardImage,
+    datePublished: post.data.pubDate,
+    author: post.data.author,
+  },
+});
+const jsonLd = JSON.stringify(metadata.jsonLd).replace(/</g, '\\u003c');
+const relatedPosts = (await entriesFor()).filter((entry) => entry.id !== post.id).slice(0, 2);
+const hasWebPageProductLink = [
+  'cuanto-cuesta-una-web-local',
+  'web-o-redes-sociales',
+].includes(post.id);
+const webPageProduct = hasWebPageProductLink
+  ? await getProductBySlug(env.DB, 'web-una-pagina').catch((error) => {
+      console.error('blog: no se pudo consultar web-una-pagina en D1', error);
+      return null;
+    })
+  : null;
+const webPageLink = hasWebPageProductLink
+  ? webPageProduct?.active
+    ? { href: '/products/web-una-pagina', label: 'Ver la web de una página' }
+    : { href: '/products', label: 'Consultar el catálogo de servicios' }
+  : null;
+---
+
+<Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
+  <script is:inline type="application/ld+json" set:html={jsonLd}></script>
+  <article class="mx-auto max-w-3xl">
+    <a class="text-sm font-semibold text-brand hover:underline" href="/blog">← Todos los artículos</a>
+    <header class="mt-6">
+      <p class="text-sm text-muted">
+        {post.data.author} · {formatDate(post.data.pubDate)} · {post.data.readTime} min de lectura
+      </p>
+      <h1 class="mt-3 font-serif text-3xl font-bold leading-tight text-ink sm:text-5xl">
+        {post.data.title}
+      </h1>
+      <p class="mt-4 text-lg leading-7 text-muted">{post.data.description}</p>
+    </header>
+
+    <img
+      class="mt-8 aspect-[16/9] w-full rounded-2xl border border-line object-cover"
+      src={post.data.cardImage}
+      alt={post.data.cardImageAlt}
+      width="1200"
+      height="675"
+    />
+
+    <div class="contenido-articulo mt-8 max-w-none text-ink">
+      <Content />
+    </div>
+    {webPageLink && (
+      <p class="mt-8 rounded-xl border border-line bg-surface p-5 text-sm text-muted">
+        Consulta la disponibilidad y las condiciones actuales.
+        <a class="ml-1 font-semibold text-brand hover:underline" href={webPageLink.href}>
+          {webPageLink.label}
+        </a>
+      </p>
+    )}
+  </article>
+
+  {relatedPosts.length > 0 && (
+    <section class="mt-14 border-t border-line pt-10" aria-labelledby="relacionados">
+      <h2 id="relacionados" class="mb-5 font-serif text-2xl font-bold text-ink">
+        Sigue leyendo
+      </h2>
+      <div class="grid gap-5 md:grid-cols-2">
+        {relatedPosts.map((entry) => <CardBlog blogEntry={entry} headingLevel="h3" />)}
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .contenido-articulo :global(h2) {
+    margin: 2rem 0 0.75rem;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .contenido-articulo :global(h3) {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .contenido-articulo :global(p),
+  .contenido-articulo :global(ul),
+  .contenido-articulo :global(ol) {
+    margin-top: 0.9rem;
+    line-height: 1.8;
+  }
+
+  .contenido-articulo :global(ul),
+  .contenido-articulo :global(ol) {
+    padding-left: 1.5rem;
+  }
+
+  .contenido-articulo :global(li) {
+    margin-top: 0.4rem;
+  }
+
+  .contenido-articulo :global(a) {
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>
