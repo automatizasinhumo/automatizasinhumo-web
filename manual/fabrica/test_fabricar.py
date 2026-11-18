@@ -43,6 +43,12 @@ class PonerDatos(unittest.TestCase):
             with self.subTest(correo=malo), self.assertRaises(ValueError):
                 poner_datos(PLANTILLA, pedido(email=malo), 'Lumen')
 
+    def test_noindex_una_sola_vez(self):
+        con_robots = PLANTILLA.replace('<head>', '<head><meta name="robots" content="index,follow">')
+        out = poner_datos(con_robots, pedido(), 'Lumen')
+        self.assertEqual(out.count('name="robots"'), 1)
+        self.assertIn('<head><meta name="robots" content="noindex">', out)
+
     def test_telefono_solo_digitos(self):
         out = poner_datos(PLANTILLA, pedido(telefono='600"><img src=x>'), 'Lumen')
         self.assertIn('href="tel:600"', out)

@@ -134,6 +134,8 @@ def fabricar(ruta_pedido, desplegar=True):
             n.replace_with(n[: len(n) - len(n.lstrip())] + t + n[len(n.rstrip()):])
 
     idx.write_text(poner_datos(str(sopa), p, marca), encoding='utf-8')
+    # Una vista previa no es la web del cliente: que ningún buscador la indexe.
+    (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
 
     nombre = 'web-' + re.sub(r'[^a-z0-9-]', '-', p['id'].lower())[:50]
     (base / 'wrangler.jsonc').write_text(json.dumps(
@@ -177,7 +179,8 @@ def poner_datos(out, p, marca):
         out = out.replace(viejo, correo)
     titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"
     out = re.sub(r'<title>[^<]*</title>', lambda _: titulo, out, count=1)
-    return re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:(url|image)[^>]*>', '', out)
+    out = re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:(url|image)[^>]*>|<meta name="robots"[^>]*>', '', out)
+    return re.sub(r'<head[^>]*>', lambda m: m.group(0) + '<meta name="robots" content="noindex">', out, count=1)
 
 
 if __name__ == '__main__':
