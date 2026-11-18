@@ -104,6 +104,38 @@ Prueba: el fichero de clave responde 200 en producción; staging nunca se envía
 Copia `samples/searchconsole/search_analytics_api_sample.py` de googleapis/google-api-python-client (Apache-2.0) a `scripts/seo/search-console.py`, con cuenta de servicio de solo lectura en un secreto de Actions. Workflow `.github/workflows/seo-search-console.yml`, semanal. El repo es público y cualquiera puede descargar sus artefactos: no sube el CSV, solo publica en el resumen del job las cifras agregadas (consultas, páginas, clics, impresiones, CTR, posición, móvil) y resume en el job las consultas comerciales («precio», «cuánto cuesta», «web peluquería»…) con muchas impresiones y pocos clics.
 Prueba: sin permisos falla con un mensaje claro y sin cifras inventadas; ninguna credencial aparece en el log.
 
+### C17 · Buscador que entiende plurales y variantes con un lematizador Snowball (simulación boda 18/11) — PENDIENTE
+Hoy «bodas» solo devuelve «Dossier comercial en PDF», y «eventos» devuelve avisos y diplomas. La búsqueda literal en FTS5 encuentra algo, así que nunca llegan a aplicarse los sinónimos de `src/features/search/sinonimos.ts`. Adopta `snowball-stemmers` (ISC, mazko/jssnowball, algoritmo Snowball oficial para español). En `src/features/search/fts.ts`, cada término de la consulta y del índice pasa por el lematizador español y la consulta usa prefijos FTS5 (`bod*`). Los sinónimos se suman siempre a la consulta, en vez de usarse solo cuando no hay resultados.
+Prueba (vitest con la D1 de pruebas): «bodas», «boda», «web para bodas» y «eventos» devuelven primero los cuatro productos de la categoría `bodas`; «peluquerías» devuelve el producto de peluquería.
+
+### C18 · Buscador visible en móvil (simulación boda 18/11) — PENDIENTE
+A 390 px, `input[name=q]` existe pero está oculto y no hay ningún botón que lo muestre. En la cabecera de `src/layouts/Layout.astro`, añade un botón con lupa y el texto oculto «Buscar» que despliega el formulario `/search`. Usa el patrón de disclosure de la WAI-ARIA APG (`aria-expanded`/`aria-controls`) con el componente de C1, sin librerías nuevas.
+Prueba (Playwright a 390 px): la lupa es visible, el campo recibe el foco al pulsarla y Enter lleva a `/search?q=`.
+
+### C19 · Todo lo que ve el cliente, en español, con un test que lo vigile (simulación boda 18/11) — PENDIENTE
+`/express` está en inglés: «Express checkout», «Buy now», «Checkout», «Qty», «← Back», «Pay with card», «Demo checkout», «Simulated — places a real test order, no charge» y «Please choose a …». Hay más textos en inglés en `ProductPurchaseForm.astro` y en `src/themes/*/ProductDetail.astro`, y conviene revisar también `cart.astro` y `pay/[publicId].astro`.
+1) Traduce todos esos textos al español de España. El método de pago de demostración se llama «Pago de prueba (sin cargo)».
+2) Adopta `franc-min` (MIT, wooorm/franc) en `tests/idioma.test.ts`. El test recorre el HTML generado de las páginas públicas (todas salvo `/admin`), extrae el texto visible y falla si algún bloque de más de 20 caracteres no se detecta como `spa`. La lista de excepciones vive en el propio test y debe ser corta: marcas, nombres propios y código. Como `franc` no distingue idiomas en textos cortos, el test también falla si en botones, `label`, `option`, `th`, `title` o `aria-label` aparece alguna palabra de una lista corta de palabras en inglés: `Buy`, `Checkout`, `Qty`, `Back`, `Pay`, `Cart`, `Total`, `Remove`, `Continue`, `Submit`, `Skip to content`.
+Prueba: el test falla en main antes de traducir y pasa después.
+
+### C20 · Demos traducidas de verdad (simulación boda 18/11) — PENDIENTE (después de C19 y C21)
+Las demos de `automatizasinhumo-demos` tienen calcos y restos en inglés:
+- «Joyfully accepts», «Skip to content»;
+- «Carne de carne - costilla lenta», «Vamos a casar»;
+- lugares extranjeros (Harare, Cotswolds);
+- `mailto:rsvp@example.com`.
+Pasa el detector de C19 por el HTML de cada demo con un script en `scripts/demos/idioma.mjs` que se lanza en el workflow de las demos.
+Lo que falle se vuelve a adaptar con la misma función `reescribir()` de `manual/fabrica/vistas-previas.py`, con un pedido de ejemplo español por sector: nombres, lugares y correos de España. Así no hay que traducir nada a mano.
+Prueba: el script falla con la demo actual de boda y pasa tras regenerarla.
+
+### C21 · La fábrica adapta cada página entera, no frase a frase (simulación boda 18/11) — PENDIENTE
+La vista previa de prueba S-88D5JKWC salió así:
+- «Lucía y Pablo & Lucía y Pablo»: la plantilla trae los dos nombres en nodos separados y la IA rellena cada uno con la pareja;
+- «Respuesta de Sábado 12 de junio»;
+- «© Prueba Claude»: en el pie sale la persona de contacto en lugar del negocio o evento.
+En `reescribir()`, manda junto a cada lote las frases vecinas, en orden y con la ruta del nodo, y añade al prompt la regla «un dato del pedido aparece una sola vez por bloque». El pie toma el nombre del negocio o evento, y la persona de contacto solo si no hay ninguno.
+Prueba (`pytest`, con la IA simulada): un pedido de boda no produce el mismo valor en dos nodos hermanos, y el pie no contiene el nombre de contacto si hay nombre de evento.
+
 ## Huecos de arquitectura (los resuelve Claude, no Copilot)
 
 - **Límite de 100 Workers:** cada vista previa crea un Worker `web-<id>`. Antes de llegar al límite hay que servir todas las vistas previas desde un único Worker con R2, por ruta o por hostname. Se buscará un repo que lo haga (ronda 09).
