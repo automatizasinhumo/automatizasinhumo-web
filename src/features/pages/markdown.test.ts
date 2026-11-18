@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { renderMarkdown, markdownExcerpt, extractMediaKeys } from './markdown';
+import {
+  renderMarkdown,
+  markdownExcerpt,
+  markdownFirstParagraphExcerpt,
+  extractMediaKeys,
+} from './markdown';
 
 describe('renderMarkdown — structure', () => {
   it('renders headings, lists, links, and emphasis', () => {
@@ -243,6 +248,20 @@ describe('markdownExcerpt', () => {
 
   it('returns an empty string for an empty body', () => {
     expect(markdownExcerpt('')).toBe('');
+  });
+});
+
+describe('markdownFirstParagraphExcerpt', () => {
+  it('keeps the space at a line break inside the paragraph', () => {
+    expect(markdownFirstParagraphExcerpt('Se entrega\npublicada.')).toBe('Se entrega publicada.');
+  });
+
+  it('uses the first paragraph without adding later headings or sections', () => {
+    expect(
+      markdownFirstParagraphExcerpt(
+        'Web de una página.\n\n## Qué recibes\n\nWeb con tus datos y tu marca.',
+      ),
+    ).toBe('Web de una página.');
   });
 });
 

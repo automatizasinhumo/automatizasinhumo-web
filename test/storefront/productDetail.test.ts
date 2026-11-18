@@ -10,6 +10,9 @@ import type {
   StorefrontGalleryImage,
   StorefrontImage,
 } from '../../src/features/storefront/models';
+import { resolveTheme } from '../../scripts/themes.mjs';
+
+const isDefaultTheme = resolveTheme().id === 'default';
 
 const image = (src: string, alt = 'Sample'): StorefrontImage => ({
   src,
@@ -281,6 +284,121 @@ describe('the store-owned product detail', () => {
     expect(html).toContain('Sample Tee');
     expect(html).toContain('$24.00');
     expect(html).toContain('href="/categories/apparel"');
+  });
+
+  it.skipIf(!isDefaultTheme)('compares delivery modalities only when both are available', async () => {
+    const variants: ProductPurchaseModel['variants'] = [
+      {
+        id: 'var_template0001',
+        label: 'Plantilla + guía (la publicas tú)',
+        formattedPrice: '149 €',
+        priceCents: 14900,
+        soldOut: false,
+        defaultSelected: true,
+        imageAnchor: '',
+      },
+      {
+        id: 'var_setup000001',
+        label: 'Te lo montamos',
+        formattedPrice: '349 €',
+        priceCents: 34900,
+        soldOut: false,
+        defaultSelected: false,
+        imageAnchor: '',
+      },
+    ];
+    const comparable = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({ variants }),
+    });
+    const incomplete = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({ variants: variants.slice(0, 1) }),
+    });
+
+    expect(comparable).toContain('Elige cómo quieres recibirlo');
+    expect(comparable).toContain('149 €');
+    expect(comparable).toContain('349 €');
+    expect(incomplete).not.toContain('Elige cómo quieres recibirlo');
+  });
+
+  it.skipIf(!isDefaultTheme)('describes the available modality instead of counting variants', async () => {
+    const html = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({
+        variants: [
+          {
+            id: 'var_template0001',
+            label: 'Plantilla + guía',
+            formattedPrice: '149 €',
+            priceCents: 14900,
+            soldOut: false,
+            defaultSelected: true,
+            imageAnchor: '',
+          },
+          {
+            id: 'var_other000001',
+            label: 'Otra opción',
+            formattedPrice: '199 €',
+            priceCents: 19900,
+            soldOut: false,
+            defaultSelected: false,
+            imageAnchor: '',
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain('Sí. Tú la publicas siguiendo la guía paso a paso.');
+    expect(html).not.toContain('No. Lo montamos nosotros; tú solo nos das los datos.');
+  });
+
+  it.skipIf(!isDefaultTheme)('shows delivery modalities when purchasing is disabled', async () => {
+    const html = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({
+        showAddToCart: false,
+        showBuyNow: false,
+        variants: [
+          {
+            id: 'var_template0001',
+            label: 'Plantilla + guía',
+            formattedPrice: '149 €',
+            priceCents: 14900,
+            soldOut: false,
+            defaultSelected: true,
+            imageAnchor: '',
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain('¿Lo tienes que montar tú?');
+    expect(html).toContain('Sí. Tú la publicas siguiendo la guía paso a paso.');
+    expect(html).not.toContain('<form');
+  });
+
+  it.skipIf(!isDefaultTheme)('does not promise a modality when its only variant is sold out', async () => {
+    const html = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({
+        variants: [
+          {
+            id: 'var_template0001',
+            label: 'Plantilla + guía',
+            formattedPrice: '149 €',
+            priceCents: 14900,
+            soldOut: true,
+            defaultSelected: false,
+            imageAnchor: '',
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain('No hay modalidades disponibles en este momento.');
+    expect(html).not.toContain('Lo montamos nosotros');
+    expect(html).not.toContain('¿Lo tienes que montar tú?');
   });
 
   it('marks low stock without pinning the wording', async () => {

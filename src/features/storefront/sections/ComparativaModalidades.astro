@@ -1,0 +1,52 @@
+---
+// Adapted from fulldotdev/ui (MIT), pricing-1.astro. Copyright (c) 2024 Fulldev, Sil Veltman. See licencias/fulldotdev-ui.txt.
+import type { StorefrontVariant } from '../models';
+import TarjetaComparacion from './TarjetaComparacion.astro';
+import { classifyDeliveryModalities } from '../deliveryModalities';
+
+interface Props {
+  variants: StorefrontVariant[];
+}
+
+const { variants } = Astro.props;
+
+const { template, setup } = classifyDeliveryModalities(variants);
+---
+
+{template && setup && (
+  <section class="mt-6" aria-labelledby="comparativa-modalidades">
+    <div class="mb-5">
+      <h2 id="comparativa-modalidades" class="text-xl font-bold text-ink">
+        Elige cómo quieres recibirlo
+      </h2>
+      <p class="mt-1 text-sm leading-relaxed text-muted">
+        Las dos opciones incluyen lo descrito en la ficha y una ronda de ajustes. Cambia quién publica el resultado.
+      </p>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <TarjetaComparacion
+        planName="Plantilla + guía"
+        price={template.formattedPrice}
+        description="Te lo entregamos preparado con tus datos para que lo publiques tú."
+        features={[
+          'Plantilla adaptada a tu información',
+          'Guía paso a paso para publicarla',
+          'Tú eliges dónde y cuándo publicarla',
+          'Una ronda de ajustes incluida',
+        ]}
+      />
+      <TarjetaComparacion
+        planName="Te lo montamos"
+        price={setup.formattedPrice}
+        description="Nos encargamos de ponerlo en marcha y te pasamos el resultado."
+        features={[
+          'Preparado con tus datos',
+          'Lo publicamos y te entregamos el enlace',
+          'Una ronda de ajustes incluida',
+          'No tienes que seguir una guía técnica',
+        ]}
+        featured
+      />
+    </div>
+  </section>
+)}
