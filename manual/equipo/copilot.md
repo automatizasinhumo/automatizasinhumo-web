@@ -14,7 +14,7 @@ Reglas para Copilot (la norma completa está en `.github/copilot-instructions.md
 - Textos visibles en español de España.
 - Push solo a `origin`, nunca a `upstream`.
 - No tocar `.instances/` ni `manual/CREDENCIALES_STAGING.local`.
-- Encargos baratos: copiar el componente del repo, cambiar textos y colores y conectarlo. Sin capturas (las hace la CI), sin refactor y sin tests nuevos salvo que la tarea los pida. Si un componente exige mucha adaptación, se descarta y se busca otro repo que encaje mejor.
+- Encargos baratos: copiar el componente del repo, cambiar textos y colores y conectarlo. Sin capturas, sin refactor y sin tests nuevos salvo que la tarea los pida (Claude revisa lo visual en staging). Si un componente exige mucha adaptación, se descarta y se busca otro repo que encaje mejor.
 
 ## Cola
 

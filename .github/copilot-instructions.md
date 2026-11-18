@@ -12,10 +12,10 @@ Esta web se construye con código público que ya funciona y que otras personas 
    - El pegamento que conecta la pieza adoptada con nuestros datos: catálogo, D1 y ajustes.
    - Textos, colores y tokens del tema.
    - Arreglos muy pequeños que valgan para toda la web.
-   Quedan fuera los refactors, las capturas manuales (las hace la CI) y los tests nuevos que la tarea no pida.
+   Quedan fuera los refactors, las capturas y los tests nuevos, salvo que la tarea los pida. Claude revisa el resultado visual en staging después de fusionar.
 5. **Licencias:**
    - Solo se copia código con licencia MIT, Apache-2.0 o BSD. Un repo sin licencia sirve solo de referencia.
-   - Se conserva el aviso de copyright: una cabecera en cada fichero copiado y el texto completo en `licencias/<repo>.txt`.
+   - Se conserva el aviso de copyright: una cabecera en cada fichero copiado (si el formato no admite comentarios, como JSON, el aviso va en `licencias/<repo>.txt` con la lista de esos ficheros) y el texto completo en `licencias/<repo>.txt`.
 6. **Cada PR dice qué se adoptó:** el repo, la licencia, los ficheros copiados, lo que se ha cambiado y la prueba que demuestra que funciona.
 
 Reglas de forma: ficheros con CRLF, textos visibles en español de España, push solo a `origin` y nunca tocar `.instances/` ni `manual/CREDENCIALES_STAGING.local`.
