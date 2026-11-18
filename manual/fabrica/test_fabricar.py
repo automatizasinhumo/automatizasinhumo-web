@@ -1,6 +1,12 @@
-"""Pruebas de la fábrica sin red ni IA: python -m unittest discover -s manual/fabrica"""
+"""Pruebas de la fábrica sin red ni IA real."""
+import json
+import runpy
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
+import fabricar as modulo_fabricar
 from fabricar import poner_datos
 
 PLANTILLA = (
@@ -9,6 +15,9 @@ PLANTILLA = (
     '<a href="tel:+1 555">Llamar</a><a href="https://wa.me/15550000">WhatsApp</a>'
     '</body></html>'
 )
+VISTAS = runpy.run_path(str(Path(__file__).with_name('vistas-previas.py')))
+pedido_de = VISTAS['pedido_de']
+MARCADOR_LOTE = 'Nodos de la página (orden de lectura):\n'
 
 
 def pedido(**cambios):
@@ -16,6 +25,26 @@ def pedido(**cambios):
          'email': 'ana@example.es', 'telefono': '986 00 00 00', 'whatsapp': '+34 600 00 00 00'}
     p.update(cambios)
     return p
+
+
+def extraer_lote(usuario):
+    return json.loads(usuario.split(MARCADOR_LOTE, 1)[1])
+
+
+def renderizar(pedido_fabrica, plantilla, ia_simulada):
+    with tempfile.TemporaryDirectory() as temporal:
+        demos = Path(temporal) / 'demos'
+        origen = demos / 'site' / pedido_fabrica['plantilla']
+        origen.mkdir(parents=True)
+        (origen / 'index.html').write_text(plantilla, encoding='utf-8')
+        ruta_pedido = Path(temporal) / 'pedido.json'
+        ruta_pedido.write_text(json.dumps(pedido_fabrica, ensure_ascii=False), encoding='utf-8')
+        with patch.object(modulo_fabricar, 'DEMOS', demos), \
+                patch.object(modulo_fabricar, 'credenciales', return_value=('token-falso', 'cuenta-falsa')), \
+                patch.object(modulo_fabricar, 'ia', side_effect=ia_simulada):
+            modulo_fabricar.fabricar(ruta_pedido, desplegar=False)
+        salida = demos / 'clientes' / pedido_fabrica['id'] / 'site' / 'index.html'
+        return salida.read_text(encoding='utf-8')
 
 
 class PonerDatos(unittest.TestCase):
@@ -71,6 +100,87 @@ class PonerDatos(unittest.TestCase):
         out = poner_datos(PLANTILLA, pedido(telefono='600"><img src=x>'), 'Lumen')
         self.assertIn('href="tel:600"', out)
         self.assertNotIn('<img', out)
+
+
+class ContextoDePagina(unittest.TestCase):
+    def test_pedido_de_boda_no_repite_el_nombre_en_nodos_hermanos(self):
+        lotes = []
+
+        def ia_simulada(_token, _cuenta, _sistema, usuario):
+            lote = extraer_lote(usuario)
+            lotes.append(lote)
+            respuesta = {}
+            for clave, nodo in lote.items():
+                if isinstance(nodo, dict) and 'ruta' in nodo:
+                    if 'span:nth-of-type(1)' in nodo['ruta']:
+                        respuesta[clave] = 'Novia Demo'
+                    elif 'span:nth-of-type(2)' in nodo['ruta']:
+                        respuesta[clave] = 'Novio Demo'
+                    else:
+                        respuesta[clave] = nodo['texto']
+                else:
+                    respuesta[clave] = 'Pareja Demo'
+            return json.dumps(respuesta, ensure_ascii=False)
+
+        pedido_fabrica = {
+            'id': 'boda-demo',
+            'plantilla': 'plantilla-demo',
+            'negocio': '',
+            'evento': 'Boda Demo',
+            'contacto': 'Contacto Demo',
+            'actividad': 'Boda',
+            'ciudad': 'España',
+            'telefono': '600000000',
+            'email': 'demo@example.test',
+            'descripcion': 'Celebración familiar',
+            'servicios': [],
+        }
+        with patch.object(modulo_fabricar, 'LOTE', 1):
+            html = renderizar(
+                pedido_fabrica,
+                '<html><head><title>Inicio | Marca Demo</title></head>'
+                '<body><main><span>Nombre</span><span>Nombre</span></main></body></html>',
+                ia_simulada,
+            )
+        self.assertIn('<span>Novia Demo</span><span>Novio Demo</span>', html)
+        self.assertEqual(len(lotes), 2)
+        nodos = [next(iter(lote.values())) for lote in lotes]
+        self.assertEqual([nodo['texto'] for nodo in nodos], ['Nombre', 'Nombre'])
+        self.assertIn('span:nth-of-type(1)', nodos[0]['ruta'])
+        self.assertIn('span:nth-of-type(2)', nodos[1]['ruta'])
+        self.assertEqual(nodos[0]['siguiente'], 'Nombre')
+        self.assertEqual(nodos[1]['anterior'], 'Nombre')
+
+    def test_el_pie_usa_el_nombre_del_evento_antes_que_el_contacto(self):
+        pedido_fabrica = pedido_de({
+            'public_id': 'boda-demo',
+            'nombre': 'Contacto Demo',
+            'email': 'demo@example.test',
+            'telefono': '600000000',
+            'producto': 'Boda',
+            'campos': json.dumps({'evento': 'Boda Demo'}),
+        }, 'plantilla-demo')
+
+        def ia_simulada(_token, _cuenta, _sistema, usuario):
+            lote = extraer_lote(usuario)
+            return json.dumps({
+                clave: nodo['texto'] if isinstance(nodo, dict) else nodo
+                for clave, nodo in lote.items()
+            }, ensure_ascii=False)
+
+        html = renderizar(
+            pedido_fabrica,
+            '<html><head><title>Inicio | Marca Demo</title></head>'
+            '<body><footer>© Marca Demo</footer></body></html>',
+            ia_simulada,
+        )
+        self.assertIn('© Boda Demo', html)
+        self.assertNotIn('Contacto Demo', html)
+        self.assertEqual(modulo_fabricar.nombre_publico({
+            'negocio': '',
+            'evento': '',
+            'contacto': 'Contacto Demo',
+        }), 'Contacto Demo')
 
 
 if __name__ == '__main__':

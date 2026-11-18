@@ -13,7 +13,7 @@ import html as H, json, os, re, subprocess, sys, tempfile, time, urllib.parse, u
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from fabricar import fabricar  # noqa: E402
+from fabricar import fabricar, nombre_publico  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[2]
 args = sys.argv[1:]
@@ -66,6 +66,23 @@ def primero(campos, *claves):
     return ''
 
 
+def nombre_negocio_evento(campos):
+    excluidos = ('contacto', 'persona', 'cliente', 'responsable', 'apellidos')
+    for clave, valor in campos.items():
+        etiqueta = clave.lower()
+        if not valor or any(palabra in etiqueta for palabra in excluidos):
+            continue
+        if etiqueta.strip() in ('evento', 'boda'):
+            return str(valor).strip()
+        if 'nombre' in etiqueta and any(palabra in etiqueta for palabra in (
+                'negocio', 'empresa', 'local', 'marca', 'evento', 'boda', 'pareja', 'novio', 'celebración',
+                'celebracion', 'salón', 'salon')):
+            return str(valor).strip()
+        if 'datos de la empresa' in etiqueta or 'nombre del' in etiqueta or 'nombre de la' in etiqueta:
+            return str(valor).strip()
+    return ''
+
+
 def ciudad_de(campos):
     # Primero ciudad/zona; de una dirección completa solo el último tramo ("C/ Mayor 3, 36201 Vigo" -> "Vigo").
     ciudad = primero(campos, 'ciudad', 'zona')
@@ -100,7 +117,7 @@ def qa(url, p):
         return ['la web no responde con 200']
     problemas = []
     texto = re.sub(r'<script.*?</script>|<style.*?</style>|<[^>]+>', ' ', html, flags=re.S)
-    if p['negocio'].lower() not in H.unescape(texto).lower():
+    if nombre_publico(p).lower() not in H.unescape(texto).lower():
         problemas.append('no aparece el nombre del negocio')
     # Correos por tokens (sin regex con retroceso): «usuario@dominio.tld» que no sea el del cliente.
     tokens = (x.strip('.,;:!?') for x in re.split(r"[\s\"'<>()=]", html))
@@ -129,12 +146,13 @@ def qa(url, p):
 
 def pedido_de(fila, plantilla):
     campos = json.loads(fila.get('campos') or '{}')
-    negocio = primero(campos, 'nombre del', 'nombre de la', 'nombre y', 'datos de la empresa') or fila['nombre']
+    negocio = nombre_negocio_evento(campos)
     texto = '. '.join(f'{k}: {v}' for k, v in campos.items() if v) + ('. ' + fila['mensaje'] if fila.get('mensaje') else '')
     return {
         'id': fila['public_id'].lower(),
         'plantilla': plantilla,
         'negocio': negocio.split('\n')[0][:60],
+        'contacto': fila.get('nombre', ''),
         'actividad': primero(campos, 'sector', 'profesión', 'temática') or fila.get('producto') or 'Negocio local',
         'ciudad': ciudad_de(campos),
         'telefono': primero(campos, 'teléfono') or fila.get('telefono') or '',
