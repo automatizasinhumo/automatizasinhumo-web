@@ -33,9 +33,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
           cache: npm
@@ -71,6 +73,8 @@ jobs:
 
       - name: Regenerar y subir las capturas
         if: ${{ inputs.actualizar }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           rm -rf tests/visual/capturas
           qa/navegador/node_modules/.bin/playwright test -c tests/visual --update-snapshots
@@ -79,9 +83,10 @@ jobs:
           git add tests/visual/capturas
           if git diff --cached --quiet; then echo 'Capturas sin cambios'; exit 0; fi
           git commit -m 'QA visual: capturas de referencia regeneradas'
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          # El checkout no guarda credenciales (no acaban en el artefacto): se pasan solo aquí.
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
           name: qa-visual
