@@ -15,7 +15,6 @@ SELECT id FROM solicitudes
 WHERE created_at < datetime('now', '-30 minutes')
   AND estado IN ('nueva', 'en_preparacion')
   AND COALESCE(nota, '') NOT LIKE 'Vista previa automática: https://%'
-  AND COALESCE(nota, '') NOT LIKE 'Vista previa automática: falló%'
 ORDER BY id
 """
 

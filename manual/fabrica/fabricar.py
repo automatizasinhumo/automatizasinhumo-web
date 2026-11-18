@@ -133,18 +133,9 @@ def fabricar(ruta_pedido, desplegar=True):
         if t:
             n.replace_with(n[: len(n) - len(n.lstrip())] + t + n[len(n.rstrip()):])
 
-    out = str(sopa)
-    if marca:
-        out = out.replace(H.escape(marca), H.escape(p['negocio'])).replace(marca, p['negocio'])
-    out = re.sub(r'href="mailto:[^"]*"', f'href="mailto:{p["email"]}"', out)
-    out = re.sub(r'href="tel:[^"]*"', f'href="tel:{re.sub(r"[^0-9+]", "", p["telefono"])}"', out)
-    if p.get('whatsapp'):
-        out = re.sub(r'wa\.me/\d+', 'wa.me/' + re.sub(r'\D', '', p['whatsapp']), out)
-    for viejo in set(re.findall(r'[\w.+-]+@[\w-]+\.[\w.]+', out)) - {p['email']}:
-        out = out.replace(viejo, p['email'])
-    out = re.sub(r'<title>[^<]*</title>', f"<title>{H.escape(p['negocio'])} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>", out, 1)
-    out = re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:(url|image)[^>]*>', '', out)
-    idx.write_text(out, encoding='utf-8')
+    idx.write_text(poner_datos(str(sopa), p, marca), encoding='utf-8')
+    # Una vista previa no es la web del cliente: que ningún buscador la indexe.
+    (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
 
     nombre = 'web-' + re.sub(r'[^a-z0-9-]', '-', p['id'].lower())[:50]
     (base / 'wrangler.jsonc').write_text(json.dumps(
@@ -159,6 +150,42 @@ def fabricar(ruta_pedido, desplegar=True):
             print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
         return url.group(0) if url else None
     print('generada sin publicar en', site)
+
+
+# Correo admitido en el HTML: sin comillas, espacios ni signos que cierren un atributo o una etiqueta.
+CORREO_VALIDO = re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+')
+
+
+def poner_datos(out, p, marca):
+    """Pone nombre, correo, teléfono y título del cliente en el HTML serializado de la plantilla.
+
+    Todo dato del pedido entra escapado: el formulario es público y un nombre con «<script>»
+    o un correo con comillas no deben convertirse en HTML de la vista previa.
+    """
+    negocio = H.escape(p['negocio'])
+    correo = p['email'].strip()
+    if not CORREO_VALIDO.fullmatch(correo):
+        raise ValueError('correo del pedido no válido')
+    correo = H.escape(correo)
+    if marca:
+        # Una sola pasada: un nombre que contenga la marca («Lumen Ana») no se vuelve a sustituir.
+        formas = sorted({H.escape(marca), marca}, key=len, reverse=True)
+        out = re.sub('|'.join(map(re.escape, formas)), lambda _: negocio, out)
+    out = re.sub(r'href="mailto:[^"]*"', lambda _: f'href="mailto:{correo}"', out)
+    tel = re.sub(r'[^0-9+]', '', p['telefono'])
+    out = re.sub(r'href="tel:[^"]*"', lambda _: f'href="tel:{tel}"', out)
+    if p.get('whatsapp'):
+        wa = re.sub(r'\D', '', p['whatsapp'])
+        out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
+    # Igual con los correos sueltos de la plantilla: una pasada, sin tocar el ya puesto.
+    out = CORREO_VALIDO.sub(lambda _: correo, out)
+    titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"
+    out = re.sub(r'<title>[^<]*</title>', lambda _: titulo, out, count=1)
+    # Los atributos pueden venir en cualquier orden y con cualquier comilla.
+    out = re.sub(r'''<link\b[^>]*\brel=["']?canonical\b[^>]*>'''
+                 r'''|<meta\b[^>]*\bproperty=["']?og:(?:url|image)\b[^>]*>'''
+                 r'''|<meta\b[^>]*\bname=["']?robots\b[^>]*>''', '', out, flags=re.I)
+    return re.sub(r'<head[^>]*>', lambda m: m.group(0) + '<meta name="robots" content="noindex">', out, count=1)
 
 
 if __name__ == '__main__':

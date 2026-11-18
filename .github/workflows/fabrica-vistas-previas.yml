@@ -114,26 +114,12 @@ jobs:
       - name: Comprobar staging
         id: staging
         run: |
-          if curl -fsS --max-time 30 "$STAGING_URL/" -o /dev/null \
-            && curl -fsS --max-time 30 "$STAGING_URL/robots.txt" -o /dev/null; then
+          if curl -fsSL --max-time 30 "$STAGING_URL/" -o /dev/null \
+            && curl -fsSL --max-time 30 "$STAGING_URL/robots.txt" -o /dev/null; then
             echo "estado=arriba" >> "$GITHUB_OUTPUT"
           else
             echo "estado=caido" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Configurar Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: '3.12'
-
-      - name: Instalar Wrangler
-        run: npm ci --ignore-scripts
 
       - name: Configurar acceso a D1
         id: credenciales
@@ -152,7 +138,25 @@ jobs:
             echo "disponible=0" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Configurar Node.js
+        if: steps.credenciales.outputs.disponible == '1'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configurar Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Instalar Wrangler
+        if: steps.credenciales.outputs.disponible == '1'
+        run: npm ci --ignore-scripts
+
       - name: Actualizar avisos automáticos
+        # Sin depender de la instalación de Wrangler: el aviso del staging sale aunque falle.
+        if: ${{ !cancelled() }}
         env:
           ESTADO_STAGING: ${{ steps.staging.outputs.estado }}
           D1_DISPONIBLE: ${{ steps.credenciales.outputs.disponible }}
