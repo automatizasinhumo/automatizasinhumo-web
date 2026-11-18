@@ -54,3 +54,12 @@ Arregla solo estos, con el cambio mínimo y sin cambiar comportamiento:
 No toques las migraciones con DELETE sin WHERE (son a propósito) ni los avisos de `npx` en workflows o scripts.
 Prueba: `npx vitest run` y `npx astro build` en verde; en la PR, la puerta de Sonar en verde.
 
+### C5 · Aprobación → pago sin enlace a mano (mapa ronda 07, adopción 5) — PENDIENTE (después de C3)
+Detalle en `manual/auditorias-gpt/ronda-07-respuesta.md`, apartado 10.5. Clona stripe-samples/checkout-one-time-payments (MIT) y copia `.github/workflows/ci_e2e.yml` → `.github/workflows/recorrido-cliente.yml`, adaptado.
+Añade un botón «Aprobar y pagar» en `src/pages/empezar/estado.astro` (o en la página autenticada) que registre la versión aprobada, cree la sesión de pago con `createCheckout` (flujo existente de Stripe) y redirija a la URL que devuelve; `/pay/[publicId]` solo sirve para pagos demo o Lightning y no admite el ID de la solicitud. Reutiliza `src/features/payments/stripe.ts`, `src/pages/api/webhook/[provider].ts` y `src/features/orders/recordWebhook.ts`; no escribas otro checkout.
+Prueba (Stripe en modo test): aprobación → checkout → webhook pagado → estado actualizado; un webhook repetido no duplica el pedido; un pago fallido no desbloquea la entrega.
+
+### C6 · Versiones de la entrega (mapa ronda 07, adopción 6) — PENDIENTE (después de C5)
+Detalle en el apartado 10.6. Usa como base `MoBio/migrations/0002_draft_publishing.sql` (dimasmong/MoBio, MIT) para `migrations/0043_solicitudes_versiones.sql` (si el número ya existe, el siguiente libre): URL de vista previa, versión aprobada, URL definitiva e historial de despliegues. La entrega solo se activa con el pago confirmado (o con una compra directa ya pagada).
+Prueba: versión 1 aprobada y pagada; después, una versión 2 sin aprobar; la entrega sigue siendo la versión 1.
+
