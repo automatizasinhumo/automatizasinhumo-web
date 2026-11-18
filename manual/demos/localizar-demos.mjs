@@ -23,6 +23,31 @@ const MODELO = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const LOTE = 25;
 const ATRIBUTOS = ['alt', 'title', 'placeholder', 'aria-label'];
 const OMITIR = 'script, style, noscript, template, svg, code, pre, #ash-aviso';
+// Misma unidad que el vigilante: el texto de un elemento junto con el de sus hijos en línea.
+const EN_LINEA = ['a', 'b', 'strong', 'em', 'i', 'span', 'small', 'br'];
+
+/** Atributos con texto visible de un elemento; `value` solo en botones, como el vigilante. */
+function atributos($, el) {
+  const tipo = $(el).attr('type') ?? '';
+  return ['submit', 'button'].includes(tipo) ? [...ATRIBUTOS, 'value'] : ATRIBUTOS;
+}
+
+/** Solo texto y elementos en línea (también dentro): se puede traducir como una frase. */
+function soloEnLinea(nodo) {
+  return (nodo.children ?? []).every((n) => n.type === 'text' || n.type === 'comment' || (n.type === 'tag' && EN_LINEA.includes(n.name) && soloEnLinea(n)));
+}
+
+const etiquetas = (s) => (s.match(/<[^>]+>/g) ?? []).join('');
+const sinEtiquetas = (s) => s.replace(/<[^>]+>/g, ' ');
+// Restos de un razonamiento en vez de la traducción: «X -> Y», «por ejemplo», «Entonces:».
+const NO_FINAL = /->|\bpor ejemplo\b|\bEntonces:|\bo bien\b/i;
+
+/** Una traducción lista para publicar: sin instrucciones, sin alargarse y con las mismas etiquetas. */
+export function esFinal(original, v) {
+  if (NO_FINAL.test(v) && !NO_FINAL.test(original)) return false;
+  if (v.length > original.length * 3 + 40) return false;
+  return etiquetas(v) === etiquetas(original) && !problemas(sinEtiquetas(v)).length;
+}
 
 export const SISTEMA =
   'Traduces y localizas a España textos sueltos de una web de ejemplo. Español de España, natural y breve, ' +
@@ -31,11 +56,14 @@ export const SISTEMA =
   'español (912 345 678 o 612 345 678). Correos de ejemplo con @ejemplo.es. Horarios en 24 h (9:00, 17:30). ' +
   'Nombres de personas inventados pasan a nombres españoles; las marcas inventadas se traducen o se dejan si ' +
   'son un nombre propio corto. Conserva emojis, flechas y signos del principio y del final. ' +
+  'Si un texto lleva etiquetas HTML, consérvalas idénticas y en el mismo orden. Da solo la traducción final, sin ' +
+  'alternativas ni explicaciones. ' +
   'Recibes un objeto JSON con claves numeradas; responde SOLO con un objeto JSON con las mismas claves.';
 
 // Símbolo delante («$40», «US$ 5», «£4.2bn») o código detrás («12000 USD»). El código detrás
 // exige que no haya cifra antes (lookbehind) para no reintentar desde cada dígito.
-const MONEDA_DELANTE = /(?:US\$|\$|£) ?(\d[\d,]*(?:\.\d+)?) ?(k|m|bn)?\b/gi;
+// El espacio antes del sufijo va dentro de su grupo: «$40 por persona» conserva el espacio.
+const MONEDA_DELANTE = /(?:US\$|\$|£) ?(\d[\d,]*(?:\.\d+)?)(?: ?(k|m|bn)\b)?/gi;
 const MONEDA_DETRAS = /(?<![\d,.])(\d[\d,]*(?:\.\d+)?) ?(?:USD|GBP)\b/gi;
 const MILES = new Intl.NumberFormat('es-ES'); // 1250 → «1250», 12000 → «12.000» (norma RAE)
 
@@ -78,9 +106,11 @@ function simbolosSueltos($) {
   return n;
 }
 
-/** Reglas sin IA: monedas, scripts, precios partidos y correos de ejemplo en mailto. */
+/** Reglas sin IA: monedas, scripts, precios partidos, correos de ejemplo en mailto y `lang`. */
 export function reglasFijas($) {
   let n = simbolosSueltos($);
+  const lang = $('html').attr('lang');
+  if (lang && !/^es\b/i.test(lang)) ($('html').attr('lang', 'es'), n++);
   $('body *, title').each((_, el) => {
     if ($(el).is('script')) {
       if ($(el).attr('src')) return;
@@ -95,7 +125,7 @@ export function reglasFijas($) {
       const nuevo = aEuros(nodo.data);
       if (nuevo !== nodo.data) ((nodo.data = nuevo), n++);
     }
-    for (const a of [...ATRIBUTOS, 'href']) {
+    for (const a of [...atributos($, el), 'href']) {
       const v = $(el).attr(a);
       if (!v) continue;
       const nuevo = a === 'href' ? v.replace(/^(mailto:[^@]+)@(?:example\.(?:com|org|net)|domain\.com|email\.com|company\.com)/i, '$1@ejemplo.es') : aEuros(v);
@@ -111,7 +141,7 @@ export function aceptadas(pedido, respuesta) {
   for (const [k, original] of Object.entries(pedido)) {
     const v = respuesta?.[k];
     if (typeof v !== 'string' || !v.trim() || v.trim() === original.trim()) continue;
-    if (problemas(v).length) continue;
+    if (!esFinal(original, v)) continue;
     buenas[k] = v;
   }
   return buenas;
@@ -159,15 +189,24 @@ async function ia({ tok, acc }, contexto, pedido) {
 /** Puntos de una página que el vigilante marca: [{texto, poner(nuevo)}]. */
 export function marcados($) {
   const out = [];
+  const enteros = new Set();
   $('body *, title').each((_, el) => {
     if ($(el).closest(OMITIR).length) return;
-    for (const n of $(el).contents().toArray()) {
+    // Dentro de una frase que ya va entera (con sus etiquetas) no se toca nada más.
+    if ($(el).parents().toArray().some((p) => enteros.has(p))) return;
+    const partido = $(el).children().length > 0 && soloEnLinea(el);
+    const frase = partido ? limpiar(sinEtiquetas($(el).html() ?? '')) : '';
+    if (frase && problemas(frase).length) {
+      enteros.add(el);
+      out.push({ texto: ($(el).html() ?? '').trim(), poner: (v) => $(el).html(v) });
+    }
+    for (const n of enteros.has(el) ? [] : $(el).contents().toArray()) {
       if (n.type !== 'text' || !n.data.trim() || !problemas(n.data).length) continue;
       const ini = n.data.slice(0, n.data.length - n.data.trimStart().length);
       const fin = n.data.slice(n.data.trimEnd().length);
       out.push({ texto: n.data.trim(), poner: (v) => (n.data = ini + v + fin) });
     }
-    for (const a of ATRIBUTOS) {
+    for (const a of atributos($, el)) {
       const v = $(el).attr(a);
       if (v && problemas(v).length) out.push({ texto: v.trim(), poner: (nuevo) => $(el).attr(a, nuevo) });
     }
