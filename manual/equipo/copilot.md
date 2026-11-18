@@ -69,8 +69,8 @@ Clona pqina/filepond (MIT). Copia `dist/filepond.min.js` y `dist/filepond.min.cs
 Prueba: una solicitud con tres imágenes deja tres objetos en R2; un archivo demasiado grande o de formato no admitido se rechaza; otra solicitud no puede leerlos.
 
 ### C8 · Factura PDF automática con pdfme (ronda 08, adopción 2) — PENDIENTE (después de C5)
-Usa el paquete oficial `@pdfme/generator` (pdfme/pdfme, MIT) y copia `playground/public/template-assets/invoice-white/template.json` a `manual/facturas/plantilla.json`, sin los datos de ejemplo. Genera la factura del pedido pagado desde `src/features/orders/recordWebhook.ts` y guárdala en R2 privado. Los pedidos con `payment_method = 'demo'` no generan factura. Si supera la CPU de Workers Free, genérala en un workflow de Actions. Si la factura falla después de guardar el pedido, el pedido queda marcado como «factura pendiente» y el cron existente del Worker la reintenta (una sola factura por pedido, clave = id del pedido).
-Prueba: pago confirmado → un PDF; webhook repetido → sin factura duplicada; pago fallido → sin factura; pedido demo → sin factura; fallo al generar → el cron la crea en la siguiente pasada.
+Usa el paquete oficial `@pdfme/generator` (pdfme/pdfme, MIT) y copia `playground/public/template-assets/invoice-white/template.json` a `manual/facturas/plantilla.json`, sin los datos de ejemplo. Genera la factura del pedido pagado desde `src/features/orders/recordWebhook.ts` y guárdala en R2 privado. Los pedidos con `payment_method = 'demo'` no generan factura. Si supera la CPU de Workers Free, genérala en un workflow de Actions. La marca «factura pendiente» se escribe en el mismo `batch` de D1 que guarda el pedido pagado y se quita al guardar el PDF; el cron existente del Worker reintenta los pedidos marcados (una sola factura por pedido, clave = id del pedido).
+Prueba: pago confirmado → un PDF; webhook repetido → sin factura duplicada; pago fallido → sin factura; pedido demo → sin factura; fallo al generar → el cron la crea en la siguiente pasada; proceso cortado entre guardar el pedido y generar el PDF → el pedido queda marcado y el cron la crea.
 
 ### C9 · Analítica propia con Counterscale (ronda 08, adopción 3) — PENDIENTE
 Despliega benvinegar/counterscale (MIT) como Worker aparte, siguiendo su README. Añade su tracker a `src/layouts/Layout.astro` con eventos de ficha, demo y formulario, sin datos personales.
@@ -89,7 +89,7 @@ Usa el binario oficial `siteone-crawler-v2.5.1-linux-x64.tar.gz` de las releases
 Prueba: `/search?q=peluqueria` y `/empezar/gracias` llevan `noindex`; `/products/web-una-pagina` no; el informe JUnit se sube como artefacto y un 404 interno hace fallar el job.
 
 ### C13 · Inspector de JSON-LD en CI con seo-graph (ronda 10, empleado 2) — PENDIENTE (después de C11)
-Usa el escáner de jdevalk/seo-graph (MIT) tal como indica `packages/seo-graph-scanner/README.md` en un job nuevo de `.github/workflows/seo-crawl.yml` que revise la portada, una categoría y tres fichas del staging. Para las migas de C11, copia `packages/astro-seo-graph/src/breadcrumbs.ts` a `src/features/seo/breadcrumbs.ts` y adapta `packages/astro-seo-graph/test/breadcrumbs.test.ts`.
+Usa el escáner de jdevalk/seo-graph (MIT), paquete `@jdevalk/seo-graph-scanner` (`npx --package=@jdevalk/seo-graph-scanner seo-graph-scan`), en un job nuevo de `.github/workflows/seo-crawl.yml` que revise la portada, una categoría y tres fichas del staging. No añade marcado: Service, Offer y BreadcrumbList los pone C11; aquí solo se validan.
 Prueba: un JSON-LD roto a propósito hace fallar el job; ninguna miga apunta a una URL inexistente; los precios de Offer coinciden con D1.
 
 ### C14 · Sitemap con lastmod y comprobación de canonical con sitemap.js (ronda 10, hallazgo 4) — PENDIENTE
@@ -101,7 +101,7 @@ Usa la acción publicada `bojieyang/indexnow-action` (MIT), fijada por SHA, en `
 Prueba: el fichero de clave responde 200 en producción; staging nunca se envía; una URL cambiada recibe respuesta aceptada.
 
 ### C16 · Informe semanal de Search Console (ronda 10, empleado 5) — PENDIENTE (después de verificar el dominio en Search Console)
-Copia `samples/searchconsole/search_analytics_api_sample.py` de googleapis/google-api-python-client (Apache-2.0) a `scripts/seo/search-console.py`, con cuenta de servicio de solo lectura en un secreto de Actions. Workflow `.github/workflows/seo-search-console.yml`, semanal, que sube un CSV como artefacto (consultas, páginas, clics, impresiones, CTR, posición, móvil) y resume en el job las consultas comerciales («precio», «cuánto cuesta», «web peluquería»…) con muchas impresiones y pocos clics.
+Copia `samples/searchconsole/search_analytics_api_sample.py` de googleapis/google-api-python-client (Apache-2.0) a `scripts/seo/search-console.py`, con cuenta de servicio de solo lectura en un secreto de Actions. Workflow `.github/workflows/seo-search-console.yml`, semanal. El repo es público y cualquiera puede descargar sus artefactos: no sube el CSV, solo publica en el resumen del job las cifras agregadas (consultas, páginas, clics, impresiones, CTR, posición, móvil) y resume en el job las consultas comerciales («precio», «cuánto cuesta», «web peluquería»…) con muchas impresiones y pocos clics.
 Prueba: sin permisos falla con un mensaje claro y sin cifras inventadas; ninguna credencial aparece en el log.
 
 ## Huecos de arquitectura (los resuelve Claude, no Copilot)

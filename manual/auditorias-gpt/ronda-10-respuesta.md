@@ -164,3 +164,9 @@ Bloques preparados para incorporar a [`manual/equipo/copilot.md`](https://github
 | **P2** | Activar C15 y C16 cuando el dominio esté publicado y verificado. |
 
 **Conclusión:** no compraría herramientas SEO ni instalaría otro framework completo. La combinación de **SiteOne Crawler + seo-graph + sitemap.js + IndexNow + Search Console**, reutilizando el código comercial ya encargado en C1/C2, cubre los huecos identificados con servicios y repositorios gratuitos. El resultado buscado no es multiplicar páginas, sino que cada búsqueda sectorial relevante conduzca a **una respuesta de precio concreta, una demo real y una acción de contratación clara**.
+
+## Fe de erratas (revisión de CodeRabbit, 18/11/2026)
+
+- El escáner se ejecuta con `npx --package=@jdevalk/seo-graph-scanner seo-graph-scan`.
+- El repo es público: los artefactos de Actions los puede descargar cualquiera. El informe de Search Console solo publica cifras agregadas.
+- C13 no añade marcado; valida el que pone C11.

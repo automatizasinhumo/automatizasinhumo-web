@@ -14,7 +14,8 @@ def a_markdown(bloque, texto):
     try:
         from markdownify import markdownify
         md = markdownify(bloque.inner_html(timeout=5000), heading_style="ATX", bullets="-").strip()
-        return re.sub(r"\n{3,}", "\n\n", md) + "\n" if md else texto
+        # Sin recortar saltos: dentro de los bloques de código cambiaría el contenido.
+        return md + "\n" if md else texto
     except Exception:
         return texto
 

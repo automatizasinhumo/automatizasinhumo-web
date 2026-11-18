@@ -290,3 +290,10 @@ Para recuperación automática de trabajos interrumpidos, reutilizar también el
 **Orden de ejecución recomendado:** reclamación D1 atómica → Worker compartido → subida R2 → QA con dos clientes → cambio de URLs → retirada gradual de Workers antiguos.
 
 Con ello desaparece el crecimiento de Workers por cliente. Los nuevos límites de capacidad pasarán a ser el almacenamiento y las operaciones de R2, las peticiones del Worker y, para dominios propios externos, la gestión de DNS y certificados.
+
+## Fe de erratas (revisión de CodeRabbit, 18/11/2026)
+
+- Límites: ver [límites de Workers](https://developers.cloudflare.com/workers/platform/limits/) y [precios de R2](https://developers.cloudflare.com/r2/pricing/).
+- Workflow copiado de `kotx/render`: instala y despliega con `working-directory: workers/webs-preview` y la ruta de su lockfile en la caché.
+- Cambio de `path` en `render`: reutiliza el `const url` que ya existe; no lo declares otra vez.
+- Reclamación de solicitudes: ya resuelta en `manual/fabrica/vistas-previas.py` (#11) con reserva caducable e identificador propio; solo quien la tiene guarda el resultado.
