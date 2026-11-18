@@ -1,0 +1,85 @@
+---
+import { env } from 'cloudflare:workers';
+import Layout from '../../layouts/Layout.astro';
+import { publicOrigin } from '../../features/http/origin';
+import { buildPageMetadata } from '../../features/seo/metadata';
+import { getSector, servicesForSector } from '../../features/blog/sectors';
+
+const sector = getSector(Astro.params.sector);
+if (!sector) return new Response('Not found', { status: 404 });
+
+const services = servicesForSector(sector);
+const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
+const metadata = buildPageMetadata({
+  title: sector.title,
+  description: sector.description,
+  canonical: new URL(Astro.url.pathname, origin).href,
+});
+const jsonLd = JSON.stringify(metadata.jsonLd).replace(/</g, '\\u003c');
+---
+
+<Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
+  <script is:inline type="application/ld+json" set:html={jsonLd}></script>
+  <section class="fondo-tecnico rounded-3xl border border-line px-6 py-10 sm:px-10 sm:py-12">
+    <span class="etiqueta">Webs para negocios locales</span>
+    <h1 class="mt-4 max-w-3xl font-serif text-4xl font-bold leading-tight text-ink sm:text-5xl">
+      {sector.heading}
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg leading-7 text-muted">{sector.introduction}</p>
+    <a
+      href="/empezar/consulta"
+      class="mt-7 inline-flex rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+    >
+      Cuéntanos qué necesitas
+    </a>
+  </section>
+
+  <section class="py-10 sm:py-12" aria-labelledby="servicios">
+    <h2 id="servicios" class="font-serif text-2xl font-bold text-ink sm:text-3xl">
+      Servicios y precios publicados
+    </h2>
+    <p class="mt-2 max-w-2xl text-muted">
+      Los importes se leen del mismo catálogo de demos que ya usa la tienda. Consulta la ficha para ver modalidades y precio vigente antes de contratar.
+    </p>
+    <div class="mt-5 grid gap-5 md:grid-cols-2">
+      {services.map((service) => (
+        <article class="tarjeta p-5">
+          <h3 class="font-serif text-xl font-semibold text-ink">{service.name}</h3>
+          <p class="mt-2 text-sm text-muted">
+            Desde {service.price} € · primera versión en {service.deliveryTime}
+          </p>
+          <a
+            href={`/products/${service.slug}`}
+            class="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
+          >
+            Ver servicio y modalidades →
+          </a>
+          <ul class="mt-4 space-y-2 border-t border-line pt-4">
+            {service.demos.map((demo) => (
+              <li>
+                <a
+                  href={demo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-brand hover:underline"
+                >
+                  {demo.tipo === 'interactiva' ? 'Probar' : 'Ver'} demo: {demo.titulo} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="mb-12 rounded-2xl border border-line bg-surface p-6">
+    <h2 class="font-serif text-2xl font-bold text-ink">Antes de publicar</h2>
+    <ul class="mt-4 list-disc space-y-2 pl-5 text-muted">
+      {sector.considerations.map((consideration) => <li>{consideration}</li>)}
+    </ul>
+    <p class="mt-5 text-sm text-muted">
+      Para que la página represente bien tu negocio, prepara horarios, zona de atención, servicios y una forma de contacto que puedas mantener actualizada.
+    </p>
+  </section>
+</Layout>

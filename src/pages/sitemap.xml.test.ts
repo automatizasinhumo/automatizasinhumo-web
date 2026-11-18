@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { sitemapLocs } from './sitemap.xml';
+import { marketingStaticPaths, sitemapLocs } from './sitemap.xml';
+import { SECTORS } from '../features/blog/sectors';
 
 const origin = 'https://shop.example';
 const data = {
@@ -30,6 +31,22 @@ describe('sitemapLocs', () => {
     expect(locs).toContain(`${origin}/products/beanie`);
     expect(locs).toContain(`${origin}/pages/about`);
     expect(locs).toHaveLength(4);
+  });
+
+  it('includes the blog, its articles, and sector landing pages', () => {
+    const staticPaths = marketingStaticPaths([
+      { id: 'cuanto-cuesta-una-web-local' },
+      { id: 'web-o-redes-sociales' },
+      { id: 'web-para-salir-en-google' },
+    ]);
+    const locs = sitemapLocs(origin, null, {
+      ...data,
+      staticPaths,
+    });
+
+    expect(locs).toContain(`${origin}/blog`);
+    expect(staticPaths).toHaveLength(1 + 3 + SECTORS.length);
+    for (const path of staticPaths) expect(locs).toContain(`${origin}${path}`);
   });
 
   it('never emits a duplicate URL', () => {

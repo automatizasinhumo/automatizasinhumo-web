@@ -6,6 +6,8 @@ import { listCategories } from '../features/categories/db';
 import { listPublishedPages } from '../features/pages/db';
 import { catalogPath } from '../features/settings/home';
 import { publicOrigin } from '../features/http/origin';
+import { getCollection } from 'astro:content';
+import { SECTORS } from '../features/blog/sectors';
 
 export const prerender = false;
 
@@ -27,6 +29,7 @@ export function sitemapLocs(
     categories: { slug: string }[];
     products: { slug: string }[];
     pages: { slug: string }[];
+    staticPaths?: string[];
   },
 ): string[] {
   return [
@@ -35,6 +38,15 @@ export function sitemapLocs(
     ...data.products.map((p) => `${origin}/products/${p.slug}`),
     // Published pages only — drafts must not be discoverable.
     ...data.pages.map((p) => `${origin}/pages/${p.slug}`),
+    ...(data.staticPaths ?? []).map((path) => `${origin}${path}`),
+  ];
+}
+
+export function marketingStaticPaths(blogEntries: { id: string }[]): string[] {
+  return [
+    '/blog',
+    ...blogEntries.map((entry) => `/blog/${entry.id}`),
+    ...SECTORS.map((sector) => `/webs/${sector.slug}`),
   ];
 }
 
@@ -46,8 +58,14 @@ export const GET: APIRoute = async ({ url, locals }) => {
   const products = total > 0 ? await listProducts(env.DB, total, 0) : [];
   const categories = await listCategories(env.DB);
   const pages = await listPublishedPages(env.DB);
+  const blogEntries = await getCollection('blog');
 
-  const locs = sitemapLocs(origin, locals.settings?.homePage, { categories, products, pages });
+  const locs = sitemapLocs(origin, locals.settings?.homePage, {
+    categories,
+    products,
+    pages,
+    staticPaths: marketingStaticPaths(blogEntries),
+  });
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
