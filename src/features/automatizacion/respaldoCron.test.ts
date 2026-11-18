@@ -12,15 +12,15 @@ function marcasMemoria(inicial: Record<string, string> = {}): Marcas & { datos: 
   return {
     datos,
     leer: async () => ({ ...datos }),
-    reclamar: async (w, p) => {
-      if (datos[w] && datos[w] >= p) return false;
-      datos[w] = p;
+    reclamar: async (w, v) => {
+      if (datos[w] && datos[w] >= v) return false;
+      datos[w] = v;
       return true;
     },
-    soltar: async (w, p, anterior) => {
-      if (datos[w] !== p) return;
-      if (anterior === undefined) delete datos[w];
-      else datos[w] = anterior;
+    cambiar: async (w, actual, nuevo) => {
+      if (datos[w] !== actual) return;
+      if (nuevo === undefined) delete datos[w];
+      else datos[w] = nuevo;
     },
   };
 }
@@ -41,7 +41,7 @@ describe('periodos', () => {
 });
 
 describe('pendientes', () => {
-  const semanaPasada = Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20']));
+  const semanaPasada = Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20@~']));
 
   it('la fábrica toca a los 05, 20, 35 y 50 de cada hora', () => {
     for (const m of ['05', '20', '35', '50']) {
@@ -61,14 +61,20 @@ describe('pendientes', () => {
     expect(nombres('2026-11-23T06:20:00Z', semanaPasada)).toEqual(['fabrica-vistas-previas.yml', ...SEMANALES]);
     // Un semanal que falló el lunes sigue pendiente el martes.
     const hechos: Record<string, string> = {};
-    for (const w of SEMANALES) hechos[w] = w === 'seguridad.yml' ? '2026-11-16T06:20' : '2026-11-23T06:20';
+    for (const w of SEMANALES) hechos[w] = w === 'seguridad.yml' ? '2026-11-16T06:20@~' : '2026-11-23T06:20@~';
     expect(nombres('2026-11-24T09:00:00Z', hechos)).toEqual(['seguridad.yml']);
+  });
+
+  it('una reserva sin confirmar bloquea 30 minutos y luego caduca', () => {
+    const reservada = { ...semanaPasada, 'seguridad.yml': '2026-11-23T06:20@2026-11-23T06:20' };
+    expect(nombres('2026-11-23T06:35:00Z', reservada)).toEqual(['fabrica-vistas-previas.yml', ...SEMANALES.filter((w) => w !== 'seguridad.yml')]);
+    expect(nombres('2026-11-23T06:50:00Z', reservada)).toContain('seguridad.yml');
   });
 });
 
 describe('lanzarProgramados', () => {
   const tick = new Date('2026-11-18T10:05:00Z');
-  const semanaHecha = Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20']));
+  const semanaHecha = Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20@~']));
 
   it('sin token o sin repo no llama a nada', async () => {
     const pedir = vi.fn();
@@ -102,6 +108,16 @@ describe('lanzarProgramados', () => {
     await lanzarProgramados(tick, 't', 'org/repo', m, pedir as unknown as typeof fetch);
     await lanzarProgramados(tick, 't', 'org/repo', m, pedir as unknown as typeof fetch);
     expect(pedir).toHaveBeenCalledTimes(1);
+    expect(m.datos['fabrica-vistas-previas.yml']).toBe('2026-11-18T10:05@~');
+  });
+
+  it('una reserva caducada (Worker caído a medias) se reintenta, y un hecho no se reclama', async () => {
+    const m = marcasMemoria({ ...semanaHecha, 'seguridad.yml': '2026-11-23T06:20@2026-11-23T06:20' });
+    const pedir = ok();
+    const r = await lanzarProgramados(new Date('2026-11-23T06:50:00Z'), 't', 'org/repo', m, pedir as unknown as typeof fetch);
+    expect(r.lanzados).toContain('seguridad.yml');
+    expect(m.datos['seguridad.yml']).toBe('2026-11-23T06:20@~');
+    expect(await m.reclamar('seguridad.yml', '2026-11-23T06:20@2026-11-23T07:05')).toBe(false);
   });
 
   it('en un tick sin nada debido no lee marcas', async () => {
@@ -122,7 +138,7 @@ describe('lanzarProgramados', () => {
     );
     const r = await lanzarProgramados(lunes, 'secreto', 'org/repo', m, pedir as unknown as typeof fetch);
     expect(r.fallidos).toEqual(['seguridad.yml']);
-    expect(m.datos['seguridad.yml']).toBe('2026-11-16T06:20');
+    expect(m.datos['seguridad.yml']).toBe('2026-11-16T06:20@~');
     expect(JSON.stringify(error.mock.calls)).not.toContain('secreto');
 
     // El siguiente tick de la fábrica reintenta solo seguridad.yml.

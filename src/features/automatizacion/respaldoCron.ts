@@ -12,10 +12,12 @@
  * (`dueño/repo`). Sin ellos no hace nada: cualquier otra tienda minshop queda igual.
  *
  * Cada workflow tiene un periodo (la franja de 15 minutos de la fábrica, la semana
- * de los semanales) y una marca en D1 con el último periodo lanzado. Antes de
- * lanzar se reclama la marca de forma atómica, así un tick repetido no despacha
- * dos veces. Si GitHub rechaza el envío se suelta la marca y el siguiente tick
- * lo reintenta; los workflows ya aceptados no se repiten.
+ * de los semanales) y una marca en D1. Antes de lanzar se reclama de forma atómica
+ * con `periodo@franja` (reserva); si GitHub acepta, pasa a `periodo@~` (hecho).
+ * Así un tick repetido no despacha dos veces. Si GitHub rechaza el envío se suelta
+ * la reserva, y si el Worker muere a medias la reserva caduca a los 30 minutos: en
+ * ambos casos el siguiente tick lo reintenta. Un envío aceptado cuya respuesta se
+ * pierde puede repetirse una vez (al menos una vez, nunca ninguna).
  */
 
 import type { D1Database } from '@cloudflare/workers-types';
@@ -64,22 +66,28 @@ export const PROGRAMADOS: Programado[] = [
   { workflow: 'vigilantes-cadena.yml', periodo: semana },
 ];
 
-/** Marcas por workflow: último periodo lanzado. */
+/** Marcas por workflow: `periodo@franja` (reservado) o `periodo@~` (hecho). */
 export interface Marcas {
   leer(): Promise<Record<string, string>>;
-  /** true solo para quien escribe primero un periodo posterior al guardado. */
-  reclamar(workflow: string, periodo: string): Promise<boolean>;
-  /** Deshace un reclamo propio tras un envío fallido. */
-  soltar(workflow: string, periodo: string, anterior: string | undefined): Promise<void>;
+  /** Escribe `valor` solo si el guardado es menor (como texto); true si lo escribió. */
+  reclamar(workflow: string, valor: string): Promise<boolean>;
+  /** Cambia `actual` por `nuevo` (o lo borra si `nuevo` es undefined) solo si sigue siendo `actual`. */
+  cambiar(workflow: string, actual: string, nuevo: string | undefined): Promise<void>;
 }
 
-/** Workflows que tocan en este tick y aún no se han lanzado en su periodo. */
-export function pendientes(cuando: Date, hechos: Record<string, string>) {
+const HECHO = '~'; // ordena después de cualquier franja: un hecho no se puede volver a reclamar
+const RESERVA_MS = 30 * 60 * 1000;
+
+/** Workflows que tocan en este tick y no están hechos ni reservados en su periodo. */
+export function pendientes(cuando: Date, marcas: Record<string, string>) {
   const lista: { programado: Programado; periodo: string }[] = [];
+  const caducada = franja(new Date(cuando.getTime() - RESERVA_MS));
   for (const programado of PROGRAMADOS) {
     const periodo = programado.periodo(cuando);
-    const hecho = hechos[programado.workflow];
-    if (periodo && (!hecho || hecho < periodo)) lista.push({ programado, periodo });
+    if (!periodo) continue;
+    const [hecho, estado] = (marcas[programado.workflow] ?? '').split('@');
+    const libre = !hecho || hecho < periodo || (hecho === periodo && estado !== HECHO && estado <= caducada);
+    if (libre) lista.push({ programado, periodo });
   }
   return lista;
 }
@@ -95,25 +103,25 @@ export function marcasD1(db: D1Database): Marcas {
         .all<{ key: string; value: string }>();
       return Object.fromEntries(results.map((r) => [r.key.slice(PREFIJO.length), r.value]));
     },
-    async reclamar(workflow, periodo) {
+    async reclamar(workflow, valor) {
       const r = await db
         .prepare(
           `INSERT INTO settings (key, value) VALUES (?, ?)
            ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
            WHERE settings.value < excluded.value`,
         )
-        .bind(PREFIJO + workflow, periodo)
+        .bind(PREFIJO + workflow, valor)
         .run();
       return (r.meta?.changes ?? 0) === 1;
     },
-    async soltar(workflow, periodo, anterior) {
-      // Solo si la marca sigue siendo la nuestra: no pisar un periodo posterior.
+    async cambiar(workflow, actual, nuevo) {
+      // Solo si la marca sigue siendo la nuestra: no pisar la de otro tick.
       const q =
-        anterior === undefined
-          ? db.prepare('DELETE FROM settings WHERE key = ? AND value = ?').bind(PREFIJO + workflow, periodo)
+        nuevo === undefined
+          ? db.prepare('DELETE FROM settings WHERE key = ? AND value = ?').bind(PREFIJO + workflow, actual)
           : db
-              .prepare('UPDATE settings SET value = ? WHERE key = ? AND value = ?')
-              .bind(anterior, PREFIJO + workflow, periodo);
+              .prepare("UPDATE settings SET value = ?, updated_at = datetime('now') WHERE key = ? AND value = ?")
+              .bind(nuevo, PREFIJO + workflow, actual);
       await q.run();
     },
   };
@@ -137,10 +145,11 @@ export async function lanzarProgramados(
   // Solo los ticks de la fábrica (uno de cada tres) leen las marcas; los semanales
   // pendientes se recogen en ellos. El lunes 06:20 también es tick de la fábrica.
   if (!cadaQuinceMinutos(cuando)) return resultado;
-  const hechos = await marcas.leer();
-  for (const { programado, periodo } of pendientes(cuando, hechos)) {
+  const guardadas = await marcas.leer();
+  for (const { programado, periodo } of pendientes(cuando, guardadas)) {
     const { workflow, inputs } = programado;
-    if (!(await marcas.reclamar(workflow, periodo))) continue; // otro tick ya lo lanzó
+    const reserva = `${periodo}@${franja(cuando)}`;
+    if (!(await marcas.reclamar(workflow, reserva))) continue; // otro tick ya lo tiene
     let ok = false;
     try {
       const r = await pedir(
@@ -164,10 +173,12 @@ export async function lanzarProgramados(
     } catch (err) {
       console.error(`workflow_dispatch ${workflow} falló:`, err instanceof Error ? err.message : 'error');
     }
-    if (ok) resultado.lanzados.push(workflow);
-    else {
+    if (ok) {
+      resultado.lanzados.push(workflow);
+      await marcas.cambiar(workflow, reserva, `${periodo}@${HECHO}`);
+    } else {
       resultado.fallidos.push(workflow);
-      await marcas.soltar(workflow, periodo, hechos[workflow]);
+      await marcas.cambiar(workflow, reserva, guardadas[workflow]);
     }
   }
   return resultado;
