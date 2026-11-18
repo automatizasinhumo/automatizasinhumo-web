@@ -48,10 +48,15 @@ def primero(campos, *claves):
 
 def ciudad_de(campos):
     # Primero ciudad/zona; de una dirección completa solo el último tramo ("C/ Mayor 3, 36201 Vigo" -> "Vigo").
-    valor = primero(campos, 'ciudad', 'zona') or primero(campos, 'dirección', 'ubicación')
-    linea = valor.splitlines()[0] if valor else ''
-    tramo = re.sub(r'\d{5}', '', linea.split(',')[-1]).strip(' .()')
-    return tramo[:40] or 'España'
+    ciudad = primero(campos, 'ciudad', 'zona')
+    if ciudad:  # «Vigo, Pontevedra» -> «Vigo»
+        return re.split(r'[,\n]', ciudad)[0].strip(' .()')[:40] or 'España'
+    tramos = [t.strip(' .()') for t in re.split(r'[,\n]', primero(campos, 'dirección', 'ubicación')) if t.strip(' .()')]
+    if not tramos:
+        return 'España'
+    # En una dirección la ciudad va tras el código postal («36201 Vigo»); si no lo hay, el último tramo.
+    con_cp = next((t for t in tramos if re.search(r'\b\d{5}\b', t)), tramos[-1])
+    return re.sub(r'\b\d{5}\b', '', con_cp).strip(' .()')[:40] or 'España'
 
 
 def pedido_de(fila, plantilla):

@@ -25,7 +25,7 @@ def send(pg):
             except Exception:
                 pass
         pg.wait_for_timeout(500)
-    pg.locator('[contenteditable="true"]').first.press("Enter")
+    pg.keyboard.press("Enter")  # el cuadro ya tiene el foco; press() sobre el locator caducaba (11/2026)
 
 
 def main():
