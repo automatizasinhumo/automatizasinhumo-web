@@ -75,6 +75,12 @@ describe('localizador', () => {
     expect(esFinal('Rooms from $1,250.50', 'Habitaciones desde 1250,50 €')).toBe(true);
     expect(esFinal('Rooms from $1,250.50', 'Habitaciones desde 1250 €')).toBe(false);
     expect(esFinal('Call 555-0100 from 9am to 5pm', 'Llama al 912 345 678 de 9:00 a 17:00')).toBe(true);
+    // Decimales a cero son el mismo importe; un céntimo distinto no.
+    expect(esFinal('Travel and Stay 40 €', 'Viaje y alojamiento 40,00 €')).toBe(true);
+    expect(esFinal('Travel and Stay 40 €', 'Viaje y alojamiento 40,01 €')).toBe(false);
+    // Importe partido por etiquetas: también se compara.
+    expect(esFinal('From <span>40</span> €', 'Desde <span>400</span> €')).toBe(false);
+    expect(esFinal('From <span>40</span> €', 'Desde <span>40</span> €')).toBe(true);
   });
 
   it('la caché solo guarda traducciones finales', () => {

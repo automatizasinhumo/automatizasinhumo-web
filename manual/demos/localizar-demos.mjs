@@ -37,19 +37,32 @@ function soloEnLinea(nodo) {
   return (nodo.children ?? []).every((n) => n.type === 'text' || n.type === 'comment' || (n.type === 'tag' && EN_LINEA.includes(n.name) && soloEnLinea(n)));
 }
 
-const etiquetas = (s) => (s.match(/<[^>]+>/g) ?? []).join('');
-const sinEtiquetas = (s) => s.replace(/<[^>]+>/g, ' ');
+// [^<>] y no [^>]: un «<» sin cerrar corta el intento en el siguiente «<» (tiempo lineal).
+const ETIQUETA = /<[^<>]*>/g;
+const etiquetas = (s) => (s.match(ETIQUETA) ?? []).join('');
+const sinEtiquetas = (s) => s.replace(ETIQUETA, ' ');
 // Restos de un razonamiento en vez de la traducción: «X -> Y», «por ejemplo», «Entonces:».
 const NO_FINAL = /->|\bpor ejemplo\b|\bEntonces:|\bo bien\b/i;
 
 // Importe en euros con su multiplicador: «1.250,50 €», «40 €», «4,2 mil millones de €».
-const IMPORTE_EUROS = /(\d[\d.]*(?:,\d+)?)\s?(?:(mil millones de|millones de|mil)\s)?€/g;
+// El lookbehind hace que solo empiece al principio de una cifra (sin reintentos en cada dígito).
+const IMPORTE_EUROS = /(?<![\d.,])(\d[\d.]*(?:,\d+)?)\s?(?:(mil millones de|millones de|mil)\s)?€/g;
 
-/** Importes en euros de un texto, normalizados («1.250 €» y «1250 €» son el mismo) y ordenados. */
+/** Cifra canónica como texto, sin redondeos: «1.250,50» → «1250.5», «40,00» → «40». */
+function canonica(n) {
+  const [entera, dec = ''] = n.replaceAll('.', '').split(',');
+  const d = dec.replace(/0+$/, '');
+  return d ? `${entera}.${d}` : entera;
+}
+
+/**
+ * Importes en euros de un texto, normalizados («1.250 €», «1250 €» y «1250,00 €» son el mismo)
+ * y ordenados. Las etiquetas se quitan antes: «<span>40</span> €» también es un importe.
+ */
 function importes(texto) {
-  return [...aEuros(texto).matchAll(IMPORTE_EUROS)]
-    .map(([, n, mult]) => `${n.replaceAll('.', '').replace(',', '.')}${mult ? ` ${mult}` : ''}`)
-    .sort();
+  return [...aEuros(texto.replace(ETIQUETA, '')).matchAll(IMPORTE_EUROS)]
+    .map(([, n, mult]) => `${canonica(n)}${mult ? ` ${mult}` : ''}`)
+    .sort((a, b) => a.localeCompare(b));
 }
 
 /**
