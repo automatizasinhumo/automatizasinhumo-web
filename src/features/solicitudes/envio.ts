@@ -69,8 +69,10 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
     .bind(e.id, e.tipo, e.version, e.asunto, e.texto)
     .run();
   // Reserva atómica: solo una petición pasa la fila a 'enviando'. Una reserva
-  // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento:
-  // la misma clave de idempotencia evita duplicar un correo que el proveedor ya aceptó.
+  // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento y
+  // con el mismo asunto y cuerpo guardados: misma clave de idempotencia y misma carga,
+  // así el proveedor no duplica (ni rechaza) un correo que ya aceptó.
+  const token = crypto.randomUUID();
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
   const exigir =
     e.exigirNota === undefined
@@ -79,24 +81,28 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
            AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`;
   const reserva = await db
     .prepare(
-      `UPDATE notificaciones SET estado_envio = 'enviando', asunto = ?, cuerpo = ?, reservado_at = datetime('now'),
+      `UPDATE notificaciones SET
+         asunto = CASE WHEN estado_envio = 'enviando' THEN asunto ELSE ? END,
+         cuerpo = CASE WHEN estado_envio = 'enviando' THEN cuerpo ELSE ? END,
+         estado_envio = 'enviando', reservado_at = datetime('now'), reserva = ?,
          intentos = intentos + CASE WHEN estado_envio = 'enviando' THEN 0 ELSE 1 END
        WHERE solicitud_public_id = ? AND tipo = ? AND version = ?
          AND ((estado_envio IN (${permitidos}) AND intentos < ?)
            OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')))
          ${exigir}
-       RETURNING id, intentos`,
+       RETURNING id, intentos, asunto, cuerpo`,
     )
     .bind(
       e.asunto,
       e.texto,
+      token,
       e.id,
       e.tipo,
       e.version,
       e.maxIntentos ?? 1_000_000,
       ...(e.exigirNota === undefined ? [] : [e.exigirNota]),
     )
-    .first<{ id: number; intentos: number }>();
+    .first<{ id: number; intentos: number; asunto: string; cuerpo: string }>();
   if (!reserva) return { estado: 'ocupado' };
 
   let error: string | null = mail ? null : 'No hay proveedor de correo configurado (Ajustes → Email).';
@@ -104,21 +110,24 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
     try {
       await mail.send({
         to: e.email,
-        subject: e.asunto,
-        text: e.texto,
-        html: correoHtml(e.texto),
+        subject: reserva.asunto,
+        text: reserva.cuerpo,
+        html: correoHtml(reserva.cuerpo),
         idempotencyKey: `notif-${reserva.id}-${reserva.intentos}`,
       });
     } catch (err) {
       error = String((err as Error)?.message ?? err).slice(0, 300);
     }
   }
-  await db
+  // Solo si la reserva sigue siendo esta: si otra la reclamó, su resultado manda.
+  const fin = await db
     .prepare(
-      `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END WHERE id = ?`,
+      `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END
+       WHERE id = ? AND reserva = ? RETURNING id`,
     )
-    .bind(error ? 'error' : 'enviado', error, error, reserva.id)
-    .run();
+    .bind(error ? 'error' : 'enviado', error, error, reserva.id, token)
+    .first();
+  if (!fin) return { estado: 'ocupado' };
   return error ? { estado: 'error', error } : { estado: 'enviado' };
 }
 

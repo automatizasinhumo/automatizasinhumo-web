@@ -135,7 +135,7 @@ describe('enviarVistasPreviasListas', () => {
     let movida = false;
     // David la mueve justo antes de que el cron reserve el envío.
     (db as unknown as { prepare: (q: string) => unknown }).prepare = (q: string) => {
-      if (!movida && q.startsWith("UPDATE notificaciones SET estado_envio = 'enviando'")) {
+      if (!movida && q.includes("estado_envio = 'enviando', reservado_at")) {
         movida = true;
         db.sql.prepare("UPDATE solicitudes SET estado = 'cambios_pedidos' WHERE public_id = 'S-AAAAAA'").run();
       }
@@ -177,6 +177,31 @@ describe('enviarNotificacion', () => {
     const mail = correo();
     const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'a', texto: 't', maxIntentos: 2 };
     expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'enviado' });
+  });
+
+  it('al reclamar reutiliza el asunto y cuerpo de la reserva, aunque el enlace haya cambiado', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'nueva', null);
+    reservada(db, 1, (db.sql.prepare("SELECT datetime('now', '-20 minutes') AS h").get() as { h: string }).h);
+    const mail = correo();
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'otro', texto: 'nuevo enlace' };
+    expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'enviado' });
+    expect(mail.send.mock.calls[0][0 as never]).toMatchObject({ subject: 'a', text: 't' });
+  });
+
+  it('un envío lento cuya reserva reclamó otro no sobrescribe el resultado', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'nueva', null);
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'a', texto: 't' };
+    const lento = correo();
+    lento.send.mockImplementationOnce(async () => {
+      // Mientras tanto, la reserva caduca y otra petición la reclama y envía.
+      db.sql.prepare("UPDATE notificaciones SET reservado_at = datetime('now', '-20 minutes')").run();
+      expect(await enviarNotificacion(db, correo(), e)).toEqual({ estado: 'enviado' });
+      throw new Error('timeout');
+    });
+    expect(await enviarNotificacion(db, lento, e)).toEqual({ estado: 'ocupado' });
+    expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviado', error: null });
   });
 
   it('no reenvía uno enviado salvo con «reenviar»', async () => {
