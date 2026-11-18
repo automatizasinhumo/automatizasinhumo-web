@@ -64,3 +64,27 @@ Prueba (Stripe en modo test): aprobación → checkout → webhook pagado → es
 Detalle en el apartado 10.6. Usa como base `MoBio/migrations/0002_draft_publishing.sql` (dimasmong/MoBio, MIT) para `migrations/0043_solicitudes_versiones.sql` (si el número ya existe, el siguiente libre): URL de vista previa, versión aprobada, URL definitiva e historial de despliegues. La entrega solo se activa con el pago confirmado (o con una compra directa ya pagada).
 Prueba: versión 1 aprobada y pagada; después, una versión 2 sin aprobar; la entrega sigue siendo la versión 1.
 
+### C7 · Archivos del cliente con FilePond (ronda 08, adopción 1) — PENDIENTE (después de C3)
+Clona pqina/filepond (MIT). Copia `dist/filepond.min.js` y `dist/filepond.min.css` a `public/vendor/filepond/` con su licencia. Úsalo en el formulario de `src/pages/empezar/[slug].astro` para que el cliente suba fotos, logotipo y documentos. Los archivos van a R2 privado con `src/features/storage/r2.ts`, a través de un endpoint en `src/pages/api/solicitudes/` asociado a la solicitud. Solo imágenes y PDF, hasta 10 MB cada uno.
+Prueba: una solicitud con tres imágenes deja tres objetos en R2; un archivo demasiado grande o de formato no admitido se rechaza; otra solicitud no puede leerlos.
+
+### C8 · Factura PDF automática con pdfme (ronda 08, adopción 2) — PENDIENTE (después de C5)
+Usa el paquete oficial `@pdfme/generator` (pdfme/pdfme, MIT) y copia `playground/public/template-assets/invoice-white/template.json` a `manual/facturas/plantilla.json`, sin los datos de ejemplo. Genera la factura del pedido pagado desde `src/features/orders/recordWebhook.ts` y guárdala en R2 privado. Si supera la CPU de Workers Free, genérala en un workflow de Actions.
+Prueba: pago confirmado → un PDF; webhook repetido → sin factura duplicada; pago fallido → sin factura.
+
+### C9 · Analítica propia con Counterscale (ronda 08, adopción 3) — PENDIENTE
+Despliega benvinegar/counterscale (MIT) como Worker aparte, siguiendo su README. Añade su tracker a `src/layouts/Layout.astro` con eventos de ficha, demo y formulario, sin datos personales.
+Prueba: diez visitas, tres demos y dos formularios simulados aparecen en el panel.
+
+### C10 · Monitor de webs entregadas con Upptime (ronda 08, adopción 7) — PENDIENTE (después de C6)
+Crea con la plantilla upptime/upptime (MIT) un repo público aparte, `automatizasinhumo-estado`. La lista de URL se genera solo con las entregas publicadas, nunca con vistas previas ni datos de clientes.
+Prueba: una URL que funciona y otra que da error; el monitor abre una incidencia solo para la segunda.
+
+### C11 · Datos estructurados por servicio con schema-dts (ronda 08, adopción 10) — PENDIENTE
+Usa el paquete `schema-dts` (google/schema-dts, Apache-2.0) para tipar el JSON-LD de `src/layouts/Layout.astro` y añadir Service, Offer y BreadcrumbList en las fichas, solo con datos reales del catálogo.
+Prueba: `npx astro build` en verde; el JSON-LD de tres fichas pasa el validador de schema.org y no lleva precios inventados.
+
+## Huecos de arquitectura (los resuelve Claude, no Copilot)
+
+- **Límite de 100 Workers:** cada vista previa crea un Worker `web-<id>`. Antes de llegar al límite hay que servir todas las vistas previas desde un único Worker con R2, por ruta o por hostname. Se buscará un repo que lo haga (ronda 09).
+- **Reclamación atómica en D1:** la fábrica marca la solicitud después de fabricarla. Mientras convivan la tarea de Windows y Actions, una solicitud puede fabricarse dos veces. Al activar Actions se desactiva la tarea de Windows.

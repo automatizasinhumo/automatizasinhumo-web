@@ -1,0 +1,30 @@
+Usa internet actual (búsqueda web) y el conector de GitHub. Lee el repositorio público davidpd89/automatizasinhumo-web, rama main, completo: src/, migrations/, .github/workflows/, manual/ (ESTADO.md, HANDOFF_SESION.md, equipo/copilot.md, fabrica/, demos/) y tu respuesta anterior en manual/auditorias-gpt/ronda-07-respuesta.md.
+
+Norma del proyecto (en .github/copilot-instructions.md): no se desarrolla nada desde cero. Cualquier fallo, hueco o necesidad se cubre ADOPTANDO un repositorio público que ya funcione y se use. Licencias admitidas: MIT, Apache-2.0 o BSD. El repo debe estar mantenido. Se clona, se copia, se adapta lo mínimo y se prueba. Si no encaja, se busca otro.
+
+Contexto: tienda que vende webs y servicios digitales a pequeños negocios de España. Debe ser 100 % automatizada y gratuita de operar. La base es minshop: Astro 7 SSR, Cloudflare Workers, D1, Stripe y Tailwind v4.
+Ya hecho:
+- Fábrica: manual/fabrica/vistas-previas.py, fabricar.py y una puerta de QA.
+- Demos traducidas.
+- SonarCloud y CodeRabbit en cada PR.
+En curso:
+- Componentes comerciales (PR #9).
+- La fábrica pasa del PC a GitHub Actions con cloudflare/wrangler-action.
+En cola para Copilot: C2 a C6 de manual/equipo/copilot.md.
+
+Quiero una AUDITORÍA DE HUECOS Y AUTOMATIZACIÓN, en español y en Markdown.
+
+1) Lista de cada punto del negocio que HOY no está automatizado al 100 % o que depende de una persona o de un PC encendido. Recorre: captación, ficha, solicitud, vista previa, revisión y cambios, pago, entrega, dominio, correo, soporte, renovaciones o suscripciones, facturas, reseñas, analítica y QA. Cita el fichero o la ruta.
+
+2) Huecos frente a las webs punteras que venden lo mismo: constructores de webs con IA, agencias productizadas y tiendas de plantillas. Revisa diseño, SEO técnico, experiencia de uso, rendimiento, accesibilidad, confianza (reseñas, garantías, casos), frontend y backend.
+
+3) Para cada hueco, 1 o 2 repositorios públicos concretos que ya lo resuelvan. Para cada repo:
+   - URL, licencia, estrellas y fecha del último commit, todo comprobado hoy;
+   - la carpeta o el fichero exacto que hay que copiar y dónde va en nuestro repo;
+   - qué hay que adaptar, en una línea;
+   - la prueba que demuestra que funciona.
+   No repitas los repos ya adoptados o asignados en la ronda 07, salvo que haya uno mejor y digas por qué.
+
+4) Termina con las 12 adopciones ordenadas por impacto en ventas y automatización frente al esfuerzo. Cada una debe ser una tarea autocontenida y barata para un agente: clonar, copiar X a Y, adaptar Z y probar.
+
+Nada de textos legales ni normativos. Nada de servicios de pago: solo capas gratuitas.
