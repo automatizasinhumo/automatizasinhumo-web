@@ -3147,7 +3147,7 @@ Si quieres afinar, cuéntanos:
 
 ### Dónde escribirnos
 - Formulario: [/empezar/consulta](/empezar/consulta)
-- Email: [hola@automatizasinhumo.com](mailto:hola@automatizasinhumo.com)
+- Email: [davidportodiaz@gmail.com](mailto:davidportodiaz@gmail.com)
 - Respondemos en menos de 24 horas laborables.
 
 _Si ya sabes qué quieres, entra en su ficha: contrátalo directamente o pulsa **Empieza gratis** y paga solo si te gusta._
@@ -3158,7 +3158,7 @@ En cumplimiento de la Ley 34/2002 (LSSI-CE):
 
 - **Titular**: David Porto Díaz (persona física)
 - **Web**: automatizasinhumo.com
-- **Email**: hola@automatizasinhumo.com
+- **Email**: davidportodiaz@gmail.com
 - Los datos fiscales completos se facilitan en la factura de cada pedido.
 
 ### Objeto
@@ -3189,12 +3189,12 @@ Se pueden cancelar en cualquier momento; el servicio sigue activo hasta el final
 ', 1, 'standard', 'page_v6a7n6p6n2');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Privacidad', 'privacidad', '## Política de privacidad
 
-- **Responsable**: David Porto Díaz, hola@automatizasinhumo.com
+- **Responsable**: David Porto Díaz, davidportodiaz@gmail.com
 - **Finalidad**: gestionar pedidos, entregar los servicios y responder consultas.
 - **Base legal**: ejecución del contrato y consentimiento.
 - **Conservación**: el tiempo necesario y los plazos legales de facturación.
 - **Destinatarios**: proveedores necesarios para prestar el servicio (alojamiento en Cloudflare, pasarela de pago, email). No vendemos datos.
-- **Derechos**: acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a hola@automatizasinhumo.com. Puedes reclamar ante la AEPD (aepd.es).
+- **Derechos**: acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a davidportodiaz@gmail.com. Puedes reclamar ante la AEPD (aepd.es).
 ', 1, 'standard', 'page_nhnty8cpd8');
 INSERT INTO pages (title, slug, body_markdown, published, layout, public_id) VALUES ('Cookies', 'cookies', '## Política de cookies
 

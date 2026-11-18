@@ -1,4 +1,5 @@
 ---
+import { CONTACT_EMAIL } from '../../contacto';
 import { env } from 'cloudflare:workers';
 import Layout from '../../layouts/Layout.astro';
 import { estadoPublico } from '../../features/solicitudes';
@@ -63,7 +64,7 @@ const TEXTO = {
 
     <p class="mt-10 text-sm text-muted">
       ¿Dudas? Te responde David Porto Díaz en{' '}
-      <a href="mailto:hola@automatizasinhumo.com" class="underline hover:text-brand">hola@automatizasinhumo.com</a>.
+      <a href={`mailto:${CONTACT_EMAIL}`} class="underline hover:text-brand">{CONTACT_EMAIL}</a>.
     </p>
     <a href="/" class="mt-6 inline-block rounded-full border border-brand px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Seguir viendo servicios</a>
   </div>
