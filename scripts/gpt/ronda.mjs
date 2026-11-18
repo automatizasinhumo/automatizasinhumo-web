@@ -41,6 +41,9 @@ const txt = [
   '=== Parte común de todas las fichas ===', comun.slice(iniComun).join('\n').trim(), '',
 ].filter((x) => x !== false && x !== '' || x === '').join('\n');
 
-writeFileSync(`${DIR}/ronda-${nn}-pregunta.txt`, txt.replace(/\r?\n/g, '\r\n'));
+const destino = `${DIR}/ronda-${nn}-pregunta.txt`;
+// No se pisa una pregunta ya generada (p. ej. si falta auditados.txt en un clon nuevo).
+if (existsSync(destino)) { console.error(`${destino} ya existe: bórrala a mano si quieres regenerarla.`); process.exit(1); }
+writeFileSync(destino, txt.replace(/\r?\n/g, '\r\n'));
 appendFileSync(`${DIR}/auditados.txt`, lote.map((p) => `${p.slug} ${n}\r\n`).join(''));
 console.log(`${DIR}/ronda-${nn}-pregunta.txt: ${lote.length} servicios (${lote.map((p) => p.slug).join(', ')}), ${txt.length} caracteres`);
