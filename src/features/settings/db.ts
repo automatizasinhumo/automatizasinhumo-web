@@ -56,6 +56,7 @@ export type SettingKey =
   | 'lnbits_url' // LNbits node URL (the invoice/read key is in the vault)
   | 'phoenixd_url' // phoenixd node URL (the password is in the vault)
   | 'opennode_api_url' // OpenNode API base override (testnet); absent = live default
+  | `cron_dispatch:${string}` // last period (UTC 'YYYY-MM-DDTHH:MM') each GitHub workflow was dispatched (respaldoCron.ts)
   | `enc:${string}`; // AES-GCM-encrypted secret (see features/secrets/store.ts), e.g. 'enc:stripe_secret_key'. Never loaded as plaintext into locals.
 
 /** The storefront features that can be flipped at runtime (default on). */
