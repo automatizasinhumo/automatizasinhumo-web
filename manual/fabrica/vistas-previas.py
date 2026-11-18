@@ -6,7 +6,8 @@ Uso:
 Por cada solicitud en estado «nueva» cuyo servicio tiene un diseño de ejemplo (EXTRA de
 manual/demos/demos.mjs), monta el pedido con sus campos, llama a fabricar.py y deja la solicitud
 en «en_preparacion» con la URL de la vista previa en la nota. La web pasa una puerta de QA (responde,
-nombre del negocio, sin correos/teléfonos de la plantilla, sin imágenes rotas); si la pasa, la nota
+nombre del negocio, sin correos/teléfonos de la plantilla, sin imágenes rotas, y la prueba funcional en
+navegador de qa/demo-funcional.mjs a 360/390/1280 px, que falla cerrado); si la pasa, la nota
 lleva «QA ok» y el cron del Worker manda el correo de revisión. Si no, queda para revisar a mano.
 """
 import html as H, json, os, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request, uuid
@@ -14,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from fabricar import fabricar, nombre_publico  # noqa: E402
+from navegador import qa_navegador  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[2]
 args = sys.argv[1:]
@@ -143,7 +145,8 @@ def qa(url, p):
             rotas.append(src)
     if rotas:
         problemas.append(f'{len(rotas)} imágenes rotas: ' + ', '.join(rotas[:3]))
-    return problemas
+    # Formularios, enlaces, recursos, errores JS y anchos móviles en un navegador real.
+    return problemas + qa_navegador(url)
 
 
 def pedido_de(fila, plantilla):
