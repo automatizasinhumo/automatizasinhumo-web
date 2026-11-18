@@ -25,7 +25,7 @@ Presupuesto: el repo es privado y tiene 2.000 min/mes gratis de Actions. Lo pesa
 | Actualizador | Dependabot (GitHub) | mensual, agrupado | `.github/dependabot.yml` | — | PR con el verificador en verde → fusionar. Las versiones mayores, una a una |
 | Auditor GPT | ChatGPT por chat (proyecto «Creación Webs») | a mano, por rondas | `scripts/gpt/` + `manual/auditorias-gpt/` | — | Ver abajo |
 
-Lanzar a mano: `gh workflow run -R davidpd89/automatizasinhumo-web empleados-semanales.yml`
+Lanzar a mano: `gh workflow run -R automatizasinhumo/automatizasinhumo-web empleados-semanales.yml`
 (o `seguridad.yml`, `empleados-qa.yml`). El resumen de cada run sale en la pestaña del run.
 
 ### Auditor GPT (local)
@@ -43,7 +43,7 @@ Necesita Edge con depuración en el puerto 9241 y la sesión de ChatGPT iniciada
 - **Repo público** → gratis CodeRabbit (revisión de cada PR) y SonarCloud (calidad y seguridad del código),
   y minutos de Actions sin límite. Hoy no se puede por ser privado.
 - **Upptime** (upptime/upptime, MIT): monitor cada 5 min + página de estado, todo en GitHub.
-  Necesita un repo público propio (p. ej. `davidpd89/estado`) y un token (PAT) como secreto.
+  Necesita un repo público propio (p. ej. `automatizasinhumo/estado`) y un token (PAT) como secreto.
 
 ## Candidatos por probar (públicos y gratis)
 

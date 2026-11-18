@@ -2,72 +2,49 @@
 
 ## Pedido
 - Tienda 100 % automatizada y gratuita, con el mínimo de tokens.
-- Claude hace de **arquitecto**: adopta repos públicos (MIT/Apache) en vez de desarrollar de cero y homogeneiza en lugar de parchear.
+- Claude hace de **arquitecto**: adopta repos públicos (MIT/Apache/BSD) en vez de desarrollar de cero. El código propio es solo pegamento.
 - El equipo:
-  - GPT (Edge 9241) busca.
-  - Copilot (chat de VS Code) programa.
-  - CodeRabbit y SonarCloud revisan.
-  - Claude reparte el trabajo, revisa y fusiona.
-- Todo cambio va por PR.
-- El Edge 9241 se cierra cuando no se usa, porque gasta mucha RAM.
+  - GPT (Edge 9241, `scripts/gpt/ask.py`) busca.
+  - Copilot (chat de la **única** ventana de VS Code de David) programa. David pega los prompts que prepara Claude.
+  - CodeRabbit, SonarCloud y Codex revisan.
+  - Claude reparte, revisa, resuelve hilos y fusiona.
+- Todo cambio va por PR. Lo útil para web-escritor se le deja como PR de aviso en `docs/pending/` (solo abrirla).
 
 ## Hecho hoy
-- **Mapa de adopción** (GPT, ronda 07): `manual/auditorias-gpt/ronda-07-respuesta.md`, con 10 adopciones priorizadas y los repos comprobados.
-- **PR #7 fusionada** (`e723ea9`):
-  - Demos sin `#template-bar` y con las 309 páginas traducidas. El worker de demos está desplegado.
-  - Ciudad limpia en las vistas previas.
-  - **Puerta de QA** en `manual/fabrica/vistas-previas.py`: la web responde, aparece el nombre del negocio, no quedan correos ni teléfonos de la plantilla y no hay imágenes rotas. Si la pasa, la nota lleva «QA ok».
-  - **Tarea programada** `automatizasinhumo-vistas-previas` (cada 15 min). Se colgaba porque wrangler esperaba una respuesta por consola; ahora usa `CI=1`, `timeout` y `stdin` a DEVNULL. Comprobado: termina en 12 s.
-  - `scripts/gpt/ask.py`:
-    - Abre y cierra el Edge 9241 por su cuenta. El perfil se ha movido a `%LOCALAPPDATA%\automatizasinhumo\edge-9241`.
-    - No pisa la salida si no hay respuesta, y `--leer` acepta respuestas cortas.
-- **SonarCloud** importado: `davidpd89_automatizasinhumo-web`. Revisa cada PR y la #7 quedó en verde.
-- **Dependabot**: #2 (vitest 5) y #4 (stripe 23) fusionadas. Verify de main en verde.
-- Borrados los workers de prueba `web-prueba-fontaneria-lois` y `web-s-gh2qc2aw`.
-- **Cola de Copilot** en `manual/equipo/copilot.md`:
-  - C1: componentes.
-  - C2: blog y sectores, con 3 artículos.
-  - C3: correo de vista previa y recordatorios a 3 y 7 días desde el cron.
-  - C4: hallazgos reales de Sonar.
-  - C5 y C6 (aprobación → pago y versiones): en la PR #8.
+- **Repo trasladado a la organización `automatizasinhumo`** (cupo de Actions propio). CodeQL y secret scanning reactivados; Apps instaladas en la organización; SonarCloud con organización y proyecto nuevos (`automatizasinhumo_automatizasinhumo-web`).
+- **Fusionadas**: #9 (C1 componentes), #11 (fábrica en Actions; tarea local desactivada), #12 (rondas 08-10), #13 (zizmor, Dependency Review, Scorecard), #14, #16 y #18 (Dependabot).
+- **#17** (endurecer el workflow de la fábrica): acciones fijadas por SHA y `persist-credentials: false`. Harden-Runner se quitó a propósito: en un repo público su informe de red mostraría el host `web-<id>` de cada vista previa.
+- Referencias al nombre viejo del repo corregidas en `manual/` (esta PR).
 
 ## Falta
-1. **Copilot, C1**: está a medias en `C:\GIT\automatizasinhumo-copilot`, rama `copilot/c1-componentes`. Tiene `homeServices.ts` y `sections/` sin commit.
-   - Un `git reset --hard` mío deshizo sus cambios en `HomeHero.astro`, `index.astro`, `products/[slug].astro` y `ProductDetail.astro`. Ya le he pedido que los vuelva a aplicar.
-   - **David**: mira la ventana de VS Code del worktree por si Copilot espera confirmación.
-   - Después: revisar la PR, fusionarla y encargar C2, C3, C4…
-2. **PR #8** (cola C5 y C6): fusionar cuando esté en verde.
-3. **Traducción de las demos**: quedan restos como «Skip to content», «Check», «£» y algún calco («Tratos»). Hace falta un glosario o una pasada final.
-4. Hacerlo por adopción, no a mano:
-   - 10.1: fábrica en GitHub Actions con wrangler-action.
-   - 10.2: solicitud → fábrica sin el PC encendido.
-5. Sonar en main: 24 bugs y 29 vulnerabilidades. Copilot arregla los reales (C4); el resto es ruido (migraciones, `npx`), que se puede marcar en Sonar con la sesión de David.
-6. Pendientes de David del 17/11 (contacto en Ajustes, pasarela, MX, aviso legal, dominio).
+1. **#15 (C4, Sonar)**: Copilot debe atender los hilos de CodeRabbit (no reescribir migraciones 0002 y 0009, dominio de ejemplo sin `<>` en el README, mensajes de `scripts/agent-demo.mjs` en español, `safeLog` sin controles C1). Después, resolver hilos y fusionar.
+2. **#19 (C2, blog y sectores, adaptado de ScrewFast)**: leer CodeRabbit, pedir arreglos a Copilot si los hay y fusionar.
+3. **#17**: fusionar si sigue en verde.
+4. Siguiente encargo a Copilot: C3 (correo de vista previa y recordatorios) y después C5, C7, C9, C11 según `manual/equipo/copilot.md`.
+5. Borrar en SonarCloud el proyecto viejo `davidpd89_automatizasinhumo-web` cuando el nuevo haya analizado varias PR. **No** tocar `davidpd89_web-escritor`.
+6. Traducción de restos en las demos («Skip to content», «£», calcos): glosario o pasada final.
+7. Pendientes de David: ver el final de `manual/ESTADO.md` (dominio, pasarela, contacto, MX, aviso legal).
 
 ## Estado vivo
-- `main` = `origin/main`.
-- Árbol principal en la rama `docs/cola-copilot-c5-c6` (PR #8).
-- La tarea programada ejecuta el `.py` del árbol principal: dejarlo en main o en una rama derivada de main.
+- El árbol principal (`C:\GIT\automatizasinhumo`) se queda en `main`. El trabajo se hace en worktrees `C:\GIT\ash-*`.
+- Copilot trabaja en `C:\GIT\ash-c4` (rama `copilot/c4-sonar`) y `C:\GIT\ash-c2` (rama `copilot/c2-blog`). **Nunca** usar `git reset` ni `git checkout` en sus worktrees.
+- Quedan carpetas huérfanas que Windows no dejó borrar: `C:\GIT\ash-c1fix`, `C:\GIT\ash-fabrica`, `C:\GIT\automatizasinhumo-copilot`. Se pueden borrar a mano con VS Code cerrado.
 - Edge 9241 cerrado. Lo abre `scripts/gpt/ask.py` cuando hace falta.
-- Encargar a Copilot desde su worktree: `cd C:/GIT/automatizasinhumo-copilot && code chat -r -m agent "<tarea>"`.
-  - **Nunca** usar `git reset` ni `git checkout` en ese worktree.
 
 ## Reglas del proyecto
-- **Norma de trabajo** (`.github/copilot-instructions.md`, cargada también en `CLAUDE.md`): ante cualquier fallo, hueco o necesidad, se busca un repo público que ya funcione, se clona, se adapta, se prueba y se sube por PR. Si no encaja, se usa otro repo; no se desarrolla desde cero ni se fuerza con parches. Excepción: arreglos muy pequeños que valgan para toda la web (p. ej. `= NULL` → `IS NULL` de C4).
+- **Norma de trabajo** (`.github/copilot-instructions.md`): ante cualquier hueco se busca un repo público que ya funcione, se clona en una carpeta vacía (sin ejecutarlo), se adapta, se prueba y se sube por PR. Si no encaja, otro repo.
 - **Repos**:
   - No tocar `davidpd89/saas-automation-lab` (producción).
   - `C:\GIT\new-website` es de solo lectura.
-  - Push solo a `origin`, nunca a `upstream`.
-  - Con `gh`, siempre `-R davidpd89/automatizasinhumo-web`.
+  - Push solo a `origin`.
+  - Con `gh`, siempre `-R automatizasinhumo/automatizasinhumo-web` (avisos: `-R davidpd89/web-escritor`).
   - Sin `git stash`.
 - **Datos y dinero**:
-  - Nunca mostrar secretos (`manual/CREDENCIALES_STAGING.local`).
-  - Nada de pagos ni tarjetas reales (Stripe en modo test, sí: lo exige la prueba de C5).
+  - Nunca mostrar secretos (`manual/CREDENCIALES_STAGING.local`, `.dev.vars`).
+  - El repo y sus registros de Actions son públicos: ni datos de clientes ni artefactos con ellos.
+  - Nada de pagos ni tarjetas reales (Stripe en modo test, sí).
   - Datos personales: el nombre sí, la dirección no.
-- **Estilo y commits**:
-  - CRLF.
-  - Nunca decir «código abierto».
-  - Commits con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- **Estilo y commits**: CRLF; nunca decir «código abierto»; leer CodeRabbit antes de fusionar; commits con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Prompt para continuar
-> Automatiza sin humo (`C:\GIT\automatizasinhumo`). Lee `manual/HANDOFF_SESION.md` y sigue desde «Falta»: revisa el avance de Copilot en C1 (worktree `C:\GIT\automatizasinhumo-copilot`, sin resetearlo), fusiona la PR #8 si está en verde y encarga la siguiente tarea de `manual/equipo/copilot.md`. Eres el arquitecto: adopción de repos, no desarrollo de cero; todo por PR.
+> Automatiza sin humo (`C:\GIT\automatizasinhumo`, repo `automatizasinhumo/automatizasinhumo-web`). Lee `manual/HANDOFF_SESION.md` y sigue desde «Falta»: revisa #15 y #19 de Copilot (sin resetear sus worktrees), resuelve los hilos de CodeRabbit, fusiona lo que esté en verde y prepara el prompt del siguiente encargo de `manual/equipo/copilot.md`. Eres el arquitecto: adopción de repos públicos, no desarrollo de cero; todo por PR.
