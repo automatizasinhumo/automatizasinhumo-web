@@ -29,15 +29,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - run: bash qa/smoke.sh
 
   lighthouse:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Lighthouse CI
@@ -47,7 +47,7 @@ jobs:
           npx --yes @lhci/cli@0.15.1 collect --config=./lighthouserc.json "${args[@]}"
           npx --yes @lhci/cli@0.15.1 upload --config=./lighthouserc.json || true
           npx --yes @lhci/cli@0.15.1 assert --config=./lighthouserc.json
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse
@@ -60,8 +60,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: pa11y-ci (WCAG2AA)
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Descargar páginas de staging
         run: |
           mkdir -p site
