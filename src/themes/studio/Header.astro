@@ -40,7 +40,7 @@ const small =
   )
 }
 
-<header class="border-b border-line">
+<header class="relative border-b border-line">
   <div class="mx-auto flex max-w-[96rem] flex-wrap items-baseline gap-x-10 gap-y-4 px-12 pb-6 pt-8">
     <a href="/" aria-label={model.storeName} class="shrink-0">
       {
@@ -58,7 +58,7 @@ const small =
         class={`hidden min-w-0 items-center gap-6 xl:flex ${small}`}
         disclosureClass={`relative order-last xl:hidden ${small}`}
       />
-      <StoreSearchToggle action={model.search.action} query={model.search.query} class={`relative sm:hidden ${small}`} />
+      <StoreSearchToggle action={model.search.action} query={model.search.query} class={`sm:hidden ${small}`} />
       {model.account.enabled && <StoreAccountControl href={model.account.href} class={small} />}
       {
         model.cart.enabled && (
