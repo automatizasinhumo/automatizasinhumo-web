@@ -1,0 +1,79 @@
+name: Vigilantes de la cadena de suministro
+
+# Empleados adoptados tal cual (acciones oficiales, sin lógica propia):
+#   - zizmor (zizmorcore/zizmor-action, MIT): audita los workflows de Actions (inyección,
+#     permisos de más, acciones sin fijar). Resultados en Security → Code scanning.
+#   - Dependency Review (actions/dependency-review-action, MIT): en cada PR bloquea dependencias
+#     nuevas con vulnerabilidad alta o con licencia fuera de la lista admitida (norma de adopción).
+#   - OpenSSF Scorecard (ossf/scorecard-action, Apache-2.0): nota semanal de prácticas de
+#     seguridad del repo. Resultados en Code scanning.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: vigilantes-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+
+  licencias:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
+          # Todos los alcances: una dependencia de desarrollo con vulnerabilidad o licencia vetada
+          # también cuenta (por defecto solo se mira runtime).
+          fail-on-scopes: runtime, development, unknown
+          allow-licenses: MIT, MIT-0, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, Unlicense, BlueOak-1.0.0, Python-2.0, CC-BY-4.0
+          # Resumen siempre en la PR: las licencias sin identificar (NOASSERTION) no hacen fallar la
+          # acción, así quedan a la vista para revisarlas antes de fusionar.
+          comment-summary-in-pr: always
+          # GHSA-fc5q-39xc-vjpf (picomatch <= 4.0.7) lo retiró GitHub el 18-11-2026; la acción aún lo
+          # marca. Quitar esta línea cuando deje de aparecer en «Vulnerabilities».
+          allow-ghsas: GHSA-fc5q-39xc-vjpf
+
+  scorecard:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: scorecard.sarif
+          results_format: sarif
+          publish_results: true
+      - uses: github/codeql-action/upload-sarif@52cf1852265d99e9bea071b03366fc777a602909 # codeql-bundle-v2.27.4
+        with:
+          sarif_file: scorecard.sarif

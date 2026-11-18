@@ -155,14 +155,15 @@ presentation, and getting them subtly wrong is invisible on the page.
 | --- | --- |
 | `<ProductGallery>` | Frame anchors the variant selector scrolls to, and LCP treatment on the first frame only. |
 | `<ProductPurchaseForm>` | Form actions and methods, `product_id`/`variant_id`/`extra` field names, sold-out and required states, and `data-fullpage`. |
+| `<ComparativaModalidades>` | Compares the “Plantilla” and “Montamos” variants when both are available, with links to the purchase form. |
 
 `data-fullpage` deserves a specific warning. The shell's cart script intercepts
 submits to open the drawer; that attribute is what tells it to stand back so
 Buy now performs a real navigation to `/express`. Rebuild the form without it
 and nothing errors — Buy now just quietly stops working.
 
-Both controls take a `class`. `<ProductGallery>` also takes `soldOutLabel` if
-you want different wording.
+The gallery and purchase controls take a `class`. `<ProductGallery>` also
+takes `soldOutLabel` if you want different wording.
 
 ## The content page contract
 

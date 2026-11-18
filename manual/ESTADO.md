@@ -1,4 +1,4 @@
-# Estado de Automatiza sin humo (17-11-2026)
+# Estado de Automatiza sin humo (18-11-2026)
 
 ## Enlaces
 - **Tienda en staging** (no indexable, robots `Disallow: /`): https://automatizasinhumo-staging.davidpd89.workers.dev
@@ -115,6 +115,16 @@ Las licencias de los repos base salen de `manual/catalogo/repos_meta.csv`. Los r
 - Un solo mensaje en toda la web: contrátalo directamente o pruébalo gratis.
 - Contacto flotante «¿Dudas? Habla con una persona»: se configura en Admin → Ajustes (WhatsApp con prefijo y solo cifras, usuario de Telegram, email). Sin datos no se muestra.
 - El QA de GitHub comprueba en staging la ficha con demo y compra, el formulario y que la portada no tenga jerga técnica.
+
+## Hecho el 18-11-2026
+- **Organización propia en GitHub**: el repo es `automatizasinhumo/automatizasinhumo-web` (la URL vieja redirige). Tiene su propio cupo de Actions, así que la cola de web-escritor ya no lo frena. Con `gh`, siempre `-R automatizasinhumo/automatizasinhumo-web`.
+  - El traslado apagó CodeQL (configuración por defecto) y secret scanning; están reactivados.
+  - CodeRabbit, SonarQube Cloud y Codex están instalados en la organización.
+  - SonarCloud tiene organización propia: proyecto `automatizasinhumo_automatizasinhumo-web`.
+- **Fábrica en GitHub Actions** (#11): `.github/workflows/fabrica-vistas-previas.yml` cada 15 min, sin depender del PC. La tarea programada local `automatizasinhumo-vistas-previas` está desactivada.
+- **Vigilantes de la cadena de suministro** (#13): zizmor, Dependency Review y Scorecard.
+- **Componentes comerciales** (C1, #9) y rondas 08-10 de GPT con la cola C7-C16 (#12).
+- Dependabot: hono y @hono/node-server en `/mcp` (#14, #16), soupsieve 4.0 en la fábrica (#18, probado con los hashes).
 
 ## Pendiente de David (al final, por orden)
 1. **Dominio**: crear una config de producción con la ruta `automatizasinhumo.com` y la variable `CANONICAL_ORIGIN=https://automatizasinhumo.com`. Sin ella, robots y canonical usan el origen de la petición y en workers.dev se bloquea todo a propósito.

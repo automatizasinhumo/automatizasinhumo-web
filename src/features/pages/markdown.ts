@@ -152,14 +152,13 @@ export function renderMarkdown(markdown: string, options: RenderOptions = {}): s
  * rather than the raw source, so `## Heading`, `**bold**`, and link syntax don't
  * leak punctuation into the description.
  */
-export function markdownExcerpt(markdown: string, maxLength = 160): string {
-  const text = md
-    .parse(markdown, {})
+function excerptFromTokens(tokens: Token[], maxLength: number): string {
+  const text = tokens
     .filter((token) => token.type === 'inline')
     .map((token) =>
       (token.children ?? [])
-        .filter((child) => child.type === 'text' || child.type === 'code_inline')
-        .map((child) => child.content)
+        .filter((child) => child.type === 'text' || child.type === 'code_inline' || child.type.endsWith('break'))
+        .map((child) => (child.type.endsWith('break') ? ' ' : child.content))
         .join(''),
     )
     .join(' ')
@@ -170,6 +169,19 @@ export function markdownExcerpt(markdown: string, maxLength = 160): string {
   const cut = text.slice(0, maxLength - 1);
   const lastSpace = cut.lastIndexOf(' ');
   return `${(lastSpace > maxLength / 2 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+export function markdownExcerpt(markdown: string, maxLength = 160): string {
+  return excerptFromTokens(md.parse(markdown, {}), maxLength);
+}
+
+/** Plain-text summary of the first Markdown paragraph, excluding later sections. */
+export function markdownFirstParagraphExcerpt(markdown: string, maxLength = 160): string {
+  const tokens = md.parse(markdown, {});
+  const paragraphIndex = tokens.findIndex((token) => token.type === 'paragraph_open');
+  if (paragraphIndex < 0) return '';
+  const inline = tokens.slice(paragraphIndex + 1).find((token) => token.type === 'inline');
+  return inline ? excerptFromTokens([inline], maxLength) : '';
 }
 
 /**

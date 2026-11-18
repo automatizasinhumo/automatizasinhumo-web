@@ -151,10 +151,10 @@ jobs:
         run: |
           mapfile -t urls < <(curl -s "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+' | cut -c6- | sort -u)
           set +e; npx --yes pa11y-ci@3.1.0 --config .pa11yci --runner axe "${urls[@]}" > axe.txt 2>&1; set -e
-          { echo "## axe-core: ${#urls[@]} páginas"; echo; echo '```'; grep -vE '^\s*$' axe.txt | tail -80; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
+          { echo "## axe-core: ${#urls[@]} pÃ¡ginas"; echo; echo '```'; grep -vE '^\s*$' axe.txt | tail -80; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
 
   knip:
-    # Código muerto: ficheros, exports y dependencias sin uso (knip). Solo avisa.
+    # CÃ³digo muerto: ficheros, exports y dependencias sin uso (knip). Solo avisa.
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -167,4 +167,4 @@ jobs:
       - name: knip
         run: |
           set +e; npx --yes knip@5 --no-progress --reporter markdown > knip.md 2>&1; set -e
-          { echo "## knip (código muerto)"; echo; head -150 knip.md; } | tee -a "$GITHUB_STEP_SUMMARY"
+          { echo "## knip (cÃ³digo muerto)"; echo; head -150 knip.md; } | tee -a "$GITHUB_STEP_SUMMARY"
