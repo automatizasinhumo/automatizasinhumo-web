@@ -186,7 +186,7 @@ def fabricar(ruta_pedido, desplegar=True):
     print(f"  {len(textos)} textos a adaptar" if PUBLICO else
           f"{p['id']}: {len(textos)} textos a adaptar (marca de la plantilla: {marca or '?'})")
     nuevos = reescribir(textos, p, credenciales())
-    comprobar_adaptacion(textos, nuevos)
+    comprobar_adaptacion(textos, nuevos, marca)
     for i, n in enumerate(nodos):
         t = nuevos.get(str(i))
         if t:
@@ -215,9 +215,13 @@ def fabricar(ruta_pedido, desplegar=True):
     print('generada sin publicar en', site)
 
 
-def comprobar_adaptacion(textos, nuevos):
+def comprobar_adaptacion(textos, nuevos, marca=''):
     """Un fallo de la IA no publica la plantilla a medias: bloquea la vista previa."""
-    sin = [t['texto'] for i, t in enumerate(textos) if str(i) not in nuevos]
+    # Sin respuesta o devuelto tal cual: los dos casos son la plantilla sin adaptar.
+    # Un texto con la marca devuelto igual sí vale: poner_datos() pone ahí el nombre del cliente.
+    sin = [t['texto'] for i, t in enumerate(textos)
+           if ' '.join(nuevos.get(str(i), '').split()) in ('', ' '.join(t['texto'].split()))
+           and not (str(i) in nuevos and marca and marca in t['texto'])]
     largos = [t for t in sin if len(t) >= LARGO_OBLIGATORIO]
     if largos or (textos and len(sin) > TOLERANCIA_SIN_ADAPTAR * len(textos)):
         raise FabricaBloqueada(f'la IA dejó {len(sin)} de {len(textos)} textos sin adaptar')
@@ -232,7 +236,10 @@ def restos_de_plantilla(html, marca, nombre):
         el.get(a, '') for el in sopa.find_all(True) for a in ('alt', 'title', 'aria-label', 'placeholder', 'content')
         if el.get(a)])
     restos = []
-    if marca and len(marca) >= 3 and marca.lower() not in nombre.lower() and marca.lower() in visible.lower():
+    # El nombre del cliente puede contener la marca («Lumen Ana»): se quitan sus apariciones
+    # y se busca la marca en lo que queda.
+    resto = re.sub(re.escape(nombre), ' ', visible, flags=re.I) if nombre else visible
+    if marca and len(marca) >= 3 and marca.lower() in resto.lower():
         restos.append('marca de la plantilla')
     if RESTOS.search(visible):
         restos.append('texto de relleno')
