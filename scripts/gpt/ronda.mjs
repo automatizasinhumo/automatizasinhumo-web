@@ -3,14 +3,15 @@
 // Coge los siguientes servicios activos del catálogo que no estén en
 // manual/auditorias-gpt/auditados.txt, escribe manual/auditorias-gpt/ronda-NN-pregunta.txt
 // y los apunta como auditados. Después: python -I -X utf8 scripts/gpt/ask.py <pregunta> <respuesta>
-import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { productos, categorias } from '../../manual/catalogo/catalogo.mjs';
 import { descripcion } from '../../manual/catalogo/descripcion.mjs';
 
 const [n, aplicado = '', cuantos = '10'] = process.argv.slice(2);
 if (!n) { console.error('uso: node scripts/gpt/ronda.mjs <n> "<aplicado>" [cuantos]'); process.exit(2); }
 const DIR = 'manual/auditorias-gpt';
-const hechos = new Set(readFileSync(`${DIR}/auditados.txt`, 'utf8').split(/\r?\n/).filter((l) => l && !l.startsWith('#')).map((l) => l.split(' ')[0]));
+mkdirSync(DIR, { recursive: true }); // carpeta solo local (ignorada): en un clon nuevo no existe
+const hechos = new Set((existsSync(`${DIR}/auditados.txt`) ? readFileSync(`${DIR}/auditados.txt`, 'utf8') : '').split(/\r?\n/).filter((l) => l && !l.startsWith('#')).map((l) => l.split(' ')[0]));
 const lote = productos.filter((p) => p.activo !== false && !hechos.has(p.slug)).slice(0, +cuantos);
 if (!lote.length) { console.log('No quedan servicios sin auditar.'); process.exit(0); }
 const cat = (s) => categorias.find((c) => c.slug === s)?.nombre ?? s;
