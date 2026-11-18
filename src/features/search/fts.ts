@@ -1,13 +1,13 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { SearchProvider, SearchResult } from './provider';
-import { countSearchProducts, searchProducts, suggestQuery } from '../products/search';
+import { contentTerms, rankSearchProducts, suggestQuery, type RankedSearch } from '../products/search';
 import { normalizeSearchQuery } from './query';
 import { categoriasPara, expandirSinonimos } from './sinonimos';
 
 /**
  * Keyword search (SQLite FTS5) with typo-correction fallback — the default
  * backend: $0, fully local, exact-match-friendly. Encapsulates the "search → if
- * empty, suggest a correction → search again" flow the /search page used inline.
+ * nothing covers the query, suggest a correction → search again" flow.
  */
 export function createFtsSearch(db: D1Database): SearchProvider {
   function variantsFor(query: string): string[] {
@@ -15,9 +15,28 @@ export function createFtsSearch(db: D1Database): SearchProvider {
     return synonym ? [query, synonym] : [query];
   }
 
-  function categoryFor(queries: string[]): string | null {
-    const categories = queries.flatMap(categoriasPara);
-    return categories[categories.length - 1] ?? null;
+  function categoriesFor(queries: string[]): string[] {
+    return [...new Set(queries.flatMap(categoriasPara))];
+  }
+
+  /** Hay una categoría que explica todos los términos de alguna variante. */
+  function categoryCoversQuery(queries: string[]): boolean {
+    return queries.some((variant) => {
+      const perTerm = contentTerms(variant).map(categoriasPara);
+      return perTerm.length > 0 && perTerm[0].some((slug) => perTerm.every((cats) => cats.includes(slug)));
+    });
+  }
+
+  async function run(query: string, excludeIds: number[]): Promise<RankedSearch & { variants: string[] }> {
+    const variants = variantsFor(query);
+    const ranked = await rankSearchProducts(
+      db,
+      variants,
+      categoriesFor(variants),
+      excludeIds,
+      categoryCoversQuery(variants),
+    );
+    return { ...ranked, variants };
   }
 
   return {
@@ -27,48 +46,30 @@ export function createFtsSearch(db: D1Database): SearchProvider {
       const limit = Math.max(0, Math.trunc(options.limit ?? 50));
       const offset = Math.max(0, Math.trunc(options.offset ?? 0));
       const excludeIds = options.excludeIds ?? [];
-      const variants = variantsFor(normalized);
-      const category = categoryFor(variants);
-      const directTotal = await countSearchProducts(db, normalized);
-      const total = await countSearchProducts(db, variants, excludeIds, category);
-      if (total > 0) {
-        const products = await searchProducts(db, variants, limit, offset, excludeIds, category);
-        const correctedTo = directTotal === 0 && variants.length > 1 ? variants[1] : null;
-        return { products, total, correctedTo };
-      }
 
-      const suggestion = await suggestQuery(db, normalized);
-      if (suggestion) {
-        const correctedVariants = variantsFor(suggestion);
-        const correctedCategory = categoryFor(correctedVariants);
-        const correctedTotal = await countSearchProducts(
-          db,
-          correctedVariants,
-          [],
-          correctedCategory,
-        );
-        if (correctedTotal > 0) {
-          const total =
-            excludeIds.length > 0
-              ? await countSearchProducts(
-                  db,
-                  correctedVariants,
-                  excludeIds,
-                  correctedCategory,
-                )
-              : correctedTotal;
-          const products = await searchProducts(
-            db,
-            correctedVariants,
-            limit,
-            offset,
-            excludeIds,
-            correctedCategory,
-          );
-          return { products, total, correctedTo: suggestion };
+      let result = await run(normalized, excludeIds);
+      let correctedTo: string | null = null;
+      const best = Math.max(0, ...result.coverageByVariant);
+      // Si ninguna ficha cubre la consulta entera, quizá hay una errata («pelukeria»).
+      if (best < 1) {
+        const suggestion = await suggestQuery(db, normalized);
+        if (suggestion) {
+          const corrected = await run(suggestion, excludeIds);
+          if (Math.max(0, ...corrected.coverageByVariant) > best) {
+            result = corrected;
+            correctedTo = suggestion;
+          }
         }
       }
-      return { products: [], total: 0, correctedTo: null };
+      // Sin nada literal, lo hallado viene del sinónimo: se dice qué se ha buscado.
+      if (!correctedTo && result.variants.length > 1 && result.coverageByVariant[0] === 0 && result.products.length > 0) {
+        correctedTo = result.variants[1];
+      }
+      return {
+        products: result.products.slice(offset, offset + limit),
+        total: result.products.length,
+        correctedTo,
+      };
     },
   };
 }
