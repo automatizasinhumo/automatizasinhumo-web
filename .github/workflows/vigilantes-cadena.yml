@@ -78,6 +78,19 @@ jobs:
           # GHSA-fc5q-39xc-vjpf (picomatch <= 4.0.7) lo retiró GitHub el 18-11-2026; la acción aún lo
           # marca. Quitar esta línea cuando deje de aparecer en «Vulnerabilities».
           allow-ghsas: GHSA-fc5q-39xc-vjpf
+          # Herramientas de QA de qa/herramientas: solo se ejecutan en el runner, no se distribuyen
+          # ni se incluyen en la web, así que su licencia (MPL, LGPL, PSF, FSL…) no obliga a nada.
+          # Excepción por paquete, no por licencia: una dependencia nueva de la web con esas
+          # licencias sigue fallando.
+          allow-dependencies-licenses: >-
+            pkg:npm/@mdn/mdn-http-observatory, pkg:npm/argparse, pkg:npm/axe-core,
+            pkg:npm/lightningcss, pkg:npm/lightningcss-android-arm64, pkg:npm/lightningcss-darwin-arm64,
+            pkg:npm/lightningcss-darwin-x64, pkg:npm/lightningcss-freebsd-x64,
+            pkg:npm/lightningcss-linux-arm-gnueabihf, pkg:npm/lightningcss-linux-arm64-gnu,
+            pkg:npm/lightningcss-linux-arm64-musl, pkg:npm/lightningcss-linux-x64-gnu,
+            pkg:npm/lightningcss-linux-x64-musl, pkg:npm/lightningcss-win32-arm64-msvc,
+            pkg:npm/lightningcss-win32-x64-msvc, pkg:npm/nan, pkg:npm/pa11y, pkg:npm/pa11y-ci,
+            pkg:npm/sentry, pkg:npm/truncate-utf8-bytes
 
   scorecard:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
