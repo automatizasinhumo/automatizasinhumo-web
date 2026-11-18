@@ -69,8 +69,8 @@ Clona pqina/filepond (MIT). Copia `dist/filepond.min.js` y `dist/filepond.min.cs
 Prueba: una solicitud con tres imágenes deja tres objetos en R2; un archivo demasiado grande o de formato no admitido se rechaza; otra solicitud no puede leerlos.
 
 ### C8 · Factura PDF automática con pdfme (ronda 08, adopción 2) — PENDIENTE (después de C5)
-Usa el paquete oficial `@pdfme/generator` (pdfme/pdfme, MIT) y copia `playground/public/template-assets/invoice-white/template.json` a `manual/facturas/plantilla.json`, sin los datos de ejemplo. Genera la factura del pedido pagado desde `src/features/orders/recordWebhook.ts` y guárdala en R2 privado. Los pedidos con `payment_method = 'demo'` no generan factura. Si supera la CPU de Workers Free, genérala en un workflow de Actions.
-Prueba: pago confirmado → un PDF; webhook repetido → sin factura duplicada; pago fallido → sin factura; pedido demo → sin factura.
+Usa el paquete oficial `@pdfme/generator` (pdfme/pdfme, MIT) y copia `playground/public/template-assets/invoice-white/template.json` a `manual/facturas/plantilla.json`, sin los datos de ejemplo. Genera la factura del pedido pagado desde `src/features/orders/recordWebhook.ts` y guárdala en R2 privado. Los pedidos con `payment_method = 'demo'` no generan factura. Si supera la CPU de Workers Free, genérala en un workflow de Actions. Si la factura falla después de guardar el pedido, el pedido queda marcado como «factura pendiente» y el cron existente del Worker la reintenta (una sola factura por pedido, clave = id del pedido).
+Prueba: pago confirmado → un PDF; webhook repetido → sin factura duplicada; pago fallido → sin factura; pedido demo → sin factura; fallo al generar → el cron la crea en la siguiente pasada.
 
 ### C9 · Analítica propia con Counterscale (ronda 08, adopción 3) — PENDIENTE
 Despliega benvinegar/counterscale (MIT) como Worker aparte, siguiendo su README. Añade su tracker a `src/layouts/Layout.astro` con eventos de ficha, demo y formulario, sin datos personales.
