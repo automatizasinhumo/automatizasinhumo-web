@@ -41,3 +41,16 @@ Hoy el envío de correos a clientes vive dentro de src/pages/admin/solicitudes.a
    Límite de 20 por pasada. Es idempotente gracias a la clave única de `notificaciones`.
 3. Tests con vitest junto a los existentes (correos.test.ts como modelo): no envía dos veces el mismo correo; no envía sin «QA ok»; las fechas de 3 y 7 días se cumplen.
 Prueba: `npx vitest run src/features/solicitudes` en verde y `npx astro build` sin errores.
+
+### C4 · Hallazgos reales de SonarCloud en main — PENDIENTE
+Lista: https://sonarcloud.io/project/issues?id=davidpd89_automatizasinhumo-web&resolved=false&types=BUG,VULNERABILITY
+Arregla solo estos, con el cambio mínimo y sin cambiar comportamiento:
+- css:S8778 (5): `@import` después de otras reglas → moverlos al principio del fichero.
+- S2871 (4, js/ts): `.sort()` sin comparador → `(a, b) => a.localeCompare(b, 'es')` o resta numérica.
+- typescript:S3923 (2): condicional que devuelve lo mismo en ambas ramas → simplificar.
+- plsql:NullComparison (2): `= NULL` → `IS NULL`.
+- python:S8904 (1) y typescript:S6324 (1).
+- jssecurity S5145/S5144/S8476 en `src/`: sanear lo que llega del usuario antes de registrarlo o de usarlo en un fetch (lista de hosts permitidos).
+No toques las migraciones con DELETE sin WHERE (son a propósito) ni los avisos de `npx` en workflows o scripts.
+Prueba: `npx vitest run` y `npx astro build` en verde; en la PR, la puerta de Sonar en verde.
+
