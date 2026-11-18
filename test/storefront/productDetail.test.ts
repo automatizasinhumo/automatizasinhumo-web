@@ -378,6 +378,29 @@ describe('the store-owned product detail', () => {
     expect(html).not.toContain('<form');
   });
 
+  it.skipIf(!isDefaultTheme)('does not promise a modality when its only variant is sold out', async () => {
+    const html = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({
+        variants: [
+          {
+            id: 'var_template0001',
+            label: 'Plantilla + guía',
+            formattedPrice: '149 €',
+            priceCents: 14900,
+            soldOut: true,
+            defaultSelected: false,
+            imageAnchor: '',
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain('No hay modalidades disponibles en este momento.');
+    expect(html).not.toContain('Lo montamos nosotros');
+    expect(html).not.toContain('¿Lo tienes que montar tú?');
+  });
+
   it('marks low stock without pinning the wording', async () => {
     const without = await render(ProductDetail, { model: detail(), purchase: purchase() });
     const withNudge = await render(ProductDetail, {

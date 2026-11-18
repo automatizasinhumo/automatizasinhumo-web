@@ -61,7 +61,9 @@ async function loadHomeService(
   const product = await getProductBySlug(db, slug);
   if (!product || !product.active) return null;
 
-  const variants = await listVariants(db, product.id);
+  const variants = (await listVariants(db, product.id)).filter(
+    (variant) => variant.active === 1 && variant.stock > 0,
+  );
   const card = buildProductCard(product, {
     currency: options.currency,
     baseUrl: options.imageBaseUrl,
