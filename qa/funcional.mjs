@@ -34,6 +34,7 @@ export async function revisarPagina(ctx, url, { ancho, captura, comprobados } = 
     const r = await pg.goto(url, { waitUntil: 'load', timeout: 45000 });
     if (!r || r.status() >= 400) problemas.push(`HTTP ${r?.status()}`);
     await pg.waitForTimeout(800);
+    await cargarDiferidas(pg);
     // Imágenes que el navegador no pudo pintar (también las de CSS en línea que fallan arriba).
     const rotas = await pg.$$eval('img', (is) => is.filter((i) => i.complete && i.currentSrc && i.naturalWidth === 0).map((i) => i.currentSrc));
     for (const s of rotas.slice(0, 5)) problemas.push('imagen rota: ' + s.slice(0, 150));
@@ -52,17 +53,61 @@ export async function revisarPagina(ctx, url, { ancho, captura, comprobados } = 
   return [...new Set(problemas)];
 }
 
+/**
+ * Fuerza la carga de las imágenes diferidas (loading="lazy" o por IntersectionObserver):
+ * recorre la página hasta abajo y espera a la red, para que una imagen rota bajo el
+ * pliegue también se vea. Vuelve arriba para la captura.
+ */
+async function cargarDiferidas(pg) {
+  await pg.evaluate(async () => {
+    for (const i of document.querySelectorAll('img[loading="lazy"]')) i.loading = 'eager';
+    const paso = Math.max(200, window.innerHeight * 0.8);
+    for (let y = 0, n = 0; y < document.documentElement.scrollHeight && n < 60; y += paso, n++) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 60));
+    }
+    window.scrollTo(0, 0);
+  });
+  await pg.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+}
+
+/**
+ * ¿Hay un manejador «submit» para el formulario nº `k` (en él, en document o en window)?
+ * Solo Chromium expone los listeners (CDP); en otros motores devuelve null (no se sabe).
+ */
+async function tieneSubmitJs(pg, k) {
+  let cdp;
+  try {
+    cdp = await pg.context().newCDPSession(pg);
+  } catch {
+    return null;
+  }
+  try {
+    for (const expr of [`document.querySelectorAll('form')[${k}]`, 'document', 'window']) {
+      const { result } = await cdp.send('Runtime.evaluate', { expression: expr });
+      if (!result.objectId) continue;
+      const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
+      if (listeners.some((l) => l.type === 'submit')) return true;
+    }
+    return false;
+  } finally {
+    await cdp.detach().catch(() => {});
+  }
+}
+
 /** Cada formulario visible se puede enviar y cada campo tiene nombre y etiqueta. */
 async function revisarFormularios(pg) {
-  return pg.$$eval('form', (fs) => {
+  const out = await pg.$$eval('form', (fs) => {
     const visible = (e) => !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
     const out = [];
     fs.filter(visible).forEach((f, k) => {
       const id = f.id ? `#${f.id}` : `nº ${k + 1}`;
       if (!f.querySelector('button:not([type=button]):not([type=reset]), input[type=submit], input[type=image]'))
         out.push(`formulario ${id} sin botón de enviar`);
+      // action="#"/javascript: solo es un fallo si además ningún JavaScript gestiona el envío
+      // (se comprueba fuera, con los listeners): se marca con el índice para resolverlo.
       const accion = f.getAttribute('action') ?? '';
-      if (/^(javascript:|#$)/i.test(accion.trim())) out.push(`formulario ${id} sin destino (${accion})`);
+      if (/^(javascript:|#$)/i.test(accion.trim()) && !f.getAttribute('onsubmit')) out.push({ k: fs.indexOf(f), texto: `formulario ${id} sin destino (${accion})` });
       for (const c of f.querySelectorAll('input, select, textarea')) {
         if (/^(hidden|submit|button|reset|image)$/i.test(c.type) || !visible(c)) continue;
         if (!c.name) out.push(`formulario ${id}: campo sin name (${c.type || c.tagName.toLowerCase()})`);
@@ -72,13 +117,19 @@ async function revisarFormularios(pg) {
     });
     return out;
   });
+  const res = [];
+  for (const p of out) {
+    if (typeof p === 'string') res.push(p);
+    else if ((await tieneSubmitJs(pg, p.k)) === false) res.push(p.texto);
+  }
+  return res;
 }
 
-/** Los enlaces «#algo» apuntan a un elemento que existe. */
+/** Los enlaces «#algo» apuntan a un elemento que existe («#top» siempre lleva arriba). */
 async function revisarAnclas(pg) {
   return pg.$$eval('a[href^="#"]', (as) =>
     [...new Set(as.map((a) => a.getAttribute('href')))]
-      .filter((h) => h.length > 1 && !h.startsWith('#!'))
+      .filter((h) => h.length > 1 && !h.startsWith('#!') && h.toLowerCase() !== '#top')
       .filter((h) => {
         const id = decodeURIComponent(h.slice(1));
         return !document.getElementById(id) && !document.getElementsByName(id).length;
