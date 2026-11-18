@@ -6,14 +6,14 @@ const nombres = (d: string, hechos: Record<string, string> = {}) =>
 
 const SEMANALES = ['empleados-qa.yml', 'seguridad.yml', 'empleados-semanales.yml', 'vigilantes-cadena.yml'];
 
-/** Marcas en memoria con la misma semántica que el upsert condicional de D1. */
+/** Marcas en memoria con la misma semántica (comparar e intercambiar) que D1. */
 function marcasMemoria(inicial: Record<string, string> = {}): Marcas & { datos: Record<string, string> } {
   const datos = { ...inicial };
   return {
     datos,
     leer: async () => ({ ...datos }),
-    reclamar: async (w, v) => {
-      if (datos[w] && datos[w] >= v) return false;
+    reclamar: async (w, leida, v) => {
+      if (datos[w] !== leida) return false;
       datos[w] = v;
       return true;
     },
@@ -117,7 +117,21 @@ describe('lanzarProgramados', () => {
     const r = await lanzarProgramados(new Date('2026-11-23T06:50:00Z'), 't', 'org/repo', m, pedir as unknown as typeof fetch);
     expect(r.lanzados).toContain('seguridad.yml');
     expect(m.datos['seguridad.yml']).toBe('2026-11-23T06:20@~');
-    expect(await m.reclamar('seguridad.yml', '2026-11-23T06:20@2026-11-23T07:05')).toBe(false);
+    expect(await m.reclamar('seguridad.yml', '2026-11-23T06:20@2026-11-23T06:20', '2026-11-23T06:20@2026-11-23T07:05')).toBe(false);
+  });
+
+  it('dos ticks que leen antes de reclamar despachan una sola vez', async () => {
+    const m = marcasMemoria(semanaHecha);
+    const leer = m.leer;
+    // Ambos leen la marca ausente antes de que ninguno reclame.
+    const lecturas = [await leer(), await leer()];
+    m.leer = async () => lecturas.shift()!;
+    const pedir = ok();
+    await Promise.all([
+      lanzarProgramados(new Date('2026-11-18T10:05:00Z'), 't', 'org/repo', m, pedir as unknown as typeof fetch),
+      lanzarProgramados(new Date('2026-11-18T10:07:00Z'), 't', 'org/repo', m, pedir as unknown as typeof fetch),
+    ]);
+    expect(pedir).toHaveBeenCalledTimes(1);
   });
 
   it('en un tick sin nada debido no lee marcas', async () => {

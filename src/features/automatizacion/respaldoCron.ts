@@ -13,7 +13,7 @@
  *
  * Cada workflow tiene un periodo (la franja de 15 minutos de la fábrica, la semana
  * de los semanales) y una marca en D1. Antes de lanzar se reclama de forma atómica
- * con `periodo@franja` (reserva); si GitHub acepta, pasa a `periodo@~` (hecho).
+ * (comparar e intercambiar sobre la marca leída) con `periodo@franja` (reserva); si GitHub acepta, pasa a `periodo@~` (hecho).
  * Así un tick repetido no despacha dos veces. Si GitHub rechaza el envío se suelta
  * la reserva, y si el Worker muere a medias la reserva caduca a los 30 minutos: en
  * ambos casos el siguiente tick lo reintenta. Un envío aceptado cuya respuesta se
@@ -69,8 +69,11 @@ export const PROGRAMADOS: Programado[] = [
 /** Marcas por workflow: `periodo@franja` (reservado) o `periodo@~` (hecho). */
 export interface Marcas {
   leer(): Promise<Record<string, string>>;
-  /** Escribe `valor` solo si el guardado es menor (como texto); true si lo escribió. */
-  reclamar(workflow: string, valor: string): Promise<boolean>;
+  /**
+   * Escribe `valor` solo si la marca guardada sigue siendo `leida` (ausente si es
+   * undefined): comparar e intercambiar. true si lo escribió.
+   */
+  reclamar(workflow: string, leida: string | undefined, valor: string): Promise<boolean>;
   /** Cambia `actual` por `nuevo` (o lo borra si `nuevo` es undefined) solo si sigue siendo `actual`. */
   cambiar(workflow: string, actual: string, nuevo: string | undefined): Promise<void>;
 }
@@ -103,15 +106,15 @@ export function marcasD1(db: D1Database): Marcas {
         .all<{ key: string; value: string }>();
       return Object.fromEntries(results.map((r) => [r.key.slice(PREFIJO.length), r.value]));
     },
-    async reclamar(workflow, valor) {
-      const r = await db
-        .prepare(
-          `INSERT INTO settings (key, value) VALUES (?, ?)
-           ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
-           WHERE settings.value < excluded.value`,
-        )
-        .bind(PREFIJO + workflow, valor)
-        .run();
+    async reclamar(workflow, leida, valor) {
+      // Un tick que leyó antes de que otro reclamara no puede pisar esa reserva.
+      const q =
+        leida === undefined
+          ? db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING').bind(PREFIJO + workflow, valor)
+          : db
+              .prepare("UPDATE settings SET value = ?, updated_at = datetime('now') WHERE key = ? AND value = ?")
+              .bind(valor, PREFIJO + workflow, leida);
+      const r = await q.run();
       return (r.meta?.changes ?? 0) === 1;
     },
     async cambiar(workflow, actual, nuevo) {
@@ -149,7 +152,7 @@ export async function lanzarProgramados(
   for (const { programado, periodo } of pendientes(cuando, guardadas)) {
     const { workflow, inputs } = programado;
     const reserva = `${periodo}@${franja(cuando)}`;
-    if (!(await marcas.reclamar(workflow, reserva))) continue; // otro tick ya lo tiene
+    if (!(await marcas.reclamar(workflow, guardadas[workflow], reserva))) continue; // otro tick ya lo tiene
     let ok = false;
     try {
       const r = await pedir(
