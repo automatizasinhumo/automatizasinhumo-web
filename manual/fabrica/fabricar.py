@@ -79,10 +79,12 @@ def bajar_plantilla(plantilla):
     url = f"{DEMOS_URL}/{urllib.parse.quote(plantilla)}/"
     with tempfile.TemporaryDirectory() as tmp:
         try:
-            subprocess.run(['wget', '-q', '-r', '-np', '-nH', '-p', '-e', 'robots=off', '-P', tmp, '--', url],
-                           timeout=600, check=False)
+            r = subprocess.run(['wget', '-q', '-r', '-np', '-nH', '-p', '-e', 'robots=off', '-P', tmp, '--', url],
+                               timeout=600, check=False)
         except (OSError, subprocess.TimeoutExpired) as e:
             raise RuntimeError(f'no se pudo bajar la plantilla ({type(e).__name__})') from None
+        if r.returncode != 0:  # algún recurso (CSS, imagen) falló: no se guarda una plantilla a medias
+            raise RuntimeError(f'descarga incompleta de la plantilla (wget {r.returncode})')
         bajada = Path(tmp, plantilla)
         if not (bajada / 'index.html').is_file():
             raise RuntimeError('la plantilla bajada no trae index.html')

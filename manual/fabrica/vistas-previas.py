@@ -20,16 +20,26 @@ args = sys.argv[1:]
 PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))  # registros públicos: sin datos de clientes
 CONFIG = args[args.index('--config') + 1] if '--config' in args else '.instances/automatizasinhumo-staging.wrangler.jsonc'
 MAXIMO = int(args[args.index('--max') + 1]) if '--max' in args else 5
+if MAXIMO < 1:
+    sys.exit('--max tiene que ser 1 o más')
 SECO = '--dry' in args
 EN_CURSO = 'Vista previa automática: fabricando'
+# Reserva con caducidad: una reclamación sin terminar (proceso cancelado) se puede volver a reclamar
+# pasado este plazo. Fabricar dos veces la misma solicitud solo vuelve a desplegar el mismo Worker.
+CADUCA = "datetime('now', '-60 minutes')"
+DISPONIBLE = f"(estado = 'nueva' OR (estado = 'en_preparacion' AND nota = {{en_curso}} AND updated_at < {CADUCA}))"
 
 
 def d1(sql):
-    r = subprocess.run(['npx', 'wrangler', 'd1', 'execute', 'DB', '--remote', '--json', '--config', CONFIG, '--command', sql],
-                       cwd=RAIZ, capture_output=True, text=True, encoding='utf-8', shell=sys.platform == 'win32',
-                       timeout=300, stdin=subprocess.DEVNULL)  # nunca esperar respuesta por consola
-    salida = r.stdout[r.stdout.find('['):]
-    return json.loads(salida)[0]['results']
+    """Consulta a D1. Un fallo se convierte en RuntimeError sin el comando (lleva datos y URL del cliente)."""
+    try:
+        r = subprocess.run(['npx', 'wrangler', 'd1', 'execute', 'DB', '--remote', '--json', '--config', CONFIG, '--command', sql],
+                           cwd=RAIZ, capture_output=True, text=True, encoding='utf-8', shell=sys.platform == 'win32',
+                           timeout=300, stdin=subprocess.DEVNULL)  # nunca esperar respuesta por consola
+        salida = r.stdout[r.stdout.find('['):]
+        return json.loads(salida)[0]['results']
+    except Exception as e:  # noqa: BLE001
+        raise RuntimeError(f'D1 no respondió ({type(e).__name__})') from None
 
 
 def sql_txt(s):
@@ -130,17 +140,25 @@ def pedido_de(fila, plantilla):
 
 
 def procesar(public_id, p):
-    """Reclama la solicitud (nueva -> en_preparacion) y solo entonces la fabrica: dos procesos a la vez
-    (la tarea del PC y Actions) no fabrican la misma. Un fallo no tumba el lote: la deja para revisar a mano."""
+    """Reclama la solicitud y solo entonces la fabrica: dos procesos a la vez (la tarea del PC y Actions)
+    no fabrican la misma. Devuelve True si la ha intentado. Ningún fallo (D1 incluido) tumba el lote:
+    si no se puede guardar la nota, la reserva caduca y otra pasada la recupera."""
     donde = f"public_id = {sql_txt(public_id)}"
-    if not d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(EN_CURSO)}, updated_at = datetime('now') "
-              f"WHERE {donde} AND estado = 'nueva' RETURNING public_id"):
-        print('  ya la ha reclamado otro proceso')
-        return
     try:
-        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as t:
-            json.dump(p, t, ensure_ascii=False)
-        url = fabricar(t.name)
+        reclamada = d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(EN_CURSO)}, "
+                       f"updated_at = datetime('now') WHERE {donde} AND "
+                       f"{DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} RETURNING public_id")
+    except RuntimeError as e:
+        print('  sin reclamar:', e)
+        return False
+    if not reclamada:
+        print('  ya la ha reclamado otro proceso')
+        return False
+    try:
+        with tempfile.TemporaryDirectory() as tmp:  # el pedido lleva datos de contacto: se borra al salir
+            ruta = Path(tmp, 'pedido.json')
+            ruta.write_text(json.dumps(p, ensure_ascii=False), encoding='utf-8')
+            url = fabricar(str(ruta))
         if not url:
             raise RuntimeError('despliegue sin URL')
         problemas = qa(url, p)
@@ -151,14 +169,18 @@ def procesar(public_id, p):
     except Exception as e:  # noqa: BLE001 — una solicitud fallida no para las demás
         print('  fallo:', type(e).__name__ if PUBLICO else f'{type(e).__name__}: {e}')
         nota = f'Vista previa automática: falló ({type(e).__name__}, revisar a mano)'
-    d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
-       f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(EN_CURSO)}")
+    try:
+        d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
+           f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(EN_CURSO)}")
+    except RuntimeError as e:
+        print('  nota sin guardar (la reserva caduca y se reintenta):', e)
+    return True
 
 
 def main():
     mapa = disenos()
     filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje FROM solicitudes "
-               "WHERE estado = 'nueva' ORDER BY created_at LIMIT 50")
+               f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO))} ORDER BY created_at LIMIT 50")
     hechas = 0
     for n, f in enumerate(filas, 1):
         plantillas = mapa.get(f['slug'])
@@ -170,12 +192,12 @@ def main():
               f"{f['public_id']} ({f['slug']}) -> {p['plantilla']} · {p['negocio']}")
         if SECO:
             print('  simulación: no se fabrica' if PUBLICO else json.dumps(p, ensure_ascii=False, indent=1))
-        else:
-            procesar(f['public_id'], p)
+        elif not procesar(f['public_id'], p):
+            continue  # reclamación perdida: no consume el límite
         hechas += 1
         if hechas >= MAXIMO:
             break
-    print('vistas previas:', hechas)
+    print('vistas previas intentadas:', hechas)
 
 
 if __name__ == '__main__':
