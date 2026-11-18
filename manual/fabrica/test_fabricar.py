@@ -245,6 +245,9 @@ class BloqueoDePublicacion(unittest.TestCase):
     def test_un_nombre_que_contiene_la_marca_no_bloquea(self):
         self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Lumen Ana</p>', 'Lumen', 'Lumen Ana'), [])
 
+    def test_la_marca_dentro_de_otra_palabra_no_bloquea(self):
+        self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Aumentamos el volumen de tu cabello</p>', 'Lumen', 'Ana'), [])
+
     def test_la_marca_suelta_bloquea_aunque_el_nombre_la_contenga(self):
         self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Lumen Ana</p><p>ESTUDIO LUMEN</p>', 'Lumen', 'Lumen Ana'),
                          ['marca de la plantilla'])

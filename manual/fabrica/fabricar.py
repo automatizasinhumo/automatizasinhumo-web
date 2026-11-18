@@ -239,7 +239,8 @@ def restos_de_plantilla(html, marca, nombre):
     # El nombre del cliente puede contener la marca («Lumen Ana»): se quitan sus apariciones
     # y se busca la marca en lo que queda.
     resto = re.sub(re.escape(nombre), ' ', visible, flags=re.I) if nombre else visible
-    if marca and len(marca) >= 3 and marca.lower() in resto.lower():
+    # Palabra entera: con la marca «Lumen», «volumen» no es un resto de la plantilla.
+    if marca and len(marca) >= 3 and re.search(rf'(?<!\w){re.escape(marca)}(?!\w)', resto, re.I):
         restos.append('marca de la plantilla')
     if RESTOS.search(visible):
         restos.append('texto de relleno')
