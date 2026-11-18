@@ -21,7 +21,7 @@ Las tareas salen del mapa de adopción (`manual/auditorias-gpt/ronda-07-respuest
 
 <!-- TAREAS -->
 
-### C1 · Componentes comerciales Astro (mapa ronda 07, adopción 8) — PENDIENTE
+### C1 · Componentes comerciales Astro (mapa ronda 07, adopción 8) — EN PR #9
 Clona fulldotdev/ui (MIT) y konstantinWDK/astro-components (MIT) en una carpeta temporal fuera del repo. Copia:
 - fulldotdev/ui/src/components/blocks/services-1.astro -> src/features/storefront/sections/ServiciosPorNecesidad.astro
 - fulldotdev/ui/src/components/blocks/pricing-1.astro -> src/features/storefront/sections/ComparativaModalidades.astro
