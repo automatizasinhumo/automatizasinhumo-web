@@ -9,7 +9,7 @@ en «en_preparacion» con la URL de la vista previa en la nota. La web pasa una 
 nombre del negocio, sin correos/teléfonos de la plantilla, sin imágenes rotas); si la pasa, la nota
 lleva «QA ok» y el cron del Worker manda el correo de revisión. Si no, queda para revisar a mano.
 """
-import html as H, json, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request
+import html as H, json, os, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -17,6 +17,7 @@ from fabricar import fabricar  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[2]
 args = sys.argv[1:]
+PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))  # registros públicos: sin datos de clientes
 CONFIG = args[args.index('--config') + 1] if '--config' in args else '.instances/automatizasinhumo-staging.wrangler.jsonc'
 MAXIMO = int(args[args.index('--max') + 1]) if '--max' in args else 5
 SECO = '--dry' in args
@@ -137,8 +138,8 @@ def main():
         if not plantillas:
             continue
         p = pedido_de(f, plantillas[0])
-        print(f"{f['public_id']} ({f['slug']}) -> {p['plantilla']} · {p['negocio']}")
-        if SECO:
+        print(f"{f['public_id']} ({f['slug']}) -> {p['plantilla']}" + ('' if PUBLICO else f" · {p['negocio']}"))
+        if SECO and not PUBLICO:
             print(json.dumps(p, ensure_ascii=False, indent=1))
         else:
             with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as t:
@@ -146,7 +147,7 @@ def main():
             url = fabricar(t.name)
             if url:
                 problemas = qa(url, p)
-                print('  QA:', '; '.join(problemas) or 'ok')
+                print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))
                 # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
                 nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
                         f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')

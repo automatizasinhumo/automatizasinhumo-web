@@ -19,6 +19,9 @@ from pathlib import Path
 from bs4 import BeautifulSoup, NavigableString, Comment
 
 DEMOS = Path(os.environ.get('DEMOS_DIR', 'C:/GIT/automatizasinhumo-demos'))
+DEMOS_URL = 'https://automatizasinhumo-demos.davidpd89.workers.dev'
+# En GitHub Actions los registros son públicos: no se escriben datos ni URLs de clientes.
+PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))
 MODELO = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 OMITIR_TAGS = {'script', 'style', 'code', 'pre', 'svg', 'template', 'textarea'}
 LOTE = 25
@@ -74,6 +77,10 @@ def fabricar(ruta_pedido, desplegar=True):
     site = base / 'site'
     if site.exists():
         shutil.rmtree(site)
+    if not (DEMOS / 'site' / p['plantilla'] / 'index.html').exists():
+        # Sin la carpeta local de demos (p. ej. en Actions), la plantilla se baja del Worker de demos.
+        subprocess.run(['wget', '-q', '-r', '-np', '-nH', '-p', '-e', 'robots=off', '-P', str(DEMOS / 'site'),
+                        f"{DEMOS_URL}/{p['plantilla']}/"], timeout=600, check=False)
     shutil.copytree(DEMOS / 'site' / p['plantilla'], site)
     idx = site / 'index.html'
     sopa = BeautifulSoup(idx.read_text(encoding='utf-8'), 'html.parser')
@@ -92,7 +99,7 @@ def fabricar(ruta_pedido, desplegar=True):
     nodos = [n for n in sopa.body.find_all(string=True) if isinstance(n, NavigableString)
              and not any(x.name in OMITIR_TAGS for x in n.parents if x.name) and re.search(r'[A-Za-zÁÉÍÓÚáéíóúñÑ]{2,}', n)]
     textos = list(dict.fromkeys(n.strip() for n in nodos))
-    print(f"{p['id']}: {len(textos)} textos a adaptar (marca de la plantilla: {marca or '?'})")
+    print(f"{p['id']}: {len(textos)} textos a adaptar" + ('' if PUBLICO else f" (marca de la plantilla: {marca or '?'})"))
     nuevos = reescribir(textos, p, credenciales())
     for n in nodos:
         t = nuevos.get(n.strip())
@@ -119,7 +126,10 @@ def fabricar(ruta_pedido, desplegar=True):
         r = subprocess.run('npx wrangler deploy', shell=True, cwd=base, capture_output=True, text=True, encoding='utf-8',
                            timeout=600, stdin=subprocess.DEVNULL)
         url = re.search(r'https://\S+\.workers\.dev', r.stdout + r.stderr)
-        print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
+        if PUBLICO:
+            print('publicada' if url else f'despliegue fallido (código {r.returncode})')
+        else:
+            print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
         return url.group(0) if url else None
     print('generada sin publicar en', site)
 
