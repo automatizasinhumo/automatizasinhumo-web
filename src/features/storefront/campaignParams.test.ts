@@ -8,6 +8,7 @@ describe('hasCatalogParams', () => {
     expect(has('')).toBe(false);
     expect(has('utm_source=google&utm_medium=cpc&utm_campaign=bodas')).toBe(false);
     expect(has('gclid=abc')).toBe(false);
+    expect(has('gclid=abc&gad_source=1&gad_campaignid=123')).toBe(false);
     expect(has('fbclid=abc')).toBe(false);
     expect(has('srsltid=abc')).toBe(false);
     expect(has('msclkid=abc&ttclid=x')).toBe(false);
@@ -18,5 +19,6 @@ describe('hasCatalogParams', () => {
     expect(has('offset=24')).toBe(true);
     expect(has('sort=price')).toBe(true);
     expect(has('utm_source=google&q=bodas')).toBe(true);
+    expect(has('gclid=abc&gad_source=1&q=bodas')).toBe(true);
   });
 });
