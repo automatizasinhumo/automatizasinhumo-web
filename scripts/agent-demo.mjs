@@ -99,13 +99,20 @@ if (!order.lightning?.invoice || !order.order_status_url) {
   console.error('Esta demo requiere Lightning y la API de estado del pedido legible por máquina.');
   process.exit(1);
 }
+let statusUrl;
+try {
+  statusUrl = checkedUrl(order.order_status_url, baseUrl);
+} catch (error) {
+  console.error('La URL de estado del pedido no está en los hosts permitidos; no pagues esta factura:', safeLog(error.message));
+  process.exit(1);
+}
 console.log('\nPaga esta factura BOLT11:');
 console.log(safeLog(order.lightning.invoice));
 console.log(`Alternativa en el navegador: ${safeLog(order.checkout_url)}`);
 console.log('Consultando el estado tras enviar el pago; una liquidación tardía aún puede aparecer como expired.');
 
 for (;;) {
-  const response = await fetchAllowed(order.order_status_url);
+  const response = await fetchAllowed(statusUrl);
   if (response.status === 410) {
     console.error('El plazo de consulta del pago terminó antes de confirmar la liquidación.');
     process.exit(2);
