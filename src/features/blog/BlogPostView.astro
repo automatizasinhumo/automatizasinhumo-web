@@ -1,9 +1,11 @@
 ---
+// Copyright (c) 2024 Emil Gulamov
 // Adaptado de mearashadowfax/ScrewFast (MIT)
 import { env } from 'cloudflare:workers';
 import { render, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { publicOrigin } from '../http/origin';
+import { getProductBySlug } from '../products/db';
 import { absoluteUrl, buildPageMetadata } from '../seo/metadata';
 import { entriesFor, formatDate } from './content';
 import CardBlog from './CardBlog.astro';
@@ -29,6 +31,18 @@ const metadata = buildPageMetadata({
 });
 const jsonLd = JSON.stringify(metadata.jsonLd).replace(/</g, '\\u003c');
 const relatedPosts = (await entriesFor()).filter((entry) => entry.id !== post.id).slice(0, 2);
+const hasWebPageProductLink = [
+  'cuanto-cuesta-una-web-local',
+  'web-o-redes-sociales',
+].includes(post.id);
+const webPageProduct = hasWebPageProductLink
+  ? await getProductBySlug(env.DB, 'web-una-pagina')
+  : null;
+const webPageLink = hasWebPageProductLink
+  ? webPageProduct?.active
+    ? { href: '/products/web-una-pagina', label: 'Ver la web de una página' }
+    : { href: '/products', label: 'Consultar el catálogo de servicios' }
+  : null;
 ---
 
 <Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
@@ -56,6 +70,14 @@ const relatedPosts = (await entriesFor()).filter((entry) => entry.id !== post.id
     <div class="contenido-articulo mt-8 max-w-none text-ink">
       <Content />
     </div>
+    {webPageLink && (
+      <p class="mt-8 rounded-xl border border-line bg-surface p-5 text-sm text-muted">
+        Consulta la disponibilidad y las condiciones actuales.
+        <a class="ml-1 font-semibold text-brand hover:underline" href={webPageLink.href}>
+          {webPageLink.label}
+        </a>
+      </p>
+    )}
   </article>
 
   {relatedPosts.length > 0 && (
@@ -64,7 +86,7 @@ const relatedPosts = (await entriesFor()).filter((entry) => entry.id !== post.id
         Sigue leyendo
       </h2>
       <div class="grid gap-5 md:grid-cols-2">
-        {relatedPosts.map((entry) => <CardBlog blogEntry={entry} />)}
+        {relatedPosts.map((entry) => <CardBlog blogEntry={entry} headingLevel="h3" />)}
       </div>
     </section>
   )}
@@ -106,5 +128,4 @@ const relatedPosts = (await entriesFor()).filter((entry) => entry.id !== post.id
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-}
 </style>

@@ -8,7 +8,12 @@ import { getSector, servicesForSector } from '../../features/blog/sectors';
 import { getConfig } from '../../config';
 
 const sector = getSector(Astro.params.sector);
-if (!sector) return new Response('Not found', { status: 404 });
+if (!sector) {
+  return new Response('Sector no encontrado', {
+    status: 404,
+    headers: { 'cache-control': 'no-store' },
+  });
+}
 
 const services = await servicesForSector(env.DB, sector, getConfig().currency);
 addCacheTags(
@@ -16,10 +21,11 @@ addCacheTags(
   productCacheTags(services.map((service) => service.publicId)),
 );
 const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
+const canonicalPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const metadata = buildPageMetadata({
   title: sector.title,
   description: sector.description,
-  canonical: new URL(Astro.url.pathname, origin).href,
+  canonical: new URL(canonicalPath, origin).href,
 });
 const jsonLd = JSON.stringify(metadata.jsonLd).replace(/</g, '\\u003c');
 ---
@@ -47,34 +53,46 @@ const jsonLd = JSON.stringify(metadata.jsonLd).replace(/</g, '\\u003c');
     <p class="mt-2 max-w-2xl text-muted">
       El importe se lee del producto activo del catálogo, como en la portada. Consulta la ficha para ver modalidades y precio vigente antes de contratar.
     </p>
-    <div class="mt-5 grid gap-5 md:grid-cols-2">
-      {services.map((service) => (
-        <article class="tarjeta p-5">
-          <h3 class="font-serif text-xl font-semibold text-ink">{service.name}</h3>
-          <p class="mt-2 text-sm text-muted">Desde {service.formattedPrice}</p>
-          <a
-            href={`/products/${service.slug}`}
-            class="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
-          >
-            Ver servicio y modalidades →
-          </a>
-          <ul class="mt-4 space-y-2 border-t border-line pt-4">
-            {service.demos.map((demo) => (
-              <li>
-                <a
-                  href={demo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-sm text-brand hover:underline"
-                >
-                  {demo.tipo === 'interactiva' ? 'Probar' : 'Ver'} demo: {demo.titulo} ↗
-                </a>
-              </li>
-            ))}
-          </ul>
-        </article>
-      ))}
-    </div>
+    {services.length > 0 ? (
+      <div class="mt-5 grid gap-5 md:grid-cols-2">
+        {services.map((service) => (
+          <article class="tarjeta p-5">
+            <h3 class="font-serif text-xl font-semibold text-ink">{service.name}</h3>
+            <p class="mt-2 text-sm text-muted">Desde {service.formattedPrice}</p>
+            <a
+              href={`/products/${service.slug}`}
+              class="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
+            >
+              Ver servicio y modalidades →
+            </a>
+            <ul class="mt-4 space-y-2 border-t border-line pt-4">
+              {service.demos.map((demo) => (
+                <li>
+                  <a
+                    href={demo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-sm text-brand hover:underline"
+                  >
+                    {demo.tipo === 'interactiva' ? 'Probar' : 'Ver'} demo: {demo.titulo} ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="mt-5 rounded-xl border border-line bg-surface p-5">
+        <p class="text-muted">Ahora mismo no hay servicios publicados para este sector.</p>
+        <a
+          href="/empezar/consulta"
+          class="mt-4 inline-flex text-sm font-semibold text-brand hover:underline"
+        >
+          Cuéntanos qué necesitas
+        </a>
+      </div>
+    )}
   </section>
 
   <section class="mb-12 rounded-2xl border border-line bg-surface p-6">

@@ -1,3 +1,4 @@
+// Copyright (c) 2024 Emil Gulamov
 // Adaptado de mearashadowfax/ScrewFast (MIT)
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 

@@ -31,7 +31,7 @@ Desconfía de una cifra sin alcance definido y de promesas de primeras posicione
 
 Empieza con lo imprescindible: qué haces, para quién, dónde trabajas, cómo pedir cita o presupuesto y qué pruebas ayudan a confiar en ti. Después añade funciones cuando exista una necesidad concreta y puedas mantenerlas.
 
-En la ficha de [web de una página](/products/web-una-pagina) puedes consultar el precio y las modalidades vigentes. La portada y las fichas muestran el importe publicado; esta guía no sustituye a ese precio ni añade costes supuestos.
+Las condiciones comerciales pueden cambiar; consulta la disponibilidad del servicio antes de decidir. Esta guía no fija importes ni añade costes supuestos.
 
 Antes de contratar, prepara una lista breve:
 

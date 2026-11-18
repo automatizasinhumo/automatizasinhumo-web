@@ -6,7 +6,7 @@ const slug = Astro.params.slug;
 const post = slug ? await getEntry('blog', slug) : undefined;
 
 if (!post) {
-  return new Response('Not found', {
+  return new Response('Artículo no encontrado', {
     status: 404,
     headers: { 'cache-control': 'no-store' },
   });

@@ -1,3 +1,4 @@
+// Copyright (c) 2024 Emil Gulamov
 // Adaptado de mearashadowfax/ScrewFast (MIT)
 export type PageKind =
   | { type: 'WebPage' }

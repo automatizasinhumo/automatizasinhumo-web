@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { parse } from 'yaml';
 
 const articleFiles = [
   'cuanto-cuesta-una-web-local.md',
@@ -8,9 +9,12 @@ const articleFiles = [
 ];
 
 function frontmatterValue(source, key) {
-  const frontmatter = source.split(/^---\s*$/m)[1];
-  const value = frontmatter?.match(new RegExp(`^${key}:\\s*"([^"]+)"$`, 'm'))?.[1];
-  if (!value) throw new Error(`Missing "${key}" in blog article frontmatter.`);
+  const frontmatter = source.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*$/m)?.[1];
+  if (!frontmatter) throw new Error('Falta el bloque YAML de metadatos del artículo.');
+  const value = parse(frontmatter)?.[key];
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(`Falta «${key}» en los metadatos YAML del artículo.`);
+  }
   return value;
 }
 

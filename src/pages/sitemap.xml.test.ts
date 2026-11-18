@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { marketingStaticPaths, sitemapLocs } from './sitemap.xml';
-import { SECTORS } from '../features/blog/sectors';
 
 const origin = 'https://shop.example';
 const data = {
@@ -10,6 +9,18 @@ const data = {
 };
 
 describe('sitemapLocs', () => {
+  const expectedMarketingPaths = [
+    '/blog',
+    '/blog/cuanto-cuesta-una-web-local',
+    '/blog/web-o-redes-sociales',
+    '/blog/web-para-salir-en-google',
+    '/webs/peluquerias',
+    '/webs/fontaneros',
+    '/webs/restaurantes',
+    '/webs/abogados',
+    '/webs/fisioterapeutas',
+  ];
+
   it('lists the catalog at / when the home page is the catalog', () => {
     const locs = sitemapLocs(origin, null, data);
     expect(locs[0]).toBe(`${origin}/`);
@@ -44,9 +55,10 @@ describe('sitemapLocs', () => {
       staticPaths,
     });
 
-    expect(locs).toContain(`${origin}/blog`);
-    expect(staticPaths).toHaveLength(1 + 3 + SECTORS.length);
-    for (const path of staticPaths) expect(locs).toContain(`${origin}${path}`);
+    expect(staticPaths).toEqual(expectedMarketingPaths);
+    for (const path of expectedMarketingPaths) {
+      expect(locs.filter((loc) => loc === `${origin}${path}`)).toHaveLength(1);
+    }
   });
 
   it('never emits a duplicate URL', () => {

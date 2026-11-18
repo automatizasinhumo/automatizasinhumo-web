@@ -36,4 +36,4 @@ Una primera web puede limitarse a:
 
 Si todavía no tienes claro qué incluir, apunta las preguntas que más recibes por teléfono o mensaje. Las respuestas suelen ser el mejor guion para una página útil.
 
-Puedes revisar las características y el precio actual de [una web de una página](/products/web-una-pagina). Si el contacto principal seguirá ocurriendo por redes, conserva esos perfiles y enlázalos desde la web: no hace falta abandonar un canal que ya te funciona.
+Compara las opciones disponibles y sus condiciones antes de decidir. Si el contacto principal seguirá ocurriendo por redes, conserva esos perfiles y enlázalos desde la web: no hace falta abandonar un canal que ya te funciona.
