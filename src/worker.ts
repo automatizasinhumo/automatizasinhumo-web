@@ -4,6 +4,7 @@ import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting, getStoreSettings } from './features/settings/db';
 import { getEmailProvider } from './features/email';
+import { escapeHtml } from './features/email/layout';
 import { enviarVistasPreviasListas } from './features/solicitudes/envio';
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
@@ -72,7 +73,7 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
       const { asunto, texto } = textoAviso(i);
       const email = await getEmailProvider(s);
       if (!email) throw new Error('sin proveedor de correo');
-      await email.send({ to: para, subject: asunto, text: texto, html: `<pre>${texto.replace(/[<&]/g, (c) => (c === '<' ? '&lt;' : '&amp;'))}</pre>`, idempotencyKey: `incidencia/${i.clave}/${i.detalle}` });
+      await email.send({ to: para, subject: asunto, text: texto, html: `<pre>${escapeHtml(texto)}</pre>`, idempotencyKey: `incidencia/${i.clave}/${i.detalle}` });
     });
   } catch (err) {
     console.error('Scheduled Stripe reconciliation failed:', err instanceof Error ? err.message : 'error');

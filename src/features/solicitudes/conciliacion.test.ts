@@ -192,6 +192,28 @@ describe('conciliación de Stripe', () => {
     expect(a.lista).toHaveLength(1);
   });
 
+  it('un reembolso mayor que llega mientras sale el aviso anterior no queda como avisado', async () => {
+    await db.prepare("INSERT INTO orders (public_id, provider_session_id, provider_payment_id, provider_refunded_cents) VALUES ('o1', 'cs_1', 'pi_carrera', 0)").run();
+    const s = await conEventos(ev('charge.refunded', { payment_intent: 'pi_carrera', amount_refunded: 1000 }));
+    const enviados: string[] = [];
+    let carrera = true;
+    const avisar = async (i: Incidencia) => {
+      enviados.push(i.detalle);
+      if (carrera) {
+        carrera = false;
+        // Otra pasada anota 2500 mientras se envía el aviso de 1000 (lo que hace anotar()).
+        await db
+          .prepare("UPDATE incidencias SET detalle = '2500', reservada_at = NULL, avisada_at = NULL WHERE clave = 'reembolso:pi_carrera'")
+          .run();
+      }
+    };
+    await conciliar(db, 'rk_test', mas(40), avisar, s.pedir);
+    await conciliar(db, 'rk_test', mas(60), avisar, s.pedir);
+    expect(enviados).toEqual(['1000', '2500']);
+    await conciliar(db, 'rk_test', mas(90), avisar, s.pedir);
+    expect(enviados).toHaveLength(2);
+  });
+
   it('pago sin entrega: más de 50 pendientes se van descubriendo en pasadas sucesivas', async () => {
     const hace = sqlFecha(new Date(T0.getTime() - 8 * 24 * 3600 * 1000));
     const k55 = Array.from({ length: 55 }, (_, k) => k);

@@ -137,11 +137,13 @@ async function anotar(db: D1Database, i: Incidencia & { vence: Date }) {
     .run();
 }
 
-async function cerrar(db: D1Database, claveInc: string, ahora: Date) {
-  await db
-    .prepare('UPDATE incidencias SET resuelta_at = ? WHERE clave = ? AND resuelta_at IS NULL AND avisada_at IS NULL')
-    .bind(sqlFecha(ahora), claveInc)
-    .run();
+/** Cierra la incidencia; con `detalle`, solo si sigue siendo esa versión (un reembolso mayor sigue abierto). */
+async function cerrar(db: D1Database, claveInc: string, ahora: Date, detalle?: string) {
+  const sql = 'UPDATE incidencias SET resuelta_at = ? WHERE clave = ? AND resuelta_at IS NULL AND avisada_at IS NULL';
+  await (detalle === undefined
+    ? db.prepare(sql).bind(sqlFecha(ahora), claveInc)
+    : db.prepare(`${sql} AND detalle = ?`).bind(sqlFecha(ahora), claveInc, detalle)
+  ).run();
 }
 
 class ErrorStripe extends Error {
@@ -251,7 +253,10 @@ export async function buscarSinEntrega(db: D1Database, ahora: Date): Promise<num
  * de forma atómica (`reservada_at`) antes de enviar y `avisada_at` solo se pone cuando
  * el correo se acepta. Si el envío falla, la reserva se suelta; si el Worker muere a
  * medias, la reserva vence a los 15 minutos y se reintenta con la misma clave de
- * idempotencia (el proveedor descarta el duplicado si el primero sí salió).
+ * idempotencia. Entrega al menos una vez: un proveedor que respeta la clave descarta el
+ * duplicado; el de Cloudflare la ignora y en ese caso raro el dueño recibe el aviso dos veces.
+ * Reserva, confirmación y cierre van atados a la versión leída (`detalle`): si un reembolso
+ * mayor reabre la fila mientras se envía el aviso anterior, la versión nueva sigue pendiente.
  */
 export async function avisarVencidas(
   db: D1Database,
@@ -269,7 +274,7 @@ export async function avisarVencidas(
     .all<Incidencia>();
   for (const i of results) {
     if (!(await sigueAbierta(db, i))) {
-      await cerrar(db, i.clave, ahora);
+      await cerrar(db, i.clave, ahora, i.detalle);
       res.cerradas.push(i.clave);
       continue;
     }
@@ -277,9 +282,10 @@ export async function avisarVencidas(
     const r = await db
       .prepare(
         `UPDATE incidencias SET reservada_at = ?
-         WHERE clave = ? AND avisada_at IS NULL AND resuelta_at IS NULL AND (reservada_at IS NULL OR reservada_at < ?)`,
+         WHERE clave = ? AND detalle = ? AND avisada_at IS NULL AND resuelta_at IS NULL
+           AND (reservada_at IS NULL OR reservada_at < ?)`,
       )
-      .bind(marca, i.clave, sqlFecha(new Date(ahora.getTime() - RESERVA_MS)))
+      .bind(marca, i.clave, i.detalle, sqlFecha(new Date(ahora.getTime() - RESERVA_MS)))
       .run();
     if ((r.meta?.changes ?? 0) !== 1) continue; // otra pasada ya la tiene
     try {
@@ -289,7 +295,11 @@ export async function avisarVencidas(
       await db.prepare('UPDATE incidencias SET reservada_at = NULL WHERE clave = ? AND reservada_at = ?').bind(i.clave, marca).run();
       continue;
     }
-    await db.prepare('UPDATE incidencias SET avisada_at = ?, reservada_at = NULL WHERE clave = ?').bind(marca, i.clave).run();
+    // Solo la versión enviada y con la reserva propia: si `anotar` la reabrió, queda pendiente.
+    await db
+      .prepare('UPDATE incidencias SET avisada_at = ?, reservada_at = NULL WHERE clave = ? AND detalle = ? AND reservada_at = ?')
+      .bind(marca, i.clave, i.detalle, marca)
+      .run();
     res.avisadas.push(i.clave);
   }
   return res;
