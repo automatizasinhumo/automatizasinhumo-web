@@ -1,0 +1,55 @@
+---
+import StoreSearch from './StoreSearch.astro';
+
+/**
+ * The search field on narrow screens: a magnifier that opens the search form
+ * in place, instead of a link that loads /search first.
+ *
+ * Like the navigation disclosure (StoreNav), it is a native <details>: the
+ * summary carries the button role and the expanded state with NO JavaScript
+ * (the WAI-ARIA disclosure pattern, built in), and the form inside is a plain
+ * GET form, so Enter reaches /search?q= with scripts blocked. The only script
+ * moves focus into the field when the disclosure opens, so typing can start
+ * right after the tap. `data-search-disclosure` is part of that contract.
+ */
+interface Props {
+  action: string;
+  query: string;
+  /** Root classes: where it sits and at which widths it shows. */
+  class?: string;
+  /** Classes of the panel that holds the form. */
+  panelClass?: string;
+}
+
+const {
+  action,
+  query,
+  class: className = 'relative sm:hidden',
+  panelClass = 'absolute right-0 z-40 mt-3 w-[min(20rem,calc(100vw-2rem))] border border-line bg-surface p-3 shadow-lg',
+} = Astro.props;
+---
+
+<details data-search-disclosure class={className}>
+  <summary class="flex cursor-pointer list-none items-center hover:text-brand [&::-webkit-details-marker]:hidden">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="m20 20-4.2-4.2"></path>
+    </svg>
+    <span class="sr-only">Buscar</span>
+  </summary>
+  <div class={panelClass}>
+    <StoreSearch
+      action={action}
+      query={query}
+      inputClass="w-full border-0 border-b border-line bg-transparent px-1 py-1 text-base focus:border-brand focus:outline-none"
+    />
+  </div>
+</details>
+
+<script>
+  for (const d of document.querySelectorAll<HTMLDetailsElement>('[data-search-disclosure]')) {
+    d.addEventListener('toggle', () => {
+      if (d.open) d.querySelector<HTMLInputElement>('input[name="q"]')?.focus();
+    });
+  }
+</script>

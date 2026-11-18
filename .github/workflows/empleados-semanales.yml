@@ -110,6 +110,7 @@ jobs:
           ln -s "$RUNNER_TEMP/pw/node_modules" node_modules
           npx playwright install --with-deps chromium firefox webkit
       - run: node qa/navegadores.mjs "$BASE" qa/urls-navegadores.txt
+      - run: node qa/buscador-movil.mjs "$BASE"
       - uses: actions/upload-artifact@v6
         if: always()
         with:
