@@ -33,12 +33,8 @@ jobs:
       WRANGLER_SEND_METRICS: 'false'
 
     steps:
-      # Harden-Runner (step-security/harden-runner, Apache-2.0) en modo auditoría: registra las
-      # conexiones de red y procesos del trabajo, que maneja el token de Cloudflare.
-      - name: Endurecer el runner
-        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
-        with:
-          egress-policy: audit
+      # Sin Harden-Runner a propósito: en un repo público su informe de red es visible para cualquiera
+      # y registraría el host web-<id> de cada vista previa, que identifica el pedido.
 
       - name: Comprobar credenciales
         id: cred
