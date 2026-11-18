@@ -31,13 +31,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Lighthouse de toda la web (muestreo por plantilla de URL)
         run: |
           # staging tiene robots «Disallow: /» a propósito: se ignora y se usa el sitemap.
-          npx --yes unlighthouse-ci@0.19.1 --site "$BASE" --disable-robots-txt \
+          # Herramientas con versión e integridad fijadas (qa/herramientas); scripts de instalación
+          # solo los de la lista: aquí, la descarga del navegador de puppeteer.
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          npm rebuild --prefix qa/herramientas puppeteer
+          qa/herramientas/node_modules/.bin/unlighthouse-ci --site "$BASE" --disable-robots-txt \
             --sitemaps "$BASE/sitemap.xml" --samples 1 --reporter jsonExpanded \
             --build-static --output-path ul || true
           node -e '
@@ -59,12 +66,18 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Cabeceras de seguridad (Mozilla HTTP Observatory)
         run: |
-          npx --yes -p @mdn/mdn-http-observatory@1.7.2 mdn-http-observatory-scan "$HOST" > obs.json || true
+          # Scripts permitidos: listas HSTS/TLD del observatorio y su almacén de certificados.
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          npm rebuild --prefix qa/herramientas @mdn/mdn-http-observatory node_extra_ca_certs_mozilla_bundle
+          qa/herramientas/node_modules/.bin/mdn-http-observatory-scan "$HOST" > obs.json || true
           node -e '
             const fs=require("fs"); let r; try{r=JSON.parse(fs.readFileSync("obs.json","utf8"))}catch{console.log(fs.readFileSync("obs.json","utf8"));process.exit(0)}
             const s=r.scan||r; const t=Object.values(r.tests||{}).filter(x=>!x.pass);
@@ -134,7 +147,8 @@ jobs:
             i=$((i+1)); curl -s "$u" > "html/$(printf %03d $i).html"; echo "$(printf %03d $i) $u" >> html/urls.txt
           done
           echo "$i páginas"
-          set +e; npx --yes html-validate@11.21.1 -c qa/htmlvalidate.json -f text html/*.html > hv.txt; rc=$?; set -e
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          set +e; qa/herramientas/node_modules/.bin/html-validate -c qa/htmlvalidate.json -f text html/*.html > hv.txt; rc=$?; set -e
           { echo "## html-validate: $i páginas, $(grep -c ' error ' hv.txt) errores"; echo; echo '```'
             sed -E 's#^html/##' hv.txt | head -60; echo '```'; echo; echo '<details><summary>Número → URL</summary>'; echo; sed 's/^/    /' html/urls.txt; echo '</details>'; } | tee -a "$GITHUB_STEP_SUMMARY"
           exit $rc
@@ -151,7 +165,9 @@ jobs:
       - name: axe-core en todas las URL del sitemap
         run: |
           mapfile -t urls < <(curl -s "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+' | cut -c6- | sort -u)
-          set +e; npx --yes pa11y-ci@3.1.0 --config .pa11yci --runner axe "${urls[@]}" > axe.txt 2>&1; set -e
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          npm rebuild --prefix qa/herramientas puppeteer
+          set +e; qa/herramientas/node_modules/.bin/pa11y-ci --config .pa11yci --runner axe "${urls[@]}" > axe.txt 2>&1; set -e
           { echo "## axe-core: ${#urls[@]} páginas"; echo; echo '```'; grep -vE '^\s*$' axe.txt | tail -80; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
 
   knip:
@@ -167,5 +183,6 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: knip
         run: |
-          set +e; npx --yes knip@5 --no-progress --reporter markdown > knip.md 2>&1; set -e
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          set +e; qa/herramientas/node_modules/.bin/knip --no-progress --reporter markdown > knip.md 2>&1; set -e
           { echo "## knip (código muerto)"; echo; head -150 knip.md; } | tee -a "$GITHUB_STEP_SUMMARY"

@@ -44,9 +44,11 @@ jobs:
         run: |
           args=()
           while read -r p; do [ -n "$p" ] && args+=(--collect.url="$BASE$p"); done < qa/urls.txt
-          npx --yes @lhci/cli@0.15.1 collect --config=./lighthouserc.json "${args[@]}"
-          npx --yes @lhci/cli@0.15.1 upload --config=./lighthouserc.json || true
-          npx --yes @lhci/cli@0.15.1 assert --config=./lighthouserc.json
+          # Herramientas con versión e integridad fijadas (qa/herramientas). lhci usa el Chrome del runner.
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          qa/herramientas/node_modules/.bin/lhci collect --config=./lighthouserc.json "${args[@]}"
+          qa/herramientas/node_modules/.bin/lhci upload --config=./lighthouserc.json || true
+          qa/herramientas/node_modules/.bin/lhci assert --config=./lighthouserc.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -68,7 +70,9 @@ jobs:
         run: |
           urls=()
           while read -r p; do [ -n "$p" ] && urls+=("$BASE$p"); done < qa/urls.txt
-          npx --yes pa11y-ci@3.1.0 --config .pa11yci "${urls[@]}"
+          npm ci --prefix qa/herramientas --ignore-scripts --no-audit --no-fund
+          npm rebuild --prefix qa/herramientas puppeteer
+          qa/herramientas/node_modules/.bin/pa11y-ci --config .pa11yci "${urls[@]}"
 
   enlaces:
     runs-on: ubuntu-24.04
