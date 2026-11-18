@@ -77,7 +77,8 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
   // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento si
   // la carga es la misma: misma clave de idempotencia, así el proveedor no duplica un
   // correo que ya aceptó. Si la carga cambió (otro enlace u otra nota), se manda la
-  // actual con un intento nuevo: nunca se marca como enviado un correo que no es este.
+  // actual con un intento nuevo, que también respeta el máximo: nunca se marca como
+  // enviado un correo que no es este ni se pasa del tope de intentos.
   const token = crypto.randomUUID();
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
   const exigir = e.exigirNota === undefined ? '' : `AND ${sigueIgual}`;
@@ -89,7 +90,8 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
          intentos = intentos + CASE WHEN estado_envio = 'enviando' AND asunto = ? AND cuerpo = ? THEN 0 ELSE 1 END
        WHERE solicitud_public_id = ? AND tipo = ? AND version = ?
          AND ((estado_envio IN (${permitidos}) AND intentos < ?)
-           OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')))
+           OR (estado_envio = 'enviando' AND COALESCE(reservado_at, '') < datetime('now', '${RESERVA_CADUCA}')
+               AND ((asunto = ? AND cuerpo = ?) OR intentos < ?)))
          ${exigir}
        RETURNING id, intentos, asunto, cuerpo`,
     )
@@ -102,6 +104,9 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
       e.id,
       e.tipo,
       e.version,
+      e.maxIntentos ?? 1_000_000,
+      e.asunto,
+      e.texto,
       e.maxIntentos ?? 1_000_000,
       ...condicion,
     )

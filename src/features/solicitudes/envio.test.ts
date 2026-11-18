@@ -190,6 +190,20 @@ describe('enviarNotificacion', () => {
     expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviado', intentos: 2 });
   });
 
+  it('una reserva caducada con otro enlace no pasa del máximo de intentos', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'nueva', null);
+    reservada(db, 3, (db.sql.prepare("SELECT datetime('now', '-20 minutes') AS h").get() as { h: string }).h);
+    const mail = correo();
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', maxIntentos: 3 };
+    expect(await enviarNotificacion(db, mail, { ...e, asunto: 'otro', texto: 'nuevo enlace' })).toEqual({ estado: 'ocupado' });
+    expect(mail.send).not.toHaveBeenCalled();
+    expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviando', intentos: 3 });
+    // La misma carga sí se recupera sin sumar intento: es el correo que quizá ya salió.
+    expect(await enviarNotificacion(db, mail, { ...e, asunto: 'a', texto: 't' })).toEqual({ estado: 'enviado' });
+    expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviado', intentos: 3 });
+  });
+
   it('un envío lento cuya reserva reclamó otro no sobrescribe el resultado', async () => {
     const db = d1();
     solicitud(db, 'S-AAAAAA', 'nueva', null);
