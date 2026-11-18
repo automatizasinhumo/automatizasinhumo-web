@@ -33,12 +33,42 @@ def motor():
     return _motor
 
 
+EMAIL = re.compile(r'([\w.+-]+@[\w-]+(?:\.[\w-]+)+)')  # un correo no se traduce (hello@ -> hola@ es otra dirección)
+ES = re.compile(r'\b(y|de|del|para|con|tu|tus|las|los|una|por|sin)\b', re.I)
+EN = re.compile(r'\b(the|and|of|for|with|your|to|an|by|in|on|is|are|we|you|our)\b', re.I)
+# Errores conocidos de Argos en nombres de demo (revisión de la PR #29).
+CORRECCIONES = {
+    'Finance dashboard': 'Panel financiero',
+    'Proof handoff template': 'Plantilla de entrega de pruebas',
+    'Shoes bags store': 'Tienda de zapatos y bolsos',
+    'Construction company': 'Empresa de construcción',
+    'Grocery store': 'Tienda de alimentación',
+    'Recipe blog': 'Blog de recetas',
+}
+
+
+def es_espanol(nucleo):
+    # La marca nunca pasa por Argos (la vuelve «humor»). Lo demás se decide por palabras
+    # frecuentes: una tilde suelta («café») no hace español un párrafo en inglés.
+    if 'Automatiza sin humo' in nucleo:
+        return True
+    es, en = len(ES.findall(nucleo)), len(EN.findall(nucleo))
+    return (en == 0 and (es > 0 or bool(YA_ES.search(nucleo)))) or es > en
+
+
 def traducir(texto):
     nucleo = texto.strip()
-    if not LETRAS.search(nucleo) or YA_ES.search(nucleo) or nucleo.startswith(('http', '{', '<')):
+    if not LETRAS.search(nucleo) or es_espanol(nucleo) or nucleo.startswith(('http', '{', '<')):
         return texto
+    if nucleo in CORRECCIONES:
+        cache[nucleo] = CORRECCIONES[nucleo]
+    if EMAIL.search(nucleo):
+        # Se traduce lo que rodea al correo; el correo queda tal cual.
+        partes = EMAIL.split(nucleo)
+        cache[nucleo] = ''.join(p if i % 2 else traducir(p) for i, p in enumerate(partes))
     if nucleo not in cache:
-        cache[nucleo] = motor().translate(nucleo)
+        # Argos convierte «&» en «&quot;»: se le da «and», que traduce a «y».
+        cache[nucleo] = motor().translate(re.sub(r'\s*&(?:amp;)?\s*', ' and ', nucleo))
     ini = texto[: len(texto) - len(texto.lstrip())]
     fin = texto[len(texto.rstrip()):]
     return ini + cache[nucleo] + fin

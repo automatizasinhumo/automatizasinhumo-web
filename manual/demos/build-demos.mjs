@@ -96,7 +96,7 @@ writeFileSync(join(OUT, 'index.html'), page('Demos y diseños de ejemplo',
 // Las portadas de catálogo de las colecciones son la página promocional del autor
 // («gratis, licencia MIT», enlaces a su repo): se sustituyen por un índice nuestro.
 for (const ruta of CATALOGOS.flatMap((c) => (c.endsWith('/*')
-  ? readdirSync(join(OUT, c.slice(0, -2))).filter((s) => statSync(join(OUT, c.slice(0, -2), s)).isDirectory()).map((s) => `${c.slice(0, -2)}/${s}`)
+  ? (existsSync(join(OUT, c.slice(0, -2))) ? readdirSync(join(OUT, c.slice(0, -2))) : []).filter((s) => statSync(join(OUT, c.slice(0, -2), s)).isDirectory()).map((s) => `${c.slice(0, -2)}/${s}`)
   : [c]))) {
   for (const f of ['index.html', '404.html', 'sitemap.xml', 'robots.txt']) rmSync(join(OUT, ruta, f), { force: true });
 }

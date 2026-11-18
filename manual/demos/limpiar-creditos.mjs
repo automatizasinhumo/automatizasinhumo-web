@@ -13,6 +13,10 @@ const MAX = 220; // un bloque con más texto no es un crédito: solo se quita el
 
 const host = (href) => { try { return new URL(href, 'https://x.invalid/').hostname; } catch { return ''; } };
 
+// El padre se borra entero solo si no tiene controles ni enlaces ajenos a los autores.
+const soloCreditos = ($, p) => p.find('button, form, input').length === 0
+  && p.find('a').toArray().every((x) => HOSTS.test(host($(x).attr('href'))));
+
 export function limpiarCreditos(html, titulo = 'Diseño de ejemplo') {
   if (!/<html|<body|<footer/i.test(html)) return html;
   const $ = cheerio.load(html, { decodeEntities: false });
@@ -20,22 +24,22 @@ export function limpiarCreditos(html, titulo = 'Diseño de ejemplo') {
   // Metadatos que apuntan a la web del autor (canonical, og:url, og:image, twitter:image…).
   $('link[rel="canonical"], link[rel="alternate"], meta[content]').each((_, m) => {
     const v = $(m).attr('href') ?? $(m).attr('content') ?? '';
-    if (/^https?:\/\//i.test(v) && HOSTS.test(host(v))) $(m).remove();
+    if (/^(https?:)?\/\//i.test(v) && HOSTS.test(host(v))) $(m).remove();
   });
   $('a[href]').each((_, a) => {
     if (!HOSTS.test(host($(a).attr('href')))) return;
     // El crédito suele ser el bloque pequeño que contiene el enlace («Plantilla gratuita de X»).
     const p = $(a).parent();
     const t = p.text().trim();
-    if (p.length && !p.is('body, main, section, article, nav, ul, header') && t.length <= MAX && CREDITO.test(t + ' ' + $(a).text())) p.remove();
+    if (p.length && !p.is('body, main, section, article, nav, ul, header, footer') && soloCreditos($, p) && t.length <= MAX && CREDITO.test(t + ' ' + $(a).text())) p.remove();
     else if (CREDITO.test($(a).text()) || /github|gitlab/i.test(host($(a).attr('href')))) $(a).remove();
   });
   // Textos sueltos de crédito sin enlace (p. ej. «Una plantilla gratuita para uicookies.»).
   $('footer p, footer span, footer small, footer div, p.small, small').each((_, el) => {
     const t = $(el).text().trim();
-    if (t.length <= MAX && CREDITO.test(t) && $(el).children('a, button, form, input').length === 0) {
+    if (t.length <= MAX && CREDITO.test(t) && $(el).find('a, button, form, input').length === 0) {
       // Conserva el «© año Negocio» si va en el mismo párrafo.
-      const copy = t.match(/^©[^.—–·|]*?(?=\s*[.—–·|]|\s+(una?|a|plantilla|fotos?|photos?|template))/i);
+      const copy = t.match(/^©[^.—–·|]{0,80}?(?=\s*[.—–·|]|\s+(?:una?|a|plantilla|fotos?|photos?|template))/i);
       if (copy) $(el).text(copy[0].trim()); else $(el).remove();
     }
   });
