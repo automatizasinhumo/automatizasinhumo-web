@@ -14,6 +14,7 @@ Reglas para Copilot:
 - Textos visibles en español de España.
 - Push solo a `origin`, nunca a `upstream`.
 - No tocar `.instances/` ni `manual/CREDENCIALES_STAGING.local`.
+- Encargos baratos: copiar el componente del repo, cambiar textos y colores y conectarlo. Sin capturas (las hace la CI), sin refactor y sin tests nuevos salvo que la tarea los pida. Si un componente exige mucha adaptación, se descarta y se busca otro repo que encaje mejor.
 
 ## Cola
 
