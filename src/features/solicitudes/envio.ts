@@ -62,11 +62,16 @@ export interface Envio {
 const RESERVA_CADUCA = '-15 minutes';
 
 export async function enviarNotificacion(db: D1Database, mail: EmailProvider | null, e: Envio): Promise<ResultadoEnvio> {
+  // Con exigirNota, ni siquiera se crea la fila si la solicitud ya no está como la leyó el cron.
+  const sigueIgual = `EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`;
+  const condicion = e.exigirNota === undefined ? [] : [e.id, e.exigirNota];
   await db
     .prepare(
-      'INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo) VALUES (?, ?, ?, ?, ?) ON CONFLICT (solicitud_public_id, tipo, version) DO NOTHING',
+      `INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo) SELECT ?, ?, ?, ?, ?
+       WHERE ${e.exigirNota === undefined ? '1' : sigueIgual}
+       ON CONFLICT (solicitud_public_id, tipo, version) DO NOTHING`,
     )
-    .bind(e.id, e.tipo, e.version, e.asunto, e.texto)
+    .bind(e.id, e.tipo, e.version, e.asunto, e.texto, ...condicion)
     .run();
   // Reserva atómica: solo una petición pasa la fila a 'enviando'. Una reserva
   // caducada (el Worker murió antes del UPDATE final) se reclama sin sumar intento y
@@ -74,11 +79,7 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
   // así el proveedor no duplica (ni rechaza) un correo que ya aceptó.
   const token = crypto.randomUUID();
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
-  const exigir =
-    e.exigirNota === undefined
-      ? ''
-      : `AND EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = notificaciones.solicitud_public_id
-           AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`;
+  const exigir = e.exigirNota === undefined ? '' : `AND ${sigueIgual}`;
   const reserva = await db
     .prepare(
       `UPDATE notificaciones SET
@@ -100,7 +101,7 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
       e.tipo,
       e.version,
       e.maxIntentos ?? 1_000_000,
-      ...(e.exigirNota === undefined ? [] : [e.exigirNota]),
+      ...condicion,
     )
     .first<{ id: number; intentos: number; asunto: string; cuerpo: string }>();
   if (!reserva) return { estado: 'ocupado' };

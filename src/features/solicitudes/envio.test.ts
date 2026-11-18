@@ -204,6 +204,16 @@ describe('enviarNotificacion', () => {
     expect(notif(db, 'S-AAAAAA')).toMatchObject({ estado_envio: 'enviado', error: null });
   });
 
+  it('con exigirNota no crea la fila si la solicitud ya se movió', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'cambios_pedidos', 'nota');
+    const mail = correo();
+    const e = { id: 'S-AAAAAA', tipo: 'revision' as const, version: 1, email: 'ana@example.es', asunto: 'a', texto: 't', exigirNota: 'nota' };
+    expect(await enviarNotificacion(db, mail, e)).toEqual({ estado: 'ocupado' });
+    expect(notif(db, 'S-AAAAAA')).toBeUndefined();
+    expect(mail.send).not.toHaveBeenCalled();
+  });
+
   it('no reenvía uno enviado salvo con «reenviar»', async () => {
     const db = d1();
     solicitud(db, 'S-AAAAAA', 'nueva', null);
