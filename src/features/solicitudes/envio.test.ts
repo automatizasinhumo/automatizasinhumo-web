@@ -455,6 +455,36 @@ describe('enviarSeguimientos', () => {
     expect(tipos(db, 'S-AAAAAA')).toEqual(['entregado:1:enviado', 'resena:1:error']);
   });
 
+  it('un reenvío fallido de la v2 conserva su envío: la espera de la v1 no sale', async () => {
+    const db = d1();
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada', 'revision', 1, 'https://example.es/v1');
+    enviada(db, 'S-AAAAAA', 'vista_previa_enviada', 'revision', 2, 'https://example.es/v2');
+    db.sql.prepare("UPDATE notificaciones SET enviado_at = '2026-11-10 10:00:00' WHERE version = 1").run();
+    const r = await enviarNotificacion(db, correo(true), {
+      id: 'S-AAAAAA',
+      tipo: 'revision',
+      version: 2,
+      email: 'x@y.es',
+      asunto: 'otro',
+      texto: 'https://example.es/v2b',
+      reenviar: true,
+    });
+    expect(r.estado).toBe('error');
+    const v2 = db.sql.prepare("SELECT estado_envio, cuerpo, error FROM notificaciones WHERE version = 2 AND tipo = 'revision'").get() as {
+      estado_envio: string;
+      cuerpo: string;
+      error: string;
+    };
+    expect(v2.estado_envio).toBe('enviado');
+    expect(v2.cuerpo).toContain('https://example.es/v2');
+    expect(v2.cuerpo).not.toContain('v2b');
+    expect(v2.error).toMatch(/^Reenvío fallido/);
+    const mail = correo();
+    await enviarSeguimientos(db, mail, dias(1), null);
+    expect(mail.send).not.toHaveBeenCalled();
+    expect(estado(db, 'S-AAAAAA')).toBe('vista_previa_enviada');
+  });
+
   it('sin proveedor de correo no hace nada', async () => {
     const db = d1();
     enviada(db, 'S-AAAAAA', 'vista_previa_enviada');

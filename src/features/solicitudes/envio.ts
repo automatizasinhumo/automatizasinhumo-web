@@ -100,6 +100,15 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
   // actual con un intento nuevo, que también respeta el máximo: nunca se marca como
   // enviado un correo que no es este ni se pasa del tope de intentos.
   const token = crypto.randomUUID();
+  // Un reenvío puede fallar sobre un correo que ya se entregó: entonces se conserva la
+  // última entrega aceptada (estado, fecha y contenido) y el fallo solo queda anotado, para
+  // que los seguimientos sigan viendo esa versión como enviada.
+  const previo = e.reenviar
+    ? await db
+        .prepare("SELECT asunto, cuerpo FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio = 'enviado'")
+        .bind(e.id, e.tipo, e.version)
+        .first<{ asunto: string; cuerpo: string }>()
+    : null;
   const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
   const exigir = sigueIgual ? `AND ${sigueIgual}` : '';
   const reserva = await db
@@ -148,13 +157,22 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
     }
   }
   // Solo si la reserva sigue siendo esta: si otra la reclamó, su resultado manda.
-  const fin = await db
-    .prepare(
-      `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END
-       WHERE id = ? AND reserva = ? RETURNING id`,
-    )
-    .bind(error ? 'error' : 'enviado', error, error, reserva.id, token)
-    .first();
+  const fin =
+    error && previo
+      ? await db
+          .prepare(
+            `UPDATE notificaciones SET estado_envio = 'enviado', asunto = ?, cuerpo = ?, error = ?
+             WHERE id = ? AND reserva = ? RETURNING id`,
+          )
+          .bind(previo.asunto, previo.cuerpo, `Reenvío fallido (sigue valiendo el envío anterior): ${error}`.slice(0, 300), reserva.id, token)
+          .first()
+      : await db
+          .prepare(
+            `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END
+             WHERE id = ? AND reserva = ? RETURNING id`,
+          )
+          .bind(error ? 'error' : 'enviado', error, error, reserva.id, token)
+          .first();
   if (!fin) return { estado: 'ocupado' };
   return error ? { estado: 'error', error } : { estado: 'enviado' };
 }
