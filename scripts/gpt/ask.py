@@ -6,6 +6,18 @@ Edge 9241 se abre solo si está cerrado y se cierra al terminar (ChatGPT consume
 import os, re, subprocess, sys, time, urllib.request
 from playwright.sync_api import sync_playwright
 
+
+def a_markdown(bloque, texto):
+    """Guarda la respuesta en Markdown (tablas, enlaces a las fuentes, código) con markdownify (MIT).
+
+    inner_text aplana las tablas en párrafos y pierde las URL de las fuentes. Sin markdownify, el texto plano."""
+    try:
+        from markdownify import markdownify
+        md = markdownify(bloque.inner_html(timeout=5000), heading_style="ATX", bullets="-").strip()
+        return re.sub(r"\n{3,}", "\n\n", md) + "\n" if md else texto
+    except Exception:
+        return texto
+
 PROJECT = "https://chatgpt.com/g/g-p-6afb191fd7e08191a093ea57adc7d51d/project"
 HERE = os.path.dirname(os.path.abspath(__file__))
 LAST = os.path.join(HERE, "last_chat.txt")
@@ -121,6 +133,7 @@ def main():
             if not text:  # no pisar una salida anterior con un fichero vacío
                 print("SIN_RESPUESTA", pg.url)
                 sys.exit(4)
+            text = a_markdown(pg.locator(ASSISTANT).last, text)
             open(out, "w", encoding="utf-8").write(text)
             print("OK", len(text), "chars", pg.url)
         finally:

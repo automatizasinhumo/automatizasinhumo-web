@@ -1,0 +1,16 @@
+Busca en internet (GitHub, documentación de Cloudflare, datos actuales con fuentes) y responde en español de España.
+
+Contexto: repo público https://github.com/davidpd89/automatizasinhumo-web (Astro + Cloudflare Workers Free + D1). La fábrica (manual/fabrica/fabricar.py) publica cada vista previa de cliente como un Worker estático «web-<id>» con `wrangler deploy`. El plan gratuito permite 100 Workers por cuenta, así que esto tiene techo.
+
+Necesito sustituirlo por UN solo Worker que sirva muchas webs estáticas desde R2 (o Workers Static Assets si sirve), resolviendo el sitio por ruta (/p/<id>/...) o por hostname (subdominio o dominio propio del cliente), con caché, tipos MIME correctos, index.html por carpeta y 404.
+
+Regla: no se desarrolla desde cero. Dame 3 repos públicos MIT/Apache/BSD que ya hagan esto y se usen (URL, licencia, estrellas, último commit), y para el mejor:
+1. ficheros exactos que copiar y dónde ponerlos en nuestro repo;
+2. cómo subir cada web a R2 desde GitHub Actions (comando o acción oficial, sin servicios de pago);
+3. la adaptación mínima;
+4. la prueba que demuestra que funciona (dos webs distintas servidas por el mismo Worker, assets, 404, caché);
+5. cómo pasar de un Worker por cliente a este sin romper las vistas previas ya enviadas.
+
+Además: repo o patrón probado para reclamar trabajos de forma atómica en D1 (UPDATE ... WHERE estado='nueva' RETURNING) para que dos ejecuciones no fabriquen la misma solicitud.
+
+Comprueba límites actuales del plan gratuito de R2 y Workers con fuentes. Sé concreto y breve.
