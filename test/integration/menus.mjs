@@ -448,7 +448,10 @@ await check('menu references are reported per target for the delete warning', as
   await addMenuItem(db, { location: 'footer', targetType: 'category', targetId: 1, label: null });
 
   const pageRefs = await menuReferencesFor(db, 'page', [1, 2]);
-  assert.deepEqual([...(pageRefs.get(1) ?? [])].sort(), ['footer', 'header']);
+  assert.deepEqual(
+    [...(pageRefs.get(1) ?? [])].sort((a, b) => a.localeCompare(b, 'es')),
+    ['footer', 'header'],
+  );
   assert.equal(pageRefs.has(2), false, 'unreferenced target is absent');
 
   const catRefs = await menuReferencesFor(db, 'category', [1]);

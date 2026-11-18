@@ -13,13 +13,15 @@
 /* source(none) + explicit src: same reasoning as global.css — without it,
    Tailwind scans test baselines and docs for class names. */
 @import "tailwindcss" source(none);
+@import "./themes/_admin.css";
+@import "./base.css";
+
 @source "../../src";
 
 /* Exclude every theme from THIS compilation's source scan (generated;
    covers all themes, unlike the per-theme files which keep their own). Theme
    templates never render inside Admin, so their utilities would be dead
    weight here — and no theme may restyle Admin by accident. */
-@import "./themes/_admin.css";
 
 /* Admin's own tokens: the upstream light palette, frozen. These match the
    default theme's values today, but they are Admin's, not the default theme's —
@@ -44,8 +46,6 @@
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
 }
-
-@import "./base.css";
 
 /* Entry marker — see the note in global.css. */
 :root {
