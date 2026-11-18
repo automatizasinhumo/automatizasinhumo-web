@@ -115,10 +115,10 @@ Prueba (Playwright a 390 px): la lupa es visible, el campo recibe el foco al pul
 ### C19 · Todo lo que ve el cliente, en español, con un test que lo vigile (simulación boda 18/11) — PENDIENTE
 `/express` está en inglés: «Express checkout», «Buy now», «Checkout», «Qty», «← Back», «Pay with card», «Demo checkout», «Simulated — places a real test order, no charge» y «Please choose a …». Hay más textos en inglés en `ProductPurchaseForm.astro` y en `src/themes/*/ProductDetail.astro`, y conviene revisar también `cart.astro` y `pay/[publicId].astro`.
 1) Traduce todos esos textos al español de España. El método de pago de demostración se llama «Pago de prueba (sin cargo)».
-2) Adopta `franc-min` (MIT, wooorm/franc) en `tests/idioma.test.ts`. El test recorre el HTML generado de las páginas públicas (todas salvo `/admin`), extrae el texto visible y falla si algún bloque de más de 20 caracteres no se detecta como `spa`. La lista de excepciones vive en el propio test y debe ser corta: marcas, nombres propios y código.
+2) Adopta `franc-min` (MIT, wooorm/franc) en `tests/idioma.test.ts`. El test recorre el HTML generado de las páginas públicas (todas salvo `/admin`), extrae el texto visible y falla si algún bloque de más de 20 caracteres no se detecta como `spa`. La lista de excepciones vive en el propio test y debe ser corta: marcas, nombres propios y código. Como `franc` no distingue idiomas en textos cortos, el test también falla si en botones, `label`, `option`, `th`, `title` o `aria-label` aparece alguna palabra de una lista corta de palabras en inglés: `Buy`, `Checkout`, `Qty`, `Back`, `Pay`, `Cart`, `Total`, `Remove`, `Continue`, `Submit`, `Skip to content`.
 Prueba: el test falla en main antes de traducir y pasa después.
 
-### C20 · Demos traducidas de verdad (simulación boda 18/11) — PENDIENTE (después de C19)
+### C20 · Demos traducidas de verdad (simulación boda 18/11) — PENDIENTE (después de C19 y C21)
 Las demos de `automatizasinhumo-demos` tienen calcos y restos en inglés:
 - «Joyfully accepts», «Skip to content»;
 - «Carne de carne - costilla lenta», «Vamos a casar»;
