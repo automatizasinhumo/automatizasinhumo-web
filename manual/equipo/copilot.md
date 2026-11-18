@@ -8,12 +8,13 @@ Funcionamiento:
 2. Copilot crea la rama `copilot/<n>`, hace la tarea, abre una PR y cambia el estado de la tarea a `EN PR #<n>`.
 3. CodeRabbit y la CI revisan la PR. Claude la revisa y la fusiona o la devuelve con comentarios.
 
-Reglas para Copilot:
+Reglas para Copilot (la norma completa está en `.github/copilot-instructions.md`, que Copilot lee solo: **adoptar código público, no desarrollar**):
 - Reutilizar código de repos públicos (MIT/Apache) en vez de escribirlo desde cero, conservando su aviso de copyright y su licencia: cabecera en cada fichero copiado y el texto completo en `licencias/<repo>.txt`.
 - Ficheros con CRLF.
 - Textos visibles en español de España.
 - Push solo a `origin`, nunca a `upstream`.
 - No tocar `.instances/` ni `manual/CREDENCIALES_STAGING.local`.
+- Encargos baratos: copiar el componente del repo, cambiar textos y colores y conectarlo. Sin capturas, sin refactor y sin tests nuevos salvo que la tarea los pida (Claude revisa lo visual en staging). Si un componente exige mucha adaptación, se descarta y se busca otro repo que encaje mejor.
 
 ## Cola
 
