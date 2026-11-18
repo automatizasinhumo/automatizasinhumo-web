@@ -1,0 +1,55 @@
+name: Seguridad
+
+# Empleado «vigilante»: en cada push a main y cada lunes.
+#   - gitleaks (gitleaks/gitleaks, MIT): secretos en el código y en TODO el historial.
+#     Pone el run en rojo. Si es un falso positivo, añadirlo a .gitleaksignore.
+#   - npm audit: vulnerabilidades altas o críticas en dependencias de producción.
+#     Solo avisa en el resumen (Dependabot propone el arreglo).
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seguridad-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secretos:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: gitleaks (binario oficial, sin acción de terceros)
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | tar xz gitleaks
+          ./gitleaks git --redact --no-banner --report-format json --report-path gitleaks.json . && ok=1 || ok=0
+          n=$(node -e 'try{console.log(require("./gitleaks.json").length)}catch{console.log(0)}')
+          echo "## Secretos (gitleaks): $n hallazgos" >> "$GITHUB_STEP_SUMMARY"
+          node -e 'try{for(const f of require("./gitleaks.json"))console.log("- "+f.RuleID+" en "+f.File+":"+f.StartLine+" ("+f.Commit.slice(0,7)+")")}catch{}' >> "$GITHUB_STEP_SUMMARY"
+          [ "$ok" = 1 ]
+
+  dependencias:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: npm audit (solo producción, altas y críticas)
+        run: |
+          npm audit --omit=dev --json > audit.json || true
+          node -e '
+            const r=require("./audit.json"); const v=r.metadata?.vulnerabilities||{};
+            const malas=Object.entries(r.vulnerabilities||{}).filter(([,x])=>["high","critical"].includes(x.severity));
+            const md=["## Dependencias (npm audit): "+(v.critical||0)+" críticas, "+(v.high||0)+" altas, "+(v.moderate||0)+" moderadas","",...malas.map(([n,x])=>"- **"+n+"** ("+x.severity+")"+(x.fixAvailable?" — tiene arreglo":""))].join("\n");
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY,md+"\n"); console.log(md)'
