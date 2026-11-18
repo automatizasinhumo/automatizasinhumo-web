@@ -181,9 +181,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config")
     parser.add_argument("--staging", choices=("arriba", "caido"), required=True)
     args = parser.parse_args(argv)
-    repositorio = os.environ.get("GITHUB_REPOSITORY")
-    if not repositorio:
-        print("::error::Falta GITHUB_REPOSITORY para gestionar los avisos.")
+    repositorio = os.environ.get("GITHUB_REPOSITORY", "")
+    # Solo «dueño/repo»: nada que gh pueda leer como opción.
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+", repositorio):
+        print("::error::GITHUB_REPOSITORY falta o no tiene la forma dueño/repo.")
+        return 1
+    if args.config and not Path(args.config).is_file():
+        print("::error::--config no es un fichero.")
         return 1
 
     errores = []

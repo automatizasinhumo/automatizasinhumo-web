@@ -114,8 +114,8 @@ jobs:
       - name: Comprobar staging
         id: staging
         run: |
-          if curl -fsSL --max-time 30 "$STAGING_URL/" -o /dev/null \
-            && curl -fsSL --max-time 30 "$STAGING_URL/robots.txt" -o /dev/null; then
+          if curl -fsSL --proto =https --proto-redir =https --max-time 30 "$STAGING_URL/" -o /dev/null \
+            && curl -fsSL --proto =https --proto-redir =https --max-time 30 "$STAGING_URL/robots.txt" -o /dev/null; then
             echo "estado=arriba" >> "$GITHUB_OUTPUT"
           else
             echo "estado=caido" >> "$GITHUB_OUTPUT"
