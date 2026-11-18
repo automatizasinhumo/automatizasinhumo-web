@@ -64,3 +64,47 @@ Prueba (Stripe en modo test): aprobación → checkout → webhook pagado → es
 Detalle en el apartado 10.6. Usa como base `MoBio/migrations/0002_draft_publishing.sql` (dimasmong/MoBio, MIT) para `migrations/0043_solicitudes_versiones.sql` (si el número ya existe, el siguiente libre): URL de vista previa, versión aprobada, URL definitiva e historial de despliegues. La entrega solo se activa con el pago confirmado (o con una compra directa ya pagada).
 Prueba: versión 1 aprobada y pagada; después, una versión 2 sin aprobar; la entrega sigue siendo la versión 1.
 
+### C7 · Archivos del cliente con FilePond (ronda 08, adopción 1) — PENDIENTE (después de C3)
+Clona pqina/filepond (MIT). Copia `dist/filepond.min.js` y `dist/filepond.min.css` a `public/vendor/filepond/` con su licencia. Úsalo en el formulario de `src/pages/empezar/[slug].astro` para que el cliente suba fotos, logotipo y documentos. Los archivos van a R2 privado con `src/features/storage/r2.ts`, a través de un endpoint en `src/pages/api/solicitudes/` asociado a la solicitud. Solo imágenes y PDF, hasta 10 MB cada uno.
+Prueba: una solicitud con tres imágenes deja tres objetos en R2; un archivo demasiado grande o de formato no admitido se rechaza; otra solicitud no puede leerlos.
+
+### C8 · Factura PDF automática con pdfme (ronda 08, adopción 2) — PENDIENTE (después de C5)
+Usa el paquete oficial `@pdfme/generator` (pdfme/pdfme, MIT) y copia `playground/public/template-assets/invoice-white/template.json` a `manual/facturas/plantilla.json`, sin los datos de ejemplo. Genera la factura del pedido pagado desde `src/features/orders/recordWebhook.ts` y guárdala en R2 privado. Los pedidos con `payment_method = 'demo'` no generan factura. Si supera la CPU de Workers Free, genérala en un workflow de Actions. La marca «factura pendiente» se escribe en el mismo `batch` de D1 que guarda el pedido pagado y se quita al guardar el PDF; el cron existente del Worker reintenta los pedidos marcados (una sola factura por pedido, clave = id del pedido).
+Prueba: pago confirmado → un PDF; webhook repetido → sin factura duplicada; pago fallido → sin factura; pedido demo → sin factura; fallo al generar → el cron la crea en la siguiente pasada; proceso cortado entre guardar el pedido y generar el PDF → el pedido queda marcado y el cron la crea.
+
+### C9 · Analítica propia con Counterscale (ronda 08, adopción 3) — PENDIENTE
+Despliega benvinegar/counterscale (MIT) como Worker aparte, siguiendo su README. Añade su tracker a `src/layouts/Layout.astro` con eventos de ficha, demo y formulario, sin datos personales.
+Prueba: diez visitas, tres demos y dos formularios simulados aparecen en el panel.
+
+### C10 · Monitor de webs entregadas con Upptime (ronda 08, adopción 7) — PENDIENTE (después de C6)
+Crea con la plantilla upptime/upptime (MIT) un repo público aparte, `automatizasinhumo-estado`. La lista de URL se genera solo con las entregas publicadas, nunca con vistas previas ni datos de clientes.
+Prueba: una URL que funciona y otra que da error; el monitor abre una incidencia solo para la segunda.
+
+### C11 · Datos estructurados por servicio con schema-dts (ronda 08, adopción 10) — PENDIENTE
+Usa el paquete `schema-dts` (google/schema-dts, Apache-2.0) para tipar el JSON-LD de `src/layouts/Layout.astro` y añadir Service, Offer y BreadcrumbList en las fichas, solo con datos reales del catálogo.
+Prueba: `npx astro build` en verde; el JSON-LD de tres fichas pasa el validador de schema.org y no lleva precios inventados.
+
+### C12 · Rastreo SEO en CI con SiteOne Crawler y noindex en páginas de trámite (ronda 10, hallazgos 1-2) — PENDIENTE
+Usa el binario oficial `siteone-crawler-v2.5.1-linux-x64.tar.gz` de las releases de janreges/siteone-crawler (MIT); toma su `.github/workflows/ci.yml` solo como molde para crear `.github/workflows/seo-crawl.yml` (semanal + `workflow_dispatch`, contra staging con `--ignore-robots-txt`, `--ci`, `--ci-max-404=0` y `--ci-junit-file`). Añade `noindex` explícito en `src/pages/search.astro`, `src/pages/empezar/[slug].astro` y `src/pages/empezar/gracias.astro` mediante una prop `noindex` de `src/layouts/Layout.astro`. No toques el `X-Robots-Tag` de `src/pages/empezar/estado.astro`.
+Prueba: `/search?q=peluqueria` y `/empezar/gracias` llevan `noindex`; `/products/web-una-pagina` no; el informe JUnit se sube como artefacto y un 404 interno hace fallar el job.
+
+### C13 · Inspector de JSON-LD en CI con seo-graph (ronda 10, empleado 2) — PENDIENTE (después de C11)
+Usa el escáner de jdevalk/seo-graph (MIT), paquete `@jdevalk/seo-graph-scanner` (`npx --package=@jdevalk/seo-graph-scanner seo-graph-scan`), en un job nuevo de `.github/workflows/seo-crawl.yml` que revise la portada, una categoría y tres fichas del staging. No añade marcado: Service, Offer y BreadcrumbList los pone C11; aquí solo se validan.
+Prueba: un JSON-LD roto a propósito hace fallar el job; ninguna miga apunta a una URL inexistente; los precios de Offer coinciden con D1.
+
+### C14 · Sitemap con lastmod y comprobación de canonical con sitemap.js (ronda 10, hallazgo 4) — PENDIENTE
+Usa el paquete `sitemap` (ekalinin/sitemap.js, MIT). Copia `examples/parse-existing-xml.js` a `qa/seo/sitemap.mjs` y adáptalo para leer `/sitemap.xml` del staging, pedir cada URL y comparar su canonical. Añade `lastmod` en `src/pages/sitemap.xml.ts` con el `updated_at` de las páginas (`src/features/pages/db.ts`), sin cambiar la lectura dinámica desde D1. Workflow `.github/workflows/seo-sitemap.yml`, semanal.
+Prueba: sitemap válido, sin duplicados ni URLs privadas; todas responden 200 y su canonical coincide con la URL; `src/pages/sitemap.xml.test.ts` cubre `lastmod`.
+
+### C15 · IndexNow al desplegar en el dominio definitivo (ronda 10, empleado 4) — PENDIENTE (después de C14 y del dominio de producción)
+Usa la acción publicada `bojieyang/indexnow-action` (MIT), fijada por SHA, en `.github/workflows/seo-indexnow.yml` tras un despliegue de producción correcto. La clave va en un secreto de Actions y su fichero de verificación en `public/`. Solo se envían URLs de `automatizasinhumo.com` cambiadas según `lastmod`.
+Prueba: el fichero de clave responde 200 en producción; staging nunca se envía; una URL cambiada recibe respuesta aceptada.
+
+### C16 · Informe semanal de Search Console (ronda 10, empleado 5) — PENDIENTE (después de verificar el dominio en Search Console)
+Copia `samples/searchconsole/search_analytics_api_sample.py` de googleapis/google-api-python-client (Apache-2.0) a `scripts/seo/search-console.py`, con cuenta de servicio de solo lectura en un secreto de Actions. Workflow `.github/workflows/seo-search-console.yml`, semanal. El repo es público y cualquiera puede descargar sus artefactos: no sube el CSV, solo publica en el resumen del job las cifras agregadas (consultas, páginas, clics, impresiones, CTR, posición, móvil) y resume en el job las consultas comerciales («precio», «cuánto cuesta», «web peluquería»…) con muchas impresiones y pocos clics.
+Prueba: sin permisos falla con un mensaje claro y sin cifras inventadas; ninguna credencial aparece en el log.
+
+## Huecos de arquitectura (los resuelve Claude, no Copilot)
+
+- **Límite de 100 Workers:** cada vista previa crea un Worker `web-<id>`. Antes de llegar al límite hay que servir todas las vistas previas desde un único Worker con R2, por ruta o por hostname. Se buscará un repo que lo haga (ronda 09).
+- **Reclamación atómica en D1:** la fábrica marca la solicitud después de fabricarla. Mientras convivan la tarea de Windows y Actions, una solicitud puede fabricarse dos veces. Al activar Actions se desactiva la tarea de Windows.
