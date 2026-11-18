@@ -46,6 +46,14 @@ def primero(campos, *claves):
     return ''
 
 
+def ciudad_de(campos):
+    # Primero ciudad/zona; de una dirección completa solo el último tramo ("C/ Mayor 3, 36201 Vigo" -> "Vigo").
+    valor = primero(campos, 'ciudad', 'zona') or primero(campos, 'dirección', 'ubicación')
+    linea = valor.splitlines()[0] if valor else ''
+    tramo = re.sub(r'\d{5}', '', linea.split(',')[-1]).strip(' .()')
+    return tramo[:40] or 'España'
+
+
 def pedido_de(fila, plantilla):
     campos = json.loads(fila.get('campos') or '{}')
     negocio = primero(campos, 'nombre del', 'nombre de la', 'nombre y', 'datos de la empresa') or fila['nombre']
@@ -55,7 +63,7 @@ def pedido_de(fila, plantilla):
         'plantilla': plantilla,
         'negocio': negocio.split('\n')[0][:60],
         'actividad': primero(campos, 'sector', 'profesión', 'temática') or fila.get('producto') or 'Negocio local',
-        'ciudad': primero(campos, 'zona', 'dirección', 'ciudad') or 'España',
+        'ciudad': ciudad_de(campos),
         'telefono': primero(campos, 'teléfono') or fila.get('telefono') or '',
         'email': primero(campos, 'correo') if '@' in primero(campos, 'correo') else fila['email'],
         'whatsapp': re.sub(r'[^\d+]', '', primero(campos, 'whatsapp') or fila.get('telefono') or ''),

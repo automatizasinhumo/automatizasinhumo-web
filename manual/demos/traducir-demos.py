@@ -47,6 +47,8 @@ def traducir(texto):
 def pagina(ruta):
     html = ruta.read_text(encoding='utf-8', errors='replace')
     sopa = BeautifulSoup(html, 'html.parser')
+    for barra in sopa.select('#template-bar'):  # barra promocional de la plantilla original
+        barra.decompose()
     for nodo in list(sopa.find_all(string=True)):
         if isinstance(nodo, (Comment, Doctype, Declaration, CData, ProcessingInstruction)) or not isinstance(nodo, NavigableString):
             continue
