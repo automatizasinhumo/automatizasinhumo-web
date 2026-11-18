@@ -14,7 +14,7 @@ correo y teléfono, y despliega un Worker estático «web-<id>» con wrangler.
 Credencial: la sesión local de wrangler (wrangler login). En Actions: CLOUDFLARE_API_TOKEN y
 CLOUDFLARE_ACCOUNT_ID.
 """
-import html as H, json, os, re, shutil, subprocess, sys, urllib.request
+import html as H, json, os, re, shutil, subprocess, sys, tempfile, urllib.parse, urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup, NavigableString, Comment
 
@@ -71,17 +71,39 @@ def reescribir(textos, p, cred):
     return salida
 
 
+def bajar_plantilla(plantilla):
+    """Sin la carpeta local de demos (p. ej. en Actions), baja la plantilla del Worker de demos.
+
+    Se baja a una carpeta temporal y solo se copia si trae su index.html; si no, error sin datos del cliente.
+    """
+    url = f"{DEMOS_URL}/{urllib.parse.quote(plantilla)}/"
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            subprocess.run(['wget', '-q', '-r', '-np', '-nH', '-p', '-e', 'robots=off', '-P', tmp, '--', url],
+                           timeout=600, check=False)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            raise RuntimeError(f'no se pudo bajar la plantilla ({type(e).__name__})') from None
+        bajada = Path(tmp, plantilla)
+        if not (bajada / 'index.html').is_file():
+            raise RuntimeError('la plantilla bajada no trae index.html')
+        destino = DEMOS / 'site' / plantilla
+        if destino.exists():
+            shutil.rmtree(destino)
+        shutil.copytree(bajada, destino)
+
+
 def fabricar(ruta_pedido, desplegar=True):
     p = json.loads(Path(ruta_pedido).read_text(encoding='utf-8'))
     base = DEMOS / 'clientes' / p['id']
     site = base / 'site'
     if site.exists():
         shutil.rmtree(site)
-    if not (DEMOS / 'site' / p['plantilla'] / 'index.html').exists():
-        # Sin la carpeta local de demos (p. ej. en Actions), la plantilla se baja del Worker de demos.
-        subprocess.run(['wget', '-q', '-r', '-np', '-nH', '-p', '-e', 'robots=off', '-P', str(DEMOS / 'site'),
-                        f"{DEMOS_URL}/{p['plantilla']}/"], timeout=600, check=False)
-    shutil.copytree(DEMOS / 'site' / p['plantilla'], site)
+    plantilla = p['plantilla']
+    if not re.fullmatch(r'[a-z0-9-]+(/[a-z0-9-]+)*', plantilla):
+        raise ValueError('ruta de plantilla no válida')
+    if not (DEMOS / 'site' / plantilla / 'index.html').exists():
+        bajar_plantilla(plantilla)
+    shutil.copytree(DEMOS / 'site' / plantilla, site)
     idx = site / 'index.html'
     sopa = BeautifulSoup(idx.read_text(encoding='utf-8'), 'html.parser')
 
@@ -99,7 +121,8 @@ def fabricar(ruta_pedido, desplegar=True):
     nodos = [n for n in sopa.body.find_all(string=True) if isinstance(n, NavigableString)
              and not any(x.name in OMITIR_TAGS for x in n.parents if x.name) and re.search(r'[A-Za-zÁÉÍÓÚáéíóúñÑ]{2,}', n)]
     textos = list(dict.fromkeys(n.strip() for n in nodos))
-    print(f"{p['id']}: {len(textos)} textos a adaptar" + ('' if PUBLICO else f" (marca de la plantilla: {marca or '?'})"))
+    print(f"  {len(textos)} textos a adaptar" if PUBLICO else
+          f"{p['id']}: {len(textos)} textos a adaptar (marca de la plantilla: {marca or '?'})")
     nuevos = reescribir(textos, p, credenciales())
     for n in nodos:
         t = nuevos.get(n.strip())

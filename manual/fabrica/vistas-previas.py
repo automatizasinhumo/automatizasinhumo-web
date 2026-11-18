@@ -21,6 +21,7 @@ PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))  # registros públicos: sin dat
 CONFIG = args[args.index('--config') + 1] if '--config' in args else '.instances/automatizasinhumo-staging.wrangler.jsonc'
 MAXIMO = int(args[args.index('--max') + 1]) if '--max' in args else 5
 SECO = '--dry' in args
+EN_CURSO = 'Vista previa automática: fabricando'
 
 
 def d1(sql):
@@ -128,31 +129,49 @@ def pedido_de(fila, plantilla):
     }
 
 
+def procesar(public_id, p):
+    """Reclama la solicitud (nueva -> en_preparacion) y solo entonces la fabrica: dos procesos a la vez
+    (la tarea del PC y Actions) no fabrican la misma. Un fallo no tumba el lote: la deja para revisar a mano."""
+    donde = f"public_id = {sql_txt(public_id)}"
+    if not d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(EN_CURSO)}, updated_at = datetime('now') "
+              f"WHERE {donde} AND estado = 'nueva' RETURNING public_id"):
+        print('  ya la ha reclamado otro proceso')
+        return
+    try:
+        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as t:
+            json.dump(p, t, ensure_ascii=False)
+        url = fabricar(t.name)
+        if not url:
+            raise RuntimeError('despliegue sin URL')
+        problemas = qa(url, p)
+        print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))
+        # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
+        nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
+                f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')
+    except Exception as e:  # noqa: BLE001 — una solicitud fallida no para las demás
+        print('  fallo:', type(e).__name__ if PUBLICO else f'{type(e).__name__}: {e}')
+        nota = f'Vista previa automática: falló ({type(e).__name__}, revisar a mano)'
+    d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
+       f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(EN_CURSO)}")
+
+
 def main():
     mapa = disenos()
     filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje FROM solicitudes "
                "WHERE estado = 'nueva' ORDER BY created_at LIMIT 50")
     hechas = 0
-    for f in filas:
+    for n, f in enumerate(filas, 1):
         plantillas = mapa.get(f['slug'])
         if not plantillas:
             continue
         p = pedido_de(f, plantillas[0])
-        print(f"{f['public_id']} ({f['slug']}) -> {p['plantilla']}" + ('' if PUBLICO else f" · {p['negocio']}"))
-        if SECO and not PUBLICO:
-            print(json.dumps(p, ensure_ascii=False, indent=1))
+        # En Actions el registro es público: ni el id (da la URL web-<id>) ni el negocio.
+        print(f"solicitud {n} ({f['slug']}) -> {p['plantilla']}" if PUBLICO else
+              f"{f['public_id']} ({f['slug']}) -> {p['plantilla']} · {p['negocio']}")
+        if SECO:
+            print('  simulación: no se fabrica' if PUBLICO else json.dumps(p, ensure_ascii=False, indent=1))
         else:
-            with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as t:
-                json.dump(p, t, ensure_ascii=False)
-            url = fabricar(t.name)
-            if url:
-                problemas = qa(url, p)
-                print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))
-                # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
-                nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
-                        f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')
-                d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(nota)}, updated_at = datetime('now') "
-                   f"WHERE public_id = {sql_txt(f['public_id'])} AND estado = 'nueva'")
+            procesar(f['public_id'], p)
         hechas += 1
         if hechas >= MAXIMO:
             break
