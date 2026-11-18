@@ -70,7 +70,7 @@ export function discoverThemeIds(root = process.cwd()) {
       ].join('\n'),
     );
   }
-  return ids.sort();
+  return ids.sort((a, b) => a.localeCompare(b, 'es'));
 }
 
 export function themePath(id, root = process.cwd()) {

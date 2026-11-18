@@ -3,14 +3,15 @@
 // Coge los siguientes servicios activos del catálogo que no estén en
 // manual/auditorias-gpt/auditados.txt, escribe manual/auditorias-gpt/ronda-NN-pregunta.txt
 // y los apunta como auditados. Después: python -I -X utf8 scripts/gpt/ask.py <pregunta> <respuesta>
-import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { productos, categorias } from '../../manual/catalogo/catalogo.mjs';
 import { descripcion } from '../../manual/catalogo/descripcion.mjs';
 
 const [n, aplicado = '', cuantos = '10'] = process.argv.slice(2);
 if (!n) { console.error('uso: node scripts/gpt/ronda.mjs <n> "<aplicado>" [cuantos]'); process.exit(2); }
 const DIR = 'manual/auditorias-gpt';
-const hechos = new Set(readFileSync(`${DIR}/auditados.txt`, 'utf8').split(/\r?\n/).filter((l) => l && !l.startsWith('#')).map((l) => l.split(' ')[0]));
+mkdirSync(DIR, { recursive: true }); // carpeta solo local (ignorada): en un clon nuevo no existe
+const hechos = new Set((existsSync(`${DIR}/auditados.txt`) ? readFileSync(`${DIR}/auditados.txt`, 'utf8') : '').split(/\r?\n/).filter((l) => l && !l.startsWith('#')).map((l) => l.split(' ')[0]));
 const lote = productos.filter((p) => p.activo !== false && !hechos.has(p.slug)).slice(0, +cuantos);
 if (!lote.length) { console.log('No quedan servicios sin auditar.'); process.exit(0); }
 const cat = (s) => categorias.find((c) => c.slug === s)?.nombre ?? s;
@@ -40,6 +41,9 @@ const txt = [
   '=== Parte común de todas las fichas ===', comun.slice(iniComun).join('\n').trim(), '',
 ].filter((x) => x !== false && x !== '' || x === '').join('\n');
 
-writeFileSync(`${DIR}/ronda-${nn}-pregunta.txt`, txt.replace(/\r?\n/g, '\r\n'));
+const destino = `${DIR}/ronda-${nn}-pregunta.txt`;
+// No se pisa una pregunta ya generada (p. ej. si falta auditados.txt en un clon nuevo).
+if (existsSync(destino)) { console.error(`${destino} ya existe: bórrala a mano si quieres regenerarla.`); process.exit(1); }
+writeFileSync(destino, txt.replace(/\r?\n/g, '\r\n'));
 appendFileSync(`${DIR}/auditados.txt`, lote.map((p) => `${p.slug} ${n}\r\n`).join(''));
 console.log(`${DIR}/ronda-${nn}-pregunta.txt: ${lote.length} servicios (${lote.map((p) => p.slug).join(', ')}), ${txt.length} caracteres`);

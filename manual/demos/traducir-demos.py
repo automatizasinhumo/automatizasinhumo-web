@@ -18,7 +18,7 @@ OMITIR_RUTAS = ('editor-bloques/resources/', 'editor-bloques/libs/', 'node_modul
 OMITIR_TAGS = {'script', 'style', 'code', 'pre', 'svg', 'math', 'template', 'textarea'}
 ATRIBUTOS = ('alt', 'title', 'placeholder', 'aria-label')
 LETRAS = re.compile(r'[A-Za-z]{2,}')
-YA_ES = re.compile(r'[áéíóúñ¿¡ÁÉÍÓÚÑ]')  # traducido a mano (traducciones.mjs) o propio
+YA_ES = re.compile(r'[áéíóúñ¿¡ÁÉÍÓÚÑ]|Automatiza sin humo')  # traducido a mano, propio o con la marca (Argos la vuelve «humor»)
 
 cache = json.loads(CACHE.read_text(encoding='utf-8')) if CACHE.exists() else {}
 _motor = None
@@ -33,12 +33,42 @@ def motor():
     return _motor
 
 
+EMAIL = re.compile(r'([^\s@]+@[^\s@]+)')  # un correo no se traduce (hello@ -> hola@ es otra dirección)
+ES = re.compile(r'\b(y|de|del|para|con|tu|tus|las|los|una|por|sin)\b', re.I)
+EN = re.compile(r'\b(the|and|of|for|with|your|to|an|by|in|on|is|are|we|you|our)\b', re.I)
+# Errores conocidos de Argos en nombres de demo (revisión de la PR #29).
+CORRECCIONES = {
+    'Finance dashboard': 'Panel financiero',
+    'Proof handoff template': 'Plantilla de entrega de pruebas',
+    'Shoes bags store': 'Tienda de zapatos y bolsos',
+    'Construction company': 'Empresa de construcción',
+    'Grocery store': 'Tienda de alimentación',
+    'Recipe blog': 'Blog de recetas',
+}
+
+
+def es_espanol(nucleo):
+    # La marca nunca pasa por Argos (la vuelve «humor»). Lo demás se decide por palabras
+    # frecuentes: una tilde suelta («café») no hace español un párrafo en inglés.
+    if 'Automatiza sin humo' in nucleo:
+        return True
+    es, en = len(ES.findall(nucleo)), len(EN.findall(nucleo))
+    return (en == 0 and (es > 0 or bool(YA_ES.search(nucleo)))) or es > en
+
+
 def traducir(texto):
     nucleo = texto.strip()
-    if not LETRAS.search(nucleo) or YA_ES.search(nucleo) or nucleo.startswith(('http', '{', '<')):
+    if not LETRAS.search(nucleo) or es_espanol(nucleo) or nucleo.startswith(('http', '{', '<')):
         return texto
+    if nucleo in CORRECCIONES:
+        cache[nucleo] = CORRECCIONES[nucleo]
+    if EMAIL.search(nucleo):
+        # Se traduce lo que rodea al correo; el correo queda tal cual.
+        partes = EMAIL.split(nucleo)
+        cache[nucleo] = ''.join(p if i % 2 else traducir(p) for i, p in enumerate(partes))
     if nucleo not in cache:
-        cache[nucleo] = motor().translate(nucleo)
+        # Argos convierte «&» en «&quot;»: se le da «and», que traduce a «y».
+        cache[nucleo] = motor().translate(' '.join(re.sub(r'&(?:amp;)?', ' and ', nucleo).split()))
     ini = texto[: len(texto) - len(texto.lstrip())]
     fin = texto[len(texto.rstrip()):]
     return ini + cache[nucleo] + fin

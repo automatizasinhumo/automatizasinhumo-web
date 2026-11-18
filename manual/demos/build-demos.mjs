@@ -4,9 +4,10 @@
 // Cada página lleva un aviso fijo en español: qué es (demo interactiva o diseño de
 // ejemplo), de quién es, y enlace de vuelta a la tienda.
 import { cpSync, mkdirSync, rmSync, readdirSync, statSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, extname } from 'node:path';
-import { DEMOS, INTERACTIVAS } from './demos.mjs';
+import { join, extname, basename, dirname } from 'node:path';
+import { DEMOS, INTERACTIVAS, CATALOGOS, TITULOS } from './demos.mjs';
 import { TRADUCCIONES, traducir } from './traducciones.mjs';
+import { limpiarCreditos } from './limpiar-creditos.mjs';
 
 const SRC = 'C:/GIT/automatizasinhumo-productos';
 const OUT = 'C:/GIT/automatizasinhumo-demos/site/';
@@ -26,6 +27,11 @@ const aviso = (interactiva, producto) => `<div id="ash-aviso" role="note" style=
 const conAviso = (html, interactiva, producto) => (html.includes('id="ash-aviso"') ? html
   : /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${aviso(interactiva, producto)}</body>`) : html + aviso(interactiva, producto));
 
+// Título de cada página limpia: el nombre en español de su carpeta (TITULOS) o el de la demo.
+// En las colecciones, el título de la colección no describe la plantilla: «Diseño de ejemplo».
+const COLECCION = new Set(CATALOGOS.map((c) => c.split('/')[0]));
+const tituloDe = (f, opts) => TITULOS[basename(dirname(f))] ?? (COLECCION.has(opts.slug) ? 'Diseño de ejemplo' : opts.titulo);
+
 let files = 0, bytes = 0;
 // opts: interactiva (tipo de aviso), aviso (false = no inyectar), soloRaiz (aviso solo en el primer nivel), skip (nombres a omitir)
 function copy(from, to, opts = {}) {
@@ -41,11 +47,13 @@ function copy(from, to, opts = {}) {
       const [es, usados] = traducir(opts.slug, readFileSync(f, 'utf8'));
       usados.forEach((i) => opts.usados.add(i));
       if (ext === '.js') { writeFileSync(t, es); files++; bytes += st.size; continue; }
-      writeFileSync(t, opts.aviso === false ? stripAnalytics(es) : conAviso(stripAnalytics(es), opts.interactiva, opts.producto));
+      const limpio = opts.creditos === false ? es : limpiarCreditos(es, tituloDe(f, opts));
+      writeFileSync(t, opts.aviso === false ? stripAnalytics(limpio) : conAviso(stripAnalytics(limpio), opts.interactiva, opts.producto));
       files++; bytes += st.size; continue;
     }
     if (ext === '.html') {
-      const html = stripAnalytics(readFileSync(f, 'utf8'));
+      const leido = readFileSync(f, 'utf8');
+      const html = stripAnalytics(opts.creditos === false ? leido : limpiarCreditos(leido, tituloDe(f, opts)));
       writeFileSync(t, opts.aviso === false ? html : conAviso(html, opts.interactiva, opts.producto));
     } else cpSync(f, t);
     files++; bytes += st.size;
@@ -54,12 +62,12 @@ function copy(from, to, opts = {}) {
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-for (const [slug, dir, , producto] of DEMOS) {
+for (const [slug, dir, titulo, producto] of DEMOS) {
   if (!existsSync(join(SRC, dir))) { console.error('falta', dir); continue; }
   // En el editor, las páginas de demo/ se editan dentro de un iframe: sin aviso.
   const editor = slug === 'editor-bloques';
   const usados = new Set();
-  copy(join(SRC, dir), join(OUT, slug), { slug, producto, usados, interactiva: INTERACTIVAS.has(slug), soloRaiz: editor, skip: editor ? new Set(['landing']) : undefined });
+  copy(join(SRC, dir), join(OUT, slug), { slug, producto, usados, interactiva: INTERACTIVAS.has(slug), soloRaiz: editor, skip: editor ? new Set(['landing']) : undefined, titulo, creditos: !editor });
   // Textos que la plantilla ya no trae: avisar para revisar la traducción.
   (TRADUCCIONES[slug] ?? []).forEach(([de], i) => { if (!usados.has(i)) console.warn(`traducción sin uso en ${slug}:`, String(de).slice(0, 60)); });
   // Ficheros ya en español (p. ej. la carta en euros) sustituyen a los originales.
@@ -85,14 +93,29 @@ writeFileSync(join(OUT, 'index.html'), page('Demos y diseños de ejemplo',
     : card(`/${slug}/`, title, 'Diseño de ejemplo', 'Ver diseño →'))).join(''),
   `<a href="${TIENDA}/">← Volver a la tienda</a>`));
 
+// Las portadas de catálogo de las colecciones son la página promocional del autor
+// («gratis, licencia MIT», enlaces a su repo): se sustituyen por un índice nuestro.
+for (const ruta of CATALOGOS.flatMap((c) => (c.endsWith('/*')
+  ? (existsSync(join(OUT, c.slice(0, -2))) ? readdirSync(join(OUT, c.slice(0, -2))) : []).filter((s) => statSync(join(OUT, c.slice(0, -2), s)).isDirectory()).map((s) => `${c.slice(0, -2)}/${s}`)
+  : [c]))) {
+  for (const f of ['index.html', '404.html', 'sitemap.xml', 'robots.txt']) rmSync(join(OUT, ruta, f), { force: true });
+}
+const nombre = (s) => (TITULOS[s] ?? s.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase()));
+function indices(base, title, atras) {
+  if (!existsSync(base)) return 0;
+  const subs = readdirSync(base).filter((s) => !s.startsWith('_') && statSync(join(base, s)).isDirectory());
+  for (const s of subs) if (!existsSync(join(base, s, 'index.html'))) indices(join(base, s), nombre(s), '<a href="../">← Volver</a>');
+  if (existsSync(join(base, 'index.html')) || existsSync(join(base, 'editor.html'))) return 0;
+  const con = subs.filter((s) => existsSync(join(base, s, 'index.html')));
+  if (!con.length) return 0;
+  writeFileSync(join(base, 'index.html'), page(title, `${con.length} diseños de ejemplo. Elige uno y lo adaptamos con tus textos, fotos y colores.`,
+    con.map((s) => card(`./${s}/`, nombre(s), 'Diseño de ejemplo, listo para adaptar', 'Ver diseño →')).join(''), atras));
+  return con.length;
+}
+
 // Colecciones sin índice propio: listamos sus subcarpetas con index.html.
 for (const [slug, , title] of DEMOS) {
-  const base = join(OUT, slug);
-  if (!existsSync(base) || existsSync(join(base, 'index.html')) || existsSync(join(base, 'editor.html'))) continue;
-  const subs = readdirSync(base).filter((s) => !s.startsWith('_') && existsSync(join(base, s, 'index.html')));
-  writeFileSync(join(base, 'index.html'), page(title, `${subs.length} diseños de ejemplo. Elige uno y lo adaptamos con tus textos, fotos y colores.`,
-    subs.map((s) => card(`./${s}/`, s.replace(/[-_]/g, ' ').replace(/^\w/, (c) => c.toUpperCase()), 'Diseño de ejemplo, listo para adaptar', 'Ver diseño →')).join(''),
-    '<a href="/">← Todas las demos</a>'));
+  indices(join(OUT, slug), title, '<a href="/">← Todas las demos</a>');
 }
 
 // Demo de testimonios con ejemplos en español.

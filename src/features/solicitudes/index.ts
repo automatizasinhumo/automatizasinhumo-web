@@ -78,7 +78,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const SLUG_RE = /^[a-z0-9-]{1,80}$/;
 
 function texto(form: FormData, k: string, max: number): string {
-  return String(form.get(k) ?? '').replace(/\u0000/g, '').trim().slice(0, max);
+  return String(form.get(k) ?? '').replaceAll(String.fromCharCode(0), '').trim().slice(0, max);
 }
 function opcional(form: FormData, k: string, max: number): string | null {
   return texto(form, k, max) || null;

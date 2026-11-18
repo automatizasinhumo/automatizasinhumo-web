@@ -23,6 +23,15 @@ const ENGLISH_CONTENT_WORDS =
 const LANGUAGE_BLOCKS = /<(p|ul|ol|details|blockquote|td|th|h1)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
 const SHORT_TEXT_ELEMENTS =
   /<(a|button|label|option|th|title|h[1-6]|p|summary)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+// franc confunde el español breve (fechas, firmas) con francés o italiano, y algo de inglés con francés.
+// Si no dice «spa», decide el recuento de palabras vacías: falla cuando hay tantas inglesas como españolas.
+const SPANISH_STOPWORDS = /\b(?:y|de|del|la|el|en|para|con|tu|tus|las|los|una?|por|sin|que|se)\b/gi;
+const ENGLISH_STOPWORDS = /\b(?:the|and|of|for|with|your|to|an?|by|in|on|is|are|we|you|our|it|this)\b/gi;
+function looksEnglish(text: string): boolean {
+  const spanish = text.match(SPANISH_STOPWORDS)?.length ?? 0;
+  const english = text.match(ENGLISH_STOPWORDS)?.length ?? 0;
+  return english > 0 && english >= spanish;
+}
 const ENTITY_MAP: Record<string, string> = {
   amp: '&',
   apos: "'",
@@ -98,7 +107,7 @@ function languageIssues(html: string, path: string): string[] {
     if (Array.from(languageText).length <= 20) continue;
     if (LANGUAGE_EXCEPTIONS.some((exception) => exception.test(languageText))) continue;
     const language = franc(languageText);
-    if (language !== 'spa') issues.push(`${path} [${language}]: ${block}`);
+    if (language !== 'spa' && looksEnglish(languageText)) issues.push(`${path} [${language}]: ${block}`);
   }
 
   const visibleHtml = html.replace(

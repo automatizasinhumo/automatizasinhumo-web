@@ -22,7 +22,9 @@ export interface ParsedKey {
 
 /** Canonical extras list: valid xtra_ IDs only, de-duped, sorted lexicographically. */
 const canonicalExtras = (xs: string[]): string[] =>
-  [...new Set(xs.map((x) => parsePublicId(x, 'extra')).filter((x): x is string => x !== null))].sort();
+  [...new Set(xs.map((x) => parsePublicId(x, 'extra')).filter((x): x is string => x !== null))].sort(
+    (a, b) => a.localeCompare(b, 'es'),
+  );
 
 /** Build the canonical cart key for a product + optional variant + extras. */
 export function cartKey(

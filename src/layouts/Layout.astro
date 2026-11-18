@@ -1,4 +1,5 @@
 ---
+import { CONTACT_EMAIL } from '../contacto';
 import { env } from 'cloudflare:workers';
 import { getConfig } from '../config';
 import { publicOrigin } from '../features/http/origin';
@@ -82,7 +83,7 @@ const orgLd = JSON.stringify({
   name: storeName,
   url: origin + '/',
   logo: new URL('/apple-touch-icon.png', origin).href,
-  email: 'hola@automatizasinhumo.com',
+  email: CONTACT_EMAIL,
   areaServed: 'ES',
   inLanguage: 'es',
   description: 'Webs, automatizaciones y servicios digitales a precio cerrado.',

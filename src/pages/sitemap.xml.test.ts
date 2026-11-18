@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sitemapLocs } from './sitemap.xml';
+import { marketingStaticPaths, sitemapLocs } from './sitemap.xml';
 
 const origin = 'https://shop.example';
 const data = {
@@ -9,6 +9,18 @@ const data = {
 };
 
 describe('sitemapLocs', () => {
+  const expectedMarketingPaths = [
+    '/blog',
+    '/blog/cuanto-cuesta-una-web-local',
+    '/blog/web-o-redes-sociales',
+    '/blog/web-para-salir-en-google',
+    '/webs/peluquerias',
+    '/webs/fontaneros',
+    '/webs/restaurantes',
+    '/webs/abogados',
+    '/webs/fisioterapeutas',
+  ];
+
   it('lists the catalog at / when the home page is the catalog', () => {
     const locs = sitemapLocs(origin, null, data);
     expect(locs[0]).toBe(`${origin}/`);
@@ -30,6 +42,23 @@ describe('sitemapLocs', () => {
     expect(locs).toContain(`${origin}/products/beanie`);
     expect(locs).toContain(`${origin}/pages/about`);
     expect(locs).toHaveLength(4);
+  });
+
+  it('includes the blog, its articles, and sector landing pages', () => {
+    const staticPaths = marketingStaticPaths([
+      { id: 'cuanto-cuesta-una-web-local' },
+      { id: 'web-o-redes-sociales' },
+      { id: 'web-para-salir-en-google' },
+    ]);
+    const locs = sitemapLocs(origin, null, {
+      ...data,
+      staticPaths,
+    });
+
+    expect(staticPaths).toEqual(expectedMarketingPaths);
+    for (const path of expectedMarketingPaths) {
+      expect(locs.filter((loc) => loc === `${origin}${path}`)).toHaveLength(1);
+    }
   });
 
   it('never emits a duplicate URL', () => {
