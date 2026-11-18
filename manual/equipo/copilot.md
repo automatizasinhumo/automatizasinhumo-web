@@ -43,7 +43,7 @@ Hoy el envío de correos a clientes vive dentro de src/pages/admin/solicitudes.a
 3. Tests con vitest junto a los existentes (correos.test.ts como modelo): no envía dos veces el mismo correo; no envía sin «QA ok»; las fechas de 3 y 7 días se cumplen.
 Prueba: `npx vitest run src/features/solicitudes` en verde y `npx astro build` sin errores.
 
-### C4 · Hallazgos reales de SonarCloud en main — PENDIENTE
+### C4 · Hallazgos reales de SonarCloud en main — EN PR #15
 Lista: https://sonarcloud.io/project/issues?id=davidpd89_automatizasinhumo-web&resolved=false&types=BUG,VULNERABILITY
 Arregla solo estos, con el cambio mínimo y sin cambiar comportamiento:
 - css:S8778 (5): `@import` después de otras reglas → moverlos al principio del fichero.
