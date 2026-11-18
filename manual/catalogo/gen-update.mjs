@@ -1,0 +1,21 @@
+// node manual/catalogo/gen-update.mjs [slug ...] > update.sql
+// Actualiza nombre, descripción, precio, activo y precio de modalidades de los
+// servicios que ya existen, sin DELETE: sirve en entornos con pedidos (la FK de
+// order_items impide el seed completo). Sin slugs, actualiza todo el catálogo.
+import { productos } from './catalogo.mjs';
+import { descripcion } from './descripcion.mjs';
+
+const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
+const slugs = process.argv.slice(2);
+const lista = slugs.length ? productos.filter((p) => slugs.includes(p.slug)) : productos;
+if (slugs.length && lista.length !== slugs.length) {
+  console.error('Slug desconocido:', slugs.filter((s) => !productos.some((p) => p.slug === s)).join(', '));
+  process.exit(1);
+}
+const out = ['-- Generado por manual/catalogo/gen-update.mjs. No editar a mano.'];
+for (const p of lista) {
+  out.push(`UPDATE products SET name=${q(p.nombre)}, description=${q(descripcion(p))}, price_cents=${p.p[0] * 100}, active=${p.activo === false ? 0 : 1} WHERE slug=${q(p.slug)};`);
+  if (p.p.length === 2)
+    p.p.forEach((eur, i) => out.push(`UPDATE product_variants SET price_cents=${eur * 100} WHERE sku=${q(`${p.slug}-${i ? 'pro' : 'diy'}`)};`));
+}
+process.stdout.write(out.join('\n') + '\n');

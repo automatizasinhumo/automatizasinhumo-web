@@ -33,11 +33,11 @@ export const ESTADO_LABEL: Record<Estado, string> = {
 
 export const LIMITES = { nombre: 120, email: 200, telefono: 40, campo: 1000, mensaje: 3000, campos: 20 };
 
-/** Lista de campos sacada de la sección «### Campos que rellenas» de la descripción. */
+/** Lista de campos sacada de la sección «## Campos que rellenas» de la descripción. */
 export function camposDeDescripcion(md: string | null | undefined): string[] {
   if (!md) return [];
   const lineas = md.split(/\r?\n/);
-  const i = lineas.findIndex((l) => /^###\s+Campos que rellenas/i.test(l.trim()));
+  const i = lineas.findIndex((l) => /^#{2,3}\s+Campos que rellenas/i.test(l.trim()));
   if (i < 0) return [];
   const out: string[] = [];
   for (const l of lineas.slice(i + 1)) {

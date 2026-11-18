@@ -24,6 +24,10 @@ describe('camposDeDescripcion', () => {
     const md = 'Intro\r\n\r\n### Campos que rellenas\r\n- **Nombre del negocio**\r\n* Horario\r\ntexto suelto\r\n### Otra cosa\r\n- No';
     expect(camposDeDescripcion(md)).toEqual(['Nombre del negocio', 'Horario']);
   });
+  it('lee el formato real de las fichas («## Campos que rellenas»)', () => {
+    const md = 'Resumen\n\n## Qué recibes\n- Web\n\n## Campos que rellenas\n- Nombre del negocio\n- Sector\n\n## Ejemplo\n> x';
+    expect(camposDeDescripcion(md)).toEqual(['Nombre del negocio', 'Sector']);
+  });
   it('sin sección o vacío → []', () => {
     expect(camposDeDescripcion('## Nada')).toEqual([]);
     expect(camposDeDescripcion(null)).toEqual([]);

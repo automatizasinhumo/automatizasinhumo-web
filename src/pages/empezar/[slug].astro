@@ -176,8 +176,13 @@ const label = 'block text-sm font-medium text-ink';
           {
             campos.length > 0 && (
               <fieldset class="space-y-4 rounded-2xl border border-line p-5" data-paso="Tu información">
-                <legend class="px-1 text-sm font-semibold text-ink">{conModalidad ? '3' : '2'}. {pedido ? 'Lo que necesitamos para preparártelo' : 'Lo que necesitamos para tu vista previa'}</legend>
+                <legend class="px-1 text-sm font-semibold text-ink">{conModalidad ? '3' : '2'}. {pedido ? 'Lo que necesitamos para preparártelo' : 'Lo que necesitamos para tu muestra'}</legend>
                 <p class="text-sm text-muted">Todo opcional: rellena lo que tengas. Lo demás te lo preguntamos.</p>
+                <p class="rounded-xl border border-line bg-surface p-4 text-sm text-muted" data-aviso-archivos>
+                  ¿Tienes fotografías, logotipos o documentos? En este formulario solo necesitamos la información inicial.
+                  Después te indicaremos por correo cómo enviarnos los archivos que necesitemos. No hace falta tenerlo todo preparado ahora.
+                  <strong class="text-ink">Nunca te pediremos que escribas contraseñas en este formulario.</strong>
+                </p>
                 {campos.map((c, i) => (
                   <label class={label}>
                     {c}
