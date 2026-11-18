@@ -2,7 +2,6 @@
 import { env } from 'cloudflare:workers';
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import {
-  CAMPO_PEDIDO,
   ESTADOS,
   ESTADO_LABEL,
   cambiarEstado,
@@ -14,12 +13,11 @@ import {
   TIPOS_CORREO,
   TIPO_CORREO_LABEL,
   correoDeEstado,
-  correoHtml,
   esTipoCorreo,
   prepararCorreo,
-  type DatosCorreo,
 } from '../../features/solicitudes/correos';
 import { getEmailProvider } from '../../features/email';
+import { datosDe as datosDeSolicitud, enviarNotificacion } from '../../features/solicitudes/envio';
 import { getStoreSettings } from '../../features/settings/db';
 
 export const prerender = false;
@@ -31,20 +29,7 @@ export const prerender = false;
 // `notificaciones` (solicitud, tipo, versión) es única, así que un doble clic o
 // repetir el estado no duplica el envío; reenviar exige marcarlo a propósito.
 const ID_RE = /^S-[A-Z0-9]{6,12}$/;
-type Fila = { nombre: string; email: string; producto: string | null; slug: string; campos: string; pedido_public_id: string | null };
-async function datosDe(id: string, enlace: string, pendientes: string): Promise<(DatosCorreo & { email: string }) | null> {
-  const r = await env.DB.prepare('SELECT nombre, email, producto, slug, campos, pedido_public_id FROM solicitudes WHERE public_id = ?')
-    .bind(id)
-    .first<Fila>();
-  if (!r) return null;
-  let pedido: string | null = null;
-  try {
-    pedido = (JSON.parse(r.campos) as Record<string, string>)[CAMPO_PEDIDO] ?? null;
-  } catch {
-    // campos corruptos: sin número de pedido
-  }
-  return { email: r.email, nombre: r.nombre, servicio: r.producto ?? r.slug, esPedido: !!r.pedido_public_id, pedido, enlace, datosPendientes: pendientes };
-}
+const datosDe = (id: string, enlace: string, pendientes: string) => datosDeSolicitud(env.DB, id, enlace, pendientes);
 
 if (Astro.request.method === 'POST') {
   const f = await Astro.request.formData();
@@ -62,44 +47,19 @@ if (Astro.request.method === 'POST') {
     const c = d ? prepararCorreo(tipo, d) : null;
     if (c && !c.ok) msg = c.error;
     if (d && c?.ok) {
-      await env.DB.prepare(
-        'INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo) VALUES (?, ?, ?, ?, ?) ON CONFLICT (solicitud_public_id, tipo, version) DO NOTHING',
-      )
-        .bind(id, tipo, version, c.asunto, c.texto)
-        .run();
-      // Reserva atómica: solo una petición pasa la fila a 'enviando'.
-      const permitidos = reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
-      const reserva = await env.DB.prepare(
-        `UPDATE notificaciones SET estado_envio = 'enviando', asunto = ?, cuerpo = ?, intentos = intentos + 1
-         WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio IN (${permitidos})
-         RETURNING id, intentos`,
-      )
-        .bind(c.asunto, c.texto, id, tipo, version)
-        .first<{ id: number; intentos: number }>();
-      if (!reserva) {
+      const r = await enviarNotificacion(env.DB, await getEmailProvider(await getStoreSettings(env.DB)), {
+        id,
+        tipo,
+        version,
+        email: d.email,
+        asunto: c.asunto,
+        texto: c.texto,
+        reenviar,
+      });
+      if (r.estado === 'ocupado') {
         msg = `Ese correo (${TIPO_CORREO_LABEL[tipo]}, versión ${version}) ya se envió. Marca «Reenviar» o sube la versión.`;
       } else {
-        const mail = await getEmailProvider(await getStoreSettings(env.DB));
-        let error: string | null = mail ? null : 'No hay proveedor de correo configurado (Ajustes → Email).';
-        if (mail) {
-          try {
-            await mail.send({
-              to: d.email,
-              subject: c.asunto,
-              text: c.texto,
-              html: correoHtml(c.texto),
-              idempotencyKey: `notif-${reserva.id}-${reserva.intentos}`,
-            });
-          } catch (e) {
-            error = String((e as Error)?.message ?? e).slice(0, 300);
-          }
-        }
-        await env.DB.prepare(
-          `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END WHERE id = ?`,
-        )
-          .bind(error ? 'error' : 'enviado', error, error, reserva.id)
-          .run();
-        msg = error ? `Correo NO enviado: ${error}` : `Correo «${TIPO_CORREO_LABEL[tipo]}» enviado a ${d.email}.`;
+        msg = r.estado === 'error' ? `Correo NO enviado: ${r.error}` : `Correo «${TIPO_CORREO_LABEL[tipo]}» enviado a ${d.email}.`;
       }
     }
     qs.set('aviso', msg);

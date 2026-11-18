@@ -2,7 +2,9 @@ import { handle } from '@astrojs/cloudflare/handler';
 import { env } from 'cloudflare:workers';
 import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
-import { getSetting } from './features/settings/db';
+import { getSetting, getStoreSettings } from './features/settings/db';
+import { getEmailProvider } from './features/email';
+import { enviarVistasPreviasListas } from './features/solicitudes/envio';
 
 /**
  * Worker entrypoint.
@@ -47,6 +49,14 @@ async function runScheduledSweeps(): Promise<void> {
     }
   } catch (err) {
     console.error('Scheduled notification sweep failed:', err);
+  }
+
+  // Vistas previas que la fábrica dejó con «QA ok»: correo de revisión al
+  // cliente y estado «vista previa enviada», sin esperar a que David entre.
+  try {
+    await enviarVistasPreviasListas(db, await getEmailProvider(await getStoreSettings(db)));
+  } catch (err) {
+    console.error('Scheduled preview email sweep failed:', err);
   }
 }
 
