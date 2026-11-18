@@ -2,6 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { toFtsQuery, editDistance } from './search';
 
 describe('toFtsQuery', () => {
+  it('mantiene la palabra literal cuando el lema no es su prefijo', () => {
+    expect(toFtsQuery('boda asistencia')).toBe('bod* AND (asistent* OR asistencia*)');
+  });
+
+  it('una tilde combinada no parte la palabra', () => {
+    expect(toFtsQuery('invitación')).toBe(toFtsQuery('invitación'));
+  });
+
   it('prefix-matches each token', () => {
     expect(toFtsQuery('red mug')).toBe('red* mug*');
   });
