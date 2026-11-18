@@ -13,7 +13,7 @@
 
 /** The synthesized free-shipping option's label. Shared with Admin validation so a
  *  configured rate can neither collide with it nor drift away from it. */
-export const FREE_SHIPPING_LABEL = 'Free shipping';
+export const FREE_SHIPPING_LABEL = 'Envío gratis';
 
 export interface ShippingOption {
   label: string;

@@ -209,8 +209,8 @@ function defaultConfig(): SiteConfig {
         {
           countries: ['US'],
           rates: [
-            { label: 'Standard', amountCents: 500 },
-            { label: 'Express', amountCents: 1500 },
+            { label: 'Estándar', amountCents: 500 },
+            { label: 'Exprés', amountCents: 1500 },
           ],
           freeOverCents: 5000, // free shipping at $50+ (null to disable)
         },

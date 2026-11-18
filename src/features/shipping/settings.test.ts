@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ShippingConfig } from './calculator';
+import { FREE_SHIPPING_LABEL, type ShippingConfig } from './calculator';
 import { formatWeightValue } from './weight';
 import {
   SHIPPING_SCHEMA_VERSION,
@@ -260,7 +260,7 @@ describe('validateShippingDocument', () => {
         {
           ...doc().zones[0]!,
           freeOverCents: 5000,
-          rates: [{ label: 'Free shipping', pricing: { type: 'flat', amountCents: 0 } }],
+          rates: [{ label: FREE_SHIPPING_LABEL, pricing: { type: 'flat', amountCents: 0 } }],
         },
       ],
     });
@@ -354,14 +354,14 @@ describe('validateShippingDocument', () => {
 
 describe('legacy migration', () => {
   it('names zones deterministically', () => {
-    expect(legacyZoneName(['US'], 0)).toBe('United States');
+    expect(legacyZoneName(['US'], 0)).toBe('Estados Unidos');
     expect(legacyZoneName(['*'], 1)).toBe('Rest of world');
     expect(legacyZoneName(['US', 'CA'], 2)).toBe('Zone 3');
   });
   it('builds an editable candidate from raw build-time values', () => {
     const model = migrationCandidate(buildTime, null, 'usd');
     expect(model.revision).toBe(0);
-    expect(model.zones[0]!.name).toBe('United States');
+    expect(model.zones[0]!.name).toBe('Estados Unidos');
     expect(model.zones[0]!.rates.map((r) => r.amountValue)).toEqual(['5', '15']);
     expect(model.zones[0]!.freeOverValue).toBe('50');
   });

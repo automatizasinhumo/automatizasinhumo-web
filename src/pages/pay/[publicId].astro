@@ -92,7 +92,7 @@ if (
 const lightningExpired = isLightning && payExpired;
 
 const { storeName } = getConfig();
-const title = isDemo ? 'Pago de prueba' : 'Pagar con Lightning';
+const title = isDemo ? 'Pago de prueba (sin cargo)' : 'Pagar con Lightning';
 const description = isDemo
   ? `Pago simulado en ${storeName}.`
   : `Paga en ${storeName} con Bitcoin Lightning.`;
