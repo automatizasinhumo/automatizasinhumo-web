@@ -14,9 +14,11 @@
 - Los cuatro ficheros cambiados tienen finales CRLF.
 - En `automatizasinhumo`, `main` se actualizó con `git switch main` y `git pull origin main`; avance rápido de `7b7d670` a `89f62e5`. Después se rebasó C21 sobre `027e09f`, donde se fusionó #34. Rama C21: `copilot/c21-contexto-fabrica`.
 - PR #34 fusionada: https://github.com/automatizasinhumo/automatizasinhumo-web/pull/34.
+- PR C21 #39, abierta contra `main`: https://github.com/automatizasinhumo/automatizasinhumo-web/pull/39.
+- Checks remotos de #39: aprobados; `scorecard` se omitió. Ejecución: https://github.com/automatizasinhumo/automatizasinhumo-web/actions/runs/44368903846.
 
 ## Fallos y pendientes
 
 - El workspace inicial `web-escritor` estaba sucio y divergía de `origin/main`; el pull fast-forward no era posible. No se modificó ese trabajo y se limpió el worktree temporal que se había creado allí.
 - Las pruebas usan pedidos sintéticos y una IA simulada; no se leyeron ni subieron pedidos reales ni vistas previas.
-- Pendiente: push a `origin`, apertura de PR C21 contra `main` y resultado de CI remoto.
+- Sin cambios pendientes; la PR queda abierta para revisión, sin fusionarla.
