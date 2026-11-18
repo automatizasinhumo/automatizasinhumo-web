@@ -67,6 +67,8 @@ export interface SolicitudInput {
   utm_medium: string | null;
   utm_campaign: string | null;
   referrer: string | null;
+  /** Token del formulario: el mismo envío repetido (doble clic, reintento) no crea otra solicitud. */
+  envio?: string | null;
 }
 
 export type Validacion =
@@ -135,9 +137,12 @@ export function validarSolicitud(form: FormData, etiquetas: string[]): Validacio
       utm_medium: opcional(form, 'utm_medium', 100),
       utm_campaign: opcional(form, 'utm_campaign', 100),
       referrer: opcional(form, 'referrer', 300),
+      envio: ENVIO_RE.test(texto(form, 'envio', 80)) ? texto(form, 'envio', 80) : null,
     },
   };
 }
+
+const ENVIO_RE = /^[A-Za-z0-9-]{16,64}$/;
 
 const ALPHA = '23456789abcdefghjkmnpqrstvwxyz';
 /** Número de solicitud legible para el cliente (p. ej. «S-7K3M9Q»). */
@@ -163,10 +168,13 @@ export async function crearSolicitud(
   pedidoPublicId: string | null = null,
 ): Promise<string> {
   const publicId = nuevoPublicId();
-  await db
+  const envio = s.envio ?? null;
+  // Mismo token de formulario = mismo envío: no se crea otra fila y se devuelve la que ya hay.
+  const r = await db
     .prepare(
-      `INSERT INTO solicitudes (public_id, slug, producto, modalidad, nombre, email, telefono, campos, mensaje, utm_source, utm_medium, utm_campaign, referrer, pedido_public_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO solicitudes (public_id, slug, producto, modalidad, nombre, email, telefono, campos, mensaje, utm_source, utm_medium, utm_campaign, referrer, pedido_public_id, envio)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(envio) WHERE envio IS NOT NULL DO NOTHING`,
     )
     .bind(
       publicId,
@@ -183,8 +191,13 @@ export async function crearSolicitud(
       s.utm_campaign,
       s.referrer,
       pedidoPublicId,
+      envio,
     )
     .run();
+  if (envio && !r.meta.changes) {
+    const previa = await db.prepare('SELECT public_id FROM solicitudes WHERE envio = ?').bind(envio).first<string>('public_id');
+    if (previa) return previa;
+  }
   return publicId;
 }
 

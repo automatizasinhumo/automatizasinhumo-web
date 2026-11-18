@@ -1,0 +1,100 @@
+name: Desplegar staging
+
+# Cada fusión en main se despliega sola en staging (antes era a mano y staging se quedaba
+# atrás: el pago seguía en inglés días después de traducirlo). Después, el empleado
+# «recorrido del cliente» (qa/recorrido-cliente.mjs, Playwright) hace en un navegador lo que
+# hace un cliente. Los lunes repite solo el recorrido. La configuración de Wrangler se
+# genera en el runner (scripts/wrangler-staging.mjs); .instances/ no se usa.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desplegar-staging
+  cancel-in-progress: false
+
+env:
+  BASE: https://automatizasinhumo-staging.davidpd89.workers.dev
+
+jobs:
+  desplegar:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Credenciales de Cloudflare
+        id: cred
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CUENTA: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          D1: ${{ vars.D1_DATABASE_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$CUENTA" ] && [ -n "$D1" ]; then echo "listo=1" >> "$GITHUB_OUTPUT"
+          else echo "::warning::Faltan CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID o D1_DATABASE_ID: no se despliega."; fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.cred.outputs.listo == '1'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        if: steps.cred.outputs.listo == '1'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        if: steps.cred.outputs.listo == '1'
+        run: npm ci --ignore-scripts
+
+      - name: Configuración de staging
+        if: steps.cred.outputs.listo == '1'
+        env:
+          D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
+        run: node scripts/wrangler-staging.mjs
+
+      - name: Construir, migrar y desplegar
+        if: steps.cred.outputs.listo == '1'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy
+
+  recorrido:
+    needs: desplegar
+    if: ${{ always() && needs.desplegar.result != 'failure' && needs.desplegar.result != 'cancelled' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+
+      - name: Instalar Playwright
+        run: |
+          # Aparte: «npm i --no-save» dentro del repo choca con su lockfile.
+          npm i --prefix "$RUNNER_TEMP/pw" --no-audit --no-fund playwright@1.56.1
+          ln -s "$RUNNER_TEMP/pw/node_modules" node_modules
+          npx playwright install --with-deps chromium
+
+      - name: Recorrido del cliente
+        run: node qa/recorrido-cliente.mjs "$BASE"
+
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: capturas-recorrido
+          path: capturas/
+          if-no-files-found: ignore
+          retention-days: 14
