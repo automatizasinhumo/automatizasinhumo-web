@@ -34,7 +34,7 @@ jobs:
           ./gitleaks git --redact --no-banner --report-format json --report-path gitleaks.json . && ok=1 || ok=0
           n=$(node -e 'try{console.log(require("./gitleaks.json").length)}catch{console.log(0)}')
           echo "## Secretos (gitleaks): $n hallazgos" >> "$GITHUB_STEP_SUMMARY"
-          node -e 'try{for(const f of require("./gitleaks.json"))console.log("- "+f.RuleID+" en "+f.File+":"+f.StartLine+" ("+f.Commit.slice(0,7)+")")}catch{}' >> "$GITHUB_STEP_SUMMARY"
+          node -e 'try{for(const f of require("./gitleaks.json"))console.log("- "+f.RuleID+" en "+f.File+":"+f.StartLine+" ("+f.Commit.slice(0,7)+")")}catch{}' | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$ok" = 1 ]
 
   dependencias:

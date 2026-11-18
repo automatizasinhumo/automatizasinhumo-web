@@ -277,6 +277,10 @@ const SECURITY_HEADERS: Record<string, string> = {
   'x-content-type-options': 'nosniff', // don't MIME-sniff responses
   'x-frame-options': 'DENY', // block framing (clickjacking) — nothing here is meant to be embedded
   'strict-transport-security': 'max-age=31536000; includeSubDomains', // force HTTPS for a year
+  'referrer-policy': 'strict-origin-when-cross-origin', // other sites see the origin, never the path
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()', // the store never needs them
+  // Minimal CSP that cannot break scripts or styles: no framing, no <base> hijack, no plugins.
+  'content-security-policy': "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
 };
 
 /** Add the security headers, rebuilding when the response's headers are immutable

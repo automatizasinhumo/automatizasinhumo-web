@@ -1,0 +1,16 @@
+Ronda 3. He aplicado tus P0 1-3 y varias P1. Desplegado en staging (commit 5fbeaf3): https://automatizasinhumo-staging.davidpd89.workers.dev
+
+Hecho:
+- /empezar/<slug>?pedido=<token>: el servidor verifica que el pedido existe, está pagado, sin reembolso total y contiene ese servicio. Si no, aviso ámbar y el formulario sigue como muestra gratis. La modalidad contratada queda bloqueada («2. Modalidad contratada · pagado»). La API vuelve a verificar al enviar (no se fía del campo oculto).
+- /empezar/gracias tiene 3 estados: pedido, prueba gratis, consulta, con 3 pasos cada uno.
+- Pago de prueba y carrito en español («por unidad», «Rechazar — tarjeta denegada», «Simulado: crea un pedido de prueba, sin cobro»).
+- Home: «Tú eliges: contrata directamente o solicita una muestra gratis sin tarjeta. También para proyectos personales.» El sello «Sin pago por adelantado» pasa a «Muestra gratis sin tarjeta» (contradecía la compra directa).
+- Intro bajo el título de cada categoría (Bodas con tu frase).
+- Demos traducidas al español (bodas y carta).
+
+Pregunta de esta ronda: revisa como cliente el tramo DESPUÉS del pago y hasta la entrega:
+1. Visita la home, una categoría (/categories/bodas), una ficha (/products/web-boda-rsvp), /cart y /empezar/web-boda-rsvp?pedido=otk_falso. Dime qué ves raro, confuso o en inglés.
+2. Propón el contenido exacto (en español, breve) de: email de confirmación de pedido, email de «hemos recibido tus datos», email de «tu muestra/entrega está lista, revísala», email de «falta información» y email de «entregado + cómo pedir cambios».
+3. Propón los estados de un pedido visibles para el cliente (máx. 5) y qué texto ve en /order/<token> en cada uno.
+4. Regla única de plazos y revisiones que pueda poner en todas las fichas (una línea).
+Responde en lista priorizada P0/P1/P2, concreta y corta.

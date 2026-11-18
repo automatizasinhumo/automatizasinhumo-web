@@ -1,0 +1,230 @@
+Ronda 6. Auditoría de servicios: 10 servicios más (quedan 51 después de esta).
+Aplicado de la ronda anterior: límites y «No incluye» en los 10 servicios de webs (precios: corporativa 249/449, portfolio 249/499), banner de cookies retirado, aviso de que los archivos se piden luego por correo y nunca contraseñas, y catálogo actualizable sin borrar pedidos (commit b6306ac).
+
+Te paso cada servicio con la parte específica de su ficha. La parte común de todas las fichas (plazo, tabla de modalidades y «Cómo funciona») va una sola vez al final: ya la auditaste, no la repitas salvo que choque con un servicio concreto.
+Para cada servicio devuélveme:
+- Decisión: Mantener / Corregir / Fusionar (con cuál) / Retirar
+- P0 (bloquea vender o engaña), P1 (confunde o resta conversión), P2 (pulido)
+- Si es Corregir: en un bloque de código, el objeto corregido con los campos que cambian (resumen, recibes[], noIncluye[], campos[], ejemplo, muestra, extra, p:[diy, pro], activo), en español de España, sin jerga y sin prometer lo que no podamos cumplir.
+- Precio: ¿coherente con el resto y con lo que se entrega en cada modalidad?
+- Exclusiones que falten (dominio, hosting, costes externos, cuotas de terceros, textos legales, etc.).
+Al final: solapamientos entre estos servicios y con los ya auditados, y los 3 cambios con más impacto. No hace falta preguntar nada a David: decide con lo que hay.
+
+=== 1. Carta digital con código QR ===
+slug: carta-qr · categoría: Restaurantes y bares · precios: 49 / 129 € · plazo interno: 24 h · ficha: /products/carta-qr
+
+Tu carta en el móvil del cliente con un QR en la mesa. Cambias tú los precios cuando quieras desde el móvil, sin coste y sin reimprimir.
+
+## Qué recibes
+- Carta digital por secciones
+- QR listo para imprimir
+- Alérgenos e idiomas
+- Cambios ilimitados de precios
+
+## Campos que rellenas
+- Nombre del local
+- Platos (nombre, precio, alérgenos)
+- Fotos (opcional)
+- Idiomas
+
+## Ejemplo
+> Bar La Esquina: QR en cada mesa → carta con tapas, raciones y bebidas, en español e inglés.
+
+=== 2. Carta QR con pedidos por WhatsApp ===
+slug: carta-pedidos-whatsapp · categoría: Restaurantes y bares · precios: 99 / 199 € · plazo interno: 48 h · ficha: /products/carta-pedidos-whatsapp
+
+El cliente elige en la carta, añade al carrito y el pedido te llega por WhatsApp ya escrito.
+
+## Qué recibes
+- Carta con carrito
+- Pedido enviado a tu WhatsApp
+- Opción recoger / a domicilio
+- Sin comisiones por pedido
+
+## Campos que rellenas
+- Carta y precios
+- Número de WhatsApp
+- Zona y coste de envío
+- Horario de pedidos
+
+## Ejemplo
+> Pizzería Nápoles: el cliente pide 2 pizzas y te llega «2× Margarita, recoger 21:00» al WhatsApp.
+
+=== 3. Reservas de mesa online ===
+slug: reservas-restaurante · categoría: Restaurantes y bares · precios: 149 / 299 € · plazo interno: 3 días · ficha: /products/reservas-restaurante
+
+Sistema propio de reservas sin pagar comisión por comensal a plataformas.
+
+## Qué recibes
+- Página de reservas
+- Panel para ver y confirmar reservas
+- Avisos al cliente
+- Control de aforo por turno
+
+## Campos que rellenas
+- Turnos y aforo
+- Mesas
+- Días de cierre
+- Correo o teléfono de avisos
+
+## Ejemplo
+> Restaurante El Puerto: el cliente reserva para 4 el sábado a las 14:30 y tú lo ves en el panel.
+
+=== 4. Asistente IA que toma pedidos ===
+slug: asistente-ia-pedidos · categoría: Restaurantes y bares · precios: 299 / 599 € · plazo interno: 7 días · ficha: /products/asistente-ia-pedidos
+
+Un asistente que contesta dudas de la carta y toma pedidos por chat, 24 horas.
+
+## Qué recibes
+- Asistente entrenado con tu carta
+- Respuestas sobre alérgenos y horarios
+- Pedido resumido para cocina
+- Informe de preguntas frecuentes
+
+## Campos que rellenas
+- Carta completa
+- Preguntas frecuentes
+- Horarios y zonas
+- Canal (web, Telegram o WhatsApp)
+
+## Ejemplo
+> «¿Tenéis algo sin gluten?» → el asistente recomienda 3 platos y apunta el pedido.
+
+=== 5. Página de citas tipo Calendly ===
+slug: pagina-citas · categoría: Reservas y citas · precios: 79 / 179 € · plazo interno: 48 h · ficha: /products/pagina-citas
+
+Comparte un enlace y tus clientes reservan hueco en tu agenda. Sin cuotas por usuario.
+
+## Qué recibes
+- Página de reserva con tus huecos
+- Tipos de cita (15, 30, 60 min…)
+- Confirmación y recordatorio por email
+- Enlace para tu web, Instagram o firma
+
+## Campos que rellenas
+- Tipos de cita y duración
+- Horario disponible
+- Correo de avisos
+- Preguntas previas al cliente
+
+## Ejemplo
+> Coach Ana: enlace «Reserva tu sesión de 30 min» en su Instagram; las citas caen solas en su agenda.
+
+=== 6. Reservas para peluquería, estética o clínica ===
+slug: reservas-salon · categoría: Reservas y citas · precios: 199 / 399 € · plazo interno: 5 días · ficha: /products/reservas-salon
+
+Motor de reservas por servicio y profesional, con ficha de cliente.
+
+## Qué recibes
+- Reserva por servicio y profesional
+- Ficha e historial de clientes
+- Recordatorios
+- Widget para tu web
+
+## Campos que rellenas
+- Servicios, duración y precio
+- Profesionales y horarios
+- Política de cancelación
+
+## Ejemplo
+> Centro Bella: «Manicura con Laura – martes 17:00 – 25 €», con recordatorio el día antes.
+
+=== 7. Web de boda con confirmación de asistencia ===
+slug: web-boda-rsvp · categoría: Bodas y eventos · precios: 99 / 249 € · plazo interno: 3 días · ficha: /products/web-boda-rsvp
+
+Toda la información de la boda en una web y los invitados confirman asistencia y menú.
+
+## Qué recibes
+- Web con historia, programa, cómo llegar y alojamiento
+- Formulario de confirmación de asistencia con menú y alergias
+- Lista de confirmados descargable
+- Preguntas frecuentes
+
+## Campos que rellenas
+- Nombres y fecha
+- Lugar de ceremonia y banquete
+- Programa del día
+- Fotos
+- Opciones de menú
+
+## Ejemplo
+> Lucía & Pablo: 140 invitados confirman desde el móvil y descargáis el Excel para el catering.
+
+=== 8. Invitación digital animada ===
+slug: invitacion-digital · categoría: Bodas y eventos · precios: 39 / 89 € · plazo interno: 24 h · ficha: /products/invitacion-digital
+
+Invitación para enviar por WhatsApp: cuenta atrás, ubicación y botón para confirmar.
+
+## Qué recibes
+- Invitación web animada
+- Cuenta atrás
+- Botón de mapa y confirmación
+- Enlace para compartir
+
+## Campos que rellenas
+- Tipo de evento
+- Nombres
+- Fecha, hora y lugar
+- Foto o estilo
+
+## Ejemplo
+> Bautizo de Hugo: enlace por WhatsApp con foto, cuenta atrás y «Confirmo asistencia».
+
+=== 9. Galería privada de fotos del evento ===
+slug: galeria-privada-evento · categoría: Bodas y eventos · precios: 69 / 149 € · plazo interno: 48 h · ficha: /products/galeria-privada-evento
+
+Álbum privado con enlace: los invitados ven y suben sus fotos, tú las descargas todas.
+
+## Qué recibes
+- Galería privada con enlace
+- Subida de fotos de invitados
+- Favoritas y descarga
+- Panel de administración
+
+## Campos que rellenas
+- Nombre del evento
+- Fotos iniciales
+- Contraseña o enlace privado
+
+## Ejemplo
+> Tras la boda, 300 fotos de invitados reunidas en un solo álbum privado.
+
+=== 10. Gestión de invitados y plano de mesas ===
+slug: gestion-invitados-mesas · categoría: Bodas y eventos · precios: 79 / 179 € · plazo interno: 3 días · ficha: /products/gestion-invitados-mesas
+
+Lista de invitados, confirmaciones, llamadas pendientes y plano de mesas en PDF.
+
+## Qué recibes
+- Panel de invitados
+- Seguimiento de confirmaciones
+- Plano de mesas imprimible
+- Exportación a Excel
+
+## Campos que rellenas
+- Lista de invitados
+- Número de mesas y capacidad
+- Restricciones (quién no con quién)
+
+## Ejemplo
+> Plano de 15 mesas generado en PDF para el restaurante a partir de las confirmaciones.
+
+=== Parte común de todas las fichas ===
+**Plazo:** primera versión en 24–72 horas laborables desde que recibimos los datos necesarios. Incluye una ronda de ajustes que puedes solicitar durante los 7 días siguientes a la primera versión. Entrega definitiva tras tu aprobación.
+
+## Plantilla + guía o te lo montamos
+**Te lo montamos:** nos encargamos de poner en funcionamiento lo incluido y te pasamos el enlace. **Plantilla + guía:** te lo entregamos preparado con tus datos y con una guía paso a paso para publicarlo tú.
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **49 €** | **129 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes | Sí | Sí |
+
+## Cómo funciona
+**Compra directa:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos la primera versión y, tras la ronda de ajustes, te lo entregamos.
+
+**Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
+
+_Te atiende David Porto Díaz, una persona real que responde a tus dudas._

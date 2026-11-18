@@ -50,3 +50,5 @@ tsconfig.theme.*.json
 # Credenciales locales (no subir)
 manual/CREDENCIALES*
 
+scripts/gpt/last_chat.txt
+ortografia.json

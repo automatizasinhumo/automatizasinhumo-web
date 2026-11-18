@@ -1,0 +1,423 @@
+Ronda 5. Auditoría de servicios, bloque 1 de 6: «Webs para tu negocio» (10 servicios).
+Ronda 4 aplicada y en staging (commit 3fd22a5): correos asistidos desde el admin con vista previa y envío único, estados cambios_pedidos y en_espera_cliente (el silencio nunca aprueba), textoPedido en el seguimiento y los textos de la home/«Cómo funciona» de tu opción A.
+
+Te paso cada servicio con su descripción íntegra tal como la ve el cliente en la ficha. Para cada uno devuélveme:
+- Decisión: Mantener / Corregir / Fusionar (con cuál) / Retirar
+- P0 (bloquea vender o engaña), P1 (confunde o resta conversión), P2 (pulido)
+- Si es Corregir: el texto corregido listo para pegar (solo las secciones que cambian), en español de España, sin jerga, sin prometer nada que no podamos cumplir (plazo único: primera versión en 24-72 h laborables desde que tenemos los datos; una ronda de ajustes en 7 días; entrega tras aprobación).
+- Precio: ¿es coherente con el resto del bloque y con lo que se entrega en cada modalidad?
+- Exclusiones que falten (dominio, hosting, costes externos, textos legales, etc.).
+Al final: solapamientos dentro del bloque y los 3 cambios con más impacto. No hace falta preguntar nada a David: decide con lo que hay.
+
+=== 1. Web de una página para tu negocio ===
+slug: web-una-pagina · precio desde 149 € · ficha: /products/web-una-pagina
+
+Tu negocio en internet con una sola página clara: quién eres, qué ofreces, cómo contactarte.
+
+## Qué recibes
+- Web de una página adaptada a móvil
+- Botón de WhatsApp y llamada
+- Mapa y horario
+- Publicada con tu dominio (o uno gratuito)
+
+## Campos que rellenas
+- Nombre del negocio
+- Sector
+- Logo (opcional)
+- 3–6 servicios con precio
+- Teléfono / WhatsApp
+- Dirección y horario
+- 3–8 fotos
+
+## Ejemplo
+> Peluquería Lola: portada con foto, lista de servicios con precios, botón «Pide cita por WhatsApp» y mapa.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 48 h desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **149 €** | **349 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 2. Web corporativa de 5 secciones ===
+slug: web-corporativa-5-secciones · precio desde 449 € · ficha: /products/web-corporativa-5-secciones
+
+Inicio, servicios, sobre nosotros, opiniones y contacto. Para empresas que necesitan algo más que una tarjeta.
+
+## Qué recibes
+- 5 páginas con diseño a elegir entre +300 plantillas
+- Formulario de contacto con aviso
+- SEO básico (títulos, descripción, sitemap)
+- Publicación y certificado SSL
+
+## Campos que rellenas
+- Datos de la empresa
+- Textos de cada sección (o te los redactamos)
+- Logo y colores
+- Fotos
+- Correo donde recibir contactos
+
+## Ejemplo
+> Asesoría García: página por servicio (fiscal, laboral, contable), equipo, testimonios y formulario.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 5 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **449 €** | **899 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 3. Web para inmobiliaria ===
+slug: web-inmobiliaria · precio desde 299 € · ficha: /products/web-inmobiliaria
+
+Escaparate de inmuebles con fichas, fotos y contacto directo con el agente.
+
+## Qué recibes
+- Listado de inmuebles con filtros
+- Ficha por inmueble con galería
+- Página de agentes
+- Formulario de consulta
+
+## Campos que rellenas
+- Nombre de la agencia
+- Inmuebles (precio, m², habitaciones, fotos)
+- Agentes
+- Zona de trabajo
+
+## Ejemplo
+> Inmobiliaria Costa: 12 pisos en venta con fotos, botón «Quiero visitarlo» y WhatsApp del agente.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 4 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **299 €** | **599 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 4. Portfolio con panel para editarlo tú ===
+slug: portfolio-editable · precio desde 179 € · ficha: /products/portfolio-editable
+
+Para fotógrafos, diseñadores, arquitectos o autónomos: cambias textos y fotos desde un panel, sin tocar código.
+
+## Qué recibes
+- Portfolio con proyectos y galería
+- Panel de administración
+- Formulario de contacto
+- Alojamiento gratuito, sin cuota
+
+## Campos que rellenas
+- Nombre y profesión
+- Proyectos (título, fotos, descripción)
+- Biografía
+- Redes sociales
+
+## Ejemplo
+> Marta, fotógrafa: 8 reportajes, sobre mí, tarifas y contacto. Ella sube los nuevos trabajos desde el móvil.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 3 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **179 €** | **349 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 5. Web con blog rápida ===
+slug: web-blog-astro · precio desde 249 € · ficha: /products/web-blog-astro
+
+Web ultrarrápida con blog para posicionar en Google y publicar artículos fácilmente.
+
+## Qué recibes
+- Web + blog con categorías
+- Carga en menos de 1 segundo
+- Sitemap y RSS
+- 3 artículos iniciales (modalidad «Te lo montamos»)
+
+## Campos que rellenas
+- Temática
+- Palabras clave
+- Logo y colores
+- Primeros temas del blog
+
+## Ejemplo
+> Clínica de fisioterapia con blog «Ejercicios para la espalda» que atrae visitas desde Google.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 4 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **249 €** | **499 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 6. Web para taller con cita previa ===
+slug: web-taller · precio desde 249 € · ficha: /products/web-taller
+
+Taller mecánico, de bicis o de reparación: servicios, precios orientativos y cita online.
+
+## Qué recibes
+- Web con servicios y precios
+- Calendario de citas
+- Aviso de cada cita por email
+- Mapa y horario
+
+## Campos que rellenas
+- Nombre del taller
+- Servicios y duración
+- Horario y huecos disponibles
+- Fotos del taller
+
+## Ejemplo
+> Talleres Pérez: «Cambio de aceite – 45 min – desde 59 €» y el cliente reserva el hueco del jueves.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 4 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **249 €** | **449 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 7. Banner de cookies legal y textos RGPD ===
+slug: banner-cookies-rgpd · precio desde 29 € · ficha: /products/banner-cookies-rgpd
+
+Pon tu web en regla: banner de cookies que bloquea de verdad hasta que el usuario acepta, y textos legales base.
+
+## Qué recibes
+- Banner de cookies con aceptar / rechazar / configurar
+- Bloqueo real de analítica y píxeles
+- Plantillas de aviso legal, privacidad y cookies
+- Instalado en tu web (modalidad «Te lo montamos»)
+
+## Campos que rellenas
+- URL de la web
+- Datos del titular
+- Herramientas que usas (Analytics, Meta…)
+
+## Ejemplo
+> Tienda con píxel de Meta: el píxel ya no se carga hasta que el cliente pulsa «Aceptar».
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 24 h desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **29 €** | **79 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 8. Tu web en inglés (u otro idioma) ===
+slug: web-multidioma · precio desde 99 € · ficha: /products/web-multidioma
+
+Añadimos un segundo idioma a tu web con selector, URLs propias y SEO para que te encuentren turistas y clientes de fuera.
+
+## Qué recibes
+- Versión completa en el idioma elegido
+- Selector de idioma
+- Etiquetas hreflang para Google
+- Revisión humana de textos clave
+
+## Campos que rellenas
+- URL de la web
+- Idioma
+- Textos que no se traducen (marcas, platos…)
+
+## Ejemplo
+> Restaurante en Sevilla con carta y reservas en inglés: el turista que busca «tapas Seville» llega a una web que entiende y reserva.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 4 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **99 €** | **249 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 9. Optimización de imágenes para tu web ===
+slug: optimizar-imagenes · precio desde 14 € · ficha: /products/optimizar-imagenes
+
+Tus fotos pesadas, convertidas a WebP o AVIF con el tamaño justo: la web carga más rápido sin perder calidad visible.
+
+## Qué recibes
+- Hasta 100 imágenes optimizadas
+- Formato WebP o AVIF + copia JPG
+- Nombres de archivo amigables para SEO
+- Informe de peso antes / después
+
+## Campos que rellenas
+- Imágenes (carpeta o zip)
+- Formato deseado
+- Ancho máximo
+- Calidad (alta / equilibrada)
+
+## Ejemplo
+> Casa rural: 60 fotos de 5 MB sacadas con la cámara, convertidas a WebP de 1600 px listas para la galería.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 24 h desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **14 €** | **39 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
+
+=== 10. Web WordPress llave en mano ===
+slug: web-wordpress · precio desde 249 € · ficha: /products/web-wordpress
+
+Si prefieres WordPress: instalada, con tema ligero, tus páginas, formulario, copias automáticas y seguridad básica.
+
+## Qué recibes
+- WordPress instalado en tu alojamiento web
+- 5 páginas con tus textos y fotos
+- Formulario de contacto y aviso legal
+- Copias de seguridad y actualizaciones automáticas
+- Vídeo de 10 minutos para editarla tú
+
+## Campos que rellenas
+- Dominio y alojamiento web (o te recomendamos uno)
+- Textos de las 5 páginas
+- Logo y fotos
+- Colores
+
+## Ejemplo
+> Academia de música: inicio, profesores, horarios, precios y contacto; la dueña cambia los horarios ella misma.
+
+**Plazo:** vista previa en 24-72 h laborables; entrega en 5 días desde que la apruebas.
+
+## Plantilla + guía o te lo montamos
+Si te gusta la vista previa, pagas y te lo entregamos: publicado (**Te lo montamos**) o con la guía para publicarlo tú (**Plantilla + guía**).
+
+| | Plantilla + guía | Te lo montamos |
+|---|---|---|
+| Precio | **249 €** | **549 €** |
+| Preparado con tus datos | Sí | Sí |
+| Guía paso a paso para publicarlo | Sí | No hace falta |
+| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
+| Ronda de ajustes antes de entregar | Sí | Sí |
+| Después de la entrega | Dudas por email | Ajustes sobre lo pedido |
+
+## Cómo funciona
+**Si lo contratas directamente:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos el resultado y, tras una ronda de ajustes, te lo entregamos.
+
+**Si prefieres probar antes:** pulsa **Empieza gratis**, rellena los campos y te enviamos una vista previa con tus datos. Si te gusta, pagas; si no, no pagas nada.
+
+_Detrás hay una persona, David Porto Díaz, que te responde cualquier duda._
