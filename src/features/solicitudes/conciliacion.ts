@@ -3,9 +3,12 @@
  *
  * Los webhooks siguen siendo la vía en tiempo real; esto rellena los huecos. El
  * sondeo de eventos está adaptado de choyiny/opensigma (MIT), `src/events/poll.ts`:
- * punto de control con el id del último evento visto, páginas de la más nueva a la
- * más antigua hasta llegarle, y aplicación de la más antigua a la más nueva. La
- * primera pasada solo adopta el evento más reciente y no repasa el histórico.
+ * punto de control con el id del último evento aplicado y aplicación de la más
+ * antigua a la más nueva. Aquí se avanza hacia delante desde el cursor
+ * (`ending_before`), página a página, guardando el cursor tras cada una: un atasco
+ * de miles de eventos se reparte entre pasadas sin saltarse ninguno. La primera
+ * pasada solo adopta el evento más reciente (o marca la cuenta vacía) y no repasa
+ * el histórico.
  *
  * Usa una clave restringida de Stripe de solo lectura (`STRIPE_CONCILIACION_KEY`,
  * permiso «Events: read»). Sin ella no hace nada. Nunca escribe en Stripe ni en
@@ -50,7 +53,10 @@ const PLAZO_PENDIENTE_MS = 3 * 24 * 60 * MIN;
 const DIAS_ENTREGA = 7;
 const MAX_PAGINAS = 20;
 const MAX_AVISOS = 20;
+const RESERVA_MS = 15 * MIN;
 export const CLAVE_CURSOR = 'conciliacion:cursor';
+/** Cursor de una cuenta que no tenía eventos al empezar: se aplican todos los que lleguen. */
+export const CURSOR_VACIO = '';
 
 /** Fecha en el formato de `datetime('now')` de SQLite, que ordena como texto. */
 export const sqlFecha = (d: Date) => d.toISOString().slice(0, 19).replace('T', ' ');
@@ -114,9 +120,19 @@ export async function sigueAbierta(db: D1Database, i: Incidencia): Promise<boole
   }
 }
 
+/**
+ * Anota una incidencia. Repetir el mismo evento no cambia nada; un reembolso con un
+ * importe acumulado mayor actualiza el importe y la reabre (aunque estuviera cerrada o
+ * avisada), porque falta aplicar la diferencia.
+ */
 async function anotar(db: D1Database, i: Incidencia & { vence: Date }) {
   await db
-    .prepare('INSERT INTO incidencias (clave, tipo, ref, detalle, vence_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(clave) DO NOTHING')
+    .prepare(
+      `INSERT INTO incidencias (clave, tipo, ref, detalle, vence_at) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(clave) DO UPDATE SET detalle = excluded.detalle, vence_at = excluded.vence_at,
+         reservada_at = NULL, avisada_at = NULL, resuelta_at = NULL
+       WHERE incidencias.tipo = 'reembolso' AND CAST(excluded.detalle AS INTEGER) > CAST(incidencias.detalle AS INTEGER)`,
+    )
     .bind(i.clave, i.tipo, i.ref, i.detalle, sqlFecha(i.vence))
     .run();
 }
@@ -128,56 +144,90 @@ async function cerrar(db: D1Database, claveInc: string, ahora: Date) {
     .run();
 }
 
-/** Una página de eventos de Stripe, de la más nueva a la más antigua. */
-async function pagina(claveApi: string, pedir: typeof fetch, despuesDe?: string, limite = 100) {
+class ErrorStripe extends Error {
+  constructor(readonly status: number) {
+    super(`Stripe events HTTP ${status}`);
+  }
+}
+
+/**
+ * Una página de eventos de Stripe (siempre de la más nueva a la más antigua). Con
+ * `posterioresA`, los inmediatamente más nuevos que ese evento; sin él, los últimos.
+ */
+async function pagina(claveApi: string, pedir: typeof fetch, posterioresA?: string, limite = 100) {
   const q = new URLSearchParams({ limit: String(limite) });
   for (const t of TIPOS_EVENTO) q.append('types[]', t);
-  if (despuesDe) q.set('starting_after', despuesDe);
+  if (posterioresA) q.set('ending_before', posterioresA);
   const r = await pedir(`https://api.stripe.com/v1/events?${q}`, { headers: { Authorization: `Bearer ${claveApi}` } });
   // Solo el estado: nunca se registra la clave ni el cuerpo.
-  if (!r.ok) throw new Error(`Stripe events HTTP ${r.status}`);
+  if (!r.ok) throw new ErrorStripe(r.status);
   return (await r.json()) as { data: EventoStripe[]; has_more: boolean };
+}
+
+async function moverCursor(db: D1Database, de: string, a: string): Promise<boolean> {
+  // Comparar e intercambiar: si otra pasada ya lo movió, esta se retira.
+  const r = await db
+    .prepare("UPDATE settings SET value = ?, updated_at = datetime('now') WHERE key = ? AND value = ?")
+    .bind(a, CLAVE_CURSOR, de)
+    .run();
+  return (r.meta?.changes ?? 0) === 1;
 }
 
 /** Sondeo incremental de eventos (patrón de opensigma). Devuelve cuántos aplicó. */
 export async function sondearEventos(db: D1Database, claveApi: string, ahora: Date, pedir: typeof fetch = fetch): Promise<number> {
-  const leido = await db.prepare('SELECT value FROM settings WHERE key = ?').bind(CLAVE_CURSOR).first<string>('value');
+  let cursor = await db.prepare('SELECT value FROM settings WHERE key = ?').bind(CLAVE_CURSOR).first<string>('value');
 
-  if (!leido) {
-    const ultimo = (await pagina(claveApi, pedir, undefined, 1)).data[0]?.id;
-    if (ultimo) await db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING').bind(CLAVE_CURSOR, ultimo).run();
+  if (cursor === null) {
+    // Primera pasada: se adopta el último evento, o la marca de cuenta vacía para que
+    // el primer pago que llegue sí se concilie.
+    const ultimo = (await pagina(claveApi, pedir, undefined, 1)).data[0]?.id ?? CURSOR_VACIO;
+    await db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING').bind(CLAVE_CURSOR, ultimo).run();
     return 0;
   }
 
-  const recogidos: EventoStripe[] = [];
-  let despuesDe: string | undefined;
-  let llegado = false;
-  for (let n = 0; n < MAX_PAGINAS && !llegado; n++) {
-    const p = await pagina(claveApi, pedir, despuesDe);
-    for (const ev of p.data) {
-      if (ev.id === leido) {
-        llegado = true;
-        break;
+  let aplicados = 0;
+  for (let n = 0; n < MAX_PAGINAS; n++) {
+    let p;
+    try {
+      // Cuenta que empezó vacía: el «principio» es el evento más antiguo. Se pide la
+      // página más antigua avanzando hasta el final la primera vez (pocos eventos).
+      p = cursor === CURSOR_VACIO ? await primeraPaginaDesdeVacio(claveApi, pedir) : await pagina(claveApi, pedir, cursor);
+    } catch (err) {
+      // El evento del cursor ya no existe (Stripe guarda 30 días): se vuelve a adoptar.
+      if (err instanceof ErrorStripe && err.status === 404) {
+        console.error('Conciliación: el evento del cursor ya no existe en Stripe; se reinicia el cursor');
+        await db.prepare('DELETE FROM settings WHERE key = ? AND value = ?').bind(CLAVE_CURSOR, cursor).run();
+        return aplicados;
       }
-      recogidos.push(ev);
+      throw err;
     }
-    if (!p.has_more || !p.data.length) break;
-    despuesDe = p.data[p.data.length - 1].id;
+    if (!p.data.length) break;
+    for (const ev of [...p.data].reverse()) {
+      const { abrir, cerrar: cerrables } = incidenciasDeEvento(ev);
+      for (const i of abrir) await anotar(db, i);
+      for (const c of cerrables) await cerrar(db, c, ahora);
+    }
+    aplicados += p.data.length;
+    // El cursor avanza tras cada página aplicada: si la pasada se corta, la siguiente
+    // sigue justo aquí y no se salta ningún evento.
+    if (!(await moverCursor(db, cursor, p.data[0].id))) break;
+    cursor = p.data[0].id;
+    if (!p.has_more) break;
   }
-  if (!llegado && recogidos.length) console.error(`Conciliación: más de ${MAX_PAGINAS} páginas de eventos; se aplican las leídas`);
+  return aplicados;
+}
 
-  const nuevo = recogidos[0]?.id ?? leido;
-  for (const ev of recogidos.reverse()) {
-    const { abrir, cerrar: cerrables } = incidenciasDeEvento(ev);
-    for (const i of abrir) await anotar(db, i);
-    for (const c of cerrables) await cerrar(db, c, ahora);
+/** Página más antigua de una cuenta que empezó sin eventos (de la más nueva a la más antigua). */
+async function primeraPaginaDesdeVacio(claveApi: string, pedir: typeof fetch) {
+  let p = await pagina(claveApi, pedir);
+  for (let n = 0; p.has_more && n < MAX_PAGINAS; n++) {
+    const q = new URLSearchParams({ limit: '100', starting_after: p.data[p.data.length - 1].id });
+    for (const t of TIPOS_EVENTO) q.append('types[]', t);
+    const r = await pedir(`https://api.stripe.com/v1/events?${q}`, { headers: { Authorization: `Bearer ${claveApi}` } });
+    if (!r.ok) throw new ErrorStripe(r.status);
+    p = (await r.json()) as { data: EventoStripe[]; has_more: boolean };
   }
-  // Comparar e intercambiar: si otra pasada ya avanzó el cursor, no se retrocede.
-  await db
-    .prepare("UPDATE settings SET value = ?, updated_at = datetime('now') WHERE key = ? AND value = ?")
-    .bind(nuevo, CLAVE_CURSOR, leido)
-    .run();
-  return recogidos.length;
+  return { data: p.data, has_more: true };
 }
 
 /** Pedidos pagados cuya solicitud lleva más de 7 días sin entregar. */
@@ -187,6 +237,7 @@ export async function buscarSinEntrega(db: D1Database, ahora: Date): Promise<num
     .prepare(
       `SELECT o.public_id AS ref FROM orders o JOIN solicitudes s ON s.pedido_public_id = o.public_id
        WHERE o.status = 'paid' AND o.created_at < ? AND s.estado NOT IN ('entregada', 'descartada')
+         AND NOT EXISTS (SELECT 1 FROM incidencias i WHERE i.clave = 'pago_sin_entrega:' || o.public_id)
        LIMIT 50`,
     )
     .bind(limite)
@@ -196,9 +247,11 @@ export async function buscarSinEntrega(db: D1Database, ahora: Date): Promise<num
 }
 
 /**
- * Avisa de las incidencias vencidas que siguen abiertas, una vez cada una: se
- * reclama `avisada_at` de forma atómica antes de enviar; si el envío falla se
- * suelta para reintentarlo en la siguiente pasada.
+ * Avisa de las incidencias vencidas que siguen abiertas, una vez cada una. Se reserva
+ * de forma atómica (`reservada_at`) antes de enviar y `avisada_at` solo se pone cuando
+ * el correo se acepta. Si el envío falla, la reserva se suelta; si el Worker muere a
+ * medias, la reserva vence a los 15 minutos y se reintenta con la misma clave de
+ * idempotencia (el proveedor descarta el duplicado si el primero sí salió).
  */
 export async function avisarVencidas(
   db: D1Database,
@@ -207,8 +260,12 @@ export async function avisarVencidas(
 ): Promise<{ avisadas: string[]; cerradas: string[] }> {
   const res = { avisadas: [] as string[], cerradas: [] as string[] };
   const { results } = await db
-    .prepare('SELECT clave, tipo, ref, detalle FROM incidencias WHERE avisada_at IS NULL AND resuelta_at IS NULL AND vence_at <= ? ORDER BY vence_at LIMIT ?')
-    .bind(sqlFecha(ahora), MAX_AVISOS)
+    .prepare(
+      `SELECT clave, tipo, ref, detalle FROM incidencias
+       WHERE avisada_at IS NULL AND resuelta_at IS NULL AND vence_at <= ? AND (reservada_at IS NULL OR reservada_at < ?)
+       ORDER BY vence_at LIMIT ?`,
+    )
+    .bind(sqlFecha(ahora), sqlFecha(new Date(ahora.getTime() - RESERVA_MS)), MAX_AVISOS)
     .all<Incidencia>();
   for (const i of results) {
     if (!(await sigueAbierta(db, i))) {
@@ -218,17 +275,22 @@ export async function avisarVencidas(
     }
     const marca = sqlFecha(ahora);
     const r = await db
-      .prepare('UPDATE incidencias SET avisada_at = ? WHERE clave = ? AND avisada_at IS NULL AND resuelta_at IS NULL')
-      .bind(marca, i.clave)
+      .prepare(
+        `UPDATE incidencias SET reservada_at = ?
+         WHERE clave = ? AND avisada_at IS NULL AND resuelta_at IS NULL AND (reservada_at IS NULL OR reservada_at < ?)`,
+      )
+      .bind(marca, i.clave, sqlFecha(new Date(ahora.getTime() - RESERVA_MS)))
       .run();
     if ((r.meta?.changes ?? 0) !== 1) continue; // otra pasada ya la tiene
     try {
       await avisar(i);
-      res.avisadas.push(i.clave);
     } catch (err) {
       console.error(`Aviso de incidencia ${i.tipo} falló:`, err instanceof Error ? err.message : 'error');
-      await db.prepare('UPDATE incidencias SET avisada_at = NULL WHERE clave = ? AND avisada_at = ?').bind(i.clave, marca).run();
+      await db.prepare('UPDATE incidencias SET reservada_at = NULL WHERE clave = ? AND reservada_at = ?').bind(i.clave, marca).run();
+      continue;
     }
+    await db.prepare('UPDATE incidencias SET avisada_at = ?, reservada_at = NULL WHERE clave = ?').bind(marca, i.clave).run();
+    res.avisadas.push(i.clave);
   }
   return res;
 }

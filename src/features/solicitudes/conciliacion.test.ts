@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { Miniflare } from 'miniflare';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { CLAVE_CURSOR, conciliar, sqlFecha, textoAviso, type EventoStripe, type Incidencia } from './conciliacion';
+import { CLAVE_CURSOR, CURSOR_VACIO, conciliar, sqlFecha, textoAviso, type EventoStripe, type Incidencia } from './conciliacion';
 
 let miniflare: Miniflare;
 let db: D1Database;
@@ -21,15 +21,25 @@ async function ejecutar(sql: string) {
   for (const s of sql.replace(/--.*$/gm, '').split(';').map((x) => x.trim()).filter(Boolean)) await db.prepare(s).run();
 }
 
-/** Stripe simulado: lista de eventos, la más nueva primero, con `limit` y `starting_after`. */
+/**
+ * Stripe simulado: lista de eventos, la más nueva primero, con `limit`, `starting_after`
+ * (más antiguos que…) y `ending_before` (más nuevos que…), como la API de listas.
+ */
 function stripe(eventos: EventoStripe[]) {
   const llamadas: string[] = [];
   const pedir = (async (url: string) => {
     llamadas.push(url);
     const q = new URL(url).searchParams;
+    const limite = Number(q.get('limit'));
+    const antes = q.get('ending_before');
+    if (antes) {
+      const j = eventos.findIndex((e) => e.id === antes);
+      if (j < 0) return new Response('{}', { status: 404 });
+      const desde = Math.max(0, j - limite);
+      return new Response(JSON.stringify({ data: eventos.slice(desde, j), has_more: desde > 0 }));
+    }
     const desde = q.get('starting_after');
     const i = desde ? eventos.findIndex((e) => e.id === desde) + 1 : 0;
-    const limite = Number(q.get('limit'));
     const data = eventos.slice(i, i + limite);
     return new Response(JSON.stringify({ data, has_more: i + limite < eventos.length }));
   }) as unknown as typeof fetch;
@@ -87,6 +97,38 @@ describe('conciliación de Stripe', () => {
     expect(new URL(s.llamadas[0]).searchParams.getAll('types[]')).toContain('charge.refunded');
   });
 
+  it('cuenta sin eventos al empezar: el primer pago que llegue sí se concilia', async () => {
+    const s = stripe([]);
+    const a = avisos();
+    await conciliar(db, 'rk_test', T0, a.avisar, s.pedir);
+    expect(await db.prepare('SELECT value FROM settings WHERE key = ?').bind(CLAVE_CURSOR).first('value')).toBe(CURSOR_VACIO);
+    s.eventos.unshift(ev('checkout.session.completed', { id: 'cs_primero', payment_status: 'paid' }));
+    await conciliar(db, 'rk_test', mas(5), a.avisar, s.pedir);
+    await conciliar(db, 'rk_test', mas(40), a.avisar, s.pedir);
+    expect(a.lista.map((i) => i.clave)).toEqual(['webhook_perdido:cs_primero']);
+  });
+
+  it('un atasco de más de 20 páginas se reparte entre pasadas sin saltarse eventos', async () => {
+    const muchos = Array.from({ length: 2050 }, (_, k) => ev('checkout.session.async_payment_failed', { id: `cs_f${k}` }));
+    const perdido = ev('checkout.session.completed', { id: 'cs_al_principio', payment_status: 'paid' });
+    const s = await conEventos(perdido, ...muchos);
+    const a = avisos();
+    const r1 = await conciliar(db, 'rk_test', mas(5), a.avisar, s.pedir);
+    expect(r1?.eventos).toBe(2000);
+    const r2 = await conciliar(db, 'rk_test', mas(40), a.avisar, s.pedir);
+    expect(r2?.eventos).toBe(51);
+    expect(await db.prepare('SELECT value FROM settings WHERE key = ?').bind(CLAVE_CURSOR).first('value')).toBe(s.eventos[0].id);
+    expect(a.lista.map((i) => i.clave)).toEqual(['webhook_perdido:cs_al_principio']);
+  }, 60000);
+
+  it('si el evento del cursor ya no existe en Stripe, se vuelve a adoptar el último', async () => {
+    await db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').bind(CLAVE_CURSOR, 'evt_caducado').run();
+    const s = stripe([ev('checkout.session.completed', { id: 'cs_y', payment_status: 'paid' })]);
+    await conciliar(db, 'rk_test', T0, avisos().avisar, s.pedir);
+    await conciliar(db, 'rk_test', T0, avisos().avisar, s.pedir);
+    expect(await db.prepare('SELECT value FROM settings WHERE key = ?').bind(CLAVE_CURSOR).first('value')).toBe(s.eventos[0].id);
+  });
+
   it('pago correcto: con su pedido no hay aviso y la incidencia se cierra', async () => {
     await db.prepare("INSERT INTO orders (public_id, provider_session_id) VALUES ('o1', 'cs_ok')").run();
     const s = await conEventos(ev('checkout.session.completed', { id: 'cs_ok', payment_status: 'paid' }));
@@ -132,6 +174,49 @@ describe('conciliación de Stripe', () => {
     await conciliar(db, 'rk_test', mas(40), a.avisar, s.pedir);
     expect(a.lista.map((i) => i.clave)).toEqual(['reembolso:pi_sin']);
     expect(textoAviso(a.lista[0]).texto).toContain('29.00');
+  });
+
+  it('reembolso acumulado: un importe mayor reabre la incidencia aunque ya estuviera cerrada', async () => {
+    await db.prepare("INSERT INTO orders (public_id, provider_session_id, provider_payment_id, provider_refunded_cents) VALUES ('o1', 'cs_1', 'pi_parcial', 1000)").run();
+    const s = await conEventos(ev('charge.refunded', { payment_intent: 'pi_parcial', amount_refunded: 1000 }));
+    const a = avisos();
+    await conciliar(db, 'rk_test', mas(40), a.avisar, s.pedir);
+    expect(a.lista).toEqual([]); // 1000 aplicado: cerrada
+    s.eventos.unshift(ev('charge.refunded', { payment_intent: 'pi_parcial', amount_refunded: 2500 }, 50));
+    await conciliar(db, 'rk_test', mas(60), a.avisar, s.pedir);
+    await conciliar(db, 'rk_test', mas(90), a.avisar, s.pedir);
+    expect(a.lista.map((i) => `${i.clave}=${i.detalle}`)).toEqual(['reembolso:pi_parcial=2500']);
+    // Repetir el mismo evento no vuelve a abrirla.
+    s.eventos.unshift({ ...s.eventos[0], id: 'evt_repetido' });
+    await conciliar(db, 'rk_test', mas(200), a.avisar, s.pedir);
+    expect(a.lista).toHaveLength(1);
+  });
+
+  it('pago sin entrega: más de 50 pendientes se van descubriendo en pasadas sucesivas', async () => {
+    const hace = sqlFecha(new Date(T0.getTime() - 8 * 24 * 3600 * 1000));
+    const k55 = Array.from({ length: 55 }, (_, k) => k);
+    await db.batch(k55.map((k) => db.prepare('INSERT INTO orders (public_id, provider_session_id, created_at) VALUES (?, ?, ?)').bind(`p${k}`, `cs_p${k}`, hace)));
+    await db.batch(k55.map((k) => db.prepare("INSERT INTO solicitudes (public_id, pedido_public_id, estado) VALUES (?, ?, 'pagada')").bind(`S-${k}`, `p${k}`)));
+    const s = await conEventos();
+    const a = avisos();
+    const r1 = await conciliar(db, 'rk_test', T0, a.avisar, s.pedir);
+    const r2 = await conciliar(db, 'rk_test', mas(5), a.avisar, s.pedir);
+    expect([r1?.sinEntrega, r2?.sinEntrega]).toEqual([50, 5]);
+    expect(await db.prepare("SELECT COUNT(*) AS n FROM incidencias WHERE tipo = 'pago_sin_entrega'").first('n')).toBe(55);
+  }, 60000);
+
+  it('una reserva de envío que se queda colgada (Worker cortado) se reintenta al vencer', async () => {
+    const s = await conEventos(ev('checkout.session.completed', { id: 'cs_colgado', payment_status: 'paid' }));
+    const a = avisos();
+    await conciliar(db, 'rk_test', mas(5), a.avisar, s.pedir);
+    // Simula un Worker cortado tras reservar y antes de que el correo saliera.
+    await db.prepare("UPDATE incidencias SET reservada_at = ? WHERE clave = 'webhook_perdido:cs_colgado'").bind(sqlFecha(mas(40))).run();
+    await conciliar(db, 'rk_test', mas(45), a.avisar, s.pedir);
+    expect(a.lista).toEqual([]); // reserva aún vigente
+    await conciliar(db, 'rk_test', mas(60), a.avisar, s.pedir);
+    expect(a.lista.map((i) => i.clave)).toEqual(['webhook_perdido:cs_colgado']);
+    await conciliar(db, 'rk_test', mas(120), a.avisar, s.pedir);
+    expect(a.lista).toHaveLength(1);
   });
 
   it('pago sin entrega: pedido pagado hace 8 días sin entregar avisa una vez', async () => {

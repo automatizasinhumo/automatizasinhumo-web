@@ -72,7 +72,7 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
       const { asunto, texto } = textoAviso(i);
       const email = await getEmailProvider(s);
       if (!email) throw new Error('sin proveedor de correo');
-      await email.send({ to: para, subject: asunto, text: texto, html: `<pre>${texto.replace(/[<&]/g, (c) => (c === '<' ? '&lt;' : '&amp;'))}</pre>`, idempotencyKey: `incidencia/${i.clave}` });
+      await email.send({ to: para, subject: asunto, text: texto, html: `<pre>${texto.replace(/[<&]/g, (c) => (c === '<' ? '&lt;' : '&amp;'))}</pre>`, idempotencyKey: `incidencia/${i.clave}/${i.detalle}` });
     });
   } catch (err) {
     console.error('Scheduled Stripe reconciliation failed:', err instanceof Error ? err.message : 'error');
