@@ -49,11 +49,15 @@ const { services } = Astro.props;
                   {service.description}
                 </span>
                 <span class="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
-                  <span class="font-semibold text-ink">{service.templatePrice}</span>
-                  <span class="text-muted">con plantilla y guía</span>
+                  {service.templatePrice && (
+                    <>
+                      <span class="font-semibold text-ink">{service.templatePrice}</span>
+                      <span class="text-muted">con plantilla y guía</span>
+                    </>
+                  )}
                   {service.setupPrice && (
                     <>
-                      <span class="text-faint" aria-hidden="true">·</span>
+                      {service.templatePrice && <span class="text-faint" aria-hidden="true">·</span>}
                       <span class="font-semibold text-ink">{service.setupPrice}</span>
                       <span class="text-muted">te lo montamos</span>
                     </>

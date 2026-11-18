@@ -10,6 +10,9 @@ import type {
   StorefrontGalleryImage,
   StorefrontImage,
 } from '../../src/features/storefront/models';
+import { resolveTheme } from '../../scripts/themes.mjs';
+
+const isDefaultTheme = resolveTheme().id === 'default';
 
 const image = (src: string, alt = 'Sample'): StorefrontImage => ({
   src,
@@ -283,7 +286,7 @@ describe('the store-owned product detail', () => {
     expect(html).toContain('href="/categories/apparel"');
   });
 
-  it('compares delivery modalities only when both are available', async () => {
+  it.skipIf(!isDefaultTheme)('compares delivery modalities only when both are available', async () => {
     const variants: ProductPurchaseModel['variants'] = [
       {
         id: 'var_template0001',
@@ -317,6 +320,37 @@ describe('the store-owned product detail', () => {
     expect(comparable).toContain('149 €');
     expect(comparable).toContain('349 €');
     expect(incomplete).not.toContain('Elige cómo quieres recibirlo');
+  });
+
+  it.skipIf(!isDefaultTheme)('describes the available modality instead of counting variants', async () => {
+    const html = await render(ProductDetail, {
+      model: detail(),
+      purchase: purchase({
+        variants: [
+          {
+            id: 'var_template0001',
+            label: 'Plantilla + guía',
+            formattedPrice: '149 €',
+            priceCents: 14900,
+            soldOut: false,
+            defaultSelected: true,
+            imageAnchor: '',
+          },
+          {
+            id: 'var_other000001',
+            label: 'Otra opción',
+            formattedPrice: '199 €',
+            priceCents: 19900,
+            soldOut: false,
+            defaultSelected: false,
+            imageAnchor: '',
+          },
+        ],
+      }),
+    });
+
+    expect(html).toContain('Sí. Tú la publicas siguiendo la guía paso a paso.');
+    expect(html).not.toContain('No. Lo montamos nosotros; tú solo nos das los datos.');
   });
 
   it('marks low stock without pinning the wording', async () => {

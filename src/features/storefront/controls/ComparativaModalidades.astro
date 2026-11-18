@@ -1,13 +1,31 @@
 ---
-// Exposes the shared comparison section through the storefront control boundary.
+// Keeps modality comparison and single-modality guidance behind the control boundary.
 import ComparativaModalidadesSection from '../sections/ComparativaModalidades.astro';
 import type { StorefrontVariant } from '../models';
+import { classifyDeliveryModalities } from '../deliveryModalities';
 
 interface Props {
   variants: StorefrontVariant[];
 }
 
 const { variants } = Astro.props;
+const modalities = classifyDeliveryModalities(variants);
+const modalityMessage = modalities.template
+  ? 'Sí. Tú la publicas siguiendo la guía paso a paso.'
+  : modalities.setup
+    ? 'No. Lo montamos nosotros; tú solo nos das los datos.'
+    : variants.length >= 2
+      ? 'Tú eliges la modalidad que mejor encaje con lo que necesitas.'
+      : 'No. Lo montamos nosotros; tú solo nos das los datos.';
 ---
 
-<ComparativaModalidadesSection variants={variants} />
+{
+  modalities.template && modalities.setup ? (
+    <ComparativaModalidadesSection variants={variants} />
+  ) : (
+    <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-quien-monta>
+      <strong class="text-ink">¿Lo tienes que montar tú?</strong>{' '}
+      {modalityMessage}
+    </p>
+  )
+}

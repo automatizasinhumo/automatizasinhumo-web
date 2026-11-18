@@ -2,6 +2,7 @@
 // Adapted from fulldotdev/ui (MIT), pricing-1.astro. Copyright (c) 2024 Fulldev, Sil Veltman. See licencias/fulldotdev-ui.txt.
 import type { StorefrontVariant } from '../models';
 import TarjetaComparacion from './TarjetaComparacion.astro';
+import { classifyDeliveryModalities } from '../deliveryModalities';
 
 interface Props {
   variants: StorefrontVariant[];
@@ -9,8 +10,7 @@ interface Props {
 
 const { variants } = Astro.props;
 
-const template = variants.find((variant) => /plantilla/i.test(variant.label));
-const setup = variants.find((variant) => /montamos/i.test(variant.label));
+const { template, setup } = classifyDeliveryModalities(variants);
 ---
 
 {template && setup && (

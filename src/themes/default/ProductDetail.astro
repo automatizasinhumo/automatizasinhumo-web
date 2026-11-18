@@ -25,9 +25,6 @@ interface Props {
 }
 
 const { model, purchase } = Astro.props;
-const hasModalities =
-  purchase.variants.some((variant) => /plantilla/i.test(variant.label)) &&
-  purchase.variants.some((variant) => /montamos/i.test(variant.label));
 ---
 
 <a href={model.backHref} class="text-sm font-medium text-faint hover:text-brand">
@@ -85,16 +82,7 @@ const hasModalities =
       )
     }
 
-    {hasModalities ? (
-      <ComparativaModalidades variants={purchase.variants} />
-    ) : (
-      <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-quien-monta>
-        <strong class="text-ink">¿Lo tienes que montar tú?</strong>{' '}
-        {purchase.variants.length >= 2
-          ? 'Tú eliges la modalidad que mejor encaje con lo que necesitas.'
-          : 'No. Lo montamos nosotros; tú solo nos das los datos.'}
-      </p>
-    )}
+    <ComparativaModalidades variants={purchase.variants} />
 
     <p class="mt-5 text-sm font-semibold text-ink">Dos formas de empezar: contrátalo directamente, o pruébalo gratis y paga solo si te gusta.</p>
 

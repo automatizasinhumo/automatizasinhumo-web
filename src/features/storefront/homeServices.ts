@@ -1,11 +1,12 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { formatMoney } from '../../money';
-import { markdownExcerpt } from '../pages/markdown.ts';
+import { markdownFirstParagraphExcerpt } from '../pages/markdown.ts';
 import { getProductBySlug } from '../products/db';
 import { listVariants } from '../products/variants';
 import type { ImageDelivery } from '../products/image';
 import { buildProductCard } from './productCard';
 import type { StorefrontImage } from './models';
+import { classifyDeliveryModalities } from './deliveryModalities';
 
 const FEATURED_SERVICES = [
   { slug: 'web-una-pagina', need: 'Necesito estar en internet' },
@@ -19,7 +20,7 @@ export interface HomeService {
   href: string;
   description: string;
   image: StorefrontImage;
-  templatePrice: string;
+  templatePrice: string | null;
   setupPrice: string | null;
 }
 
@@ -48,18 +49,17 @@ export async function loadHomeServices(
             ? Math.max(...variants.map((variant) => variant.price_cents))
             : undefined,
       });
-      const template = variants.find((variant) => /plantilla/i.test(variant.label));
-      const setup = variants.find((variant) => /montamos/i.test(variant.label));
+      const { template, setup } = classifyDeliveryModalities(variants);
 
       return {
         need,
         name: card.name,
         href: card.href,
-        description: product.description ? markdownExcerpt(product.description, 150) : '',
+        description: product.description
+          ? markdownFirstParagraphExcerpt(product.description, 150)
+          : '',
         image: card.image,
-        templatePrice: template
-          ? formatMoney(template.price_cents, options.currency)
-          : card.formattedPrice,
+        templatePrice: template ? formatMoney(template.price_cents, options.currency) : null,
         setupPrice: setup ? formatMoney(setup.price_cents, options.currency) : null,
       };
     }),

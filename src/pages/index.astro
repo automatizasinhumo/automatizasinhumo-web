@@ -18,13 +18,18 @@ if (homePath) return Astro.rewrite(homePath);
 // La portada solo en la primera vista del catálogo, no al ordenar ni paginar.
 const showHero = Astro.url.searchParams.size === 0;
 const config = getConfig();
-const homeServices = showHero
-  ? await loadHomeServices(env.DB, {
+let homeServices: Awaited<ReturnType<typeof loadHomeServices>> = [];
+if (showHero) {
+  try {
+    homeServices = await loadHomeServices(env.DB, {
       currency: config.currency,
       imageBaseUrl: config.images.baseUrl,
       delivery: Astro.locals.settings?.imageDelivery,
-    })
-  : [];
+    });
+  } catch (error) {
+    console.error('Home services failed to load:', error);
+  }
+}
 ---
 
 <Layout>
