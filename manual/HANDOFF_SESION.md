@@ -61,7 +61,7 @@
   - Sin `git stash`.
 - **Datos y dinero**:
   - Nunca mostrar secretos (`manual/CREDENCIALES_STAGING.local`).
-  - Nada de pagos ni tarjetas.
+  - Nada de pagos ni tarjetas reales (Stripe en modo test, sí: lo exige la prueba de C5).
   - Datos personales: el nombre sí, la dirección no.
 - **Estilo y commits**:
   - CRLF.
