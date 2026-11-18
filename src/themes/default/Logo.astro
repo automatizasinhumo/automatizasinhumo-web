@@ -18,8 +18,10 @@ const { class: cls = '', conNombre = true } = Astro.props;
     <path d="M7.4 17 H24.5" stroke="#176B5A" stroke-width="2.6" stroke-linecap="square" />
     <path d="M20.5 12.8 L25 17 L20.5 21.2" stroke="#B34A28" stroke-width="2.6" stroke-linecap="square" stroke-linejoin="miter" />
   </svg>
+  {/* Por debajo de 400 px el nombre va en dos líneas: en una sola, la cabecera
+      (logo + menú + Buscar + Carrito) se salía 13-16 px a 360 px (empleado multinavegador). */}
   {conNombre && (
-    <span class="whitespace-nowrap font-serif text-base leading-none min-[420px]:text-lg tracking-tight text-ink sm:text-[1.35rem]">
+    <span class="flex flex-col gap-0.5 whitespace-nowrap font-serif text-base leading-none min-[400px]:block min-[420px]:text-lg tracking-tight text-ink sm:text-[1.35rem]">
       <span class="font-bold">Automatiza</span> <span class="font-medium text-brand">sin humo</span>
     </span>
   )}

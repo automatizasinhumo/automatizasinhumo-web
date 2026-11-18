@@ -137,3 +137,34 @@ jobs:
           { echo "## html-validate: $i pÃ¡ginas, $(grep -c ' error ' hv.txt) errores"; echo; echo '```'
             sed -E 's#^html/##' hv.txt | head -60; echo '```'; echo; echo '<details><summary>NÃºmero â†’ URL</summary>'; echo; sed 's/^/    /' html/urls.txt; echo '</details>'; } | tee -a "$GITHUB_STEP_SUMMARY"
           exit $rc
+
+  axe:
+    # Segundo motor de accesibilidad (axe-core de Deque) con el mismo pa11y-ci, sobre todo el sitemap. Solo avisa.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: axe-core en todas las URL del sitemap
+        run: |
+          mapfile -t urls < <(curl -s "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+' | cut -c6- | sort -u)
+          set +e; npx --yes pa11y-ci@3.1.0 --config .pa11yci --runner axe "${urls[@]}" > axe.txt 2>&1; set -e
+          { echo "## axe-core: ${#urls[@]} páginas"; echo; echo '```'; grep -vE '^\s*$' axe.txt | tail -80; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  knip:
+    # Código muerto: ficheros, exports y dependencias sin uso (knip). Solo avisa.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: knip
+        run: |
+          set +e; npx --yes knip@5 --no-progress --reporter markdown > knip.md 2>&1; set -e
+          { echo "## knip (código muerto)"; echo; head -150 knip.md; } | tee -a "$GITHUB_STEP_SUMMARY"
