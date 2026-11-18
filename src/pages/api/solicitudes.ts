@@ -8,6 +8,7 @@ import { resolverPedido } from '../../features/solicitudes/pedido';
 import {
   CAMPO_PEDIDO,
   camposDeDescripcion,
+  confirmarCorreos,
   crearSolicitud,
   liberarCorreos,
   reclamarCorreos,
@@ -97,10 +98,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
           idempotencyKey: `solicitud-aviso-${publicId}`,
         });
       }
+      await confirmarCorreos(env.DB, publicId);
     }
   } catch (e) {
     // La solicitud ya está guardada; el aviso queda en los logs del Worker para revisarlo.
     console.error(`solicitudes: email no enviado (${publicId})`, e);
+    // Si liberar también falla, la reserva caduca sola a los 10 minutos.
     if (reclamado) await liberarCorreos(env.DB, publicId).catch(() => undefined);
   }
 

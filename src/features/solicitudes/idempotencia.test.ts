@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { Miniflare } from 'miniflare';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { crearSolicitud, liberarCorreos, reclamarCorreos, validarSolicitud, type SolicitudInput } from './index';
+import { confirmarCorreos, crearSolicitud, liberarCorreos, reclamarCorreos, validarSolicitud, type SolicitudInput } from './index';
 
 const MIGRACIONES = ['0040_solicitudes.sql', '0041_solicitudes_pedido.sql', '0044_solicitudes_envio.sql'];
 
@@ -81,6 +81,23 @@ describe('idempotencia de solicitudes', () => {
     expect(await reclamarCorreos(db, id)).toBe(true);
     await liberarCorreos(db, id);
     expect(await reclamarCorreos(db, id)).toBe(true);
+  });
+
+  it('una reserva sin confirmar (Worker cortado) caduca y el reintento manda los correos', async () => {
+    const id = await crearSolicitud(db, datos(crypto.randomUUID()));
+    expect(await reclamarCorreos(db, id)).toBe(true);
+    expect(await reclamarCorreos(db, id)).toBe(false);
+    await db.prepare("UPDATE solicitudes SET correos_at = datetime('now', '-11 minutes') WHERE public_id = ?").bind(id).run();
+    expect(await reclamarCorreos(db, id)).toBe(true);
+  });
+
+  it('con los correos confirmados no hay más envíos, aunque pase el tiempo o se libere', async () => {
+    const id = await crearSolicitud(db, datos(crypto.randomUUID()));
+    expect(await reclamarCorreos(db, id)).toBe(true);
+    await confirmarCorreos(db, id);
+    await liberarCorreos(db, id);
+    await db.prepare("UPDATE solicitudes SET correos_at = datetime('now', '-1 day') WHERE public_id = ?").bind(id).run();
+    expect(await reclamarCorreos(db, id)).toBe(false);
   });
 
   it('un token con forma rara se descarta en vez de guardarse', () => {

@@ -202,20 +202,31 @@ export async function crearSolicitud(
 }
 
 /**
- * Reclama de forma atómica el envío de los correos de una solicitud. Devuelve false si
- * otro envío (reenvío del mismo token, doble clic) ya los reclamó o mandó.
+ * Reserva de forma atómica el envío de los correos de una solicitud. Devuelve false si ya
+ * se mandaron o si otro envío (reenvío del mismo token, doble clic) los tiene reservados.
+ * La reserva caduca a los 10 minutos sin confirmar: si el Worker se cortó entre reservar y
+ * enviar, el siguiente reintento del formulario los manda.
  */
 export async function reclamarCorreos(db: D1Database, publicId: string): Promise<boolean> {
   const r = await db
-    .prepare("UPDATE solicitudes SET correos_at = datetime('now') WHERE public_id = ? AND correos_at IS NULL")
+    .prepare(
+      `UPDATE solicitudes SET correos_at = datetime('now')
+       WHERE public_id = ? AND correos_enviados_at IS NULL
+         AND (correos_at IS NULL OR correos_at < datetime('now', '-10 minutes'))`,
+    )
     .bind(publicId)
     .run();
   return r.meta.changes > 0;
 }
 
+/** Cierra la reserva: los correos salieron y ningún reintento los repite. */
+export async function confirmarCorreos(db: D1Database, publicId: string): Promise<void> {
+  await db.prepare("UPDATE solicitudes SET correos_enviados_at = datetime('now') WHERE public_id = ?").bind(publicId).run();
+}
+
 /** Libera el reclamo si el envío falló, para que el reintento del formulario los mande. */
 export async function liberarCorreos(db: D1Database, publicId: string): Promise<void> {
-  await db.prepare('UPDATE solicitudes SET correos_at = NULL WHERE public_id = ?').bind(publicId).run();
+  await db.prepare('UPDATE solicitudes SET correos_at = NULL WHERE public_id = ? AND correos_enviados_at IS NULL').bind(publicId).run();
 }
 
 export async function listarSolicitudes(db: D1Database, estado?: Estado): Promise<SolicitudRow[]> {
