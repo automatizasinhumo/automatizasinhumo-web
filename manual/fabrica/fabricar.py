@@ -46,25 +46,66 @@ def ia(tok, acc, sistema, usuario):
     return r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
 
 
+def nombre_publico(p):
+    for clave in ('negocio', 'evento', 'contacto'):
+        nombre = p.get(clave)
+        if isinstance(nombre, str) and nombre.strip():
+            return nombre.strip()
+    return ''
+
+
+def ruta_nodo(nodo):
+    partes = []
+    actual = nodo.parent
+    while getattr(actual, 'name', None) and actual.name != '[document]':
+        indice = len(actual.find_previous_siblings(actual.name)) + 1
+        partes.append(f'{actual.name}:nth-of-type({indice})')
+        actual = actual.parent
+    textos = [hijo for hijo in nodo.parent.contents if isinstance(hijo, NavigableString) and not isinstance(hijo, Comment)]
+    indice_texto = next(i + 1 for i, hijo in enumerate(textos) if hijo is nodo)
+    partes.reverse()
+    partes.append(f'#text[{indice_texto}]')
+    return ' > '.join(partes)
+
+
+def contexto_nodos(nodos):
+    textos = [nodo.strip() for nodo in nodos]
+    return [
+        {
+            'ruta': ruta_nodo(nodo),
+            'anterior': textos[i - 1] if i else '',
+            'texto': texto,
+            'siguiente': textos[i + 1] if i + 1 < len(textos) else '',
+        }
+        for i, (nodo, texto) in enumerate(zip(nodos, textos))
+    ]
+
+
 def reescribir(textos, p, cred):
     sistema = ('Eres redactor web para pequeños negocios de España. Adaptas los textos de una plantilla al negocio '
-               'del cliente. Español de España, tono cercano y concreto, sin inventar premios, cifras ni años. '
+               'o evento del cliente. Mantén el contexto de la página y el orden de lectura; no adaptes frases aisladas. '
+               'un dato del pedido aparece una sola vez por bloque. Español de España, tono cercano y concreto, '
+               'sin inventar premios, cifras ni años. '
                'Los textos cortos (menú, botones, etiquetas, nombres de personas, clientes o proyectos) también se adaptan: '
-               'nombres inventados de la plantilla pasan a ser genéricos del negocio. Recibes un objeto JSON {"número": "texto"}; responde SOLO con un objeto JSON con las mismas claves '
-               'y el texto adaptado como valor.')
-    datos = (f"Negocio: {p['negocio']}. Actividad: {p['actividad']}. Ciudad: {p['ciudad']}. "
+               'nombres inventados de la plantilla pasan a ser genéricos del negocio o evento. Recibes un objeto JSON '
+               'con nodos numerados; cada nodo contiene su ruta y las frases vecinas en orden. Responde SOLO con un '
+               'objeto JSON con las mismas claves y un texto adaptado como valor.')
+    nombre = nombre_publico(p)
+    datos = (f"Negocio o evento: {nombre}. Actividad: {p['actividad']}. Ciudad: {p['ciudad']}. "
              f"Servicios: {', '.join(p.get('servicios', []))}. Lo que cuenta el cliente: {p.get('descripcion', '')}")
     salida = {}
     for i in range(0, len(textos), LOTE):
-        pend = {str(k): t for k, t in enumerate(textos[i:i + LOTE])}
+        pend = {str(k): textos[k] for k in range(i, min(i + LOTE, len(textos)))}
         for intento in range(3):
             if not pend:
                 break
             try:
-                r = ia(*cred, sistema, f'{datos}\n\nTextos de la plantilla:\n{json.dumps(pend, ensure_ascii=False)}')
+                r = ia(*cred, sistema, f'{datos}\n\nNodos de la página (orden de lectura):\n'
+                       f'{json.dumps(pend, ensure_ascii=False)}')
                 nuevo = json.loads(r[r.index('{'): r.rindex('}') + 1])
                 for k in [k for k in pend if isinstance(nuevo.get(k), str) and nuevo[k].strip()]:
-                    salida[pend.pop(k)] = nuevo[k]
+                    salida[k] = nuevo[k]
+                    del pend[k]
             except Exception as e:  # noqa: BLE001 — lo que no se adapte conserva el texto de la plantilla
                 print('  lote', i // LOTE, 'intento', intento + 1, type(e).__name__)
         print(f'  textos {min(i + LOTE, len(textos))}/{len(textos)} (sin adaptar: {len(pend)})', flush=True)
@@ -124,12 +165,12 @@ def fabricar(ruta_pedido, desplegar=True):
 
     nodos = [n for n in sopa.body.find_all(string=True) if isinstance(n, NavigableString)
              and not any(x.name in OMITIR_TAGS for x in n.parents if x.name) and re.search(r'[A-Za-zÁÉÍÓÚáéíóúñÑ]{2,}', n)]
-    textos = list(dict.fromkeys(n.strip() for n in nodos))
+    textos = contexto_nodos(nodos)
     print(f"  {len(textos)} textos a adaptar" if PUBLICO else
           f"{p['id']}: {len(textos)} textos a adaptar (marca de la plantilla: {marca or '?'})")
     nuevos = reescribir(textos, p, credenciales())
-    for n in nodos:
-        t = nuevos.get(n.strip())
+    for i, n in enumerate(nodos):
+        t = nuevos.get(str(i))
         if t:
             n.replace_with(n[: len(n) - len(n.lstrip())] + t + n[len(n.rstrip()):])
 
@@ -162,7 +203,7 @@ def poner_datos(out, p, marca):
     Todo dato del pedido entra escapado: el formulario es público y un nombre con «<script>»
     o un correo con comillas no deben convertirse en HTML de la vista previa.
     """
-    negocio = H.escape(p['negocio'])
+    negocio = H.escape(nombre_publico(p))
     correo = p['email'].strip()
     if not CORREO_VALIDO.fullmatch(correo):
         raise ValueError('correo del pedido no válido')
