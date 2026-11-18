@@ -698,11 +698,12 @@ The order is recorded only after the existing settlement verifier confirms payme
 ### Demo — an agent shops the store
 
 ```sh
-export AGENT_DEMO_ALLOWED_HOSTS=<your-host>
-node scripts/agent-demo.mjs https://<your-host> "warm hat" 40
-# Search "warm hat" under 40: 3 in-stock candidate(s)
-#   USD 32  Merino Wool Beanie  [merino-wool-beanie]   ← picked (most relevant in budget)
-# → prints the full Stripe checkout URL
+# Sustitúyelo por el host de tu tienda.
+export AGENT_DEMO_ALLOWED_HOSTS=tienda.example.com
+node scripts/agent-demo.mjs https://tienda.example.com "warm hat" 40
+# Buscar "warm hat" por debajo de 40: 3 producto(s) con stock
+#   USD 32  Merino Wool Beanie  [merino-wool-beanie]   ← seleccionado por relevancia dentro del presupuesto
+# → muestra la factura BOLT11 completa y consulta el estado del pedido
 ```
 
 Or just ask any tool-using LLM:

@@ -13,4 +13,4 @@ CREATE INDEX IF NOT EXISTS idx_product_images_product ON product_images(product_
 
 -- Backfill: each product's existing image becomes its first gallery image.
 INSERT INTO product_images (product_id, image_key, position)
-  SELECT id, image_key, 0 FROM products WHERE image_key IS NOT NULL AND length(image_key) > 0;
+  SELECT id, image_key, 0 FROM products WHERE image_key IS NOT NULL AND image_key != '';

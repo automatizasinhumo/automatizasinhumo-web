@@ -8,6 +8,6 @@ ALTER TABLE products ADD COLUMN slug TEXT;
 -- the app generates clean unique slugs going forward.
 UPDATE products
 SET slug = lower(replace(replace(replace(replace(name, ' ', '-'), '''', ''), '.', ''), ',', ''))
-WHERE slug IS NULL OR length(slug) = 0;
+WHERE slug IS NULL OR slug = '';
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
