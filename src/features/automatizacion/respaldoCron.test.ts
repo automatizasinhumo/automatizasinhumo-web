@@ -1,10 +1,11 @@
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
-import { franja, lanzarProgramados, type Marcas, pendientes, semana } from './respaldoCron';
+import { franja, lanzarProgramados, type Marcas, PROGRAMADOS, pendientes, semana } from './respaldoCron';
 
 const nombres = (d: string, hechos: Record<string, string> = {}) =>
   pendientes(new Date(d), hechos).map((p) => p.programado.workflow);
 
-const SEMANALES = ['empleados-qa.yml', 'seguridad.yml', 'empleados-semanales.yml', 'vigilantes-cadena.yml'];
+const SEMANALES = ['empleados-qa.yml', 'seguridad.yml', 'empleados-semanales.yml', 'vigilantes-cadena.yml', 'desplegar-staging.yml'];
 
 /** Marcas en memoria con la misma semántica (comparar e intercambiar) que D1. */
 function marcasMemoria(inicial: Record<string, string> = {}): Marcas & { datos: Record<string, string> } {
@@ -165,5 +166,16 @@ describe('lanzarProgramados', () => {
     );
     expect(r2.lanzados).toEqual(['fabrica-vistas-previas.yml', 'seguridad.yml']);
     error.mockRestore();
+  });
+});
+
+describe('cobertura del respaldo', () => {
+  // GitHub no dispara `schedule` en este repo: un workflow programado fuera de la lista no correría nunca.
+  it('todo workflow con `schedule` está en PROGRAMADOS', () => {
+    const dir = new URL('../../../.github/workflows/', import.meta.url);
+    const programados = readdirSync(dir)
+      .filter((f) => /\.ya?ml$/.test(f) && /^\s*schedule:/m.test(readFileSync(new URL(f, dir), 'utf8')))
+      .sort();
+    expect(PROGRAMADOS.map((p) => p.workflow).sort()).toEqual(programados);
   });
 });

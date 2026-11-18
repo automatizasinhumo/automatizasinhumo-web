@@ -8,7 +8,8 @@ name: Empleados semanales (staging)
 #   - corrector     (LanguageTool, LGPL): erratas en los textos del catálogo (manual/catalogo)
 #   - navegadores   (microsoft/playwright, Apache-2.0): Chromium + Firefox + WebKit, 360/1280 px
 #   - html          (html-validate, MIT): HTML válido y accesible en todas las URL del sitemap
-# Solo «navegadores» y «html» pueden poner el run en rojo; el resto avisa en el resumen.
+#   - idioma-demos  (cheerio, MIT): las demos públicas en español de España (C20)
+# Solo «navegadores», «html» e «idioma-demos» pueden poner el run en rojo; el resto avisa en el resumen.
 
 on:
   schedule:
@@ -105,10 +106,10 @@ jobs:
           node-version: '22'
       - name: Instalar Playwright (fuera del package.json de la tienda)
         run: |
-          # Aparte: «npm i --no-save» dentro del repo choca con su lockfile (edgesOut null).
-          npm i --prefix "$RUNNER_TEMP/pw" --no-audit --no-fund playwright@1.56.1
-          ln -s "$RUNNER_TEMP/pw/node_modules" node_modules
-          npx playwright install --with-deps chromium firefox webkit
+          # Paquete aparte con su propio lockfile (qa/navegador): versión e integridad fijadas.
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          ln -s qa/navegador/node_modules node_modules
+          qa/navegador/node_modules/.bin/playwright install --with-deps chromium firefox webkit
       - run: node qa/navegadores.mjs "$BASE" qa/urls-navegadores.txt
       - run: node qa/buscador-movil.mjs "$BASE"
       - uses: actions/upload-artifact@v6
@@ -169,3 +170,24 @@ jobs:
         run: |
           set +e; npx --yes knip@5 --no-progress --reporter markdown > knip.md 2>&1; set -e
           { echo "## knip (código muerto)"; echo; head -150 knip.md; } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  idioma-demos:
+    # Si falla: node manual/demos/localizar-demos.mjs y desplegar las demos (manual/demos).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: node scripts/demos/idioma.mjs --json idioma-demos.json
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: idioma-demos
+          path: idioma-demos.json
+          if-no-files-found: ignore
+          retention-days: 14

@@ -64,6 +64,8 @@ export const PROGRAMADOS: Programado[] = [
   { workflow: 'seguridad.yml', periodo: semana },
   { workflow: 'empleados-semanales.yml', periodo: semana },
   { workflow: 'vigilantes-cadena.yml', periodo: semana },
+  // Lanzado a mano o por el respaldo, también redespliega main en staging antes del recorrido.
+  { workflow: 'desplegar-staging.yml', periodo: semana },
 ];
 
 /** Marcas por workflow: `periodo@franja` (reservado) o `periodo@~` (hecho). */

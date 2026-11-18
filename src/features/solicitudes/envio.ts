@@ -245,6 +245,8 @@ interface Paso {
   /** Estado en que ese correo dejó la solicitud: si cambió, el cliente respondió o David la movió. */
   estado: Estado;
   dias: number;
+  /** Días a partir de los cuales ya no se manda (lo sustituye otro seguimiento). */
+  hasta?: number;
   /** Estado al que pasa tras enviarlo (solo si sigue en `estado`). */
   despues?: Estado;
   /** Seguimientos de la misma versión que hacen innecesario este. */
@@ -274,26 +276,44 @@ export async function enviarSeguimientos(
   // La espera primero: con 7 días cumplidos el recordatorio ya no tiene sentido.
   const pasos: Paso[] = [
     { tipo: 'espera', base: 'revision', estado: 'vista_previa_enviada', dias: DIAS_ESPERA, despues: 'en_espera_cliente' },
-    { tipo: 'recordatorio', base: 'revision', estado: 'vista_previa_enviada', dias: DIAS_RECORDATORIO, salvo: 'espera' },
+    // `hasta`: aunque la espera no saliera (lote lleno, fallo), el recordatorio caduca al día 7.
+    { tipo: 'recordatorio', base: 'revision', estado: 'vista_previa_enviada', dias: DIAS_RECORDATORIO, hasta: DIAS_ESPERA, salvo: 'espera' },
   ];
   if (resenaUrl && /^https:\/\/\S+$/.test(resenaUrl)) {
     pasos.push({ tipo: 'resena', base: 'entregado', estado: 'entregada', dias: DIAS_RESENA });
   }
   for (const p of pasos) {
+    if (p.despues) {
+      // Reparación: correo enviado pero el cambio de estado no llegó a guardarse (el Worker
+      // murió entre los dos). Solo si nadie tocó la solicitud después del correo y es el de
+      // la última versión enviada del correo base.
+      await db
+        .prepare(
+          `UPDATE solicitudes SET estado = ?, updated_at = datetime('now')
+           WHERE estado = ? AND EXISTS (SELECT 1 FROM notificaciones x
+             WHERE x.solicitud_public_id = solicitudes.public_id AND x.tipo = ? AND x.estado_envio = 'enviado'
+               AND x.enviado_at >= solicitudes.updated_at
+               AND x.version = (SELECT MAX(m.version) FROM notificaciones m WHERE m.solicitud_public_id = x.solicitud_public_id
+                 AND m.tipo = ? AND m.estado_envio = 'enviado'))`,
+        )
+        .bind(p.despues, p.estado, p.tipo, p.base)
+        .run();
+    }
     // Último correo base enviado de cada solicitud que sigue en su estado. Las agotadas
-    // (error tras MAX_INTENTOS_CRON) esperan en Admin y no ocupan el LIMIT.
+    // (error tras MAX_INTENTOS_CRON) esperan en Admin y no ocupan el LIMIT; una reserva
+    // «enviando» caducada sí vuelve a salir, para que enviarNotificacion la reclame.
     const { results } = await db
       .prepare(
         `SELECT n.solicitud_public_id AS id, n.version, n.cuerpo FROM notificaciones n
          JOIN solicitudes s ON s.public_id = n.solicitud_public_id
-         WHERE n.tipo = ? AND n.estado_envio = 'enviado' AND n.enviado_at <= ? AND s.estado = ?
+         WHERE n.tipo = ? AND n.estado_envio = 'enviado' AND n.enviado_at <= ? AND n.enviado_at > ? AND s.estado = ?
            AND n.version = (SELECT MAX(m.version) FROM notificaciones m
              WHERE m.solicitud_public_id = n.solicitud_public_id AND m.tipo = n.tipo AND m.estado_envio = 'enviado')
            AND NOT EXISTS (SELECT 1 FROM notificaciones x WHERE x.solicitud_public_id = n.solicitud_public_id
-             AND x.version = n.version AND (x.tipo = ? AND (x.estado_envio = 'enviado' OR x.intentos >= ?) OR x.tipo = ?))
+             AND x.version = n.version AND (x.tipo = ? AND (x.estado_envio = 'enviado' OR (x.estado_envio = 'error' AND x.intentos >= ?)) OR x.tipo = ?))
          ORDER BY n.enviado_at LIMIT ?`,
       )
-      .bind(p.base, hace(p.dias), p.estado, p.tipo, MAX_INTENTOS_CRON, p.salvo ?? '', limite)
+      .bind(p.base, hace(p.dias), p.hasta ? hace(p.hasta) : '', p.estado, p.tipo, MAX_INTENTOS_CRON, p.salvo ?? '', limite)
       .all<{ id: string; version: number; cuerpo: string }>();
     for (const { id, version, cuerpo } of results ?? []) {
       const enlace = p.tipo === 'resena' ? (resenaUrl as string) : enlaceDe(cuerpo);

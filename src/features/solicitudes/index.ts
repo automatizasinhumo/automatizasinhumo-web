@@ -67,6 +67,8 @@ export interface SolicitudInput {
   utm_medium: string | null;
   utm_campaign: string | null;
   referrer: string | null;
+  /** Token del formulario: el mismo envío repetido (doble clic, reintento) no crea otra solicitud. */
+  envio?: string | null;
 }
 
 export type Validacion =
@@ -135,9 +137,12 @@ export function validarSolicitud(form: FormData, etiquetas: string[]): Validacio
       utm_medium: opcional(form, 'utm_medium', 100),
       utm_campaign: opcional(form, 'utm_campaign', 100),
       referrer: opcional(form, 'referrer', 300),
+      envio: ENVIO_RE.test(texto(form, 'envio', 80)) ? texto(form, 'envio', 80) : null,
     },
   };
 }
+
+const ENVIO_RE = /^[A-Za-z0-9-]{16,64}$/;
 
 const ALPHA = '23456789abcdefghjkmnpqrstvwxyz';
 /** Número de solicitud legible para el cliente (p. ej. «S-7K3M9Q»). */
@@ -163,10 +168,13 @@ export async function crearSolicitud(
   pedidoPublicId: string | null = null,
 ): Promise<string> {
   const publicId = nuevoPublicId();
-  await db
+  const envio = s.envio ?? null;
+  // Mismo token de formulario = mismo envío: no se crea otra fila y se devuelve la que ya hay.
+  const r = await db
     .prepare(
-      `INSERT INTO solicitudes (public_id, slug, producto, modalidad, nombre, email, telefono, campos, mensaje, utm_source, utm_medium, utm_campaign, referrer, pedido_public_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO solicitudes (public_id, slug, producto, modalidad, nombre, email, telefono, campos, mensaje, utm_source, utm_medium, utm_campaign, referrer, pedido_public_id, envio)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(envio) WHERE envio IS NOT NULL DO NOTHING`,
     )
     .bind(
       publicId,
@@ -183,9 +191,42 @@ export async function crearSolicitud(
       s.utm_campaign,
       s.referrer,
       pedidoPublicId,
+      envio,
     )
     .run();
+  if (envio && !r.meta.changes) {
+    const previa = await db.prepare('SELECT public_id FROM solicitudes WHERE envio = ?').bind(envio).first<string>('public_id');
+    if (previa) return previa;
+  }
   return publicId;
+}
+
+/**
+ * Reserva de forma atómica el envío de los correos de una solicitud. Devuelve false si ya
+ * se mandaron o si otro envío (reenvío del mismo token, doble clic) los tiene reservados.
+ * La reserva caduca a los 10 minutos sin confirmar: si el Worker se cortó entre reservar y
+ * enviar, el siguiente reintento del formulario los manda.
+ */
+export async function reclamarCorreos(db: D1Database, publicId: string): Promise<boolean> {
+  const r = await db
+    .prepare(
+      `UPDATE solicitudes SET correos_at = datetime('now')
+       WHERE public_id = ? AND correos_enviados_at IS NULL
+         AND (correos_at IS NULL OR correos_at < datetime('now', '-10 minutes'))`,
+    )
+    .bind(publicId)
+    .run();
+  return r.meta.changes > 0;
+}
+
+/** Cierra la reserva: los correos salieron y ningún reintento los repite. */
+export async function confirmarCorreos(db: D1Database, publicId: string): Promise<void> {
+  await db.prepare("UPDATE solicitudes SET correos_enviados_at = datetime('now') WHERE public_id = ?").bind(publicId).run();
+}
+
+/** Libera el reclamo si el envío falló, para que el reintento del formulario los mande. */
+export async function liberarCorreos(db: D1Database, publicId: string): Promise<void> {
+  await db.prepare('UPDATE solicitudes SET correos_at = NULL WHERE public_id = ? AND correos_enviados_at IS NULL').bind(publicId).run();
 }
 
 export async function listarSolicitudes(db: D1Database, estado?: Estado): Promise<SolicitudRow[]> {

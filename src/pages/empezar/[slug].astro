@@ -120,6 +120,8 @@ const label = 'block text-sm font-medium text-ink';
             </div>
           </div>
           <input type="hidden" name="slug" value={slug} />
+          {/* Un token por formulario mostrado: el doble envío devuelve la misma solicitud. */}
+          <input type="hidden" name="envio" value={crypto.randomUUID()} />
           {verificado && <input type="hidden" name="pedido" value={pedidoToken} />}
           <input type="hidden" name="utm_source" value={q.get('utm_source') ?? ''} />
           <input type="hidden" name="utm_medium" value={q.get('utm_medium') ?? ''} />

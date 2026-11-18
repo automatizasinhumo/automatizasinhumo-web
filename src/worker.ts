@@ -4,8 +4,11 @@ import { sweepStaleNotifications } from './features/email/outbox';
 import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting, getStoreSettings } from './features/settings/db';
 import { getEmailProvider } from './features/email';
+import { escapeHtml } from './features/email/layout';
 import { enviarSeguimientos, enviarVistasPreviasListas } from './features/solicitudes/envio';
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
+import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
+import { getConfig } from './config';
 
 /**
  * Worker entrypoint.
@@ -67,6 +70,22 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     await enviarSeguimientos(db, await getEmailProvider(ajustes), new Date(), await getSetting(db, 'resena_url'));
   } catch (err) {
     console.error('Scheduled follow-up email sweep failed:', err);
+  }
+
+  // Conciliación de Stripe con pedidos y entregas (C39): una alerta por incidencia
+  // al correo del dueño. No-op sin STRIPE_CONCILIACION_KEY (clave restringida, solo lectura).
+  try {
+    const s = await getStoreSettings(db);
+    const para = s.emailNotifyTo || getConfig().email.notifyTo;
+    await conciliar(db, env.STRIPE_CONCILIACION_KEY, cuando, async (i) => {
+      if (!para) throw new Error('sin destinatario de avisos (email_notify_to)');
+      const { asunto, texto } = textoAviso(i);
+      const email = await getEmailProvider(s);
+      if (!email) throw new Error('sin proveedor de correo');
+      await email.send({ to: para, subject: asunto, text: texto, html: `<pre>${escapeHtml(texto)}</pre>`, idempotencyKey: `incidencia/${i.clave}/${i.detalle}` });
+    });
+  } catch (err) {
+    console.error('Scheduled Stripe reconciliation failed:', err instanceof Error ? err.message : 'error');
   }
 
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.

@@ -75,6 +75,9 @@ declare namespace Cloudflare {
     // con Actions: write en un solo repo, y ese repo como dueño/repo. Sin ellos, nada.
     GITHUB_DISPATCH_TOKEN?: string;
     GITHUB_DISPATCH_REPO?: string;
+    // Conciliación de pagos (solicitudes/conciliacion.ts): clave restringida de Stripe
+    // con solo «Events: read». Sin ella, la conciliación no corre.
+    STRIPE_CONCILIACION_KEY?: string;
     // Stable HTTPS origin for absolute URLs embedded in public cached responses.
     // Set when a custom domain is the sole ingress; fresh workers.dev instances
     // omit it and use their request origin until a custom domain is attached.
