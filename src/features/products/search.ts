@@ -15,8 +15,10 @@ export function toFtsQuery(raw: string | readonly string[]): string | null {
     ...new Set(
       queries
         .map((query) => {
-          const tokens = tokenizeSearchTerms(normalizeSearchQuery(query)).map(stemSpanishTerm);
-          return tokens.length > 0 ? tokens.map((term) => `${term}*`).join(' ') : null;
+          const terms = tokenizeSearchTerms(normalizeSearchQuery(query)).map(termQuery);
+          if (terms.length === 0) return null;
+          // FTS5 no admite AND implícito junto a un grupo entre paréntesis.
+          return terms.join(terms.some((t) => t.startsWith('(')) ? ' AND ' : ' ');
         })
         .filter((query): query is string => query !== null),
     ),
@@ -26,6 +28,15 @@ export function toFtsQuery(raw: string | readonly string[]): string | null {
   return expressions.length === 1
     ? expressions[0]
     : expressions.map((expression) => `(${expression})`).join(' OR ');
+}
+
+/**
+ * Snowball no siempre recorta: «asistencia» da «asistent», que no es prefijo de la
+ * palabra indexada (el índice FTS5 no lematiza). Entonces se busca también la literal.
+ */
+function termQuery(token: string): string {
+  const stem = stemSpanishTerm(token);
+  return token.startsWith(stem) ? `${stem}*` : `(${stem}* OR ${token}*)`;
 }
 
 function exclusionSql(ids: number[]): string {

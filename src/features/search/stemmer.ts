@@ -7,5 +7,6 @@ export function stemSpanishTerm(term: string): string {
 }
 
 export function tokenizeSearchTerms(value: string): string[] {
-  return value.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  // NFC antes de partir: «invitación» (tilde combinada) sería «invitacio» + «n».
+  return value.normalize('NFC').toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
 }
