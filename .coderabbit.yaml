@@ -23,6 +23,6 @@ reviews:
     - path: "manual/catalogo/**"
       instructions: >-
         Catálogo de servicios. Comprueba precios coherentes (Lo montas tú < Te lo montamos),
-        tono claro sin promesas exageradas y que no aparezcan datos personales salvo el nombre del titular.
+        tono claro sin promesas exageradas y que no aparezcan datos personales salvo el nombre del titular y su correo de contacto (src/contacto.ts).
 chat:
   auto_reply: true
