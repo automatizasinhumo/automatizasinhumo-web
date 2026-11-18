@@ -20,3 +20,13 @@ Reglas para Copilot:
 Las tareas salen del mapa de adopción (`manual/auditorias-gpt/ronda-07-respuesta.md`). Cada una dice qué clonar, qué copiar y dónde, y la prueba que demuestra que funciona.
 
 <!-- TAREAS -->
+
+### C1 · Componentes comerciales Astro (mapa ronda 07, adopción 8) — PENDIENTE
+Clona fulldotdev/ui (MIT) y konstantinWDK/astro-components (MIT) en una carpeta temporal fuera del repo. Copia:
+- fulldotdev/ui/src/components/blocks/services-1.astro -> src/features/storefront/sections/ServiciosPorNecesidad.astro
+- fulldotdev/ui/src/components/blocks/pricing-1.astro -> src/features/storefront/sections/ComparativaModalidades.astro
+- konstantinWDK/astro-components/src/components/lib/cards/PricingCompareMiniCard.astro -> src/features/storefront/sections/TarjetaComparacion.astro
+Adáptalos a los tokens y clases Tailwind v4 del tema actual (sin añadir dependencias nuevas salvo que sean imprescindibles), con datos del catálogo real. Úsalos en la portada y en las fichas donde la comparación aporte información. Prueba: `npx astro build` sin errores y capturas a 360 y 1280 px de la portada y de tres fichas, adjuntas a la PR.
+
+### C2 · Blog y páginas por sector en el sitemap (mapa ronda 07, adopción 9) — PENDIENTE
+Clona mearashadowfax/ScrewFast (MIT). Copia src/views/BlogIndexView.astro, src/views/BlogPostView.astro, src/components/ui/cards/CardBlog.astro, src/utils/content.ts y src/utils/metadata.ts a src/features/blog/ y src/features/seo/metadata.ts. Crea src/pages/blog/ y src/pages/webs/[sector].astro (peluquerías, fontaneros, restaurantes, abogados, fisioterapeutas) enlazando a los servicios y demos reales. Añade las rutas a src/pages/sitemap.xml.ts. Prueba: build sin errores; cada página con title y description únicos; las rutas aparecen en /sitemap.xml.
