@@ -29,7 +29,8 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias
-        run: pip install --only-binary :all: --require-hashes -r manual/fabrica/requirements-ci.txt
+        run: |
+          pip install --only-binary :all: --require-hashes -r manual/fabrica/requirements-ci.txt
 
       - name: Pruebas
         run: python -m unittest discover -s manual/fabrica -v
