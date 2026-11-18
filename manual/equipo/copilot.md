@@ -84,6 +84,26 @@ Prueba: una URL que funciona y otra que da error; el monitor abre una incidencia
 Usa el paquete `schema-dts` (google/schema-dts, Apache-2.0) para tipar el JSON-LD de `src/layouts/Layout.astro` y añadir Service, Offer y BreadcrumbList en las fichas, solo con datos reales del catálogo.
 Prueba: `npx astro build` en verde; el JSON-LD de tres fichas pasa el validador de schema.org y no lleva precios inventados.
 
+### C12 · Rastreo SEO en CI con SiteOne Crawler y noindex en páginas de trámite (ronda 10, hallazgos 1-2) — PENDIENTE
+Usa el binario oficial `siteone-crawler-v2.5.1-linux-x64.tar.gz` de las releases de janreges/siteone-crawler (MIT); toma su `.github/workflows/ci.yml` solo como molde para crear `.github/workflows/seo-crawl.yml` (semanal + `workflow_dispatch`, contra staging con `--ignore-robots-txt`, `--ci`, `--ci-max-404=0` y `--ci-junit-file`). Añade `noindex` explícito en `src/pages/search.astro`, `src/pages/empezar/[slug].astro` y `src/pages/empezar/gracias.astro` mediante una prop `noindex` de `src/layouts/Layout.astro`. No toques el `X-Robots-Tag` de `src/pages/empezar/estado.astro`.
+Prueba: `/search?q=peluqueria` y `/empezar/gracias` llevan `noindex`; `/products/web-una-pagina` no; el informe JUnit se sube como artefacto y un 404 interno hace fallar el job.
+
+### C13 · Inspector de JSON-LD en CI con seo-graph (ronda 10, empleado 2) — PENDIENTE (después de C11)
+Usa el escáner de jdevalk/seo-graph (MIT) tal como indica `packages/seo-graph-scanner/README.md` en un job nuevo de `.github/workflows/seo-crawl.yml` que revise la portada, una categoría y tres fichas del staging. Para las migas de C11, copia `packages/astro-seo-graph/src/breadcrumbs.ts` a `src/features/seo/breadcrumbs.ts` y adapta `packages/astro-seo-graph/test/breadcrumbs.test.ts`.
+Prueba: un JSON-LD roto a propósito hace fallar el job; ninguna miga apunta a una URL inexistente; los precios de Offer coinciden con D1.
+
+### C14 · Sitemap con lastmod y comprobación de canonical con sitemap.js (ronda 10, hallazgo 4) — PENDIENTE
+Usa el paquete `sitemap` (ekalinin/sitemap.js, MIT). Copia `examples/parse-existing-xml.js` a `qa/seo/sitemap.mjs` y adáptalo para leer `/sitemap.xml` del staging, pedir cada URL y comparar su canonical. Añade `lastmod` en `src/pages/sitemap.xml.ts` con el `updated_at` de las páginas (`src/features/pages/db.ts`), sin cambiar la lectura dinámica desde D1. Workflow `.github/workflows/seo-sitemap.yml`, semanal.
+Prueba: sitemap válido, sin duplicados ni URLs privadas; todas responden 200 y su canonical coincide con la URL; `src/pages/sitemap.xml.test.ts` cubre `lastmod`.
+
+### C15 · IndexNow al desplegar en el dominio definitivo (ronda 10, empleado 4) — PENDIENTE (después de C14 y del dominio de producción)
+Usa la acción publicada `bojieyang/indexnow-action` (MIT), fijada por SHA, en `.github/workflows/seo-indexnow.yml` tras un despliegue de producción correcto. La clave va en un secreto de Actions y su fichero de verificación en `public/`. Solo se envían URLs de `automatizasinhumo.com` cambiadas según `lastmod`.
+Prueba: el fichero de clave responde 200 en producción; staging nunca se envía; una URL cambiada recibe respuesta aceptada.
+
+### C16 · Informe semanal de Search Console (ronda 10, empleado 5) — PENDIENTE (después de verificar el dominio en Search Console)
+Copia `samples/searchconsole/search_analytics_api_sample.py` de googleapis/google-api-python-client (Apache-2.0) a `scripts/seo/search-console.py`, con cuenta de servicio de solo lectura en un secreto de Actions. Workflow `.github/workflows/seo-search-console.yml`, semanal, que sube un CSV como artefacto (consultas, páginas, clics, impresiones, CTR, posición, móvil) y resume en el job las consultas comerciales («precio», «cuánto cuesta», «web peluquería»…) con muchas impresiones y pocos clics.
+Prueba: sin permisos falla con un mensaje claro y sin cifras inventadas; ninguna credencial aparece en el log.
+
 ## Huecos de arquitectura (los resuelve Claude, no Copilot)
 
 - **Límite de 100 Workers:** cada vista previa crea un Worker `web-<id>`. Antes de llegar al límite hay que servir todas las vistas previas desde un único Worker con R2, por ruta o por hostname. Se buscará un repo que lo haga (ronda 09).
