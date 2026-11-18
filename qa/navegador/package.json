@@ -3,6 +3,7 @@
   "private": true,
   "description": "Playwright fijado con lockfile para los workflows de QA en navegador (npm ci --prefix qa/navegador).",
   "dependencies": {
+    "@playwright/test": "1.56.1",
     "playwright": "1.56.1"
   }
 }

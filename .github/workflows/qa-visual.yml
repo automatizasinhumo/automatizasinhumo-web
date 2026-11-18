@@ -1,0 +1,92 @@
+name: QA visual
+
+# Regresión visual (C23): construye la web de la PR, la sirve en local con el catálogo real
+# (manual/catalogo/seed.sql) y compara cada página clave a 360, 390, 768 y 1280 px con su
+# captura de referencia (tests/visual/capturas, generadas en este mismo runner Linux).
+# Si desaparece el buscador o un botón, o se rompe la maqueta, la PR se pone en rojo y el
+# artefacto «qa-visual» enseña esperado / actual / diferencia.
+#
+# Cambio visual a propósito: Actions → QA visual → Run workflow sobre la rama de la PR con
+# actualizar=true. Regenera las capturas y las sube como commit a esa rama (un commit del
+# GITHUB_TOKEN no relanza los checks: cerrar y reabrir la PR, o el siguiente push, los repite).
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      actualizar:
+        description: 'Regenerar las capturas de referencia y subirlas a la rama'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            qa/navegador/package-lock.json
+
+      - name: Dependencias (web y navegador con versión fijada)
+        run: |
+          npm ci
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          ln -s ../../qa/navegador/node_modules tests/visual/node_modules
+          qa/navegador/node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Construir
+        run: npm run build
+
+      - name: Base de datos local con el catálogo
+        run: |
+          W="npx wrangler --config dist/server/wrangler.json"
+          CI=1 $W d1 migrations apply DB --local --persist-to .wrangler/visual
+          $W d1 execute DB --local --persist-to .wrangler/visual --file=manual/catalogo/seed.sql
+          $W d1 execute DB --local --persist-to .wrangler/visual --file=tests/visual/ajustes.sql
+
+      - name: Comparar con las capturas de referencia
+        if: ${{ !inputs.actualizar }}
+        run: |
+          if ! ls tests/visual/capturas/*.png >/dev/null 2>&1; then
+            echo "::error::No hay capturas de referencia: lanza QA visual a mano sobre esta rama con actualizar=true"
+            exit 1
+          fi
+          qa/navegador/node_modules/.bin/playwright test -c tests/visual
+
+      - name: Regenerar y subir las capturas
+        if: ${{ inputs.actualizar }}
+        run: |
+          rm -rf tests/visual/capturas
+          qa/navegador/node_modules/.bin/playwright test -c tests/visual --update-snapshots
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests/visual/capturas
+          if git diff --cached --quiet; then echo 'Capturas sin cambios'; exit 0; fi
+          git commit -m 'QA visual: capturas de referencia regeneradas'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: qa-visual
+          path: |
+            playwright-report/
+            test-results/visual/
+          if-no-files-found: ignore
+          retention-days: 14
