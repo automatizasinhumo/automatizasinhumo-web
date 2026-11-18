@@ -20,7 +20,7 @@ export function normalizeCacheTags(tags: Iterable<string>): string[] {
     // cannot belong to one tag.
     if (!VALID_TAG.test(tag)) throw new Error(`Invalid cache tag: ${JSON.stringify(tag)}`);
   }
-  return normalized.sort();
+  return normalized.sort((a, b) => a.localeCompare(b, 'es'));
 }
 
 /** Merge tags without discarding route-specific product tags. */

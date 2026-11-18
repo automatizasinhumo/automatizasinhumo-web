@@ -86,8 +86,10 @@ def fabricar(ruta_pedido, desplegar=True):
     titulo = sopa.title.string if sopa.title and sopa.title.string else ''
     marca = H.unescape(titulo.split('|')[-1]).strip() if '|' in titulo else ''
     logo = sopa.select_one('[class*="brand"], [class*="logo"]')
-    if not marca and logo and 0 < len(logo.get_text(' ', strip=True)) < 40:
-        marca = logo.get_text(' ', strip=True)
+    if not marca and logo is not None:
+        texto_logo = logo.get_text(' ', strip=True)
+        if 0 < len(texto_logo) < 40:
+            marca = texto_logo
 
     nodos = [n for n in sopa.body.find_all(string=True) if isinstance(n, NavigableString)
              and not any(x.name in OMITIR_TAGS for x in n.parents if x.name) and re.search(r'[A-Za-zÁÉÍÓÚáéíóúñÑ]{2,}', n)]
