@@ -3,7 +3,7 @@ uso: python ask.py <prompt.txt> <salida.md> [--new | --chat URL] [--wait MIN] [-
 Por defecto sigue en el último chat (last_chat.txt); --new abre uno nuevo en el proyecto.
 Edge 9241 se abre solo si está cerrado y se cierra al terminar (ChatGPT consume mucha RAM);
 --no-cerrar lo deja abierto. Perfil con la sesión: %LOCALAPPDATA%\automatizasinhumo\edge-9241."""
-import os, re, subprocess, sys, time, urllib.request
+import os, subprocess, sys, time, urllib.request
 from playwright.sync_api import sync_playwright
 
 
