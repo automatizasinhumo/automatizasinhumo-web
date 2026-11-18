@@ -49,6 +49,14 @@ class PonerDatos(unittest.TestCase):
         self.assertEqual(out.count('name="robots"'), 1)
         self.assertIn('<head><meta name="robots" content="noindex">', out)
 
+    def test_metas_de_la_plantilla_en_cualquier_orden(self):
+        metas = ('<meta content="index,follow" name="robots"><meta content="x" property="og:image">'
+                 "<link href='https://lumen.test/' rel='canonical'>")
+        out = poner_datos(PLANTILLA.replace('<head>', '<head>' + metas), pedido(), 'Lumen')
+        self.assertEqual(out.count('robots'), 1)
+        self.assertNotIn('og:image', out)
+        self.assertNotIn('canonical', out)
+
     def test_nombre_que_contiene_la_marca_no_se_duplica(self):
         out = poner_datos(PLANTILLA, pedido(negocio='Lumen Ana'), 'Lumen')
         self.assertIn('class="logo">Lumen Ana<', out)

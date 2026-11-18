@@ -181,7 +181,10 @@ def poner_datos(out, p, marca):
     out = CORREO_VALIDO.sub(lambda _: correo, out)
     titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"
     out = re.sub(r'<title>[^<]*</title>', lambda _: titulo, out, count=1)
-    out = re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:(url|image)[^>]*>|<meta name="robots"[^>]*>', '', out)
+    # Los atributos pueden venir en cualquier orden y con cualquier comilla.
+    out = re.sub(r'''<link\b[^>]*\brel=["']?canonical\b[^>]*>'''
+                 r'''|<meta\b[^>]*\bproperty=["']?og:(?:url|image)\b[^>]*>'''
+                 r'''|<meta\b[^>]*\bname=["']?robots\b[^>]*>''', '', out, flags=re.I)
     return re.sub(r'<head[^>]*>', lambda m: m.group(0) + '<meta name="robots" content="noindex">', out, count=1)
 
 
