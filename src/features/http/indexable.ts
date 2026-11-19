@@ -14,7 +14,9 @@ export function esIndexable(origin: string): boolean {
   } catch {
     return false;
   }
-  return url.protocol === 'https:' && !NO_INDEXABLE.some((r) => r.test(url.hostname));
+  // «x.workers.dev.» (punto final, FQDN) es el mismo host: se quita antes de comparar.
+  const host = url.hostname.replace(/\.+$/, '');
+  return url.protocol === 'https:' && host !== '' && !NO_INDEXABLE.some((r) => r.test(host));
 }
 
 /** Rutas privadas: ni en robots.txt como permitidas ni en el sitemap. */
