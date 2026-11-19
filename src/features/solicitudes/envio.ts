@@ -7,25 +7,13 @@
  * «Enviar» y el cron) nunca mandan el mismo correo dos veces.
  */
 
-import type { D1Database } from "@cloudflare/workers-types";
-import type { EmailProvider } from "../email/provider";
-import { CAMPO_PEDIDO, type Estado } from "./index";
-import {
-  correoHtml,
-  prepararCorreo,
-  type DatosCorreo,
-  type TipoCorreo,
-} from "./correos";
-import type { Firmador } from "./decision";
+import type { D1Database } from '@cloudflare/workers-types';
+import type { EmailProvider } from '../email/provider';
+import { CAMPO_PEDIDO, type Estado } from './index';
+import { correoHtml, prepararCorreo, type DatosCorreo, type TipoCorreo } from './correos';
+import type { Firmador } from './decision';
 
-type Fila = {
-  nombre: string;
-  email: string;
-  producto: string | null;
-  slug: string;
-  campos: string;
-  pedido_public_id: string | null;
-};
+type Fila = { nombre: string; email: string; producto: string | null; slug: string; campos: string; pedido_public_id: string | null };
 
 export async function datosDe(
   db: D1Database,
@@ -38,48 +26,34 @@ export async function datosDe(
   version?: number,
 ): Promise<(DatosCorreo & { email: string }) | null> {
   const r = await db
-    .prepare(
-      "SELECT nombre, email, producto, slug, campos, pedido_public_id FROM solicitudes WHERE public_id = ?",
-    )
+    .prepare('SELECT nombre, email, producto, slug, campos, pedido_public_id FROM solicitudes WHERE public_id = ?')
     .bind(id)
     .first<Fila>();
   if (!r) return null;
   let pedido: string | null = null;
   try {
-    pedido =
-      (JSON.parse(r.campos) as Record<string, string>)[CAMPO_PEDIDO] ?? null;
+    pedido = (JSON.parse(r.campos) as Record<string, string>)[CAMPO_PEDIDO] ?? null;
   } catch {
     // campos corruptos: sin número de pedido
   }
   let v = version;
   if (firmar && !v) {
     const u = await db
-      .prepare(
-        "SELECT MAX(version) AS v FROM notificaciones WHERE solicitud_public_id = ? AND tipo = 'revision' AND estado_envio = 'enviado'",
-      )
+      .prepare("SELECT MAX(version) AS v FROM notificaciones WHERE solicitud_public_id = ? AND tipo = 'revision' AND estado_envio = 'enviado'")
       .bind(id)
       .first<{ v: number | null }>()
       .catch(() => null);
     v = u?.v ?? 1;
   }
   const enlaceDecision = firmar ? await firmar(id, v ?? 1) : null;
-  return {
-    email: r.email,
-    nombre: r.nombre,
-    servicio: r.producto ?? r.slug,
-    esPedido: !!r.pedido_public_id,
-    pedido,
-    enlace,
-    enlaceDecision,
-    datosPendientes: pendientes,
-  };
+  return { email: r.email, nombre: r.nombre, servicio: r.producto ?? r.slug, esPedido: !!r.pedido_public_id, pedido, enlace, enlaceDecision, datosPendientes: pendientes };
 }
 
 export type ResultadoEnvio =
-  | { estado: "enviado" }
-  | { estado: "error"; error: string }
+  | { estado: 'enviado' }
+  | { estado: 'error'; error: string }
   /** No se reservó: ya enviado, otro envío en curso o sin intentos. */
-  | { estado: "ocupado" };
+  | { estado: 'ocupado' };
 
 export interface Envio {
   id: string;
@@ -107,39 +81,29 @@ export interface Envio {
 }
 
 /** Una reserva 'enviando' más antigua que esto se da por muerta y se puede reclamar. */
-const RESERVA_CADUCA = "-15 minutes";
+const RESERVA_CADUCA = '-15 minutes';
 
-export async function enviarNotificacion(
-  db: D1Database,
-  mail: EmailProvider | null,
-  e: Envio,
-): Promise<ResultadoEnvio> {
+export async function enviarNotificacion(db: D1Database, mail: EmailProvider | null, e: Envio): Promise<ResultadoEnvio> {
   // Con exigirNota/exigirEstado, ni siquiera se crea la fila si la solicitud ya no está como la leyó el cron.
   const partes: string[] = [];
   const condicion: (string | number)[] = [];
   if (e.exigirNota !== undefined) {
-    partes.push(
-      `EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`,
-    );
+    partes.push(`EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`);
     condicion.push(e.id, e.exigirNota);
   }
   if (e.exigirEstado !== undefined) {
-    partes.push(
-      "EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado = ?)",
-    );
+    partes.push('EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado = ?)');
     condicion.push(e.id, e.exigirEstado);
   }
   if (e.exigirUltima !== undefined) {
-    partes.push(
-      `NOT EXISTS (SELECT 1 FROM notificaciones b WHERE b.solicitud_public_id = ? AND b.tipo = ? AND b.estado_envio = 'enviado' AND b.version > ?)`,
-    );
+    partes.push(`NOT EXISTS (SELECT 1 FROM notificaciones b WHERE b.solicitud_public_id = ? AND b.tipo = ? AND b.estado_envio = 'enviado' AND b.version > ?)`);
     condicion.push(e.id, e.exigirUltima.tipo, e.exigirUltima.version);
   }
-  const sigueIgual = partes.join(" AND ");
+  const sigueIgual = partes.join(' AND ');
   await db
     .prepare(
       `INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo) SELECT ?, ?, ?, ?, ?
-       WHERE ${sigueIgual || "1"}
+       WHERE ${sigueIgual || '1'}
        ON CONFLICT (solicitud_public_id, tipo, version) DO NOTHING`,
     )
     .bind(e.id, e.tipo, e.version, e.asunto, e.texto, ...condicion)
@@ -159,15 +123,11 @@ export async function enviarNotificacion(
   type Previo = { asunto: string; cuerpo: string; enviado_at: string | null };
   const leerPrevio = () =>
     db
-      .prepare(
-        "SELECT asunto, cuerpo, enviado_at FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio = 'enviado'",
-      )
+      .prepare("SELECT asunto, cuerpo, enviado_at FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = ? AND estado_envio = 'enviado'")
       .bind(e.id, e.tipo, e.version)
       .first<Previo>();
-  const permitidos = e.reenviar
-    ? `'pendiente', 'error', 'enviado'`
-    : `'pendiente', 'error'`;
-  const exigir = sigueIgual ? `AND ${sigueIgual}` : "";
+  const permitidos = e.reenviar ? `'pendiente', 'error', 'enviado'` : `'pendiente', 'error'`;
+  const exigir = sigueIgual ? `AND ${sigueIgual}` : '';
   let previo: Previo | null = e.reenviar ? await leerPrevio() : null;
   let reserva = await reservar(previo);
   for (let i = 0; !reserva && e.reenviar && i < 2; i++) {
@@ -176,16 +136,15 @@ export async function enviarNotificacion(
     previo = ahora;
     reserva = await reservar(previo);
   }
-  if (!reserva) return { estado: "ocupado" };
+  if (!reserva) return { estado: 'ocupado' };
 
   function reservar(leido: Previo | null) {
     const mismaEntrega = !e.reenviar
-      ? ""
+      ? ''
       : leido
         ? `AND (estado_envio <> 'enviado' OR (asunto = ? AND cuerpo = ? AND enviado_at IS ?))`
         : `AND estado_envio <> 'enviado'`;
-    const entrega =
-      e.reenviar && leido ? [leido.asunto, leido.cuerpo, leido.enviado_at] : [];
+    const entrega = e.reenviar && leido ? [leido.asunto, leido.cuerpo, leido.enviado_at] : [];
     return db
       .prepare(
         `UPDATE notificaciones SET
@@ -215,17 +174,10 @@ export async function enviarNotificacion(
         ...condicion,
         ...entrega,
       )
-      .first<{
-        id: number;
-        intentos: number;
-        asunto: string;
-        cuerpo: string;
-      }>();
+      .first<{ id: number; intentos: number; asunto: string; cuerpo: string }>();
   }
 
-  let error: string | null = mail
-    ? null
-    : "No hay proveedor de correo configurado (Ajustes → Email).";
+  let error: string | null = mail ? null : 'No hay proveedor de correo configurado (Ajustes → Email).';
   if (mail) {
     try {
       await mail.send({
@@ -247,26 +199,17 @@ export async function enviarNotificacion(
             `UPDATE notificaciones SET estado_envio = 'enviado', asunto = ?, cuerpo = ?, error = ?
              WHERE id = ? AND reserva = ? RETURNING id`,
           )
-          .bind(
-            previo.asunto,
-            previo.cuerpo,
-            `Reenvío fallido (sigue valiendo el envío anterior): ${error}`.slice(
-              0,
-              300,
-            ),
-            reserva.id,
-            token,
-          )
+          .bind(previo.asunto, previo.cuerpo, `Reenvío fallido (sigue valiendo el envío anterior): ${error}`.slice(0, 300), reserva.id, token)
           .first()
       : await db
           .prepare(
             `UPDATE notificaciones SET estado_envio = ?, error = ?, enviado_at = CASE WHEN ? IS NULL THEN datetime('now') ELSE enviado_at END
              WHERE id = ? AND reserva = ? RETURNING id`,
           )
-          .bind(error ? "error" : "enviado", error, error, reserva.id, token)
+          .bind(error ? 'error' : 'enviado', error, error, reserva.id, token)
           .first();
-  if (!fin) return { estado: "ocupado" };
-  return error ? { estado: "error", error } : { estado: "enviado" };
+  if (!fin) return { estado: 'ocupado' };
+  return error ? { estado: 'error', error } : { estado: 'enviado' };
 }
 
 /** Nota que deja la fábrica cuando la vista previa pasó el QA. */
@@ -305,12 +248,12 @@ export async function enviarVistasPreviasListas(
     .all<{ public_id: string; nota: string }>();
   for (const { public_id: id, nota } of results ?? []) {
     const enlace = NOTA_QA_OK.exec(nota)?.[1];
-    const d = enlace ? await datosDe(db, id, enlace, "", firmar, 1) : null;
-    const c = d ? prepararCorreo("revision", d) : null;
+    const d = enlace ? await datosDe(db, id, enlace, '', firmar, 1) : null;
+    const c = d ? prepararCorreo('revision', d) : null;
     if (!d || !c?.ok) continue;
     const r = await enviarNotificacion(db, mail, {
       id,
-      tipo: "revision",
+      tipo: 'revision',
       version: 1,
       email: d.email,
       asunto: c.asunto,
@@ -318,19 +261,17 @@ export async function enviarVistasPreviasListas(
       maxIntentos: MAX_INTENTOS_CRON,
       exigirNota: nota,
     });
-    let enviado = r.estado === "enviado";
-    if (r.estado === "ocupado") {
+    let enviado = r.estado === 'enviado';
+    if (r.estado === 'ocupado') {
       // Ya enviado (a mano o por un tick anterior que murió antes de avanzar).
       const fila = await db
-        .prepare(
-          "SELECT estado_envio FROM notificaciones WHERE solicitud_public_id = ? AND tipo = 'revision' AND version = 1",
-        )
+        .prepare("SELECT estado_envio FROM notificaciones WHERE solicitud_public_id = ? AND tipo = 'revision' AND version = 1")
         .bind(id)
         .first<{ estado_envio: string }>();
-      enviado = fila?.estado_envio === "enviado";
+      enviado = fila?.estado_envio === 'enviado';
     }
     if (!enviado) {
-      if (r.estado === "error") {
+      if (r.estado === 'error') {
         res.fallidas.push(id);
         console.error(`Vista previa ${id}: correo no enviado (${r.error})`);
       }
@@ -350,7 +291,7 @@ export async function enviarVistasPreviasListas(
 }
 
 /** Formato de `datetime('now')` de SQLite, para comparar con `enviado_at`. */
-const sqlFecha = (d: Date) => d.toISOString().slice(0, 19).replace("T", " ");
+const sqlFecha = (d: Date) => d.toISOString().slice(0, 19).replace('T', ' ');
 const DIA_MS = 24 * 3600 * 1000;
 /** Días tras la revisión para el recordatorio y para dejarla en espera; tras la entrega, para la reseña. */
 export const DIAS_RECORDATORIO = 3;
@@ -358,8 +299,7 @@ export const DIAS_ESPERA = 7;
 export const DIAS_RESENA = 7;
 
 /** Primer enlace http(s) de un correo ya enviado (el de la versión que se está revisando; mismos protocolos que admite prepararCorreo). */
-const enlaceDe = (cuerpo: string) =>
-  /https?:\/\/[^\s<>]+/.exec(cuerpo)?.[0] ?? "";
+const enlaceDe = (cuerpo: string) => /https?:\/\/[^\s<>]+/.exec(cuerpo)?.[0] ?? '';
 
 interface Paso {
   tipo: TipoCorreo;
@@ -396,34 +336,15 @@ export async function enviarSeguimientos(
 ): Promise<{ enviadas: string[]; fallidas: string[] }> {
   const res = { enviadas: [] as string[], fallidas: [] as string[] };
   if (!mail) return res;
-  const hace = (dias: number) =>
-    sqlFecha(new Date(ahora.getTime() - dias * DIA_MS));
+  const hace = (dias: number) => sqlFecha(new Date(ahora.getTime() - dias * DIA_MS));
   // La espera primero: con 7 días cumplidos el recordatorio ya no tiene sentido.
   const pasos: Paso[] = [
-    {
-      tipo: "espera",
-      base: "revision",
-      estado: "vista_previa_enviada",
-      dias: DIAS_ESPERA,
-      despues: "en_espera_cliente",
-    },
+    { tipo: 'espera', base: 'revision', estado: 'vista_previa_enviada', dias: DIAS_ESPERA, despues: 'en_espera_cliente' },
     // `hasta`: aunque la espera no saliera (lote lleno, fallo), el recordatorio caduca al día 7.
-    {
-      tipo: "recordatorio",
-      base: "revision",
-      estado: "vista_previa_enviada",
-      dias: DIAS_RECORDATORIO,
-      hasta: DIAS_ESPERA,
-      salvo: "espera",
-    },
+    { tipo: 'recordatorio', base: 'revision', estado: 'vista_previa_enviada', dias: DIAS_RECORDATORIO, hasta: DIAS_ESPERA, salvo: 'espera' },
   ];
   if (resenaUrl && /^https:\/\/\S+$/.test(resenaUrl)) {
-    pasos.push({
-      tipo: "resena",
-      base: "entregado",
-      estado: "entregada",
-      dias: DIAS_RESENA,
-    });
+    pasos.push({ tipo: 'resena', base: 'entregado', estado: 'entregada', dias: DIAS_RESENA });
   }
   for (const p of pasos) {
     if (p.despues) {
@@ -457,28 +378,11 @@ export async function enviarSeguimientos(
              AND x.version = n.version AND (x.tipo = ? AND (x.estado_envio = 'enviado' OR (x.estado_envio = 'error' AND x.intentos >= ?)) OR x.tipo = ?))
          ORDER BY n.enviado_at LIMIT ?`,
       )
-      .bind(
-        p.base,
-        hace(p.dias),
-        p.hasta ? hace(p.hasta) : "",
-        p.estado,
-        p.tipo,
-        MAX_INTENTOS_CRON,
-        p.salvo ?? "",
-        limite,
-      )
+      .bind(p.base, hace(p.dias), p.hasta ? hace(p.hasta) : '', p.estado, p.tipo, MAX_INTENTOS_CRON, p.salvo ?? '', limite)
       .all<{ id: string; version: number; cuerpo: string }>();
     for (const { id, version, cuerpo } of results ?? []) {
-      const enlace =
-        p.tipo === "resena" ? (resenaUrl as string) : enlaceDe(cuerpo);
-      const d = await datosDe(
-        db,
-        id,
-        enlace,
-        "",
-        p.base === "revision" ? firmar : null,
-        version,
-      );
+      const enlace = p.tipo === 'resena' ? (resenaUrl as string) : enlaceDe(cuerpo);
+      const d = await datosDe(db, id, enlace, '', p.base === 'revision' ? firmar : null, version);
       const c = d ? prepararCorreo(p.tipo, d) : null;
       if (!d || !c?.ok) continue;
       const r = await enviarNotificacion(db, mail, {
@@ -492,7 +396,7 @@ export async function enviarSeguimientos(
         exigirEstado: p.estado,
         exigirUltima: { tipo: p.base, version },
       });
-      if (r.estado === "ocupado") {
+      if (r.estado === 'ocupado') {
         // Reserva del último intento caducada que no se puede reclamar (la carga cambió, p. ej.
         // otra resena_url): pasa a error agotado para que Admin la vea y no ocupe el lote siempre.
         await db
@@ -504,13 +408,11 @@ export async function enviarSeguimientos(
           .bind(id, p.tipo, version, MAX_INTENTOS_CRON)
           .run();
       }
-      if (r.estado === "error") {
+      if (r.estado === 'error') {
         res.fallidas.push(`${id}:${p.tipo}`);
-        console.error(
-          `Seguimiento ${p.tipo} de ${id}: correo no enviado (${r.error})`,
-        );
+        console.error(`Seguimiento ${p.tipo} de ${id}: correo no enviado (${r.error})`);
       }
-      if (r.estado !== "enviado") continue;
+      if (r.estado !== 'enviado') continue;
       if (p.despues) {
         // Condicional: si David la movió mientras salía el correo, manda su estado.
         await db
