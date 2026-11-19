@@ -4,7 +4,8 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/"
+    # Todos los lockfiles: la raíz, el MCP y las herramientas de QA fijadas (Danger, navegador).
+    directories: ["/", "/mcp", "/qa/navegador", "/qa/danger"]
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
