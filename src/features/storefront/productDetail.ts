@@ -14,6 +14,7 @@ import { requirePublicId } from '../catalog/serialize';
 import { buildProductCard } from './productCard';
 import { breadcrumbJsonLd, productTrail } from './breadcrumbs';
 // Generado por manual/demos/gen-galeria.mjs: slug del servicio → demos.
+import { disenosDe } from '../solicitudes/diseno';
 import demosPorProducto from '../../data/demos-producto.json';
 import type {
   ProductDetailModel,
@@ -178,7 +179,16 @@ export async function loadProductDetail(
     ...(product.description ? { description: markdownExcerpt(product.description, 5000) } : {}),
     image: new URL(imagePath, options.origin).href,
     offers: {
-      '@type': 'Offer',
+      // Con modalidades de distinto precio, el rango real (schema.org AggregateOffer),
+      // igual que el «Desde … según la modalidad» que se ve en la ficha.
+      ...(priceVaries
+        ? {
+            '@type': 'AggregateOffer',
+            lowPrice: toMajorUnits(Math.min(...inStockPrices), options.currency).toFixed(currencyDecimals(options.currency)),
+            highPrice: toMajorUnits(Math.max(...inStockPrices), options.currency).toFixed(currencyDecimals(options.currency)),
+            offerCount: inStockPrices.length,
+          }
+        : { '@type': 'Offer' }),
       // The SAME currency the page displays. These previously disagreed: the
       // header formatted in the store currency while JSON-LD and the live-price
       // script announced the product row's, so a legacy row advertised one
@@ -246,6 +256,7 @@ export async function loadProductDetail(
       backHref: catalogHref,
       startHref: `/empezar/${product.slug}`,
       demos: ((demosPorProducto as Record<string, StorefrontDemo[]>)[product.slug] ?? []),
+      disenos: disenosDe(product.slug),
       error: options.searchParams.get('error'),
     },
     purchase: {

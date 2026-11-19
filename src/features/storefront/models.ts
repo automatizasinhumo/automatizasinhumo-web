@@ -251,6 +251,8 @@ export interface ProductDetailModel {
   startHref: string;
   /** Demos que se ven DENTRO de la ficha (visor embebido), primero las que se tocan. */
   demos: StorefrontDemo[];
+  /** Plantillas de diseño elegibles con «Quiero este diseño» (ver solicitudes/diseno.ts). */
+  disenos: { plantilla: string; titulo: string }[];
   /** Validated message from ?error=, or null. */
   error: string | null;
 }

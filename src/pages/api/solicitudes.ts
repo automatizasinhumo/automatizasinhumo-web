@@ -6,6 +6,7 @@ import { getEmailProvider } from '../../features/email';
 import { getConfig } from '../../config';
 import { rememberStoreUrl } from '../../features/email/outbox';
 import { resolverPedido } from '../../features/solicitudes/pedido';
+import { CAMPO_DISENO, disenoElegido } from '../../features/solicitudes/diseno';
 import {
   CAMPO_PEDIDO,
   camposDeDescripcion,
@@ -30,7 +31,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   }
   const slug = String(form.get('slug') ?? 'consulta').trim();
   const slugSeguro = /^[a-z0-9-]{1,80}$/.test(slug) ? slug : 'consulta';
-  const volver = `/empezar/${slugSeguro}`;
+  const diseno = slug !== 'consulta' ? disenoElegido(slug, form.get('diseno')) : null;
+  // Un error devuelve al formulario sin perder el diseño elegido.
+  const volver = `/empezar/${slugSeguro}?${diseno ? `diseno=${encodeURIComponent(diseno.plantilla)}&` : ''}`;
 
   // Los campos válidos salen del servidor (ficha del servicio), no del navegador.
   let etiquetas: string[] = [];
@@ -53,8 +56,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   if (v.ok && v.spam) return redirect('/empezar/gracias', 303);
   if (!v.ok) {
     const primero = Object.keys(v.errores)[0] ?? 'datos';
-    return redirect(`${volver}?error=${encodeURIComponent(primero)}`, 303);
+    return redirect(`${volver}error=${encodeURIComponent(primero)}`, 303);
   }
+  if (diseno) v.data.campos = { [CAMPO_DISENO]: diseno.plantilla, ...v.data.campos };
   if (pedido) {
     v.data.campos = { [CAMPO_PEDIDO]: pedido.ref, ...v.data.campos };
     if (pedido.modalidad) v.data.modalidad = pedido.modalidad; // la pagada, no la del formulario
@@ -66,7 +70,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     publicId = await crearSolicitud(env.DB, v.data, pedido?.publicId ?? null);
   } catch (e) {
     console.error('solicitudes: no se pudo guardar', e);
-    return redirect(`${volver}?error=guardar`, 303);
+    return redirect(`${volver}error=guardar`, 303);
   }
 
   // Origen público para los enlaces firmados que el cron pone en los correos (no lanza).

@@ -103,7 +103,7 @@ const { model, purchase } = Astro.props;
       <dl class="mt-4 grid gap-2 rounded-xl bg-brand/5 p-4 text-xs leading-relaxed sm:grid-cols-2" data-antes-de-pagar>
         <div>
           <dt class="font-semibold text-ink">Pagas hoy</dt>
-          <dd class="text-muted">{model.priceVaries ? `Desde ${model.formattedPrice}, según la modalidad que elijas.` : `${model.formattedPrice}.`} Precio cerrado y con factura.</dd>
+          <dd class="text-muted"><span data-pagas-hoy>{model.priceVaries ? `Desde ${model.formattedPrice}, según la modalidad que elijas.` : `${model.formattedPrice}.`}</span> Precio cerrado y con factura.</dd>
         </div>
         <div>
           <dt class="font-semibold text-ink">Posibles costes después</dt>
@@ -111,7 +111,7 @@ const { model, purchase } = Astro.props;
         </div>
         <div>
           <dt class="font-semibold text-ink">Qué podrás cambiar tú</dt>
-          <dd class="text-muted">Es tuyo: te damos todos los accesos a tu nombre. Con «Te lo montamos» pides ajustes sobre lo pedido; con «Plantilla + guía» te resolvemos las dudas por email.</dd>
+          <dd class="text-muted">Es tuya: te entregamos la web y su código para publicarla donde quieras. Si prefieres que la alojemos nosotros, es una cuota aparte y opcional. Con «Te lo montamos» pides ajustes sobre lo pedido; con «Plantilla + guía» te resolvemos las dudas por email.</dd>
         </div>
         <div>
           <dt class="font-semibold text-ink">Si no te convence</dt>
@@ -276,6 +276,19 @@ const { model, purchase } = Astro.props;
           class="block h-[70vh] min-h-[420px] w-full bg-white"
         ></iframe>
       </div>
+      {model.disenos.length > 0 && (
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-sm" data-elegir-diseno>
+          <span class="text-muted">¿Te gusta uno? Empieza gratis con:</span>
+          {model.disenos.map((d) => (
+            <a
+              href={`${model.startHref}?diseno=${encodeURIComponent(d.plantilla)}`}
+              class="inline-flex rounded-full bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand/20"
+            >
+              {d.titulo} →
+            </a>
+          ))}
+        </div>
+      )}
       <p class="mt-4 text-sm text-muted">
         ¿Te encaja? <a href="#comprar" class="font-semibold text-brand hover:underline">Contrátalo arriba</a> o{' '}
         <a href={model.startHref} class="font-semibold text-brand hover:underline">pruébalo gratis con tus datos</a>.
