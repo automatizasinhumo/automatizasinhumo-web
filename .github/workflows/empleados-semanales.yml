@@ -358,7 +358,7 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
-      - run: pip install --disable-pip-version-check --only-binary :all: schemathesis==4.33.4
+      - run: 'pip install --disable-pip-version-check --only-binary=:all: schemathesis==4.33.4'
       - name: Schemathesis
         run: bash qa/api/schemathesis.sh
         env:
