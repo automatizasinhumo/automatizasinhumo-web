@@ -204,6 +204,19 @@ class ContextoDePagina(unittest.TestCase):
         self.assertEqual(nodos[0]['siguiente'], 'Nombre')
         self.assertEqual(nodos[1]['anterior'], 'Nombre')
 
+    def test_usa_el_diseno_elegido_si_el_servicio_lo_tiene(self):
+        plantilla_de = VISTAS['plantilla_de']
+        ps = ['plantillas-a/x', 'plantillas-b/y']
+        fila = {'campos': json.dumps({'Diseño elegido': 'plantillas-b/y'})}
+        self.assertEqual(plantilla_de(fila, ps), 'plantillas-b/y')
+        self.assertEqual(plantilla_de({'campos': json.dumps({'Diseño elegido': 'otra'})}, ps), 'plantillas-a/x')
+        self.assertEqual(plantilla_de({'campos': 'roto'}, ps), 'plantillas-a/x')
+        self.assertEqual(plantilla_de({'campos': None}, ps), 'plantillas-a/x')
+        # La ruta interna no llega a los textos que adapta la IA.
+        pedido = pedido_de({'public_id': 'S-1', 'nombre': 'Ana', 'email': 'a@example.test',
+                            'campos': json.dumps({'Diseño elegido': 'plantillas-b/y', 'sector': 'Peluquería'})}, 'plantillas-b/y')
+        self.assertNotIn('plantillas-b/y', json.dumps(pedido, ensure_ascii=False).replace('"plantilla": "plantillas-b/y"', ''))
+
     def test_el_pie_usa_el_nombre_del_evento_antes_que_el_contacto(self):
         pedido_fabrica = pedido_de({
             'public_id': 'boda-demo',

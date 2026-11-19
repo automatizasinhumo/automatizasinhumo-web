@@ -149,8 +149,22 @@ def qa(url, p):
     return problemas + qa_navegador(url)
 
 
+# Clave que guarda /api/solicitudes con «Quiero este diseño» (src/features/solicitudes/diseno.ts).
+CAMPO_DISENO = 'Diseño elegido'
+
+
+def plantilla_de(fila, plantillas):
+    """La plantilla que eligió el cliente si el servicio la tiene; si no, la primera."""
+    try:
+        elegida = json.loads(fila.get('campos') or '{}').get(CAMPO_DISENO)
+    except (ValueError, AttributeError):
+        elegida = None
+    return elegida if elegida in plantillas else plantillas[0]
+
+
 def pedido_de(fila, plantilla):
     campos = json.loads(fila.get('campos') or '{}')
+    campos.pop(CAMPO_DISENO, None)  # es una ruta interna, no un texto del negocio
     negocio = nombre_negocio_evento(campos)
     texto = '. '.join(f'{k}: {v}' for k, v in campos.items() if v) + ('. ' + fila['mensaje'] if fila.get('mensaje') else '')
     return {
@@ -233,7 +247,7 @@ def main():
         plantillas = mapa.get(f['slug'])
         if not plantillas:
             continue
-        p = pedido_de(f, plantillas[0])
+        p = pedido_de(f, plantilla_de(f, plantillas))
         # En Actions el registro es público: ni el id (da la URL web-<id>) ni el negocio.
         print(f"solicitud {n} ({f['slug']}) -> {p['plantilla']}" if PUBLICO else
               f"{f['public_id']} ({f['slug']}) -> {p['plantilla']} · {p['negocio']}")
