@@ -26,7 +26,7 @@
   // Recurring jobs (handler: src/worker.ts) — retries queued notifications and
   // releases expired inventory holds without waiting for the next shopper.
   "triggers": { "crons": ["*/5 * * * *"] },
-  "observability": { "enabled": true, "traces": { "enabled": true, "head_sampling_rate": 1 } },
+  "observability": { "enabled": true, "traces": { "enabled": true, "head_sampling_rate": 0.1 } },
   // Fresh instances begin on workers.dev and therefore stay uncached. A later
   // custom-domain config may enable this only alongside CANONICAL_ORIGIN and
   // workers_dev: false. cross_version_cache additionally requires a shared
