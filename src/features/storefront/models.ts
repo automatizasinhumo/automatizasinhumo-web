@@ -78,6 +78,8 @@ export interface StorefrontShellModel {
   announcement: { text: string; href: string | null } | null;
   headerLinks: StorefrontLink[];
   footerLinks: StorefrontLink[];
+  /** Páginas «Web para …» de cada oficio: enlazadas en todas las rutas para que no queden huérfanas. */
+  sectorLinks: StorefrontLink[];
   /** Form action plus the current query, so the field repopulates on /search. */
   search: { action: string; query: string };
   cart: { enabled: boolean; href: string };
