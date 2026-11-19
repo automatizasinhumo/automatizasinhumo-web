@@ -136,6 +136,32 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  exploratorio:
+    # Ronda 22 (D1): secuencias aleatorias de navegación con fast-check (qa/exploratorio.mjs).
+    # Si falla, el resumen trae la secuencia mínima y la semilla para repetirla en local.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Instalar Playwright y fast-check (qa/navegador, con lockfile)
+        run: |
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          ln -s qa/navegador/node_modules node_modules
+          qa/navegador/node_modules/.bin/playwright install --with-deps chromium
+      - run: node qa/exploratorio.mjs "$BASE" 25
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: capturas-exploratorio
+          path: capturas/
+          if-no-files-found: ignore
+          retention-days: 14
+
   html:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
