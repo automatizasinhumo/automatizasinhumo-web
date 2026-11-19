@@ -320,3 +320,18 @@ class BloqueoDePublicacion(unittest.TestCase):
     def test_un_texto_devuelto_sin_cambios_bloquea(self):
         with self.assertRaises(modulo_fabricar.FabricaBloqueada):
             renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_que_adapta(lambda n: n['texto']))
+
+
+class PublicacionKV(unittest.TestCase):
+    def test_pares_kv_por_fichero_con_caducidad_y_sin_headers(self):
+        import base64
+        with tempfile.TemporaryDirectory() as t:
+            site = Path(t)
+            (site / 'css').mkdir()
+            (site / 'index.html').write_text('<p>hola</p>', encoding='utf-8')
+            (site / 'css' / 'a.css').write_bytes(b'p{}')
+            (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
+            pares = modulo_fabricar.pares_kv(site, 'abc-1')
+        self.assertEqual([p['key'] for p in pares], ['sites/abc-1/css/a.css', 'sites/abc-1/index.html'])
+        self.assertEqual(base64.b64decode(pares[1]['value']), b'<p>hola</p>')
+        self.assertTrue(all(p['base64'] and p['expiration_ttl'] == modulo_fabricar.VISTAS_TTL for p in pares))
