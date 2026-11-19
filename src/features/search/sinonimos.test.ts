@@ -18,4 +18,8 @@ describe('expandirSinonimos', () => {
   it('cambia restaurante por carta', () => {
     expect(expandirSinonimos('restaurante')).toBe('carta');
   });
+  it('ignora la puntuación pegada a la palabra', () => {
+    expect(expandirSinonimos('intranet,')).toBe('portal');
+    expect(expandirSinonimos('¿restaurante?')).toBe('carta');
+  });
 });
