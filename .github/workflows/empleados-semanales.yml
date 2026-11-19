@@ -242,7 +242,7 @@ jobs:
           sed "s#^#$BASE#" qa/urls.txt > urls-abs.txt
           set +e
           docker run --rm --shm-size=1g -v "$PWD:/sitespeed.io" sitespeedio/sitespeed.io:43.0.0 \
-            urls-abs.txt --budget.configPath qa/perf-budget.json -b chrome -n 3 --outputFolder sitespeed-result > sitespeed.log 2>&1
+            urls-abs.txt --budget.configPath qa/perf-budget.json -b chrome -n 3 --chrome.collectLongTasks --outputFolder sitespeed-result > sitespeed.log 2>&1
           code=$?; set -e
           { echo "## sitespeed.io: presupuesto (salida $code)"; echo; echo '```'; grep -iE 'budget|fail|pass|error' sitespeed.log | tail -60; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
