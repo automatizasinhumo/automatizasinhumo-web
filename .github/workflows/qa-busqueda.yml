@@ -44,16 +44,16 @@ jobs:
 
       - name: Base de datos local con el catálogo
         run: |
-          W="npx wrangler --config dist/server/wrangler.json"
+          W="./node_modules/.bin/wrangler --config dist/server/wrangler.json"
           CI=1 $W d1 migrations apply DB --local --persist-to .wrangler/busqueda
           $W d1 execute DB --local --persist-to .wrangler/busqueda --file=manual/catalogo/seed.sql
           $W d1 execute DB --local --persist-to .wrangler/busqueda --file=qa/search/ajustes.sql
 
       - name: Servir y lanzar las consultas
         run: |
-          npx wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/busqueda \
+          ./node_modules/.bin/wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/busqueda \
             --var AUTH_SECRET:qa-busqueda-0123456789abcdef0123 --ip 127.0.0.1 --port 8791 > wrangler.log 2>&1 &
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             curl -fsS -o /dev/null http://127.0.0.1:8791/search?q=web && break
             sleep 2
           done
