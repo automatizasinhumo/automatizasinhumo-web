@@ -303,9 +303,11 @@ const label = 'block text-sm font-medium text-ink';
     const b = leerBorrador(almacen.getItem(clave), Date.now());
     if (b) {
       let usado = false;
+      // Lo que pide la URL (?modalidad=pro) manda sobre lo guardado.
+      const enUrl = new URLSearchParams(location.search);
       for (const el of campos()) {
         const v = b.campos[el.name];
-        if (v === undefined) continue;
+        if (v === undefined || enUrl.has(el.name)) continue;
         if (el.type === 'radio' || el.type === 'checkbox') {
           if ((el as HTMLInputElement).value === v) {
             (el as HTMLInputElement).checked = true;
@@ -323,7 +325,9 @@ const label = 'block text-sm font-medium text-ink';
           almacen!.removeItem(clave);
           for (const el of campos()) if (el.type !== 'radio' && el.type !== 'checkbox') el.value = '';
           aviso.remove();
-          f.querySelector<HTMLElement>('input:not([type=hidden]),textarea')?.focus();
+          // El formulario por pasos vuelve al primero (y lo enfoca); sin pasos, primer campo visible.
+          if (!f.dispatchEvent(new CustomEvent('borrador:reinicio', { cancelable: true }))) return;
+          f.querySelector<HTMLElement>('[data-paso] input:not([type=hidden]),[data-paso] textarea')?.focus();
         });
       }
     }
@@ -407,6 +411,10 @@ const label = 'block text-sm font-medium text-ink';
     prog.classList.remove('hidden');
     nav.classList.replace('hidden', 'flex');
     sig.addEventListener('click', avanzar);
+    f.addEventListener('borrador:reinicio', (e) => {
+      e.preventDefault();
+      mostrar(0, true);
+    });
     atras.addEventListener('click', () => actual > 0 && mostrar(actual - 1, true));
     // Intro en un campo de texto avanza de paso en vez de intentar enviar.
     f.addEventListener('keydown', (e) => {

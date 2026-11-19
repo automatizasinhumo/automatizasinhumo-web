@@ -73,9 +73,11 @@ const TEXTO = {
 <script>
   import { PREFIJO } from '../../features/solicitudes/borrador';
 
-  // Solicitud enviada: el borrador local ya no hace falta.
+  // Solicitud enviada: su borrador ya no hace falta. Solo el de este servicio; los
+  // borradores de otros servicios siguen ahí.
+  const slug = new URLSearchParams(location.search).get('slug') ?? '';
   try {
-    for (const k of Object.keys(localStorage)) if (k.startsWith(PREFIJO)) localStorage.removeItem(k);
+    if (/^[a-z0-9-]{1,80}$/.test(slug)) localStorage.removeItem(PREFIJO + slug);
   } catch {
     /* sin almacenamiento */
   }
