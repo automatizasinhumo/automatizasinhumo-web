@@ -1,0 +1,75 @@
+name: QA búsqueda
+
+# Relevancia del buscador (C24): construye la web de la PR, la sirve en local con el catálogo
+# real (manual/catalogo/seed.sql), lanza las consultas de qa/search/consultas.tsv contra /search
+# y mide el orden con ir_measures (nDCG@5 y Recall@5 de lo imprescindible, qa/search/qrels.txt).
+# Si un cambio en fichas, sinónimos o ranking empeora lo que encuentra un cliente, la PR se pone
+# en rojo y el artefacto «qa-busqueda» enseña las consultas más flojas.
+#
+# Ficha nueva: añadir sus consultas y juicios a consultas.tsv y qrels.txt en la misma PR.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-busqueda-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  busqueda:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependencias
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          python3 -m venv .venv-busqueda
+          .venv-busqueda/bin/pip install --quiet ir-measures==0.4.3
+
+      - name: Construir
+        run: npm run build
+
+      - name: Base de datos local con el catálogo
+        run: |
+          W="./node_modules/.bin/wrangler --config dist/server/wrangler.json"
+          CI=1 $W d1 migrations apply DB --local --persist-to .wrangler/busqueda
+          $W d1 execute DB --local --persist-to .wrangler/busqueda --file=manual/catalogo/seed.sql
+          $W d1 execute DB --local --persist-to .wrangler/busqueda --file=qa/search/ajustes.sql
+
+      - name: Servir y lanzar las consultas
+        run: |
+          ./node_modules/.bin/wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/busqueda \
+            --var AUTH_SECRET:qa-busqueda-0123456789abcdef0123 --ip 127.0.0.1 --port 8791 > wrangler.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -fsS -o /dev/null http://127.0.0.1:8791/search?q=web && break
+            sleep 2
+          done
+          node qa/search/ejecutar.mjs http://127.0.0.1:8791 busqueda.run
+
+      - name: Medir la relevancia
+        shell: bash  # -eo pipefail: el tee no tapa la salida 1 de evaluar.py
+        run: .venv-busqueda/bin/python qa/search/evaluar.py busqueda.run | tee busqueda.txt
+
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: qa-busqueda
+          path: |
+            busqueda.run
+            busqueda.txt
+            wrangler.log
+          if-no-files-found: ignore
+          retention-days: 14

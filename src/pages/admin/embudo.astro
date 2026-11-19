@@ -1,0 +1,154 @@
+---
+import { env } from 'cloudflare:workers';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { pct, resumen, type Resumen } from '../../features/embudo';
+
+export const prerender = false;
+
+// Embudo sin cookies: cuántas visitas llegan, ven una ficha, miran la muestra y
+// abren el formulario; las solicitudes y los pagos salen de sus propias tablas.
+// Cada paso se cuenta por separado (no hay identificador de visitante), así que los
+// porcentajes son entre totales del periodo, no el recorrido de una persona.
+const OPCIONES = [7, 30, 90] as const;
+const pedido = Number(Astro.url.searchParams.get('dias'));
+const dias = (OPCIONES as readonly number[]).includes(pedido) ? pedido : 30;
+
+let r: Resumen | null = null;
+try {
+  r = await resumen(env.DB, dias);
+} catch (error) {
+  console.error('Embudo: no se pudo leer', error);
+}
+
+const filas = r
+  ? [
+      { label: 'Entradas a la web', n: r.pasos.entrada, base: null, sobre: '' },
+      { label: 'Vistas de ficha', n: r.pasos.ficha, base: r.pasos.entrada, sobre: 'las entradas' },
+      { label: 'Muestra vista en la ficha', n: r.pasos.muestra, base: r.pasos.ficha, sobre: 'las vistas de ficha' },
+      { label: 'Formulario abierto', n: r.pasos.empezar, base: r.pasos.ficha, sobre: 'las vistas de ficha' },
+      { label: 'Solicitudes enviadas', n: r.solicitudes, base: r.pasos.empezar, sobre: 'los formularios abiertos' },
+      { label: 'Pagos', n: r.pagos, base: r.solicitudes, sobre: 'las solicitudes' },
+    ]
+  : [];
+const NOMBRE_METRICA: Record<string, string> = {
+  LCP: 'Carga (LCP)',
+  INP: 'Respuesta (INP)',
+  CLS: 'Estabilidad (CLS)',
+};
+---
+
+<AdminLayout title="Embudo" active="embudo">
+  <div class="space-y-8" lang="es">
+    <div>
+      <h1 class="text-2xl font-semibold">Embudo</h1>
+      <p class="mt-1 text-sm text-gray-600">
+        Recuentos por día, sin cookies ni datos personales. Cada paso se cuenta aparte: los porcentajes comparan totales del periodo.
+        No cuentan los robots ni quien tiene activado el control de privacidad del navegador.
+      </p>
+    </div>
+
+    <nav class="flex flex-wrap gap-2 text-sm" aria-label="Periodo">
+      {OPCIONES.map((d) => (
+        <a href={`/admin/embudo?dias=${d}`} class:list={['rounded-full border px-3 py-1', d === dias ? 'border-black bg-black text-white' : 'border-line']}>
+          {d} días
+        </a>
+      ))}
+    </nav>
+
+    {!r && <p class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">No se pudo leer el embudo. ¿Falta aplicar la migración 0046_embudo?</p>}
+
+    {r && (
+      <>
+        <section>
+          <h2 class="mb-3 text-lg font-semibold">Pasos</h2>
+          <table class="w-full text-sm">
+            <thead class="text-left text-xs uppercase tracking-widest text-gray-500">
+              <tr><th class="py-1">Paso</th><th class="py-1 text-right">Total</th><th class="py-1 text-right">Porcentaje</th></tr>
+            </thead>
+            <tbody>
+              {filas.map((f) => (
+                <tr class="border-t border-line">
+                  <td class="py-2">{f.label}</td>
+                  <td class="py-2 text-right font-mono">{f.n}</td>
+                  <td class="py-2 text-right font-mono text-gray-600">{f.base === null ? '' : `${pct(f.n, f.base)} de ${f.sobre}`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2 class="mb-3 text-lg font-semibold">De dónde llegan</h2>
+          {r.origenes.length === 0 ? (
+            <p class="text-sm text-gray-500">Todavía no hay entradas en este periodo.</p>
+          ) : (
+            <table class="w-full text-sm">
+              <tbody>
+                {r.origenes.map((o) => (
+                  <tr class="border-t border-line">
+                    <td class="py-2">{o.origen}</td>
+                    <td class="py-2 text-right font-mono">{o.n}</td>
+                    <td class="py-2 text-right font-mono text-gray-600">{pct(Number(o.n), r!.pasos.entrada)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <section>
+          <h2 class="mb-3 text-lg font-semibold">Fichas</h2>
+          {r.fichas.length === 0 ? (
+            <p class="text-sm text-gray-500">Todavía no hay visitas a fichas en este periodo.</p>
+          ) : (
+            <table class="w-full text-sm">
+              <thead class="text-left text-xs uppercase tracking-widest text-gray-500">
+                <tr><th class="py-1">Ficha</th><th class="py-1 text-right">Vistas</th><th class="py-1 text-right">Muestra</th><th class="py-1 text-right">Formulario</th></tr>
+              </thead>
+              <tbody>
+                {r.fichas.map((f) => (
+                  <tr class="border-t border-line">
+                    <td class="py-2"><a class="underline" href={`/products/${f.ficha}`} target="_blank" rel="noopener">{f.ficha}</a></td>
+                    <td class="py-2 text-right font-mono">{f.ficha_n}</td>
+                    <td class="py-2 text-right font-mono">{f.muestra_n} <span class="text-gray-500">({pct(Number(f.muestra_n), Number(f.ficha_n))})</span></td>
+                    <td class="py-2 text-right font-mono">{f.empezar_n} <span class="text-gray-500">({pct(Number(f.empezar_n), Number(f.ficha_n))})</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <section>
+          <h2 class="mb-1 text-lg font-semibold">Velocidad real (Core Web Vitals)</h2>
+          <p class="mb-3 text-sm text-gray-600">Medida en los navegadores de las visitas. Google pide que al menos el 75 % sea «buena».</p>
+          {r.vitales.length === 0 ? (
+            <p class="text-sm text-gray-500">Todavía no hay medidas en este periodo.</p>
+          ) : (
+            <table class="w-full text-sm">
+              <thead class="text-left text-xs uppercase tracking-widest text-gray-500">
+                <tr><th class="py-1">Métrica</th><th class="py-1">Página</th><th class="py-1 text-right">Buena</th><th class="py-1 text-right">Mejorable</th><th class="py-1 text-right">Mala</th><th class="py-1 text-right">Medidas</th></tr>
+              </thead>
+              <tbody>
+                {r.vitales.map((v) => {
+                  const total = Number(v.bueno) + Number(v.mejorable) + Number(v.malo);
+                  const bien = total > 0 && Number(v.bueno) / total >= 0.75;
+                  return (
+                    <tr class="border-t border-line">
+                      <td class="py-2">{NOMBRE_METRICA[v.metrica] ?? v.metrica}</td>
+                      <td class="py-2">{v.ruta}</td>
+                      <td class:list={['py-2 text-right font-mono', bien ? 'text-emerald-700' : 'text-red-700']}>{pct(Number(v.bueno), total)}</td>
+                      <td class="py-2 text-right font-mono">{pct(Number(v.mejorable), total)}</td>
+                      <td class="py-2 text-right font-mono">{pct(Number(v.malo), total)}</td>
+                      <td class="py-2 text-right font-mono text-gray-600">{total}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </>
+    )}
+  </div>
+</AdminLayout>
