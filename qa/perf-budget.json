@@ -1,0 +1,24 @@
+{
+  "budget": {
+    "timings": {
+      "firstContentfulPaint": 1800,
+      "largestContentfulPaint": 2500
+    },
+    "requests": {
+      "total": 60
+    },
+    "transferSize": {
+      "total": 1500000,
+      "javascript": 300000,
+      "css": 100000,
+      "image": 800000,
+      "font": 150000
+    },
+    "thirdParty": {
+      "requests": 10
+    },
+    "cpu": {
+      "totalBlockingTime": 200
+    }
+  }
+}

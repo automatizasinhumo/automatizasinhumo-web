@@ -9,6 +9,9 @@ name: Empleados semanales (staging)
 #   - navegadores   (microsoft/playwright, Apache-2.0): Chromium + Firefox + WebKit, 360/1280 px
 #   - html          (html-validate, MIT): HTML válido y accesible en todas las URL del sitemap
 #   - idioma-demos  (cheerio, MIT): las demos públicas en español de España (C20)
+#   - zap           (zaproxy/action-baseline, Apache-2.0): DAST pasivo del staging
+#   - presupuesto-web (sitespeedio/sitespeed.io, MIT): peso y tiempos por página (qa/perf-budget.json)
+#   - nuclei        (projectdiscovery/nuclei-action, MIT): exposiciones y mala configuración
 # Solo «navegadores», «html» e «idioma-demos» pueden poner el run en rojo; el resto avisa en el resumen.
 
 on:
@@ -72,7 +75,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
       - name: Cabeceras de seguridad (Mozilla HTTP Observatory)
         run: |
           # Scripts permitidos: listas HSTS/TLD del observatorio y su almacén de certificados.
@@ -210,3 +213,64 @@ jobs:
           path: idioma-demos.json
           if-no-files-found: ignore
           retention-days: 14
+
+  zap:
+    # DAST pasivo (zaproxy/action-baseline, Apache-2.0): araña el staging y señala cabeceras, cookies y
+    # fugas que solo se ven con la web desplegada. Solo avisa: informe en el artefacto zap_scan.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        continue-on-error: true # código 3 (no pudo analizar) también es solo aviso
+        with:
+          target: ${{ env.BASE }}
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -m 5'
+
+  presupuesto-web:
+    # Presupuesto de peso y tiempos por página (sitespeedio/sitespeed.io, MIT), límites en qa/perf-budget.json.
+    # Complementa a Lighthouse: falla por kB y peticiones, no por nota. Solo avisa.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: sitespeed.io con presupuesto
+        run: |
+          sed "s#^#$BASE#" qa/urls.txt > urls-abs.txt
+          set +e
+          docker run --rm --shm-size=1g -v "$PWD:/sitespeed.io" sitespeedio/sitespeed.io:43.0.0 \
+            urls-abs.txt --budget.configPath qa/perf-budget.json -b chrome -n 3 --chrome.collectLongTasks --outputFolder sitespeed-result > sitespeed.log 2>&1
+          code=$?; set -e
+          { echo "## sitespeed.io: presupuesto (salida $code)"; echo; echo '```'; grep -iE 'budget|fail|pass|error' sitespeed.log | tail -60; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: sitespeed
+          path: sitespeed-result
+          if-no-files-found: ignore
+          retention-days: 7
+
+  nuclei:
+    # Plantillas de exposición y mala configuración (projectdiscovery/nuclei-action, MIT). Solo avisa.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: projectdiscovery/nuclei-action@32a91c0da7be14c07b0ade6c14fa0f6e78d97c9c # v3.1.0
+        id: nuclei
+        continue-on-error: true
+        with:
+          args: -u ${{ env.BASE }} -tags misconfig,exposure -severity medium,high,critical -silent -o nuclei.txt -rl 20
+      - name: Resumen
+        if: always()
+        run: |
+          {
+            echo "## nuclei: exposiciones y mala configuración"; echo
+            if [ "$RESULTADO" != success ]; then echo "⚠️ El análisis no terminó ($RESULTADO): sin datos, no «sin hallazgos»."
+            elif [ -s nuclei.txt ]; then echo '```'; head -80 nuclei.txt; echo '```'
+            else echo 'Sin hallazgos.'; fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+        env:
+          RESULTADO: ${{ steps.nuclei.outcome }}
