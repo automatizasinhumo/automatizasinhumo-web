@@ -72,7 +72,9 @@ if (loaded.backfillRelated) {
         out.textContent = fmt.format(cents / divisor);
         // «Pagas hoy» dice el total de lo elegido, no el «Desde» de la ficha.
         const hoy = document.querySelector('[data-pagas-hoy]');
-        if (hoy && v) hoy.textContent = `${fmt.format(cents / divisor)} por lo que has elegido.`;
+        // Sin variantes también cuenta (solo extras); con variantes, espera a una elegida.
+        const sinVariantes = !form.querySelector('input[name="variant_id"]');
+        if (hoy && (v || sinVariantes)) hoy.textContent = `${fmt.format(cents / divisor)} por lo que has elegido.`;
         if (scroll && v) showImage(v.getAttribute('data-image-id') || '');
       };
       // Sync price + carousel to the default-selected variant on load, and on every
