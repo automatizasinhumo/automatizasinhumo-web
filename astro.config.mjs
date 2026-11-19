@@ -44,7 +44,16 @@ export default defineConfig({
   // Replaced by the equivalent middleware guard so the bearer-capability
   // /pay/otk_… form can support clients that omit Origin without weakening
   // cookie-authenticated Admin/account forms.
-  security: { checkOrigin: false },
+  security: {
+    checkOrigin: false,
+    // CSP con hashes generada por Astro (security.csp): scripts y estilos propios por hash,
+    // sin 'unsafe-inline'. Turnstile es el único script externo.
+    csp: {
+      directives: ["default-src 'self'", "img-src 'self' data: https:", "connect-src 'self'", "frame-src https://challenges.cloudflare.com", "font-src 'self'", "form-action 'self'"],
+      scriptDirective: { resources: ["'self'", 'https://challenges.cloudflare.com'] },
+      styleDirective: { resources: ["'self'"] },
+    },
+  },
   adapter: cloudflare({
     // Keep Cloudflare Images opt-in. The adapter otherwise auto-provisions an
     // IMAGES binding even though minshop stores and serves originals from R2.

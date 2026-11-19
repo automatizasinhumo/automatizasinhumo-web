@@ -285,9 +285,24 @@ const SECURITY_HEADERS: Record<string, string> = {
 
 /** Add the security headers, rebuilding when the response's headers are immutable
  *  (e.g. a Response.redirect to a payment provider, or a Cache API hit). */
+/** Astro (security.csp) already sends a CSP with script/style hashes on rendered pages:
+ *  keep it and add the hardening directives it does not set, instead of replacing it. */
+export function mergeCsp(existing: string | null, extra: string): string {
+  if (!existing) return extra;
+  const present = new Set(existing.split(';').map((d) => d.trim().split(/\s+/)[0]?.toLowerCase()).filter(Boolean));
+  const missing = extra.split(';').map((d) => d.trim()).filter((d) => d && !present.has(d.split(/\s+/)[0].toLowerCase()));
+  return missing.length ? `${existing.replace(/;\s*$/, '')}; ${missing.join('; ')}` : existing;
+}
+
+function applySecurityHeaders(headers: Headers): void {
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
+    headers.set(k, k === 'content-security-policy' ? mergeCsp(headers.get(k), v) : v);
+  }
+}
+
 function withSecurityHeaders(res: Response): Response {
   try {
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.headers.set(k, v);
+    applySecurityHeaders(res.headers);
     return res;
   } catch {
     const rebuilt = new Response(res.body, {
@@ -295,7 +310,7 @@ function withSecurityHeaders(res: Response): Response {
       statusText: res.statusText,
       headers: new Headers(res.headers),
     });
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) rebuilt.headers.set(k, v);
+    applySecurityHeaders(rebuilt.headers);
     return rebuilt;
   }
 }
