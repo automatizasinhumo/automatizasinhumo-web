@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import { asegurarPaginaEntera, pagina503 } from './features/http/paginaEntera';
 import type { APIContext, MiddlewareNext } from 'astro';
 import { env } from 'cloudflare:workers';
 import { verifyAccessJwt } from './features/auth/access';
@@ -317,5 +318,19 @@ function withSecurityHeaders(res: Response): Response {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  return withSecurityHeaders(await route(context, next));
+  let res: Response;
+  try {
+    res = await route(context, next);
+  } catch (error) {
+    // Un fallo antes de empezar a emitir (p. ej. D1 sin cupo en el frontmatter) en una página
+    // pública: mejor la página de «volvemos enseguida» que el 500 en blanco.
+    if (context.request.method !== 'GET' || !aceptaHtml(context.request)) throw error;
+    console.error('PAGINA_FALLIDA', context.url.pathname, error);
+    res = pagina503();
+  }
+  return withSecurityHeaders(await asegurarPaginaEntera(context.request.method, res, context.url.pathname));
 });
+
+function aceptaHtml(request: Request): boolean {
+  return (request.headers.get('accept') ?? '').includes('text/html');
+}
