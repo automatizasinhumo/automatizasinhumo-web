@@ -1,12 +1,15 @@
 name: Seguridad
 
-# Empleado «vigilante»: en cada push a main y cada lunes.
+# Empleado «vigilante»: en cada PR, en cada push a main y cada lunes.
 #   - gitleaks (gitleaks/gitleaks, MIT): secretos en el código y en TODO el historial.
-#     Pone el run en rojo. Si es un falso positivo, añadirlo a .gitleaksignore.
+#     Pone el run en rojo. Falso positivo: describir su FORMA en .gitleaks.toml (no la huella
+#     del commit en .gitleaksignore, que vuelve a saltar en cuanto el valor se copia a otro commit).
+#     En PR también corre, para que el rojo salga antes de fusionar y no en main.
 #   - npm audit: vulnerabilidades altas o críticas en dependencias de producción.
 #     Solo avisa en el resumen (Dependabot propone el arreglo).
 
 on:
+  pull_request:
   push:
     branches: [main]
   schedule:
