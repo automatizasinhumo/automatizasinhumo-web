@@ -16,6 +16,9 @@
     },
     "thirdParty": {
       "requests": 10
+    },
+    "cpu": {
+      "totalBlockingTime": 200
     }
   }
 }
