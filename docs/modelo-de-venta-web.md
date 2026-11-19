@@ -82,7 +82,7 @@ web normalmente no sabe registrar un dominio.
 
 | Opción | Ventaja | Problema |
 | --- | --- | --- |
-| [Registrar API de Cloudflare](https://blog.cloudflare.com/registrar-api-beta/) (beta desde abril de 2026) | Buscar, comprobar y registrar por API, **a precio de coste sin margen**, en el mismo sitio que el alojamiento | Beta: todavía no hay renovaciones, traslados ni cambio de contactos por API. Cobra en la tarjeta de la cuenta que registra. **[por verificar] Parece que no admite `.es`**: hay [una petición abierta](https://community.cloudflare.com/c/application-performance/registrar-feature-request/100) |
+| [Registrar API de Cloudflare](https://blog.cloudflare.com/registrar-api-beta/) (beta desde abril de 2026) | Buscar, comprobar y registrar por API, **a precio de coste sin margen**, en el mismo sitio que el alojamiento | Beta: todavía no hay renovaciones, traslados ni cambio de contactos por API. Cobra en la tarjeta de la cuenta que registra. **No admite `.es`, `.eu`, `.cat` ni los geográficos** (`.madrid`, `.barcelona`, `.gal`, `.eus`): comprobado el 19/11/2026 en los datos de su [página de TLD](https://www.cloudflare.com/tld-policies/) (376 TLD; los de dos letras son `ai`, `ca`, `cc`, `co`, `fm`, `io`, `mx`, `nz`, `tv`, `uk` y `us`) |
 | [API de dominios de OVHcloud](https://help.ovhcloud.com/csm/en-domain-names-api-order?id=kb_article_view&sysparm_article=KB0051563) | Admite `.es`, valida la elegibilidad del titular en el propio pedido y tiene API estable | Otra cuenta y otro proveedor. El traslado de un `.es` tarda de 7 a 9 días |
 
 **Flujo propuesto:**
@@ -90,7 +90,7 @@ web normalmente no sabe registrar un dominio.
   así no hay que trasladarlo. Si se registra en la nuestra, hay que
   [moverlo entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/):
   las dos partes lo confirman y queda bloqueado 30 días.
-- **`.es`:** se registra en OVHcloud con el cliente como titular y se apuntan los DNS a su cuenta de
+- **`.es`, `.eu`, `.cat` y geográficos:** se registran en OVHcloud con el cliente como titular y se apuntan los DNS a su cuenta de
   Cloudflare.
 
 ## 4. Qué compra exactamente el cliente
@@ -108,8 +108,8 @@ gratis en su cuenta y tiene una copia completa.
 
 - [ ] **[ahora]** Cambiar «publicadas con tu dominio» (`introCategorias.ts`) por algo cierto hoy, hasta que
       el dominio esté en el producto.
-- [ ] **[ahora]** Comprobar por API qué TLD admite la Registrar API de Cloudflare (`.es`, `.com`, `.eu`,
-      `.cat`) y anotar sus precios.
+- [x] Comprobar qué TLD admite Cloudflare Registrar: `.com`, `.net`, `.org`, `.dev` y similares, sí; `.es`,
+      `.eu`, `.cat` y geográficos, no (van por OVHcloud). Falta anotar precios desde la API con un token propio.
 - [ ] **[ahora]** Prueba con una segunda cuenta nuestra: invitación como miembro, token, despliegue del
       Worker y conexión de un dominio.
 - [ ] **[antes de producción]** Comprobación de dominio en el formulario: disponibilidad, precio y
