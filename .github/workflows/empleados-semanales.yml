@@ -120,6 +120,10 @@ jobs:
     # La etiqueta sigue a qa/navegador/package-lock.json (1.56.1); digest fijado.
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+    # Actions corre el contenedor como root con HOME de pwuser: Firefox se niega a arrancar
+    # («Running Nightly as root…», run 44527699801). Receta de la doc de Playwright para CI.
+    env:
+      HOME: /root
     steps:
       - uses: actions/checkout@v5
       - name: Instalar Playwright (fuera del package.json de la tienda)
@@ -142,18 +146,19 @@ jobs:
     # Si falla, el resumen trae la secuencia mínima y la semilla para repetirla en local.
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # Misma imagen que «navegadores»: navegadores ya dentro, sin apt (que se colgaba).
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+    env:
+      HOME: /root
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-      - name: Instalar Playwright y fast-check (qa/navegador, con lockfile)
+      - name: Instalar fast-check (qa/navegador, con lockfile; Playwright ya viene en la imagen)
         run: |
           npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
           ln -s qa/navegador/node_modules node_modules
-          qa/navegador/node_modules/.bin/playwright install --with-deps chromium
       - run: node qa/exploratorio.mjs "$BASE" 25
       - uses: actions/upload-artifact@v6
         if: failure()
