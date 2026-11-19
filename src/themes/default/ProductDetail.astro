@@ -99,6 +99,26 @@ const { model, purchase } = Astro.props;
         <li><strong class="text-ink">3.</strong> Te enseñamos el resultado en 24-72 h laborables.</li>
         <li><strong class="text-ink">4.</strong> Una ronda de ajustes y te lo entregamos.</li>
       </ol>
+      {/* Lo que se pregunta justo antes de pagar, con las mismas reglas que las preguntas
+          frecuentes: nada de cifras que no estén en la ficha. */}
+      <dl class="mt-4 grid gap-2 rounded-xl bg-brand/5 p-4 text-xs leading-relaxed sm:grid-cols-2" data-antes-de-pagar>
+        <div>
+          <dt class="font-semibold text-ink">Pagas hoy</dt>
+          <dd class="text-muted">{model.priceVaries ? `Desde ${model.formattedPrice}, según la modalidad que elijas.` : `${model.formattedPrice}.`} Precio cerrado y con factura.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-ink">Posibles costes después</dt>
+          <dd class="text-muted">Ninguna cuota obligatoria. Solo pagarías aparte lo de terceros que tú elijas (por ejemplo, un dominio propio) o el mantenimiento mensual, si lo quieres.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-ink">Qué podrás cambiar tú</dt>
+          <dd class="text-muted">Es tuyo: te damos todos los accesos a tu nombre. Con «Te lo montamos» pides ajustes sobre lo pedido; con «Plantilla + guía» te resolvemos las dudas por email.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-ink">Si no te convence</dt>
+          <dd class="text-muted">Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero. Y si empiezas gratis, no pagas nada hasta ver la vista previa.</dd>
+        </div>
+      </dl>
       <ProductPurchaseForm model={purchase} />
       <p class="mt-3 text-xs leading-relaxed text-faint" data-garantia>
         Pago seguro con tarjeta. Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero. Factura incluida.
