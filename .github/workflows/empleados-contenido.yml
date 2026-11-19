@@ -303,6 +303,7 @@ jobs:
                   rows.append(f"| {p['url']} | {words} | Error | Error | {str(e)[:40]} |")
           rows.append('\nEvaluación orientativa. No aplicar umbrales de veto a textos legales o páginas breves.')
           print('\n'.join(rows))
+          Path('legibilidad.md').write_text('\n'.join(rows) + '\n')
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('\n'.join(rows) + '\n')
           PY
@@ -323,6 +324,7 @@ jobs:
             const lines = ['## P1 — Accesibilidad con prefers-color-scheme: dark',
               '| Página | Violaciones WCAG | Contraste |', '|---|---:|---:|'];
             let total = 0, failures = 0;
+            const details = [], full = [];
             for (const p of pages) {
               const page = await context.newPage();
               try {
@@ -334,14 +336,17 @@ jobs:
                 const contrast = r.violations.filter(v => v.id === 'color-contrast').length;
                 total += r.violations.length;
                 lines.push(`| ${p.url} | ${r.violations.length} | ${contrast} |`);
-                if (r.violations.length) lines.push(`\n- ${p.url}: ${r.violations.map(v => v.id).join(', ')}`);
+                if (r.violations.length) details.push(`- ${p.url}: ${r.violations.map(v => v.id).join(', ')}`);
+                full.push({url: p.url, violations: r.violations.map(v => ({id: v.id, impact: v.impact, nodes: v.nodes.map(n => ({target: n.target, summary: n.failureSummary}))}))});
               } catch (e) {
                 failures++;
                 lines.push(`| ${p.url} | Sin analizar | ${String(e.message).slice(0, 90)} |`);
               } finally { await page.close(); }
             }
             await browser.close();
-            lines.splice(1, 0, `Páginas revisadas: ${pages.length - failures}; violaciones encontradas: ${total}; fallos de ejecución: ${failures}.`);
+            lines.splice(1, 0, `Páginas revisadas: ${pages.length - failures}; violaciones encontradas: ${total}; fallos de ejecución: ${failures}.`, '');
+            if (details.length) lines.push('', ...details);
+            fs.writeFileSync('axe-oscuro.json', JSON.stringify(full, null, 2));
             console.log(lines.join('\n'));
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
           })().catch(e => {console.error(e); process.exitCode = 1;});
@@ -361,6 +366,8 @@ jobs:
             qa-r21/siteone.html
             qa-r21/siteone.log
             qa-r21/pages.json
+            qa-r21/legibilidad.md
+            qa-r21/axe-oscuro.json
             qa-r21/urls.json
             qa-r21/cspell.log
             qa-r21/stylelint.log
