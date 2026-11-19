@@ -1,0 +1,374 @@
+# Ronda 21 — empleados de contenido (GPT, copiado tal cual con pins SHA): SiteOne Crawler (SEO,
+# huérfanas, duplicados), CSpell es-ES, Stylelint del CSS servido, textstat (legibilidad ES)
+# y axe en modo oscuro. Informes en el resumen del run; no bloquean.
+name: Empleados de contenido (semanal)
+
+on:
+  schedule:
+    - cron: '17 4 * * 1' # Lunes, 04:17 UTC
+  workflow_dispatch:
+  pull_request: # se prueba solo cuando cambia este fichero
+    paths: ['.github/workflows/empleados-contenido.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  qa-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASE_URL: https://automatizasinhumo-staging.davidpd89.workers.dev
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+
+      - name: Preparar utilidades QA con versiones fijas
+        run: |
+          mkdir -p qa-r21/text qa-r21/css
+          cd qa-r21
+          npm init -y >/dev/null
+          npm install --save-exact --ignore-scripts --no-audit --no-fund \
+            playwright@1.65.1 @axe-core/playwright@4.14.0 \
+            stylelint@18.0.0 cspell@10.5.1 @cspell/dict-es-es@3.0.9
+          npx --no-install playwright install --with-deps chromium
+
+      - name: Preparar sitemap y extraer texto visible del HTML
+        continue-on-error: true
+        run: |
+          cd qa-r21
+          python <<'PY'
+          import json, os
+          from urllib.parse import urljoin, urlsplit, urldefrag
+          from urllib.request import Request, urlopen
+          from xml.etree import ElementTree as ET
+
+          base = os.environ['BASE_URL'].rstrip('/') + '/'
+          origin = urlsplit(base).netloc.lower()
+          pending = [urljoin(base, 'sitemap.xml')]
+          visited = set()
+          urls = []
+          while pending:
+              sitemap = pending.pop()
+              if sitemap in visited:
+                  continue
+              visited.add(sitemap)
+              request = Request(sitemap, headers={'User-Agent': 'AutomatizaSinHumo-QA/1.0'})
+              with urlopen(request, timeout=25) as response:
+                  root = ET.fromstring(response.read())
+              locs = [n.text.strip() for n in root.findall('.//{*}loc') if n.text]
+              if root.tag.endswith('sitemapindex'):
+                  pending.extend(locs)
+              else:
+                  for url in locs:
+                      url = urldefrag(url)[0]
+                      if urlsplit(url).netloc.lower() == origin and url not in urls:
+                          urls.append(url)
+          if not urls:
+              raise RuntimeError('El sitemap no devolvió URLs de este dominio')
+          json.dump({'sitemap': urls, 'urls': list(dict.fromkeys([base, *urls]))},
+                    open('urls.json', 'w'), ensure_ascii=False, indent=2)
+          print(f'{len(urls)} URLs del sitemap')
+          PY
+          node <<'JS'
+          const fs = require('node:fs');
+          const { chromium } = require('playwright');
+          (async () => {
+            const { urls } = JSON.parse(fs.readFileSync('urls.json', 'utf8'));
+            const browser = await chromium.launch();
+            const context = await browser.newContext({ colorScheme: 'light' });
+            const pages = [];
+            const styles = new Set();
+            for (const [i, url] of urls.entries()) {
+              const page = await context.newPage();
+              try {
+                const response = await page.goto(url, { waitUntil: 'load', timeout: 25000 });
+                const info = await page.evaluate(() => ({
+                  title: document.title,
+                  description: document.querySelector('meta[name="description"]')?.content || '',
+                  // innerText refleja texto renderizado (no script, CSS oculto ni display:none).
+                  text: (document.querySelector('main') || document.body)?.innerText || '',
+                  links: [...document.querySelectorAll('a[href]')].map(a => a.href),
+                  css: [...document.querySelectorAll('link[rel~="stylesheet"][href]')].map(a => a.href)
+                }));
+                const file = `text/${String(i).padStart(4, '0')}.txt`;
+                fs.writeFileSync(file, info.text.trim() + '\n');
+                info.css.forEach(url => styles.add(url));
+                pages.push({url, status: response?.status() || 0,
+                  title: info.title, description: info.description,
+                  links: info.links, file});
+              } catch (e) {
+                pages.push({url, status: 0, title: '', description: '', links: [],
+                  error: String(e.message).slice(0, 200)});
+              } finally { await page.close(); }
+            }
+            fs.writeFileSync('pages.json', JSON.stringify(pages, null, 2));
+            let n = 0;
+            for (const url of styles) {
+              try {
+                if (new URL(url).origin !== new URL(process.env.BASE_URL).origin) continue;
+                const res = await fetch(url, {signal: AbortSignal.timeout(15000)});
+                if (!res.ok) continue;
+                const css = await res.text();
+                fs.writeFileSync(`css/${String(n++).padStart(4, '0')}.css`, css);
+              } catch (e) { console.error('CSS no descargado:', url, e.message); }
+            }
+            await browser.close();
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+              `## Preparación\n- Sitemap: ${urls.length - (urls.includes(process.env.BASE_URL.replace(/\/$/, '') + '/') ? 1 : 0)} URL(s), más portada si no figura.\n- HTML procesados: ${pages.filter(p => p.file).length}.\n- CSS externos propios descargados: ${n}.\n`);
+          })().catch(e => { console.error(e); process.exitCode = 1; });
+          JS
+
+      - name: 'P0 SEO: SiteOne Crawler, duplicados y huérfanas'
+        if: always()
+        continue-on-error: true
+        run: |
+          cd qa-r21
+          curl -fLsS --proto =https --retry 3 \
+            -o siteone.deb \
+            'https://github.com/janreges/siteone-crawler/releases/download/v2.5.1/siteone-crawler-static_2.5.1-1_amd64.deb'
+          echo '294add3b77f4b90c1a68c900cd2c18495f538b8212222b7433ae081e9c271181  siteone.deb' | sha256sum -c -
+          sudo dpkg -i siteone.deb
+          siteone-crawler --url="${BASE_URL%/}/" --ignore-robots-txt --workers=2 \
+            --max-reqs-per-sec=2 --timeout=15 \
+            --output-text-file=siteone.txt \
+            --output-json-file=siteone.json \
+            --output-html-report=siteone.html > siteone.log 2>&1 || true
+          {
+            echo '## P0 — SiteOne Crawler 2.5.1'
+            echo 'Informe SEO completo: qa-r21/siteone.html en el artefacto qa-ronda21-informes.'
+            echo '```text'
+            grep -iE 'non-unique|duplicate|seo score|critical|missing|404|5xx' siteone.txt | head -n 25 || true
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -f pages.json ]; then
+            node <<'JS'
+            const fs = require('node:fs');
+            const crypto = require('node:crypto');
+            const pages = JSON.parse(fs.readFileSync('pages.json', 'utf8'));
+            const {sitemap} = JSON.parse(fs.readFileSync('urls.json', 'utf8'));
+            const norm = url => {const u = new URL(url); u.hash=''; u.search='';
+              u.pathname = u.pathname.replace(/\/+$/, '') || '/'; return u.href;};
+            const byUrl = new Map(pages.filter(p => p.file).map(p => [norm(p.url), p]));
+            const root = norm(process.env.BASE_URL);
+            const reachable = new Set([root]);
+            const queue = [root];
+            while (queue.length) {
+              const p = byUrl.get(queue.shift());
+              if (!p) continue;
+              for (const href of p.links) {
+                try {
+                  const target = norm(href);
+                  if (byUrl.has(target) && !reachable.has(target)) {
+                    reachable.add(target); queue.push(target);
+                  }
+                } catch { /* URL inválida */ }
+              }
+            }
+            const orphan = sitemap.filter(u => byUrl.has(norm(u)) && !reachable.has(norm(u)));
+            const failed = pages.filter(p => !p.file || p.status >= 400);
+            const duplicateGroups = get => {
+              const groups = new Map();
+              for (const p of pages.filter(p => p.file)) {
+                const key = get(p);
+                if (!key) continue;
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(p.url);
+              }
+              return [...groups.values()].filter(g => g.length > 1);
+            };
+            const titles = duplicateGroups(p => p.title.trim().toLowerCase());
+            const descriptions = duplicateGroups(p => p.description.trim().toLowerCase());
+            const content = duplicateGroups(p => {
+              const txt = fs.readFileSync(p.file, 'utf8').replace(/\s+/g, ' ').trim().toLowerCase();
+              return txt.split(' ').length < 80 ? '' : crypto.createHash('sha256').update(txt).digest('hex');
+            });
+            const lines = [
+              '### Comparación sitemap ↔ enlaces internos ↔ contenido',
+              `- Huérfanas candidatas: **${orphan.length}** (no alcanzables desde la portada dentro de las páginas analizadas).`,
+              `- Títulos repetidos: **${titles.length}** grupos.`,
+              `- Descripciones repetidas: **${descriptions.length}** grupos.`,
+              `- Contenido principal idéntico (≥80 palabras): **${content.length}** grupos.`,
+              `- Páginas sin extracción correcta / HTTP ≥400: **${failed.length}**.`,
+            ];
+            for (const [label, groups] of [['Huérfanas', orphan.map(u => [u])],
+                ['Títulos', titles], ['Descripciones', descriptions], ['Contenido', content],
+                ['Errores', failed.map(p => [p.url])]]) {
+              if (groups.length) {
+                lines.push(`**${label}** (primeros 15):`);
+                for (const g of groups.slice(0, 15)) lines.push(`- ${g.map(u => `\`${u}\``).join(' · ')}`);
+              }
+            }
+            console.log(lines.join('\n'));
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          JS
+          else
+            echo '- No se pudo contrastar el sitemap con enlaces: falló la extracción previa.' | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 'P0 Ortografía española: CSpell'
+        if: always()
+        continue-on-error: true
+        run: |
+          cd qa-r21
+          cat > cspell.json <<'JSON'
+          {
+            "version": "0.2",
+            "language": "es,es_ES",
+            "import": ["@cspell/dict-es-es/cspell-ext.json"],
+            "dictionaries": ["es-es"],
+            "words": ["Acortador", "Activepieces", "AEPD", "antispam", "apruébalas", "Astro", "Atelier", "automatizasinhumo", "banner", "Bizum", "Blush", "Brevo", "Canva", "Card", "Checklist", "Cloudflare", "Cloudways", "Contrátalo", "cookies", "currículums", "descargable", "Discord", "Docs", "Drive", "Díaz", "editable", "editables", "Elementor", "enlázalos", "Excel", "flyers", "Food", "freelance", "Garden", "gestoría", "Gmail", "Holded", "hosting", "Hostinger", "hreflang", "imprimible", "indexación", "Ironworks", "IRPF", "Kinsta", "Linktree", "Lola", "LSSI", "Mailer", "Maps", "maquetador", "Metricool", "Midnight", "multi", "multivendedor", "muéstralas", "newsletter", "noindex", "Notion", "Nápoles", "Orbea", "Outlook", "Pack", "packs", "Pexels", "prediseñados", "premium", "PRUÉBALA", "pruébalo", "pymes", "Quipu", "Raiola", "RGPD", "Rocket", "Rooibos", "Sage", "Sheets", "Site", "sitemap", "Stripe", "Systeme", "tablet", "Telegram", "teína", "TRLGDCU", "truck", "tunegocio", "Verifactu", "Webempresa", "webinar", "webinars", "WhatsApp", "yoga"],
+            "useGitignore": false
+          }
+          JSON
+          {
+            echo '## P0 — Ortografía CSpell 10.5.1 + es-ES 3.0.9'
+            if compgen -G 'text/*.txt' >/dev/null; then
+              npx --no-install cspell lint --config cspell.json --no-progress 'text/*.txt' > cspell.log 2>&1 || true
+              echo '```text'
+              sed -n '1,65p' cspell.log
+              echo '```'
+              echo 'Avisos de diccionario: revisar marcas, nombres y tecnicismos antes de corregir.'
+            else
+              echo 'Sin texto extraído; comprobar preparación.'
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 'P1 CSS servido: Stylelint, solo reglas de error'
+        if: always()
+        continue-on-error: true
+        run: |
+          cd qa-r21
+          cat > stylelint.json <<'JSON'
+          {
+            "rules": {
+              "color-no-invalid-hex": true,
+              "unit-no-unknown": true,
+              "no-invalid-double-slash-comments": true
+            }
+          }
+          JSON
+          {
+            echo '## P1 — Stylelint 18.0.0 (CSS servido)'
+            if compgen -G 'css/*.css' >/dev/null; then
+              npx --no-install stylelint 'css/*.css' \
+                --config stylelint.json --formatter compact > stylelint.log 2>&1 || true
+              if [ -s stylelint.log ]; then
+                echo '```text'
+                sed -n '1,65p' stylelint.log
+                echo '```'
+              else
+                echo 'Sin errores de las reglas seleccionadas.'
+              fi
+            else
+              echo 'No se descargó CSS externo propio; estilos inline no comprobados.'
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 'P2 Legibilidad ES: Fernández-Huerta, Szigriszt e INFLESZ'
+        if: always()
+        continue-on-error: true
+        run: |
+          python -m pip install --disable-pip-version-check --only-binary :all: --quiet 'textstat==0.7.13'
+          cd qa-r21
+          python <<'PY'
+          import json, os
+          from pathlib import Path
+          from textstat import textstat
+          textstat.set_lang('es')
+          pages = json.loads(Path('pages.json').read_text()) if Path('pages.json').exists() else []
+          rows = ['## P2 — Legibilidad en español (textstat 0.7.13)',
+                  '| Página | Palabras | Fernández-Huerta | Szigriszt | INFLESZ |',
+                  '|---|---:|---:|---:|---|']
+          for p in pages:
+              if not p.get('file'):
+                  continue
+              text = Path(p['file']).read_text().strip()
+              words = len(text.split())
+              if words < 40:
+                  rows.append(f"| {p['url']} | {words} | — | — | Texto insuficiente |")
+                  continue
+              try:
+                  huerta = textstat.fernandez_huerta(text)
+                  sz = textstat.szigriszt_pazos(text)
+                  label = ('muy fácil' if sz >= 80 else 'bastante fácil' if sz >= 65
+                           else 'normal' if sz >= 55 else 'algo difícil' if sz >= 40
+                           else 'muy difícil')
+                  rows.append(f"| {p['url']} | {words} | {huerta:.1f} | {sz:.1f} | {label} |")
+              except Exception as e:
+                  rows.append(f"| {p['url']} | {words} | Error | Error | {str(e)[:40]} |")
+          rows.append('\nEvaluación orientativa. No aplicar umbrales de veto a textos legales o páginas breves.')
+          print('\n'.join(rows))
+          Path('legibilidad.md').write_text('\n'.join(rows) + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('\n'.join(rows) + '\n')
+          PY
+
+      - name: 'P1 Accesibilidad real en modo oscuro: Playwright + axe'
+        if: always()
+        continue-on-error: true
+        run: |
+          cd qa-r21
+          node <<'JS'
+          const fs = require('node:fs');
+          const {chromium} = require('playwright');
+          const {AxeBuilder} = require('@axe-core/playwright');
+          (async () => {
+            const pages = JSON.parse(fs.readFileSync('pages.json', 'utf8')).filter(p => p.file);
+            const browser = await chromium.launch();
+            const context = await browser.newContext({colorScheme: 'dark', viewport: {width: 1366, height: 768}});
+            const lines = ['## P1 — Accesibilidad con prefers-color-scheme: dark',
+              '| Página | Violaciones WCAG | Contraste |', '|---|---:|---:|'];
+            let total = 0, failures = 0;
+            const details = [], full = [];
+            for (const p of pages) {
+              const page = await context.newPage();
+              try {
+                await page.goto(p.url, {waitUntil: 'load', timeout: 25000});
+                const dark = await page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+                if (!dark) throw new Error('No está emulado el modo oscuro');
+                const r = await new AxeBuilder({page})
+                  .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+                const contrast = r.violations.filter(v => v.id === 'color-contrast').length;
+                total += r.violations.length;
+                lines.push(`| ${p.url} | ${r.violations.length} | ${contrast} |`);
+                if (r.violations.length) details.push(`- ${p.url}: ${r.violations.map(v => v.id).join(', ')}`);
+                full.push({url: p.url, violations: r.violations.map(v => ({id: v.id, impact: v.impact, nodes: v.nodes.map(n => ({target: n.target, summary: n.failureSummary}))}))});
+              } catch (e) {
+                failures++;
+                lines.push(`| ${p.url} | Sin analizar | ${String(e.message).slice(0, 90)} |`);
+                full.push({url: p.url, error: String(e.message)});
+              } finally { await page.close(); }
+            }
+            await browser.close();
+            lines.splice(1, 0, `Páginas revisadas: ${pages.length - failures}; violaciones encontradas: ${total}; fallos de ejecución: ${failures}.`, '');
+            if (details.length) lines.push('', ...details);
+            fs.writeFileSync('axe-oscuro.json', JSON.stringify(full, null, 2));
+            console.log(lines.join('\n'));
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          })().catch(e => {console.error(e); process.exitCode = 1;});
+          JS
+
+      - name: Conservar informes completos como artefacto
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: qa-ronda21-informes
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            qa-r21/siteone.txt
+            qa-r21/siteone.json
+            qa-r21/siteone.html
+            qa-r21/siteone.log
+            qa-r21/pages.json
+            qa-r21/legibilidad.md
+            qa-r21/axe-oscuro.json
+            qa-r21/urls.json
+            qa-r21/cspell.log
+            qa-r21/stylelint.log

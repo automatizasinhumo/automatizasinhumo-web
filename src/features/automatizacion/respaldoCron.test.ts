@@ -5,7 +5,7 @@ import { franja, lanzarProgramados, type Marcas, PROGRAMADOS, pendientes, semana
 const nombres = (d: string, hechos: Record<string, string> = {}) =>
   pendientes(new Date(d), hechos).map((p) => p.programado.workflow);
 
-const SEMANALES = ['empleados-qa.yml', 'seguridad.yml', 'empleados-semanales.yml', 'vigilantes-cadena.yml', 'desplegar-staging.yml'];
+const SEMANALES = ['empleados-qa.yml', 'seguridad.yml', 'empleados-semanales.yml', 'empleados-contenido.yml', 'vigilantes-cadena.yml', 'desplegar-staging.yml'];
 /** Diarios ya lanzados en cualquier periodo de estas pruebas (se prueban aparte). */
 const DIARIOS_HECHOS = { 'indexnow.yml': '9999-12-31@~' };
 

@@ -66,6 +66,7 @@ export const PROGRAMADOS: Programado[] = [
   { workflow: 'empleados-qa.yml', periodo: semana },
   { workflow: 'seguridad.yml', periodo: semana },
   { workflow: 'empleados-semanales.yml', periodo: semana },
+  { workflow: 'empleados-contenido.yml', periodo: semana },
   { workflow: 'vigilantes-cadena.yml', periodo: semana },
   // Lanzado a mano o por el respaldo, también redespliega main en staging antes del recorrido.
   { workflow: 'desplegar-staging.yml', periodo: semana },
