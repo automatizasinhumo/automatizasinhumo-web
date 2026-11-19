@@ -3,12 +3,17 @@ import { stemSpanishTerm, tokenizeSearchTerms } from './stemmer';
 // Sinónimos de búsqueda: cómo lo dice el cliente → palabra que aparece en las fichas.
 const SINONIMOS: Record<string, string> = {
   restaurante: 'carta', bar: 'carta', cafeteria: 'carta', cafetería: 'carta', menu: 'carta', hosteleria: 'carta', hostelería: 'carta',
-  peluqueria: 'reservas', peluquería: 'reservas', estetica: 'reservas', clínica: 'reservas', clinica: 'reservas', dentista: 'reservas', fisio: 'reservas',
+  peluqueria: 'reservas', peluquería: 'reservas', estetica: 'reservas', clínica: 'reservas', clinica: 'reservas', fisio: 'reservas',
+  // Profesiones sanitarias → «clínica», que nombra la ficha de reservas (con «reservas»,
+  // «web para dentista» daba la web de taller «con reserva de citas»).
+  dentista: 'clinica', medico: 'clinica', veterinario: 'clinica', podologo: 'clinica', nutricionista: 'clinica',
   cita: 'citas', agenda: 'citas', calendly: 'citas', turnos: 'citas',
   boda: 'boda', invitados: 'boda', evento: 'evento', bautizo: 'evento', comunion: 'evento',
-  chatbot: 'bot', chat: 'bot', ia: 'IA', gpt: 'IA', chatgpt: 'IA', inteligencia: 'IA',
+  chatbot: 'chat', asistente: 'chat', ia: 'IA', gpt: 'IA', chatgpt: 'IA', inteligencia: 'IA',
   landing: 'web', pagina: 'web', website: 'web', sitio: 'web', blog: 'blog',
   ecommerce: 'tienda', shop: 'tienda', vender: 'tienda', cobrar: 'tienda',
+  // «que me paguen online»: sin esto, «paguen» busca el prefijo «pag*» y casa con «página».
+  pagar: 'tienda', pago: 'tienda', pagos: 'tienda', cobros: 'tienda',
   qr: 'QR', enlaces: 'enlaces', linktree: 'enlaces', bio: 'enlaces',
   factura: 'facturas', presupuesto: 'facturas', pdf: 'PDF', contrato: 'documentos',
   correo: 'email', mail: 'email', newsletter: 'email', boletin: 'email',
@@ -26,6 +31,12 @@ const SINONIMOS: Record<string, string> = {
   lenta: 'velocidad', rapida: 'velocidad', posicionamiento: 'SEO',
   marketing: 'newsletter', caida: 'cae', caido: 'cae', manual: 'ayuda', area: 'portal', intranet: 'portal',
   ebook: 'ebooks', hosting: 'alojamiento', servidor: 'alojamiento',
+  // «Que me llamen / me escriban»: lo que hace la ficha es recoger el contacto.
+  llamar: 'contacto', llamada: 'contacto', escriban: 'contacto', contacten: 'contacto',
+  // Despachos y servicios profesionales: web corporativa; oficios: web de negocio.
+  abogado: 'corporativa', abogada: 'corporativa', despacho: 'corporativa', asesoria: 'corporativa',
+  gestoria: 'corporativa', consultoria: 'corporativa', notaria: 'corporativa', empresa: 'corporativa',
+  fontanero: 'negocio', electricista: 'negocio', autonomo: 'negocio', reformas: 'negocio', pintor: 'negocio',
 };
 
 const SINONIMOS_POR_LEMA = new Map(
@@ -63,10 +74,11 @@ export const POPULARES = ['web', 'carta QR', 'reservas', 'boda', 'bot IA', 'tien
 const CATEGORIA_DE: Record<string, string> = {
   boda: 'bodas', evento: 'bodas', invitado: 'bodas', bautizo: 'bodas', comunion: 'bodas', fiesta: 'bodas',
   restaurante: 'hosteleria', bar: 'hosteleria', cafeteria: 'hosteleria', cafetería: 'hosteleria', carta: 'hosteleria', menu: 'hosteleria', hosteleria: 'hosteleria', hostelería: 'hosteleria',
-  reserva: 'reservas', cita: 'reservas', peluqueria: 'reservas', peluquería: 'reservas', estetica: 'reservas', clinica: 'reservas', agenda: 'reservas',
+  reserva: 'reservas', cita: 'reservas', peluqueria: 'reservas', peluquería: 'reservas', estetica: 'reservas', clinica: 'reservas', agenda: 'reservas', dentista: 'reservas',
   web: 'webs', pagina: 'webs', landing: 'webs',
-  bot: 'bots', chatbot: 'bots', ia: 'bots',
-  tienda: 'tiendas', vender: 'tiendas',
+  bot: 'bots', chatbot: 'bots', chat: 'bots', asistente: 'bots', ia: 'bots',
+  contacto: 'captacion', llamar: 'captacion', llamada: 'captacion',
+  tienda: 'tiendas', vender: 'tiendas', cobrar: 'tiendas', pagar: 'tiendas', pago: 'tiendas',
   cv: 'identidad', curriculum: 'identidad', tarjeta: 'identidad',
   automatizacion: 'automatizaciones', automatizar: 'automatizaciones',
   pdf: 'documentos', factura: 'documentos', documento: 'documentos',
