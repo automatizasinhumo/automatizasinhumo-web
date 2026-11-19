@@ -8,7 +8,7 @@ import { SECTORS, servicesBySlugs } from '../features/blog/sectors';
 import { getConfig } from '../config';
 import { breadcrumbJsonLd } from '../features/storefront/breadcrumbs';
 import { enlaceConsulta } from '../features/search/sinResultados';
-import { empezarHref, MODALIDADES, OBJETIVOS, recomendar } from '../features/storefront/selector';
+import { empezarHref, MODALIDAD_POR_DEFECTO, MODALIDADES, OBJETIVOS, recomendar } from '../features/storefront/selector';
 
 // «Dime qué necesitas»: formulario GET sin JS; el resultado se calcula aquí con los
 // precios del catálogo. Las respuestas viven en la URL: se pueden compartir.
@@ -33,7 +33,7 @@ const breadcrumb = breadcrumbJsonLd(
 const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g, '\\u003c');
 const objetivoActual = q.get('objetivo');
 const oficioActual = q.get('oficio') ?? '';
-const modalidadActual = q.get('modalidad') ?? 'pro';
+const modalidadActual = rec?.modalidad?.id ?? q.get('modalidad') ?? MODALIDAD_POR_DEFECTO;
 const mensaje = rec?.objetivo
   ? `${rec.objetivo.label.toLowerCase()}${rec.sector ? `, ${rec.sector.label.toLowerCase()}` : ''}`
   : '';

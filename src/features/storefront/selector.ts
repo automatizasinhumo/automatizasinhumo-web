@@ -18,6 +18,7 @@ export interface Modalidad {
 }
 
 export const OBJETIVOS = selectorData.objetivos as readonly Objetivo[];
+export const MODALIDAD_POR_DEFECTO = 'pro';
 export const MODALIDADES = selectorData.modalidades as readonly Modalidad[];
 
 export interface Recomendacion {
@@ -36,7 +37,9 @@ export interface Recomendacion {
 export function recomendar(params: URLSearchParams): Recomendacion | null {
   const objetivo = OBJETIVOS.find((o) => o.id === params.get('objetivo'));
   const sector = getSector(params.get('oficio') ?? undefined);
-  const modalidad = MODALIDADES.find((m) => m.id === params.get('modalidad'));
+  // Sin respuesta, «pro»: lo mismo que marca el formulario de /elige.
+  const modalidad =
+    MODALIDADES.find((m) => m.id === params.get('modalidad')) ?? MODALIDADES.find((m) => m.id === MODALIDAD_POR_DEFECTO);
   if (!objetivo && !sector) return null;
 
   let servicios: ServiceSlug[];

@@ -36,4 +36,10 @@ describe('selector «Dime qué necesitas»', () => {
     expect(empezarHref('web-una-pagina', r?.modalidad)).toBe('/empezar/web-una-pagina?modalidad=pro');
     expect(empezarHref('web-una-pagina', undefined)).toBe('/empezar/web-una-pagina');
   });
+
+  it('sin modalidad en la URL, el enlace usa la misma que marca el formulario', () => {
+    const r = recomendar(q('objetivo=llamadas'));
+    expect(r?.modalidad?.id).toBe('pro');
+    expect(empezarHref('web-una-pagina', r?.modalidad)).toBe('/empezar/web-una-pagina?modalidad=pro');
+  });
 });
