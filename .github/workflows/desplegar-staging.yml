@@ -139,5 +139,6 @@ jobs:
           ANTERIOR: ${{ needs.desplegar.outputs.anterior }}
         run: |
           # Con la versión anotada antes de desplegar; si no se pudo leer, la anterior por defecto.
-          npx --yes wrangler@4.164.0 rollback $ANTERIOR --name automatizasinhumo-staging -y             -m "Recorrido fallido tras desplegar ${SHA:0:7}"
+          npm i -g --ignore-scripts --no-audit --no-fund wrangler@4.164.0
+          wrangler rollback ${ANTERIOR:+"$ANTERIOR"} --name automatizasinhumo-staging -y -m "Recorrido fallido tras desplegar ${SHA:0:7}"
           echo "::error::El recorrido falló: staging ha vuelto a la versión anterior. Revisa las capturas del job recorrido."
