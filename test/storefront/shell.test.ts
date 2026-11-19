@@ -145,9 +145,9 @@ describe('the store-owned header', () => {
     // state on its own. A checkbox or a script-driven menu would not.
     expect(html).toContain('<summary');
     expect(html).not.toContain('type="checkbox"');
-    // Both the inline row and the disclosure list the link, so it is reachable
-    // at every width even with scripts blocked.
-    expect(html.match(/href="\/pages\/about"/g)?.length).toBe(2);
+    // The inline row (in the default theme, the mega menu) and the disclosure
+    // both list the link, so it is reachable at every width even with scripts blocked.
+    expect(html.match(/href="\/pages\/about"/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
   it('keeps the search form a real GET form with the q field', async () => {

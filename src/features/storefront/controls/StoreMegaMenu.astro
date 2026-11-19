@@ -1,0 +1,73 @@
+---
+import type { StorefrontLink } from '../models';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from './starwind/navigation-menu';
+
+/**
+ * Mega menú de cabecera: un desplegable de áreas (dos niveles como máximo) más
+ * enlaces sueltos. Envuelve el Navigation Menu de Starwind UI (MIT), que trae
+ * teclado, Escape y foco; sin JavaScript los enlaces siguen en el HTML.
+ */
+export interface MegaMenuArea {
+  title: string;
+  href: string;
+  items: StorefrontLink[];
+}
+
+interface Props {
+  label: string;
+  areas: MegaMenuArea[];
+  allHref: string;
+  allText: string;
+  links?: StorefrontLink[];
+  class?: string;
+}
+
+const { label, areas, allHref, allText, links = [], class: className } = Astro.props;
+---
+
+<NavigationMenu aria-label={label} class={className}>
+  <NavigationMenuList>
+    <NavigationMenuItem value="areas">
+      <NavigationMenuTrigger>{label}</NavigationMenuTrigger>
+      <NavigationMenuContent class="w-[min(46rem,calc(100vw-2rem))] p-5">
+        <div class="grid grid-cols-3 gap-6">
+          {
+            areas.map((area) => (
+              <div>
+                <NavigationMenuLink href={area.href} class="font-semibold text-ink">
+                  {area.title}
+                </NavigationMenuLink>
+                <ul class="mt-1">
+                  {area.items.map((item) => (
+                    <li>
+                      <NavigationMenuLink href={item.href} class="text-muted">
+                        {item.text}
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+        <NavigationMenuLink href={allHref} class="mt-4 border-t border-line pt-3 font-medium text-brand">
+          {allText} →
+        </NavigationMenuLink>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+    {
+      links.map((link) => (
+        <NavigationMenuItem>
+          <NavigationMenuLink href={link.href}>{link.text}</NavigationMenuLink>
+        </NavigationMenuItem>
+      ))
+    }
+  </NavigationMenuList>
+</NavigationMenu>

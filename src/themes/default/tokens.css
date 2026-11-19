@@ -27,6 +27,12 @@
      `paper` so a panel can sit *on* the page rather than dissolving into it. */
   --color-surface: #ffffff;
 
+  /* Tokens que pide el menú de Starwind UI (src/features/storefront/controls/starwind), con nuestra paleta. */
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  --color-foreground: var(--color-ink);
+  --color-outline: var(--color-brand);
+
   /* Secondary and tertiary text. Two levels, not one — the storefront leans on
      the distinction between a supporting line and an incidental one, and
      collapsing them flattens every summary and product meta block.

@@ -1,0 +1,38 @@
+/**
+ * STORE-OWNED. Áreas del mega menú «Servicios» de la cabecera (tema default).
+ * Agrupa las categorías del catálogo (slug de D1) en dos niveles como máximo.
+ * Una categoría que no exista en D1 solo da un enlace a una página vacía: si se
+ * renombra un slug en manual/catalogo/catalogo.mjs, hay que cambiarlo aquí.
+ */
+const area = (title: string, slug: string, items: [string, string][]) => ({
+  title,
+  href: `/categories/${slug}`,
+  items: items.map(([text, s]) => ({ text, href: `/categories/${s}` })),
+});
+
+export const menuAreas = [
+  area('Webs', 'webs', [
+    ['Webs para tu negocio', 'webs'],
+    ['Restaurantes y bares', 'hosteleria'],
+    ['Reservas y citas', 'reservas'],
+    ['Bodas y eventos', 'bodas'],
+    ['Tiendas y productos digitales', 'tiendas'],
+    ['Portales y webs editables', 'portales'],
+    ['Tarjetas, enlaces y CV', 'identidad'],
+  ]),
+  area('Automatizaciones e IA', 'automatizaciones', [
+    ['Automatizaciones', 'automatizaciones'],
+    ['Bots e IA', 'bots'],
+    ['Formularios y captación', 'captacion'],
+    ['Documentos, PDF e IA', 'documentos'],
+    ['Enlaces, QR y analítica', 'enlaces'],
+  ]),
+  area('Contenido y planes', 'planes', [
+    ['Contenido y redes', 'contenido'],
+    ['Planes mensuales', 'planes'],
+  ]),
+];
+
+/** Enlaces de cabecera que ya cubre el mega menú (catálogo y categorías). */
+export const coveredByMegaMenu = (href: string) =>
+  href === '/products' || href.startsWith('/categories/');
