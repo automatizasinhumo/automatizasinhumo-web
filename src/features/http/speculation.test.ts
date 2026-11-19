@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { URLPattern as Polyfill } from 'urlpattern-polyfill';
 import { CON_QUERY, RUTAS_PRECARGABLES, speculationRules } from './speculation';
+
+// Node 22 (CI) aún no trae URLPattern global; el polyfill sigue la misma especificación
+// que usa el navegador para evaluar href_matches.
+const URLPattern: typeof Polyfill = (globalThis as { URLPattern?: typeof Polyfill }).URLPattern ?? Polyfill;
 
 const BASE = 'https://automatizasinhumo.es';
 const coincide = (p: string | Record<string, string>, url: string) =>
