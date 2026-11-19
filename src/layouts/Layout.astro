@@ -1,4 +1,5 @@
 ---
+import { speculationRules } from '../features/http/speculation';
 import { CONTACT_EMAIL } from '../contacto';
 import { env } from 'cloudflare:workers';
 import { getConfig } from '../config';
@@ -178,6 +179,8 @@ const shell = buildShellModel({
     </script>
     <script is:inline type="application/ld+json" set:html={orgLd}></script>
     {websiteLd && <script is:inline type="application/ld+json" set:html={websiteLd}></script>}
+    {/* Precarga la siguiente página pública al apuntar a un enlace (ver features/http/speculation). */}
+    <script is:inline type="speculationrules" set:html={speculationRules()}></script>
   </head>
   <body class="flex min-h-screen flex-col bg-paper text-ink antialiased">
     <StoreHeader model={shell} />
