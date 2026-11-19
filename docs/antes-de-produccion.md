@@ -81,6 +81,20 @@ Para presentar las sugerencias del buscador sin cambiar el motor propio se usa
 Ver [entrega-y-alojamiento.md](entrega-y-alojamiento.md). La FAQ de entrega se publica cuando el
 paquete ZIP y el dominio del cliente funcionen.
 
+## 7. CSP completa (Observatory B+)
+
+- Hoy en main: CSP mínima en el middleware (`frame-ancestors 'none'; base-uri 'self'; object-src 'none'`).
+- Rama `r22-csp`: activa `security.csp` de Astro 7, que manda hashes de scripts y estilos en la cabecera, y
+  `mergeCsp`, que añade la CSP mínima sin pisarla. **No se fusiona todavía.** En local, el 19/11, dio 37
+  violaciones en 23 páginas (`qa/csp-violaciones.mjs`).
+- Qué hay que cambiar antes:
+  1. 18 `<script is:inline>` en 11 ficheros: pasarlos a scripts procesados por Astro o registrar su hash
+     (`Astro.csp.insertScriptHash`).
+  2. Las speculation rules en línea de `Layout.astro`: hash fijo en `scriptDirective.hashes`.
+  3. 15 atributos `style=` en `.astro`: pasarlos a clases de Tailwind o a variables CSS fijadas desde script.
+- Criterio de fusión: `qa/csp-violaciones.mjs` con 0 violaciones en local, y el exploratorio en verde
+  sobre el staging.
+
 ## Ya adoptado (ronda 22, «ahora»)
 
 - [x] `qa/exploratorio.mjs`: [fast-check](https://github.com/dubzzz/fast-check) (MIT) genera
