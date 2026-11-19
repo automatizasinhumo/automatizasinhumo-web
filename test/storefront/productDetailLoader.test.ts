@@ -163,6 +163,27 @@ describe('loadProductDetail public-ID policy', () => {
     await expect(load()).resolves.toEqual({ status: 'not_found' });
   });
 
+  it('«Desde» solo con variantes comprables de precio distinto', async () => {
+    rows.variants = [
+      variant({ price_cents: 1000, stock: 0 }),
+      variant({ id: 8, public_id: 'var_bbbbbbbbbb', price_cents: 3000, stock: 0 }),
+    ];
+    let loaded = await load();
+    if (loaded.status !== 'ok') throw new Error('sin página');
+    expect(loaded.model.soldOut).toBe(true);
+    expect(loaded.model.priceVaries).toBe(false);
+
+    rows.variants = [
+      variant({ price_cents: 1000, stock: 0 }),
+      variant({ id: 8, public_id: 'var_bbbbbbbbbb', price_cents: 3000, stock: 2 }),
+      variant({ id: 9, public_id: 'var_cccccccccc', price_cents: 4000, stock: 1 }),
+    ];
+    loaded = await load();
+    if (loaded.status !== 'ok') throw new Error('sin página');
+    expect(loaded.model.priceVaries).toBe(true);
+    expect(loaded.model.formattedPrice).toContain('30');
+  });
+
   it('reports not_found for a deactivated product (no purchasable page)', async () => {
     rows.product = { ...rows.product, active: 0 };
 

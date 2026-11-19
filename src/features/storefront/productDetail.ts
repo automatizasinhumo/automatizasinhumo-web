@@ -119,9 +119,12 @@ export async function loadProductDetail(
   // them; otherwise from the product's own stock.
   const soldOut = hasVariants ? variants.every((v) => v.stock <= 0) : state === 'out';
 
-  const variantPrices = variants.map((v) => v.price_cents);
+  // «Desde» tiene que ser un precio comprable: las variantes agotadas no cuentan,
+  // salvo que lo estén todas: entonces se enseña el más bajo, sin «Desde» (nada es comprable).
+  const inStockPrices = variants.filter((v) => v.stock > 0).map((v) => v.price_cents);
+  const variantPrices = inStockPrices.length > 0 ? inStockPrices : variants.map((v) => v.price_cents);
   const displayPriceCents = hasVariants ? Math.min(...variantPrices) : product.price_cents;
-  const priceVaries = hasVariants && Math.min(...variantPrices) !== Math.max(...variantPrices);
+  const priceVaries = inStockPrices.length > 0 && Math.min(...inStockPrices) !== Math.max(...inStockPrices);
 
   // A variant's linked image reaches the markup as the gallery anchor — a pimg_
   // public ID, never the row FK and never the storage key. The old image_key
