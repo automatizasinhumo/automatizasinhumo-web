@@ -45,13 +45,19 @@ for (const [ancho, alto] of [[1280, 800], [390, 844]]) {
     await pagina.addScriptTag({ path: script });
     await pagina.evaluate(async ({ n, semilla }) => {
       const g = window.gremlins;
+      // Sin indicadores visuales: el de `typer` escribe un carácter en el body durante
+      // un segundo y haría pasar por viva una página que la horda ha vaciado.
+      const sin = { showAction: false };
       await g.createHorde({
         randomizer: new g.Chance(semilla),
-        species: [g.species.clicker(), g.species.toucher(), g.species.formFiller(), g.species.scroller(), g.species.typer()],
+        species: [g.species.clicker(sin), g.species.toucher(sin), g.species.formFiller(sin), g.species.scroller(sin), g.species.typer(sin)],
         mogwais: [g.mogwais.alert(), g.mogwais.gizmo({ maxErrors: 1000 })],
         strategies: [g.strategies.distribution({ delay: 5, nb: n })],
-      }).unleash().catch(() => {});
+      }).unleash();
     }, { n: Number(n), semilla }).catch((e) => errores.push(`horda: ${e.message}`));
+    // `toucher` programa gestos con temporizadores de hasta 1,5 s que siguen tras acabar
+    // la horda: se espera a que terminen (con los listeners activos) antes de comprobar.
+    await pagina.waitForTimeout(2000);
     const vivos = await pagina.evaluate(() => document.body && document.body.innerText.trim().length > 0).catch(() => false);
     const propios = errores.filter((e) => !IGNORAR.some((r) => r.test(e)));
     if (propios.length || !vivos) {
