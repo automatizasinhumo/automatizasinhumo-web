@@ -32,7 +32,7 @@ jobs:
           mkdir -p qa-r21/text qa-r21/css
           cd qa-r21
           npm init -y >/dev/null
-          npm install --save-exact --no-audit --no-fund \
+          npm install --save-exact --ignore-scripts --no-audit --no-fund \
             playwright@1.65.1 @axe-core/playwright@4.14.0 \
             stylelint@18.0.0 cspell@10.5.1 @cspell/dict-es-es@3.0.9
           npx --no-install playwright install --with-deps chromium
@@ -128,7 +128,7 @@ jobs:
         continue-on-error: true
         run: |
           cd qa-r21
-          curl -fLsS --retry 3 \
+          curl -fLsS --proto =https --retry 3 \
             -o siteone.deb \
             'https://github.com/janreges/siteone-crawler/releases/download/v2.5.1/siteone-crawler-static_2.5.1-1_amd64.deb'
           echo '294add3b77f4b90c1a68c900cd2c18495f538b8212222b7433ae081e9c271181  siteone.deb' | sha256sum -c -
@@ -273,7 +273,7 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          python -m pip install --disable-pip-version-check --quiet 'textstat==0.7.13'
+          python -m pip install --disable-pip-version-check --only-binary :all: --quiet 'textstat==0.7.13'
           cd qa-r21
           python <<'PY'
           import json, os
