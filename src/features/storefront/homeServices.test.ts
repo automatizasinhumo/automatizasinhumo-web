@@ -117,7 +117,19 @@ describe('loadHomeServices', () => {
 
     expect(webService?.templatePrice).toBe(formatMoney(1500, 'usd'));
     expect(webService?.setupPrice).toBe(formatMoney(2500, 'usd'));
+    expect(webService?.fromPrice).toBe(formatMoney(1500, 'usd'));
     expect(qrService?.templatePrice).toBeNull();
     expect(digitalCard?.setupPrice).toBeNull();
+  });
+
+  it('«desde» es el precio más bajo aunque montarlo cueste menos que la plantilla', async () => {
+    vi.mocked(listVariants).mockImplementation(async (_db, productId) => [
+      variant(10 + productId, productId, 'Plantilla + guía', 3000, 0, 1),
+      variant(20 + productId, productId, 'Te lo montamos', 2000, 1, 1),
+    ]);
+
+    const result = await loadHomeServices(db, options);
+    const webService = result.services.find((service) => service.href === '/products/web-una-pagina');
+    expect(webService?.fromPrice).toBe(formatMoney(2000, 'usd'));
   });
 });

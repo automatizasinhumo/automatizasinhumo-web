@@ -16,7 +16,7 @@ const { services } = Astro.props;
 // Precio «desde» de los destacados, leído del catálogo (no escrito a mano): así la
 // primera pantalla dice qué vendemos y cuánto cuesta, y no se queda desfasada.
 const precios = services
-  .map((s) => ({ name: s.name, href: s.href, desde: s.templatePrice ?? s.setupPrice }))
+  .map((s) => ({ name: s.name, href: s.href, desde: s.fromPrice }))
   .filter((s): s is { name: string; href: string; desde: string } => s.desde !== null);
 
 const destacados = [

@@ -22,6 +22,8 @@ export interface HomeService {
   image: StorefrontImage;
   templatePrice: string | null;
   setupPrice: string | null;
+  /** El precio más bajo entre las variantes que se pueden comprar: lo que va tras «desde». */
+  fromPrice: string | null;
 }
 
 export interface HomeServiceOptions {
@@ -86,5 +88,9 @@ async function loadHomeService(
     image: card.image,
     templatePrice: template ? formatMoney(template.price_cents, options.currency) : null,
     setupPrice: setup ? formatMoney(setup.price_cents, options.currency) : null,
+    fromPrice:
+      variants.length > 0
+        ? formatMoney(Math.min(...variants.map((variant) => variant.price_cents)), options.currency)
+        : null,
   };
 }
