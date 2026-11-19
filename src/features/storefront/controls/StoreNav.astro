@@ -87,3 +87,16 @@ const {
     </details>
   )
 }
+
+<script>
+  // Mejora, no requisito: sin JS el <details> sigue funcionando. Al volver con
+  // atrás/adelante la bfcache lo restauraría abierto tapando la página.
+  const closeDisclosures = () =>
+    document
+      .querySelectorAll('details[data-nav-disclosure][open]')
+      .forEach((el) => el.removeAttribute('open'));
+  window.addEventListener('pagehide', closeDisclosures);
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) closeDisclosures();
+  });
+</script>
