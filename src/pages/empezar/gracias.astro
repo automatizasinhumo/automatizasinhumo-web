@@ -69,3 +69,16 @@ const TEXTO = {
     <a href="/" class="mt-6 inline-block rounded-full border border-brand px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Seguir viendo servicios</a>
   </div>
 </Layout>
+
+<script>
+  import { PREFIJO } from '../../features/solicitudes/borrador';
+
+  // Solicitud enviada: su borrador ya no hace falta. Solo el de este servicio; los
+  // borradores de otros servicios siguen ahí.
+  const slug = new URLSearchParams(location.search).get('slug') ?? '';
+  try {
+    if (/^[a-z0-9-]{1,80}$/.test(slug)) localStorage.removeItem(PREFIJO + slug);
+  } catch {
+    /* sin almacenamiento */
+  }
+</script>

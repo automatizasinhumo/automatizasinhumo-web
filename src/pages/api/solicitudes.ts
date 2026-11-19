@@ -28,7 +28,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return redirect('/empezar/consulta?error=formulario', 303);
   }
   const slug = String(form.get('slug') ?? 'consulta').trim();
-  const volver = `/empezar/${/^[a-z0-9-]{1,80}$/.test(slug) ? slug : 'consulta'}`;
+  const slugSeguro = /^[a-z0-9-]{1,80}$/.test(slug) ? slug : 'consulta';
+  const volver = `/empezar/${slugSeguro}`;
 
   // Los campos válidos salen del servidor (ficha del servicio), no del navegador.
   let etiquetas: string[] = [];
@@ -107,7 +108,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     if (reclamado) await liberarCorreos(env.DB, publicId).catch(() => undefined);
   }
 
-  return redirect(`/empezar/gracias?id=${encodeURIComponent(publicId)}&tipo=${tipo}`, 303);
+  return redirect(`/empezar/gracias?id=${encodeURIComponent(publicId)}&tipo=${tipo}&slug=${slugSeguro}`, 303);
 };
 
 function escapar(s: string): string {
