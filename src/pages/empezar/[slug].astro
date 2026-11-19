@@ -6,6 +6,7 @@ import { getProductBySlug, maxVariantPrices } from '../../features/products/db';
 import { camposDeDescripcion, nombreCampo, LIMITES } from '../../features/solicitudes';
 import { formatPrice } from '../../config';
 import { resolverPedido } from '../../features/solicitudes/pedido';
+import { firmaFormulario } from '../../features/solicitudes/borrador';
 
 export const prerender = false;
 
@@ -111,7 +112,7 @@ const label = 'block text-sm font-medium text-ink';
           )
         }
 
-        <form method="post" action="/api/solicitudes" id="solicitud-form" class="mt-8 space-y-6" data-solicitud data-desde-url={camposDesdeUrl || undefined} data-error-ultimo={errorEnUltimo ? '' : undefined}>
+        <form method="post" action="/api/solicitudes" id="solicitud-form" class="mt-8 space-y-6" data-solicitud data-firma={firmaFormulario(campos)} data-desde-url={camposDesdeUrl || undefined} data-error-ultimo={errorEnUltimo ? '' : undefined}>
           {/* Sin JS se ve todo de una vez; con JS, un paso cada vez con esta barra. */}
           <div class="hidden" data-progreso aria-live="polite">
             <div class="flex items-baseline justify-between text-xs font-semibold">
@@ -303,7 +304,7 @@ const label = 'block text-sm font-medium text-ink';
     } catch {
       return; // navegación privada estricta: sin borrador
     }
-    const b = leerBorrador(almacen.getItem(clave), Date.now());
+    const b = leerBorrador(almacen.getItem(clave), Date.now(), f.dataset.firma ?? '');
     if (b) {
       let usado = false;
       // Lo que el servidor rellenó desde la URL (?modalidad=pro) manda sobre lo guardado.
@@ -341,7 +342,7 @@ const label = 'block text-sm font-medium text-ink';
         if ((el.type === 'radio' || el.type === 'checkbox') && !(el as HTMLInputElement).checked) continue;
         datos[el.name] = el.value;
       }
-      const raw = crearBorrador(datos, Date.now());
+      const raw = crearBorrador(datos, Date.now(), f.dataset.firma ?? '');
       try {
         if (raw) almacen!.setItem(clave, raw);
         else almacen!.removeItem(clave);

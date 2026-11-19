@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { CADUCA_MS, crearBorrador, guardable, leerBorrador } from './borrador';
+import { CADUCA_MS, crearBorrador, firmaFormulario, guardable, leerBorrador } from './borrador';
+
+describe('firma de las preguntas', () => {
+  it('un borrador solo vuelve al mismo formulario (mismo orden y etiquetas)', () => {
+    const f = firmaFormulario(['Nombre del bar', 'Horario']);
+    const raw = crearBorrador({ campo_0: 'La Tasca', campo_1: '9-14' }, 1000, f);
+    expect(leerBorrador(raw, 2000, f)?.campos).toEqual({ campo_0: 'La Tasca', campo_1: '9-14' });
+    // Reordenadas: campo_0 sería ahora «Horario» → se descarta entero.
+    expect(leerBorrador(raw, 2000, firmaFormulario(['Horario', 'Nombre del bar']))).toBeNull();
+    expect(leerBorrador(raw, 2000, firmaFormulario(['Nombre del bar', 'Horarios']))).toBeNull();
+    // Borrador antiguo sin firma en un formulario con preguntas: también fuera.
+    expect(leerBorrador(crearBorrador({ campo_0: 'x' }, 1000), 2000, f)).toBeNull();
+  });
+});
 
 describe('borrador del formulario', () => {
   it('no guarda campos ocultos, antispam ni consentimiento', () => {
