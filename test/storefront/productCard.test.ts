@@ -10,6 +10,10 @@ import {
 } from '../../src/features/storefront/productCard';
 import type { Product } from '../../src/features/products/db';
 import demosPorProducto from '../../src/data/demos-producto.json';
+import { resolveTheme } from '../../scripts/themes.mjs';
+
+// El texto de la tarjeta (resumen, modalidades, CTA) es del tema propio; los de minshop no lo llevan.
+const isDefaultTheme = resolveTheme().id === 'default';
 
 const product = (overrides: Partial<Product> = {}): Product => ({
   id: 42,
@@ -132,7 +136,7 @@ describe('tarjetas iguales (qué resuelve, precios, modalidad, demo y CTA)', () 
     expect(cardFor(product({ slug: 'no-existe-este-servicio' })).conDemo).toBe(false);
   });
 
-  it('pinta resumen, demo, modalidad y CTA', async () => {
+  it.skipIf(!isDefaultTheme)('pinta resumen, demo, modalidad y CTA', async () => {
     const html = await render(
       ProductCard,
       cardFor(product({ description: 'Resuelve algo concreto.' }), { maxPriceCents: 9999 }),
