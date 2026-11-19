@@ -8,6 +8,9 @@ updates:
     directories: ["/", "/mcp", "/qa/navegador", "/qa/danger"]
     schedule:
       interval: "monthly"
+    # Espera 7 días a que una versión nueva madure (zizmor dependabot-cooldown).
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 3
     ignore:
       # TS 7 rompe npm ci: @astrojs/check 0.9 pide typescript ^5 || ^6 (PR #3, 18/11/2026).
@@ -23,6 +26,9 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    # Espera 7 días a que una versión nueva madure (zizmor dependabot-cooldown).
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns:
