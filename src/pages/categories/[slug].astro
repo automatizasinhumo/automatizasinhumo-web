@@ -79,7 +79,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
 ---
 
 <Layout title={category.name} description={INTRO_CATEGORIA[category.slug]}>
-  <nav class="mb-4 flex flex-wrap gap-x-2 text-xs uppercase tracking-widest text-faint">
+  <nav aria-label="Migas de pan" class="mb-4 flex flex-wrap gap-x-2 text-xs uppercase tracking-widest text-faint">
     <a href={shopHref} class="hover:text-brand">Catálogo</a>
     {
       trail.map((c) => (
