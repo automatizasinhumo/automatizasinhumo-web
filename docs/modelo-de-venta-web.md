@@ -95,7 +95,7 @@ Ningún registrador le cobra el primer año aparte, porque el pedido sale de nue
 
 | TLD | Registro (año 1) | Entrega | Renovación (año 2 y siguientes) |
 | --- | --- | --- | --- |
-| `.com`, `.net` y otros admitidos por Cloudflare | Con la Registrar API, **en nuestra cuenta de Cloudflare**, después de que el cliente confirme y pague. Cada registro envía los datos del cliente como contacto titular (`contacts.registrant`): sin ese campo, la API usa el contacto por defecto de la cuenta, que es el nuestro, y el cliente no sería el titular hasta el traslado | [Traslado entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/) a la cuenta del cliente. Cloudflare solo lo permite **cuando el dominio lleva más de 10 días registrado**; las dos partes lo confirman y después queda bloqueado 30 días. Mientras tanto la web se ve en la vista previa y el dominio se conecta el día del traslado | La paga el cliente desde su cuenta, con su método de pago |
+| `.com`, `.net` y otros admitidos por Cloudflare | Con la Registrar API, **en nuestra cuenta de Cloudflare**, después de que el cliente confirme y pague. Cada registro envía los datos del cliente como contacto titular (`contacts.registrant`): sin ese campo, la API usa el contacto por defecto de la cuenta, que es el nuestro, y el cliente no sería el titular hasta el traslado. El registrador envía al cliente un correo para **verificar su dirección** (ICANN lo exige; sin verificar, el dominio puede quedar suspendido), y no se pide el traslado hasta que esté verificada | [Traslado entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/) a la cuenta del cliente. Cloudflare solo lo permite **cuando el dominio lleva más de 10 días registrado**; las dos partes lo confirman y después queda bloqueado 30 días. Mientras tanto la web se ve en la vista previa y el dominio se conecta el día del traslado | La paga el cliente desde su cuenta, con su método de pago |
 | `.es`, `.eu`, `.cat` y geográficos | En **nuestra cuenta de OVHcloud**, con el cliente como **titular** (NIF/NIE validado) | Se pasan los contactos **administrativo y de facturación** a la cuenta de OVHcloud del cliente (gratis). Solo el contacto administrativo puede gestionar el dominio; nosotros nos quedamos como contacto técnico mientras haga falta | La paga el cliente desde su cuenta de OVHcloud. Si no quiere otra cuenta, puede trasladarlo a otro registrador cuando quiera |
 
 **[por verificar]** El cambio de contactos de OVHcloud por API y lo que tarda; el precio exacto de cada TLD
@@ -128,6 +128,9 @@ gratis en su cuenta y tiene una copia completa.
       poder recibir el dominio y renovarlo, la cuenta del cliente necesita: un perfil de facturación con un
       método de pago válido, un contacto de registro por defecto y aceptar el Domain Registration Agreement
       en *Registrar*. Los mismos requisitos valen para nuestra cuenta, que registra el primer año.
+- [ ] **[antes de producción]** Tras registrar el `.com`, avisar al cliente del correo de verificación del titular y
+      comprobar que lo ha verificado antes de pedir el traslado. **[por verificar]** Si Cloudflare bloquea el
+      traslado sin esa verificación.
 - [ ] **[antes de producción]** Guía de OVHcloud para `.es`: crear la cuenta y aceptar los contactos
       administrativo y de facturación.
 - [ ] **[antes de producción]** Condiciones: titularidad del dominio, quién paga la renovación, fin del
