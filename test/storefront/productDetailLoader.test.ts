@@ -37,6 +37,7 @@ const rows = {
 vi.mock('../../src/features/products/db', () => ({
   getProductBySlug: vi.fn(async () => rows.product),
   listProductImages: vi.fn(async () => rows.images),
+  maxVariantPrices: vi.fn(async () => new Map()),
 }));
 vi.mock('../../src/features/products/variants', () => ({
   listVariants: vi.fn(async () => rows.variants),

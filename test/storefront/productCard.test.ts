@@ -4,9 +4,12 @@ import ProductCard from '#theme/ProductCard.astro';
 import AltProductCard from './fixtures/product-card/AltProductCard.astro';
 import {
   buildProductCard,
+  RESUMEN_MAX,
+  resumenTarjeta,
   type ProductCardOptions,
 } from '../../src/features/storefront/productCard';
 import type { Product } from '../../src/features/products/db';
+import demosPorProducto from '../../src/data/demos-producto.json';
 
 const product = (overrides: Partial<Product> = {}): Product => ({
   id: 42,
@@ -34,7 +37,7 @@ const product = (overrides: Partial<Product> = {}): Product => ({
 /** Currency is a required option: the builder is pure, so it cannot read the
  *  store config to guess one. Tests state it once here. */
 const cardFor = (p: Product, options: Partial<ProductCardOptions> = {}) =>
-  buildProductCard(p, { currency: 'usd', ...options });
+  buildProductCard(p, { currency: 'usd', maxPriceCents: undefined, ...options });
 
 const render = async (component: unknown, model: unknown) => {
   const container = await AstroContainer.create();
@@ -101,6 +104,46 @@ describe('buildProductCard', () => {
     expect(lazy.src).toContain('width=384');
     expect(lcp.src).toContain('width=768');
     expect(lcp.priority).toBe(true);
+  });
+});
+
+describe('tarjetas iguales (qué resuelve, precios, modalidad, demo y CTA)', () => {
+  it('resume con el primer párrafo de la descripción, sin Markdown', () => {
+    const card = cardFor(
+      product({ description: 'Tu negocio en **internet** con una sola página.\n\n## Qué recibes\n- Web' }),
+    );
+    expect(card.resumen).toBe('Tu negocio en internet con una sola página.');
+  });
+
+  it('recorta el resumen en una palabra', () => {
+    const card = cardFor(product({ description: 'palabra '.repeat(60) }));
+    expect(card.resumen!.length).toBeLessThanOrEqual(RESUMEN_MAX);
+    expect(card.resumen!.endsWith('…')).toBe(true);
+  });
+
+  it('sin descripción no inventa resumen', () => {
+    expect(cardFor(product({ description: null })).resumen).toBeUndefined();
+    expect(resumenTarjeta('   ')).toBeUndefined();
+  });
+
+  it('marca la demo solo si el servicio tiene alguna publicada', () => {
+    const conDemo = Object.entries(demosPorProducto as Record<string, unknown[]>).find(([, d]) => d.length > 0)![0];
+    expect(cardFor(product({ slug: conDemo })).conDemo).toBe(true);
+    expect(cardFor(product({ slug: 'no-existe-este-servicio' })).conDemo).toBe(false);
+  });
+
+  it('pinta resumen, demo, modalidad y CTA', async () => {
+    const html = await render(
+      ProductCard,
+      cardFor(product({ description: 'Resuelve algo concreto.' }), { maxPriceCents: 9999 }),
+    );
+    expect(html).toContain('Resuelve algo concreto.');
+    expect(html).toContain('la publicas tú');
+    expect(html).toContain('te la montamos');
+    expect(html).toContain('Ver servicio');
+
+    const unico = await render(ProductCard, cardFor(product()));
+    expect(unico).toContain('lo hacemos nosotros');
   });
 });
 
