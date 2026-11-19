@@ -1,6 +1,9 @@
 # Dependencies (root + mcp/ subproject — non-anchored, matches at any depth)
 node_modules/
 
+# WebP de capturas: los genera scripts/webp-capturas.mjs en cada build
+public/images/demos/*.webp
+
 # Build output
 dist/
 .astro/

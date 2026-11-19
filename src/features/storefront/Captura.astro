@@ -1,0 +1,21 @@
+---
+/**
+ * Captura de una demo (public/images/demos/<nombre>.png) servida como WebP de 640 o
+ * 1280 px según el ancho en pantalla, con la PNG de respaldo. Los WebP los genera
+ * scripts/webp-capturas.mjs en cada build.
+ */
+interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  sizes?: string;
+}
+const { src, alt, class: clase, loading = 'lazy', sizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw' } = Astro.props;
+const base = src.replace(/\.png$/, '');
+const conWebp = base !== src && base.startsWith('/images/demos/');
+---
+<picture class="contents">
+  {conWebp && <source type="image/webp" srcset={`${base}-640.webp 640w, ${base}.webp 1280w`} sizes={sizes} />}
+  <img src={src} alt={alt} width="1280" height="860" loading={loading} decoding="async" class={clase} />
+</picture>
