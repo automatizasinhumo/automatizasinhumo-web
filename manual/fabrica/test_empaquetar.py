@@ -49,6 +49,11 @@ class Empaquetar(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             emp.empaquetar(self.pedido({'id': 'nada'}))
 
+    def test_id_con_ruta_rechazado(self):
+        for malo in ('../fuera', 'a/b', '', '..'):
+            with self.subTest(malo=malo), self.assertRaises(ValueError):
+                emp.empaquetar(self.pedido({'id': malo}))
+
 
 if __name__ == '__main__':
     unittest.main()

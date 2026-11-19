@@ -15,6 +15,8 @@ CAMPOS_NEGOCIO = ('negocio', 'actividad', 'ciudad', 'telefono', 'email', 'whatsa
 SOLO_VISTA_PREVIA = {'_headers'}
 # fabricar.py mete este meta en cada HTML de la vista previa; la copia publicable no lo lleva.
 META_NOINDEX = re.compile(r'<meta name="robots" content="noindex">')
+# El id del pedido acaba en una ruta: solo letras, números, guion y guion bajo.
+ID_PEDIDO = re.compile(r'[A-Za-z0-9_-]{1,64}')
 
 LEEME = """# {negocio}: tu web
 
@@ -54,14 +56,20 @@ def manifiesto(p):
 
 def empaquetar(ruta_pedido, destino=None):
     p = json.loads(Path(ruta_pedido).read_text(encoding='utf-8'))
-    base = DEMOS / 'clientes' / p['id']
+    pid = str(p.get('id', ''))
+    if not ID_PEDIDO.fullmatch(pid):
+        raise ValueError(f'id de pedido no válido: {pid!r}')
+    clientes = (DEMOS / 'clientes').resolve()
+    base = (clientes / pid).resolve()
+    if base.parent != clientes:
+        raise ValueError(f'id de pedido no válido: {pid!r}')
     site = base / 'site'
     if not (site / 'index.html').is_file():
         raise FileNotFoundError('falta la web fabricada: ejecuta antes fabricar.py')
-    destino = Path(destino or base / f"entrega-{p['id']}.zip")
+    destino = Path(destino or base / f"entrega-{pid}.zip")
     ficheros = sorted(f for f in site.rglob('*') if f.is_file())
     with zipfile.ZipFile(destino, 'w', zipfile.ZIP_DEFLATED) as z:
-        z.writestr('LEEME.md', LEEME.format(negocio=p.get('negocio', 'Tu negocio'), id=p['id'],
+        z.writestr('LEEME.md', LEEME.format(negocio=p.get('negocio', 'Tu negocio'), id=pid,
                                             fecha=date.today().isoformat()))
         for f in ficheros:
             rel = f.relative_to(site).as_posix()
