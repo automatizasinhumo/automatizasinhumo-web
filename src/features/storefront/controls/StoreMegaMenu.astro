@@ -72,3 +72,19 @@ const { label, areas, allHref, allText, links = [], class: className } = Astro.p
     }
   </NavigationMenuList>
 </NavigationMenu>
+
+<script>
+  import { createNavigationMenu } from '@starwind-ui/runtime/navigation-menu';
+
+  // Atrás/adelante restaura la página desde la bfcache tal como se dejó: con el
+  // panel abierto y su estado interno a medias. Se cierra al salir (pagehide) y,
+  // por si el navegador guardó la foto antes, también al volver (pageshow).
+  const closeAll = () =>
+    document
+      .querySelectorAll<HTMLElement>('[data-sw-nav-menu]')
+      .forEach((root) => createNavigationMenu(root).close());
+  window.addEventListener('pagehide', closeAll);
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) closeAll();
+  });
+</script>
