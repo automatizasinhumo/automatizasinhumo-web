@@ -69,3 +69,14 @@ const TEXTO = {
     <a href="/" class="mt-6 inline-block rounded-full border border-brand px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Seguir viendo servicios</a>
   </div>
 </Layout>
+
+<script>
+  import { PREFIJO } from '../../features/solicitudes/borrador';
+
+  // Solicitud enviada: el borrador local ya no hace falta.
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith(PREFIJO)) localStorage.removeItem(k);
+  } catch {
+    /* sin almacenamiento */
+  }
+</script>

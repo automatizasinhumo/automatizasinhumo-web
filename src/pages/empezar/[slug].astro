@@ -119,6 +119,10 @@ const label = 'block text-sm font-medium text-ink';
               <div class="h-full rounded-full bg-brand transition-all duration-300" style="width:0%" data-progreso-relleno></div>
             </div>
           </div>
+          <p class="hidden items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-muted" role="status" data-borrador-aviso>
+            <span>Hemos recuperado lo que escribiste. Solo está guardado en este navegador.</span>
+            <button type="button" class="shrink-0 font-semibold text-brand underline-offset-2 hover:underline" data-borrador-borrar>Empezar de cero</button>
+          </p>
           <input type="hidden" name="slug" value={slug} />
           {/* Un token por formulario mostrado: el doble envío devuelve la misma solicitud. */}
           <input type="hidden" name="envio" value={crypto.randomUUID()} />
@@ -281,6 +285,70 @@ const label = 'block text-sm font-medium text-ink';
 </Layout>
 
 <script>
+  import { PREFIJO, crearBorrador, guardable, leerBorrador } from '../../features/solicitudes/borrador';
+
+  // Borrador local: lo escrito sobrevive a cerrar la pestaña o a un ?error= del servidor.
+  document.querySelectorAll<HTMLFormElement>('form[data-solicitud]').forEach((f) => {
+    const slug = f.querySelector<HTMLInputElement>('input[name=slug]')?.value;
+    if (!slug) return;
+    const clave = PREFIJO + slug;
+    const campos = () =>
+      [...f.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[name],textarea[name]')].filter((el) => guardable(el.name, el.type));
+    let almacen: Storage | null = null;
+    try {
+      almacen = window.localStorage;
+    } catch {
+      return; // navegación privada estricta: sin borrador
+    }
+    const b = leerBorrador(almacen.getItem(clave), Date.now());
+    if (b) {
+      let usado = false;
+      for (const el of campos()) {
+        const v = b.campos[el.name];
+        if (v === undefined) continue;
+        if (el.type === 'radio' || el.type === 'checkbox') {
+          if ((el as HTMLInputElement).value === v) {
+            (el as HTMLInputElement).checked = true;
+            usado = true;
+          }
+        } else if (!el.value) {
+          el.value = v;
+          usado = true;
+        }
+      }
+      const aviso = f.querySelector<HTMLElement>('[data-borrador-aviso]');
+      if (usado && aviso) {
+        aviso.classList.replace('hidden', 'flex');
+        aviso.querySelector('[data-borrador-borrar]')?.addEventListener('click', () => {
+          almacen!.removeItem(clave);
+          for (const el of campos()) if (el.type !== 'radio' && el.type !== 'checkbox') el.value = '';
+          aviso.remove();
+          f.querySelector<HTMLElement>('input:not([type=hidden]),textarea')?.focus();
+        });
+      }
+    }
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const guardar = () => {
+      const datos: Record<string, string> = {};
+      for (const el of campos()) {
+        if ((el.type === 'radio' || el.type === 'checkbox') && !(el as HTMLInputElement).checked) continue;
+        datos[el.name] = el.value;
+      }
+      const raw = crearBorrador(datos, Date.now());
+      try {
+        if (raw) almacen!.setItem(clave, raw);
+        else almacen!.removeItem(clave);
+      } catch {
+        /* cuota llena: sin borrador */
+      }
+    };
+    f.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(guardar, 400);
+    });
+    f.addEventListener('change', guardar);
+  });
+
   // Evita envíos dobles (doble clic o red lenta).
   document.querySelectorAll<HTMLFormElement>('form[data-solicitud]').forEach((f) =>
     f.addEventListener('submit', () => {
