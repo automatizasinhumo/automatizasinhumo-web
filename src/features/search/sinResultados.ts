@@ -6,13 +6,17 @@
  */
 export const MAX_BUSQUEDA = 120;
 
-/** Limpia la consulta que llega por URL: sin controles, espacios colapsados y recortada. */
+/**
+ * Limpia la consulta que llega por URL: sin controles, espacios colapsados y recortada.
+ * Recorta por puntos de código, no por unidades UTF-16: partir un emoji deja un sustituto
+ * suelto y `encodeURIComponent` lanzaría `URIError` al construir el enlace.
+ */
 export function limpiarBusqueda(valor: string | null | undefined): string {
-  return (valor ?? '')
-    .replace(/[\p{Cc}\p{Cf}]/gu, ' ')
+  const limpia = (valor ?? '')
+    .replace(/[\p{Cc}\p{Cf}\p{Cs}]/gu, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, MAX_BUSQUEDA);
+    .trim();
+  return Array.from(limpia).slice(0, MAX_BUSQUEDA).join('').trim();
 }
 
 /** Enlace a la consulta libre con la búsqueda ya escrita. */

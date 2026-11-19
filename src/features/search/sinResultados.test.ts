@@ -13,6 +13,13 @@ describe('búsqueda sin resultados', () => {
     expect(limpiarBusqueda('x'.repeat(500))).toHaveLength(MAX_BUSQUEDA);
   });
 
+  it('no parte emojis al recortar ni deja sustitutos sueltos', () => {
+    const q = 'x'.repeat(MAX_BUSQUEDA - 1) + '\u{1F600}' + 'y';
+    expect(Array.from(limpiarBusqueda(q))).toHaveLength(MAX_BUSQUEDA);
+    expect(() => enlaceConsulta(q)).not.toThrow();
+    expect(() => enlaceConsulta('a\uD83D')).not.toThrow();
+  });
+
   it('prepara el mensaje solo si hay búsqueda', () => {
     expect(mensajeDesdeBusqueda('gogle maps')).toBe('Busqué «gogle maps» en la web y no encontré lo que necesito. ');
     expect(mensajeDesdeBusqueda('')).toBe('');

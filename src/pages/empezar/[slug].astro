@@ -316,7 +316,17 @@ const label = 'block text-sm font-medium text-ink';
       const desdeUrl = new Set((f.dataset.desdeUrl ?? '').split(' ').filter(Boolean));
       for (const el of campos()) {
         const v = b.campos[el.name];
-        if (v === undefined || desdeUrl.has(el.name)) continue;
+        if (v === undefined) continue;
+        if (desdeUrl.has(el.name)) {
+          // Misma búsqueda: el borrador continúa el texto que trae la URL y se recupera entero.
+          // Otra búsqueda (u otra modalidad) manda la URL.
+          const texto = el.type !== 'radio' && el.type !== 'checkbox';
+          if (texto && el.value && v !== el.value && v.startsWith(el.value)) {
+            el.value = v;
+            usado = true;
+          }
+          continue;
+        }
         if (el.type === 'radio' || el.type === 'checkbox') {
           if ((el as HTMLInputElement).value === v) {
             (el as HTMLInputElement).checked = true;
