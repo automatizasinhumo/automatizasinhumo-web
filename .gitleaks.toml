@@ -15,6 +15,8 @@ regexes = ['''^(qa-[a-z]+|visual-auth-secret|integration-auth-secret)(-[0-9a-f]+
 [[allowlists]]
 # Sin «paths»: una excepción global con ruta descarta el fichero entero aunque lleve
 # condition = "AND" (comprobado con 8.28.0), y taparía otros secretos del mismo test.
-description = "Tokens inventados en tests (prefijo otk_ de outbox.test.ts)"
+# Solo los valores exactos de los tests: un token otk_ real (aleatorio) nunca coincide,
+# así que sigue saltando en cualquier fichero. Un token de prueba nuevo se añade aquí.
+description = "Tokens inventados en tests (outbox.test.ts, formOrigin.test.ts)"
 regexTarget = "secret"
-regexes = ['''^otk_[A-Za-z0-9]{8,32}$''']
+regexes = ['''^otk_(zZ11abCDefGHijKLmnpQ|xK3mQ9vRt2LwZa8pYc4dNQ)$''']
