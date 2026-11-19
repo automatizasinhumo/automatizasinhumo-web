@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { describe, expect, it, vi } from 'vitest';
 import type { D1Database } from '@cloudflare/workers-types';
 import type { EmailProvider } from '../email/provider';
-import { enviarNotificacion, enviarSeguimientos, enviarVistasPreviasListas } from './envio';
+import { enviarEntregasListas, enviarNotificacion, enviarSeguimientos, enviarVistasPreviasListas } from './envio';
 
 /** D1 mínimo sobre SQLite de Node con las migraciones reales: el SQL se ejecuta de verdad. */
 function d1(): D1Database & { sql: DatabaseSync } {
@@ -44,6 +44,33 @@ const correo = (falla = false) => {
   });
   return { send } satisfies EmailProvider;
 };
+
+describe('enviarEntregasListas', () => {
+  const ZIP = 'https://vistas.example.dev/entrega/abcdefghijklmnopqrstuvwxyz012345.zip';
+  it('manda el correo «entregado» con el enlace del ZIP y pasa a «entregada»', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'pagada', `Entrega automática: ${ZIP} · lista`);
+    const mail = correo();
+    expect(await enviarEntregasListas(db, mail)).toEqual({ enviadas: ['S-AAAAAA'], fallidas: [] });
+    const msg = mail.send.mock.calls[0][0 as never] as { text: string };
+    expect(msg.text).toContain(ZIP);
+    expect(estado(db, 'S-AAAAAA')).toBe('entregada');
+    // Un segundo tick no repite el correo.
+    expect(await enviarEntregasListas(db, mail)).toEqual({ enviadas: [], fallidas: [] });
+    expect(mail.send).toHaveBeenCalledTimes(1);
+  });
+
+  it('solo actúa sobre solicitudes pagadas con la nota exacta de entregar.py', async () => {
+    const db = d1();
+    solicitud(db, 'S-BBBBBB', 'aprobada', `Entrega automática: ${ZIP} · lista`);
+    solicitud(db, 'S-CCCCCC', 'pagada', 'Entrega automática: falló (sin vista previa en KV, revisar a mano)');
+    solicitud(db, 'S-DDDDDD', 'pagada', `Vista previa automática: ${URL_OK} · QA ok`);
+    const mail = correo();
+    expect(await enviarEntregasListas(db, mail)).toEqual({ enviadas: [], fallidas: [] });
+    expect(mail.send).not.toHaveBeenCalled();
+    expect(await enviarVistasPreviasListas(db, mail)).toEqual({ enviadas: [], fallidas: [] });
+  });
+});
 
 describe('enviarVistasPreviasListas', () => {
   it('manda el correo de revisión con el enlace y pasa a «vista previa enviada»', async () => {

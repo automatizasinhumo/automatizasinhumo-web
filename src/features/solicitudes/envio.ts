@@ -71,6 +71,8 @@ export interface Envio {
    * exacta (cron): si David la movió o reescribió la nota tras la lectura, no se envía.
    */
   exigirNota?: string;
+  /** Estados en los que vale exigirNota (por defecto, los de la vista previa). */
+  estadosNota?: readonly string[];
   /** Solo reservar si la solicitud sigue en este estado (seguimientos del cron). */
   exigirEstado?: Estado;
   /**
@@ -88,8 +90,9 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
   const partes: string[] = [];
   const condicion: (string | number)[] = [];
   if (e.exigirNota !== undefined) {
-    partes.push(`EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado IN ('nueva', 'en_preparacion') AND s.nota = ?)`);
-    condicion.push(e.id, e.exigirNota);
+    const estados = e.estadosNota ?? ['nueva', 'en_preparacion'];
+    partes.push(`EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado IN (${estados.map(() => '?').join(', ')}) AND s.nota = ?)`);
+    condicion.push(e.id, ...estados, e.exigirNota);
   }
   if (e.exigirEstado !== undefined) {
     partes.push('EXISTS (SELECT 1 FROM solicitudes s WHERE s.public_id = ? AND s.estado = ?)');
@@ -214,7 +217,37 @@ export async function enviarNotificacion(db: D1Database, mail: EmailProvider | n
 
 /** Nota que deja la fábrica cuando la vista previa pasó el QA. */
 const NOTA_QA_OK = /^Vista previa automática: (https:\/\/\S+) · QA ok$/;
+/** Nota que deja manual/fabrica/entregar.py cuando el ZIP de la web está subido. */
+const NOTA_ENTREGA = /^Entrega automática: (https:\/\/\S+) · lista$/;
 const MAX_INTENTOS_CRON = 3;
+
+/** Un paso automático del cron: nota de la fábrica -> correo -> estado siguiente. */
+type PasoListo = {
+  desde: readonly string[];
+  like: string;
+  nota: RegExp;
+  tipo: 'revision' | 'entregado';
+  hasta: string;
+  etiqueta: string;
+};
+
+const VISTA_PREVIA: PasoListo = {
+  desde: ['nueva', 'en_preparacion'],
+  like: 'Vista previa automática: https://% · QA ok',
+  nota: NOTA_QA_OK,
+  tipo: 'revision',
+  hasta: 'vista_previa_enviada',
+  etiqueta: 'Vista previa',
+};
+
+const ENTREGA: PasoListo = {
+  desde: ['pagada'],
+  like: 'Entrega automática: https://% · lista',
+  nota: NOTA_ENTREGA,
+  tipo: 'entregado',
+  hasta: 'entregada',
+  etiqueta: 'Entrega',
+};
 
 /**
  * Cierra el último paso manual de la fábrica: cada solicitud cuya vista previa
@@ -227,63 +260,88 @@ const MAX_INTENTOS_CRON = 3;
  * intentos. Un correo que falla se reintenta en ticks siguientes hasta
  * MAX_INTENTOS_CRON; después queda en Admin con su error.
  */
-export async function enviarVistasPreviasListas(
+export function enviarVistasPreviasListas(
   db: D1Database,
   mail: EmailProvider | null,
   limite = 10,
   firmar?: Firmador | null,
 ): Promise<{ enviadas: string[]; fallidas: string[] }> {
+  return enviarListos(db, mail, VISTA_PREVIA, limite, firmar);
+}
+
+/**
+ * Lo mismo para la entrega: una solicitud `pagada` con el ZIP subido por
+ * manual/fabrica/entregar.py recibe el correo «entregado» con el enlace de
+ * descarga y pasa a «Entregada».
+ */
+export function enviarEntregasListas(
+  db: D1Database,
+  mail: EmailProvider | null,
+  limite = 10,
+): Promise<{ enviadas: string[]; fallidas: string[] }> {
+  return enviarListos(db, mail, ENTREGA, limite, null);
+}
+
+async function enviarListos(
+  db: D1Database,
+  mail: EmailProvider | null,
+  paso: PasoListo,
+  limite: number,
+  firmar?: Firmador | null,
+): Promise<{ enviadas: string[]; fallidas: string[] }> {
   const res = { enviadas: [] as string[], fallidas: [] as string[] };
   if (!mail) return res;
+  const desde = paso.desde.map(() => '?').join(', ');
   const { results } = await db
     .prepare(
       `SELECT public_id, nota FROM solicitudes
-       WHERE estado IN ('nueva', 'en_preparacion') AND nota LIKE 'Vista previa automática: https://% · QA ok'
+       WHERE estado IN (${desde}) AND nota LIKE ?
          -- Las agotadas (error tras MAX_INTENTOS_CRON) esperan en Admin y no ocupan el LIMIT.
          AND NOT EXISTS (SELECT 1 FROM notificaciones n WHERE n.solicitud_public_id = solicitudes.public_id
-           AND n.tipo = 'revision' AND n.version = 1 AND n.estado_envio = 'error' AND n.intentos >= ?)
+           AND n.tipo = ? AND n.version = 1 AND n.estado_envio = 'error' AND n.intentos >= ?)
        ORDER BY id LIMIT ?`,
     )
-    .bind(MAX_INTENTOS_CRON, limite)
+    .bind(...paso.desde, paso.like, paso.tipo, MAX_INTENTOS_CRON, limite)
     .all<{ public_id: string; nota: string }>();
   for (const { public_id: id, nota } of results ?? []) {
-    const enlace = NOTA_QA_OK.exec(nota)?.[1];
+    const enlace = paso.nota.exec(nota)?.[1];
     const d = enlace ? await datosDe(db, id, enlace, '', firmar, 1) : null;
-    const c = d ? prepararCorreo('revision', d) : null;
+    const c = d ? prepararCorreo(paso.tipo, d) : null;
     if (!d || !c?.ok) continue;
     const r = await enviarNotificacion(db, mail, {
       id,
-      tipo: 'revision',
+      tipo: paso.tipo,
       version: 1,
       email: d.email,
       asunto: c.asunto,
       texto: c.texto,
       maxIntentos: MAX_INTENTOS_CRON,
       exigirNota: nota,
+      estadosNota: paso.desde,
     });
     let enviado = r.estado === 'enviado';
     if (r.estado === 'ocupado') {
       // Ya enviado (a mano o por un tick anterior que murió antes de avanzar).
       const fila = await db
-        .prepare("SELECT estado_envio FROM notificaciones WHERE solicitud_public_id = ? AND tipo = 'revision' AND version = 1")
-        .bind(id)
+        .prepare('SELECT estado_envio FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = 1')
+        .bind(id, paso.tipo)
         .first<{ estado_envio: string }>();
       enviado = fila?.estado_envio === 'enviado';
     }
     if (!enviado) {
       if (r.estado === 'error') {
         res.fallidas.push(id);
-        console.error(`Vista previa ${id}: correo no enviado (${r.error})`);
+        console.error(`${paso.etiqueta} ${id}: correo no enviado (${r.error})`);
       }
       continue;
     }
     // Condicional: si David la movió mientras tanto, se respeta su estado.
     await db
       .prepare(
-        `UPDATE solicitudes SET estado = 'vista_previa_enviada', updated_at = datetime('now')
-         WHERE public_id = ? AND estado IN ('nueva', 'en_preparacion') AND nota = ?`,
+        `UPDATE solicitudes SET estado = ?, updated_at = datetime('now')
+         WHERE public_id = ? AND estado IN (${desde}) AND nota = ?`,
       )
-      .bind(id, nota)
+      .bind(paso.hasta, id, ...paso.desde, nota)
       .run();
     res.enviadas.push(id);
   }

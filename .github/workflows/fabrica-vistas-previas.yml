@@ -1,6 +1,7 @@
 name: Fábrica de vistas previas
 
-# Solicitudes nuevas -> vista previa publicada (manual/fabrica/vistas-previas.py), sin depender del PC.
+# Solicitudes nuevas -> vista previa publicada (manual/fabrica/vistas-previas.py) y pagadas -> ZIP entregado
+# (manual/fabrica/entregar.py), sin depender del PC.
 # Necesita el secreto CLOUDFLARE_API_TOKEN (Workers Scripts Edit, D1 Edit, Workers AI Read, Account Settings Read)
 # y las variables CLOUDFLARE_ACCOUNT_ID y D1_DATABASE_ID. Sin ellas, el trabajo falla.
 # Los registros de Actions son públicos: los scripts no escriben datos ni URLs de clientes cuando GITHUB_ACTIONS existe.
@@ -99,6 +100,13 @@ jobs:
         env:
           MAXIMO: ${{ inputs.max || '3' }}
         run: python -X utf8 -u manual/fabrica/vistas-previas.py --config "$WRANGLER_CONFIG" --max "$MAXIMO"
+
+      # Solicitudes pagadas: ZIP de la vista previa aprobada en KV; el cron del Worker manda el correo «entregado».
+      - name: Entregar webs pagadas
+        if: ${{ !cancelled() && steps.cred.outputs.listo == '1' }}
+        env:
+          MAXIMO: ${{ inputs.max || '3' }}
+        run: python -X utf8 -u manual/fabrica/entregar.py --config "$WRANGLER_CONFIG" --max "$MAXIMO"
 
   vigilancia:
     needs: vistas-previas

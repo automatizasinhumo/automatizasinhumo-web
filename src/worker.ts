@@ -5,7 +5,7 @@ import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting, getStoreSettings } from './features/settings/db';
 import { getEmailProvider } from './features/email';
 import { escapeHtml } from './features/email/layout';
-import { enviarSeguimientos, enviarVistasPreviasListas } from './features/solicitudes/envio';
+import { enviarSeguimientos, enviarEntregasListas, enviarVistasPreviasListas } from './features/solicitudes/envio';
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
 import { getConfig } from './config';
@@ -65,6 +65,13 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     await enviarVistasPreviasListas(db, await getEmailProvider(await getStoreSettings(db)), 10, firmar);
   } catch (err) {
     console.error('Scheduled preview email sweep failed:', err);
+  }
+
+  // Entregas: el ZIP que subió manual/fabrica/entregar.py tras el pago -> correo «entregado».
+  try {
+    await enviarEntregasListas(db, await getEmailProvider(await getStoreSettings(db)));
+  } catch (err) {
+    console.error('Scheduled delivery email sweep failed:', err);
   }
 
   // Seguimiento sin respuesta: recordatorio al día 3, espera al día 7 y reseña a la

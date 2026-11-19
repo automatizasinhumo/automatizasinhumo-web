@@ -21,6 +21,15 @@ export default {
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response(null, { status: 405, headers: { ...BASE, Allow: 'GET, HEAD' } });
     const url = new URL(request.url);
     if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { ...BASE, 'Content-Type': TIPOS.txt } });
+    // ZIP de la entrega (manual/fabrica/entregar.py): el token aleatorio del enlace es la única llave.
+    const entrega = /^\/entrega\/([A-Za-z0-9_-]{32})\.zip$/.exec(url.pathname);
+    if (entrega) {
+      const zip = await env.VISTAS.get(`entregas/${entrega[1]}.zip`, 'stream');
+      if (zip === null) return noEncontrada();
+      return new Response(request.method === 'HEAD' ? null : zip, {
+        headers: { ...BASE, 'Content-Type': 'application/zip', 'Content-Disposition': 'attachment; filename="tu-web.zip"', 'Cache-Control': 'private, no-store' },
+      });
+    }
     let ruta;
     try { ruta = decodeURIComponent(url.pathname); } catch { return noEncontrada(); }
     const [, id, ...resto] = ruta.split('/');
