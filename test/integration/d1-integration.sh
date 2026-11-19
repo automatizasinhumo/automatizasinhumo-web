@@ -126,6 +126,16 @@ node -e '
   }
 ' "$search_page"
 
+# Búsqueda sin resultados: la consulta viaja al formulario de consulta ya escrita.
+empty_search="$(curl --max-time 30 --fail --silent --show-error \
+  "http://127.0.0.1:$test_port/search?q=zzqxv%20kwyj")"
+grep -q 'href="/empezar/consulta?busqueda=zzqxv%20kwyj"' <<<"$empty_search" \
+  || { echo "empty search did not link to the prefilled consultation" >&2; exit 1; }
+consulta_form="$(curl --max-time 30 --fail --silent --show-error \
+  "http://127.0.0.1:$test_port/empezar/consulta?busqueda=zzqxv%20kwyj")"
+grep -q 'Busqué «zzqxv kwyj» en la web' <<<"$consulta_form" \
+  || { echo "consultation form did not prefill the search" >&2; exit 1; }
+
 # Catalog list serialization should fetch categories in bulk and preserve them.
 sample_page="$(curl --max-time 30 --fail --silent --show-error \
   "http://127.0.0.1:$test_port/api/products?q=sample&limit=2")"

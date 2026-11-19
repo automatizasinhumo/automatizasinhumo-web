@@ -15,6 +15,7 @@ import Icono from '../components/Icono.astro';
 import { POPULARES, categoriasPara } from '../features/search/sinonimos';
 import { listCategories, childrenOf } from '../features/categories/db';
 import { ICONO_CAT } from '../features/storefront/iconos';
+import { enlaceConsulta, eventoSinResultados } from '../features/search/sinResultados';
 
 const q = normalizeSearchQuery(Astro.url.searchParams.get('q') ?? '');
 const PAGE_SIZE = 24;
@@ -70,6 +71,8 @@ const allCats = await listCategories(env.DB);
 const cats = !q || products.length === 0 ? childrenOf(allCats, null) : [];
 // «boda» → atajo a Bodas y eventos: la categoría entera suele ser mejor respuesta que la lista.
 const catAtajos = q ? categoriasPara(q).map((slug) => allCats.find((c) => c.slug === slug)).filter((c) => c !== undefined) : [];
+// Sin resultados: queda en los logs (Observability) para ampliar sinónimos y fichas.
+if (q && products.length === 0) console.info(eventoSinResultados(q));
 const fillerCards = fillers.map((product) =>
   buildProductCard(product, { ...cardOptions, maxPriceCents: maxPrices.get(product.id) }),
 );
@@ -148,8 +151,8 @@ const fillerCards = fillers.map((product) =>
     q && products.length === 0 && (
       <div class="mb-8 rounded-2xl border border-dashed border-line px-6 py-8 text-center" role="status">
         <p class="text-lg font-semibold text-ink">No encontramos nada para “{q}”.</p>
-        <p class="mt-1 text-muted">Prueba con otra palabra, mira las categorías o cuéntanos qué necesitas.</p>
-        <a href="/pages/contacto" class="mt-4 inline-block rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Pedir algo a medida</a>
+        <p class="mt-1 text-muted">Prueba con otra palabra o una de las populares, mira las categorías o cuéntanos qué necesitas: te respondemos con una propuesta.</p>
+        <a href={enlaceConsulta(q)} data-sin-resultados-cta class="mt-4 inline-block rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Cuéntanos qué necesitas</a>
       </div>
     )
   }
