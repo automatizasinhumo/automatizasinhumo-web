@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import fabricar as modulo_fabricar
-from fabricar import barra_contacto, numero_internacional, poner_datos
+from fabricar import barra_contacto, numero_internacional, poner_datos, poner_datos
 
 PLANTILLA = (
     '<html><head><title>Inicio | Lumen</title></head><body>'
@@ -48,6 +48,12 @@ def renderizar(pedido_fabrica, plantilla, ia_simulada):
 
 
 class BarraContacto(unittest.TestCase):
+    def test_whatsapp_no_valido_no_deja_el_de_la_plantilla(self):
+        html = '<head></head><a href="https://wa.me/34999999999">WhatsApp</a>'
+        out = poner_datos(html, pedido(whatsapp='12'), None)
+        self.assertNotIn('wa.me/34999999999', out)
+        self.assertIn('href="tel:986000000">WhatsApp', out)
+
     def test_whatsapp_sin_prefijo_lleva_34(self):
         self.assertEqual(numero_internacional('600111222'), '34600111222')
         out = barra_contacto(PLANTILLA, pedido(whatsapp='600 111 222'))

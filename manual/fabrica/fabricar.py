@@ -272,10 +272,12 @@ def poner_datos(out, p, marca):
     out = re.sub(r'href="mailto:[^"]*"', lambda _: f'href="mailto:{correo}"', out)
     tel = re.sub(r'[^0-9+]', '', p['telefono'])
     out = re.sub(r'href="tel:[^"]*"', lambda _: f'href="tel:{tel}"', out)
-    if p.get('whatsapp'):
-        wa = numero_internacional(p['whatsapp'])
-        if wa:
-            out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
+    wa = numero_internacional(p.get('whatsapp') or '')
+    if wa:
+        out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
+    else:
+        # Sin WhatsApp válido, el botón de la plantilla llamaría al número de otro negocio: pasa a llamar al cliente.
+        out = re.sub(r'''href=["']https?://(?:wa\.me|api\.whatsapp\.com)/[^"']*["']''', lambda _: f'href="tel:{tel}"', out, flags=re.I)
     # Igual con los correos sueltos de la plantilla: una pasada, sin tocar el ya puesto.
     out = CORREO_VALIDO.sub(lambda _: correo, out)
     titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"

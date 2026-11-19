@@ -63,6 +63,8 @@ async function revisarUnaVez(ctx, url, { ancho, captura, comprobados, primerClic
     const r = await pg.goto(url, { waitUntil: 'load', timeout: 45000 });
     if (!r || r.status() >= 400) problemas.push(`HTTP ${r?.status()}`);
     await pg.waitForTimeout(800);
+    // La primera pantalla se mira antes de desplazar la página para cargar las imágenes diferidas.
+    problemas.push(...(await revisarContacto(pg, { primerClic: primerClic && ancho <= 400 })));
     const pendientes = await cargarDiferidas(pg);
     for (const s of pendientes.slice(0, 5)) problemas.push('imagen sin terminar de cargar en 10 s: ' + s.slice(0, 150));
     // Imágenes que el navegador no pudo pintar (también las de CSS en línea que fallan arriba).
@@ -74,7 +76,6 @@ async function revisarUnaVez(ctx, url, { ancho, captura, comprobados, primerClic
     }
     problemas.push(...(await revisarFormularios(pg)));
     problemas.push(...(await revisarAnclas(pg)));
-    problemas.push(...(await revisarContacto(pg, { primerClic: primerClic && ancho <= 400 })));
     if (publicar) problemas.push(...(await revisarIndexacion(pg, r)));
     if (comprobados) problemas.push(...(await revisarEnlaces(pg, comprobados)));
     if (captura) await pg.screenshot({ path: captura, fullPage: false });
@@ -197,7 +198,7 @@ async function revisarContacto(pg, { primerClic }) {
     };
     const enPantalla = (e) => {
       const r = e.getBoundingClientRect();
-      return r.top < window.innerHeight && r.bottom > 0 && visible(e);
+      return r.top < window.innerHeight && r.bottom > 0 && r.left < window.innerWidth && r.right > 0 && visible(e);
     };
     window.scrollTo(0, 0);
     const clicables = [...document.querySelectorAll('a[href], button, input[type=submit], [role=button]')];

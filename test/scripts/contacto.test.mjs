@@ -25,6 +25,7 @@ describe('enlaces de contacto', () => {
     expect(problemaContacto('https://wa.me/+34600000000')).toMatch(/^WhatsApp no válido/);
     expect(problemaContacto('https://wa.me/34%20600000000')).toMatch(/^WhatsApp no válido/);
     expect(problemaContacto('https://api.whatsapp.com/send?phone=600')).toMatch(/^WhatsApp no válido/);
+    expect(problemaContacto('//wa.me/600000000')).toMatch(/^WhatsApp no válido/);
   });
 
   it('correo con dominio', () => {
@@ -52,6 +53,8 @@ describe('primer clic', () => {
     expect(esCta({ texto: 'Inicio', href: '/' })).toBe(false);
     expect(esCta({ texto: 'Menú', href: '' })).toBe(false);
     expect(esCta({ texto: 'Servicios', href: '#servicios' })).toBe(false);
+    expect(esCta({ texto: 'Pagos', href: '/contactless-payments' })).toBe(false);
+    expect(esCta({ texto: 'Ver', href: '/contacto/' })).toBe(true);
   });
 });
 
@@ -67,6 +70,8 @@ describe('indexación al publicar', () => {
     expect(problemasIndexacion({ url, robotsCabecera: 'noindex' })).toHaveLength(1);
     expect(problemasIndexacion({ url, robotsMeta: ['none'] })).toHaveLength(1);
     expect(problemasIndexacion({ url, robotsMeta: ['index, follow'] })).toEqual([]);
+    expect(problemasIndexacion({ url, robotsMeta: ['index, max-image-preview:none'] })).toEqual([]);
+    expect(problemasIndexacion({ url, robotsCabecera: 'googlebot: noindex' })).toHaveLength(1);
   });
   it('marca canonical a otra URL o duplicado', () => {
     expect(problemasIndexacion({ url, canonicals: ['https://plantilla.test/'] })[0]).toMatch(/canonical apunta/);

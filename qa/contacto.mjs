@@ -43,7 +43,7 @@ export function problemaContacto(href) {
   }
   let u;
   try {
-    u = new URL(h);
+    u = new URL(h, 'https://pagina.invalid/'); // «//wa.me/…» relativo al protocolo también cuenta
   } catch {
     return null;
   }
@@ -61,7 +61,10 @@ export function problemaContacto(href) {
 
 // Lo que un visitante de un negocio local busca primero: llamar, escribir, reservar, pedir cita.
 const TEXTO_CTA = /\b(llam|reserv|cita|contact|whats|presupuest|pide|pedir|escr[ií]b|inscr[ií]b|apúntate|apuntate|consulta|confirma|rsvp|asist|compra|encarg|visítanos|visitanos|cómo llegar|como llegar)/i;
-const HREF_CTA = /(?:^(?:tel|mailto|sms):)|(?:\/\/(?:wa\.me|api\.whatsapp\.com)\/)|(?:#(?:contact|reserv|cita|rsvp|presupuesto|pedido|inscrip))|(?:\/(?:contact|reserv|cita|pedir|presupuesto|rsvp))/i;
+const HREF_CTA = /(?:^(?:tel|mailto|sms):)|(?:\/\/(?:wa\.me|api\.whatsapp\.com)\/)|(?:#(?:contact|reserv|cita|rsvp|presupuesto|pedido|inscrip))|(?:\/(?:contact(?:o|os|ar|e|us)?|reserv(?:a|as|ar|e|ation|ations)?|citas?|pedir|presupuestos?|rsvp)(?:[/?#.]|$))/i;
+
+/** Directivas robots por comas («googlebot: noindex» incluido); «max-image-preview:none» no es noindex. */
+const esNoindex = (r) => (r ?? '').split(',').some((d) => /^(?:(?!max-)[\w-]+\s*:\s*)?(?:noindex|none)$/i.test(d.trim()));
 
 /** ¿Este enlace o botón es una llamada a la acción de contacto? */
 export function esCta({ texto = '', href = '' } = {}) {
@@ -74,7 +77,7 @@ export function esCta({ texto = '', href = '' } = {}) {
  */
 export function problemasIndexacion({ url, robotsMeta = [], robotsCabecera = '', canonicals = [] }) {
   const out = [];
-  if ([...robotsMeta, robotsCabecera].some((r) => /\b(noindex|none)\b/i.test(r ?? ''))) out.push('la página lleva noindex (Google no la mostrará)');
+  if ([...robotsMeta, robotsCabecera].some(esNoindex)) out.push('la página lleva noindex (Google no la mostrará)');
   if (canonicals.length > 1) out.push(`varias etiquetas canonical (${canonicals.length})`);
   if (canonicals.length === 1) {
     const sin = (x) => {
