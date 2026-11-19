@@ -28,10 +28,13 @@
 	"triggers": { "crons": ["*/5 * * * *"] },
 	"observability": {
 		"enabled": true,
-		// Span-level attribution (D1 calls, subrequests, waitUntil work). Full
-		// sampling: post-cache invocation volume is a few thousand a day, and the
-		// tail spikes we chase are exactly the ones sampling would drop.
-		"traces": { "enabled": true, "head_sampling_rate": 1 }
+		// Logs stay at 100 % (one event per invocation). Traces add one event per
+		// span (D1 calls, subrequests, waitUntil), so full sampling multiplied the
+		// count: staging served ~38k invocations on 19/11/2026, mostly our own QA
+		// crawlers, and used 75 % of the Free plan's daily Observability allowance
+		// (200k events/day; from 1/12/2026, 0.5 GB/day). 10 % of traces keeps
+		// enough samples to attribute slow requests. Errors are still in the logs.
+		"traces": { "enabled": true, "head_sampling_rate": 0.1 }
 	},
 	// Safe default for fresh workers.dev deployments. A rendered instance may
 	// enable Workers Caching only after it declares CANONICAL_ORIGIN and disables
