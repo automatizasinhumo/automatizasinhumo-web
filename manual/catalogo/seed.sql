@@ -2128,7 +2128,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Logo
 
 ## Ejemplo
-> La tienda de Ana cae un sábado a las 23:10; a las 23:11 le llega «tienda caída» al Telegram y lo arreglamos.
+> La tienda de Ana cae un sábado a las 23:10; a las 23:11 le llega «tienda caída» al Telegram con la hora y el error, y ya puede avisar a quien le mantiene la web.
 
 **Plazo:** primera versión en 24–72 horas laborables desde que recibimos los datos necesarios. Incluye una ronda de ajustes que puedes solicitar durante los 7 días siguientes a la primera versión. Entrega definitiva tras tu aprobación.
 

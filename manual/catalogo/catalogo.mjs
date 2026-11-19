@@ -443,7 +443,7 @@ export const productos = [
     recibes: ['Vigilancia cada 60 s de webs, tiendas o reservas', 'Aviso por Telegram o email', 'Página de estado con tu logo', 'Informe mensual de disponibilidad'],
     campos: ['Webs a vigilar (URLs)', 'Canal de aviso (Telegram / email)', 'Logo'],
     noIncluye: ['Reparación de las averías detectadas', 'Alojamiento o mantenimiento de la web vigilada', 'Atención humana de urgencias', 'Garantía de disponibilidad del 100 %', 'Costes de canales de aviso externos de pago'],
-    ejemplo: 'La tienda de Ana cae un sábado a las 23:10; a las 23:11 le llega «tienda caída» al Telegram y lo arreglamos.',
+    ejemplo: 'La tienda de Ana cae un sábado a las 23:10; a las 23:11 le llega «tienda caída» al Telegram con la hora y el error, y ya puede avisar a quien le mantiene la web.',
     repos: ['louislam/uptime-kuma'],
   },
 
