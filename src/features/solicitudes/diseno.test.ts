@@ -27,5 +27,7 @@ describe('diseño elegido', () => {
     expect(disenoElegido(slug!, 'plantillas-otra/cosa')).toBeNull();
     expect(disenoElegido('no-existe', d.plantilla)).toBeNull();
     expect(disenoElegido(slug!, null)).toBeNull();
+    expect(disenosDe('constructor')).toEqual([]);
+    expect(disenoElegido('__proto__', d.plantilla)).toBeNull();
   });
 });

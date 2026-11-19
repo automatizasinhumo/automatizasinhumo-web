@@ -26,13 +26,13 @@ export function plantillaDeUrl(url: string): string | null {
 
 /** Diseños elegibles de un servicio (demos de tipo diseño con plantilla concreta). */
 export function disenosDe(slug: string): Diseno[] {
-  const demos =
-    (
-      demosPorProducto as Record<
-        string,
-        { url: string; titulo: string; tipo: string }[]
-      >
-    )[slug] ?? [];
+  const tabla = demosPorProducto as Record<
+    string,
+    { url: string; titulo: string; tipo: string }[]
+  >;
+  // hasOwn: un slug como «constructor» no debe leer Object.prototype.
+  const entrada = Object.hasOwn(tabla, slug) ? tabla[slug] : null;
+  const demos = Array.isArray(entrada) ? entrada : [];
   const out: Diseno[] = [];
   for (const d of demos) {
     const plantilla = d.tipo === 'diseno' ? plantillaDeUrl(d.url) : null;
