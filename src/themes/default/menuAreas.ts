@@ -34,5 +34,8 @@ export const menuAreas = [
 ];
 
 /** Enlaces de cabecera que ya cubre el mega menú (catálogo y categorías). */
-export const coveredByMegaMenu = (href: string) =>
-  href === '/products' || href.startsWith('/categories/');
+const enMegaMenu = new Set(
+  menuAreas.flatMap((a) => [a.href, ...a.items.map((i) => i.href)]).concat('/products'),
+);
+/** Solo se quita de la fila lo que el mega menú ya enseña; una categoría nueva sigue visible. */
+export const coveredByMegaMenu = (href: string) => enMegaMenu.has(href);

@@ -147,7 +147,12 @@ describe('the store-owned header', () => {
     expect(html).not.toContain('type="checkbox"');
     // The inline row (in the default theme, the mega menu) and the disclosure
     // both list the link, so it is reachable at every width even with scripts blocked.
-    expect(html.match(/href="\/pages\/about"/g)?.length).toBeGreaterThanOrEqual(2);
+    // Each root is checked on its own: a global count would pass with two
+    // copies in one root and none in the other.
+    const disclosure = html.match(/<details[^>]*data-nav-disclosure[\s\S]*?<\/details>/)?.[0] ?? '';
+    const inline = html.replace(disclosure, '');
+    expect(disclosure).toContain('href="/pages/about"');
+    expect(inline).toContain('href="/pages/about"');
   });
 
   it('keeps the search form a real GET form with the q field', async () => {

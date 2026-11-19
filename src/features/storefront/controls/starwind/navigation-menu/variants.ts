@@ -39,7 +39,6 @@ export const navigationMenuContent = tv({
   base: [
     "data-starting-style:opacity-0 data-ending-style:opacity-0 h-full w-auto p-1 transition-opacity duration-[0.35s] ease-[cubic-bezier(0.22,1,0.36,1)] outline-none",
     "data-[state=closed]:pointer-events-none data-[state=closed]:absolute data-[state=closed]:inset-0 data-instant:transition-none",
-    "**:data-[slot=navigation-menu-link]:focus:ring-0 **:data-[slot=navigation-menu-link]:focus:outline-none",
   ],
 });
 
