@@ -1,6 +1,7 @@
 import type { MenuItem } from '../navigation/db';
 import { mediaUrl } from '../media/url';
 import type { StorefrontLink, StorefrontShellModel } from './models';
+import { SECTORS } from '../blog/sectors';
 
 /**
  * Builds the header/footer model.
@@ -50,6 +51,7 @@ export function buildShellModel(input: ShellInput): StorefrontShellModel {
       : null,
     headerLinks: input.headerItems.map(toLink),
     footerLinks: input.footerItems.map(toLink),
+    sectorLinks: SECTORS.map((sector) => ({ text: `Web para ${sector.label.toLowerCase()}`, href: `/webs/${sector.slug}` })),
     search: { action: '/search', query: input.searchQuery },
     cart: { enabled: input.cartEnabled, href: '/cart' },
     account: { enabled: input.accountsEnabled, href: '/account' },

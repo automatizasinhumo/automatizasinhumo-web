@@ -1,7 +1,6 @@
 ---
 import type { StorefrontShellModel } from '../../features/storefront/models';
 import Logo from './Logo.astro';
-import { SECTORS } from '../../features/blog/sectors';
 
 /**
  * STORE-OWNED. Edit freely — this file belongs to your store.
@@ -37,14 +36,18 @@ const { model } = Astro.props;
       )
     }
   </div>
-  <nav aria-label="Webs por sector" class="mx-auto max-w-6xl px-6 pb-10 text-sm">
-    <p class="font-semibold text-white">Webs por sector</p>
-    <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-      {SECTORS.map((sector) => (
-        <li><a href={`/webs/${sector.slug}`} class="text-white/80 hover:text-white hover:underline">Web para {sector.label.toLowerCase()}</a></li>
-      ))}
-    </ul>
-  </nav>
+  {
+    model.sectorLinks.length > 0 && (
+      <section aria-labelledby="pie-sectores" class="mx-auto max-w-6xl px-6 pb-10 text-sm">
+        <h2 id="pie-sectores" class="font-semibold text-white">Webs por sector</h2>
+        <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          {model.sectorLinks.map((link) => (
+            <li><a href={link.href} class="text-white/80 hover:text-white hover:underline">{link.text}</a></li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
   <div class="border-t border-white/10">
     <p class="mx-auto max-w-6xl px-6 py-5 text-xs text-white/60">&copy; {new Date().getFullYear()} {model.storeName} · Sin complicaciones y con una persona detrás.</p>
   </div>

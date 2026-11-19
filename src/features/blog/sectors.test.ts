@@ -45,6 +45,7 @@ function product(slug: string, active: number): Product {
 
 const sectorWithTwoServices: SectorPage = {
   slug: 'test',
+  label: 'Prueba',
   title: 'Sector de prueba',
   description: 'Descripción de prueba',
   heading: 'Sector de prueba',
