@@ -11,6 +11,12 @@
  * por ahí), así que quien guarda ve su cambio en la siguiente página. Los demás
  * isolates lo ven en como mucho `TTL_MS`.
  *
+ * Borde: una página pública generada en otro isolate con la entrada aún vigente puede
+ * guardarse en la caché del borde tras la purga de la escritura (`s-maxage=600`). El
+ * desfase posible es solo de menús y ajustes (no de precios ni fichas, que no pasan por
+ * aquí), como mucho TTL_MS + 600 s, y caduca solo. Se acepta frente a leer D1 en cada
+ * documento; si molesta, `STORE_CACHE_TTL_MS=0` lo elimina.
+ *
  * Las escrituras que no pasan por el Worker (`wrangler d1 execute`, semillas, pruebas de
  * integración) solo se ven al caducar: `STORE_CACHE_TTL_MS=0` desactiva la caché.
  */

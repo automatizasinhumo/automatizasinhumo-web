@@ -233,14 +233,19 @@ async function route(context: APIContext, next: MiddlewareNext): Promise<Respons
   const path = context.url.pathname;
   const productError = path.startsWith('/products/') && context.url.searchParams.has('error');
 
-  let response = isForbiddenFormOrigin(context.request, context.url)
-    ? new Response(`Cross-site ${context.request.method} form submissions are forbidden`, {
-        status: 403,
-      })
-    : await gate(context, next);
-  // Segundo vaciado tras la escritura: una lectura que empezó entre el primer vaciado
-  // (en gate) y el commit podría haber guardado los ajustes anteriores.
-  if (!esLectura(context.request.method)) olvidarCacheTienda();
+  let response: Response;
+  try {
+    response = isForbiddenFormOrigin(context.request, context.url)
+      ? new Response(`Cross-site ${context.request.method} form submissions are forbidden`, {
+          status: 403,
+        })
+      : await gate(context, next);
+  } finally {
+    // Segundo vaciado tras la escritura, también si la ruta lanza después de confirmarla:
+    // una lectura que empezó entre el primer vaciado (en gate) y el commit podría haber
+    // guardado los ajustes anteriores.
+    if (!esLectura(context.request.method)) olvidarCacheTienda();
+  }
 
   // Workers Caching heuristically stores headerless responses, so make every
   // response explicit: only allowlisted public successes/301s are shared.
