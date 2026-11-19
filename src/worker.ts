@@ -5,7 +5,7 @@ import { releaseExpiredReservations } from './features/orders/reservations';
 import { getSetting, getStoreSettings } from './features/settings/db';
 import { getEmailProvider } from './features/email';
 import { escapeHtml } from './features/email/layout';
-import { enviarVistasPreviasListas } from './features/solicitudes/envio';
+import { enviarSeguimientos, enviarVistasPreviasListas } from './features/solicitudes/envio';
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
 import { getConfig } from './config';
@@ -61,6 +61,15 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     await enviarVistasPreviasListas(db, await getEmailProvider(await getStoreSettings(db)));
   } catch (err) {
     console.error('Scheduled preview email sweep failed:', err);
+  }
+
+  // Seguimiento sin respuesta: recordatorio al día 3, espera al día 7 y reseña a la
+  // semana de entregar (solo con `resena_url`). Ver enviarSeguimientos.
+  try {
+    const ajustes = await getStoreSettings(db);
+    await enviarSeguimientos(db, await getEmailProvider(ajustes), new Date(), await getSetting(db, 'resena_url'));
+  } catch (err) {
+    console.error('Scheduled follow-up email sweep failed:', err);
   }
 
   // Conciliación de Stripe con pedidos y entregas (C39): una alerta por incidencia

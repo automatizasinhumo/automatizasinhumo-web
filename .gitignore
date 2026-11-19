@@ -62,3 +62,6 @@ manual/entregas/
 manual/equipo/
 manual/catalogo/gen-entregas.mjs
 manual/catalogo/entrega.mjs
+# Regresión visual (tests/visual): informes y fallos locales
+/test-results/
+/playwright-report/

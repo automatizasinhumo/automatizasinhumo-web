@@ -1,0 +1,14 @@
+{
+  "name": "Automatiza sin humo",
+  "short_name": "Sin humo",
+  "description": "Webs y servicios digitales para negocios a precio cerrado.",
+  "lang": "es",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#176b5a",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+  ]
+}

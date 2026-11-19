@@ -186,6 +186,15 @@ export async function loadProductDetail(
     },
   };
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', options.origin).href },
+      { '@type': 'ListItem', position: 2, name: product.name, item: new URL(options.pathname, options.origin).href },
+    ],
+  };
+
   return {
     status: 'ok',
     cacheTagIds: [product.public_id, ...related.map((candidate) => candidate.public_id)],
@@ -197,7 +206,7 @@ export async function loadProductDetail(
       description: product.description ? markdownExcerpt(product.description, 160) : null,
       imagePath,
       // Escape "<" so a product name can't break out of the <script> tag.
-      jsonLd: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+      jsonLd: JSON.stringify([jsonLd, breadcrumbLd]).replace(/</g, '\\u003c'),
     },
     model: {
       id: requirePublicId(product.public_id, product.id, 'product'),

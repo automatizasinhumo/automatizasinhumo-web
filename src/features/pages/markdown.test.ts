@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   renderMarkdown,
   markdownExcerpt,
+  markdownFaq,
   markdownFirstParagraphExcerpt,
   extractMediaKeys,
 } from './markdown';
@@ -236,7 +237,13 @@ describe('extractMediaKeys', () => {
 describe('markdownExcerpt', () => {
   it('strips Markdown punctuation rather than copying the raw source', () => {
     const excerpt = markdownExcerpt('## Returns\n\nWe accept **returns** within [30 days](/x).');
-    expect(excerpt).toBe('Returns We accept returns within 30 days.');
+    expect(excerpt).toBe('Returns. We accept returns within 30 days.');
+  });
+
+  it('separa encabezados, párrafos y elementos de lista como frases', () => {
+    expect(markdownExcerpt('Servicios como barras de pan\n\n## Qué recibes\n\n- Web de una página\n- Dominio: tuyo\n\nListo.')).toBe(
+      'Servicios como barras de pan. Qué recibes. Web de una página. Dominio: tuyo. Listo.',
+    );
   });
 
   it('truncates on a word boundary with an ellipsis', () => {
@@ -248,6 +255,20 @@ describe('markdownExcerpt', () => {
 
   it('returns an empty string for an empty body', () => {
     expect(markdownExcerpt('')).toBe('');
+  });
+});
+
+describe('markdownFaq', () => {
+  it('saca las preguntas de los encabezados con su respuesta', () => {
+    const faq = markdownFaq('Intro.\n\n## ¿El dominio es mío?\n\nSí, a tu **nombre**.\n\n- Siempre\n\n## Precios\n\nTexto.\n\n## ¿Y si no me gusta?\n\nNo pagas.');
+    expect(faq).toEqual([
+      { question: '¿El dominio es mío?', answer: 'Sí, a tu nombre. Siempre' },
+      { question: '¿Y si no me gusta?', answer: 'No pagas.' },
+    ]);
+  });
+
+  it('sin preguntas devuelve una lista vacía', () => {
+    expect(markdownFaq('## Hola\n\nTexto.')).toEqual([]);
   });
 });
 
