@@ -1,0 +1,84 @@
+{
+  "operation": "GET /api/health",
+  "method": "TRACE",
+  "path_template": "/api/health",
+  "fingerprint": "a9b51579",
+  "case_id": "S9lw9f",
+  "code_sample": "curl -X TRACE -H 'User-Agent: automatizasinhumo-qa-schemathesis' https://automatizasinhumo-staging.davidpd89.workers.dev/api/health",
+  "sequence": [
+    {
+      "method": "TRACE",
+      "url": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/health",
+      "url_template": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/health",
+      "headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "S9lw9f",
+        "Content-Length": "0"
+      },
+      "response": {
+        "status_code": 405,
+        "headers": {
+          "server": "cloudflare",
+          "date": "Thu, 19 Nov 2026 16:10:12 GMT",
+          "content-type": "text/html",
+          "content-length": "155",
+          "connection": "close",
+          "cf-ray": "-"
+        },
+        "body": "<html>\r\n<head><title>405 Not Allowed</title></head>\r\n<body>\r\n<center><h1>405 Not Allowed</h1></center>\r\n<hr><center>cloudflare</center>\r\n</body>\r\n</html>\r\n"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "unsupported_method",
+          "status": "failure",
+          "message": "Wrong response to undeclared method\n\nTRACE returned 405 without required `Allow` header\n\nAdd `Allow` header listing supported methods (required by RFC 9110)"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 1.5099998563528061e-05,
+          "mode": "negative"
+        },
+        "components": {},
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Unspecified HTTP method: TRACE",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "scenario": "unspecified_http_method"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/health",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis"
+      },
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "GET /api/health"
+    }
+  ],
+  "aliases": [
+    "gJ9S3q"
+  ]
+}

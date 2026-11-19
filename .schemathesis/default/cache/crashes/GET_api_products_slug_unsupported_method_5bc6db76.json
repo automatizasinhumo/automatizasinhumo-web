@@ -1,0 +1,107 @@
+{
+  "operation": "GET /api/products/{slug}",
+  "method": "TRACE",
+  "path_template": "/api/products/{slug}",
+  "fingerprint": "5bc6db76",
+  "case_id": "Ge7Rfo",
+  "code_sample": "curl -X TRACE -H 'User-Agent: automatizasinhumo-qa-schemathesis' https://automatizasinhumo-staging.davidpd89.workers.dev/api/products/web-una-pagina",
+  "sequence": [
+    {
+      "method": "TRACE",
+      "url": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/products/web-una-pagina",
+      "url_template": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/products/{slug}",
+      "headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "Ge7Rfo",
+        "Content-Length": "0"
+      },
+      "response": {
+        "status_code": 405,
+        "headers": {
+          "server": "cloudflare",
+          "date": "Thu, 19 Nov 2026 16:10:16 GMT",
+          "content-type": "text/html",
+          "content-length": "155",
+          "connection": "close",
+          "cf-ray": "-"
+        },
+        "body": "<html>\r\n<head><title>405 Not Allowed</title></head>\r\n<body>\r\n<center><h1>405 Not Allowed</h1></center>\r\n<hr><center>cloudflare</center>\r\n</body>\r\n</html>\r\n"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "unsupported_method",
+          "status": "failure",
+          "message": "Wrong response to undeclared method\n\nTRACE returned 405 without required `Allow` header\n\nAdd `Allow` header listing supported methods (required by RFC 9110)"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 2.529995981603861e-05,
+          "mode": "negative"
+        },
+        "components": {
+          "PATH": "positive"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Unspecified HTTP method: TRACE",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "scenario": "unspecified_http_method"
+          }
+        },
+        "pool_draws": [
+          {
+            "location": "path",
+            "parameter_name": "slug",
+            "resource_name": "Producto",
+            "resource_field": "slug",
+            "source_operation": "GET /api/products",
+            "source_status": 200,
+            "source_identity": null,
+            "source_input": false,
+            "source_query": {
+              "limit": "1",
+              "offset": "0"
+            }
+          }
+        ],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {
+          "PATH": {
+            "slug": "web-una-pagina"
+          }
+        }
+      },
+      "path": "/api/products/{slug}",
+      "path_parameters": {
+        "slug": "web-una-pagina"
+      },
+      "query": {},
+      "case_headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis"
+      },
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "GET /api/products/{slug}"
+    }
+  ],
+  "aliases": [
+    "143UEg"
+  ]
+}

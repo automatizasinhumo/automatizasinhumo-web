@@ -70,6 +70,7 @@ npx wrangler dev \
   --persist-to "$state_dir" \
   --var CANONICAL_ORIGIN:https://canonical.example \
   --var AUTH_SECRET:integration-auth-secret \
+  --var STORE_CACHE_TTL_MS:0 \
   --ip 127.0.0.1 \
   --port "$test_port" >"$worker_log" 2>&1 &
 worker_pid="$!"
@@ -124,6 +125,16 @@ node -e '
     throw new Error("search page did not return the requested window");
   }
 ' "$search_page"
+
+# Búsqueda sin resultados: la consulta viaja al formulario de consulta ya escrita.
+empty_search="$(curl --max-time 30 --fail --silent --show-error \
+  "http://127.0.0.1:$test_port/search?q=zzqxv%20kwyj")"
+grep -q 'href="/empezar/consulta?busqueda=zzqxv%20kwyj"' <<<"$empty_search" \
+  || { echo "empty search did not link to the prefilled consultation" >&2; exit 1; }
+consulta_form="$(curl --max-time 30 --fail --silent --show-error \
+  "http://127.0.0.1:$test_port/empezar/consulta?busqueda=zzqxv%20kwyj")"
+grep -q 'Busqué «zzqxv kwyj» en la web' <<<"$consulta_form" \
+  || { echo "consultation form did not prefill the search" >&2; exit 1; }
 
 # Catalog list serialization should fetch categories in bulk and preserve them.
 sample_page="$(curl --max-time 30 --fail --silent --show-error \

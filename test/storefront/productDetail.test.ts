@@ -463,6 +463,7 @@ describe('an independently authored product page', () => {
             image: image('/images/other.jpg'),
             formattedPrice: '$12.00',
             inStock: true,
+            conDemo: false,
           },
         ],
       }),

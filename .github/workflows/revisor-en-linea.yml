@@ -1,0 +1,65 @@
+name: Revisor en línea
+
+# reviewdog (MIT, binario oficial con suma comprobada) convierte la salida de analizadores
+# que ya usamos en comentarios sobre las líneas añadidas de la PR. Solo comenta: el bloqueo
+# sigue en «Vigilantes de cadena» (actionlint) y en Verify.
+#   - shellcheck (preinstalado en el runner) sobre los scripts .sh.
+#   - actionlint sobre los workflows, para ver el aviso junto a la línea y no solo en el log.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revisor-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  revisor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      REVIEWDOG_VERSION: 0.21.3
+      REVIEWDOG_SHA256: 7029c2faf54e1237454cae8f1adf876c965b3d13d054f1a392206459091af4a1
+      ACTIONLINT_VERSION: 1.7.12
+      ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Instalar reviewdog y actionlint
+        run: |
+          f="reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64.tar.gz"
+          curl --proto '=https' --tlsv1.2 -fsSLo "$RUNNER_TEMP/$f" "https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/$f"
+          echo "$REVIEWDOG_SHA256  $RUNNER_TEMP/$f" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$f" -C "$RUNNER_TEMP" reviewdog
+          f="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl --proto '=https' --tlsv1.2 -fsSLo "$RUNNER_TEMP/$f" "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/$f"
+          echo "$ACTIONLINT_SHA256  $RUNNER_TEMP/$f" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$f" -C "$RUNNER_TEMP" actionlint
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: shellcheck
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mapfile -d '' -t scripts < <(git ls-files -z '*.sh')
+          [ "${#scripts[@]}" -eq 0 ] && exit 0
+          shellcheck -f checkstyle "${scripts[@]}" \
+            | reviewdog -f=checkstyle -name=shellcheck -reporter=github-pr-review \
+                -filter-mode=added -fail-level=none
+
+      - name: actionlint
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          actionlint -oneline \
+            | reviewdog -efm='%f:%l:%c: %m' -name=actionlint -reporter=github-pr-review \
+                -filter-mode=added -fail-level=none

@@ -3477,7 +3477,7 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
 |---|---|---|
 | Qué recibes | Plantilla + guía paso a paso | Servicio publicado con tus datos |
 | Para quién | Quien quiere ahorrar y se maneja | Quien quiere olvidarse |
-| Soporte | Por email | Por email y WhatsApp |
+| Soporte | Por email y Telegram | Por email y Telegram |
 
 ## Sin humo
 - **Es tuyo**: accesos a tu nombre y sin cuotas obligatorias.

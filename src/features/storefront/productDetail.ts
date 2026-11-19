@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { StoreSettings } from '../settings/db';
-import { getProductBySlug, listProductImages, type Product } from '../products/db';
+import { getProductBySlug, listProductImages, maxVariantPrices, type Product } from '../products/db';
 import { listVariants, listExtras } from '../products/variants';
 import { categoriesForProduct, relatedProducts } from '../categories/db';
 import { getRelatedStored, storeRelatedIds } from '../search';
@@ -112,6 +112,9 @@ export async function loadProductDetail(
     const byCategory = await relatedProducts(db, product.id, RELATED_TARGET + semantic.length);
     related = [...related, ...byCategory.filter((p) => !seen.has(p.id))].slice(0, RELATED_TARGET);
   }
+
+  // Los relacionados son tarjetas como las del catálogo: con sus dos precios (una consulta por lotes).
+  const relatedMaxPrices = await maxVariantPrices(db, related.map((candidate) => candidate.id));
 
   const hasVariants = variants.length > 0;
   const state = stockState(product.stock);
@@ -239,6 +242,7 @@ export async function loadProductDetail(
           delivery: options.delivery,
           currency: options.currency,
           sizes: RELATED_CARD_SIZES,
+          maxPriceCents: relatedMaxPrices.get(candidate.id),
         }),
       ),
       backHref: catalogPath(options.settings?.homePage),

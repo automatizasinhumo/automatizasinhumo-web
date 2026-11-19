@@ -7,6 +7,7 @@ import { camposDeDescripcion, nombreCampo, LIMITES } from '../../features/solici
 import { formatPrice } from '../../config';
 import { resolverPedido } from '../../features/solicitudes/pedido';
 import { firmaFormulario } from '../../features/solicitudes/borrador';
+import { mensajeDesdeBusqueda } from '../../features/search/sinResultados';
 
 export const prerender = false;
 
@@ -33,7 +34,11 @@ const q = Astro.url.searchParams;
 const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Plantilla + guía';
 // Campos que el servidor ha rellenado desde la URL: solo esos mandan sobre el borrador.
 // Un parámetro que no inicializa nada (?nombre=Ana) no debe vaciar lo guardado.
-const camposDesdeUrl = q.get('modalidad') === 'pro' ? 'modalidad' : '';
+// Desde una búsqueda sin resultados (?busqueda=) el mensaje llega ya empezado.
+const mensajeInicial = consulta ? mensajeDesdeBusqueda(q.get('busqueda')) : '';
+const camposDesdeUrl = [q.get('modalidad') === 'pro' ? 'modalidad' : '', mensajeInicial ? 'mensaje' : '']
+  .filter(Boolean)
+  .join(' ');
 // (con pedido verificado manda la modalidad pagada; ver modalidadFija)
 const ERRORES: Record<string, string> = {
   nombre: 'Escribe tu nombre (mínimo 2 letras).',
@@ -216,7 +221,7 @@ const label = 'block text-sm font-medium text-ink';
               maxlength={LIMITES.mensaje}
               required={consulta}
               placeholder={consulta ? 'Por ejemplo: quiero organizar un cumpleaños y que los invitados confirmen si vienen, pero no sé qué necesito.' : 'Colores, ejemplos que te gusten, fechas…'}
-            />
+            >{mensajeInicial}</textarea>
           </label>
 
           <label class="flex gap-3 text-sm text-muted">
@@ -311,7 +316,17 @@ const label = 'block text-sm font-medium text-ink';
       const desdeUrl = new Set((f.dataset.desdeUrl ?? '').split(' ').filter(Boolean));
       for (const el of campos()) {
         const v = b.campos[el.name];
-        if (v === undefined || desdeUrl.has(el.name)) continue;
+        if (v === undefined) continue;
+        if (desdeUrl.has(el.name)) {
+          // Misma búsqueda: el borrador continúa el texto que trae la URL y se recupera entero.
+          // Otra búsqueda (u otra modalidad) manda la URL.
+          const texto = el.type !== 'radio' && el.type !== 'checkbox';
+          if (texto && el.value && v !== el.value && v.startsWith(el.value)) {
+            el.value = v;
+            usado = true;
+          }
+          continue;
+        }
         if (el.type === 'radio' || el.type === 'checkbox') {
           if ((el as HTMLInputElement).value === v) {
             (el as HTMLInputElement).checked = true;
