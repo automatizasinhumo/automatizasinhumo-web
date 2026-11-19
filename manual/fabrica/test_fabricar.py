@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import fabricar as modulo_fabricar
-from fabricar import poner_datos
+from fabricar import barra_contacto, numero_internacional, poner_datos
 
 PLANTILLA = (
     '<html><head><title>Inicio | Lumen</title></head><body>'
@@ -45,6 +45,37 @@ def renderizar(pedido_fabrica, plantilla, ia_simulada):
             modulo_fabricar.fabricar(ruta_pedido, desplegar=False)
         salida = demos / 'clientes' / pedido_fabrica['id'] / 'site' / 'index.html'
         return salida.read_text(encoding='utf-8')
+
+
+class BarraContacto(unittest.TestCase):
+    def test_whatsapp_sin_prefijo_lleva_34(self):
+        self.assertEqual(numero_internacional('600111222'), '34600111222')
+        out = barra_contacto(PLANTILLA, pedido(whatsapp='600 111 222'))
+        self.assertIn('href="https://wa.me/34600111222"', out)
+
+    def test_whatsapp_con_34_no_lo_duplica(self):
+        out = barra_contacto(PLANTILLA, pedido(whatsapp='+34 600 00 00 00'))
+        self.assertIn('wa.me/34600000000"', out)
+        self.assertNotIn('wa.me/3434', out)
+
+    def test_telefono_corto_no_pone_llamar(self):
+        out = barra_contacto(PLANTILLA, pedido(telefono='98600', whatsapp=''))
+        self.assertNotIn('>Llamar</a></nav>', out.replace('<a href="mailto:ana@example.es">Escribir</a>', ''))
+        self.assertIn('href="mailto:ana@example.es">Escribir</a>', out)
+
+    def test_barra_antes_de_body_y_solo_movil(self):
+        out = barra_contacto(PLANTILLA, pedido())
+        self.assertIn('href="tel:+34986000000">Llamar</a>', out)
+        self.assertLess(out.index('id="ash-contacto"'), out.index('</body>'))
+        self.assertIn('@media (max-width:768px)', out)
+
+    def test_sin_datos_validos_no_pone_barra(self):
+        out = barra_contacto(PLANTILLA, pedido(telefono='12', whatsapp='', email='no-vale'))
+        self.assertNotIn('ash-contacto', out)
+
+    def test_poner_datos_normaliza_whatsapp(self):
+        out = poner_datos(PLANTILLA, pedido(whatsapp='600111222'), 'Lumen')
+        self.assertIn('wa.me/34600111222', out)
 
 
 class PonerDatos(unittest.TestCase):

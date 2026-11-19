@@ -18,6 +18,7 @@ import html as H, json, os, re, shutil, subprocess, sys, tempfile, urllib.parse,
 from pathlib import Path
 from bs4 import BeautifulSoup, NavigableString, Comment
 import fastjsonschema  # BSD-3-Clause, https://github.com/horejsek/python-fastjsonschema
+import phonenumbers  # Apache-2.0, https://github.com/daviddrysdale/python-phonenumbers (libphonenumber de Google)
 
 DEMOS = Path(os.environ.get('DEMOS_DIR', 'C:/GIT/automatizasinhumo-demos'))
 DEMOS_URL = 'https://automatizasinhumo-demos.davidpd89.workers.dev'
@@ -194,7 +195,7 @@ def fabricar(ruta_pedido, desplegar=True):
         if t:
             n.replace_with(n[: len(n) - len(n.lstrip())] + t + n[len(n.rstrip()):])
 
-    final = poner_datos(str(sopa), p, marca)
+    final = barra_contacto(poner_datos(str(sopa), p, marca), p)
     restos = restos_de_plantilla(final, marca, nombre_publico(p))
     if restos:
         raise FabricaBloqueada('restos de la plantilla: ' + ', '.join(restos))
@@ -272,8 +273,9 @@ def poner_datos(out, p, marca):
     tel = re.sub(r'[^0-9+]', '', p['telefono'])
     out = re.sub(r'href="tel:[^"]*"', lambda _: f'href="tel:{tel}"', out)
     if p.get('whatsapp'):
-        wa = re.sub(r'\D', '', p['whatsapp'])
-        out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
+        wa = numero_internacional(p['whatsapp'])
+        if wa:
+            out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
     # Igual con los correos sueltos de la plantilla: una pasada, sin tocar el ya puesto.
     out = CORREO_VALIDO.sub(lambda _: correo, out)
     titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"
@@ -283,6 +285,48 @@ def poner_datos(out, p, marca):
                  r'''|<meta\b[^>]*\bproperty=["']?og:(?:url|image)\b[^>]*>'''
                  r'''|<meta\b[^>]*\bname=["']?robots\b[^>]*>''', '', out, flags=re.I)
     return re.sub(r'<head[^>]*>', lambda m: m.group(0) + '<meta name="robots" content="noindex">', out, count=1)
+
+
+def numero_internacional(numero, region='ES'):
+    """Número en formato internacional sin «+» (lo que piden wa.me y tel:), o '' si no es válido.
+
+    libphonenumber decide: «600111222» -> «34600111222»; un número corto o inventado, ''.
+    """
+    try:
+        n = phonenumbers.parse(numero or '', region)
+    except phonenumbers.NumberParseException:
+        return ''
+    return phonenumbers.format_number(n, phonenumbers.PhoneNumberFormat.E164)[1:] if phonenumbers.is_valid_number(n) else ''
+
+
+# Barra fija de contacto solo en móvil: el primer clic (llamar o escribir) siempre a la vista.
+BARRA_CSS = (
+    '<style id="ash-contacto-css">#ash-contacto{display:none}'
+    '@media (max-width:768px){#ash-contacto{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:2147483000;'
+    'gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,.15)}'
+    '#ash-contacto a{flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:8px;'
+    'font:600 16px/1.2 system-ui,sans-serif;text-decoration:none;color:#fff;background:#1f2937}'
+    '#ash-contacto a.ash-wa{background:#128c4b}body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}}</style>'
+)
+
+
+def barra_contacto(html, p):
+    """Añade antes de </body> la barra móvil «Llamar» + «WhatsApp» (o «Escribir» por correo)."""
+    botones = []
+    tel = numero_internacional(p.get('telefono'))
+    if tel:
+        botones.append(f'<a href="tel:+{tel}">Llamar</a>')
+    wa = numero_internacional(p.get('whatsapp'))
+    if wa:
+        botones.append(f'<a class="ash-wa" href="https://wa.me/{wa}" rel="noopener">WhatsApp</a>')
+    elif CORREO_VALIDO.fullmatch((p.get('email') or '').strip()):
+        botones.append(f'<a href="mailto:{H.escape(p["email"].strip())}">Escribir</a>')
+    if not botones:
+        return html
+    barra = BARRA_CSS + '<nav id="ash-contacto" aria-label="Contacto">' + ''.join(botones) + '</nav>'
+    if re.search(r'</body>', html, re.I):
+        return re.sub(r'</body>', lambda m: barra + m.group(0), html, count=1, flags=re.I)
+    return html + barra
 
 
 if __name__ == '__main__':
