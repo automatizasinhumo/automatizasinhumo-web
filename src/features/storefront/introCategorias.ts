@@ -3,7 +3,7 @@
 export const INTRO_CATEGORIA: Record<string, string> = {
   bodas:
     'Crea la web de vuestra boda, recoge confirmaciones y organiza a los invitados. Elige solo lo que necesitéis.',
-  webs: 'Webs para negocios y particulares, publicadas con tu dominio y lista para enseñar.',
+  webs: 'Webs para negocios y particulares, publicadas y listas para enseñar. Si ya tienes dominio, te ayudamos a conectarlo.',
   hosteleria: 'Carta QR, reservas y avisos para bares y restaurantes, sin apps ni comisiones.',
   reservas: 'Que tus clientes reserven solos, con recordatorio y sin llamadas.',
   automatizaciones: 'Quita de en medio las tareas repetitivas: avisos, formularios, hojas y correos que se mueven solos.',
