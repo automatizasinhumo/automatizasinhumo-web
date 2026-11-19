@@ -68,7 +68,7 @@ async function revisarLineas() {
 
 // 4. Dependencias: package.json sin su lockfile rompe `npm ci`.
 async function revisarLockfiles() {
-  for (const dir of ['', 'mcp/', 'qa/navegador/']) {
+  for (const dir of ['', 'mcp/', 'qa/navegador/', 'qa/danger/']) {
     if (cambiados.includes(`${dir}package.json`) && !cambiados.includes(`${dir}package-lock.json`)) {
       const diff = await danger.git.JSONDiffForFile(`${dir}package.json`);
       if (diff.dependencies || diff.devDependencies || diff.optionalDependencies) {

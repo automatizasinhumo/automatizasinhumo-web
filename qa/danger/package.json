@@ -1,0 +1,8 @@
+{
+  "name": "ash-danger",
+  "private": true,
+  "description": "Danger JS fijado con lockfile para el workflow de Danger (sin instalación suelta).",
+  "devDependencies": {
+    "danger": "14.1.0"
+  }
+}
