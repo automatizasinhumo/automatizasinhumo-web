@@ -39,7 +39,7 @@ if (showHero) {
 }
 ---
 
-<Layout>
+<Layout title={showHero ? 'Webs para negocios a precio cerrado: la ves gratis antes de pagar' : undefined}>
   {showHero && <HomeHero services={homeServices} />}
   <ProductList belowHero={showHero} />
 </Layout>

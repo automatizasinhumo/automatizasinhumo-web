@@ -88,6 +88,24 @@ const orgLd = JSON.stringify({
   inLanguage: 'es',
   description: 'Webs, automatizaciones y servicios digitales a precio cerrado.',
 }).replace(/</g, '\\u003c');
+// En la portada, WebSite con su buscador (SearchAction) para el cuadro de búsqueda de Google.
+// originPathname: si la portada es una página o ficha configurada, index.astro la reescribe
+// y Astro.url ya trae la ruta destino.
+const websiteLd =
+  Astro.originPathname === '/'
+    ? JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: storeName,
+        url: origin + '/',
+        inLanguage: 'es',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: { '@type': 'EntryPoint', urlTemplate: origin + '/search?q={search_term_string}' },
+          'query-input': 'required name=search_term_string',
+        },
+      }).replace(/</g, '\\u003c')
+    : null;
 
 // The header and footer are store-owned, so they receive a model rather than
 // request context. Built from values middleware already loaded — no extra D1
@@ -119,6 +137,7 @@ const shell = buildShellModel({
         the branded 404 page. The files are also present as static assets, which
         answers the agents that probe regardless without invoking the Worker. */}
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>{pageTitle}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
@@ -157,6 +176,7 @@ const shell = buildShellModel({
       document.addEventListener('error', finishImageFade, true);
     </script>
     <script is:inline type="application/ld+json" set:html={orgLd}></script>
+    {websiteLd && <script is:inline type="application/ld+json" set:html={websiteLd}></script>}
   </head>
   <body class="flex min-h-screen flex-col bg-paper text-ink antialiased">
     <StoreHeader model={shell} />
