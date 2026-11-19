@@ -20,3 +20,8 @@ regexes = ['''^(qa-[a-z]+|visual-auth-secret|integration-auth-secret)(-[0-9a-f]+
 description = "Tokens inventados en tests (outbox.test.ts, formOrigin.test.ts)"
 regexTarget = "secret"
 regexes = ['''^otk_(zZ11abCDefGHijKLmnpQ|xK3mQ9vRt2LwZa8pYc4dNQ)$''']
+
+[[allowlists]]
+description = "Clave HMAC inventada en decision.test.ts (enlaces firmados de aprobar/cambios)"
+regexTarget = "secret"
+regexes = ['''^secreto-de-prueba-0123456789abcdef$''']
