@@ -1,7 +1,11 @@
 // Prueba funcional de una página en un navegador real (Playwright). La usan el empleado
 // «multinavegador» (qa/navegadores.mjs) y la puerta de la fábrica (qa/demo-funcional.mjs):
 // una demo con errores de JavaScript, recursos rotos, enlaces muertos, formularios sin
-// enviar ni etiquetas o que se sale de ancho en móvil no se da por buena.
+// enviar ni etiquetas o que se sale de ancho en móvil no se da por buena. Tampoco una con un
+// teléfono, WhatsApp o correo mal escritos (qa/contacto.mjs); con `primerClic`, la que en el
+// móvil no enseña ningún botón de contacto en la primera pantalla, y con `publicar`, la que
+// lleva noindex o un canonical a otra URL.
+import { esCta, problemaContacto, problemasIndexacion } from './contacto.mjs';
 
 export const ANCHOS = [360, 390, 1280];
 // Ruido que no depende de la página (analítica bloqueada, favicon).
@@ -39,7 +43,7 @@ export async function revisarPagina(ctx, url, opciones = {}) {
   return segundo;
 }
 
-async function revisarUnaVez(ctx, url, { ancho, captura, comprobados } = {}) {
+async function revisarUnaVez(ctx, url, { ancho, captura, comprobados, primerClic, publicar } = {}) {
   const pg = await ctx.newPage();
   const problemas = [];
   pg.on('pageerror', (e) => problemas.push('JS: ' + e.message.split('\n')[0]));
@@ -59,6 +63,8 @@ async function revisarUnaVez(ctx, url, { ancho, captura, comprobados } = {}) {
     const r = await pg.goto(url, { waitUntil: 'load', timeout: 45000 });
     if (!r || r.status() >= 400) problemas.push(`HTTP ${r?.status()}`);
     await pg.waitForTimeout(800);
+    // La primera pantalla se mira antes de desplazar la página para cargar las imágenes diferidas.
+    problemas.push(...(await revisarContacto(pg, { primerClic: primerClic && ancho <= 400 })));
     const pendientes = await cargarDiferidas(pg);
     for (const s of pendientes.slice(0, 5)) problemas.push('imagen sin terminar de cargar en 10 s: ' + s.slice(0, 150));
     // Imágenes que el navegador no pudo pintar (también las de CSS en línea que fallan arriba).
@@ -70,6 +76,7 @@ async function revisarUnaVez(ctx, url, { ancho, captura, comprobados } = {}) {
     }
     problemas.push(...(await revisarFormularios(pg)));
     problemas.push(...(await revisarAnclas(pg)));
+    if (publicar) problemas.push(...(await revisarIndexacion(pg, r)));
     if (comprobados) problemas.push(...(await revisarEnlaces(pg, comprobados)));
     if (captura) await pg.screenshot({ path: captura, fullPage: false });
   } catch (e) {
@@ -176,6 +183,45 @@ async function revisarAnclas(pg) {
       })
       .map((h) => `ancla sin destino: ${h}`),
   );
+}
+
+/**
+ * Enlaces tel:, WhatsApp y mailto bien escritos; con `primerClic`, al menos una llamada a la
+ * acción de contacto (o un formulario) visible sin desplazarse.
+ */
+async function revisarContacto(pg, { primerClic }) {
+  const { enlaces, arriba, formArriba } = await pg.evaluate(() => {
+    const visible = (e) => {
+      const r = e.getBoundingClientRect();
+      const st = getComputedStyle(e);
+      return r.width > 0 && r.height > 0 && st.visibility !== 'hidden' && st.display !== 'none' && Number(st.opacity) > 0;
+    };
+    const enPantalla = (e) => {
+      const r = e.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0 && r.left < window.innerWidth && r.right > 0 && visible(e);
+    };
+    window.scrollTo(0, 0);
+    const clicables = [...document.querySelectorAll('a[href], button, input[type=submit], [role=button]')];
+    return {
+      enlaces: [...new Set([...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')))],
+      arriba: clicables
+        .filter(enPantalla)
+        .map((e) => ({ texto: (e.innerText || e.value || e.getAttribute('aria-label') || '').trim().slice(0, 80), href: e.getAttribute('href') || '' })),
+      formArriba: [...document.querySelectorAll('form')].some(enPantalla),
+    };
+  });
+  const out = enlaces.map(problemaContacto).filter(Boolean);
+  if (primerClic && !formArriba && !arriba.some(esCta)) out.push('sin botón de contacto (llamar, WhatsApp, reservar…) en la primera pantalla del móvil');
+  return out;
+}
+
+/** Web que se publica: indexable y con canonical a sí misma. */
+async function revisarIndexacion(pg, respuesta) {
+  const { robotsMeta, canonicals } = await pg.evaluate(() => ({
+    robotsMeta: [...document.querySelectorAll('meta[name=robots i], meta[name=googlebot i]')].map((m) => m.content),
+    canonicals: [...document.querySelectorAll('link[rel~=canonical i]')].map((l) => l.getAttribute('href')),
+  }));
+  return problemasIndexacion({ url: pg.url(), robotsMeta, robotsCabecera: respuesta?.headers()['x-robots-tag'] ?? '', canonicals });
 }
 
 /** Enlaces del mismo sitio que responden con error (cada URL una sola vez por ejecución). */
