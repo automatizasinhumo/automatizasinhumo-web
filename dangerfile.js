@@ -28,7 +28,7 @@ const RE_PRECIO = /\b(price|precio|price_cents|amount)\b|€/i;
 
 // 3. Contacto: David no publica su número; el soporte es email, formulario y Telegram.
 const RE_WHATSAPP_CONTACTO = /whatsapp/i;
-const RE_ENLACE_WHATSAPP = /(wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com)\//i; // enlace = canal público aunque no diga «WhatsApp»
+const RE_ENLACE_WHATSAPP = /\b(wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com)\//i; // enlace = canal público aunque no diga «WhatsApp»
 const RE_CONTEXTO_CONTACTO = /soporte|contacto|cont[aá]ctanos|escr[ií]benos|ll[aá]manos/i;
 
 async function revisarLineas() {
