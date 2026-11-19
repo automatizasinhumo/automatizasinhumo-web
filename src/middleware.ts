@@ -10,6 +10,7 @@ import {
   parseStoreSettings,
   STORE_SETTINGS_SQL,
 } from './features/settings/db';
+import { conCache, esLectura, olvidarCacheTienda } from './features/storefront/cacheTienda';
 import {
   MENU_ITEMS_SQL,
   EMPTY_MENUS,
@@ -69,6 +70,8 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   // the storefront/admin can reflect wizard-set values without a redeploy. APIs and
   // static assets skip it (one indexed D1 read per page, not per asset/API call).
   const path = context.url.pathname;
+  // Cualquier escritura vacía la caché de ajustes y menús de este isolate (ver cacheTienda).
+  if (!esLectura(context.request.method)) olvidarCacheTienda();
   const isDocument =
     !path.startsWith('/api/') &&
     !path.startsWith('/_') &&
@@ -80,10 +83,13 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
     const wantsMenus = !path.startsWith('/admin');
     try {
       if (wantsMenus) {
-        const [settings, menus] = await env.DB.batch<Record<string, string>>([
-          env.DB.prepare(STORE_SETTINGS_SQL),
-          env.DB.prepare(MENU_ITEMS_SQL),
-        ]);
+        // En la memoria del isolate durante TTL_MS: era el 75 % de las filas leídas de D1.
+        const [settings, menus] = await conCache(() =>
+          env.DB.batch<Record<string, string>>([
+            env.DB.prepare(STORE_SETTINGS_SQL),
+            env.DB.prepare(MENU_ITEMS_SQL),
+          ]),
+        );
         context.locals.settings = parseStoreSettings(
           (settings.results ?? []) as Array<{ key: string; value: string }>,
         );
