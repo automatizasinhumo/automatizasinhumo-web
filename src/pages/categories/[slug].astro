@@ -25,6 +25,7 @@ import CatalogSort from '../../features/storefront/controls/CatalogSort.astro';
 import { buildSortModel } from '../../features/storefront/catalog';
 import { catalogPath } from '../../features/settings/home';
 import { breadcrumbJsonLd } from '../../features/storefront/breadcrumbs';
+import { publicOrigin } from '../../features/http/origin';
 import StoreBreadcrumbs from '../../features/storefront/controls/StoreBreadcrumbs.astro';
 import { addCacheTags, productCacheTags } from '../../features/cache/tags';
 
@@ -79,7 +80,7 @@ const hrefFor = (p: number) =>
 // The catalog is at / until the home page is pointed elsewhere.
 const shopHref = catalogPath(Astro.locals.settings?.homePage);
 const crumbs = [{ text: 'Servicios', href: shopHref }, ...trail.map((c) => ({ text: c.name, href: `/categories/${c.slug}` }))];
-const breadcrumbLd = JSON.stringify(breadcrumbJsonLd(crumbs, Astro.url.origin, Astro.url.pathname)).replace(/</g, '\\u003c');
+const breadcrumbLd = JSON.stringify(breadcrumbJsonLd(crumbs, publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN), Astro.url.pathname)).replace(/</g, '\\u003c');
 ---
 
 <Layout title={category.name} description={Object.hasOwn(INTRO_CATEGORIA, category.slug) ? INTRO_CATEGORIA[category.slug] : undefined}>
