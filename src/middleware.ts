@@ -236,6 +236,9 @@ async function route(context: APIContext, next: MiddlewareNext): Promise<Respons
         status: 403,
       })
     : await gate(context, next);
+  // Segundo vaciado tras la escritura: una lectura que empezó entre el primer vaciado
+  // (en gate) y el commit podría haber guardado los ajustes anteriores.
+  if (!esLectura(context.request.method)) olvidarCacheTienda();
 
   // Workers Caching heuristically stores headerless responses, so make every
   // response explicit: only allowlisted public successes/301s are shared.

@@ -31,4 +31,25 @@ describe('cacheTienda', () => {
     expect(esLectura('HEAD')).toBe(true);
     for (const m of ['POST', 'PUT', 'PATCH', 'DELETE']) expect(esLectura(m)).toBe(false);
   });
+  it('las peticiones concurrentes comparten una carga', async () => {
+    let soltar!: (v: string) => void;
+    const cargar = vi.fn(() => new Promise<string>((r) => { soltar = r; }));
+    const a = conCache(cargar, 0);
+    const b = conCache(cargar, 1);
+    soltar('x');
+    expect(await Promise.all([a, b])).toEqual(['x', 'x']);
+    expect(cargar).toHaveBeenCalledTimes(1);
+  });
+
+  it('una carga anterior al vaciado no vuelve a guardarse', async () => {
+    let soltar!: (v: string) => void;
+    const vieja = conCache(() => new Promise<string>((r) => { soltar = r; }), 0);
+    olvidarCacheTienda();
+    const cargar = vi.fn(async () => 'nuevo');
+    soltar('viejo');
+    expect(await vieja).toBe('viejo');
+    expect(await conCache(cargar, 1)).toBe('nuevo');
+    expect(await conCache(cargar, 2)).toBe('nuevo');
+    expect(cargar).toHaveBeenCalledTimes(1);
+  });
 });

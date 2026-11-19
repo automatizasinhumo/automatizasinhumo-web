@@ -14,21 +14,32 @@
 export const TTL_MS = 60_000;
 
 interface Entrada<T> {
-  valor: T;
+  valor: Promise<T>;
   caduca: number;
 }
 
 let entrada: Entrada<unknown> | null = null;
+/** Sube en cada vaciado: una carga iniciada antes no puede volver a guardar datos viejos. */
+let generacion = 0;
 
-export async function conCache<T>(cargar: () => Promise<T>, ahora = Date.now()): Promise<T> {
-  if (entrada && entrada.caduca > ahora) return entrada.valor as T;
-  const valor = await cargar();
-  entrada = { valor, caduca: ahora + TTL_MS };
-  return valor;
+/**
+ * Devuelve el valor guardado o lo carga. Las peticiones concurrentes comparten la misma
+ * promesa (una sola lectura de D1 en ráfagas); si la carga falla, se olvida para reintentar.
+ */
+export function conCache<T>(cargar: () => Promise<T>, ahora = Date.now()): Promise<T> {
+  if (entrada && entrada.caduca > ahora) return entrada.valor as Promise<T>;
+  const gen = generacion;
+  const nueva: Entrada<T> = { valor: cargar(), caduca: ahora + TTL_MS };
+  entrada = nueva;
+  nueva.valor.catch(() => {
+    if (entrada === nueva && generacion === gen) entrada = null;
+  });
+  return nueva.valor;
 }
 
-/** Vacía la caché (escrituras y tests). */
+/** Vacía la caché (escrituras y tests) e invalida las cargas en curso. */
 export function olvidarCacheTienda(): void {
+  generacion++;
   entrada = null;
 }
 
