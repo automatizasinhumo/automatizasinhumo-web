@@ -172,6 +172,34 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  gremlins:
+    # QA de caos con gremlins.js (marmelab, MIT): clics, toques, escritura y scroll aleatorios
+    # en las páginas principales; falla si hay errores de JavaScript o la página queda vacía.
+    # No bloqueante mientras se calibra: el resultado se lee en el resumen del run.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    continue-on-error: true
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Instalar gremlins.js (qa/navegador, con lockfile; Playwright ya viene en la imagen)
+        run: |
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          ln -s qa/navegador/node_modules node_modules
+      - run: node qa/gremlins.mjs "$BASE" 1000
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: failure()
+        with:
+          name: capturas-gremlins
+          path: capturas/
+          if-no-files-found: ignore
+          retention-days: 14
+
   html:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
