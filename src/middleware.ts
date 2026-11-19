@@ -1,36 +1,39 @@
-import { defineMiddleware } from 'astro:middleware';
-import { asegurarPaginaEntera, pagina503 } from './features/http/paginaEntera';
-import type { APIContext, MiddlewareNext } from 'astro';
-import { env } from 'cloudflare:workers';
-import { verifyAccessJwt } from './features/auth/access';
-import { accessGateDecision } from './features/auth/accessGate';
-import { verifySession } from './features/auth/session';
-import { adminCredential } from './features/auth/admin';
+import { defineMiddleware } from "astro:middleware";
+import { asegurarPaginaEntera, pagina503 } from "./features/http/paginaEntera";
+import type { APIContext, MiddlewareNext } from "astro";
+import { env } from "cloudflare:workers";
+import { verifyAccessJwt } from "./features/auth/access";
+import { accessGateDecision } from "./features/auth/accessGate";
+import { verifySession } from "./features/auth/session";
+import { adminCredential } from "./features/auth/admin";
 import {
   getStoreSettings,
   parseStoreSettings,
   STORE_SETTINGS_SQL,
-} from './features/settings/db';
-import { conCache, esLectura, olvidarCacheTienda, ttlDesdeEnv } from './features/storefront/cacheTienda';
+} from "./features/settings/db";
+import {
+  conCache,
+  esLectura,
+  olvidarCacheTienda,
+  ttlDesdeEnv,
+} from "./features/storefront/cacheTienda";
 import {
   MENU_ITEMS_SQL,
   EMPTY_MENUS,
   groupMenus,
   type MenuItemRow,
-} from './features/navigation/db';
+} from "./features/navigation/db";
 import {
   checkPageRateLimit,
   checkRateLimit,
   isThrottledPage,
   rateLimitBucket,
   rateLimitedResponse,
-} from './features/auth/rateLimit';
-import {
-  responseCacheControl,
-} from './features/cache/public';
-import { addCacheTags, responseCacheTags } from './features/cache/tags';
-import { normalizeSearchQuery } from './features/search/query';
-import { isForbiddenFormOrigin } from './features/auth/formOrigin';
+} from "./features/auth/rateLimit";
+import { responseCacheControl } from "./features/cache/public";
+import { addCacheTags, responseCacheTags } from "./features/cache/tags";
+import { normalizeSearchQuery } from "./features/search/query";
+import { isForbiddenFormOrigin } from "./features/auth/formOrigin";
 
 /**
  * Admin auth gate. Protects BOTH the admin UI (`/admin/*`) and the admin API
@@ -61,14 +64,17 @@ import { isForbiddenFormOrigin } from './features/auth/formOrigin';
  */
 function isProtected(pathname: string): boolean {
   return (
-    pathname === '/admin' ||
-    pathname.startsWith('/admin/') ||
-    pathname === '/api/admin' ||
-    pathname.startsWith('/api/admin/')
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/api/admin" ||
+    pathname.startsWith("/api/admin/")
   );
 }
 
-async function gate(context: APIContext, next: MiddlewareNext): Promise<Response> {
+async function gate(
+  context: APIContext,
+  next: MiddlewareNext,
+): Promise<Response> {
   // Runtime settings overlay (store name etc.) — only for HTML page requests, so
   // the storefront/admin can reflect wizard-set values without a redeploy. APIs and
   // static assets skip it (one indexed D1 read per page, not per asset/API call).
@@ -79,33 +85,45 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   if (isThrottledPage(context.request.method, path)) {
     try {
       if (!(await checkPageRateLimit(env.PAGE_RATE_LIMITER, context.request))) {
-        console.warn(JSON.stringify({ event: 'rate_limited', bucket: 'page', path }));
+        console.warn(
+          JSON.stringify({ event: "rate_limited", bucket: "page", path }),
+        );
         return rateLimitedResponse(path);
       }
     } catch (error) {
       // Si el limitador falla, la tienda sigue abierta.
-      console.error(JSON.stringify({ event: 'rate_limit_error', bucket: 'page', path, message: String(error) }));
+      console.error(
+        JSON.stringify({
+          event: "rate_limit_error",
+          bucket: "page",
+          path,
+          message: String(error),
+        }),
+      );
     }
   }
   const isDocument =
-    !path.startsWith('/api/') &&
-    !path.startsWith('/_') &&
-    !path.startsWith('/partials/');
+    !path.startsWith("/api/") &&
+    !path.startsWith("/_") &&
+    !path.startsWith("/partials/");
   if (isDocument) {
     // Storefront documents also need the header/footer menus. Both reads go in
     // ONE batch so /cart, /checkout, /account, /order, and /pay — which are never
     // edge-cached — don't pay a second D1 round trip.
-    const wantsMenus = !path.startsWith('/admin');
+    const wantsMenus = !path.startsWith("/admin");
     try {
       if (wantsMenus) {
         // En la memoria del isolate durante TTL_MS: era el 75 % de las filas leídas de D1.
-        const [settings, menus] = await conCache(() =>
-          env.DB.batch<Record<string, string>>([
-            env.DB.prepare(STORE_SETTINGS_SQL),
-            env.DB.prepare(MENU_ITEMS_SQL),
-          ]),
+        const [settings, menus] = await conCache(
+          () =>
+            env.DB.batch<Record<string, string>>([
+              env.DB.prepare(STORE_SETTINGS_SQL),
+              env.DB.prepare(MENU_ITEMS_SQL),
+            ]),
           Date.now(),
-          ttlDesdeEnv((env as { STORE_CACHE_TTL_MS?: unknown }).STORE_CACHE_TTL_MS),
+          ttlDesdeEnv(
+            (env as { STORE_CACHE_TTL_MS?: unknown }).STORE_CACHE_TTL_MS,
+          ),
         );
         context.locals.settings = parseStoreSettings(
           (settings.results ?? []) as Array<{ key: string; value: string }>,
@@ -138,11 +156,11 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   // loaded and setup_complete isn't set.
   if (
     isDocument &&
-    !path.startsWith('/admin') &&
+    !path.startsWith("/admin") &&
     context.locals.settings &&
     !context.locals.settings.setupComplete
   ) {
-    return context.redirect('/admin/setup', 302);
+    return context.redirect("/admin/setup", 302);
   }
 
   // Throttle anonymous, resource-spending mutations and cache-missing searches.
@@ -150,18 +168,18 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   const bucket = rateLimitBucket(
     context.request.method,
     path,
-    normalizeSearchQuery(context.url.searchParams.get('q') ?? '') !== '',
+    normalizeSearchQuery(context.url.searchParams.get("q") ?? "") !== "",
   );
   if (bucket) {
     const limiter =
-      bucket === 'auth'
+      bucket === "auth"
         ? env.AUTH_RATE_LIMITER
-        : bucket === 'checkout'
+        : bucket === "checkout"
           ? env.CHECKOUT_RATE_LIMITER
           : env.SEARCH_RATE_LIMITER;
     try {
       if (!(await checkRateLimit(limiter, context.request, path))) {
-        console.warn(JSON.stringify({ event: 'rate_limited', bucket, path }));
+        console.warn(JSON.stringify({ event: "rate_limited", bucket, path }));
         return rateLimitedResponse(path);
       }
     } catch (error) {
@@ -169,7 +187,7 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
       // failures remain visible in Workers Logs for operational follow-up.
       console.error(
         JSON.stringify({
-          event: 'rate_limit_error',
+          event: "rate_limit_error",
           bucket,
           path,
           message: error instanceof Error ? error.message : String(error),
@@ -189,16 +207,24 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   const cred = await adminCredential(env.DB);
   if (cred.enabled) {
     // The login page itself must be reachable unauthenticated (to log in).
-    if (path === '/admin/login') return next();
-    const session = context.cookies.get('admin_session')?.value ?? null;
+    if (path === "/admin/login") return next();
+    const session = context.cookies.get("admin_session")?.value ?? null;
     // Sign/verify with AUTH_SECRET (high-entropy key); the credential is the bound tag.
     const signingKey = env.AUTH_SECRET || cred.tagSource;
-    if (await verifySession(session, signingKey, cred.tagSource, Date.now() / 1000)) return next();
+    if (
+      await verifySession(
+        session,
+        signingKey,
+        cred.tagSource,
+        Date.now() / 1000,
+      )
+    )
+      return next();
     // Not authenticated: humans go to the login form, API callers get 401.
-    if (path.startsWith('/api/')) {
-      return new Response('Authentication required.', { status: 401 });
+    if (path.startsWith("/api/")) {
+      return new Response("Authentication required.", { status: 401 });
     }
-    return context.redirect('/admin/login', 303);
+    return context.redirect("/admin/login", 303);
   }
 
   // 3. Cloudflare Access. The edge injects a signed JWT into the origin request.
@@ -208,14 +234,14 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   //    Access mode REQUIRES CF_ACCESS_TEAM_DOMAIN + CF_ACCESS_AUD; without both we
   //    fail closed rather than trust an unverifiable header.
   const access = accessGateDecision(
-    context.request.headers.get('Cf-Access-Jwt-Assertion'),
+    context.request.headers.get("Cf-Access-Jwt-Assertion"),
     env.CF_ACCESS_TEAM_DOMAIN,
     env.CF_ACCESS_AUD,
   );
-  if (access.action === 'deny') {
+  if (access.action === "deny") {
     return new Response(access.message, { status: 403 });
   }
-  if (access.action === 'verify') {
+  if (access.action === "verify") {
     let identity = null;
     try {
       identity = await verifyAccessJwt(access.token, {
@@ -229,7 +255,7 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
       context.locals.adminEmail = identity.email;
       return next();
     }
-    return new Response('Invalid Access token.', { status: 403 });
+    return new Response("Invalid Access token.", { status: 403 });
   }
 
   // 4. Bootstrap (first run): no admin password and no Access configuration. The
@@ -237,23 +263,32 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   //    step 2 and locks the door. Everything else under /admin bounces to setup;
   //    admin APIs get 401. (Set the password promptly, or front /admin with
   //    Cloudflare Access, to close this window. See README → Admin auth.)
-  if (path === '/admin/setup') return next();
-  if (path.startsWith('/api/')) {
-    return new Response('Admin not set up yet — complete /admin/setup first.', { status: 401 });
+  if (path === "/admin/setup") return next();
+  if (path.startsWith("/api/")) {
+    return new Response("Admin not set up yet — complete /admin/setup first.", {
+      status: 401,
+    });
   }
-  return context.redirect('/admin/setup', 303);
+  return context.redirect("/admin/setup", 303);
 }
 
-async function route(context: APIContext, next: MiddlewareNext): Promise<Response> {
+async function route(
+  context: APIContext,
+  next: MiddlewareNext,
+): Promise<Response> {
   const path = context.url.pathname;
-  const productError = path.startsWith('/products/') && context.url.searchParams.has('error');
+  const productError =
+    path.startsWith("/products/") && context.url.searchParams.has("error");
 
   let response: Response;
   try {
     response = isForbiddenFormOrigin(context.request, context.url)
-      ? new Response(`Cross-site ${context.request.method} form submissions are forbidden`, {
-          status: 403,
-        })
+      ? new Response(
+          `Cross-site ${context.request.method} form submissions are forbidden`,
+          {
+            status: 403,
+          },
+        )
       : await gate(context, next);
   } finally {
     // Segundo vaciado tras la escritura, también si la ruta lanza después de confirmarla:
@@ -267,12 +302,12 @@ async function route(context: APIContext, next: MiddlewareNext): Promise<Respons
   const cacheControl = responseCacheControl(
     path,
     response.status,
-    response.headers.get('cache-control'),
+    response.headers.get("cache-control"),
     productError,
   );
-  if (response.headers.get('cache-control') !== cacheControl) {
+  if (response.headers.get("cache-control") !== cacheControl) {
     try {
-      response.headers.set('cache-control', cacheControl);
+      response.headers.set("cache-control", cacheControl);
     } catch {
       // Redirect responses can have immutable headers.
       response = new Response(response.body, {
@@ -280,7 +315,7 @@ async function route(context: APIContext, next: MiddlewareNext): Promise<Respons
         statusText: response.statusText,
         headers: new Headers(response.headers),
       });
-      response.headers.set('cache-control', cacheControl);
+      response.headers.set("cache-control", cacheControl);
     }
   }
 
@@ -305,20 +340,23 @@ async function route(context: APIContext, next: MiddlewareNext): Promise<Respons
 
 // Response hardening for a store on a real domain. Applied to EVERY response.
 const SECURITY_HEADERS: Record<string, string> = {
-  'x-content-type-options': 'nosniff', // don't MIME-sniff responses
-  'x-frame-options': 'DENY', // block framing (clickjacking) — nothing here is meant to be embedded
-  'strict-transport-security': 'max-age=31536000; includeSubDomains', // force HTTPS for a year
-  'referrer-policy': 'strict-origin-when-cross-origin', // other sites see the origin, never the path
-  'permissions-policy': 'camera=(), microphone=(), geolocation=()', // the store never needs them
+  "x-content-type-options": "nosniff", // don't MIME-sniff responses
+  "x-frame-options": "DENY", // block framing (clickjacking) — nothing here is meant to be embedded
+  "strict-transport-security": "max-age=31536000; includeSubDomains", // force HTTPS for a year
+  "referrer-policy": "strict-origin-when-cross-origin", // other sites see the origin, never the path
+  "permissions-policy": "camera=(), microphone=(), geolocation=()", // the store never needs them
   // Minimal CSP that cannot break scripts or styles: no framing, no <base> hijack, no plugins.
-  'content-security-policy': "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+  "content-security-policy":
+    "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
 };
 
 /** Add the security headers, rebuilding when the response's headers are immutable
  *  (e.g. a Response.redirect to a payment provider, or a Cache API hit). */
 function withSecurityHeaders(res: Response): Response {
   try {
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.headers.set(k, v);
+    for (const [k, v] of Object.entries(SECURITY_HEADERS))
+      if (!(k === "referrer-policy" && res.headers.has(k)))
+        res.headers.set(k, v);
     return res;
   } catch {
     const rebuilt = new Response(res.body, {
@@ -326,7 +364,10 @@ function withSecurityHeaders(res: Response): Response {
       statusText: res.statusText,
       headers: new Headers(res.headers),
     });
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) rebuilt.headers.set(k, v);
+    // Una página puede endurecer su Referrer-Policy (p. ej. enlaces firmados en la query).
+    for (const [k, v] of Object.entries(SECURITY_HEADERS))
+      if (!(k === "referrer-policy" && rebuilt.headers.has(k)))
+        rebuilt.headers.set(k, v);
     return rebuilt;
   }
 }
@@ -338,13 +379,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
   } catch (error) {
     // Un fallo antes de empezar a emitir (p. ej. D1 sin cupo en el frontmatter) en una página
     // pública: mejor la página de «volvemos enseguida» que el 500 en blanco.
-    if (context.request.method !== 'GET' || !aceptaHtml(context.request)) throw error;
-    console.error('PAGINA_FALLIDA', context.url.pathname, error);
+    if (context.request.method !== "GET" || !aceptaHtml(context.request))
+      throw error;
+    console.error("PAGINA_FALLIDA", context.url.pathname, error);
     res = pagina503();
   }
-  return withSecurityHeaders(await asegurarPaginaEntera(context.request.method, res, context.url.pathname));
+  return withSecurityHeaders(
+    await asegurarPaginaEntera(
+      context.request.method,
+      res,
+      context.url.pathname,
+    ),
+  );
 });
 
 function aceptaHtml(request: Request): boolean {
-  return (request.headers.get('accept') ?? '').includes('text/html');
+  return (request.headers.get("accept") ?? "").includes("text/html");
 }
