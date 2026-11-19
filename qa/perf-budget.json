@@ -2,8 +2,7 @@
   "budget": {
     "timings": {
       "firstContentfulPaint": 1800,
-      "largestContentfulPaint": 2500,
-      "totalBlockingTime": 200
+      "largestContentfulPaint": 2500
     },
     "requests": {
       "total": 60

@@ -75,7 +75,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
       - name: Cabeceras de seguridad (Mozilla HTTP Observatory)
         run: |
           # Scripts permitidos: listas HSTS/TLD del observatorio y su almacén de certificados.
@@ -264,4 +264,4 @@ jobs:
       - name: Resumen
         if: always()
         run: |
-          { echo "## nuclei: exposiciones y mala configuración"; echo; echo '```'; cat nuclei.txt 2>/dev/null | head -80 || true; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
+          { echo "## nuclei: exposiciones y mala configuración"; echo; echo '```'; head -80 nuclei.txt 2>/dev/null || echo 'sin hallazgos'; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
