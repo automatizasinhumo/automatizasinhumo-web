@@ -282,7 +282,11 @@ def poner_datos(out, p, marca):
         # al cliente, y su texto/etiqueta dice «Llamar» en vez de «WhatsApp».
         def a_llamada(m):
             a = re.sub(href_wa, f'href="tel:{tel}"', m.group(0), flags=re.I)
-            return re.sub(r'whats\s*app', 'Llamar', a, flags=re.I)
+            # Solo el texto visible y las etiquetas accesibles: clases, ids y <use href="#whatsapp"> se quedan.
+            cambia = lambda t: re.sub(r'whats\s*app', 'Llamar', t, flags=re.I)
+            a = re.sub(r'>([^<]*)<', lambda t: '>' + cambia(t.group(1)) + '<', a)
+            return re.sub(r'''(\b(?:aria-label|title)=)(["'])(.*?)\2''',
+                          lambda t: t.group(1) + t.group(2) + ('Llamar' if cambia(t.group(3)) != t.group(3) else t.group(3)) + t.group(2), a, flags=re.I | re.S)
         out = re.sub(r'<a\s[^>]*' + href_wa + r'[^>]*>.*?</a>', a_llamada, out, flags=re.I | re.S)
         out = re.sub(href_wa, lambda _: f'href="tel:{tel}"', out, flags=re.I)
     # Igual con los correos sueltos de la plantilla: una pasada, sin tocar el ya puesto.

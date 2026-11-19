@@ -55,6 +55,15 @@ class BarraContacto(unittest.TestCase):
         self.assertIn('href="tel:986000000">Llamar', out)
         self.assertNotIn('WhatsApp', out)
 
+    def test_whatsapp_no_valido_conserva_icono_svg(self):
+        html = ('<head></head><a class="btn-whatsapp" aria-label="Abrir WhatsApp" href="https://wa.me/34999999999">'
+                '<svg><use href="#whatsapp"></use></svg> WhatsApp</a>')
+        out = poner_datos(html, pedido(whatsapp=''), None)
+        self.assertIn('<use href="#whatsapp">', out)
+        self.assertIn('class="btn-whatsapp"', out)
+        self.assertIn('aria-label="Llamar"', out)
+        self.assertIn('</svg> Llamar</a>', out)
+
     def test_whatsapp_valido_cambia_tambien_api_whatsapp(self):
         html = '<head></head><a href="https://api.whatsapp.com/send?phone=15550000">Escríbenos</a><a href="https://wa.me/1555">x</a>'
         out = poner_datos(html, pedido(whatsapp='600 111 222'), None)
