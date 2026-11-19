@@ -1,0 +1,49 @@
+name: IndexNow
+
+# Avisa a Bing, Yandex, Seznam… (protocolo IndexNow) de las URLs del sitemap cuyo lastmod
+# cambió en el último día. Código adoptado: bojieyang/indexnow-action (MIT). Solo corre con
+# un dominio público indexable en vars.SITIO_PUBLICO (p. ej. https://automatizasinhumo.es):
+# staging (*.workers.dev) es noindex a propósito y no se anuncia. La misma clave va en el
+# secreto INDEXNOW_KEY de Actions y en el del Worker (lo sirve src/pages/[clave].txt.ts).
+
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  avisar:
+    if: vars.SITIO_PUBLICO != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Comprobar clave y dominio
+        id: listo
+        env:
+          SITIO: ${{ vars.SITIO_PUBLICO }}
+          KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then echo "::warning::Falta el secreto INDEXNOW_KEY: no se avisa."; exit 0; fi
+          case "$SITIO" in https://*.workers.dev*|https://*.pages.dev*|http://*) echo "::warning::$SITIO no es indexable."; exit 0;; esac
+          # El buscador validará https://dominio/<clave>.txt: si no responde la clave, avisar sería inútil.
+          if [ "$(curl -fsS --max-time 20 "$SITIO/$KEY.txt")" != "$KEY" ]; then
+            echo "::error::$SITIO/<clave>.txt no devuelve la clave (¿falta INDEXNOW_KEY en el Worker?)."; exit 1
+          fi
+          echo "si=1" >> "$GITHUB_OUTPUT"
+      - name: Avisar a IndexNow
+        if: steps.listo.outputs.si == '1'
+        uses: bojieyang/indexnow-action@38ddfbd93579a8a44c0dee662121bf9d51098f71 # v3.0.0
+        with:
+          sitemap-location: ${{ vars.SITIO_PUBLICO }}/sitemap.xml
+          key: ${{ secrets.INDEXNOW_KEY }}
+          endpoint: api.indexnow.org
+          since: 1
+          since-unit: day
+          failure-strategy: error
