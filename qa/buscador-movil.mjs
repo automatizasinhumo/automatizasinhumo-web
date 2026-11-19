@@ -20,7 +20,8 @@ try {
     await lupa.click();
     const campo = pg.locator('header [data-search-disclosure] input[name="q"]').first();
     await campo.waitFor({ state: 'visible', timeout: 5000 }).catch(() => fallos.push('el campo no aparece al pulsar la lupa'));
-    const conFoco = await pg.evaluate(() => document.activeElement?.closest('[data-search-disclosure]') != null && document.activeElement?.getAttribute('name') === 'q');
+    // El foco llega en el evento «toggle» del <details>, que es asíncrono: se espera, no se lee al instante.
+    const conFoco = await pg.waitForFunction(() => document.activeElement?.closest('[data-search-disclosure]') != null && document.activeElement?.getAttribute('name') === 'q', null, { timeout: 3000 }).then(() => true, () => false);
     if (!conFoco) fallos.push('el campo no recibe el foco al pulsar la lupa');
     await pg.keyboard.type('boda');
     await Promise.all([pg.waitForURL(/\/search\?q=boda/, { timeout: 15000 }).catch(() => fallos.push(`Enter no lleva a /search?q= (está en ${pg.url()})`)), pg.keyboard.press('Enter')]);

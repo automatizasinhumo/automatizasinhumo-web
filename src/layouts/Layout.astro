@@ -66,7 +66,10 @@ const contactos = [
   Astro.locals.settings?.contactTelegram && { label: 'Telegram', href: `https://t.me/${Astro.locals.settings.contactTelegram}` },
   Astro.locals.settings?.contactEmail && { label: 'Email', href: `mailto:${Astro.locals.settings.contactEmail}` },
 ].filter((c): c is { label: string; href: string } => !!c);
-const pageTitle = title ? `${title} — ${storeName}` : storeName;
+// The store name goes after the page title only while the whole stays within the 70 characters
+// search results show (html-validate long-title); a longer title keeps its own words.
+const conMarca = title ? `${title} — ${storeName}` : storeName;
+const pageTitle = title && conMarca.length > 70 ? title : conMarca;
 const query =
   Astro.url.pathname === '/search'
     ? normalizeSearchQuery(Astro.url.searchParams.get('q') ?? '')
