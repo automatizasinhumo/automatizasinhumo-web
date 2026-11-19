@@ -44,26 +44,29 @@ const br = await chromium.launch();
 // lo correcto: como una persona, solo se usan los enlaces de dentro del modal.
 const MODAL = '[aria-modal="true"], dialog[open]';
 async function ambito(pg) {
-  const hay = await pg.evaluate((sel) => [...document.querySelectorAll(sel)].some((m) => m.checkVisibility()), MODAL);
+  const hay = await pg.evaluate((sel) => [...document.querySelectorAll(sel)].some((m) => m.checkVisibility({ visibilityProperty: true })), MODAL);
+  // visibilityProperty: el carrito cerrado sigue con aria-modal pero con visibility:hidden.
   return hay ? MODAL.split(',').map((s) => s.trim() + ' ') : [''];
 }
 
 async function enlacesInternos(pg) {
   const pref = await ambito(pg);
   const sel = pref[0] ? pref.map((p) => p + 'a[href]').join(', ') : 'header a[href], main a[href], footer a[href]';
-  const hrefs = await pg.$$eval(sel, (as) =>
-    as
+  // querySelectorAll, como en marcar(): el índice tiene que significar lo mismo en los dos.
+  const hrefs = await pg.evaluate((sel) =>
+    [...document.querySelectorAll(sel)]
+      .map((a, indice) => ({ a, indice }))
       // checkVisibility y no offsetParent: un enlace dentro de un <details> cerrado conserva
       // offsetParent y tamaño, pero no se pinta (content-visibility) y no se puede pulsar.
-      .filter((a) => a.checkVisibility({ visibilityProperty: true }) && a.getClientRects().length > 0 && !a.target && !a.hasAttribute('download'))
-      .map((a, i) => ({ i, href: a.getAttribute('href') || '' })),
-  );
+      .filter(({ a }) => a.checkVisibility({ visibilityProperty: true }) && a.getClientRects().length > 0 && !a.target && !a.hasAttribute('download'))
+      .map(({ a, indice }) => ({ indice, href: a.getAttribute('href') || '' })),
+  sel);
   return hrefs
     .filter((h) => {
       if (!h.href.startsWith('/') || h.href.startsWith('//')) return false;
       return !VETADAS.test(h.href.split('#')[0]);
     })
-    .map((h) => ({ ...h, sel: pref.map((p) => p + porHref(h.href)).join(', ') }));
+    .map((h) => ({ ...h, sel }));
 }
 
 async function ejecutar(secuencia) {
@@ -96,8 +99,15 @@ async function ejecutar(secuencia) {
   }
 }
 
-// Selector de atributo con el valor escapado (comillas y barras invertidas).
-const porHref = (href) => `a[href="${href.replace(/[\\"]/g, '\\$&')}"]:visible`;
+// Marca el enlace elegido (por su posición entre los candidatos) para pulsar ese mismo
+// elemento: con un selector por href, dos enlaces iguales en cabecera y pie serían el mismo.
+async function marcar(pg, { sel, indice }) {
+  await pg.evaluate(({ sel, indice }) => {
+    document.querySelectorAll('[data-qa-explorar]').forEach((e) => e.removeAttribute('data-qa-explorar'));
+    document.querySelectorAll(sel)[indice]?.setAttribute('data-qa-explorar', '');
+  }, { sel, indice });
+  return pg.locator('[data-qa-explorar]');
+}
 
 async function paso(pg, a) {
   // Acción que puede navegar: se espera a que cambie la URL (si cambia) y a que cargue.
@@ -123,15 +133,17 @@ async function paso(pg, a) {
     case 'enlace': {
       const ls = await enlacesInternos(pg);
       if (!ls.length) return;
-      const { href, sel } = ls[a.i % ls.length];
-      await nav(() => pg.locator(sel).first().click({ timeout: 10000 }), `el enlace ${href}`);
+      const elegido = ls[a.i % ls.length];
+      const objetivo = await marcar(pg, elegido);
+      await nav(() => objetivo.click({ timeout: 10000 }), `el enlace ${elegido.href}`);
       return;
     }
     case 'doble': {
       const ls = await enlacesInternos(pg);
       if (!ls.length) return;
-      const { href, sel } = ls[a.i % ls.length];
-      await nav(() => pg.locator(sel).first().dblclick({ timeout: 10000 }), `el enlace ${href} (doble clic)`);
+      const elegido = ls[a.i % ls.length];
+      const objetivo = await marcar(pg, elegido);
+      await nav(() => objetivo.dblclick({ timeout: 10000 }), `el enlace ${elegido.href} (doble clic)`);
       return;
     }
     case 'atras':
