@@ -2,8 +2,21 @@ import { newStemmer } from 'snowball-stemmers';
 
 const spanish = newStemmer('spanish');
 
+// Snowball solo reconoce los sufijos con tilde («facturación»); quien escribe sin
+// tildes («facturacion») se queda sin lema y no casa con «facturas».
+const SIN_TILDE: [RegExp, string][] = [
+  [/cion(es)?$/, 'ción'],
+  [/sion(es)?$/, 'sión'],
+  [/logia(s)?$/, 'logía'],
+  // Tiendas y oficios: «papeleria» → «papelería» → «papel», como con tilde.
+  [/eria(s)?$/, 'ería'],
+  [/grafia(s)?$/, 'grafía'],
+];
+
 export function stemSpanishTerm(term: string): string {
-  return spanish.stem(term.toLowerCase().normalize('NFC'));
+  const word = term.toLowerCase().normalize('NFC');
+  const rule = SIN_TILDE.find(([pattern]) => pattern.test(word));
+  return spanish.stem(rule ? word.replace(rule[0], rule[1]) : word);
 }
 
 export function tokenizeSearchTerms(value: string): string[] {
