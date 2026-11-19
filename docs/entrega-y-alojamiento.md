@@ -8,9 +8,9 @@ falta**: los textos de la FAQ del final solo se publican cuando su parte esté f
 
 | Paso | Qué pasa | Quién |
 | --- | --- | --- |
-| Vista previa | `fabricar.py` baja la plantilla demo, reescribe textos con Workers AI, pone nombre, correo y teléfono del cliente y despliega un Worker estático `web-<id>` con `wrangler deploy` | Automático (fábrica en local o en Actions) |
-| Enlace | `https://web-<id>.davidpd89.workers.dev` | Automático |
-| Dónde vive | En **nuestra** cuenta de Cloudflare, un Worker por cliente | — |
+| Vista previa | `fabricar.py` baja la plantilla demo, reescribe textos con Workers AI, pone nombre, correo y teléfono del cliente y la sube a Workers KV con `wrangler kv bulk put` (caduca a los 60 días); si KV falla, despliega un Worker `web-<id>` como antes | Automático (fábrica en local o en Actions) |
+| Enlace | `https://vistas.davidpd89.workers.dev/<id>/` (respaldo: `https://web-<id>.davidpd89.workers.dev`) | Automático |
+| Dónde vive | En **nuestra** cuenta de Cloudflare, en un único Worker `vistas` con `noindex` | — |
 | Dominio propio, paquete descargable, traspaso | **No existe** | — |
 
 La web dice «te entregamos el enlace publicado» y «ninguna cuota obligatoria». Eso es cierto hoy, pero
@@ -153,14 +153,7 @@ web publicada; si quieres usar tu dominio o llevártela, escríbenos y te lo pre
 - [ ] P0. Clonar stripe-samples/checkout-one-time-payments, pasar sus pruebas y hacer una compra de prueba de punta a punta con la tarjeta 4242.
 - [ ] P0. Guardar el ZIP en el almacenamiento elegido (R2 o la alternativa gratuita), montar «Mis pedidos» con enlace temporal y enviar el correo con Resend.
 - [ ] P1. Desplegar sitedrop tal cual, publicar 10 webs de prueba y sustituir `wrangler deploy web-<id>`.
-- [ ] P1. Vistas previas en un solo Worker sin R2 (ronda 29, `manual/auditorias-gpt/ronda-29-respuesta.md`). Hoy cada vista previa es un Worker `web-<id>` que nunca se borra, y el plan Free permite 100 por cuenta (el 19/11 había 7). Plan:
-  - Usar Workers KV, con el ejemplo oficial [Store and retrieve static assets](https://developers.cloudflare.com/kv/examples/workers-kv-to-serve-assets/), y un Worker `vistas` que sirva `/<id>/ruta` desde `sites/<id>/ruta`.
-  - `fabricar.py` cambia `wrangler deploy` por `wrangler kv bulk put` con `expiration_ttl` en las pruebas gratuitas, de forma que caducan solas.
-  - Las plantillas ya funcionan bajo una subruta, porque así las sirve el Worker de demos.
-  - El Worker `vistas` responde con `X-Robots-Tag: noindex`, como el `_headers` de hoy: una vista previa no se indexa.
-  - Los Workers `web-*` actuales se quedan como están.
-  - Límites Free: 1.000 escrituras al día (unas 33 webs de 30 archivos), 100.000 lecturas al día y 1 GB. Las peticiones al Worker comparten las 100.000 diarias de la cuenta con staging.
-  - Se hace cuando queden menos de 30 Workers libres o antes de abrir tráfico real.
+- [x] P1. Vistas previas en un solo Worker con KV y sin R2 (ronda 29, PR #105). Worker `vistas/`, namespace `automatizasinhumo-vistas`, caducidad de 60 días y respaldo a `web-<id>`. Límites Free: 1.000 escrituras al día (unas 33 webs de 30 archivos), 100.000 lecturas al día y 1 GB.
 - [ ] P1. Suscripciones de Stripe y portal de cliente.
 - [ ] P2. Dominios del cliente y tickets de mantenimiento.
 - [ ] Publicar los textos de la FAQ del apartado 4 cuando su parte esté en verde, adaptados antes a los escalones: qué incluye «te la montamos» (349 €) y que el alojamiento es aparte.
