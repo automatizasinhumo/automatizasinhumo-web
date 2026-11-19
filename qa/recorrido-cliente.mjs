@@ -46,6 +46,20 @@ async function recorrido(ctx, ancho) {
       if (!(await pg.locator(`a[href="/products/${slug}"]`).count())) throw new Error(`sin enlace a /products/${slug}`);
     });
 
+    // Un error a mitad del HTML (p. ej. D1 sin cupo) deja la página con 200 pero cortada:
+    // sin pie ni scripts, y los menús no abren. Se comprueba el final de la página y el menú,
+    // también al volver con atrás/adelante. Playwright desactiva el bfcache, así que esto cubre
+    // la carga desde el historial, no la restauración desde bfcache.
+    await paso('la portada llega entera: pie y menú, también tras atrás/adelante', async () => {
+      await comprobarPieYMenu(pg, ancho);
+      await ir(`/products/${slug}`);
+      await comprobarPieYMenu(pg, ancho);
+      await pg.goBack({ waitUntil: 'load' });
+      await comprobarPieYMenu(pg, ancho);
+      await pg.goForward({ waitUntil: 'load' });
+      await comprobarPieYMenu(pg, ancho);
+    });
+
     await paso('la ficha tiene «Contratar ahora» y «Empieza gratis»', async () => {
       await ir(`/products/${slug}`);
       await pg.getByRole('button', { name: /Contratar/i }).first().waitFor({ state: 'visible', timeout: 10000 });
@@ -122,6 +136,31 @@ async function recorrido(ctx, ancho) {
   } finally {
     for (const e of errores) fallos.push(`${ancho}px ${e}`);
     await pg.close();
+  }
+}
+
+/** El pie está y el menú principal abre y cierra (hamburguesa en móvil, «Servicios» en escritorio). */
+async function comprobarPieYMenu(pg, ancho) {
+  const pie = pg.locator('footer').last();
+  await pie.scrollIntoViewIfNeeded({ timeout: 10000 });
+  await pie.waitFor({ state: 'visible', timeout: 10000 });
+  await pg.evaluate(() => window.scrollTo(0, 0));
+  if (ancho < 1280) {
+    const menu = pg.locator('details[data-nav-disclosure]').first();
+    if (await menu.evaluate((d) => d.open)) throw new Error('el menú móvil aparece abierto al cargar');
+    await menu.locator('summary').click();
+    await menu.locator('a').first().waitFor({ state: 'visible', timeout: 5000 });
+    await menu.locator('summary').click();
+    await menu.locator('a').first().waitFor({ state: 'hidden', timeout: 5000 });
+  } else {
+    const boton = pg.getByRole('button', { name: 'Servicios' }).first();
+    await boton.click();
+    await pg.waitForFunction((b) => b.getAttribute('aria-expanded') === 'true', await boton.elementHandle(), { timeout: 5000 });
+    const panel = pg.locator(`[id="${await boton.getAttribute('aria-controls')}"]`);
+    await panel.locator('a').first().waitFor({ state: 'visible', timeout: 5000 });
+    await pg.keyboard.press('Escape');
+    await pg.waitForFunction((b) => b.getAttribute('aria-expanded') === 'false', await boton.elementHandle(), { timeout: 5000 });
+    await panel.locator('a').first().waitFor({ state: 'hidden', timeout: 5000 });
   }
 }
 
