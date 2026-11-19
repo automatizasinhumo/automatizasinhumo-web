@@ -20,19 +20,36 @@ const SINONIMOS: Record<string, string> = {
   cv: 'CV', curriculum: 'CV', tarjeta: 'tarjeta', portfolio: 'portfolio',
   cookies: 'cookies', rgpd: 'cookies', analitica: 'analítica', estadisticas: 'analítica',
   telegram: 'Telegram', whatsapp: 'WhatsApp',
+  fisioterapeuta: 'reservas', fisioterapia: 'reservas', psicologo: 'citas', masajes: 'reservas', centro: 'reservas',
+  testimonios: 'opiniones', valoraciones: 'opiniones', logotipo: 'logo', page: 'web',
+  ingles: 'idioma', traduccion: 'idioma', traducir: 'idioma', idiomas: 'idioma',
+  lenta: 'velocidad', rapida: 'velocidad', posicionamiento: 'SEO',
+  marketing: 'newsletter', caida: 'cae', caido: 'cae', manual: 'ayuda', area: 'portal', intranet: 'portal',
+  ebook: 'ebooks', hosting: 'alojamiento', servidor: 'alojamiento',
 };
 
 const SINONIMOS_POR_LEMA = new Map(
   Object.entries(SINONIMOS).map(([term, synonym]) => [stemSpanishTerm(term), synonym]),
 );
 
+/**
+ * Lemas con los que se busca una palabra en los diccionarios: el suyo y el del
+ * singular, porque Snowball deja algunos plurales enteros («webs» → «webs»).
+ */
+function lemas(word: string): string[] {
+  const lema = stemSpanishTerm(word);
+  return word.length > 3 && word.endsWith('s') ? [lema, stemSpanishTerm(word.slice(0, -1))] : [lema];
+}
+
 /** Devuelve la consulta con sinónimos sustituidos, o null si no cambia nada. */
 export function expandirSinonimos(q: string): string | null {
   let cambia = false;
   const out = q.split(/\s+/).map((w) => {
-    const lema = stemSpanishTerm(w);
-    const s = SINONIMOS_POR_LEMA.get(lema);
-    if (s && stemSpanishTerm(s) !== lema) { cambia = true; return s; }
+    // «intranet,» busca «intranet»: la puntuación de los extremos no forma parte del lema.
+    const palabra = w.toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+    const lema = palabra ? lemas(palabra).find((l) => SINONIMOS_POR_LEMA.has(l)) : undefined;
+    const s = lema ? SINONIMOS_POR_LEMA.get(lema) : undefined;
+    if (s && lema && stemSpanishTerm(s) !== lema) { cambia = true; return s; }
     return w;
   });
   return cambia ? out.join(' ') : null;
@@ -66,8 +83,14 @@ const CATEGORIA_POR_LEMA = new Map(
 export function categoriasPara(q: string): string[] {
   const out: string[] = [];
   for (const word of tokenizeSearchTerms(q)) {
-    const slug = CATEGORIA_POR_LEMA.get(stemSpanishTerm(word));
+    const lema = lemas(word).find((l) => CATEGORIA_POR_LEMA.has(l));
+    const slug = lema ? CATEGORIA_POR_LEMA.get(lema) : undefined;
     if (slug && !out.includes(slug)) out.push(slug);
   }
   return out;
+}
+
+/** Palabras que el buscador entiende sin estar en las fichas (para corregir erratas). */
+export function vocabularioConsultas(): string[] {
+  return [...Object.keys(SINONIMOS), ...Object.keys(CATEGORIA_DE)];
 }

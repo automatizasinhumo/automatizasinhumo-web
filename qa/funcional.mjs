@@ -10,7 +10,18 @@ const ignorado = (t) => IGNORAR.some((r) => r.test(t));
 const MAX_ENLACES = 40;
 // Errores de transporte (no de la web): conexión cortada, reiniciada o agotada.
 const RED = /net::ERR_(CONNECTION_(RESET|CLOSED|REFUSED|TIMED_OUT)|TIMED_OUT|NETWORK_CHANGED|EMPTY_RESPONSE|HTTP2_PROTOCOL_ERROR)|NS_ERROR_NET_(RESET|INTERRUPT|TIMEOUT)|NS_ERROR_CONNECTION_REFUSED|Timeout \d+ms exceeded|network connection was lost|Could not connect to the server|socket hang up|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE/i;
-const deRed = (p) => /^(carga: |recurso sin cargar \(|enlace sin respuesta: )/.test(p) && RED.test(p);
+// Solo el motivo del fallo cuenta, nunca la URL: una ruta con «ECONNRESET» no convierte
+// un fallo de DNS en uno de red.
+function motivo(p) {
+  if (p.startsWith('recurso sin cargar (')) return p.match(/^recurso sin cargar \((.*?)\): /)?.[1] ?? null;
+  if (p.startsWith('enlace sin respuesta: ')) return p.match(/\(([^()]*)\)$/)?.[1] ?? null;
+  if (p.startsWith('carga: ')) return p.slice(7).replace(/ at https?:\/\/\S+/g, '');
+  return null;
+}
+const deRed = (p) => {
+  const m = motivo(p);
+  return m !== null && RED.test(m);
+};
 
 /**
  * Abre `url` en una página nueva del contexto `ctx` y devuelve la lista de problemas
