@@ -14,6 +14,7 @@ export const TIPOS_CORREO = [
   'espera',
   'falta_informacion',
   'entregado',
+  'resena',
 ] as const;
 export type TipoCorreo = (typeof TIPOS_CORREO)[number];
 
@@ -25,6 +26,7 @@ export const TIPO_CORREO_LABEL: Record<TipoCorreo, string> = {
   espera: 'En espera (día 7 sin respuesta)',
   falta_informacion: 'Falta información',
   entregado: 'Entregado',
+  resena: 'Petición de reseña (día 7 tras la entrega)',
 };
 
 export function esTipoCorreo(v: unknown): v is TipoCorreo {
@@ -63,7 +65,7 @@ export function prepararCorreo(tipo: TipoCorreo, d: DatosCorreo): Correo {
   const s = d.servicio;
   const enlace = (d.enlace ?? '').trim();
   const pendientes = (d.datosPendientes ?? '').trim();
-  const necesitaEnlace = tipo === 'revision' || tipo === 'entregado';
+  const necesitaEnlace = tipo === 'revision' || tipo === 'entregado' || tipo === 'resena';
   if (necesitaEnlace && !/^https?:\/\/\S+$/.test(enlace)) return { ok: false, error: 'Falta el enlace (https://…) a la versión o a la entrega.' };
   if (tipo === 'falta_informacion' && !pendientes) return { ok: false, error: 'Escribe qué datos faltan antes de enviar.' };
 
@@ -106,6 +108,11 @@ export function prepararCorreo(tipo: TipoCorreo, d: DatosCorreo): Correo {
       return c(
         `Tu ${s} está entregado${d.pedido ? ` · ${d.pedido}` : ''}`,
         `Hola, ${nombre}:\n\nTu ${s} ya está listo para utilizarlo. Accede o descárgalo aquí: ${enlace}\n\nTambién encontrarás las instrucciones para utilizarlo.\n\nGracias por confiar en Automatiza sin humo.`,
+      );
+    case 'resena':
+      return c(
+        `¿Qué tal con tu ${s}?`,
+        `Hola, ${nombre}:\n\nHace una semana te entregué tu ${s}. Si te está siendo útil, me ayudaría mucho que lo contaras en una reseña breve: ${enlace}\n\nY si algo no funciona como esperabas, responde a este correo y lo revisamos.`,
       );
   }
 }
