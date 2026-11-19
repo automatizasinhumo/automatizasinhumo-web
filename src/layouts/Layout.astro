@@ -375,7 +375,8 @@ const shell = buildShellModel({
         if (visor && 'IntersectionObserver' in window) {
           const io = new IntersectionObserver(
             (entradas) => {
-              if (entradas.some((e) => e.isIntersecting)) {
+              // La primera notificación llega aunque se vea menos del umbral: se exige el 40 % real.
+              if (entradas.some((e) => e.isIntersecting && e.intersectionRatio >= 0.4)) {
                 io.disconnect();
                 enviar({ t: 'muestra', p });
               }

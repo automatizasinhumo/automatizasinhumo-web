@@ -18,9 +18,22 @@ function d1(): D1Database & { sql: DatabaseSync } {
       first: async () => (st.get(...a) as unknown) ?? null,
       all: async () => ({ results: st.all(...a) }),
       run: async () => ({ meta: { changes: Number(st.run(...a).changes) } }),
+      todo: () => st.all(...a),
     };
   };
-  return { sql, prepare: (q: string) => prep(q) } as unknown as D1Database & { sql: DatabaseSync };
+  // batch como en D1: una transacción; si una sentencia falla, no queda nada.
+  const batch = async (sts: { todo: () => unknown[] }[]) => {
+    sql.exec('BEGIN');
+    try {
+      const out = sts.map((s) => ({ results: s.todo() }));
+      sql.exec('COMMIT');
+      return out;
+    } catch (e) {
+      sql.exec('ROLLBACK');
+      throw e;
+    }
+  };
+  return { sql, prepare: (q: string) => prep(q), batch } as unknown as D1Database & { sql: DatabaseSync };
 }
 
 const HOST = 'automatizasinhumo.es';
@@ -121,6 +134,14 @@ describe('registrar y resumen', () => {
       { metrica: 'CLS', ruta: 'ficha', bueno: 0, mejorable: 0, malo: 1 },
       { metrica: 'LCP', ruta: 'ficha', bueno: 1, mejorable: 1, malo: 0 },
     ]);
+  });
+
+  it('un evento con varios pasos cuenta entero o no cuenta', async () => {
+    const db = d1();
+    // Se rompe la tabla a mitad: la vista externa de ficha suma entrada y ficha en un lote.
+    db.sql.exec("CREATE TRIGGER romper BEFORE INSERT ON embudo WHEN NEW.paso = 'ficha' BEGIN SELECT RAISE(ABORT, 'x'); END");
+    await expect(registrar(db, ev({ t: 'vista', p: '/products/web-taller', r: 'https://www.google.es/' })!, hoy())).rejects.toThrow();
+    expect(db.sql.prepare('SELECT COUNT(*) AS n FROM embudo').get()).toEqual({ n: 0 });
   });
 });
 

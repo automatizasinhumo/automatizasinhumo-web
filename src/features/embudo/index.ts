@@ -141,7 +141,8 @@ export async function registrar(db: D1Database, e: Evento, dia: string): Promise
         .bind(dia, v.metrica, ruta),
     );
   }
-  for (const s of sentencias) await s.run();
+  // Un lote de D1 es una transacción: o cuentan todos los pasos del evento o ninguno.
+  if (sentencias.length) await db.batch(sentencias);
 }
 
 export interface Resumen {
@@ -157,44 +158,34 @@ export interface Resumen {
 export async function resumen(db: D1Database, dias: number): Promise<Resumen> {
   const n = Math.min(Math.max(Math.trunc(dias) || 1, 1), 366);
   const desde = new Date(Date.now() - (n - 1) * 86_400_000).toISOString().slice(0, 10);
-  const filas = (
-    await db.prepare('SELECT paso, SUM(n) AS n FROM embudo WHERE dia >= ? GROUP BY paso').bind(desde).all<{ paso: string; n: number }>()
-  ).results;
+  // Todas las lecturas en un solo lote (una transacción): totales y desgloses ven el
+  // mismo estado, así un desglose nunca supera a su total.
+  const consultas = [
+    'SELECT paso, SUM(n) AS n FROM embudo WHERE dia >= ? GROUP BY paso',
+    'SELECT COUNT(*) AS n FROM solicitudes WHERE date(created_at) >= ?',
+    "SELECT COUNT(*) AS n FROM orders WHERE status = 'paid' AND date(created_at) >= ?",
+    "SELECT origen, SUM(n) AS n FROM embudo WHERE paso = 'entrada' AND dia >= ? GROUP BY origen ORDER BY n DESC, origen LIMIT 20",
+    `SELECT ficha,
+       SUM(CASE WHEN paso = 'ficha' THEN n ELSE 0 END) AS ficha_n,
+       SUM(CASE WHEN paso = 'muestra' THEN n ELSE 0 END) AS muestra_n,
+       SUM(CASE WHEN paso = 'empezar' THEN n ELSE 0 END) AS empezar_n
+     FROM embudo WHERE ficha != '' AND dia >= ?
+     GROUP BY ficha ORDER BY ficha_n DESC, ficha LIMIT 30`,
+    `SELECT metrica, ruta, SUM(bueno) AS bueno, SUM(mejorable) AS mejorable, SUM(malo) AS malo
+     FROM vitales WHERE dia >= ? GROUP BY metrica, ruta ORDER BY metrica, ruta`,
+  ];
+  const [filas = [], sol = [], pag = [], origenes = [], fichas = [], vitales = []] = (
+    await db.batch<Record<string, unknown>>(consultas.map((q) => db.prepare(q).bind(desde)))
+  ).map((x) => x.results ?? []);
   const pasos = Object.fromEntries(PASOS.map((p) => [p, 0])) as Record<Paso, number>;
-  for (const f of filas) if (Object.hasOwn(pasos, f.paso)) pasos[f.paso as Paso] = Number(f.n);
-  const contar = async (sql: string) => Number((await db.prepare(sql).bind(desde).first<{ n: number }>())?.n ?? 0);
+  for (const f of filas) if (Object.hasOwn(pasos, String(f.paso))) pasos[f.paso as Paso] = Number(f.n);
   return {
     pasos,
-    solicitudes: await contar('SELECT COUNT(*) AS n FROM solicitudes WHERE date(created_at) >= ?'),
-    pagos: await contar("SELECT COUNT(*) AS n FROM orders WHERE status = 'paid' AND date(created_at) >= ?"),
-    origenes: (
-      await db
-        .prepare("SELECT origen, SUM(n) AS n FROM embudo WHERE paso = 'entrada' AND dia >= ? GROUP BY origen ORDER BY n DESC, origen LIMIT 20")
-        .bind(desde)
-        .all<Resumen['origenes'][number]>()
-    ).results,
-    fichas: (
-      await db
-        .prepare(
-          `SELECT ficha,
-             SUM(CASE WHEN paso = 'ficha' THEN n ELSE 0 END) AS ficha_n,
-             SUM(CASE WHEN paso = 'muestra' THEN n ELSE 0 END) AS muestra_n,
-             SUM(CASE WHEN paso = 'empezar' THEN n ELSE 0 END) AS empezar_n
-           FROM embudo WHERE ficha != '' AND dia >= ?
-           GROUP BY ficha ORDER BY ficha_n DESC, ficha LIMIT 30`,
-        )
-        .bind(desde)
-        .all<Resumen['fichas'][number]>()
-    ).results,
-    vitales: (
-      await db
-        .prepare(
-          `SELECT metrica, ruta, SUM(bueno) AS bueno, SUM(mejorable) AS mejorable, SUM(malo) AS malo
-           FROM vitales WHERE dia >= ? GROUP BY metrica, ruta ORDER BY metrica, ruta`,
-        )
-        .bind(desde)
-        .all<Resumen['vitales'][number]>()
-    ).results,
+    solicitudes: Number(sol[0]?.n ?? 0),
+    pagos: Number(pag[0]?.n ?? 0),
+    origenes: origenes as unknown as Resumen['origenes'],
+    fichas: fichas as unknown as Resumen['fichas'],
+    vitales: vitales as unknown as Resumen['vitales'],
   };
 }
 
