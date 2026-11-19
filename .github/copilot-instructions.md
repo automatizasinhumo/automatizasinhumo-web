@@ -25,5 +25,6 @@ Esta web se construye con código público que ya funciona y que otras personas 
 8. **Separar sus fallos de los nuestros.** Nuestras pruebas (CSP estricta, accesibilidad, exploratorio) son más duras que las del original. Cuando una prueba falla:
    - Se pasa primero contra el original sin tocar. Si también falla allí, el fallo es del original: se arregla una vez y se propone el arreglo al repo de origen.
    - Si solo falla en lo nuestro, el fallo es de la adaptación y se corrige en el pegamento, no en la pieza adoptada.
+   - Si la pieza choca con un requisito nuestro (por ejemplo, usa `eval` y la CSP estricta lo bloquea), no se rebaja el requisito ni se parchea la pieza: se cambia por otra compatible (regla 3).
 
 Reglas de forma: ficheros con CRLF, textos visibles en español de España, push solo a `origin` y nunca tocar `.instances/` ni `manual/CREDENCIALES_STAGING.local`.
