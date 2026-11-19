@@ -179,9 +179,9 @@ def pedido_de(fila, plantilla):
     campos.pop(CAMPO_DISENO, None)  # es una ruta interna, no un texto del negocio
     negocio = nombre_negocio_evento(campos)
     texto = '. '.join(f'{k}: {v}' for k, v in campos.items() if v) + ('. ' + fila['mensaje'] if fila.get('mensaje') else '')
-    # Los cambios pedidos van delante: el recorte a 1500 caracteres no debe dejarlos fuera.
-    rondas = ' '.join(re.findall(r'Cambios pedidos sobre la versión \d+: .*?(?=\n\nCambios pedidos sobre la versión|\Z)',
-                                 fila.get('mensaje') or '', re.S))
+    # Los cambios pedidos van delante (la última ronda primero): el recorte a 1500 caracteres no debe dejarlos fuera.
+    rondas = ' '.join(reversed(re.findall(r'Cambios pedidos sobre la versión \d+: .*?(?=\n\nCambios pedidos sobre la versión|\Z)',
+                                          fila.get('mensaje') or '', re.S)))  # la más reciente primero
     if rondas:
         texto = f'{rondas}. {texto}'
     return {
