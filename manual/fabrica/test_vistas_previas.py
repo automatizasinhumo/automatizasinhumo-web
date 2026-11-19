@@ -24,6 +24,8 @@ class RondaDeCambios(unittest.TestCase):
         fila = {'public_id': 'S-ABC123', 'slug': 's', 'producto': 'Web', 'nombre': 'Ana', 'email': 'a@b.es',
                 'telefono': '', 'campos': '{}', 'mensaje': vp.con_cambios({'estado': 'cambios_pedidos', 'nota': NOTA})}
         self.assertIn('Teléfono 600 000 000', vp.pedido_de(fila, 'plantillas-negocio/x')['descripcion'])
+        largo = {**fila, 'campos': '{"Historia": "%s"}' % ('x' * 2000)}
+        self.assertIn('Teléfono 600 000 000', vp.pedido_de(largo, 'plantillas-negocio/x')['descripcion'])
 
 
 if __name__ == '__main__':
