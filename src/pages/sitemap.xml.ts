@@ -42,6 +42,54 @@ export function sitemapLocs(
   ];
 }
 
+/**
+ * <lastmod> only where the date is real: a page's updated_at (kept by the app on every
+ * save) and a post's pubDate. Products have only created_at, which does not move on edit;
+ * a lastmod that never changes or lies is worse than none (Google ignores inaccurate ones).
+ */
+export function sitemapLastmods(
+  origin: string,
+  pages: { slug: string; updated_at?: string | null }[],
+  blogEntries: { id: string; data: { pubDate: Date } }[],
+): Map<string, string> {
+  const out = new Map<string, string>();
+  const dia = (d: Date) => (Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10));
+  for (const p of pages) {
+    // D1 datetime('now') es UTC sin zona: «2026-11-19 08:00:00».
+    const iso = p.updated_at?.replace(' ', 'T');
+    // El parser nativo «corrige» días imposibles (30 de febrero → 2 de marzo): fecha inventada.
+    if (!iso || !diaDeCalendarioReal(iso)) continue;
+    const d = dia(new Date(/(Z|[+-]\d\d:?\d\d)$/.test(iso) ? iso : `${iso}Z`));
+    if (d) out.set(`${origin}/pages/${p.slug}`, d);
+  }
+  for (const e of blogEntries) {
+    const d = dia(e.data.pubDate);
+    if (d) out.set(`${origin}/blog/${e.id}`, d);
+  }
+  return out;
+}
+
+/** «AAAA-MM-DD…» con un día que existe en ese mes (bisiestos incluidos). */
+function diaDeCalendarioReal(iso: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return false;
+  const [a, mes, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const ultimo = new Date(Date.UTC(a, mes, 0)).getUTCDate(); // día 0 del mes siguiente
+  return mes >= 1 && mes <= 12 && d >= 1 && d <= ultimo;
+}
+
+export function sitemapXml(locs: string[], lastmods: Map<string, string>): string {
+  const url = (l: string) => {
+    const m = lastmods.get(l);
+    return m ? `  <url><loc>${l}</loc><lastmod>${m}</lastmod></url>` : `  <url><loc>${l}</loc></url>`;
+  };
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${locs.map(url).join('\n')}
+</urlset>
+`;
+}
+
 export function marketingStaticPaths(blogEntries: { id: string }[]): string[] {
   return [
     '/blog',
@@ -67,11 +115,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
     staticPaths: marketingStaticPaths(blogEntries),
   });
 
-  const body = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${locs.map((l) => `  <url><loc>${l}</loc></url>`).join('\n')}
-</urlset>
-`;
+  const body = sitemapXml(locs, sitemapLastmods(origin, pages, blogEntries));
 
   return new Response(body, {
     headers: {
