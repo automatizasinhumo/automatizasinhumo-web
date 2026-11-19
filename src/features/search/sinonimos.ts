@@ -39,9 +39,32 @@ const SINONIMOS: Record<string, string> = {
   fontanero: 'negocio', electricista: 'negocio', autonomo: 'negocio', reformas: 'negocio', pintor: 'negocio',
 };
 
+/**
+ * Términos de SINONIMOS agrupados por lema. Snowball junta a veces palabras que no tienen
+ * nada que ver («pagar», «pago» y «page» dan `pag`): sin agrupar, la última entrada del
+ * diccionario pisaba a las demás y «pagar» buscaba «web».
+ */
+export function gruposPorLema(): Map<string, Map<string, string[]>> {
+  const grupos = new Map<string, Map<string, string[]>>();
+  for (const [term, synonym] of Object.entries(SINONIMOS)) {
+    const lema = stemSpanishTerm(term);
+    const porSinonimo = grupos.get(lema) ?? new Map<string, string[]>();
+    porSinonimo.set(synonym, [...(porSinonimo.get(synonym) ?? []), term]);
+    grupos.set(lema, porSinonimo);
+  }
+  return grupos;
+}
+
+// Un lema compartido va al sinónimo con más términos («pag» → tienda: pagar, pago, pagos
+// frente a page). La palabra exacta siempre gana, así que «page» sigue buscando «web».
 const SINONIMOS_POR_LEMA = new Map(
-  Object.entries(SINONIMOS).map(([term, synonym]) => [stemSpanishTerm(term), synonym]),
+  [...gruposPorLema()].map(([lema, porSinonimo]) => [
+    lema,
+    [...porSinonimo].sort((x, y) => y[1].length - x[1].length)[0][0],
+  ]),
 );
+
+const sinTildes = (w: string) => w.normalize('NFD').replace(/\p{M}/gu, '');
 
 /**
  * Lemas con los que se busca una palabra en los diccionarios: el suyo y el del
@@ -58,8 +81,9 @@ export function expandirSinonimos(q: string): string | null {
   const out = q.split(/\s+/).map((w) => {
     // «intranet,» busca «intranet»: la puntuación de los extremos no forma parte del lema.
     const palabra = w.toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+    const exacta = Object.hasOwn(SINONIMOS, sinTildes(palabra)) ? SINONIMOS[sinTildes(palabra)] : undefined;
     const lema = palabra ? lemas(palabra).find((l) => SINONIMOS_POR_LEMA.has(l)) : undefined;
-    const s = lema ? SINONIMOS_POR_LEMA.get(lema) : undefined;
+    const s = exacta ?? (lema ? SINONIMOS_POR_LEMA.get(lema) : undefined);
     if (s && lema && stemSpanishTerm(s) !== lema) { cambia = true; return s; }
     return w;
   });
