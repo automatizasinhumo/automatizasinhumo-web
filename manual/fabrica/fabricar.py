@@ -233,9 +233,13 @@ def publicar_kv(site, p):
     with tempfile.TemporaryDirectory() as tmp:
         lote = Path(tmp, 'kv.json')
         lote.write_text(json.dumps(pares_kv(site, ident)), encoding='utf-8')
-        r = subprocess.run(['npx', 'wrangler', 'kv', 'bulk', 'put', str(lote), '--namespace-id', VISTAS_KV, '--remote'],
-                           shell=os.name == 'nt', capture_output=True, text=True, encoding='utf-8', timeout=900,
-                           stdin=subprocess.DEVNULL)
+        try:
+            r = subprocess.run(['npx', 'wrangler', 'kv', 'bulk', 'put', str(lote), '--namespace-id', VISTAS_KV, '--remote'],
+                               shell=os.name == 'nt', capture_output=True, text=True, encoding='utf-8', timeout=900,
+                               stdin=subprocess.DEVNULL)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            print('publicación en KV fallida', type(e).__name__)
+            return None
     if r.returncode != 0:
         print(f'publicación fallida (código {r.returncode})' if PUBLICO else 'publicación fallida: ' + (r.stdout + r.stderr)[-800:])
         return None

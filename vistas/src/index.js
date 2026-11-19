@@ -31,8 +31,10 @@ export default {
     if (clave.endsWith('/')) clave += 'index.html';
     let valor = await env.VISTAS.get(clave, 'stream');
     if (valor === null && !/\.[a-z0-9]+$/i.test(clave)) {
-      clave += '/index.html';
-      valor = await env.VISTAS.get(clave, 'stream');
+      // /<id>/seccion con seccion/index.html: redirige con barra para que sus rutas relativas resuelvan bien.
+      if (await env.VISTAS.get(`${clave}/index.html`, 'stream') !== null) {
+        return Response.redirect(`${url.origin}${url.pathname}/${url.search}`, 301);
+      }
     }
     if (valor === null) return noEncontrada();
     const ext = clave.split('.').pop().toLowerCase();
