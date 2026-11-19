@@ -78,11 +78,16 @@ describe('sitemap lastmod', () => {
         { slug: 'about', updated_at: '2026-11-18 23:30:00' },
         { slug: 'roto', updated_at: 'nunca' },
         { slug: 'sin', updated_at: null },
+        { slug: 'feb30', updated_at: '2026-02-30 08:00:00' },
+        { slug: 'feb29-no', updated_at: '2026-02-29 08:00:00' },
+        { slug: 'feb29-si', updated_at: '2028-02-29 08:00:00' },
+        { slug: 'mes13', updated_at: '2026-13-01 08:00:00' },
       ],
       [{ id: 'post', data: { pubDate: new Date('2026-10-01T00:00:00Z') } }],
     );
     expect(Object.fromEntries(m)).toEqual({
       [`${origin}/pages/about`]: '2026-11-18',
+      [`${origin}/pages/feb29-si`]: '2028-02-29',
       [`${origin}/blog/post`]: '2026-10-01',
     });
   });

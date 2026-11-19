@@ -57,7 +57,9 @@ export function sitemapLastmods(
   for (const p of pages) {
     // D1 datetime('now') es UTC sin zona: «2026-11-19 08:00:00».
     const iso = p.updated_at?.replace(' ', 'T');
-    const d = iso ? dia(new Date(/(Z|[+-]\d\d:?\d\d)$/.test(iso) ? iso : `${iso}Z`)) : null;
+    // El parser nativo «corrige» días imposibles (30 de febrero → 2 de marzo): fecha inventada.
+    if (!iso || !diaDeCalendarioReal(iso)) continue;
+    const d = dia(new Date(/(Z|[+-]\d\d:?\d\d)$/.test(iso) ? iso : `${iso}Z`));
     if (d) out.set(`${origin}/pages/${p.slug}`, d);
   }
   for (const e of blogEntries) {
@@ -65,6 +67,15 @@ export function sitemapLastmods(
     if (d) out.set(`${origin}/blog/${e.id}`, d);
   }
   return out;
+}
+
+/** «AAAA-MM-DD…» con un día que existe en ese mes (bisiestos incluidos). */
+function diaDeCalendarioReal(iso: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return false;
+  const [a, mes, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const ultimo = new Date(Date.UTC(a, mes, 0)).getUTCDate(); // día 0 del mes siguiente
+  return mes >= 1 && mes <= 12 && d >= 1 && d <= ultimo;
 }
 
 export function sitemapXml(locs: string[], lastmods: Map<string, string>): string {
