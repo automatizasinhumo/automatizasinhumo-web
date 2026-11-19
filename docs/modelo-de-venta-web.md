@@ -76,6 +76,9 @@ web normalmente no sabe registrar un dominio.
   **renovación anual**, que la paga el cliente desde su cuenta.
 - **Disponibilidad comprobada antes de cobrar.** Si el nombre está cogido o es *premium*, el formulario
   ofrece alternativas (`.es`, `.com`, con guion, con ciudad) con su precio, y el cliente elige.
+- **Elegibilidad antes de ofrecerlo.** `.cat` solo vale para webs en catalán o relacionadas con la
+  cultura catalana ([OVHcloud, `.cat`](https://www.ovhcloud.com/en/domains/tld/cat/)), y los geográficos tienen
+  sus propias reglas. El formulario solo propone un TLD si el cliente cumple sus condiciones.
 - El registro es **no reembolsable**. Solo se registra después de que el cliente confirme nombre y precio.
 
 **¿Con qué registrador? (automatizable)**
@@ -92,7 +95,7 @@ Ningún registrador le cobra el primer año aparte, porque el pedido sale de nue
 
 | TLD | Registro (año 1) | Entrega | Renovación (año 2 y siguientes) |
 | --- | --- | --- | --- |
-| `.com`, `.net` y otros admitidos por Cloudflare | Con la Registrar API, **en nuestra cuenta de Cloudflare**, después de que el cliente confirme y pague | [Traslado entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/) a la cuenta del cliente: las dos partes lo confirman y queda bloqueado 30 días | La paga el cliente desde su cuenta, con su método de pago |
+| `.com`, `.net` y otros admitidos por Cloudflare | Con la Registrar API, **en nuestra cuenta de Cloudflare**, después de que el cliente confirme y pague | [Traslado entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/) a la cuenta del cliente. Cloudflare solo lo permite **cuando el dominio lleva más de 10 días registrado**; las dos partes lo confirman y después queda bloqueado 30 días. Mientras tanto la web se ve en la vista previa y el dominio se conecta el día del traslado | La paga el cliente desde su cuenta, con su método de pago |
 | `.es`, `.eu`, `.cat` y geográficos | En **nuestra cuenta de OVHcloud**, con el cliente como **titular** (NIF/NIE validado) | Se pasan los contactos **administrativo y de facturación** a la cuenta de OVHcloud del cliente (gratis). Solo el contacto administrativo puede gestionar el dominio; nosotros nos quedamos como contacto técnico mientras haga falta | La paga el cliente desde su cuenta de OVHcloud. Si no quiere otra cuenta, puede trasladarlo a otro registrador cuando quiera |
 
 **[por verificar]** El cambio de contactos de OVHcloud por API y lo que tarda; el precio exacto de cada TLD
@@ -118,8 +121,8 @@ gratis en su cuenta y tiene una copia completa.
       `.eu`, `.cat` y geográficos, no (van por OVHcloud). Falta anotar precios desde la API con un token propio.
 - [ ] **[ahora]** Prueba con una segunda cuenta nuestra: invitación como miembro, token, despliegue del
       Worker y conexión de un dominio.
-- [ ] **[antes de producción]** Comprobación de dominio en el formulario: disponibilidad, precio y
-      renovación de 2–3 alternativas.
+- [ ] **[antes de producción]** Comprobación de dominio en el formulario: elegibilidad del TLD,
+      disponibilidad, precio y renovación de 2–3 alternativas. La fecha de entrega cuenta los 10 días antes del traslado.
 - [ ] **[antes de producción]** Guía «Crea tu cuenta gratuita de Cloudflare e invítanos», con capturas. Para
       poder recibir el dominio y renovarlo, la cuenta del cliente necesita: un perfil de facturación con un
       método de pago válido, un contacto de registro por defecto y aceptar el Domain Registration Agreement
