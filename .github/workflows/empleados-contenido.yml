@@ -341,6 +341,7 @@ jobs:
               } catch (e) {
                 failures++;
                 lines.push(`| ${p.url} | Sin analizar | ${String(e.message).slice(0, 90)} |`);
+                full.push({url: p.url, error: String(e.message)});
               } finally { await page.close(); }
             }
             await browser.close();
