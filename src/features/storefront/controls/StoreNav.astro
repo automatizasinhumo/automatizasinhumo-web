@@ -19,12 +19,15 @@ interface Props {
    */
   class?: string;
   disclosureClass?: string;
+  /** false: only the disclosure, for themes whose own control covers wide screens. */
+  inline?: boolean;
 }
 
 const {
   links,
   class: inlineClass = 'hidden min-w-0 items-center gap-4 xl:flex xl:gap-6',
   disclosureClass = 'relative order-last xl:hidden',
+  inline = true,
 } = Astro.props;
 ---
 
@@ -39,7 +42,7 @@ const {
     `min-w-0` is what makes the shrink possible — flex items default to
     min-width:auto, which would otherwise force overflow instead. */}
 {
-  links.length > 0 && (
+  inline && links.length > 0 && (
     <div class={inlineClass}>
       {links.map((link) => (
         <a href={link.href} title={link.text} class="min-w-0 truncate hover:text-brand">

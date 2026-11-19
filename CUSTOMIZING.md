@@ -105,6 +105,7 @@ Four controls carry behavior your template must not reimplement:
 | Control | What it owns |
 | --- | --- |
 | `<StoreNav>` | Inline links plus the mobile `<details>` disclosure, which works with no JavaScript. |
+| `<StoreMegaMenu>` | Mega menú de áreas (Starwind Navigation Menu, MIT) con teclado y Escape; los enlaces siguen en el HTML sin JavaScript. |
 | `<StoreSearch>` | GET method, the `q` field, the search landmark, the accessible label. |
 | `<StoreCartControl>` | The `data-cart-open` and `data-cart-count-label` hooks the drawer script depends on. |
 | `<StoreAccountControl>` | The account destination, which middleware guards. |

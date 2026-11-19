@@ -17,6 +17,7 @@ const input = (overrides: Partial<ShellInput> = {}): ShellInput => ({
   announcement: '',
   announcementHref: '',
   headerItems: [],
+  catalogHref: '/',
   footerItems: [],
   searchQuery: '',
   cartEnabled: true,
@@ -122,6 +123,10 @@ describe('the store-owned header', () => {
     expect(html).toContain('data-nav-disclosure');
   });
 
+  it('passes the real catalog route to the theme', () => {
+    expect(buildShellModel(input({ catalogHref: '/products' })).catalogHref).toBe('/products');
+  });
+
   it('shows the mobile disclosure only when there is navigation to disclose', async () => {
     const without = await render(Header, buildShellModel(input()));
     const withLinks = await render(
@@ -145,9 +150,14 @@ describe('the store-owned header', () => {
     // state on its own. A checkbox or a script-driven menu would not.
     expect(html).toContain('<summary');
     expect(html).not.toContain('type="checkbox"');
-    // Both the inline row and the disclosure list the link, so it is reachable
-    // at every width even with scripts blocked.
-    expect(html.match(/href="\/pages\/about"/g)?.length).toBe(2);
+    // The inline row (in the default theme, the mega menu) and the disclosure
+    // both list the link, so it is reachable at every width even with scripts blocked.
+    // Each root is checked on its own: a global count would pass with two
+    // copies in one root and none in the other.
+    const disclosure = html.match(/<details[^>]*data-nav-disclosure[\s\S]*?<\/details>/)?.[0] ?? '';
+    const inline = html.replace(disclosure, '');
+    expect(disclosure).toContain('href="/pages/about"');
+    expect(inline).toContain('href="/pages/about"');
   });
 
   it('keeps the search form a real GET form with the q field', async () => {
