@@ -30,6 +30,9 @@ const precioDe = (valor: string) =>
   producto ? formatPrice(valor === 'Te lo montamos' && precioMontado ? precioMontado : producto.price_cents, producto.currency) : '';
 const q = Astro.url.searchParams;
 const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Plantilla + guía';
+// Campos que el servidor ha rellenado desde la URL: solo esos mandan sobre el borrador.
+// Un parámetro que no inicializa nada (?nombre=Ana) no debe vaciar lo guardado.
+const camposDesdeUrl = q.get('modalidad') === 'pro' ? 'modalidad' : '';
 // (con pedido verificado manda la modalidad pagada; ver modalidadFija)
 const ERRORES: Record<string, string> = {
   nombre: 'Escribe tu nombre (mínimo 2 letras).',
@@ -108,7 +111,7 @@ const label = 'block text-sm font-medium text-ink';
           )
         }
 
-        <form method="post" action="/api/solicitudes" id="solicitud-form" class="mt-8 space-y-6" data-solicitud data-error-ultimo={errorEnUltimo ? '' : undefined}>
+        <form method="post" action="/api/solicitudes" id="solicitud-form" class="mt-8 space-y-6" data-solicitud data-desde-url={camposDesdeUrl || undefined} data-error-ultimo={errorEnUltimo ? '' : undefined}>
           {/* Sin JS se ve todo de una vez; con JS, un paso cada vez con esta barra. */}
           <div class="hidden" data-progreso aria-live="polite">
             <div class="flex items-baseline justify-between text-xs font-semibold">
@@ -303,11 +306,11 @@ const label = 'block text-sm font-medium text-ink';
     const b = leerBorrador(almacen.getItem(clave), Date.now());
     if (b) {
       let usado = false;
-      // Lo que pide la URL (?modalidad=pro) manda sobre lo guardado.
-      const enUrl = new URLSearchParams(location.search);
+      // Lo que el servidor rellenó desde la URL (?modalidad=pro) manda sobre lo guardado.
+      const desdeUrl = new Set((f.dataset.desdeUrl ?? '').split(' ').filter(Boolean));
       for (const el of campos()) {
         const v = b.campos[el.name];
-        if (v === undefined || enUrl.has(el.name)) continue;
+        if (v === undefined || desdeUrl.has(el.name)) continue;
         if (el.type === 'radio' || el.type === 'checkbox') {
           if ((el as HTMLInputElement).value === v) {
             (el as HTMLInputElement).checked = true;
