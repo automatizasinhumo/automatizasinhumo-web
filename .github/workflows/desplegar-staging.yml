@@ -28,6 +28,9 @@ jobs:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      desplegado: ${{ steps.deploy.outputs.desplegado }}
+      anterior: ${{ steps.anterior.outputs.version }}
     steps:
       - name: Credenciales de Cloudflare
         id: cred
@@ -60,18 +63,36 @@ jobs:
           D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
         run: node scripts/wrangler-staging.mjs
 
+      # Versión activa antes de desplegar: destino fijo de la vuelta atrás, para que
+      # reejecutar el job no devuelva staging a la versión rota.
+      - name: Versión anterior
+        id: anterior
+        if: steps.cred.outputs.listo == '1'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          v=$(npx wrangler deployments status --name automatizasinhumo-staging --json             | python3 -c 'import json,sys; d=json.load(sys.stdin); print(max(d["versions"], key=lambda x: x["percentage"])["version_id"])')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
       - name: Construir, migrar y desplegar
+        id: deploy
         if: steps.cred.outputs.listo == '1'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: npm run deploy
+        run: |
+          npm run deploy
+          echo "desplegado=1" >> "$GITHUB_OUTPUT"
 
   recorrido:
     needs: desplegar
     if: ${{ always() && needs.desplegar.result != 'failure' && needs.desplegar.result != 'cancelled' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      roto: ${{ steps.recorrido.outcome == 'failure' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -89,6 +110,7 @@ jobs:
           qa/navegador/node_modules/.bin/playwright install --with-deps chromium
 
       - name: Recorrido del cliente
+        id: recorrido
         # Un segundo intento antes de dar la versión por rota: un fallo suelto de red no
         # debe deshacer un despliegue bueno.
         run: node qa/recorrido-cliente.mjs "$BASE" || { sleep 30; node qa/recorrido-cliente.mjs "$BASE"; }
@@ -105,7 +127,7 @@ jobs:
   # (wrangler rollback). Las migraciones de D1 no se deshacen: son siempre aditivas.
   volver-atras:
     needs: [desplegar, recorrido]
-    if: ${{ always() && needs.desplegar.result == 'success' && needs.recorrido.result == 'failure' }}
+    if: ${{ always() && needs.desplegar.outputs.desplegado == '1' && needs.recorrido.outputs.roto == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -114,6 +136,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           SHA: ${{ github.sha }}
+          ANTERIOR: ${{ needs.desplegar.outputs.anterior }}
         run: |
-          npx --yes wrangler@4.164.0 rollback --name automatizasinhumo-staging -y             -m "Recorrido fallido tras desplegar ${SHA:0:7}"
+          # Con la versión anotada antes de desplegar; si no se pudo leer, la anterior por defecto.
+          npx --yes wrangler@4.164.0 rollback $ANTERIOR --name automatizasinhumo-staging -y             -m "Recorrido fallido tras desplegar ${SHA:0:7}"
           echo "::error::El recorrido falló: staging ha vuelto a la versión anterior. Revisa las capturas del job recorrido."
