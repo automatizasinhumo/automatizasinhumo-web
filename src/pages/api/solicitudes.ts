@@ -4,6 +4,7 @@ import { getProductBySlug } from '../../features/products/db';
 import { getStoreSettings } from '../../features/settings/db';
 import { getEmailProvider } from '../../features/email';
 import { getConfig } from '../../config';
+import { rememberStoreUrl } from '../../features/email/outbox';
 import { resolverPedido } from '../../features/solicitudes/pedido';
 import {
   CAMPO_PEDIDO,
@@ -67,6 +68,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     console.error('solicitudes: no se pudo guardar', e);
     return redirect(`${volver}?error=guardar`, 303);
   }
+
+  // Origen público para los enlaces firmados que el cron pone en los correos (no lanza).
+  await rememberStoreUrl(env.DB, new URL(request.url).origin);
 
   // Emails: mejor esfuerzo. Si fallan, la solicitud ya está guardada en el panel.
   // Un solo envío por solicitud: un reenvío del mismo formulario no los repite.

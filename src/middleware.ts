@@ -318,7 +318,7 @@ const SECURITY_HEADERS: Record<string, string> = {
  *  (e.g. a Response.redirect to a payment provider, or a Cache API hit). */
 function withSecurityHeaders(res: Response): Response {
   try {
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.headers.set(k, v);
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) if (!(k === 'referrer-policy' && res.headers.has(k))) res.headers.set(k, v);
     return res;
   } catch {
     const rebuilt = new Response(res.body, {
@@ -326,7 +326,8 @@ function withSecurityHeaders(res: Response): Response {
       statusText: res.statusText,
       headers: new Headers(res.headers),
     });
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) rebuilt.headers.set(k, v);
+    // Una página puede endurecer su Referrer-Policy (p. ej. enlaces firmados en la query).
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) if (!(k === 'referrer-policy' && rebuilt.headers.has(k))) rebuilt.headers.set(k, v);
     return rebuilt;
   }
 }
