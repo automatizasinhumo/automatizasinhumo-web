@@ -85,9 +85,9 @@ const pageLinks = model.headerLinks.filter((link) => !coveredByMegaMenu(link.hre
         links={pageLinks}
         class="hidden xl:flex"
       />
-      {/* Fila en línea apagada: en xl la sustituye el mega menú; la hamburguesa
+      {/* Sin fila en línea: en xl la sustituye el mega menú; la hamburguesa
           (xl:hidden) sigue llevando todos los enlaces del menú de D1. */}
-      <StoreNav links={model.headerLinks} class="hidden" />
+      <StoreNav links={model.headerLinks} inline={false} />
       {/* The inline field is hidden below sm; the magnifier opens it in place.
           The panel hangs from the sticky header (its positioned ancestor), full
           width minus the gutters, because the magnifier is not at the edge. */}
