@@ -351,5 +351,53 @@ const shell = buildShellModel({
         });
       }
     </script>
+
+    {/* Embudo y Core Web Vitals sin cookies (src/features/embudo). Solo se manda la
+        ruta, el referrer y la nota de web-vitals; nada queda en el navegador. Quien
+        activa Global Privacy Control no se cuenta. */}
+    <script>
+      // @ts-nocheck -- plain-JS client script
+      import { onCLS, onINP, onLCP } from 'web-vitals';
+
+      if (!navigator.globalPrivacyControl && typeof navigator.sendBeacon === 'function') {
+        const enviar = (datos) => {
+          try {
+            navigator.sendBeacon('/api/embudo', new Blob([JSON.stringify(datos)], { type: 'text/plain' }));
+          } catch {
+            // Medir nunca puede romper la página.
+          }
+        };
+        const p = location.pathname;
+        const u = new URLSearchParams(location.search).get('utm_source') ?? '';
+        enviar({ t: 'vista', p, r: document.referrer, u });
+
+        const visor = document.querySelector('#demo[data-demo-visor]');
+        if (visor && 'IntersectionObserver' in window) {
+          const io = new IntersectionObserver(
+            (entradas) => {
+              if (entradas.some((e) => e.isIntersecting)) {
+                io.disconnect();
+                enviar({ t: 'muestra', p });
+              }
+            },
+            { threshold: 0.4 },
+          );
+          io.observe(visor);
+        }
+
+        // web-vitals avisa cuando cada métrica es definitiva (al ocultar la página
+        // en INP y CLS); se juntan y se mandan en un solo envío.
+        const notas = new Map();
+        const guardar = (m) => notas.set(m.name, m.rating);
+        onLCP(guardar);
+        onINP(guardar);
+        onCLS(guardar);
+        addEventListener('visibilitychange', () => {
+          if (document.visibilityState !== 'hidden' || notas.size === 0) return;
+          enviar({ t: 'vitales', p, v: [...notas].map(([n, r]) => ({ n, r })) });
+          notas.clear();
+        });
+      }
+    </script>
   </body>
 </html>
