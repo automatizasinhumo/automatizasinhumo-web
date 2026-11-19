@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { marketingStaticPaths, sitemapLocs } from './sitemap.xml';
+import { marketingStaticPaths, sitemapLastmods, sitemapLocs, sitemapXml } from './sitemap.xml';
 
 const origin = 'https://shop.example';
 const data = {
@@ -67,5 +67,32 @@ describe('sitemapLocs', () => {
       const locs = sitemapLocs(origin, home, data);
       expect(new Set(locs).size).toBe(locs.length);
     }
+  });
+});
+
+describe('sitemap lastmod', () => {
+  it('fecha solo páginas y entradas, en UTC, y omite fechas inválidas', () => {
+    const m = sitemapLastmods(
+      origin,
+      [
+        { slug: 'about', updated_at: '2026-11-18 23:30:00' },
+        { slug: 'roto', updated_at: 'nunca' },
+        { slug: 'sin', updated_at: null },
+      ],
+      [{ id: 'post', data: { pubDate: new Date('2026-10-01T00:00:00Z') } }],
+    );
+    expect(Object.fromEntries(m)).toEqual({
+      [`${origin}/pages/about`]: '2026-11-18',
+      [`${origin}/blog/post`]: '2026-10-01',
+    });
+  });
+
+  it('pone lastmod donde hay fecha y lo omite en el resto', () => {
+    const xml = sitemapXml(
+      [`${origin}/products/beanie`, `${origin}/pages/about`],
+      new Map([[`${origin}/pages/about`, '2026-11-18']]),
+    );
+    expect(xml).toContain(`<url><loc>${origin}/products/beanie</loc></url>`);
+    expect(xml).toContain(`<url><loc>${origin}/pages/about</loc><lastmod>2026-11-18</lastmod></url>`);
   });
 });

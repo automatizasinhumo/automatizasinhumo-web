@@ -64,11 +64,11 @@ export async function listPublishedPageLinks(db: D1Database): Promise<PageLink[]
   return results ?? [];
 }
 
-/** Every published page, for the sitemap and llms.txt (no footer cap). */
-export async function listPublishedPages(db: D1Database): Promise<PageLink[]> {
+/** Every published page, for the sitemap and llms.txt (no footer cap). updated_at feeds <lastmod>. */
+export async function listPublishedPages(db: D1Database): Promise<(PageLink & { updated_at?: string })[]> {
   const { results } = await db
-    .prepare('SELECT title, slug FROM pages WHERE published = 1 ORDER BY title COLLATE NOCASE, id')
-    .all<PageLink>();
+    .prepare('SELECT title, slug, updated_at FROM pages WHERE published = 1 ORDER BY title COLLATE NOCASE, id')
+    .all<PageLink & { updated_at?: string }>();
   return results ?? [];
 }
 
