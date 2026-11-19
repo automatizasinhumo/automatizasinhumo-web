@@ -9,4 +9,11 @@ export const INTRO_CATEGORIA: Record<string, string> = {
   automatizaciones: 'Quita de en medio las tareas repetitivas: avisos, formularios, hojas y correos que se mueven solos.',
   documentos: 'Facturas, PDF y documentos que se rellenan solos o se resumen con IA.',
   planes: 'Mantenimiento mensual: cambios, copias y alguien que responde.',
+  bots: 'Bots de Telegram y WhatsApp y chat con IA que responden a tus clientes a cualquier hora.',
+  contenido: 'Carruseles, textos de producto y publicaciones para redes, listos para publicar.',
+  enlaces: 'Enlaces cortos, códigos QR y analítica sin cookies para saber qué funciona.',
+  captacion: 'Formularios, listas de espera y boletines que convierten visitas en contactos.',
+  portales: 'Webs que editas tú mismo, portales de cliente y centros de ayuda.',
+  identidad: 'Tarjeta digital, página de enlaces, firma de correo y CV para presentarte bien.',
+  tiendas: 'Tienda online, productos digitales y fotos o etiquetas para vender sin complicaciones.',
 };

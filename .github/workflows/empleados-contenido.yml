@@ -144,7 +144,7 @@ jobs:
             echo '```text'
             grep -iE 'non-unique|duplicate|seo score|critical|missing|404|5xx' siteone.txt | head -n 25 || true
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
           if [ -f pages.json ]; then
             node <<'JS'
             const fs = require('node:fs');
@@ -203,10 +203,11 @@ jobs:
                 for (const g of groups.slice(0, 15)) lines.push(`- ${g.map(u => `\`${u}\``).join(' · ')}`);
               }
             }
+            console.log(lines.join('\n'));
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
           JS
           else
-            echo '- No se pudo contrastar el sitemap con enlaces: falló la extracción previa.' >> "$GITHUB_STEP_SUMMARY"
+            echo '- No se pudo contrastar el sitemap con enlaces: falló la extracción previa.' | tee -a "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: 'P0 Ortografía española: CSpell'
@@ -220,7 +221,7 @@ jobs:
             "language": "es,es_ES",
             "import": ["@cspell/dict-es-es/cspell-ext.json"],
             "dictionaries": ["es-es"],
-            "words": ["Astro", "Cloudflare", "Stripe", "WhatsApp", "Verifactu"],
+            "words": ["Acortador", "Activepieces", "AEPD", "antispam", "apruébalas", "Astro", "Atelier", "automatizasinhumo", "banner", "Bizum", "Blush", "Brevo", "Canva", "Card", "Checklist", "Cloudflare", "Cloudways", "Contrátalo", "cookies", "currículums", "descargable", "Discord", "Docs", "Drive", "Díaz", "editable", "editables", "Elementor", "enlázalos", "Excel", "flyers", "Food", "freelance", "Garden", "gestoría", "Gmail", "Holded", "hosting", "Hostinger", "hreflang", "imprimible", "indexación", "Ironworks", "IRPF", "Kinsta", "Linktree", "Lola", "LSSI", "Mailer", "Maps", "maquetador", "Metricool", "Midnight", "multi", "multivendedor", "muéstralas", "newsletter", "noindex", "Notion", "Nápoles", "Orbea", "Outlook", "Pack", "packs", "Pexels", "prediseñados", "premium", "PRUÉBALA", "pruébalo", "pymes", "Quipu", "Raiola", "RGPD", "Rocket", "Rooibos", "Sage", "Sheets", "Site", "sitemap", "Stripe", "Systeme", "tablet", "Telegram", "teína", "TRLGDCU", "truck", "tunegocio", "Verifactu", "Webempresa", "webinar", "webinars", "WhatsApp", "yoga"],
             "useGitignore": false
           }
           JSON
@@ -235,7 +236,7 @@ jobs:
             else
               echo 'Sin texto extraído; comprobar preparación.'
             fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: 'P1 CSS servido: Stylelint, solo reglas de error'
         if: always()
@@ -266,7 +267,7 @@ jobs:
             else
               echo 'No se descargó CSS externo propio; estilos inline no comprobados.'
             fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: 'P2 Legibilidad ES: Fernández-Huerta, Szigriszt e INFLESZ'
         if: always()
@@ -301,6 +302,7 @@ jobs:
               except Exception as e:
                   rows.append(f"| {p['url']} | {words} | Error | Error | {str(e)[:40]} |")
           rows.append('\nEvaluación orientativa. No aplicar umbrales de veto a textos legales o páginas breves.')
+          print('\n'.join(rows))
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('\n'.join(rows) + '\n')
           PY
@@ -340,6 +342,7 @@ jobs:
             }
             await browser.close();
             lines.splice(1, 0, `Páginas revisadas: ${pages.length - failures}; violaciones encontradas: ${total}; fallos de ejecución: ${failures}.`);
+            console.log(lines.join('\n'));
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
           })().catch(e => {console.error(e); process.exitCode = 1;});
           JS
