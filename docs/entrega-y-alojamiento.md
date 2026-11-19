@@ -22,6 +22,39 @@ Un Worker por cliente se agota con 100 ventas. No se resuelve abriendo más cuen
 
 ## 2. Modelo propuesto
 
+### Decisión 19/11: escalones que elige el comprador (ronda 23)
+
+Copiamos lo que hace el mercado (ronda 23 de GPT, `manual/auditorias-gpt/ronda-23-respuesta.md`):
+
+| Escalón | Qué recibe | Precio orientativo |
+| --- | --- | --- |
+| 1. Toma tu web | ZIP con la web publicable, el código, los datos del negocio y las guías; se gestiona solo | Plantilla 149 €, te la montamos 349 € |
+| 2. + Alojamiento | La alojamos nosotros, con su enlace o su dominio | +9,90 €/mes |
+| 3. + Mantenimiento | Cambios y control por nuestra parte, con historial de peticiones | +29,90 €/mes |
+| 4. Extras | Formulario, idioma, dominio… | Formulario +29 €, inglés +99 € |
+
+Estructura del ZIP: `LEEME.md`, `web-publicable/`, `codigo-fuente/`, `datos-negocio/business-manifest.json`, `guias/`.
+
+**Piezas que se clonan tal cual, por prioridad:**
+
+- **P0. Cobro y entrega:**
+  - [stripe-samples/checkout-one-time-payments](https://github.com/stripe-samples/checkout-one-time-payments) → webhook → pedido en D1.
+  - La fábrica genera el ZIP en GitHub Actions y lo guarda en R2.
+  - «Mis pedidos» da una URL prefirmada de 15 minutos (patrón rezvee6/stripe-r2-pattern con aws4fetch).
+  - Correo con Resend Free.
+- **P1. Alojamiento y cuotas:**
+  - [t0saki/sitedrop](https://github.com/t0saki/sitedrop): multisitio en un único Worker. Clonado y probado tal cual: 94/94 tests.
+  - Se descarta raveli/agent2web, que exige Workers Paid.
+  - Stripe en modo `subscription`: pago único más una cuota «Alojamiento» o «Alojamiento + mantenimiento», con el portal de cliente de Stripe.
+- **P2. Dominios y tickets:** enrutado por hostname en D1 y tickets de mantenimiento (OpenDrone-Web).
+
+**Aparcado hasta que la web esté terminada (decisión de David, 19/11):**
+
+- Stripe y la plataforma de pago real: se configuran al final.
+- R2 pide tarjeta, así que no se activa. Hay que buscar una alternativa gratuita. Si no la hay, más adelante se pagará un plan fijo de unos 5 € con tope conocido.
+
+El resto de este apartado es el modelo de la ronda 22. Vale como contexto, pero manda la tabla anterior.
+
 1. **Vista previa (antes de pagar):** un único Worker compartido con D1 y R2 que sirve todas las vistas
    previas por ruta, con versiones y vuelta atrás. No se escribe desde cero: se adopta uno de estos
    repos MIT y se prueba con 100 webs de ejemplo antes de elegir.
@@ -114,11 +147,12 @@ web publicada; si quieres usar tu dominio o llevártela, escríbenos y te lo pre
 
 ## 5. Tareas
 
-- [ ] Probar agent2web y sitedrop con 100 webs de ejemplo (aislamiento, caché, rollback, plan gratuito)
-      y elegir uno. **[ahora]**
-- [ ] `fabricar.py` genera el ZIP de entrega y lo sube a R2. **[ahora]**
-- [ ] La guía `conectar-dominio.md` y despliegue en la cuenta del cliente con un token que da él.
-      **[antes de producción]**
-- [ ] Prueba de entrega: el formulario de ejemplo llega de verdad al destino. **[antes de producción]**
-- [ ] Publicar los textos de la FAQ del apartado 4. **[antes de producción, cuando 1–3 estén en
-      verde]**
+- [x] Probar agent2web y sitedrop tal cual: sitedrop 94/94; agent2web 193/194, descartado por exigir Workers Paid.
+- [ ] Alternativa gratuita a R2 para guardar los ZIP (sin tarjeta). Todo lo de pagos queda aparcado hasta que la web esté terminada.
+- [ ] P0. La fábrica genera el ZIP de entrega con la estructura de la ronda 23. Se puede hacer sin R2.
+- [ ] P0. Clonar stripe-samples/checkout-one-time-payments, pasar sus pruebas y hacer una compra de prueba de punta a punta con la tarjeta 4242.
+- [ ] P0. Guardar el ZIP en el almacenamiento elegido (R2 o la alternativa gratuita), montar «Mis pedidos» con enlace temporal y enviar el correo con Resend.
+- [ ] P1. Desplegar sitedrop tal cual, publicar 10 webs de prueba y sustituir `wrangler deploy web-<id>`.
+- [ ] P1. Suscripciones de Stripe y portal de cliente.
+- [ ] P2. Dominios del cliente y tickets de mantenimiento.
+- [ ] Publicar los textos de la FAQ del apartado 4 cuando su parte esté en verde, adaptados antes a los escalones: qué incluye «te la montamos» (349 €) y que el alojamiento es aparte.
