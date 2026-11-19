@@ -723,7 +723,7 @@ El correo corporativo no está incluido en las webs; cada ficha lo indica. El pl
 ## Cambios y después de la entrega
 
 ### ¿Puedo pedir cambios?
-Sí. Tienes una ronda de ajustes incluida, que puedes solicitar durante los siete días siguientes a la entrega.
+Sí. Cada servicio incluye una ronda de cambios sobre lo entregado. Cambios posteriores, con plan de mantenimiento o por horas.
 
 ### ¿Y si quiero cambiar algo más adelante?
 Los cambios posteriores se hacen con el plan de [mantenimiento](/products/plan-mantenimiento-web) (incluye 30 minutos de cambios al mes) o por horas.
