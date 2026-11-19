@@ -303,6 +303,7 @@ export const productos = [
     resumen: 'Enlaces cortos de marca (tunegocio.es/oferta) con estadísticas de clics y QR.',
     recibes: ['Acortador en tu dominio', 'Estadísticas por enlace', 'QR por enlace', 'Panel de gestión'],
     campos: ['Dominio o subdominio', 'Primeros enlaces'],
+    noIncluye: ['Compra del dominio'],
     ejemplo: 'Campaña de flyers con tunegocio.es/verano: sabes cuántos escanearon el QR y desde dónde.',
     repos: ['miantiao-me/Sink', 'botnick/shortlink'],
   },
@@ -722,7 +723,7 @@ El correo corporativo no está incluido en las webs; cada ficha lo indica. El pl
 ## Cambios y después de la entrega
 
 ### ¿Puedo pedir cambios?
-Sí. Tienes una ronda de ajustes incluida, que puedes solicitar durante los siete días siguientes a la primera versión.
+Sí. Tienes una ronda de ajustes incluida, que puedes solicitar durante los siete días siguientes a la entrega.
 
 ### ¿Y si quiero cambiar algo más adelante?
 Los cambios posteriores se hacen con el plan de [mantenimiento](/products/plan-mantenimiento-web) (incluye 30 minutos de cambios al mes) o por horas.
