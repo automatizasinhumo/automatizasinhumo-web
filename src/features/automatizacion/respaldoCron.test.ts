@@ -6,6 +6,8 @@ const nombres = (d: string, hechos: Record<string, string> = {}) =>
   pendientes(new Date(d), hechos).map((p) => p.programado.workflow);
 
 const SEMANALES = ['empleados-qa.yml', 'seguridad.yml', 'empleados-semanales.yml', 'vigilantes-cadena.yml', 'desplegar-staging.yml'];
+/** Diarios ya lanzados en cualquier periodo de estas pruebas (se prueban aparte). */
+const DIARIOS_HECHOS = { 'indexnow.yml': '9999-12-31@~' };
 
 /** Marcas en memoria con la misma semántica (comparar e intercambiar) que D1. */
 function marcasMemoria(inicial: Record<string, string> = {}): Marcas & { datos: Record<string, string> } {
@@ -42,7 +44,7 @@ describe('periodos', () => {
 });
 
 describe('pendientes', () => {
-  const semanaPasada = Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20@~']));
+  const semanaPasada = { ...Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20@~'])), ...DIARIOS_HECHOS };
 
   it('la fábrica toca a los 05, 20, 35 y 50 de cada hora', () => {
     for (const m of ['05', '20', '35', '50']) {
@@ -61,9 +63,18 @@ describe('pendientes', () => {
     expect(nombres('2026-11-23T06:15:00Z', semanaPasada)).toEqual([]);
     expect(nombres('2026-11-23T06:20:00Z', semanaPasada)).toEqual(['fabrica-vistas-previas.yml', ...SEMANALES]);
     // Un semanal que falló el lunes sigue pendiente el martes.
-    const hechos: Record<string, string> = {};
+    const hechos: Record<string, string> = { ...DIARIOS_HECHOS };
     for (const w of SEMANALES) hechos[w] = w === 'seguridad.yml' ? '2026-11-16T06:20@~' : '2026-11-23T06:20@~';
     expect(nombres('2026-11-24T09:00:00Z', hechos)).toEqual(['seguridad.yml']);
+  });
+
+  it('indexnow toca una vez al día desde las 05:23 UTC', () => {
+    const resto = { ...semanaPasada };
+    delete (resto as Record<string, string>)['indexnow.yml'];
+    expect(nombres('2026-11-18T10:00:00Z', resto)).toEqual(['indexnow.yml']);
+    expect(nombres('2026-11-18T10:00:00Z', { ...resto, 'indexnow.yml': '2026-11-18@~' })).toEqual([]);
+    expect(nombres('2026-11-19T05:20:00Z', { ...resto, 'indexnow.yml': '2026-11-18@~' })).toEqual(['fabrica-vistas-previas.yml']);
+    expect(nombres('2026-11-19T05:30:00Z', { ...resto, 'indexnow.yml': '2026-11-18@~' })).toEqual(['indexnow.yml']);
   });
 
   it('una reserva sin confirmar bloquea 30 minutos y luego caduca', () => {
@@ -75,7 +86,7 @@ describe('pendientes', () => {
 
 describe('lanzarProgramados', () => {
   const tick = new Date('2026-11-18T10:05:00Z');
-  const semanaHecha = Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20@~']));
+  const semanaHecha = { ...Object.fromEntries(SEMANALES.map((w) => [w, '2026-11-16T06:20@~'])), ...DIARIOS_HECHOS };
 
   it('sin token o sin repo no llama a nada', async () => {
     const pedir = vi.fn();
