@@ -296,3 +296,38 @@ const { model, purchase } = Astro.props;
     </section>
   )
 }
+
+{/* CTA fijo en móvil (ronda 24, ejemplo «Bottom banner» de Flowbite, MIT, sin su JS).
+    Se oculta mientras la zona de compra, «Empieza gratis» o el pie están a la vista:
+    no tapa los botones originales, ni el pie, ni duplica lo que ya se ve. */}
+<div
+  class="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-line bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-lg transition-transform md:hidden"
+  data-cta-fijo
+  hidden
+>
+  <a href="#comprar" class="flex-1 rounded-full bg-brand px-4 py-3 text-center text-sm font-semibold text-on-brand">
+    Contratar · {model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice}
+  </a>
+  <a href={model.startHref} class="flex-1 rounded-full border-2 border-brand px-4 py-3 text-center text-sm font-semibold text-brand">
+    Pruébalo gratis
+  </a>
+</div>
+
+<script>
+  const barra = document.querySelector<HTMLElement>('[data-cta-fijo]');
+  const zonas = [
+    document.getElementById('comprar'),
+    document.querySelector('[data-empieza-gratis]'),
+    [...document.querySelectorAll('footer')].at(-1) ?? null,
+  ].filter(
+    (z): z is HTMLElement => z !== null,
+  );
+  if (barra && zonas.length && 'IntersectionObserver' in window) {
+    const visibles = new Set<Element>();
+    const obs = new IntersectionObserver((entradas) => {
+      for (const e of entradas) e.isIntersecting ? visibles.add(e.target) : visibles.delete(e.target);
+      barra.hidden = visibles.size > 0;
+    });
+    zonas.forEach((z) => obs.observe(z));
+  }
+</script>
