@@ -140,7 +140,7 @@ jobs:
             --output-html-report=siteone.html > siteone.log 2>&1 || true
           {
             echo '## P0 — SiteOne Crawler 2.5.1'
-            echo 'Informe SEO completo: archivo local `qa-r21/siteone.html` (no publicado).'
+            echo 'Informe SEO completo: qa-r21/siteone.html en el artefacto qa-ronda21-informes.'
             echo '```text'
             grep -iE 'non-unique|duplicate|seo score|critical|missing|404|5xx' siteone.txt | head -n 25 || true
             echo '```'
