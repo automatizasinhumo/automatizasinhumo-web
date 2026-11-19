@@ -119,7 +119,10 @@ export async function loadProductDetail(
   // them; otherwise from the product's own stock.
   const soldOut = hasVariants ? variants.every((v) => v.stock <= 0) : state === 'out';
 
-  const variantPrices = variants.map((v) => v.price_cents);
+  // «Desde» tiene que ser un precio comprable: las variantes agotadas no cuentan,
+  // salvo que lo estén todas (entonces se enseña el rango que había).
+  const inStockPrices = variants.filter((v) => v.stock > 0).map((v) => v.price_cents);
+  const variantPrices = inStockPrices.length > 0 ? inStockPrices : variants.map((v) => v.price_cents);
   const displayPriceCents = hasVariants ? Math.min(...variantPrices) : product.price_cents;
   const priceVaries = hasVariants && Math.min(...variantPrices) !== Math.max(...variantPrices);
 
