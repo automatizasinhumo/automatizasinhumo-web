@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers';
 import Layout from '../layouts/Layout.astro';
 import ProductList from '../features/products/ProductList.astro';
 import HomeHero from '../features/storefront/HomeHero.astro';
+import TourInvitacion from '../features/tour/TourInvitacion.astro';
 import { loadHomeServices } from '../features/storefront/homeServices';
 import { hasCatalogParams } from '../features/storefront/campaignParams';
 import { resolveHomePath } from '../features/settings/home';
@@ -42,4 +43,5 @@ if (showHero) {
 <Layout title={showHero ? 'Webs para negocios a precio cerrado: la ves gratis antes de pagar' : undefined}>
   {showHero && <HomeHero services={homeServices} />}
   <ProductList belowHero={showHero} />
+  {showHero && <TourInvitacion />}
 </Layout>

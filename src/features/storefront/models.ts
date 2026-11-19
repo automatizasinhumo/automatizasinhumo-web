@@ -82,6 +82,8 @@ export interface StorefrontShellModel {
   /** Escaped message plus an already-validated link, or null when unset. */
   announcement: { text: string; href: string | null } | null;
   headerLinks: StorefrontLink[];
+  /** Ruta real del catálogo: / salvo que la portada apunte a otra página. */
+  catalogHref: string;
   footerLinks: StorefrontLink[];
   /** Páginas «Web para …» de cada oficio: enlazadas en todas las rutas para que no queden huérfanas. */
   sectorLinks: StorefrontLink[];

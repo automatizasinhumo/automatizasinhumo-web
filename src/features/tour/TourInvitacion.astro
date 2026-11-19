@@ -1,0 +1,119 @@
+---
+/**
+ * Tour de bienvenida de la portada con Driver.js (MIT, https://github.com/nilbuild/driver.js).
+ * Primera visita: aviso «¿Quieres conocer la web en un minuto?». La elección queda en
+ * localStorage (`CLAVE_TOUR`) y el enlace «Ver guía» del pie (`/#guia`) la reabre.
+ * Los pasos salen de src/data/tour.ts; uno cuyo bloque no esté visible se salta.
+ * Script empaquetado (sin is:inline) para no sumar excepciones a la CSP.
+ */
+---
+
+<aside
+  id="tour-invitacion"
+  aria-label="Guía de la web"
+  hidden
+  class="fixed inset-x-4 bottom-4 z-30 rounded-2xl border border-line bg-surface p-4 shadow-lg sm:left-auto sm:right-6 sm:max-w-sm"
+>
+  <p class="font-semibold text-ink">¿Quieres conocer la web en un minuto?</p>
+  <p class="mt-1 text-sm text-muted">Seis pasos: qué ves gratis, cómo buscar y cómo pedir.</p>
+  <div class="mt-3 flex gap-2">
+    <button type="button" data-tour-accion="empezar" class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-on-brand hover:bg-brand-hover">Empezar guía</button>
+    <button type="button" data-tour-accion="no" class="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink hover:border-brand">Ahora no</button>
+  </div>
+</aside>
+
+<script>
+  import { driver, type DriveStep } from 'driver.js';
+  import 'driver.js/dist/driver.css';
+  import { ANCLA_TOUR, CLAVE_TOUR, PASOS_TOUR } from '../../data/tour';
+
+  const leer = (): string | null => {
+    try {
+      return localStorage.getItem(CLAVE_TOUR);
+    } catch {
+      return null;
+    }
+  };
+  const guardar = (valor: 'visto' | 'no') => {
+    try {
+      localStorage.setItem(CLAVE_TOUR, valor);
+    } catch {
+      /* modo privado o almacenamiento lleno: la guía volverá a ofrecerse */
+    }
+  };
+
+  const aviso = document.getElementById('tour-invitacion');
+  const visible = (el: Element | null): el is HTMLElement =>
+    el instanceof HTMLElement && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+
+  function empezar() {
+    if (aviso) aviso.hidden = true;
+    const pasos: DriveStep[] = PASOS_TOUR.flatMap((p) => {
+      const el = document.querySelector(`[data-tour="${p.id}"]`);
+      return visible(el) ? [{ element: el, popover: { title: p.titulo, description: p.texto } }] : [];
+    });
+    if (!pasos.length) return;
+    const previo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const guia = driver({
+      steps: pasos,
+      showProgress: true,
+      progressText: '{{current}} de {{total}}',
+      nextBtnText: 'Siguiente',
+      prevBtnText: 'Anterior',
+      doneBtnText: 'Terminar',
+      closeBtnLabel: 'Cerrar la guía',
+      popoverClass: 'tour-ash',
+      animate: !quieto,
+      smoothScroll: !quieto,
+      allowKeyboardControl: true,
+      onDestroyed: () => {
+        guardar('visto');
+        (previo && previo.isConnected ? previo : document.querySelector<HTMLElement>('main'))?.focus({ preventScroll: true });
+      },
+    });
+    guia.drive();
+  }
+
+  aviso?.addEventListener('click', (e) => {
+    const accion = (e.target as Element).closest('[data-tour-accion]')?.getAttribute('data-tour-accion');
+    if (accion === 'empezar') empezar();
+    if (accion === 'no') {
+      guardar('no');
+      aviso.hidden = true;
+    }
+  });
+
+  const pedidaPorEnlace = () => {
+    if (location.hash !== `#${ANCLA_TOUR}`) return false;
+    history.replaceState(null, '', location.pathname + location.search);
+    return true;
+  };
+  window.addEventListener('hashchange', () => {
+    if (pedidaPorEnlace()) empezar();
+  });
+  if (pedidaPorEnlace()) empezar();
+  else if (aviso && leer() === null) aviso.hidden = false;
+</script>
+
+<style is:global>
+  .driver-popover.tour-ash {
+    background: var(--color-surface, #fff);
+    color: var(--color-ink, #111);
+    border-radius: 1rem;
+    max-width: min(22rem, calc(100vw - 2rem));
+  }
+  .driver-popover.tour-ash .driver-popover-title {
+    font-size: 1.05rem;
+  }
+  .driver-popover.tour-ash .driver-popover-footer button {
+    text-shadow: none;
+    border-radius: 9999px;
+    padding: 0.4rem 0.9rem;
+  }
+  .driver-popover.tour-ash .driver-popover-next-btn {
+    background: var(--color-brand, #1d4ed8);
+    color: var(--color-on-brand, #fff);
+    border-color: transparent;
+  }
+</style>
