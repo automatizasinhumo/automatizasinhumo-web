@@ -61,7 +61,7 @@ export function problemaContacto(href) {
 
 // Lo que un visitante de un negocio local busca primero: llamar, escribir, reservar, pedir cita.
 const TEXTO_CTA = /\b(llam|reserv|cita|contact|whats|presupuest|pide|pedir|escr[ií]b|inscr[ií]b|apúntate|apuntate|consulta|confirma|rsvp|asist|compra|encarg|visítanos|visitanos|cómo llegar|como llegar)/i;
-const HREF_CTA = /^(tel:|mailto:|sms:)|(\/\/(wa\.me|api\.whatsapp\.com)\/)|#(contact|reserv|cita|rsvp|presupuesto|pedido|inscrip)|\/(contact|reserv|cita|pedir|presupuesto|rsvp)/i;
+const HREF_CTA = /(?:^(?:tel|mailto|sms):)|(?:\/\/(?:wa\.me|api\.whatsapp\.com)\/)|(?:#(?:contact|reserv|cita|rsvp|presupuesto|pedido|inscrip))|(?:\/(?:contact|reserv|cita|pedir|presupuesto|rsvp))/i;
 
 /** ¿Este enlace o botón es una llamada a la acción de contacto? */
 export function esCta({ texto = '', href = '' } = {}) {
