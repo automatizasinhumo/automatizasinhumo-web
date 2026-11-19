@@ -19,6 +19,7 @@ import {
 import { getEmailProvider } from '../../features/email';
 import { datosDe as datosDeSolicitud, enviarNotificacion } from '../../features/solicitudes/envio';
 import { getStoreSettings } from '../../features/settings/db';
+import { firmadorDecision } from '../../features/solicitudes/decision';
 
 export const prerender = false;
 
@@ -29,7 +30,8 @@ export const prerender = false;
 // `notificaciones` (solicitud, tipo, versión) es única, así que un doble clic o
 // repetir el estado no duplica el envío; reenviar exige marcarlo a propósito.
 const ID_RE = /^S-[A-Z0-9]{6,12}$/;
-const datosDe = (id: string, enlace: string, pendientes: string) => datosDeSolicitud(env.DB, id, enlace, pendientes);
+const firmar = firmadorDecision(Astro.url.origin, env.AUTH_SECRET);
+const datosDe = (id: string, enlace: string, pendientes: string) => datosDeSolicitud(env.DB, id, enlace, pendientes, firmar);
 
 if (Astro.request.method === 'POST') {
   const f = await Astro.request.formData();

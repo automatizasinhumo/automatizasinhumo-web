@@ -11,6 +11,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 import type { EmailProvider } from '../email/provider';
 import { CAMPO_PEDIDO, type Estado } from './index';
 import { correoHtml, prepararCorreo, type DatosCorreo, type TipoCorreo } from './correos';
+import type { Firmador } from './decision';
 
 type Fila = { nombre: string; email: string; producto: string | null; slug: string; campos: string; pedido_public_id: string | null };
 
@@ -19,6 +20,8 @@ export async function datosDe(
   id: string,
   enlace: string,
   pendientes: string,
+  /** Firma el enlace «Aprobar / Pedir cambios» (sin él, el correo pide responder). */
+  firmar?: Firmador | null,
 ): Promise<(DatosCorreo & { email: string }) | null> {
   const r = await db
     .prepare('SELECT nombre, email, producto, slug, campos, pedido_public_id FROM solicitudes WHERE public_id = ?')
@@ -31,7 +34,8 @@ export async function datosDe(
   } catch {
     // campos corruptos: sin número de pedido
   }
-  return { email: r.email, nombre: r.nombre, servicio: r.producto ?? r.slug, esPedido: !!r.pedido_public_id, pedido, enlace, datosPendientes: pendientes };
+  const enlaceDecision = firmar ? await firmar(id) : null;
+  return { email: r.email, nombre: r.nombre, servicio: r.producto ?? r.slug, esPedido: !!r.pedido_public_id, pedido, enlace, enlaceDecision, datosPendientes: pendientes };
 }
 
 export type ResultadoEnvio =
@@ -216,6 +220,7 @@ export async function enviarVistasPreviasListas(
   db: D1Database,
   mail: EmailProvider | null,
   limite = 10,
+  firmar?: Firmador | null,
 ): Promise<{ enviadas: string[]; fallidas: string[] }> {
   const res = { enviadas: [] as string[], fallidas: [] as string[] };
   if (!mail) return res;
@@ -232,7 +237,7 @@ export async function enviarVistasPreviasListas(
     .all<{ public_id: string; nota: string }>();
   for (const { public_id: id, nota } of results ?? []) {
     const enlace = NOTA_QA_OK.exec(nota)?.[1];
-    const d = enlace ? await datosDe(db, id, enlace, '') : null;
+    const d = enlace ? await datosDe(db, id, enlace, '', firmar) : null;
     const c = d ? prepararCorreo('revision', d) : null;
     if (!d || !c?.ok) continue;
     const r = await enviarNotificacion(db, mail, {
@@ -316,6 +321,7 @@ export async function enviarSeguimientos(
   ahora: Date,
   resenaUrl: string | null,
   limite = 10,
+  firmar?: Firmador | null,
 ): Promise<{ enviadas: string[]; fallidas: string[] }> {
   const res = { enviadas: [] as string[], fallidas: [] as string[] };
   if (!mail) return res;
@@ -365,7 +371,7 @@ export async function enviarSeguimientos(
       .all<{ id: string; version: number; cuerpo: string }>();
     for (const { id, version, cuerpo } of results ?? []) {
       const enlace = p.tipo === 'resena' ? (resenaUrl as string) : enlaceDe(cuerpo);
-      const d = await datosDe(db, id, enlace, '');
+      const d = await datosDe(db, id, enlace, '', p.base === 'revision' ? firmar : null);
       const c = d ? prepararCorreo(p.tipo, d) : null;
       if (!d || !c?.ok) continue;
       const r = await enviarNotificacion(db, mail, {
