@@ -127,6 +127,6 @@ export function correoHtml(texto: string): string {
   const esc = (t: string) => t.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!);
   return texto
     .split(/\n{2,}/)
-    .map((p) => `<p>${esc(p).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}">${u}</a>`).replace(/\n/g, '<br>')}</p>`)
+    .map((p) => `<p>${esc(p).replace(/https?:\/\/[^\s<]*[^\s<.,;:!?)»]/g, (u) => `<a href="${u}">${u}</a>`).replace(/\n/g, '<br>')}</p>`)
     .join('');
 }

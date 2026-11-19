@@ -64,7 +64,12 @@ describe('enlace «Aprobar / Pedir cambios»', () => {
       if (!c.ok) throw new Error(c.error);
       expect(c.texto).toContain(firmado);
       expect(c.texto).not.toContain('responde «Aprobado»');
-      if (tipo === 'revision' || tipo === 'recordatorio') expect(c.texto.indexOf(base.enlace)).toBeLessThan(c.texto.indexOf(firmado));
+      if (tipo === 'revision' || tipo === 'recordatorio') {
+        expect(c.texto).toContain(base.enlace);
+        expect(c.texto.indexOf(base.enlace)).toBeLessThan(c.texto.indexOf(firmado));
+      }
+      // En el HTML, el punto que sigue al enlace no entra en el href (rompería la firma).
+      expect(correoHtml(c.texto)).toContain(`href="${firmado}"`);
     }
   });
   it('sin enlace (o no https) sigue pidiendo responder', () => {
