@@ -13,6 +13,11 @@ interface Props {
 }
 
 const { services } = Astro.props;
+// Precio «desde» de los destacados, leído del catálogo (no escrito a mano): así la
+// primera pantalla dice qué vendemos y cuánto cuesta, y no se queda desfasada.
+const precios = services
+  .map((s) => ({ name: s.name, href: s.href, desde: s.fromPrice }))
+  .filter((s): s is { name: string; href: string; desde: string } => s.desde !== null);
 
 const destacados = [
   { href: '/categories/webs', titulo: 'Webs para tu negocio', desde: 'desde 149 €', icono: 'world-www' },
@@ -61,6 +66,17 @@ const muestras = [
         <a href="#catalogo" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Elegir servicio</a>
         <a href="/empezar/consulta" class="rounded-full border border-brand bg-surface px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Cuéntanos qué necesitas →</a>
       </div>
+      {precios.length > 0 && (
+        <p class="mt-5 text-sm text-muted" data-precios-hero>
+          Por ejemplo:{' '}
+          {precios.map((p, i) => (
+            <>
+              <a href={p.href} class="font-semibold text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand">{p.name}</a>{' '}
+              desde <strong class="text-ink">{p.desde}</strong>{i < precios.length - 1 ? ' · ' : '.'}
+            </>
+          ))}
+        </p>
+      )}
       <ul class="mt-6 flex flex-wrap gap-2 text-sm font-medium text-ink">
         <li class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5"><Icono name="shield-check" class="h-4 w-4 text-brand" /> La muestra es gratuita y no necesitas tarjeta</li>
         <li class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5"><Icono name="mood-smile" class="h-4 w-4 text-brand" /> Atendido por una persona real</li>

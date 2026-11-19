@@ -45,6 +45,7 @@ function product(slug: string, active: number): Product {
 
 const sectorWithTwoServices: SectorPage = {
   slug: 'test',
+  label: 'Prueba',
   title: 'Sector de prueba',
   description: 'Descripción de prueba',
   heading: 'Sector de prueba',
@@ -67,10 +68,42 @@ describe('sector pages', () => {
   });
 
   it('have unique titles and descriptions for all requested sectors', () => {
-    expect(SECTORS).toHaveLength(5);
-    expect(new Set(SECTORS.map((sector) => sector.title)).size).toBe(5);
-    expect(new Set(SECTORS.map((sector) => sector.description)).size).toBe(5);
-    expect(new Set(SECTORS.map((sector) => sector.description.slice(0, 160))).size).toBe(5);
+    const n = SECTORS.length;
+    expect(n).toBeGreaterThanOrEqual(6);
+    expect(new Set(SECTORS.map((sector) => sector.title)).size).toBe(n);
+    expect(new Set(SECTORS.map((sector) => sector.description)).size).toBe(n);
+    expect(new Set(SECTORS.map((sector) => sector.description.slice(0, 160))).size).toBe(n);
+  });
+
+  // Cada oficio llega a una web que le sirve: una general o la hecha para él. Una web
+  // de nicho de otro oficio (fontaneros → «Web para taller») confunde al comprador.
+  const WEB_GENERAL = new Set(['web-una-pagina', 'web-corporativa-5-secciones']);
+  const WEB_DE_NICHO: Record<string, string> = { 'web-taller': 'talleres', 'web-inmobiliaria': 'inmobiliarias' };
+
+  it('offers every sector a general web or its own niche web, never the niche web of another trade', () => {
+    for (const sector of SECTORS) {
+      const webs = sector.serviceSlugs.filter((slug) => WEB_GENERAL.has(slug) || slug in WEB_DE_NICHO);
+      expect(webs.length, sector.slug).toBeGreaterThan(0);
+      for (const slug of sector.serviceSlugs) {
+        if (slug in WEB_DE_NICHO) expect(WEB_DE_NICHO[slug], `${sector.slug} → ${slug}`).toBe(sector.slug);
+      }
+    }
+  });
+
+  it('puts a demo of the trade first in every sector card that has one', () => {
+    for (const sector of SECTORS) {
+      const hints = sector.demoHints ?? [];
+      expect(hints.length, sector.slug).toBeGreaterThan(0);
+      const first = demosForService(sector.serviceSlugs[0], hints).find((demo) => demo.tipo !== 'interactiva')!;
+      expect(hints.some((hint) => first.url.includes(hint)), `${sector.slug}: ${first.url}`).toBe(true);
+    }
+  });
+
+  it('keeps interactive demos and never repeats one', () => {
+    const demos = demosForService('carta-qr', ['restaurant/restaurant']);
+    expect(demos.some((demo) => demo.tipo === 'interactiva')).toBe(true);
+    expect(new Set(demos.map((demo) => demo.url)).size).toBe(demos.length);
+    expect(demos.length).toBeLessThanOrEqual(3);
   });
 
   it('links every sector to published service slugs and real demos', () => {

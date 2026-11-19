@@ -19,6 +19,7 @@ describe('sitemapLocs', () => {
     '/webs/restaurantes',
     '/webs/abogados',
     '/webs/fisioterapeutas',
+    '/webs/talleres',
   ];
 
   it('lists the catalog at / when the home page is the catalog', () => {
