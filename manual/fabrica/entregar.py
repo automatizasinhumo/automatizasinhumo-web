@@ -116,7 +116,10 @@ def main():
     hechas = 0
     for n, f in enumerate(filas, 1):
         print(f'entrega {n}' if vp.PUBLICO else f"entrega {f['public_id']}")
-        hechas += procesar(f)
+        try:
+            hechas += procesar(f)
+        except Exception as e:  # noqa: BLE001 — un fallo de D1 no para el resto del lote
+            print('  fallo D1:', type(e).__name__)
     print('entregas intentadas:', hechas)
 
 
