@@ -78,6 +78,16 @@ async function revisarLockfiles() {
   }
 }
 
+// 4b. API pública: health y products tienen contrato en qa/api/openapi.yaml (Schemathesis).
+const API_PUBLICA = /^src\/pages\/api\/(health\.ts|products(\/|\.ts))/;
+const apiTocada = tocados.filter((f) => !esPrueba(f) && API_PUBLICA.test(f));
+if (apiTocada.length && !tocados.includes('qa/api/openapi.yaml')) {
+  warn(
+    `Cambia la API pública (${apiTocada.map((f) => '`' + f + '`').join(', ')}) sin tocar \`qa/api/openapi.yaml\`. ` +
+      'Si cambia la forma de la respuesta o los parámetros, actualiza el contrato para que Schemathesis lo compruebe.',
+  );
+}
+
 // 5. Tamaño y descripción.
 const lineas = (pr.additions || 0) + (pr.deletions || 0);
 if (lineas > 1500) {
