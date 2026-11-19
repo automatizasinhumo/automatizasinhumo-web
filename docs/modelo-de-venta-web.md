@@ -95,11 +95,12 @@ Ningún registrador le cobra el primer año aparte, porque el pedido sale de nue
 
 | TLD | Registro (año 1) | Entrega | Renovación (año 2 y siguientes) |
 | --- | --- | --- | --- |
-| `.com`, `.net` y otros admitidos por Cloudflare | Con la Registrar API, **en nuestra cuenta de Cloudflare**, después de que el cliente confirme y pague | [Traslado entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/) a la cuenta del cliente. Cloudflare solo lo permite **cuando el dominio lleva más de 10 días registrado**; las dos partes lo confirman y después queda bloqueado 30 días. Mientras tanto la web se ve en la vista previa y el dominio se conecta el día del traslado | La paga el cliente desde su cuenta, con su método de pago |
+| `.com`, `.net` y otros admitidos por Cloudflare | Con la Registrar API, **en nuestra cuenta de Cloudflare**, después de que el cliente confirme y pague. Cada registro envía los datos del cliente como contacto titular (`contacts.registrant`): sin ese campo, la API usa el contacto por defecto de la cuenta, que es el nuestro, y el cliente no sería el titular hasta el traslado | [Traslado entre cuentas](https://developers.cloudflare.com/registrar/account-options/inter-account-transfer/) a la cuenta del cliente. Cloudflare solo lo permite **cuando el dominio lleva más de 10 días registrado**; las dos partes lo confirman y después queda bloqueado 30 días. Mientras tanto la web se ve en la vista previa y el dominio se conecta el día del traslado | La paga el cliente desde su cuenta, con su método de pago |
 | `.es`, `.eu`, `.cat` y geográficos | En **nuestra cuenta de OVHcloud**, con el cliente como **titular** (NIF/NIE validado) | Se pasan los contactos **administrativo y de facturación** a la cuenta de OVHcloud del cliente (gratis). Solo el contacto administrativo puede gestionar el dominio; nosotros nos quedamos como contacto técnico mientras haga falta | La paga el cliente desde su cuenta de OVHcloud. Si no quiere otra cuenta, puede trasladarlo a otro registrador cuando quiera |
 
 **[por verificar]** El cambio de contactos de OVHcloud por API y lo que tarda; el precio exacto de cada TLD
-en las dos API.
+en las dos API; que la Registrar API de Cloudflare (beta) acepte `contacts.registrant` en el alta, como dice
+su [documentación](https://developers.cloudflare.com/registrar/registrar-api/).
 
 Si el cliente ya tiene dominio, no se registra nada: se conecta el suyo.
 
