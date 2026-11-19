@@ -1,0 +1,105 @@
+{
+  "operation": "GET /api/products",
+  "method": "GET",
+  "path_template": "/api/products",
+  "fingerprint": "5bc2158d",
+  "case_id": "g3ZSAw",
+  "code_sample": "curl -X GET -H 'User-Agent: automatizasinhumo-qa-schemathesis' 'https://automatizasinhumo-staging.davidpd89.workers.dev/api/products?q=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'",
+  "sequence": [
+    {
+      "method": "GET",
+      "url": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/products?q=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "url_template": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/products",
+      "headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "g3ZSAw"
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "date": "Thu, 19 Nov 2026 16:10:15 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "transfer-encoding": "chunked",
+          "connection": "keep-alive",
+          "access-control-allow-origin": "*",
+          "cache-control": "public, max-age=0, s-maxage=600",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "access-control-allow-methods": "GET, OPTIONS",
+          "cache-tag": "catalog",
+          "content-security-policy": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+          "permissions-policy": "camera=(), microphone=(), geolocation=()",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=HPpFlJDVM2QqOqrFVU9ULftAS3byVW%2B4hOH60fn4pPwBSiQouFmxTpoKWB7Fu69%2FgWThbpxEGexkJqAoH%2BfAWZ4bNZdyDhuK%2F%2Bf9fz5Gqcw0JFNg1nqLsm04Fdp85sO54NfAzysemONf8z2rzRqDJFl3n3Bjkkds8%2BImneZl4e0mtcQXg%2BJ7kSq%2F5RI7Xg%3D%3D\"}]}",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "content-encoding": "gzip",
+          "server": "cloudflare",
+          "cf-ray": "a5d07be78a9ab6e2-MAD",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        },
+        "body": "{\n  \"products\": [],\n  \"total\": 0,\n  \"limit\": 24,\n  \"offset\": 0,\n  \"query\": \"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\"\n}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "negative_data_rejection",
+          "status": "failure",
+          "message": "Schema-violating request accepted\n\nInvalid data should have been rejected\nExpected: 400, 401, 403, 404, 405, 406, 409, 415, 422, 428, 429, 5xx\nInvalid component: parameter `q` in query - q: String larger than maxLength"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.03075679996982217,
+          "mode": "negative"
+        },
+        "components": {
+          "QUERY": "negative"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "q: String larger than maxLength",
+            "location": null,
+            "parameter": "q",
+            "parameter_location": "QUERY",
+            "scenario": "string_above_max_length"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {
+          "QUERY": {
+            "q": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      },
+      "path": "/api/products",
+      "path_parameters": {},
+      "query": {
+        "q": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "case_headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis"
+      },
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "GET /api/products"
+    }
+  ],
+  "aliases": [
+    "2i9BCC"
+  ]
+}

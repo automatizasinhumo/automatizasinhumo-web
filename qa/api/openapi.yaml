@@ -1,0 +1,145 @@
+openapi: 3.1.0
+# Contrato de la API pública de solo lectura (catálogo y salud). Lo usa Schemathesis
+# (qa/api/schemathesis.sh) para generar peticiones y comprobar estado, cabeceras y forma.
+# Las rutas que escriben (carrito, solicitudes, embudo, checkout, webhooks) quedan fuera a
+# propósito: probarlas contra el staging ensuciaría el D1 y gastaría su cupo de escrituras.
+info:
+  title: automatizasinhumo — API pública de catálogo
+  version: '1'
+servers:
+  - url: /
+paths:
+  /api/health:
+    get:
+      operationId: salud
+      responses:
+        '200':
+          description: D1 accesible.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Salud' }
+        '503':
+          description: D1 caída.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Salud' }
+  /api/products:
+    options:
+      operationId: catalogoPreflight
+      responses:
+        '204': { description: Preflight CORS. }
+    get:
+      operationId: catalogo
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string, maxLength: 200 }
+        - name: limit
+          in: query
+          description: Se recorta a 1-100; un valor no numérico usa 24.
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 10000 }
+      responses:
+        '200':
+          description: Página del catálogo.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [products, total, limit, offset, query]
+                properties:
+                  products:
+                    type: array
+                    maxItems: 100
+                    items: { $ref: '#/components/schemas/Producto' }
+                  total: { type: integer, minimum: 0 }
+                  limit: { type: integer, minimum: 1, maximum: 100 }
+                  offset: { type: integer, minimum: 0 }
+                  query: { type: [string, 'null'] }
+  /api/products/{slug}:
+    parameters:
+      - name: slug
+        in: path
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 120 }
+    options:
+      operationId: fichaPreflight
+      responses:
+        '204': { description: Preflight CORS. }
+    get:
+      operationId: ficha
+      responses:
+        '200':
+          description: Producto activo con variantes y extras.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Producto' }
+                  - type: object
+                    required: [variants, extras]
+                    properties:
+                      variants:
+                        type: array
+                        items: { $ref: '#/components/schemas/Variante' }
+                      extras:
+                        type: array
+                        items: { $ref: '#/components/schemas/Extra' }
+        '404':
+          description: No existe o no está activo.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+components:
+  schemas:
+    Salud:
+      type: object
+      required: [status, db, latency_ms, time]
+      properties:
+        status: { enum: [ok, error] }
+        db: { enum: [ok, down] }
+        latency_ms: { type: integer, minimum: 0 }
+        time: { type: string, format: date-time }
+    Dinero:
+      type: object
+      required: [amount, cents, currency]
+      properties:
+        amount: { type: number }
+        cents: { type: integer }
+        currency: { type: string, pattern: '^[A-Z]{3}$' }
+    Producto:
+      type: object
+      required: [id, slug, name, description, price, in_stock, variant_label, categories, image, url]
+      properties:
+        id: { type: string, pattern: '^prod_' }
+        slug: { type: string, pattern: '^[a-z0-9-]+$' }
+        name: { type: string, minLength: 1 }
+        description: { type: [string, 'null'] }
+        price: { $ref: '#/components/schemas/Dinero' }
+        in_stock: { type: boolean }
+        variant_label: { type: [string, 'null'] }
+        categories: { type: array, items: { type: string } }
+        image: { type: string, format: uri }
+        url: { type: string, format: uri }
+    Variante:
+      type: object
+      required: [id, label, price, in_stock, sku]
+      properties:
+        id: { type: string, pattern: '^var_' }
+        label: { type: string }
+        price: { $ref: '#/components/schemas/Dinero' }
+        in_stock: { type: boolean }
+        sku: { type: [string, 'null'] }
+    Extra:
+      type: object
+      required: [id, label, price_delta]
+      properties:
+        id: { type: string, pattern: '^xtra_' }
+        label: { type: string }
+        price_delta: { $ref: '#/components/schemas/Dinero' }
