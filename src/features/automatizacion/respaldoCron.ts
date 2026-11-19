@@ -52,7 +52,7 @@ export function semana(cuando: Date): string {
   return new Date(inicio).toISOString().slice(0, 16);
 }
 
-/** Cada día desde las 05:23 UTC (cron de indexnow.yml): un fallo se reintenta hasta el día siguiente. */
+/** Cada día desde las 05:23 UTC (cron de indexnow.yml): si GitHub rechaza el envío, los ticks siguientes lo reintentan hasta el día siguiente; un run aceptado que falle después no se reintenta. */
 const diario = (cuando: Date) => new Date(cuando.getTime() - (5 * 60 + 23) * 60_000).toISOString().slice(0, 10);
 
 /** Cada 15 minutos (05, 20, 35, 50), como `7-59/15` en el workflow. */

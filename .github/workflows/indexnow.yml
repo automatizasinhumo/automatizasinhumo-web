@@ -31,7 +31,9 @@ jobs:
           KEY: ${{ secrets.INDEXNOW_KEY }}
         run: |
           if [ -z "$KEY" ]; then echo "::warning::Falta el secreto INDEXNOW_KEY: no se avisa."; exit 0; fi
-          case "$SITIO" in https://*.workers.dev*|https://*.pages.dev*|http://*) echo "::warning::$SITIO no es indexable."; exit 0;; esac
+          case "$SITIO" in https://*.workers.dev*|https://*.pages.dev*) echo "::warning::$SITIO no es indexable."; exit 0;; esac
+          # Solo HTTPS: la clave viaja en la ruta y no debe ir en claro.
+          case "$SITIO" in https://*) ;; *) echo "::error::SITIO_PUBLICO debe empezar por https://"; exit 1;; esac
           # El buscador validará https://dominio/<clave>.txt: si no responde la clave, avisar sería inútil.
           if [ "$(curl -fsS --max-time 20 "$SITIO/$KEY.txt")" != "$KEY" ]; then
             echo "::error::$SITIO/<clave>.txt no devuelve la clave (¿falta INDEXNOW_KEY en el Worker?)."; exit 1
@@ -44,6 +46,8 @@ jobs:
           sitemap-location: ${{ vars.SITIO_PUBLICO }}/sitemap.xml
           key: ${{ secrets.INDEXNOW_KEY }}
           endpoint: api.indexnow.org
-          since: 1
+          # lastmod lleva solo fecha (medianoche UTC): con un día, una edición tras las 05:23 se perdería.
+          since: 2
           since-unit: day
+          limit: 10000 # máximo por petición de IndexNow; la acción recorta a 100 por defecto
           failure-strategy: error
