@@ -5,7 +5,7 @@ Uso: python manual/fabrica/empaquetar.py RUTA/pedido.json   (tras fabricar.py)
 Estructura: LEEME.md, web-publicable/, codigo-fuente/, datos-negocio/business-manifest.json, guias/.
 Solo biblioteca estándar. El ZIP nunca lleva claves: la vista previa no las usa.
 """
-import json, os, sys, zipfile
+import json, os, re, sys, zipfile
 from datetime import date
 from pathlib import Path
 
@@ -13,6 +13,8 @@ DEMOS = Path(os.environ.get('DEMOS_DIR', 'C:/GIT/automatizasinhumo-demos'))
 CAMPOS_NEGOCIO = ('negocio', 'actividad', 'ciudad', 'telefono', 'email', 'whatsapp', 'descripcion', 'servicios')
 # Solo vale para la vista previa: la web del cliente sí debe indexarse.
 SOLO_VISTA_PREVIA = {'_headers'}
+# fabricar.py mete este meta en cada HTML de la vista previa; la copia publicable no lo lleva.
+META_NOINDEX = re.compile(r'<meta name="robots" content="noindex">')
 
 LEEME = """# {negocio}: tu web
 
@@ -63,9 +65,13 @@ def empaquetar(ruta_pedido, destino=None):
                                             fecha=date.today().isoformat()))
         for f in ficheros:
             rel = f.relative_to(site).as_posix()
-            if rel not in SOLO_VISTA_PREVIA:
-                z.write(f, 'web-publicable/' + rel)
-            z.write(f, 'codigo-fuente/site/' + rel)
+            if rel in SOLO_VISTA_PREVIA:
+                continue
+            datos = f.read_bytes()
+            if rel.endswith('.html'):
+                datos = META_NOINDEX.sub('', datos.decode('utf-8')).encode('utf-8')
+            for carpeta in ('web-publicable/', 'codigo-fuente/site/'):
+                z.writestr(carpeta + rel, datos)
         if (base / 'wrangler.jsonc').is_file():
             z.write(base / 'wrangler.jsonc', 'codigo-fuente/wrangler.jsonc')
         z.writestr('datos-negocio/business-manifest.json',

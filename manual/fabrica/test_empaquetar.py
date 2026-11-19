@@ -25,7 +25,8 @@ class Empaquetar(unittest.TestCase):
     def test_paquete_con_estructura_de_entrega(self):
         site = self.dir / 'clientes' / 'p1' / 'site'
         (site / 'css').mkdir(parents=True)
-        (site / 'index.html').write_text('<h1>Hola</h1>', encoding='utf-8')
+        (site / 'index.html').write_text(
+            '<html><head><meta name="robots" content="noindex"></head><h1>Hola</h1></html>', encoding='utf-8')
         (site / 'css' / 'a.css').write_text('h1{}', encoding='utf-8')
         (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
         ruta = self.pedido({'id': 'p1', 'negocio': 'Bar Pepe', 'email': 'a@b.es', 'clave': 'x'})
@@ -33,10 +34,15 @@ class Empaquetar(unittest.TestCase):
         with zipfile.ZipFile(emp.empaquetar(ruta)) as z:
             nombres = set(z.namelist())
             datos = json.loads(z.read('datos-negocio/business-manifest.json'))
+            publicable = z.read('web-publicable/index.html').decode()
+            fuente = z.read('codigo-fuente/site/index.html').decode()
         self.assertLessEqual({'LEEME.md', 'web-publicable/index.html', 'web-publicable/css/a.css',
                               'codigo-fuente/site/index.html', 'datos-negocio/business-manifest.json',
                               'guias/publicar.md', 'guias/dominio.md'}, nombres)
-        self.assertNotIn('web-publicable/_headers', nombres)  # el noindex es solo de la vista previa
+        self.assertFalse({'web-publicable/_headers', 'codigo-fuente/site/_headers'} & nombres)  # noindex de la vista previa
+        self.assertNotIn('noindex', publicable)  # la web del cliente sí se indexa
+        self.assertIn('<h1>Hola</h1>', publicable)
+        self.assertNotIn('noindex', fuente)
         self.assertEqual(datos['negocio'], {'negocio': 'Bar Pepe', 'email': 'a@b.es'})  # sin campos ajenos
 
     def test_sin_web_fabricada_falla(self):
