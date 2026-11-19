@@ -10,8 +10,17 @@
  * la atiende (todas las escrituras del admin y del asistente de configuración pasan
  * por ahí), así que quien guarda ve su cambio en la siguiente página. Los demás
  * isolates lo ven en como mucho `TTL_MS`.
+ *
+ * Las escrituras que no pasan por el Worker (`wrangler d1 execute`, semillas, pruebas de
+ * integración) solo se ven al caducar: `STORE_CACHE_TTL_MS=0` desactiva la caché.
  */
 export const TTL_MS = 60_000;
+
+/** TTL efectivo: `STORE_CACHE_TTL_MS` si es un entero ≥ 0; si no, `TTL_MS`. */
+export function ttlDesdeEnv(valor: unknown): number {
+  const n = typeof valor === 'string' && valor.trim() !== '' ? Number(valor) : NaN;
+  return Number.isInteger(n) && n >= 0 ? n : TTL_MS;
+}
 
 interface Entrada<T> {
   valor: Promise<T>;
@@ -26,10 +35,14 @@ let generacion = 0;
  * Devuelve el valor guardado o lo carga. Las peticiones concurrentes comparten la misma
  * promesa (una sola lectura de D1 en ráfagas); si la carga falla, se olvida para reintentar.
  */
-export function conCache<T>(cargar: () => Promise<T>, ahora = Date.now()): Promise<T> {
+export function conCache<T>(
+  cargar: () => Promise<T>,
+  ahora = Date.now(),
+  ttl = TTL_MS,
+): Promise<T> {
   if (entrada && entrada.caduca > ahora) return entrada.valor as Promise<T>;
   const gen = generacion;
-  const nueva: Entrada<T> = { valor: cargar(), caduca: ahora + TTL_MS };
+  const nueva: Entrada<T> = { valor: cargar(), caduca: ahora + ttl };
   entrada = nueva;
   nueva.valor.catch(() => {
     if (entrada === nueva && generacion === gen) entrada = null;

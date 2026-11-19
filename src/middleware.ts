@@ -10,7 +10,7 @@ import {
   parseStoreSettings,
   STORE_SETTINGS_SQL,
 } from './features/settings/db';
-import { conCache, esLectura, olvidarCacheTienda } from './features/storefront/cacheTienda';
+import { conCache, esLectura, olvidarCacheTienda, ttlDesdeEnv } from './features/storefront/cacheTienda';
 import {
   MENU_ITEMS_SQL,
   EMPTY_MENUS,
@@ -89,6 +89,8 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
             env.DB.prepare(STORE_SETTINGS_SQL),
             env.DB.prepare(MENU_ITEMS_SQL),
           ]),
+          Date.now(),
+          ttlDesdeEnv((env as { STORE_CACHE_TTL_MS?: unknown }).STORE_CACHE_TTL_MS),
         );
         context.locals.settings = parseStoreSettings(
           (settings.results ?? []) as Array<{ key: string; value: string }>,

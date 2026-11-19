@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TTL_MS, conCache, esLectura, olvidarCacheTienda } from './cacheTienda';
+import { TTL_MS, conCache, esLectura, olvidarCacheTienda, ttlDesdeEnv } from './cacheTienda';
 
 describe('cacheTienda', () => {
   beforeEach(() => olvidarCacheTienda());
@@ -51,5 +51,15 @@ describe('cacheTienda', () => {
     expect(await conCache(cargar, 1)).toBe('nuevo');
     expect(await conCache(cargar, 2)).toBe('nuevo');
     expect(cargar).toHaveBeenCalledTimes(1);
+  });
+
+  it('STORE_CACHE_TTL_MS=0 desactiva la caché; valores no válidos usan TTL_MS', async () => {
+    expect(ttlDesdeEnv('0')).toBe(0);
+    expect(ttlDesdeEnv('5000')).toBe(5000);
+    for (const v of [undefined, '', 'x', '-1', '1.5', 3]) expect(ttlDesdeEnv(v)).toBe(TTL_MS);
+    const cargar = vi.fn(async () => 'v');
+    await conCache(cargar, 10, 0);
+    await conCache(cargar, 10, 0);
+    expect(cargar).toHaveBeenCalledTimes(2);
   });
 });
