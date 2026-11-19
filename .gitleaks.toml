@@ -1,0 +1,20 @@
+# gitleaks: reglas por defecto + valores de prueba conocidos.
+# Los falsos positivos se describen por FORMA (no por commit): así un mismo valor de
+# prueba copiado a otra rama o a otro commit no vuelve a poner Seguridad en rojo.
+# Un valor nuevo de prueba debe seguir una de estas formas; un secreto real nunca.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Claves locales de QA (wrangler dev en CI y en local), nunca de producción"
+regexTarget = "line"
+regexes = [
+  '''AUTH_SECRET:(qa-[a-z]+|visual-auth-secret|integration-auth-secret)(-[0-9a-f]+)?\b''',
+]
+
+[[allowlists]]
+description = "Tokens inventados en tests (prefijo otk_ de outbox.test.ts)"
+condition = "AND"
+paths = ['''\.test\.ts$''']
+regexTarget = "match"
+regexes = ['''otk_[A-Za-z0-9]{8,32}''']
