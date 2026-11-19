@@ -52,6 +52,9 @@ export function semana(cuando: Date): string {
   return new Date(inicio).toISOString().slice(0, 16);
 }
 
+/** Cada día desde las 05:23 UTC (cron de indexnow.yml): un fallo se reintenta hasta el día siguiente. */
+const diario = (cuando: Date) => new Date(cuando.getTime() - (5 * 60 + 23) * 60_000).toISOString().slice(0, 10);
+
 /** Cada 15 minutos (05, 20, 35, 50), como `7-59/15` en el workflow. */
 const cadaQuinceMinutos = (cuando: Date) => {
   const f = franja(cuando);
@@ -66,6 +69,7 @@ export const PROGRAMADOS: Programado[] = [
   { workflow: 'vigilantes-cadena.yml', periodo: semana },
   // Lanzado a mano o por el respaldo, también redespliega main en staging antes del recorrido.
   { workflow: 'desplegar-staging.yml', periodo: semana },
+  { workflow: 'indexnow.yml', periodo: diario },
 ];
 
 /** Marcas por workflow: `periodo@franja` (reservado) o `periodo@~` (hecho). */
