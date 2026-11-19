@@ -28,25 +28,38 @@ function frases(texto) {
     .filter(Boolean);
 }
 
-// Plazos escritos con cifra o con letra («siete días»).
+// Plazos escritos con cifra o con letra («siete días»). Los «días hábiles» no se tiran:
+// se marcan, porque garantía y ajustes son días naturales y «14 días hábiles» en una
+// frase de devolución también contradice la política.
 const NUMEROS = { un: 1, uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15, veinte: 20, treinta: 30 };
-const PLAZO = new RegExp(`(?<![\\wáéíóúñ])(\\d+|${Object.keys(NUMEROS).join('|')})\\s*días(?! hábiles)`, 'gi');
+const PLAZO = new RegExp(`(?<![\\wáéíóúñ])(\\d+|${Object.keys(NUMEROS).join('|')})\\s*días( hábiles)?`, 'gi');
+function plazosDetalle(frase) {
+  return [...frase.matchAll(PLAZO)].map((m) => ({
+    n: /^\d+$/.test(m[1]) ? Number(m[1]) : NUMEROS[m[1].toLowerCase()],
+    habiles: Boolean(m[2]),
+  }));
+}
+/** Plazos en días naturales (lo que se compara con la política). */
 function plazos(frase) {
-  return [...frase.matchAll(PLAZO)].map((m) => (/^\d+$/.test(m[1]) ? Number(m[1]) : NUMEROS[m[1].toLowerCase()]));
+  return plazosDetalle(frase).filter((x) => !x.habiles).map((x) => x.n);
 }
 
 const fuentes = [...archivos('src'), 'manual/catalogo/seed.sql'].map((p) => [p, readFileSync(p, 'utf8')]);
 
-function dias(regex) {
+function diasEn(textos, regex) {
   const hallazgos = [];
-  for (const [p, texto] of fuentes) {
+  for (const [p, texto] of textos) {
     for (const f of frases(texto)) {
       if (!regex.test(f)) continue;
-      for (const n of plazos(f)) hallazgos.push({ p, f: f.slice(0, 160), n });
+      for (const { n, habiles } of plazosDetalle(f)) hallazgos.push({ p, f: f.slice(0, 160), n, habiles });
     }
   }
   return hallazgos;
 }
+const dias = (regex) => diasEn(fuentes, regex);
+// Un plazo incoherente: otro número, o el mismo en días hábiles (la política es en naturales).
+const incoherentes = (h, esperado) => h.filter((x) => x.n !== esperado || x.habiles);
+const GARANTIA = /devol(vemos|ución)[^.]*dinero|garant[ií]a de devoluci|Devolución en|devolvemos el importe/i;
 
 describe('lectura de frases y plazos', () => {
   it('une la frase partida en dos líneas del código', () => {
@@ -59,18 +72,27 @@ describe('lectura de frases y plazos', () => {
     expect(plazos('durante los ocho días siguientes')).toEqual([8]);
     expect(plazos('en 3 días hábiles')).toEqual([]);
   });
+  it('una devolución en días hábiles cuenta como incoherente', () => {
+    const malo = diasEn([['x.md', 'Devolución en 14 días hábiles.']], GARANTIA);
+    expect(incoherentes(malo, GARANTIA_DIAS)).toHaveLength(1);
+    const malo7 = diasEn([['x.md', 'Devolución en 7 días hábiles.']], GARANTIA);
+    expect(incoherentes(malo7, GARANTIA_DIAS)).toHaveLength(1);
+    const bueno = diasEn([['x.md', 'Devolución en 7 días.']], GARANTIA);
+    expect(bueno).toHaveLength(1);
+    expect(incoherentes(bueno, GARANTIA_DIAS)).toEqual([]);
+  });
 });
 
 describe('condiciones coherentes', () => {
   it('la garantía de devolución usa siempre el mismo plazo', () => {
-    const h = dias(/devol(vemos|ución)[^.]*dinero|garant[ií]a de devoluci|Devolución en|devolvemos el importe/i);
+    const h = dias(GARANTIA);
     expect(h.length).toBeGreaterThan(3);
-    expect(h.filter((x) => x.n !== GARANTIA_DIAS)).toEqual([]);
+    expect(incoherentes(h, GARANTIA_DIAS)).toEqual([]);
   });
 
   it('la ronda de ajustes usa siempre el mismo plazo', () => {
     const h = dias(/ronda de ajustes|ajustes que puedes solicitar/i);
     expect(h.length).toBeGreaterThan(0);
-    expect(h.filter((x) => x.n !== AJUSTES_DIAS)).toEqual([]);
+    expect(incoherentes(h, AJUSTES_DIAS)).toEqual([]);
   });
 });
