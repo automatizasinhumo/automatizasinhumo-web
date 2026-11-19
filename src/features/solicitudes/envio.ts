@@ -220,6 +220,15 @@ const NOTA_QA_OK = /^Vista previa automática: (https:\/\/\S+) · QA ok$/;
 /** Nota que deja manual/fabrica/entregar.py cuando el ZIP de la web está subido. */
 const NOTA_ENTREGA = /^Entrega automática: (https:\/\/\S+) · lista$/;
 const MAX_INTENTOS_CRON = 3;
+/** Marca que añade la fábrica al mensaje en cada ronda de cambios (manual/fabrica/vistas-previas.py). */
+const RONDA_RE = /Cambios pedidos sobre la versión (\d+):/g;
+
+/** Versión de la revisión que toca mandar: la siguiente a la última sobre la que se pidieron cambios. */
+export function versionRevision(mensaje: string | null): number {
+  let v = 1;
+  for (const m of (mensaje ?? '').matchAll(RONDA_RE)) v = Math.max(v, Math.min(Number(m[1]) + 1, 20));
+  return v;
+}
 
 /** Un paso automático del cron: nota de la fábrica -> correo -> estado siguiente. */
 type PasoListo = {
@@ -232,6 +241,7 @@ type PasoListo = {
 };
 
 const VISTA_PREVIA: PasoListo = {
+  // en_preparacion también cubre la vista previa rehecha tras «pedir cambios» (versión siguiente).
   desde: ['nueva', 'en_preparacion'],
   like: 'Vista previa automática: https://% · QA ok',
   nota: NOTA_QA_OK,
@@ -294,24 +304,25 @@ async function enviarListos(
   const desde = paso.desde.map(() => '?').join(', ');
   const { results } = await db
     .prepare(
-      `SELECT public_id, nota FROM solicitudes
+      `SELECT public_id, nota, mensaje FROM solicitudes
        WHERE estado IN (${desde}) AND nota LIKE ?
          -- Las agotadas (error tras MAX_INTENTOS_CRON) esperan en Admin y no ocupan el LIMIT.
          AND NOT EXISTS (SELECT 1 FROM notificaciones n WHERE n.solicitud_public_id = solicitudes.public_id
-           AND n.tipo = ? AND n.version = 1 AND n.estado_envio = 'error' AND n.intentos >= ?)
+           AND n.tipo = ? AND n.estado_envio = 'error' AND n.intentos >= ?)
        ORDER BY id LIMIT ?`,
     )
     .bind(...paso.desde, paso.like, paso.tipo, MAX_INTENTOS_CRON, limite)
-    .all<{ public_id: string; nota: string }>();
-  for (const { public_id: id, nota } of results ?? []) {
+    .all<{ public_id: string; nota: string; mensaje: string | null }>();
+  for (const { public_id: id, nota, mensaje } of results ?? []) {
+    const version = paso.tipo === 'revision' ? versionRevision(mensaje) : 1;
     const enlace = paso.nota.exec(nota)?.[1];
-    const d = enlace ? await datosDe(db, id, enlace, '', firmar, 1) : null;
+    const d = enlace ? await datosDe(db, id, enlace, '', firmar, version) : null;
     const c = d ? prepararCorreo(paso.tipo, d) : null;
     if (!d || !c?.ok) continue;
     const r = await enviarNotificacion(db, mail, {
       id,
       tipo: paso.tipo,
-      version: 1,
+      version,
       email: d.email,
       asunto: c.asunto,
       texto: c.texto,
@@ -323,8 +334,8 @@ async function enviarListos(
     if (r.estado === 'ocupado') {
       // Ya enviado (a mano o por un tick anterior que murió antes de avanzar).
       const fila = await db
-        .prepare('SELECT estado_envio FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = 1')
-        .bind(id, paso.tipo)
+        .prepare('SELECT estado_envio FROM notificaciones WHERE solicitud_public_id = ? AND tipo = ? AND version = ?')
+        .bind(id, paso.tipo, version)
         .first<{ estado_envio: string }>();
       enviado = fila?.estado_envio === 'enviado';
     }
