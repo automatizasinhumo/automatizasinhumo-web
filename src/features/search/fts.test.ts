@@ -1,6 +1,7 @@
 import { Miniflare } from 'miniflare';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createFtsSearch } from './fts';
+import { textoBuscable } from './textoBuscable';
 
 const BODAS = [
   'web-boda-rsvp',
@@ -30,6 +31,9 @@ const PRODUCTS = (
     ['diplomas-eventos', 'Diplomas para eventos', 'Crea diplomas para los asistentes a cada evento.', 'documentos'],
     ['correo-contacto', 'Correo de contacto', 'Dirección para recibir consultas de clientes.', 'contacto'],
     ['newsletter-email', 'Newsletter por email', 'Envía boletines y novedades a tus clientes.', 'contacto'],
+    ['transcripcion-audios', 'Transcripción automática de audios', 'Pasa tus notas de voz a texto.\n## No incluye\n- Resúmenes\n## Ejemplo\nLa nota de voz dice «Pide cita para la renta».', 'automatizaciones'],
+    // Plantilla real de las fichas: lo que va tras «## No incluye» no se busca.
+    ['dossier-pdf', 'Dossier en PDF con tu marca', 'Un PDF para enviar a clientes.\n## No incluye\n- Tienda online\n## Ejemplo\nUn catálogo para cobrar señal.', 'documentos'],
   ] as const
 ).map(([slug, name, description, category]) => ({ slug, name, description, category }));
 
@@ -73,7 +77,7 @@ describe('buscador FTS en D1', () => {
             .bind(id, product.slug, product.name, product.description),
           db
             .prepare('INSERT INTO products_fts (rowid, name, description) VALUES (?, ?, ?)')
-            .bind(id, product.name, product.description),
+            .bind(id, product.name, textoBuscable(product.description)),
           db
             .prepare('INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)')
             .bind(id, category.id),
@@ -116,6 +120,20 @@ describe('buscador FTS en D1', () => {
     const { products, correctedTo } = await search.search('pelukeria');
     expect(correctedTo).toBe('peluqueria');
     expect(products[0]?.slug).toBe('reservas-salon');
+  });
+
+  it('una ficha que solo cubre la consulta en su ejemplo no sale: el ejemplo no se busca', async () => {
+    const { products } = await search.search('quiero que me pidan cita');
+    expect(products[0]?.slug).toBe('reservas-salon');
+    expect(products.map((product) => product.slug)).not.toContain('transcripcion-audios');
+  });
+
+  it('no busca en «No incluye» ni en el ejemplo de la plantilla', async () => {
+    for (const consulta of ['tienda online', 'cobrar señal']) {
+      const { products } = await search.search(consulta);
+      expect(products.map((product) => product.slug), consulta).not.toContain('dossier-pdf');
+    }
+    expect((await search.search('dossier')).products.map((product) => product.slug)).toContain('dossier-pdf');
   });
 
   it('pone primero la ficha que lleva la palabra buscada en el nombre', async () => {

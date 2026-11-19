@@ -3,6 +3,7 @@ import type { Product } from './db';
 import { normalizeSearchQuery } from '../search/query';
 import { stemSpanishTerm, tokenizeSearchTerms } from '../search/stemmer';
 import { vocabularioConsultas } from '../search/sinonimos';
+import { textoBuscable } from '../search/textoBuscable';
 
 // Palabras que no distinguen un producto de otro: «web para mi peluquería» busca
 // «web peluquería». Si la consulta solo tiene estas, se usan tal cual.
@@ -10,6 +11,11 @@ const VACIAS = new Set([
   'a', 'al', 'busco', 'como', 'con', 'de', 'del', 'el', 'en', 'es', 'la', 'las', 'lo', 'los',
   'me', 'mi', 'mis', 'necesito', 'o', 'para', 'por', 'que', 'quiero', 'se', 'sin', 'su', 'sus',
   'tu', 'tus', 'un', 'una', 'unas', 'uno', 'unos', 'y', 'yo',
+  // Verbos y muletillas de una frase hablada («mi web va muy lenta», «tengo un bar»):
+  // sin quitarlas, «va» casaba por prefijo con «valoraciones» y el corrector la
+  // convertía en «iva».
+  'algo', 'alguien', 'esta', 'estan', 'hay', 'hacer', 'ir', 'mas', 'mucho', 'muy', 'nos', 'puedo',
+  'quisiera', 'ser', 'tengo', 'tenemos', 'va', 'van', 'voy',
 ]);
 
 /** Quita tildes y diéresis, como hace el tokenizador unicode61 de FTS5. */
@@ -104,12 +110,28 @@ interface Scored {
   inCategory: boolean;
 }
 
-/** Fracción de términos de la consulta que aparecen (por prefijo) en el texto. */
-function coverage(terms: string[][], text: string): number {
+function hits(prefixes: string[], words: string[]): boolean {
+  return words.some((word) => prefixes.some((p) => word.startsWith(p)));
+}
+
+/**
+ * Fracción de términos de la consulta que aparecen (por prefijo) en el texto, con cada
+ * término ponderado por su rareza en el catálogo (`weights`, IDF). Sin pesos cuentan
+ * igual. Así, en «web para mi bar», cubrir «bar» (3 fichas) vale más que cubrir «web»
+ * (25 fichas): sin ponderar, cualquier «Web …» empataba con la carta del bar y bm25 la
+ * ponía delante por tener el nombre más corto.
+ */
+function coverage(terms: string[][], text: string, weights?: number[]): number {
   if (terms.length === 0) return 0;
   const words = tokenizeSearchTerms(fold(text));
-  const hits = terms.filter((prefixes) => words.some((word) => prefixes.some((p) => word.startsWith(p))));
-  return hits.length / terms.length;
+  let total = 0;
+  let hit = 0;
+  terms.forEach((prefixes, i) => {
+    const w = weights?.[i] ?? 1;
+    total += w;
+    if (hits(prefixes, words)) hit += w;
+  });
+  return total > 0 ? hit / total : 0;
 }
 
 /**
@@ -194,31 +216,49 @@ export async function rankSearchProducts(
   );
   const coverageByVariant = variants.map(() => 0);
   const seen = new Set<number>();
-  const scored: Scored[] = [];
-  const add = (product: Product, score: number) => {
+  const found: Array<{ product: Product; score: number; words: string[]; nameWords: string[] }> = [];
+  const collect = (product: Product, score: number) => {
     if (seen.has(product.id)) return;
     seen.add(product.id);
+    found.push({
+      product,
+      score,
+      words: tokenizeSearchTerms(fold(`${product.name} ${textoBuscable(product.description)}`)),
+      nameWords: tokenizeSearchTerms(fold(product.name)),
+    });
+  };
+  for (const { search_score, ...product } of [...strictRows, ...(textRows.results ?? [])]) collect(product as Product, search_score);
+  for (const product of categoryOnly) collect(product, Number.POSITIVE_INFINITY);
+
+  // Rareza de cada término: toda ficha que contiene un término está entre las candidatas
+  // (el MATCH pide cualquiera), así que su frecuencia se cuenta aquí sin otra consulta.
+  const total = await db.prepare('SELECT count(*) AS n FROM products WHERE active = 1').first<{ n: number }>();
+  const n = Math.max(total?.n ?? found.length, found.length, 1);
+  const weightsFor = (terms: string[][]) =>
+    terms.map((prefixes) => Math.log(1 + n / Math.max(1, found.filter((f) => hits(prefixes, f.words)).length)));
+  const variantWeights = variantTerms.map(weightsFor);
+  const cov = (i: number, words: string[]) => coverage(variantTerms[i], words.join(' '), variantWeights[i]);
+
+  const scored: Scored[] = found.map(({ product, score, words, nameWords }) => {
     let best = 0;
     let bestName = 0;
-    variantTerms.forEach((terms, i) => {
-      const all = coverage(terms, `${product.name} ${product.description ?? ''}`);
-      const name = coverage(terms, product.name);
+    variantTerms.forEach((_, i) => {
+      const all = cov(i, words);
+      const name = cov(i, nameWords);
       coverageByVariant[i] = Math.max(coverageByVariant[i], all);
       if (all > best || (all === best && name > bestName)) {
         best = all;
         bestName = name;
       }
     });
-    const literal = variantTerms.length > 0 ? coverage(variantTerms[0], `${product.name} ${product.description ?? ''}`) : 0;
-    const head = tokenizeSearchTerms(fold(product.name))[0] ?? '';
+    const literal = variantTerms.length > 0 ? cov(0, words) : 0;
+    const head = nameWords[0] ?? '';
     const literalInName =
       variantTerms.length > 0 &&
-      coverage(variantTerms[0], product.name) === 1 &&
+      cov(0, nameWords) === 1 &&
       variantTerms[0].some((prefixes) => prefixes.some((p) => head.startsWith(p)));
-    scored.push({ product, score, coverage: best, literal, literalInName, nameCoverage: bestName, inCategory: categoryIds.has(product.id) });
-  };
-  for (const { search_score, ...product } of [...strictRows, ...(textRows.results ?? [])]) add(product as Product, search_score);
-  for (const product of categoryOnly) add(product, Number.POSITIVE_INFINITY);
+    return { product, score, coverage: best, literal, literalInName, nameCoverage: bestName, inCategory: categoryIds.has(product.id) };
+  });
 
   // Si la categoría explica toda la consulta («bodas», «restaurante») es la mejor
   // respuesta y va delante; si solo explica una parte («carta qr»), manda el texto.
@@ -226,10 +266,28 @@ export async function rankSearchProducts(
   // por las palabras del cliente («facturas» → «Facturas recibidas a hoja de cálculo»).
   // La que solo las menciona («Diplomas para eventos», «un dossier útil para bodas») o
   // casa por sinónimo va después de la categoría.
+  // Sin `categoryFirst` pasa lo mismo con la ficha de fuera que cubre la consulta solo en
+  // la descripción: «quiero que me pidan cita» no debe dar primero la transcripción de
+  // audios porque su ejemplo diga «Pide cita», sino las fichas de Reservas y citas. Ni
+  // basta con que el nombre tenga una de las palabras: «agenda online» no debe dar la
+  // web de taller («… reserva de citas», «online» en la descripción) antes que la
+  // página de citas. Y la categoría solo adelanta a quien cubre la mayor parte de la
+  // consulta (por peso): en «mi web va lenta», «web» trae toda la categoría Webs, y una
+  // «Web rápida con blog» que solo cubre «web» no debe ir antes que la auditoría, que
+  // cubre «web» y «velocidad».
   const tier = categoryFirst
     ? (s: Scored) =>
         s.inCategory && s.coverage === 1 ? 0 : s.literalInName ? 1 : s.inCategory ? 2 : s.coverage === 1 ? 3 : 4
-    : (s: Scored) => (s.coverage === 1 ? 0 : s.inCategory ? 1 : 2);
+    : (s: Scored) =>
+        s.coverage === 1 && (s.inCategory || s.nameCoverage === 1)
+          ? 0
+          : s.inCategory && s.coverage >= 0.5
+            ? 1
+            : s.coverage === 1
+              ? 2
+              : s.inCategory
+                ? 3
+                : 4;
   // Dentro de la categoría que explica la consulta manda el orden del catálogo (la
   // ficha principal primero); fuera, bm25.
   const curated = (a: Scored, b: Scored) =>
@@ -274,7 +332,7 @@ async function knownWords(db: D1Database): Promise<Map<string, string>> {
     .prepare('SELECT name, description FROM products WHERE active = 1')
     .all<{ name: string; description: string | null }>();
   const words = new Map<string, string>();
-  const texts = (results ?? []).map((r) => `${r.name} ${r.description ?? ''}`);
+  const texts = (results ?? []).map((r) => `${r.name} ${textoBuscable(r.description)}`);
   for (const word of [...vocabularioConsultas(), ...texts.flatMap((text) => tokenizeSearchTerms(text))]) {
     const key = fold(word);
     if (key.length >= 3 && !words.has(key)) words.set(key, word);
