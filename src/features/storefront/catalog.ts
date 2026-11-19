@@ -1,5 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import { listProducts, countProducts } from '../products/db';
+import { listProducts, countProducts, maxVariantPrices } from '../products/db';
 import { listCategories, childrenOf } from '../categories/db';
 import { orderByClause, parseStoreSortQuery, STORE_SORTS } from '../products/sort';
 import { MAX_PUBLIC_PAGE, paginate, queryHref } from '../../pagination';
@@ -135,6 +135,8 @@ export async function loadCatalogPage(
     MAX_PUBLIC_PAGE,
   );
   const products = await listProducts(db, PAGE_SIZE, offset, order);
+  // Una consulta por lotes: la tarjeta enseña los dos precios como en categorías y búsqueda.
+  const maxPrices = await maxVariantPrices(db, products.map((product) => product.id));
 
   addCacheTags(
     options.responseHeaders,
@@ -155,6 +157,7 @@ export async function loadCatalogPage(
         delivery: options.delivery,
         currency: options.currency,
         sizes: CARD_SIZES,
+        maxPriceCents: maxPrices.get(product.id),
         // Only the first card is the page's likely LCP image.
         priority: index === 0,
       }),

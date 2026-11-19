@@ -3,6 +3,9 @@ import { productImageSources, type ImageDelivery } from '../products/image';
 import { requirePublicId } from '../catalog/serialize';
 import { stockState } from '../products/stock';
 import { formatMoney } from '../../money';
+import { markdownExcerpt } from '../pages/markdown.ts';
+// Generado por manual/demos/gen-galeria.mjs: slug del servicio → demos.
+import demosPorProducto from '../../data/demos-producto.json';
 import type { ProductCardModel, StorefrontImage } from './models';
 
 /**
@@ -64,9 +67,27 @@ export interface ProductCardOptions extends StorefrontImageOptions {
    */
   currency: string;
   /** Highest active variant price (minor units) from maxVariantPrices().
-   *  Shown only when above the base price. */
-  maxPriceCents?: number;
+   *  Shown only when above the base price. Obligatoria (aunque sea `undefined`):
+   *  si un llamador la olvida, esa lista enseña un solo precio y esconde «Te lo
+   *  montamos», y las tarjetas dejan de ser iguales en toda la web. */
+  maxPriceCents: number | undefined;
 }
+
+/** Largo del resumen de la tarjeta: tres líneas a 320 px. */
+export const RESUMEN_MAX = 140;
+
+/** Qué resuelve: el primer párrafo de la descripción (antes de «## Qué recibes»). */
+export function resumenTarjeta(description: string | null): string | undefined {
+  const primero = (description ?? '').split(/\r?\n\s*\r?\n/)[0]?.trim() ?? '';
+  if (!primero) return undefined;
+  return markdownExcerpt(primero, RESUMEN_MAX) || undefined;
+}
+
+const SLUGS_CON_DEMO = new Set(
+  Object.entries(demosPorProducto as Record<string, unknown[]>)
+    .filter(([, demos]) => demos.length > 0)
+    .map(([slug]) => slug),
+);
 
 /**
  * A product row as a card. Throws on a row without a public ID, matching the
@@ -88,6 +109,8 @@ export function buildProductCard(
     ...(options.maxPriceCents !== undefined && options.maxPriceCents > product.price_cents
       ? { formattedMaxPrice: formatMoney(options.maxPriceCents, options.currency) }
       : {}),
+    ...(resumenTarjeta(product.description) ? { resumen: resumenTarjeta(product.description) } : {}),
+    conDemo: SLUGS_CON_DEMO.has(product.slug),
     // Availability only — never the count. `stockState` is the authoritative
     // classification; re-deriving `stock > 0` here would fork that rule.
     inStock: stockState(product.stock) !== 'out',

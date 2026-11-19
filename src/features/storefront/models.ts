@@ -51,6 +51,11 @@ export interface ProductCardModel {
   /** Top variant price ("Te lo montamos") when above the base price; absent
    *  for single-price products. */
   formattedMaxPrice?: string;
+  /** Qué resuelve: el primer párrafo de la descripción, en texto plano y corto.
+   *  Ausente solo si el producto no tiene descripción (la prueba del catálogo lo impide). */
+  resumen?: string;
+  /** El servicio tiene al menos una demo publicada (src/data/demos-producto.json). */
+  conDemo: boolean;
   /** Availability as a boolean, deliberately not a quantity: exact stock counts
    *  stay private, and bucket-level changes avoid cache invalidation. */
   inStock: boolean;

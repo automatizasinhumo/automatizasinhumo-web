@@ -35,7 +35,7 @@ const model = (overrides: Partial<CatalogPageModel> = {}): CatalogPageModel => (
   heading: 'All products',
   categories: [{ text: 'Apparel', href: '/categories/apparel' }],
   // Mirrors the loader: only the first card is the page's likely LCP image.
-  products: [product(1), product(2)].map((p, i) => buildProductCard(p, { currency: 'usd', priority: i === 0 })),
+  products: [product(1), product(2)].map((p, i) => buildProductCard(p, { currency: 'usd', maxPriceCents: undefined, priority: i === 0 })),
   sort: buildSortModel('/products', 'newest', 'desc'),
   pagination: buildPaginationModel('/products', 1, 3, 'newest', 'desc'),
   ...overrides,
