@@ -157,6 +157,7 @@ web publicada; si quieres usar tu dominio o llevártela, escríbenos y te lo pre
   - Usar Workers KV, con el ejemplo oficial [Store and retrieve static assets](https://developers.cloudflare.com/kv/examples/workers-kv-to-serve-assets/), y un Worker `vistas` que sirva `/<id>/ruta` desde `sites/<id>/ruta`.
   - `fabricar.py` cambia `wrangler deploy` por `wrangler kv bulk put` con `expiration_ttl` en las pruebas gratuitas, de forma que caducan solas.
   - Las plantillas ya funcionan bajo una subruta, porque así las sirve el Worker de demos.
+  - El Worker `vistas` responde con `X-Robots-Tag: noindex`, como el `_headers` de hoy: una vista previa no se indexa.
   - Los Workers `web-*` actuales se quedan como están.
   - Límites Free: 1.000 escrituras al día (unas 33 webs de 30 archivos), 100.000 lecturas al día y 1 GB. Las peticiones al Worker comparten las 100.000 diarias de la cuenta con staging.
   - Se hace cuando queden menos de 30 Workers libres o antes de abrir tráfico real.
