@@ -115,17 +115,18 @@ jobs:
   navegadores:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # Imagen oficial de Playwright con los 3 navegadores y sus dependencias ya dentro:
+    # `install --with-deps` por apt se colgaba 20 min en el espejo de Ubuntu (19/11).
+    # La etiqueta sigue a qa/navegador/package-lock.json (1.56.1); digest fijado.
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
       - name: Instalar Playwright (fuera del package.json de la tienda)
         run: |
           # Paquete aparte con su propio lockfile (qa/navegador): versión e integridad fijadas.
           npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
           ln -s qa/navegador/node_modules node_modules
-          qa/navegador/node_modules/.bin/playwright install --with-deps chromium firefox webkit
       - run: node qa/navegadores.mjs "$BASE" qa/urls-navegadores.txt
       - run: node qa/buscador-movil.mjs "$BASE"
       - uses: actions/upload-artifact@v6
