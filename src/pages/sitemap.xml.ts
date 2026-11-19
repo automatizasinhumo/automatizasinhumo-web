@@ -93,6 +93,7 @@ ${locs.map(url).join('\n')}
 export function marketingStaticPaths(blogEntries: { id: string }[]): string[] {
   return [
     '/blog',
+    '/elige',
     ...blogEntries.map((entry) => `/blog/${entry.id}`),
     ...SECTORS.map((sector) => `/webs/${sector.slug}`),
   ];

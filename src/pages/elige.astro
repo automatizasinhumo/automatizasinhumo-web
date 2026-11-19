@@ -1,0 +1,134 @@
+---
+import { env } from 'cloudflare:workers';
+import Layout from '../layouts/Layout.astro';
+import { addCacheTags, productCacheTags } from '../features/cache/tags';
+import { publicOrigin } from '../features/http/origin';
+import { buildPageMetadata } from '../features/seo/metadata';
+import { SECTORS, servicesBySlugs } from '../features/blog/sectors';
+import { getConfig } from '../config';
+import { breadcrumbJsonLd } from '../features/storefront/breadcrumbs';
+import { enlaceConsulta } from '../features/search/sinResultados';
+import { empezarHref, MODALIDAD_POR_DEFECTO, MODALIDADES, OBJETIVOS, recomendar } from '../features/storefront/selector';
+
+// «Dime qué necesitas»: formulario GET sin JS; el resultado se calcula aquí con los
+// precios del catálogo. Las respuestas viven en la URL: se pueden compartir.
+const q = Astro.url.searchParams;
+const rec = recomendar(q);
+const servicios = rec
+  ? (await servicesBySlugs(env.DB, rec.servicios, getConfig().currency, rec.sector?.demoHints)).slice(0, 2)
+  : [];
+addCacheTags(Astro.response.headers, productCacheTags(servicios.map((s) => s.publicId)));
+
+const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
+const metadata = buildPageMetadata({
+  title: 'Dime qué necesitas: elige tu servicio en tres preguntas',
+  description: 'Responde tres preguntas sobre tu negocio o tu evento y te decimos qué servicio encaja, con su precio cerrado y una demo para probar.',
+  canonical: new URL('/elige', origin).href,
+});
+const breadcrumb = breadcrumbJsonLd(
+  [{ text: 'Inicio', href: '/' }, { text: 'Dime qué necesitas', href: null }],
+  origin,
+  metadata.canonical,
+);
+const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g, '\\u003c');
+const objetivoActual = q.get('objetivo');
+const oficioActual = q.get('oficio') ?? '';
+const modalidadActual = rec?.modalidad?.id ?? q.get('modalidad') ?? MODALIDAD_POR_DEFECTO;
+const mensaje = rec?.objetivo
+  ? `${rec.objetivo.label.toLowerCase()}${rec.sector ? `, ${rec.sector.label.toLowerCase()}` : ''}`
+  : '';
+const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surface p-4 has-[:checked]:border-brand has-[:checked]:bg-brand/5';
+---
+
+<Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
+  <script is:inline type="application/ld+json" set:html={jsonLd}></script>
+  <section class="fondo-tecnico rounded-3xl border border-line px-6 py-10 sm:px-10 sm:py-12">
+    <span class="etiqueta">Tres preguntas, un minuto</span>
+    <h1 class="mt-4 max-w-3xl font-serif text-4xl font-bold leading-tight text-ink sm:text-5xl">Dime qué necesitas</h1>
+    <p class="mt-5 max-w-2xl text-lg leading-7 text-muted">
+      Contesta lo que sepas y te decimos qué servicio encaja contigo, con su precio cerrado y una demo para probar. Sin registro y sin tarjeta.
+    </p>
+  </section>
+
+  {rec && (
+    <section id="resultado" class="mt-8 scroll-mt-24 rounded-2xl border border-brand bg-brand/5 p-6 sm:p-8" aria-labelledby="titulo-resultado">
+      <h2 id="titulo-resultado" class="font-serif text-2xl font-bold text-ink sm:text-3xl">
+        {servicios.length > 0 ? 'Te recomendamos' : 'Te ayudamos a elegir'}
+      </h2>
+      {servicios.length > 0 ? (
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          {servicios.map((s, i) => (
+            <article class="tarjeta p-5">
+              <p class="text-xs font-semibold uppercase tracking-wide text-brand">{i === 0 ? 'La mejor opción' : 'También encaja'}</p>
+              <h3 class="mt-1 font-serif text-xl font-semibold text-ink">{s.name}</h3>
+              <p class="mt-2 text-sm text-muted">Desde {s.formattedPrice}. El precio de cada modalidad está en la ficha.</p>
+              <div class="mt-4 flex flex-wrap gap-3">
+                <a href={empezarHref(s.slug, rec.modalidad)} class="inline-flex rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Empieza gratis →</a>
+                <a href={`/products/${s.slug}`} class="inline-flex items-center text-sm font-semibold text-brand hover:underline">Ver servicio y precios</a>
+              </div>
+              {s.demos[0] && (
+                <a href={s.demos[0].url} target="_blank" rel="noopener noreferrer" class="mt-4 block border-t border-line pt-3 text-sm text-brand hover:underline">
+                  {s.demos[0].tipo === 'interactiva' ? 'Probar' : 'Ver'} demo: {s.demos[0].titulo} ↗
+                </a>
+              )}
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="mt-3 text-muted">Ahora mismo no hay un servicio publicado para esa combinación. Cuéntanoslo y te proponemos uno.</p>
+      )}
+      <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        {rec.sector && <a href={`/webs/${rec.sector.slug}`} class="font-semibold text-brand hover:underline">Ideas para {rec.sector.label.toLowerCase()} →</a>}
+        <a href={enlaceConsulta(mensaje)} class="font-semibold text-brand hover:underline">¿No es esto? Cuéntanos qué necesitas →</a>
+      </div>
+    </section>
+  )}
+
+  <form method="get" action="/elige#resultado" class="my-10 space-y-6">
+    <fieldset class="rounded-2xl border border-line p-5">
+      <legend class="px-1 text-sm font-semibold text-ink">1. ¿Qué quieres conseguir?</legend>
+      <div class="mt-2 grid gap-3 sm:grid-cols-2">
+        {OBJETIVOS.map((o) => (
+          <label class={tarjeta}>
+            <input type="radio" name="objetivo" value={o.id} checked={o.id === objetivoActual} class="mt-1 accent-[var(--color-brand)]" />
+            <span>
+              <span class="block font-semibold text-ink">{o.label}</span>
+              <span class="block text-sm text-muted">{o.detalle}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="rounded-2xl border border-line p-5">
+      <legend class="px-1 text-sm font-semibold text-ink">2. ¿A qué te dedicas?</legend>
+      <div class="mt-2 flex flex-wrap gap-2">
+        {[...SECTORS.map((s) => [s.slug, s.label]), ['', 'Otro / no es un negocio']].map(([valor, texto]) => (
+          <label class="cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand has-[:checked]:border-brand has-[:checked]:bg-brand/5 has-[:checked]:font-semibold">
+            <input type="radio" name="oficio" value={valor} checked={valor === oficioActual} class="sr-only" />
+            {texto}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="rounded-2xl border border-line p-5">
+      <legend class="px-1 text-sm font-semibold text-ink">3. ¿Cómo lo prefieres?</legend>
+      <div class="mt-2 grid gap-3 sm:grid-cols-2">
+        {MODALIDADES.map((m) => (
+          <label class={tarjeta}>
+            <input type="radio" name="modalidad" value={m.id} checked={m.id === modalidadActual} class="mt-1 accent-[var(--color-brand)]" />
+            <span>
+              <span class="block font-semibold text-ink">{m.label}</span>
+              <span class="block text-sm text-muted">{m.detalle}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <button type="submit" class="w-full rounded-full bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover sm:w-auto">
+      Ver mi recomendación →
+    </button>
+  </form>
+</Layout>
