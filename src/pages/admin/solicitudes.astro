@@ -19,6 +19,7 @@ import {
 import { getEmailProvider } from '../../features/email';
 import { datosDe as datosDeSolicitud, enviarNotificacion } from '../../features/solicitudes/envio';
 import { getStoreSettings } from '../../features/settings/db';
+import { firmadorDecision } from '../../features/solicitudes/decision';
 
 export const prerender = false;
 
@@ -29,7 +30,10 @@ export const prerender = false;
 // `notificaciones` (solicitud, tipo, versión) es única, así que un doble clic o
 // repetir el estado no duplica el envío; reenviar exige marcarlo a propósito.
 const ID_RE = /^S-[A-Z0-9]{6,12}$/;
-const datosDe = (id: string, enlace: string, pendientes: string) => datosDeSolicitud(env.DB, id, enlace, pendientes);
+const firmar = firmadorDecision(Astro.url.origin, env.AUTH_SECRET);
+// Un correo «revision» firma su propia versión; los demás, la última revisión enviada.
+const datosDe = (id: string, enlace: string, pendientes: string, version?: number) =>
+  datosDeSolicitud(env.DB, id, enlace, pendientes, firmar, version);
 
 if (Astro.request.method === 'POST') {
   const f = await Astro.request.formData();
@@ -43,7 +47,7 @@ if (Astro.request.method === 'POST') {
     const pendientes = String(f.get('pendientes') ?? '').trim().slice(0, 2000);
     const reenviar = f.get('reenviar') === 'si';
     let msg = 'Correo no enviado: datos no válidos.';
-    const d = ID_RE.test(id) ? await datosDe(id, enlace, pendientes) : null;
+    const d = ID_RE.test(id) ? await datosDe(id, enlace, pendientes, tipo === 'revision' ? version : undefined) : null;
     const c = d ? prepararCorreo(tipo, d) : null;
     if (c && !c.ok) msg = c.error;
     if (d && c?.ok) {
@@ -102,7 +106,7 @@ const correoEnlace = (sp.get('enlace') ?? '').slice(0, 500);
 const correoPendientes = (sp.get('pendientes') ?? '').slice(0, 2000);
 let vista: ReturnType<typeof prepararCorreo> | null = null;
 if (correoId && !sinTabla) {
-  const d = await datosDe(correoId, correoEnlace, correoPendientes);
+  const d = await datosDe(correoId, correoEnlace, correoPendientes, correoTipo === 'revision' ? correoVersion : undefined);
   vista = d ? prepararCorreo(correoTipo, d) : null;
 }
 

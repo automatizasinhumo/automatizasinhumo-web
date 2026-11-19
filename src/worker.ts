@@ -9,6 +9,7 @@ import { enviarSeguimientos, enviarVistasPreviasListas } from './features/solici
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
 import { getConfig } from './config';
+import { firmadorDecision } from './features/solicitudes/decision';
 
 /**
  * Worker entrypoint.
@@ -57,8 +58,11 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
 
   // Vistas previas que la fábrica dejó con «QA ok»: correo de revisión al
   // cliente y estado «vista previa enviada», sin esperar a que David entre.
+  // Enlace «Aprobar / Pedir cambios» en los correos: necesita el origen público (lo
+  // guarda cada solicitud recibida) y AUTH_SECRET; sin ellos, el correo pide responder.
+  const firmar = await getSetting(db, 'store_url').then((o) => firmadorDecision(o, env.AUTH_SECRET)).catch(() => null);
   try {
-    await enviarVistasPreviasListas(db, await getEmailProvider(await getStoreSettings(db)));
+    await enviarVistasPreviasListas(db, await getEmailProvider(await getStoreSettings(db)), 10, firmar);
   } catch (err) {
     console.error('Scheduled preview email sweep failed:', err);
   }
@@ -67,7 +71,7 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
   // semana de entregar (solo con `resena_url`). Ver enviarSeguimientos.
   try {
     const ajustes = await getStoreSettings(db);
-    await enviarSeguimientos(db, await getEmailProvider(ajustes), new Date(), await getSetting(db, 'resena_url'));
+    await enviarSeguimientos(db, await getEmailProvider(ajustes), new Date(), await getSetting(db, 'resena_url'), 10, firmar);
   } catch (err) {
     console.error('Scheduled follow-up email sweep failed:', err);
   }

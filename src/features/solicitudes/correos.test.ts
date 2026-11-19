@@ -54,3 +54,26 @@ describe('correos al cliente', () => {
     expect(h).toContain('<a href="https://a.com/x">');
   });
 });
+
+describe('enlace «Aprobar / Pedir cambios»', () => {
+  const base = { nombre: 'Ana', servicio: 'web', esPedido: true, enlace: 'https://vista.example/s-1/' };
+  const firmado = 'https://tienda.example/empezar/revision?t=abc.1.ff';
+  it('sustituye «responde Aprobado» y deja primero el enlace de la versión', () => {
+    for (const tipo of ['revision', 'recordatorio', 'confirmar_aprobacion', 'espera'] as const) {
+      const c = prepararCorreo(tipo, { ...base, enlaceDecision: firmado });
+      if (!c.ok) throw new Error(c.error);
+      expect(c.texto).toContain(firmado);
+      expect(c.texto).not.toContain('responde «Aprobado»');
+      if (tipo === 'revision' || tipo === 'recordatorio') {
+        expect(c.texto).toContain(base.enlace);
+        expect(c.texto.indexOf(base.enlace)).toBeLessThan(c.texto.indexOf(firmado));
+      }
+      // En el HTML, el punto que sigue al enlace no entra en el href (rompería la firma).
+      expect(correoHtml(c.texto)).toContain(`href="${firmado}"`);
+    }
+  });
+  it('sin enlace (o no https) sigue pidiendo responder', () => {
+    const c = prepararCorreo('espera', { ...base, enlaceDecision: 'http://x' });
+    expect(c.ok && c.texto).toContain('responde «Aprobado»');
+  });
+});

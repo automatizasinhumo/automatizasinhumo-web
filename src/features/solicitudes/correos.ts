@@ -52,6 +52,8 @@ export interface DatosCorreo {
   pedido?: string | null;
   /** Enlace a la versión para revisar o a la entrega. */
   enlace?: string | null;
+  /** Enlace firmado a /empezar/revision para aprobar o pedir cambios (sin él: «responde a este correo»). */
+  enlaceDecision?: string | null;
   /** Lo que falta, una línea por dato (solo «Falta información»). */
   datosPendientes?: string | null;
 }
@@ -65,6 +67,9 @@ export function prepararCorreo(tipo: TipoCorreo, d: DatosCorreo): Correo {
   const s = d.servicio;
   const enlace = (d.enlace ?? '').trim();
   const pendientes = (d.datosPendientes ?? '').trim();
+  const decision = /^https:\/\/\S+$/.test((d.enlaceDecision ?? '').trim()) ? (d.enlaceDecision as string).trim() : '';
+  // Con enlace, el cliente decide en la web (sin que nadie tenga que leer su respuesta).
+  const aprobar = decision ? `pulsa «Aprobar» aquí: ${decision}` : 'responde «Aprobado»';
   const necesitaEnlace = tipo === 'revision' || tipo === 'entregado' || tipo === 'resena';
   if (necesitaEnlace && !/^https?:\/\/\S+$/.test(enlace)) return { ok: false, error: 'Falta el enlace (https://…) a la versión o a la entrega.' };
   if (tipo === 'falta_informacion' && !pendientes) return { ok: false, error: 'Escribe qué datos faltan antes de enviar.' };
@@ -74,15 +79,15 @@ export function prepararCorreo(tipo: TipoCorreo, d: DatosCorreo): Correo {
     case 'revision':
       return c(
         `Tu ${s} está listo para revisar`,
-        `Hola, ${nombre}:\n\nYa puedes revisar tu ${s}: ${enlace}\n\nÉchale un vistazo y responde a este correo para decirme si te encaja o qué cambiarías. Tienes incluida una ronda de ajustes, que puedes pedir durante los próximos siete días.\n\n` +
+        `Hola, ${nombre}:\n\nYa puedes revisar tu ${s}: ${enlace}\n\nÉchale un vistazo y ${decision ? `dime si te encaja o qué cambiarías desde aquí: ${decision}` : 'responde a este correo para decirme si te encaja o qué cambiarías'}. Tienes incluida una ronda de ajustes, que puedes pedir durante los próximos siete días.\n\n` +
           (d.esPedido
-            ? 'Si te encaja, responde «Aprobado» y prepararé la entrega definitiva. No tienes que volver a pagar.'
+            ? `Si te encaja, ${decision ? 'pulsa «Aprobar»' : 'responde «Aprobado»'} y prepararé la entrega definitiva. No tienes que volver a pagar.`
             : 'Si te gusta, te enviaré el enlace para contratarlo. Si no, no pagas nada.'),
       );
     case 'recordatorio':
       return c(
         `¿Has podido revisar tu ${s}?`,
-        `Hola, ${nombre}:\n\nTe recuerdo que tu ${s} está listo para revisar${enlace ? `: ${enlace}` : '.'}\n\nSi te encaja, responde «Aprobado». Si quieres cambiar algo, dímelo respondiendo a este correo.`,
+        `Hola, ${nombre}:\n\nTe recuerdo que tu ${s} está listo para revisar${enlace ? `: ${enlace}` : '.'}\n\nSi te encaja, ${aprobar}. Si quieres cambiar algo, ${decision ? 'escríbelo en esa misma página' : 'dímelo respondiendo a este correo'}.`,
       );
     case 'cambios_recibidos':
       return c(
@@ -92,12 +97,12 @@ export function prepararCorreo(tipo: TipoCorreo, d: DatosCorreo): Correo {
     case 'confirmar_aprobacion':
       return c(
         `¿Damos tu ${s} por aprobado?`,
-        `¡Qué bien, ${nombre}!\n\n¿Me confirmas que damos esta versión por aprobada y preparo la entrega definitiva? Basta con responder «Aprobado».`,
+        `¡Qué bien, ${nombre}!\n\n¿Me confirmas que damos esta versión por aprobada y preparo la entrega definitiva? ${decision ? `Basta con pulsar «Aprobar» aquí: ${decision}` : 'Basta con responder «Aprobado».'}`,
       );
     case 'espera':
       return c(
         `Tu ${s} queda en espera`,
-        `Hola, ${nombre}:\n\nHace siete días te envié tu ${s} para revisarlo. Si te encaja, responde «Aprobado». Si necesitas algo, escríbeme.\n\nDe momento, el trabajo queda en espera y no realizaré más cambios ni lo daré por aprobado sin tu confirmación.`,
+        `Hola, ${nombre}:\n\nHace siete días te envié tu ${s} para revisarlo. Si te encaja, ${aprobar}. Si necesitas algo, escríbeme.\n\nDe momento, el trabajo queda en espera y no realizaré más cambios ni lo daré por aprobado sin tu confirmación.`,
       );
     case 'falta_informacion':
       return c(
@@ -122,6 +127,6 @@ export function correoHtml(texto: string): string {
   const esc = (t: string) => t.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!);
   return texto
     .split(/\n{2,}/)
-    .map((p) => `<p>${esc(p).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}">${u}</a>`).replace(/\n/g, '<br>')}</p>`)
+    .map((p) => `<p>${esc(p).replace(/https?:\/\/[^\s<]*[^\s<.,;:!?)»]/g, (u) => `<a href="${u}">${u}</a>`).replace(/\n/g, '<br>')}</p>`)
     .join('');
 }
