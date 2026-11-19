@@ -1,0 +1,58 @@
+{
+  "objetivos": [
+    {
+      "id": "llamadas",
+      "label": "Que me encuentren y me llamen",
+      "detalle": "Una web con tus servicios, zona, horario y botón de llamar.",
+      "servicios": ["web-una-pagina", "web-corporativa-5-secciones", "web-taller"]
+    },
+    {
+      "id": "citas",
+      "label": "Que me pidan cita o reserven",
+      "detalle": "Reservas por internet sin estar pendiente del teléfono.",
+      "servicios": ["reservas-salon", "pagina-citas", "reservas-restaurante"]
+    },
+    {
+      "id": "carta",
+      "label": "Enseñar mi carta o recibir pedidos",
+      "detalle": "Carta en el móvil con código QR o pedidos por WhatsApp.",
+      "servicios": ["carta-qr", "carta-pedidos-whatsapp", "asistente-ia-pedidos"]
+    },
+    {
+      "id": "vender",
+      "label": "Vender por internet",
+      "detalle": "Tienda con pago online, de productos físicos o descargables.",
+      "servicios": ["tienda-online", "tienda-productos-digitales"]
+    },
+    {
+      "id": "evento",
+      "label": "Organizar una boda o un evento",
+      "detalle": "Invitaciones, confirmaciones de asistencia, mesas y fotos.",
+      "servicios": ["web-boda-rsvp", "invitacion-digital", "gestion-invitados-mesas", "galeria-privada-evento"]
+    },
+    {
+      "id": "perfil",
+      "label": "Presentarme como profesional",
+      "detalle": "Portfolio, currículum o una página con todos tus enlaces.",
+      "servicios": ["portfolio-editable", "cv-profesional", "link-in-bio"]
+    },
+    {
+      "id": "confianza",
+      "label": "Conseguir más reseñas y clientes fieles",
+      "detalle": "Pedir reseñas, mostrar testimonios o abrir una lista de espera.",
+      "servicios": ["auto-resenas", "muro-testimonios", "lista-espera"]
+    }
+  ],
+  "modalidades": [
+    {
+      "id": "pro",
+      "label": "Que me lo dejéis listo",
+      "detalle": "Te lo montamos: tú nos das los textos y las fotos."
+    },
+    {
+      "id": "guia",
+      "label": "Prefiero hacerlo yo con una guía",
+      "detalle": "Plantilla + guía paso a paso, más económica."
+    }
+  ]
+}

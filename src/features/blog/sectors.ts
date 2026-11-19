@@ -69,8 +69,18 @@ export async function servicesForSector(
   sector: SectorPage,
   currency: string,
 ): Promise<SectorService[]> {
+  return servicesBySlugs(db, sector.serviceSlugs, currency, sector.demoHints);
+}
+
+/** Servicios activos del catálogo, en el orden dado, con precio «Desde» y demos. */
+export async function servicesBySlugs(
+  db: D1Database,
+  slugs: readonly ServiceSlug[],
+  currency: string,
+  demoHints: readonly string[] = [],
+): Promise<SectorService[]> {
   const services = await Promise.all(
-    sector.serviceSlugs.map(async (slug) => {
+    slugs.map(async (slug) => {
       const product = await getProductBySlug(db, slug);
       if (!product || !product.active) {
         return null;
@@ -79,7 +89,7 @@ export async function servicesForSector(
       // Mismo «Desde» que la ficha: con variantes, el precio mínimo de las activas.
       const variants = await listVariants(db, product.id);
       const fromCents = variants.length > 0 ? Math.min(...variants.map((v) => v.price_cents)) : product.price_cents;
-      const demos = demosForService(slug, sector.demoHints);
+      const demos = demosForService(slug, demoHints);
       return {
         slug,
         publicId: product.public_id,

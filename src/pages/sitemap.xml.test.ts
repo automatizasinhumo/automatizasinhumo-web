@@ -11,6 +11,7 @@ const data = {
 describe('sitemapLocs', () => {
   const expectedMarketingPaths = [
     '/blog',
+    '/elige',
     '/blog/cuanto-cuesta-una-web-local',
     '/blog/web-o-redes-sociales',
     '/blog/web-para-salir-en-google',
