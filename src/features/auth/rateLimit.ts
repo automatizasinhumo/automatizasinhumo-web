@@ -39,6 +39,31 @@ export function anonymousRateLimitKey(request: Request, pathname: string): strin
   return `${new URL(request.url).hostname}:${pathname}:${client}`;
 }
 
+/**
+ * Freno a bots y rastreadores: cada página servida lee D1 (ajustes y menús), y una IP
+ * que pide más de PAGE_LIMIT páginas por minuto no es una persona navegando.
+ * La clave es por IP (no por ruta), para que repartir peticiones entre URLs no lo esquive.
+ */
+export function isThrottledPage(method: string, pathname: string): boolean {
+  return (
+    (method === 'GET' || method === 'HEAD') &&
+    !pathname.startsWith('/api/') &&
+    !pathname.startsWith('/_') &&
+    !pathname.startsWith('/partials/') &&
+    !pathname.startsWith('/admin')
+  );
+}
+
+export async function checkPageRateLimit(
+  limiter: RateLimit | undefined,
+  request: Request,
+): Promise<boolean> {
+  // En local (CI de las PR, wrangler dev) los navegadores de QA salen todos de la misma IP.
+  const host = new URL(request.url).hostname;
+  if (host === 'localhost' || host === '127.0.0.1') return true;
+  return checkRateLimit(limiter, request, '*pagina*');
+}
+
 export async function checkRateLimit(
   limiter: RateLimit | undefined,
   request: Request,

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   anonymousRateLimitKey,
+  checkPageRateLimit,
+  isThrottledPage,
   checkRateLimit,
   rateLimitBucket,
   rateLimitedResponse,
@@ -61,4 +63,35 @@ it('returns a non-cacheable 429 with retry guidance', async () => {
 
 it('keeps catalog search 429s readable cross-origin', () => {
   expect(rateLimitedResponse('/api/products').headers.get('access-control-allow-origin')).toBe('*');
+});
+
+describe('freno de páginas', () => {
+  it.each(['/', '/products/web-una-pagina', '/empezar/estado'])('cuenta las páginas GET %s', (path) => {
+    expect(isThrottledPage('GET', path)).toBe(true);
+  });
+
+  it.each([
+    ['GET', '/api/products'],
+    ['GET', '/_astro/x.js'],
+    ['GET', '/partials/cart'],
+    ['GET', '/admin/orders'],
+    ['POST', '/'],
+  ])('no cuenta %s %s', (method, path) => {
+    expect(isThrottledPage(method, path)).toBe(false);
+  });
+
+  it('una sola cuenta por IP, sea cual sea la ruta', async () => {
+    const limit = vi.fn().mockResolvedValue({ success: false });
+    const request = new Request('https://shop.example/products/x', {
+      headers: { 'CF-Connecting-IP': '203.0.113.7' },
+    });
+    expect(await checkPageRateLimit({ limit } as never, request)).toBe(false);
+    expect(limit).toHaveBeenCalledWith({ key: 'shop.example:*pagina*:203.0.113.7' });
+  });
+
+  it('en local no frena (la QA de las PR sale de una sola IP)', async () => {
+    const limit = vi.fn().mockResolvedValue({ success: false });
+    expect(await checkPageRateLimit({ limit } as never, new Request('http://localhost:8787/'))).toBe(true);
+    expect(limit).not.toHaveBeenCalled();
+  });
 });
