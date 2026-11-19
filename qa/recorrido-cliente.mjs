@@ -48,7 +48,8 @@ async function recorrido(ctx, ancho) {
 
     // Un error a mitad del HTML (p. ej. D1 sin cupo) deja la página con 200 pero cortada:
     // sin pie ni scripts, y los menús no abren. Se comprueba el final de la página y el menú,
-    // también al volver con atrás/adelante (bfcache).
+    // también al volver con atrás/adelante. Playwright desactiva el bfcache, así que esto cubre
+    // la carga desde el historial, no la restauración desde bfcache.
     await paso('la portada llega entera: pie y menú, también tras atrás/adelante', async () => {
       await comprobarPieYMenu(pg, ancho);
       await ir(`/products/${slug}`);
@@ -159,6 +160,7 @@ async function comprobarPieYMenu(pg, ancho) {
     await panel.locator('a').first().waitFor({ state: 'visible', timeout: 5000 });
     await pg.keyboard.press('Escape');
     await pg.waitForFunction((b) => b.getAttribute('aria-expanded') === 'false', await boton.elementHandle(), { timeout: 5000 });
+    await panel.locator('a').first().waitFor({ state: 'hidden', timeout: 5000 });
   }
 }
 
