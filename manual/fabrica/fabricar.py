@@ -209,6 +209,10 @@ def fabricar(ruta_pedido, desplegar=True):
     # Una vista previa no es la web del cliente: que ningún buscador la indexe.
     (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
 
+    # Configuración para publicarla como Worker propio: la usa el respaldo y va en el ZIP de entrega.
+    nombre = 'web-' + re.sub(r'[^a-z0-9-]', '-', p['id'].lower())[:50]
+    (base / 'wrangler.jsonc').write_text(json.dumps(
+        {'name': nombre, 'compatibility_date': '2026-11-01', 'assets': {'directory': './site'}}, indent=2), encoding='utf-8')
     if not desplegar:
         print('generada sin publicar en', site)
         return None
@@ -249,9 +253,6 @@ def publicar_kv(site, p):
 
 
 def desplegar_worker(base, p):
-    nombre = 'web-' + re.sub(r'[^a-z0-9-]', '-', p['id'].lower())[:50]
-    (base / 'wrangler.jsonc').write_text(json.dumps(
-        {'name': nombre, 'compatibility_date': '2026-11-01', 'assets': {'directory': './site'}}, indent=2), encoding='utf-8')
     r = subprocess.run('npx wrangler deploy', shell=True, cwd=base, capture_output=True, text=True, encoding='utf-8',
                        timeout=600, stdin=subprocess.DEVNULL)
     url = re.search(r'https://\S+\.workers\.dev', r.stdout + r.stderr)
