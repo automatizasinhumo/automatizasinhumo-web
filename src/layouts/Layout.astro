@@ -3,6 +3,7 @@ import { CONTACT_EMAIL } from '../contacto';
 import { env } from 'cloudflare:workers';
 import { getConfig } from '../config';
 import { publicOrigin } from '../features/http/origin';
+import { esIndexable } from '../features/http/indexable';
 import { normalizeSearchQuery } from '../features/search/query';
 import { EMPTY_MENUS, visibleItems } from '../features/navigation/db';
 import { getEmailProvider } from '../features/email';
@@ -75,8 +76,8 @@ const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
 const canonical = canonicalOverride ?? new URL(Astro.url.pathname, origin).href;
 // Sin foto de producto (placeholder): usar la imagen social de la marca.
 const ogImage = new URL(image && !image.endsWith('/placeholder.png') ? image : '/og-default.png', origin).href;
-// Los *.workers.dev son staging: nunca indexables.
-const noindex = origin.includes('.workers.dev');
+// Misma regla que robots.txt: solo un dominio propio en HTTPS es indexable.
+const noindex = !esIndexable(origin);
 const orgLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Organization',
