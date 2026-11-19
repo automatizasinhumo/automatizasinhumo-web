@@ -8,6 +8,9 @@ const SIN_TILDE: [RegExp, string][] = [
   [/cion(es)?$/, 'ción'],
   [/sion(es)?$/, 'sión'],
   [/logia(s)?$/, 'logía'],
+  // Tiendas y oficios: «papeleria» → «papelería» → «papel», como con tilde.
+  [/eria(s)?$/, 'ería'],
+  [/grafia(s)?$/, 'grafía'],
 ];
 
 export function stemSpanishTerm(term: string): string {

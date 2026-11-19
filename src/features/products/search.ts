@@ -20,7 +20,7 @@ export function fold(value: string): string {
 /** Términos con significado de la consulta (sin palabras vacías). */
 export function contentTerms(query: string): string[] {
   const tokens = tokenizeSearchTerms(normalizeSearchQuery(query));
-  const content = tokens.filter((token) => !VACIAS.has(token));
+  const content = tokens.filter((token) => !VACIAS.has(fold(token)));
   return content.length > 0 ? content : tokens;
 }
 
@@ -131,17 +131,26 @@ export async function rankSearchProducts(
   const query = toFtsQuery(variants, 'any');
   if (!query) return { products: [], coverageByVariant: variants.map(() => 0) };
 
-  const textRows = await db
-    .prepare(
-      `SELECT p.*, ${BM25} AS search_score
-         FROM products_fts
-         JOIN products p ON p.id = products_fts.rowid
-        WHERE products_fts MATCH ? AND p.active = 1${exclusionSql(excludeIds)}
-        ORDER BY search_score
-        LIMIT ?`,
-    )
-    .bind(query, ...excludeIds, MAX_CANDIDATES)
-    .all<Product & { search_score: number }>();
+  const candidates = (match: string) =>
+    db
+      .prepare(
+        `SELECT p.*, ${BM25} AS search_score
+           FROM products_fts
+           JOIN products p ON p.id = products_fts.rowid
+          WHERE products_fts MATCH ? AND p.active = 1${exclusionSql(excludeIds)}
+          ORDER BY search_score
+          LIMIT ?`,
+      )
+      .bind(match, ...excludeIds, MAX_CANDIDATES)
+      .all<Product & { search_score: number }>();
+  const textRows = await candidates(query);
+  // Con el cupo lleno, bm25 puede haber dejado fuera fichas que casan con TODOS los
+  // términos (muchas fichas con una palabra común): se piden aparte y van primero.
+  const strictQuery = toFtsQuery(variants, 'all');
+  const strictRows =
+    (textRows.results?.length ?? 0) >= MAX_CANDIDATES && strictQuery && strictQuery !== query
+      ? (await candidates(strictQuery)).results ?? []
+      : [];
 
   const categoryIds = new Set<number>();
   const categoryOnly: Product[] = [];
@@ -162,6 +171,21 @@ export async function rankSearchProducts(
     for (const product of rows.results ?? []) {
       categoryIds.add(product.id);
       categoryOnly.push(product);
+    }
+    // El cupo limita las fichas que se añaden por categoría, no la pertenencia: si se
+    // ha llenado, se pregunta por las halladas por texto que no han entrado.
+    const fuera = [...strictRows, ...(textRows.results ?? [])].map((p) => p.id).filter((id) => !categoryIds.has(id));
+    if ((rows.results?.length ?? 0) >= MAX_CANDIDATES && fuera.length > 0) {
+      const members = await db
+        .prepare(
+          `SELECT DISTINCT pc.product_id AS id
+             FROM product_categories pc
+             JOIN categories c ON c.id = pc.category_id
+            WHERE c.slug IN (${marks}) AND pc.product_id IN (SELECT value FROM json_each(?))`,
+        )
+        .bind(...categorySlugs, JSON.stringify(fuera))
+        .all<{ id: number }>();
+      for (const { id } of members.results ?? []) categoryIds.add(id);
     }
   }
 
@@ -193,7 +217,7 @@ export async function rankSearchProducts(
       variantTerms[0].some((prefixes) => prefixes.some((p) => head.startsWith(p)));
     scored.push({ product, score, coverage: best, literal, literalInName, nameCoverage: bestName, inCategory: categoryIds.has(product.id) });
   };
-  for (const { search_score, ...product } of textRows.results ?? []) add(product as Product, search_score);
+  for (const { search_score, ...product } of [...strictRows, ...(textRows.results ?? [])]) add(product as Product, search_score);
   for (const product of categoryOnly) add(product, Number.POSITIVE_INFINITY);
 
   // Si la categoría explica toda la consulta («bodas», «restaurante») es la mejor

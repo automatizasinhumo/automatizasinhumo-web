@@ -45,7 +45,9 @@ function lemas(word: string): string[] {
 export function expandirSinonimos(q: string): string | null {
   let cambia = false;
   const out = q.split(/\s+/).map((w) => {
-    const lema = lemas(w.toLowerCase()).find((l) => SINONIMOS_POR_LEMA.has(l));
+    // «intranet,» busca «intranet»: la puntuación de los extremos no forma parte del lema.
+    const palabra = w.toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+    const lema = palabra ? lemas(palabra).find((l) => SINONIMOS_POR_LEMA.has(l)) : undefined;
     const s = lema ? SINONIMOS_POR_LEMA.get(lema) : undefined;
     if (s && lema && stemSpanishTerm(s) !== lema) { cambia = true; return s; }
     return w;

@@ -107,6 +107,11 @@ describe('buscador FTS en D1', () => {
     );
   });
 
+  it('encuentra la peluquería escrita sin tilde', async () => {
+    const { products } = await search.search('peluqueria');
+    expect(products[0]?.slug).toBe('reservas-salon');
+  });
+
   it('corrige una errata y dice qué ha buscado', async () => {
     const { products, correctedTo } = await search.search('pelukeria');
     expect(correctedTo).toBe('peluqueria');

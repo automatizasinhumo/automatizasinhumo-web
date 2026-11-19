@@ -7,6 +7,9 @@ describe('stemSpanishTerm', () => {
     expect(stemSpanishTerm('facturacion')).toBe(stemSpanishTerm('facturación'));
     expect(stemSpanishTerm('automatizaciones')).toBe(stemSpanishTerm('automatización'));
     expect(stemSpanishTerm('transcripcion')).toBe(stemSpanishTerm('transcripción'));
+    expect(stemSpanishTerm('papeleria')).toBe(stemSpanishTerm('papelería'));
+    expect(stemSpanishTerm('peluquerias')).toBe(stemSpanishTerm('peluquerías'));
+    expect(stemSpanishTerm('fotografia')).toBe(stemSpanishTerm('fotografía'));
   });
 });
 
@@ -26,5 +29,9 @@ describe('contentTerms', () => {
   });
   it('si todo son palabras vacías, se queda con ellas', () => {
     expect(contentTerms('de la')).toEqual(['de', 'la']);
+  });
+  it('reconoce las palabras vacías con tilde', () => {
+    expect(contentTerms('cómo web')).toEqual(['web']);
+    expect(contentTerms('qué web')).toEqual(['web']);
   });
 });

@@ -52,13 +52,18 @@ export function createFtsSearch(db: D1Database): SearchProvider {
       const best = Math.max(0, ...result.coverageByVariant);
       // Si ninguna ficha cubre la consulta entera, quizá hay una errata («pelukeria»).
       if (best < 1) {
-        const suggestion = await suggestQuery(db, normalized);
-        if (suggestion) {
-          const corrected = await run(suggestion, excludeIds);
-          if (Math.max(0, ...corrected.coverageByVariant) > best) {
-            result = corrected;
-            correctedTo = suggestion;
+        // La corrección es un extra: si falla, se devuelve lo que ya se había encontrado.
+        try {
+          const suggestion = await suggestQuery(db, normalized);
+          if (suggestion) {
+            const corrected = await run(suggestion, excludeIds);
+            if (Math.max(0, ...corrected.coverageByVariant) > best) {
+              result = corrected;
+              correctedTo = suggestion;
+            }
           }
+        } catch (error) {
+          console.error('Search correction failed', error);
         }
       }
       // Sin nada literal, lo hallado viene del sinónimo: se dice qué se ha buscado.
