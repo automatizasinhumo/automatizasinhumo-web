@@ -6,6 +6,7 @@ import { publicOrigin } from '../../features/http/origin';
 import { buildPageMetadata } from '../../features/seo/metadata';
 import { getSector, SECTORS, servicesForSector } from '../../features/blog/sectors';
 import { getConfig } from '../../config';
+import { breadcrumbJsonLd } from '../../features/storefront/breadcrumbs';
 
 const sector = getSector(Astro.params.sector);
 if (!sector) {
@@ -29,14 +30,11 @@ const metadata = buildPageMetadata({
   description: sector.description,
   canonical: new URL(canonicalPath, origin).href,
 });
-const breadcrumb = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', origin).href },
-    { '@type': 'ListItem', position: 2, name: sector.heading, item: metadata.canonical },
-  ],
-};
+const breadcrumb = breadcrumbJsonLd(
+  [{ text: 'Inicio', href: '/' }, { text: sector.heading, href: null }],
+  origin,
+  metadata.canonical,
+);
 const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g, '\\u003c');
 ---
 

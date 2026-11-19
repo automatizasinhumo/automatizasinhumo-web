@@ -5,6 +5,7 @@ import { REGLA_PLAZOS } from './plazos';
 import ProductGallery from '../../features/storefront/controls/ProductGallery.astro';
 import ProductPurchaseForm from '../../features/storefront/controls/ProductPurchaseForm.astro';
 import ComparativaModalidades from '../../features/storefront/controls/ComparativaModalidades.astro';
+import StoreBreadcrumbs from '../../features/storefront/controls/StoreBreadcrumbs.astro';
 
 /**
  * STORE-OWNED. Edit freely — this file belongs to your store.
@@ -27,9 +28,7 @@ interface Props {
 const { model, purchase } = Astro.props;
 ---
 
-<a href={model.backHref} class="text-sm font-medium text-faint hover:text-brand">
-  &larr; Volver al catálogo
-</a>
+<StoreBreadcrumbs trail={model.breadcrumbs} class="text-sm" />
 
 {
   model.error && (

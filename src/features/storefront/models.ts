@@ -242,6 +242,8 @@ export interface ProductDetailModel {
   heroImage: StorefrontImage;
   related: ProductCardModel[];
   /** Where "back to shop" goes — the catalog, wherever the merchant put it. */
+  /** Migas visibles; el JSON-LD sale de las mismas (breadcrumbJsonLd). */
+  breadcrumbs: { text: string; href: string | null }[];
   backHref: string;
   /** «Empieza gratis»: formulario sin pago (/empezar/<slug>). */
   startHref: string;

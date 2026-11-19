@@ -12,6 +12,7 @@ import { catalogPath } from '../settings/home';
 import { formatMoney, toMajorUnits, currencyDecimals } from '../../money';
 import { requirePublicId } from '../catalog/serialize';
 import { buildProductCard } from './productCard';
+import { breadcrumbJsonLd, productTrail } from './breadcrumbs';
 // Generado por manual/demos/gen-galeria.mjs: slug del servicio → demos.
 import demosPorProducto from '../../data/demos-producto.json';
 import type {
@@ -192,14 +193,13 @@ export async function loadProductDetail(
     },
   };
 
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', options.origin).href },
-      { '@type': 'ListItem', position: 2, name: product.name, item: new URL(options.pathname, options.origin).href },
-    ],
-  };
+  const categoryLinks = categories.map((category) => ({
+    text: category.name,
+    href: `/categories/${category.slug}`,
+  }));
+  const catalogHref = catalogPath(options.settings?.homePage);
+  const trail = productTrail(catalogHref, categoryLinks, product.name);
+  const breadcrumbLd = breadcrumbJsonLd(trail, options.origin, options.pathname);
 
   return {
     status: 'ok',
@@ -230,10 +230,8 @@ export async function loadProductDetail(
       // count means nothing when the variant is the inventory unit.
       lowStock: !hasVariants && state === 'low',
       digitalDelivery: Boolean(product.file_key),
-      categories: categories.map((category) => ({
-        text: category.name,
-        href: `/categories/${category.slug}`,
-      })),
+      categories: categoryLinks,
+      breadcrumbs: trail,
       images,
       heroImage: heroImage(product, options),
       related: related.map((candidate) =>
@@ -245,7 +243,7 @@ export async function loadProductDetail(
           maxPriceCents: relatedMaxPrices.get(candidate.id),
         }),
       ),
-      backHref: catalogPath(options.settings?.homePage),
+      backHref: catalogHref,
       startHref: `/empezar/${product.slug}`,
       demos: ((demosPorProducto as Record<string, StorefrontDemo[]>)[product.slug] ?? []),
       error: options.searchParams.get('error'),
