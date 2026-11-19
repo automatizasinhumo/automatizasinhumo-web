@@ -24,6 +24,9 @@ import Pagination from '../../components/Pagination.astro';
 import CatalogSort from '../../features/storefront/controls/CatalogSort.astro';
 import { buildSortModel } from '../../features/storefront/catalog';
 import { catalogPath } from '../../features/settings/home';
+import { breadcrumbJsonLd } from '../../features/storefront/breadcrumbs';
+import { publicOrigin } from '../../features/http/origin';
+import StoreBreadcrumbs from '../../features/storefront/controls/StoreBreadcrumbs.astro';
 import { addCacheTags, productCacheTags } from '../../features/cache/tags';
 
 const { slug } = Astro.params;
@@ -76,22 +79,13 @@ const hrefFor = (p: number) =>
   });
 // The catalog is at / until the home page is pointed elsewhere.
 const shopHref = catalogPath(Astro.locals.settings?.homePage);
+const crumbs = [{ text: 'Servicios', href: shopHref }, ...trail.map((c) => ({ text: c.name, href: `/categories/${c.slug}` }))];
+const breadcrumbLd = JSON.stringify(breadcrumbJsonLd(crumbs, publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN), Astro.url.pathname)).replace(/</g, '\\u003c');
 ---
 
 <Layout title={category.name} description={Object.hasOwn(INTRO_CATEGORIA, category.slug) ? INTRO_CATEGORIA[category.slug] : undefined}>
-  <nav aria-label="Migas de pan" class="mb-4 flex flex-wrap gap-x-2 text-xs uppercase tracking-widest text-faint">
-    <a href={shopHref} class="hover:text-brand">Catálogo</a>
-    {
-      trail.map((c) => (
-        <span class="flex gap-x-2">
-          <span aria-hidden="true">/</span>
-          <a href={`/categories/${c.slug}`} class="hover:text-brand">
-            {c.name}
-          </a>
-        </span>
-      ))
-    }
-  </nav>
+  <script is:inline type="application/ld+json" set:html={breadcrumbLd}></script>
+  <StoreBreadcrumbs trail={crumbs} class="mb-4 text-xs uppercase tracking-widest" />
 
   <h1 class="mb-3 font-serif text-4xl tracking-tight sm:text-5xl">{category.name}</h1>
   <p class="mb-8 max-w-2xl text-lg text-muted">{INTRO_CATEGORIA[category.slug] ?? ''}</p>

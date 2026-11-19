@@ -1,0 +1,42 @@
+---
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from './starwind/breadcrumb';
+
+/**
+ * Migas de pan visibles (Starwind UI Breadcrumb, MIT). El último paso es la
+ * página actual (aria-current="page"). El JSON-LD sale de las mismas migas con
+ * breadcrumbJsonLd() en la ruta, para que lo visible y lo estructurado coincidan.
+ */
+interface Props {
+  trail: { text: string; href?: string | null }[];
+  class?: string;
+}
+
+const { trail, class: className } = Astro.props;
+const last = trail.length - 1;
+---
+
+<Breadcrumb class={className}>
+  <BreadcrumbList>
+    {
+      trail.map((step, i) => (
+        <>
+          <BreadcrumbItem>
+            {i === last || !step.href ? (
+              <BreadcrumbPage>{step.text}</BreadcrumbPage>
+            ) : (
+              <BreadcrumbLink href={step.href}>{step.text}</BreadcrumbLink>
+            )}
+          </BreadcrumbItem>
+          {i < last && <BreadcrumbSeparator />}
+        </>
+      ))
+    }
+  </BreadcrumbList>
+</Breadcrumb>

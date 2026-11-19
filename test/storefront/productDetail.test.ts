@@ -99,6 +99,7 @@ const detail = (overrides: Partial<ProductDetailModel> = {}): ProductDetailModel
   heroImage: { ...image('/images/tee.jpg'), priority: true },
   related: [],
   backHref: '/',
+  breadcrumbs: [{ text: 'Servicios', href: '/' }, { text: 'Sample Tee', href: null }],
   startHref: '/empezar/tee',
   demos: [],
   error: null,
