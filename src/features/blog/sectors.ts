@@ -9,12 +9,16 @@ type ServiceSlug = keyof typeof demosPorProducto;
 
 export interface SectorPage {
   slug: string;
+  /** Nombre corto del oficio para menús y enlaces («Peluquerías»). */
+  label: string;
   title: string;
   description: string;
   heading: string;
   introduction: string;
   considerations: readonly string[];
   serviceSlugs: readonly ServiceSlug[];
+  /** Fragmentos de URL de las demos del oficio («plumber-home-services»): salen primero. */
+  demoHints?: readonly string[];
 }
 
 export const SECTORS = sectoresData as readonly SectorPage[];
@@ -37,12 +41,27 @@ export function getSector(slug: string | undefined): SectorPage | undefined {
   return SECTORS.find((sector) => sector.slug === slug);
 }
 
-export function demosForService(slug: ServiceSlug): SectorDemo[] {
+const TODAS_LAS_DEMOS: SectorDemo[] = Object.values(demosPorProducto).flat();
+
+/**
+ * Hasta tres demos del servicio, con las del oficio delante: primero las interactivas
+ * (se pueden probar), luego las suyas que encajan con el sector, luego una
+ * plantilla del oficio aunque esté catalogada en otro servicio (la misma plantilla
+ * sirve para cualquier web) y, por último, el resto de las suyas.
+ */
+export function demosForService(slug: ServiceSlug, hints: readonly string[] = []): SectorDemo[] {
   const demos = demosPorProducto[slug];
   if (!demos || demos.length === 0) {
     throw new Error(`Faltan demos publicadas para el servicio «${slug}».`);
   }
-  return demos.slice(0, 3);
+  const delOficio = (demo: SectorDemo) => hints.some((hint) => demo.url.includes(hint));
+  const ordenadas = [
+    ...demos.filter((demo) => demo.tipo === 'interactiva'),
+    ...demos.filter(delOficio),
+    ...TODAS_LAS_DEMOS.filter(delOficio),
+    ...demos,
+  ];
+  return ordenadas.filter((demo, i) => ordenadas.findIndex((d) => d.url === demo.url) === i).slice(0, 3);
 }
 
 export async function servicesForSector(
@@ -60,7 +79,7 @@ export async function servicesForSector(
       // Mismo «Desde» que la ficha: con variantes, el precio mínimo de las activas.
       const variants = await listVariants(db, product.id);
       const fromCents = variants.length > 0 ? Math.min(...variants.map((v) => v.price_cents)) : product.price_cents;
-      const demos = demosForService(slug);
+      const demos = demosForService(slug, sector.demoHints);
       return {
         slug,
         publicId: product.public_id,
