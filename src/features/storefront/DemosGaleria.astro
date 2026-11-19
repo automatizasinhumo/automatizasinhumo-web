@@ -5,6 +5,7 @@
  * Datos: src/data/galeria-demos.json (manual/demos/gen-galeria.mjs).
  */
 import Icono from '../../components/Icono.astro';
+import Captura from './Captura.astro';
 import galeria from '../../data/galeria-demos.json';
 import { ICONO_CAT } from './iconos';
 
@@ -42,7 +43,7 @@ const ld = JSON.stringify({
           <span class="flex gap-1.5 border-b border-line bg-paper px-3 py-1.5" aria-hidden="true">
             <span class="h-2 w-2 rounded-full bg-accent/70"></span><span class="h-2 w-2 rounded-full bg-line"></span><span class="h-2 w-2 rounded-full bg-line"></span>
           </span>
-          <img src={`/images/demos/${d.img}.png`} alt={`Captura de la demo ${d.titulo}`} width="1280" height="860" loading="lazy" class="aspect-[16/10] w-full object-cover object-top" />
+          <Captura src={`/images/demos/${d.img}.png`} alt={`Captura de la demo ${d.titulo}`} class="aspect-[16/10] w-full object-cover object-top" />
         </span>
         <span class:list={['absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold', d.tipo === 'interactiva' ? 'bg-brand text-on-brand' : 'bg-surface/95 text-ink border border-line']}>
           {d.tipo === 'interactiva' ? 'Demo interactiva' : 'Diseño de ejemplo'}

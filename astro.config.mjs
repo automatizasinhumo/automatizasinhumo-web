@@ -3,6 +3,7 @@ import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 import { resolveTheme } from './scripts/themes.mjs';
 import { themeCssPath, writeThemeArtifacts } from './scripts/theme-css.mjs';
+import { generarWebpCapturas } from './scripts/webp-capturas.mjs';
 
 // SSR on Cloudflare Workers. platformProxy lets `astro dev` read bindings
 // (D1, R2, vars) from wrangler.jsonc locally.
@@ -18,6 +19,8 @@ import { themeCssPath, writeThemeArtifacts } from './scripts/theme-css.mjs';
 // them (see the design rule in scripts/theme-css.mjs).
 const theme = resolveTheme();
 writeThemeArtifacts();
+// WebP de las capturas de demos (no van al repo; ver scripts/webp-capturas.mjs).
+await generarWebpCapturas();
 
 // Stamp every build with the theme it was compiled for. The deploy scripts
 // refuse to ship an artifact whose stamp disagrees with the current
