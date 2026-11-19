@@ -12,7 +12,8 @@ name: Empleados semanales (staging)
 #   - zap           (zaproxy/action-baseline, Apache-2.0): DAST pasivo del staging
 #   - presupuesto-web (sitespeedio/sitespeed.io, MIT): peso y tiempos por página (qa/perf-budget.json)
 #   - nuclei        (projectdiscovery/nuclei-action, MIT): exposiciones y mala configuración
-# Solo «navegadores», «html» e «idioma-demos» pueden poner el run en rojo; el resto avisa en el resumen.
+#   - contrato-api  (schemathesis/schemathesis, MIT): la API pública de catálogo cumple qa/api/openapi.yaml
+# Solo «navegadores», «html», «idioma-demos» y «contrato-api» pueden poner el run en rojo; el resto avisa en el resumen.
 
 on:
   schedule:
@@ -344,3 +345,29 @@ jobs:
           } | tee -a "$GITHUB_STEP_SUMMARY"
         env:
           RESULTADO: ${{ steps.nuclei.outcome }}
+
+  contrato-api:
+    # Genera ~160 peticiones de lectura contra /api/health y /api/products desde el contrato
+    # y comprueba estados, tipos de contenido, cabeceras y forma del JSON. Pone el run en rojo.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - run: pip install --disable-pip-version-check schemathesis==4.33.4
+      - name: Schemathesis
+        run: bash qa/api/schemathesis.sh
+        env:
+          BASE_URL: ${{ env.BASE }}
+          REPORT_DIR: ${{ runner.temp }}/schemathesis
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: contrato-api
+          path: ${{ runner.temp }}/schemathesis
+          if-no-files-found: ignore
+          retention-days: 14

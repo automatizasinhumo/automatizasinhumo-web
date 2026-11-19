@@ -1,0 +1,102 @@
+{
+  "operation": "OPTIONS /api/products/{slug}",
+  "method": "OPTIONS",
+  "path_template": "/api/products/{slug}",
+  "fingerprint": "1ecbc40e",
+  "case_id": "mDvjMj",
+  "code_sample": "curl -X OPTIONS -H 'User-Agent: automatizasinhumo-qa-schemathesis' https://automatizasinhumo-staging.davidpd89.workers.dev/api/products/0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "sequence": [
+    {
+      "method": "OPTIONS",
+      "url": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/products/0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "url_template": "https://automatizasinhumo-staging.davidpd89.workers.dev/api/products/{slug}",
+      "headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "mDvjMj",
+        "Content-Length": "0"
+      },
+      "response": {
+        "status_code": 204,
+        "headers": {
+          "date": "Thu, 19 Nov 2026 16:10:16 GMT",
+          "connection": "keep-alive",
+          "access-control-allow-origin": "*",
+          "cache-control": "private, no-store",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "access-control-allow-methods": "GET, OPTIONS",
+          "content-security-policy": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+          "permissions-policy": "camera=(), microphone=(), geolocation=()",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=AvTIz6AG6UxKf56W4LgERYEBS3ig%2FWBaWg54H%2FAzAimzAehwlSnhh%2Bkb6GrU6cdnIcYjZS2vt8GZCRFhJGQbzdKIdCKGCMoSD1j%2BgKXfAl9j8hNHBZLCakP2a16jARFd4ZQov0B4tWYoAazpezJQuSCmkXOV8nUy8ygttI0GoP3F%2B9ucnuDsAcGbbjabAw%3D%3D\"}]}",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "server": "cloudflare",
+          "cf-ray": "a5d07bee7d473333-MAD",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        },
+        "body": ""
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "negative_data_rejection",
+          "status": "failure",
+          "message": "Schema-violating request accepted\n\nInvalid data should have been rejected\nExpected: 400, 401, 403, 404, 405, 406, 409, 415, 422, 428, 429, 5xx\nInvalid component: parameter `slug` in path - string larger than maxLength"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.0009482000023126602,
+          "mode": "negative"
+        },
+        "components": {
+          "PATH": "negative"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "String larger than maxLength",
+            "location": "/maxLength",
+            "parameter": "slug",
+            "parameter_location": "PATH",
+            "scenario": "string_above_max_length"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {
+          "PATH": {
+            "slug": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      },
+      "path": "/api/products/{slug}",
+      "path_parameters": {
+        "slug": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "query": {},
+      "case_headers": {
+        "User-Agent": "automatizasinhumo-qa-schemathesis"
+      },
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "OPTIONS /api/products/{slug}"
+    }
+  ],
+  "aliases": [
+    "xbmOLR"
+  ]
+}
