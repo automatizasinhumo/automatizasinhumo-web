@@ -52,7 +52,14 @@ class BarraContacto(unittest.TestCase):
         html = '<head></head><a href="https://wa.me/34999999999">WhatsApp</a>'
         out = poner_datos(html, pedido(whatsapp='12'), None)
         self.assertNotIn('wa.me/34999999999', out)
-        self.assertIn('href="tel:986000000">WhatsApp', out)
+        self.assertIn('href="tel:986000000">Llamar', out)
+        self.assertNotIn('WhatsApp', out)
+
+    def test_whatsapp_valido_cambia_tambien_api_whatsapp(self):
+        html = '<head></head><a href="https://api.whatsapp.com/send?phone=15550000">Escríbenos</a><a href="https://wa.me/1555">x</a>'
+        out = poner_datos(html, pedido(whatsapp='600 111 222'), None)
+        self.assertNotIn('15550000', out)
+        self.assertEqual(out.count('href="https://wa.me/34600111222"'), 2)
 
     def test_whatsapp_sin_prefijo_lleva_34(self):
         self.assertEqual(numero_internacional('600111222'), '34600111222')

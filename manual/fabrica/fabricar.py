@@ -273,11 +273,18 @@ def poner_datos(out, p, marca):
     tel = re.sub(r'[^0-9+]', '', p['telefono'])
     out = re.sub(r'href="tel:[^"]*"', lambda _: f'href="tel:{tel}"', out)
     wa = numero_internacional(p.get('whatsapp') or '')
+    href_wa = r'''href=["']https?://(?:www\.)?(?:wa\.me|api\.whatsapp\.com|whatsapp\.com)/[^"']*["']'''
     if wa:
-        out = re.sub(r'wa\.me/\d+', lambda _: 'wa.me/' + wa, out)
+        # Cualquier forma de enlace de WhatsApp de la plantilla (wa.me o api.whatsapp.com) pasa al número del cliente.
+        out = re.sub(href_wa, lambda _: f'href="https://wa.me/{wa}"', out, flags=re.I)
     else:
-        # Sin WhatsApp válido, el botón de la plantilla llamaría al número de otro negocio: pasa a llamar al cliente.
-        out = re.sub(r'''href=["']https?://(?:wa\.me|api\.whatsapp\.com)/[^"']*["']''', lambda _: f'href="tel:{tel}"', out, flags=re.I)
+        # Sin WhatsApp válido, el botón de la plantilla llamaría al número de otro negocio: pasa a llamar
+        # al cliente, y su texto/etiqueta dice «Llamar» en vez de «WhatsApp».
+        def a_llamada(m):
+            a = re.sub(href_wa, f'href="tel:{tel}"', m.group(0), flags=re.I)
+            return re.sub(r'whats\s*app', 'Llamar', a, flags=re.I)
+        out = re.sub(r'<a\s[^>]*' + href_wa + r'[^>]*>.*?</a>', a_llamada, out, flags=re.I | re.S)
+        out = re.sub(href_wa, lambda _: f'href="tel:{tel}"', out, flags=re.I)
     # Igual con los correos sueltos de la plantilla: una pasada, sin tocar el ya puesto.
     out = CORREO_VALIDO.sub(lambda _: correo, out)
     titulo = f"<title>{negocio} · {H.escape(p['actividad'])} en {H.escape(p['ciudad'])}</title>"
