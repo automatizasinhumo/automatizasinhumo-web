@@ -25,7 +25,9 @@ interface Props {
 const { model } = Astro.props;
 // En xl el mega menú «Servicios» sustituye a los enlaces de catálogo y categorías;
 // el resto (páginas) sigue en línea. Por debajo de xl, la hamburguesa lleva todos.
-const pageLinks = model.headerLinks.filter((link) => !coveredByMegaMenu(link.href));
+// El catálogo vive en / mientras la portada no apunte a otra página.
+const shopHref = model.catalogHref;
+const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !coveredByMegaMenu(link.href));
 ---
 
 {/* Announcement bar. Deliberately NOT fixed: the header below is sticky, so a
@@ -80,7 +82,7 @@ const pageLinks = model.headerLinks.filter((link) => !coveredByMegaMenu(link.hre
       <StoreMegaMenu
         label="Servicios"
         areas={menuAreas}
-        allHref="/products"
+        allHref={shopHref}
         allText="Ver todos los servicios"
         links={pageLinks}
         class="hidden xl:flex"

@@ -17,6 +17,7 @@ const input = (overrides: Partial<ShellInput> = {}): ShellInput => ({
   announcement: '',
   announcementHref: '',
   headerItems: [],
+  catalogHref: '/',
   footerItems: [],
   searchQuery: '',
   cartEnabled: true,
@@ -120,6 +121,10 @@ describe('the store-owned header', () => {
     expect(html).toContain('custom-inline');
     expect(html).toContain('custom-disclosure');
     expect(html).toContain('data-nav-disclosure');
+  });
+
+  it('passes the real catalog route to the theme', () => {
+    expect(buildShellModel(input({ catalogHref: '/products' })).catalogHref).toBe('/products');
   });
 
   it('shows the mobile disclosure only when there is navigation to disclose', async () => {

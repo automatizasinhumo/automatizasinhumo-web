@@ -25,6 +25,8 @@ export interface ShellInput {
   announcementHref: string;
   /** Menu items, already filtered to the publishable ones. */
   headerItems: MenuItem[];
+  /** catalogPath(settings.homePage). */
+  catalogHref: string;
   footerItems: MenuItem[];
   /** Current search term, normalized, or '' when not on the search route. */
   searchQuery: string;
@@ -51,6 +53,7 @@ export function buildShellModel(input: ShellInput): StorefrontShellModel {
       ? { text: input.announcement, href: input.announcementHref || null }
       : null,
     headerLinks: input.headerItems.map(toLink),
+    catalogHref: input.catalogHref,
     footerLinks: input.footerItems.map(toLink),
     sectorLinks: (sectores as { slug: string; label: string }[]).map((sector) => ({ text: `Web para ${sector.label.toLowerCase()}`, href: `/webs/${sector.slug}` })),
     search: { action: '/search', query: input.searchQuery },
