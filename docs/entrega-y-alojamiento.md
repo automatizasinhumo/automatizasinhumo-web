@@ -151,8 +151,8 @@ web publicada; si quieres usar tu dominio o llevártela, escríbenos y te lo pre
 - [ ] Alternativa gratuita a R2 para guardar los ZIP (sin tarjeta). Todo lo de pagos queda aparcado hasta que la web esté terminada.
 - [ ] P0. La fábrica genera el ZIP de entrega con la estructura de la ronda 23. Se puede hacer sin R2.
 - [ ] P0. Clonar stripe-samples/checkout-one-time-payments, pasar sus pruebas y hacer una compra de prueba de punta a punta con la tarjeta 4242.
-- [ ] P0. Guardar el ZIP en R2, montar «Mis pedidos» con URL prefirmada y enviar el correo con Resend.
+- [ ] P0. Guardar el ZIP en el almacenamiento elegido (R2 o la alternativa gratuita), montar «Mis pedidos» con enlace temporal y enviar el correo con Resend.
 - [ ] P1. Desplegar sitedrop tal cual, publicar 10 webs de prueba y sustituir `wrangler deploy web-<id>`.
 - [ ] P1. Suscripciones de Stripe y portal de cliente.
 - [ ] P2. Dominios del cliente y tickets de mantenimiento.
-- [ ] Publicar los textos de la FAQ del apartado 4 cuando su parte esté en verde.
+- [ ] Publicar los textos de la FAQ del apartado 4 cuando su parte esté en verde, adaptados antes a los escalones: qué incluye «te la montamos» (349 €) y que el alojamiento es aparte.
