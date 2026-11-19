@@ -113,14 +113,17 @@ def procesar(fila):
 def main():
     filas = vp.d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje FROM solicitudes "
                   f"WHERE {DISPONIBLE} ORDER BY updated_at LIMIT {int(vp.MAXIMO)}")
-    hechas = 0
+    hechas = fallos = 0
     for n, f in enumerate(filas, 1):
         print(f'entrega {n}' if vp.PUBLICO else f"entrega {f['public_id']}")
         try:
             hechas += procesar(f)
         except Exception as e:  # noqa: BLE001 — un fallo de D1 no para el resto del lote
             print('  fallo D1:', type(e).__name__)
+            fallos += 1
     print('entregas intentadas:', hechas)
+    if fallos:
+        sys.exit(f'{fallos} entrega(s) con fallo de D1')  # el paso sale en rojo
 
 
 if __name__ == '__main__':
