@@ -70,6 +70,15 @@
 				"limit": 60,
 				"period": 60
 			}
+		},
+		{
+			// Páginas por IP y minuto: frena bots y rastreadores que agotan D1.
+			"name": "PAGE_RATE_LIMITER",
+			"namespace_id": "10004",
+			"simple": {
+				"limit": 120,
+				"period": 60
+			}
 		}
 	],
 	"d1_databases": [

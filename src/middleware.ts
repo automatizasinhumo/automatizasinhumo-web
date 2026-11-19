@@ -19,7 +19,9 @@ import {
   type MenuItemRow,
 } from './features/navigation/db';
 import {
+  checkPageRateLimit,
   checkRateLimit,
+  isThrottledPage,
   rateLimitBucket,
   rateLimitedResponse,
 } from './features/auth/rateLimit';
@@ -73,6 +75,18 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   const path = context.url.pathname;
   // Cualquier escritura vacía la caché de ajustes y menús de este isolate (ver cacheTienda).
   if (!esLectura(context.request.method)) olvidarCacheTienda();
+  // Freno a bots antes de leer D1: una IP con más de 120 páginas/minuto recibe 429.
+  if (isThrottledPage(context.request.method, path)) {
+    try {
+      if (!(await checkPageRateLimit(env.PAGE_RATE_LIMITER, context.request))) {
+        console.warn(JSON.stringify({ event: 'rate_limited', bucket: 'page', path }));
+        return rateLimitedResponse(path);
+      }
+    } catch (error) {
+      // Si el limitador falla, la tienda sigue abierta.
+      console.error(JSON.stringify({ event: 'rate_limit_error', bucket: 'page', path, message: String(error) }));
+    }
+  }
   const isDocument =
     !path.startsWith('/api/') &&
     !path.startsWith('/_') &&
