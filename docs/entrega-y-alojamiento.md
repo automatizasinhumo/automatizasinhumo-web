@@ -36,7 +36,9 @@ Un Worker por cliente se agota con 100 ventas. No se resuelve abriendo más cuen
    `checksums.sha256`. Se guarda en R2: 10 GB gratis.
 3. **Publicación definitiva:** la opción preferida es la **cuenta gratuita de Cloudflare del cliente**,
    que así es dueño de alojamiento, dominio y estadísticas. La alternativa es GitHub Pages o Netlify con
-   el mismo ZIP. Mientras el cliente prepara su cuenta sigue funcionando el enlace de nuestra vista
+   el mismo ZIP, pero esos alojamientos solo sirven ficheros estáticos: el formulario necesita su Worker
+   + D1 en Cloudflare o el servicio de formularios del alojamiento (por ejemplo, Netlify Forms). La guía
+   de publicación y la FAQ lo dicen expresamente. Mientras el cliente prepara su cuenta sigue funcionando el enlace de nuestra vista
    previa.
 4. **Dominio:** el dominio se añade como zona en la cuenta Cloudflare del cliente, y en el Worker se usa
    *Settings → Domains & Routes → Custom Domain*. Una vez autorizado, se automatiza con Wrangler o la API.
@@ -94,7 +96,8 @@ estadísticas quedan a tu nombre. No hay cuota obligatoria.
 **¿Qué recibo exactamente?**
 El enlace de tu web funcionando y un archivo descargable con todo lo necesario para publicarla en
 cualquier sitio: la web lista, sus textos e imágenes, una guía para publicarla y conectar tu dominio, y
-el informe de pruebas que pasó antes de entregártela. En automatizaciones y traducciones recibes los
+el informe de pruebas que pasó antes de entregártela. Si la publicas fuera de Cloudflare, el formulario
+de contacto necesita un servicio de formularios en ese alojamiento: la guía explica cómo conectarlo. En automatizaciones y traducciones recibes los
 archivos exportados y la guía para usarlos.
 
 **¿Puedo usar mi propio dominio?**
