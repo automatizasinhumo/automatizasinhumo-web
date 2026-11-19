@@ -303,6 +303,7 @@ export const productos = [
     resumen: 'Enlaces cortos de marca (tunegocio.es/oferta) con estadísticas de clics y QR.',
     recibes: ['Acortador en tu dominio', 'Estadísticas por enlace', 'QR por enlace', 'Panel de gestión'],
     campos: ['Dominio o subdominio', 'Primeros enlaces'],
+    noIncluye: ['Compra del dominio'],
     ejemplo: 'Campaña de flyers con tunegocio.es/verano: sabes cuántos escanearon el QR y desde dónde.',
     repos: ['miantiao-me/Sink', 'botnick/shortlink'],
   },
@@ -674,32 +675,72 @@ Publicamos el servicio con tus datos y te enviamos el enlace y una guía corta d
   },
   {
     slug: 'preguntas-frecuentes', titulo: 'Preguntas frecuentes', menu: 'footer',
-    md: `## ¿De quién es la web o la automatización?
-Tuya. Te entregamos todos los accesos a tu nombre.
+    md: `## Precio y pago
 
-## ¿Tengo que pagar antes?
+### ¿El precio de la ficha es el que pago al final?
+Sí. El precio de cada ficha es el precio final, sin recargos, y recibes factura del pedido. Cada ficha indica si es **pago único** o una cuota mensual.
+
+### ¿Tengo que pagar antes?
 Tú eliges. Puedes **contratarlo directamente** con tarjeta (si en 7 días no hace lo que dice la ficha, te devolvemos el dinero) o pulsar **Empieza gratis**, ver una vista previa con tus datos y pagar solo si te gusta.
 
-## ¿Es solo para empresas?
-No. También para particulares: webs de boda, cumpleaños, viajes, asociaciones, currículums o tu proyecto personal.
+### ¿Hay costes ocultos o cuotas mensuales?
+Los servicios de pago único no tienen cuota con nosotros. Si hay costes externos (por ejemplo, el dominio o una suscripción de pago de otra empresa), la ficha los indica en **Qué no incluye** antes de comprar. Las cuotas solo existen si contratas un plan mensual, y son opcionales.
 
-## ¿Hay alguien al otro lado?
-Sí. David Porto Díaz atiende cada pedido en persona y responde a cualquier duda.
+### ¿Emitís factura?
+Sí, cada compra lleva su factura.
 
-## ¿Hay cuotas mensuales?
-No son obligatorias. Muchos servicios funcionan gratis, sin cuota. Si prefieres que lo mantengamos, tienes los **Planes mensuales**.
+### ¿Y si pago y no hace lo que promete la ficha?
+Si en 7 días desde la entrega el servicio no hace lo que describe su ficha, te devolvemos el importe. Las condiciones completas están en [Condiciones de contratación](/pages/condiciones).
 
-## ¿Y si no tengo textos o fotos?
+## Plazos y lo que necesitas
+
+### ¿Cuánto tarda?
+La primera versión llega en 24–72 horas laborables desde que recibimos los datos necesarios; el plazo de cada servicio aparece en su ficha.
+
+### ¿Qué tengo que darte?
+Solo lo que pide el formulario de la ficha: tarda 2-3 minutos. Lo que no tengas, lo marcas y seguimos.
+
+### ¿Y si no tengo textos o fotos?
 Marca «no lo tengo» en el campo y te proponemos textos e imágenes libres de derechos.
 
-## ¿Puedo pedir cambios?
-Sí. Todo incluye una ronda de ajustes antes de la entrega. Después, con **Te lo montamos** tienes ajustes sobre lo pedido; con **Plantilla + guía**, resolvemos tus dudas por email. Para cambios nuevos, el plan de mantenimiento.
+### ¿Puedo verlo antes de pagar?
+Sí, con **Empieza gratis**: te enviamos una vista previa con tus datos y pagas solo si te gusta. Si no te convence, no pagas nada.
 
-## ¿Cuánto tarda?
-El plazo aparece en cada ficha y cuenta desde que recibimos los campos completos.
+## Propiedad, dominio y correo
 
-## ¿Emitís factura?
-Sí, cada compra lleva su factura.
+### ¿De quién es la web o la automatización?
+Tuya. Te entregamos todos los accesos a tu nombre, junto con el enlace y una guía de uso.
+
+### ¿Está incluido el dominio?
+La compra del dominio no está incluida en los servicios de pago único: lo indica cada ficha. Puedes usar el dominio que ya tienes o registrar uno nuevo, por ejemplo en Cloudflare Registrar, a precio de coste. Si prefieres no ocuparte de renovaciones, el plan [Alojamiento + dominio gestionado](/products/plan-hosting-dominio) lo hace por ti.
+
+### ¿Tengo que pagar alojamiento?
+Depende del servicio, y la ficha lo dice. Muchos funcionan sin alojamiento de pago; los que lo necesitan (por ejemplo, WordPress) lo indican en **Qué no incluye**.
+
+### ¿Incluye correo con mi dominio?
+El correo corporativo no está incluido en las webs; cada ficha lo indica. El plan [Alojamiento + dominio gestionado](/products/plan-hosting-dominio) incluye un correo de reenvío.
+
+## Cambios y después de la entrega
+
+### ¿Puedo pedir cambios?
+Sí. Tienes una ronda de ajustes incluida, que puedes solicitar durante los siete días siguientes a la entrega.
+
+### ¿Y si quiero cambiar algo más adelante?
+Los cambios posteriores se hacen con el plan de [mantenimiento](/products/plan-mantenimiento-web) (incluye 30 minutos de cambios al mes) o por horas.
+
+### ¿Quién me ayuda si tengo dudas o algo falla?
+Con **Te lo montamos**, te atendemos por email y WhatsApp; con **Plantilla + guía**, por email. Si quieres que alguien vigile que tu web sigue funcionando, el plan de [mantenimiento](/products/plan-mantenimiento-web) incluye copias de seguridad, actualizaciones y aviso de caídas.
+
+### ¿Puedo cancelar un plan mensual?
+Sí, en cualquier momento. El servicio sigue activo hasta el final del periodo pagado.
+
+## Sobre nosotros
+
+### ¿Es solo para empresas?
+No. También para particulares: webs de boda, cumpleaños, viajes, asociaciones, currículums o tu proyecto personal.
+
+### ¿Hay alguien al otro lado?
+Sí. Detrás hay una persona, David Porto Díaz, que te responde cualquier duda.
 `,
   },
   {
