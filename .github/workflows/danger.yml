@@ -35,7 +35,12 @@ jobs:
         with:
           node-version: 22
 
+      # Instalación fija y sin scripts de ciclo de vida, fuera del árbol del repo
+      # (npx podría instalar y ejecutar scripts bajo demanda: Sonar S6505).
+      - name: Instalar Danger
+        run: npm install --prefix "$RUNNER_TEMP/danger" --ignore-scripts --no-audit --no-fund danger@14.1.0
+
       - name: Danger
-        run: npx --yes danger@14.1.0 ci --failOnErrors
+        run: '"$RUNNER_TEMP/danger/node_modules/.bin/danger" ci --failOnErrors'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
