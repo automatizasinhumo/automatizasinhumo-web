@@ -159,11 +159,14 @@ function excerptFromTokens(tokens: Token[], maxLength: number): string {
       (token.children ?? [])
         .filter((child) => child.type === 'text' || child.type === 'code_inline' || child.type.endsWith('break'))
         .map((child) => (child.type.endsWith('break') ? ' ' : child.content))
-        .join(''),
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim(),
     )
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .filter(Boolean)
+    // Each block (heading, paragraph, list item) is its own sentence: without a separator
+    // a heading runs into the next paragraph («Qué recibes Web de un…»).
+    .reduce((acc, block) => (acc ? `${acc}${/[.!?…:;,]$/.test(acc) ? ' ' : '. '}${block}` : block), '');
   if (text.length <= maxLength) return text;
   // Cut on a word boundary so the summary doesn't end mid-word.
   const cut = text.slice(0, maxLength - 1);
@@ -173,6 +176,36 @@ function excerptFromTokens(tokens: Token[], maxLength: number): string {
 
 export function markdownExcerpt(markdown: string, maxLength = 160): string {
   return excerptFromTokens(md.parse(markdown, {}), maxLength);
+}
+
+/**
+ * Pares pregunta/respuesta de un cuerpo Markdown: cada encabezado que termina en «?»
+ * con el texto que lo sigue hasta el siguiente encabezado. Sirve para el FAQPage de
+ * cualquier página escrita como preguntas, sin marcarla a mano.
+ */
+export function markdownFaq(markdown: string, maxAnswer = 1000): Array<{ question: string; answer: string }> {
+  const tokens = md.parse(markdown, {});
+  const pares: Array<{ question: string; answer: string }> = [];
+  let actual: { question: string; cuerpo: Token[] } | null = null;
+  const cerrar = () => {
+    if (!actual) return;
+    const answer = excerptFromTokens(actual.cuerpo, maxAnswer);
+    if (answer) pares.push({ question: actual.question, answer });
+    actual = null;
+  };
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token.type === 'heading_open') {
+      cerrar();
+      const titulo = excerptFromTokens([tokens[i + 1]], 300);
+      if (titulo.endsWith('?')) actual = { question: titulo, cuerpo: [] };
+      i += 2;
+      continue;
+    }
+    if (actual && token.type === 'inline') actual.cuerpo.push(token);
+  }
+  cerrar();
+  return pares;
 }
 
 /** Plain-text summary of the first Markdown paragraph, excluding later sections. */

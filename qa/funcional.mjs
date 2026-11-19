@@ -8,13 +8,27 @@ export const ANCHOS = [360, 390, 1280];
 export const IGNORAR = [/cloudflareinsights/i, /favicon/i, /Failed to load resource.*\bnet::ERR_BLOCKED/i];
 const ignorado = (t) => IGNORAR.some((r) => r.test(t));
 const MAX_ENLACES = 40;
+// Errores de transporte (no de la web): conexión cortada, reiniciada o agotada.
+const RED = /net::ERR_(CONNECTION_(RESET|CLOSED|REFUSED|TIMED_OUT)|TIMED_OUT|NETWORK_CHANGED|EMPTY_RESPONSE|HTTP2_PROTOCOL_ERROR)|NS_ERROR_NET_(RESET|INTERRUPT|TIMEOUT)|NS_ERROR_CONNECTION_REFUSED|Timeout \d+ms exceeded|network connection was lost|Could not connect to the server|socket hang up|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE/i;
+const deRed = (p) => /^(carga: |recurso sin cargar \(|enlace sin respuesta: )/.test(p) && RED.test(p);
 
 /**
  * Abre `url` en una página nueva del contexto `ctx` y devuelve la lista de problemas
  * (vacía = bien). Con `comprobados`, comprueba también los enlaces internos (una vez por URL,
  * no por ancho: se pasa el Set de ya comprobados).
  */
-export async function revisarPagina(ctx, url, { ancho, captura, comprobados } = {}) {
+export async function revisarPagina(ctx, url, opciones = {}) {
+  const primero = await revisarUnaVez(ctx, url, opciones);
+  // Un corte de red puntual (reset, timeout) entre el runner y Cloudflare no es un fallo de
+  // la web: si todo lo hallado es de transporte, se repite una vez y solo cuenta lo que vuelva.
+  // Un error de JS, de consola o de contenido nunca se reintenta.
+  if (!primero.length || !primero.every(deRed)) return primero;
+  const segundo = await revisarUnaVez(ctx, url, opciones);
+  if (!segundo.length) console.log(`aviso: ${url} (${opciones.ancho ?? '?'}px) falló por red y pasó al repetir (${primero[0]})`);
+  return segundo;
+}
+
+async function revisarUnaVez(ctx, url, { ancho, captura, comprobados } = {}) {
   const pg = await ctx.newPage();
   const problemas = [];
   pg.on('pageerror', (e) => problemas.push('JS: ' + e.message.split('\n')[0]));
