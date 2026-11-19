@@ -48,10 +48,10 @@ Estructura del ZIP: `LEEME.md`, `web-publicable/`, `codigo-fuente/`, `datos-nego
   - Stripe en modo `subscription`: pago único más una cuota «Alojamiento» o «Alojamiento + mantenimiento», con el portal de cliente de Stripe.
 - **P2. Dominios y tickets:** enrutado por hostname en D1 y tickets de mantenimiento (OpenDrone-Web).
 
-**Bloqueos que dependen de David:**
+**Aparcado hasta que la web esté terminada (decisión de David, 19/11):**
 
-- R2 no está activado en la cuenta (error 10042): hay que activarlo en el panel de Cloudflare.
-- No hay claves de Stripe de prueba (`sk_test_…`, `whsec_…`) en los secretos del repo.
+- Stripe y la plataforma de pago real: se configuran al final.
+- R2 pide tarjeta, así que no se activa. Hay que buscar una alternativa gratuita. Si no la hay, más adelante se pagará un plan fijo de unos 5 € con tope conocido.
 
 El resto de este apartado es el modelo de la ronda 22. Vale como contexto, pero manda la tabla anterior.
 
@@ -148,7 +148,7 @@ web publicada; si quieres usar tu dominio o llevártela, escríbenos y te lo pre
 ## 5. Tareas
 
 - [x] Probar agent2web y sitedrop tal cual: sitedrop 94/94; agent2web 193/194, descartado por exigir Workers Paid.
-- [ ] **Bloqueado (David):** activar R2 y dar las claves de Stripe de prueba.
+- [ ] Alternativa gratuita a R2 para guardar los ZIP (sin tarjeta). Todo lo de pagos queda aparcado hasta que la web esté terminada.
 - [ ] P0. La fábrica genera el ZIP de entrega con la estructura de la ronda 23. Se puede hacer sin R2.
 - [ ] P0. Clonar stripe-samples/checkout-one-time-payments, pasar sus pruebas y hacer una compra de prueba de punta a punta con la tarjeta 4242.
 - [ ] P0. Guardar el ZIP en R2, montar «Mis pedidos» con URL prefirmada y enviar el correo con Resend.
