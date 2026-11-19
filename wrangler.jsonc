@@ -28,8 +28,8 @@
 	"triggers": { "crons": ["*/5 * * * *"] },
 	"observability": {
 		"enabled": true,
-		// Logs stay at 100 % (one event per invocation). Traces add one event per
-		// span (D1 calls, subrequests, waitUntil), so full sampling multiplied the
+		// Logs stay at 100 % (one invocation event plus one per console.log line).
+		// Traces add one event per span (D1 calls, subrequests, waitUntil), so full sampling multiplied the
 		// count: staging served ~38k invocations on 19/11/2026, mostly our own QA
 		// crawlers, and used 75 % of the Free plan's daily Observability allowance
 		// (200k events/day; from 1/12/2026, 0.5 GB/day). 10 % of traces keeps
