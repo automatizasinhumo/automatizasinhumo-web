@@ -30,6 +30,7 @@ const PRODUCTS = (
     ['diplomas-eventos', 'Diplomas para eventos', 'Crea diplomas para los asistentes a cada evento.', 'documentos'],
     ['correo-contacto', 'Correo de contacto', 'Dirección para recibir consultas de clientes.', 'contacto'],
     ['newsletter-email', 'Newsletter por email', 'Envía boletines y novedades a tus clientes.', 'contacto'],
+    ['transcripcion-audios', 'Transcripción automática de audios', 'Ejemplo: la nota de voz dice «Pide cita para la renta».', 'automatizaciones'],
   ] as const
 ).map(([slug, name, description, category]) => ({ slug, name, description, category }));
 
@@ -116,6 +117,12 @@ describe('buscador FTS en D1', () => {
     const { products, correctedTo } = await search.search('pelukeria');
     expect(correctedTo).toBe('peluqueria');
     expect(products[0]?.slug).toBe('reservas-salon');
+  });
+
+  it('la categoría que nombra la consulta va antes que una ficha que solo la cubre en un ejemplo', async () => {
+    const { products } = await search.search('quiero que me pidan cita');
+    expect(products[0]?.slug).toBe('reservas-salon');
+    expect(products.map((product) => product.slug)).toContain('transcripcion-audios');
   });
 
   it('pone primero la ficha que lleva la palabra buscada en el nombre', async () => {

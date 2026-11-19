@@ -226,10 +226,14 @@ export async function rankSearchProducts(
   // por las palabras del cliente («facturas» → «Facturas recibidas a hoja de cálculo»).
   // La que solo las menciona («Diplomas para eventos», «un dossier útil para bodas») o
   // casa por sinónimo va después de la categoría.
+  // Sin `categoryFirst` pasa lo mismo con la ficha de fuera que cubre la consulta solo en
+  // la descripción: «quiero que me pidan cita» no debe dar primero la transcripción de
+  // audios porque su ejemplo diga «Pide cita», sino las fichas de Reservas y citas.
   const tier = categoryFirst
     ? (s: Scored) =>
         s.inCategory && s.coverage === 1 ? 0 : s.literalInName ? 1 : s.inCategory ? 2 : s.coverage === 1 ? 3 : 4
-    : (s: Scored) => (s.coverage === 1 ? 0 : s.inCategory ? 1 : 2);
+    : (s: Scored) =>
+        s.coverage === 1 && (s.inCategory || s.nameCoverage > 0) ? 0 : s.inCategory ? 1 : s.coverage === 1 ? 2 : 3;
   // Dentro de la categoría que explica la consulta manda el orden del catálogo (la
   // ficha principal primero); fuera, bm25.
   const curated = (a: Scored, b: Scored) =>
