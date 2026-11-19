@@ -1,6 +1,7 @@
 [
   {
     "slug": "peluquerias",
+    "label": "Peluquerías",
     "title": "Web para peluquerías: servicios, horarios y reservas",
     "description": "Una web para peluquerías que explica servicios y horarios, muestra una demo real y facilita que cada cliente reserve o contacte.",
     "heading": "Una web clara para tu peluquería",
@@ -10,10 +11,17 @@
       "Muestra ubicación, horario y un botón directo para llamar o pedir cita.",
       "Si las reservas dependen de la duración o del profesional, enlaza un sistema que gestione esa disponibilidad."
     ],
-    "serviceSlugs": ["web-una-pagina", "reservas-salon"]
+    "serviceSlugs": [
+      "web-una-pagina",
+      "reservas-salon"
+    ],
+    "demoHints": [
+      "spa-salon"
+    ]
   },
   {
     "slug": "fontaneros",
+    "label": "Fontaneros",
     "title": "Web para fontaneros: servicios y avisos de urgencia",
     "description": "Una página para fontaneros con zona de servicio, trabajos habituales y contacto visible, apoyada en una demo real de fontanería.",
     "heading": "Una web práctica para un fontanero",
@@ -23,10 +31,17 @@
       "Indica las localidades que cubres y el horario real de atención.",
       "Haz que llamar desde el móvil sea sencillo y explica si el desplazamiento o la urgencia se presupuestan aparte."
     ],
-    "serviceSlugs": ["web-taller"]
+    "serviceSlugs": [
+      "web-una-pagina",
+      "web-corporativa-5-secciones"
+    ],
+    "demoHints": [
+      "plumber-home-services"
+    ]
   },
   {
     "slug": "restaurantes",
+    "label": "Restaurantes",
     "title": "Web para restaurantes: carta, ubicación y reservas",
     "description": "Una web para restaurantes con acceso a la carta, ubicación y reservas, enlazada con servicios y demos reales de hostelería.",
     "heading": "Una web útil para tu restaurante",
@@ -36,10 +51,20 @@
       "Aclara si se puede reservar mesa, pedir para recoger o solicitar entrega.",
       "Añade dirección, horario y una ruta para llegar; comprueba que coinciden con tu ficha de empresa."
     ],
-    "serviceSlugs": ["carta-qr", "reservas-restaurante"]
+    "serviceSlugs": [
+      "web-una-pagina",
+      "carta-qr",
+      "reservas-restaurante"
+    ],
+    "demoHints": [
+      "restaurant/restaurant",
+      "restaurant/cafe",
+      "pizza"
+    ]
   },
   {
     "slug": "abogados",
+    "label": "Abogados",
     "title": "Web para abogados: especialidades y primera consulta",
     "description": "Una web para despachos de abogados que presenta especialidades, ámbito de actuación y vías de contacto con claridad y prudencia.",
     "heading": "Una web profesional para un despacho",
@@ -49,10 +74,16 @@
       "Indica quién presta el servicio, dónde atiende y cómo se gestiona la primera consulta.",
       "No publiques información identificable de clientes ni detalles de casos sin autorización expresa."
     ],
-    "serviceSlugs": ["web-corporativa-5-secciones"]
+    "serviceSlugs": [
+      "web-corporativa-5-secciones"
+    ],
+    "demoHints": [
+      "consulting-firm"
+    ]
   },
   {
     "slug": "fisioterapeutas",
+    "label": "Fisioterapeutas",
     "title": "Web para fisioterapeutas: tratamientos y citas",
     "description": "Una web para fisioterapeutas con tratamientos, ubicación y un camino claro para solicitar cita, apoyada en una demo real del sector.",
     "heading": "Una web cercana para tu consulta de fisioterapia",
@@ -62,6 +93,32 @@
       "Incluye ubicación, accesibilidad, horarios y la forma de reservar.",
       "Evita recoger datos de salud en formularios generales; solicita solo lo imprescindible y con las garantías adecuadas."
     ],
-    "serviceSlugs": ["pagina-citas"]
+    "serviceSlugs": [
+      "web-una-pagina",
+      "pagina-citas"
+    ],
+    "demoHints": [
+      "physiotherapy"
+    ]
+  },
+  {
+    "slug": "talleres",
+    "label": "Talleres",
+    "title": "Web para talleres: servicios, precios orientativos y cita online",
+    "description": "Una web para talleres mecánicos, de bicis o de reparación con servicios, precios orientativos y reserva de cita, apoyada en una demo real de taller.",
+    "heading": "Una web clara para tu taller",
+    "introduction": "Quien busca un taller quiere saber si reparas lo suyo, cuánto puede costar y cuándo puede llevarlo. La web debe responder eso y dejar pedir cita sin llamar.",
+    "considerations": [
+      "Publica los servicios habituales con precios orientativos y explica qué se presupuesta tras revisar el vehículo.",
+      "Indica horario, días de cierre y con cuánta antelación se puede reservar.",
+      "Aclara qué pasa si la reparación tarda más de lo previsto y cómo avisas al cliente."
+    ],
+    "serviceSlugs": [
+      "web-taller",
+      "web-una-pagina"
+    ],
+    "demoHints": [
+      "auto-repair"
+    ]
   }
 ]
