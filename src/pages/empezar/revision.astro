@@ -1,0 +1,138 @@
+---
+import { CONTACT_EMAIL } from '../../contacto';
+import { env } from 'cloudflare:workers';
+import Layout from '../../layouts/Layout.astro';
+import { decidir, ESPERANDO_DECISION, leerDecision, MAX_CAMBIOS, type Accion } from '../../features/solicitudes/decision';
+
+export const prerender = false;
+
+// Aprobar o pedir cambios desde el enlace firmado del correo de revisión.
+// GET solo muestra (los escáneres de correo abren enlaces); la decisión va en POST.
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+// strict-origin: sin ruta ni query (el token) en el Referer, pero con Origin en el POST
+// (no-referrer manda «Origin: null» y el guard de formularios lo rechazaría).
+Astro.response.headers.set('Referrer-Policy', 'strict-origin');
+
+let token = Astro.url.searchParams.get('t');
+let hecho: Accion | null = null;
+let error = '';
+let fallo = false;
+let cambios = '';
+if (Astro.request.method === 'POST') {
+  const f = await Astro.request.formData().catch(() => null);
+  token = String(f?.get('t') ?? '');
+  const accion = f?.get('accion') === 'aprobar' ? 'aprobar' : f?.get('accion') === 'cambios' ? 'cambios' : null;
+  cambios = String(f?.get('cambios') ?? '').slice(0, MAX_CAMBIOS);
+  const e = await leerDecision(token, env.AUTH_SECRET);
+  if (e && accion) {
+    if (accion === 'cambios' && !cambios.trim()) error = 'Cuéntanos qué quieres cambiar.';
+    else {
+      try {
+        if (await decidir(env.DB, e, accion, cambios)) hecho = accion;
+      } catch {
+        // D1 caída o sin cupo: que el cliente sepa que NO se guardó y pueda reintentar.
+        fallo = true;
+        Astro.response.status = 503;
+      }
+    }
+  }
+}
+
+const enl = await leerDecision(token, env.AUTH_SECRET);
+type Fila = { estado: string; producto: string | null; slug: string; cuerpo: string | null; ultima: number | null };
+const s = enl
+  ? await env.DB.prepare(
+      `SELECT s.estado, s.producto, s.slug,
+         (SELECT n.cuerpo FROM notificaciones n WHERE n.solicitud_public_id = s.public_id AND n.tipo = 'revision'
+            AND n.estado_envio = 'enviado' AND n.version = ?) AS cuerpo,
+         (SELECT MAX(n.version) FROM notificaciones n WHERE n.solicitud_public_id = s.public_id AND n.tipo = 'revision'
+            AND n.estado_envio = 'enviado') AS ultima
+       FROM solicitudes s WHERE s.public_id = ?`,
+    )
+      .bind(enl.version, enl.id)
+      .first<Fila>()
+      .catch(() => {
+        fallo = true;
+        return null;
+      })
+  : null;
+// La versión a revisar es el primer enlace del correo de revisión de ESA versión.
+const vista = /https?:\/\/[^\s<>]+/.exec(s?.cuerpo ?? '')?.[0] ?? null;
+const superada = !!s && (s.ultima ?? 0) > (enl?.version ?? 0);
+const abierta = !!s && !superada && (ESPERANDO_DECISION as readonly string[]).includes(s.estado);
+const servicio = s?.producto ?? s?.slug ?? 'tu web';
+if (!s && !fallo) Astro.response.status = 404;
+if (fallo && Astro.response.status !== 503) Astro.response.status = 503;
+---
+
+<Layout title="Revisa tu vista previa" description="Aprueba tu vista previa o pide cambios.">
+  <div class="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+    <h1 class="font-serif text-3xl font-bold text-ink sm:text-4xl">Revisa tu vista previa</h1>
+
+    {fallo && (
+      <p class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert" data-revision-error>
+        No hemos podido guardar tu respuesta ahora mismo. Vuelve a intentarlo en unos minutos con el mismo enlace del correo; no se ha registrado nada.
+      </p>
+    )}
+
+    {!s && !fallo && (
+      <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" data-revision-invalida>
+        Este enlace no es válido o ha caducado. Responde al correo que te enviamos o escríbenos a {CONTACT_EMAIL} y lo resolvemos.
+      </p>
+    )}
+
+    {s && hecho === 'aprobar' && (
+      <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 font-medium text-ink" data-revision-hecho="aprobar">
+        ¡Gracias! Hemos registrado tu aprobación de {servicio}. Te escribiremos con el siguiente paso.
+      </p>
+    )}
+    {s && hecho === 'cambios' && (
+      <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 font-medium text-ink" data-revision-hecho="cambios">
+        Hemos recibido tus cambios para {servicio}. Te avisaremos cuando la nueva versión esté lista.
+      </p>
+    )}
+
+    {s && !hecho && superada && (
+      <p class="mt-6 text-muted" data-revision-superada>
+        Ya hay una versión más reciente de {servicio}. Usa el enlace del último correo que te enviamos para revisarla.
+      </p>
+    )}
+
+    {s && !hecho && !superada && !abierta && (
+      <p class="mt-6 text-muted" data-revision-cerrada>
+        Ya tenemos tu respuesta sobre {servicio}. Si quieres añadir algo, responde al correo o escríbenos a {CONTACT_EMAIL}.
+      </p>
+    )}
+
+    {s && !hecho && abierta && (
+      <section class="mt-6 space-y-8" data-revision-abierta>
+        <p class="text-muted">
+          {vista ? (
+            <>Mira tu {servicio} <a class="font-semibold text-brand underline" href={vista} target="_blank" rel="noopener noreferrer">en esta vista previa</a> y dinos qué te parece.</>
+          ) : (
+            <>Dinos qué te parece tu {servicio}.</>
+          )}
+        </p>
+
+        <form method="POST" class="rounded-2xl border border-line bg-surface p-5">
+          <input type="hidden" name="t" value={token} />
+          <input type="hidden" name="accion" value="aprobar" />
+          <h2 class="text-lg font-bold text-ink">Me encaja</h2>
+          <p class="mt-1 text-sm text-muted">Damos esta versión por buena y pasamos a la entrega.</p>
+          <button type="submit" class="mt-4 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Aprobar</button>
+        </form>
+
+        <form method="POST" class="rounded-2xl border border-line bg-surface p-5">
+          <input type="hidden" name="t" value={token} />
+          <input type="hidden" name="accion" value="cambios" />
+          <h2 class="text-lg font-bold text-ink"><label for="cambios">Quiero cambiar algo</label></h2>
+          <p class="mt-1 text-sm text-muted">Una ronda de ajustes está incluida. Cuanto más concreto, mejor (textos, colores, fotos, secciones).</p>
+          <textarea id="cambios" name="cambios" required maxlength={MAX_CAMBIOS} rows="5" class="mt-3 w-full rounded-xl border border-line bg-surface px-4 py-3 text-ink">{cambios}</textarea>
+          {error && <p class="mt-2 text-sm text-red-700" role="alert">{error}</p>}
+          <button type="submit" class="mt-3 rounded-full border border-brand px-6 py-3 text-sm font-semibold text-brand hover:bg-brand/5">Enviar cambios</button>
+        </form>
+      </section>
+    )}
+  </div>
+</Layout>
