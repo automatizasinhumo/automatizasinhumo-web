@@ -9,7 +9,7 @@ export const IGNORAR = [/cloudflareinsights/i, /favicon/i, /Failed to load resou
 const ignorado = (t) => IGNORAR.some((r) => r.test(t));
 const MAX_ENLACES = 40;
 // Errores de transporte (no de la web): conexión cortada, reiniciada o agotada.
-const RED = /net::ERR_(CONNECTION_(RESET|CLOSED|REFUSED|TIMED_OUT)|TIMED_OUT|NETWORK_CHANGED|EMPTY_RESPONSE|HTTP2_PROTOCOL_ERROR)|NS_ERROR_NET_(RESET|INTERRUPT|TIMEOUT)|NS_ERROR_CONNECTION_REFUSED|Timeout \d+ms exceeded|network connection was lost|Could not connect to the server/i;
+const RED = /net::ERR_(CONNECTION_(RESET|CLOSED|REFUSED|TIMED_OUT)|TIMED_OUT|NETWORK_CHANGED|EMPTY_RESPONSE|HTTP2_PROTOCOL_ERROR)|NS_ERROR_NET_(RESET|INTERRUPT|TIMEOUT)|NS_ERROR_CONNECTION_REFUSED|Timeout \d+ms exceeded|network connection was lost|Could not connect to the server|socket hang up|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE/i;
 const deRed = (p) => /^(carga: |recurso sin cargar \(|enlace sin respuesta: )/.test(p) && RED.test(p);
 
 /**
