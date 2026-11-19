@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { describe, expect, it, vi } from 'vitest';
 import type { D1Database } from '@cloudflare/workers-types';
 import type { EmailProvider } from '../email/provider';
-import { enviarEntregasListas, enviarNotificacion, enviarSeguimientos, enviarVistasPreviasListas } from './envio';
+import { enviarEntregasListas, enviarNotificacion, enviarSeguimientos, enviarVistasPreviasListas, versionRevision } from './envio';
 
 /** D1 mínimo sobre SQLite de Node con las migraciones reales: el SQL se ejecuta de verdad. */
 function d1(): D1Database & { sql: DatabaseSync } {
@@ -98,6 +98,27 @@ describe('enviarVistasPreviasListas', () => {
     expect(await enviarVistasPreviasListas(db, mail)).toEqual({ enviadas: [], fallidas: [] });
     expect(mail.send).not.toHaveBeenCalled();
     expect(estado(db, 'S-DDDDDD')).toBe('cambios_pedidos');
+  });
+
+  it('tras una ronda de cambios manda la revisión siguiente (v2), aunque la v1 ya se enviara', async () => {
+    const db = d1();
+    solicitud(db, 'S-AAAAAA', 'en_preparacion', `Vista previa automática: ${URL_OK} · QA ok`);
+    db.sql.prepare("UPDATE solicitudes SET mensaje = 'Hola\n\nCambios pedidos sobre la versión 1: teléfono nuevo' WHERE public_id = 'S-AAAAAA'").run();
+    db.sql
+      .prepare("INSERT INTO notificaciones (solicitud_public_id, tipo, version, asunto, cuerpo, estado_envio) VALUES ('S-AAAAAA', 'revision', 1, 'a', 'b', 'enviado')")
+      .run();
+    const mail = correo();
+    expect(await enviarVistasPreviasListas(db, mail)).toEqual({ enviadas: ['S-AAAAAA'], fallidas: [] });
+    expect(mail.send).toHaveBeenCalledTimes(1);
+    const v = db.sql.prepare("SELECT MAX(version) AS v FROM notificaciones WHERE tipo = 'revision' AND estado_envio = 'enviado'").get() as { v: number };
+    expect(v.v).toBe(2);
+    expect(estado(db, 'S-AAAAAA')).toBe('vista_previa_enviada');
+  });
+
+  it('versionRevision: 1 sin rondas; la siguiente a la mayor; con tope', () => {
+    expect(versionRevision(null)).toBe(1);
+    expect(versionRevision('Cambios pedidos sobre la versión 1: a\n\nCambios pedidos sobre la versión 2: b')).toBe(3);
+    expect(versionRevision('Cambios pedidos sobre la versión 99: a')).toBe(20);
   });
 
   it('dos ticks seguidos no duplican el correo', async () => {

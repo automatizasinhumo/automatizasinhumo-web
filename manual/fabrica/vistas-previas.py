@@ -34,8 +34,20 @@ CADUCA = "datetime('now', '-60 minutes')"
 # Un fallo antes de tener la web (descarga de la plantilla, wrangler) se reintenta tras CADUCA, hasta
 # REINTENTOS veces; volver a fabricar solo redespliega el mismo Worker. Fallos de QA: revisión a mano.
 REINTENTOS = 3
+# «cambios_pedidos» con la nota que deja el enlace del correo (src/features/solicitudes/decision.ts):
+# se vuelve a fabricar con los cambios añadidos al mensaje y el cron manda la revisión siguiente.
+CAMBIOS_RE = re.compile(r'^Cambios pedidos por el cliente \(sobre la versión (\d+)\):\n(.*?)(?:\n\n|\Z)', re.S)
 DISPONIBLE = (f"(estado = 'nueva' OR (estado = 'en_preparacion' AND nota LIKE {{en_curso}} "
-              f"AND updated_at < {CADUCA}))")
+              f"AND updated_at < {CADUCA}) OR (estado = 'cambios_pedidos' AND nota LIKE 'Cambios pedidos por el cliente (%'))")
+
+
+def con_cambios(fila):
+    """Si la solicitud vuelve con cambios, el mensaje lleva su texto (lo lee la IA al reescribir)."""
+    m = CAMBIOS_RE.match(fila.get('nota') or '') if fila.get('estado') == 'cambios_pedidos' else None
+    if not m or not m[2].strip():
+        return None
+    # El número de versión lo lee el cron del Worker para mandar la revisión siguiente (envio.ts).
+    return f"{fila.get('mensaje') or ''}\n\nCambios pedidos sobre la versión {m[1]}: {m[2].strip()}".strip()
 
 
 def d1(sql):
@@ -162,22 +174,8 @@ def plantilla_de(fila, plantillas):
     return elegida if elegida in plantillas else plantillas[0]
 
 
-# Clave que guarda /api/solicitudes con «Quiero este diseño» (src/features/solicitudes/diseno.ts).
-CAMPO_DISENO = 'Diseño elegido'
-
-
-def plantilla_de(fila, plantillas):
-    """La plantilla que eligió el cliente si el servicio la tiene; si no, la primera."""
-    try:
-        elegida = json.loads(fila.get('campos') or '{}').get(CAMPO_DISENO)
-    except (ValueError, AttributeError):
-        elegida = None
-    return elegida if elegida in plantillas else plantillas[0]
-
-
 def pedido_de(fila, plantilla):
     campos = json.loads(fila.get('campos') or '{}')
-    campos.pop(CAMPO_DISENO, None)  # es una ruta interna, no un texto del negocio
     campos.pop(CAMPO_DISENO, None)  # es una ruta interna, no un texto del negocio
     negocio = nombre_negocio_evento(campos)
     texto = '. '.join(f'{k}: {v}' for k, v in campos.items() if v) + ('. ' + fila['mensaje'] if fila.get('mensaje') else '')
@@ -196,14 +194,15 @@ def pedido_de(fila, plantilla):
     }
 
 
-def procesar(public_id, p, intentos=0):
+def procesar(public_id, p, intentos=0, mensaje=None):
     """Reclama la solicitud y solo entonces la fabrica: dos procesos a la vez (la tarea del PC y Actions)
     no fabrican la misma. Devuelve True si la ha intentado. Ningún fallo (D1 incluido) tumba el lote:
     si no se puede guardar la nota, la reserva caduca y otra pasada la recupera."""
     donde = f"public_id = {sql_txt(public_id)}"
     reserva = f'{EN_CURSO} #{uuid.uuid4().hex}'
     try:
-        reclamada = d1(f"UPDATE solicitudes SET estado = 'en_preparacion', nota = {sql_txt(reserva)}, "
+        extra = f"mensaje = {sql_txt(mensaje)}, " if mensaje is not None else ''
+        reclamada = d1(f"UPDATE solicitudes SET estado = 'en_preparacion', {extra}nota = {sql_txt(reserva)}, "
                        f"updated_at = datetime('now') WHERE {donde} AND "
                        f"{DISPONIBLE.format(en_curso=sql_txt(EN_CURSO + '%'))} RETURNING public_id")
     except RuntimeError as e:
@@ -253,7 +252,7 @@ def main():
         return
     # Solo servicios con plantilla: las solicitudes sin plantilla no ocupan el LIMIT.
     slugs = ', '.join(sql_txt(s) for s in sorted(mapa))
-    filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje, nota FROM solicitudes "
+    filas = d1("SELECT public_id, slug, producto, nombre, email, telefono, campos, mensaje, nota, estado FROM solicitudes "
                f"WHERE {DISPONIBLE.format(en_curso=sql_txt(EN_CURSO + '%'))} AND slug IN ({slugs}) "
                "ORDER BY created_at LIMIT 50")
     hechas = 0
@@ -261,13 +260,16 @@ def main():
         plantillas = mapa.get(f['slug'])
         if not plantillas:
             continue
-        p = pedido_de(f, plantilla_de(f, plantillas))
+        mensaje = con_cambios(f)
+        if f.get('estado') == 'cambios_pedidos' and mensaje is None:
+            continue  # nota sin texto de cambios: la revisa David
+        p = pedido_de({**f, 'mensaje': mensaje} if mensaje else f, plantilla_de(f, plantillas))
         # En Actions el registro es público: ni el id (da la URL web-<id>) ni el negocio.
         print(f"solicitud {n} ({f['slug']}) -> {p['plantilla']}" if PUBLICO else
               f"{f['public_id']} ({f['slug']}) -> {p['plantilla']} · {p['negocio']}")
         if SECO:
             print('  simulación: no se fabrica' if PUBLICO else json.dumps(p, ensure_ascii=False, indent=1))
-        elif not procesar(f['public_id'], p, int((re.search(r'reintento (\d+)', f.get('nota') or '') or [0, 0])[1])):
+        elif not procesar(f['public_id'], p, int((re.search(r'reintento (\d+)', f.get('nota') or '') or [0, 0])[1]), mensaje):
             continue  # reclamación perdida: no consume el límite
         hechas += 1
         if hechas >= MAXIMO:
