@@ -82,7 +82,7 @@ export function rateLimitedResponse(pathname: string): Response {
   return new Response(
     api
       ? JSON.stringify({ error: 'Too many requests. Try again shortly.' })
-      : 'Too many requests. Try again shortly.',
+      : 'Demasiadas peticiones seguidas. Espera un minuto y vuelve a intentarlo.',
     {
       status: 429,
       headers: {
