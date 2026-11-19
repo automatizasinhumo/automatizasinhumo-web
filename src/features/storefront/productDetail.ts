@@ -14,6 +14,7 @@ import { requirePublicId } from '../catalog/serialize';
 import { buildProductCard } from './productCard';
 import { breadcrumbJsonLd, productTrail } from './breadcrumbs';
 // Generado por manual/demos/gen-galeria.mjs: slug del servicio → demos.
+import { disenosDe } from '../solicitudes/diseno';
 import demosPorProducto from '../../data/demos-producto.json';
 import type {
   ProductDetailModel,
@@ -255,6 +256,7 @@ export async function loadProductDetail(
       backHref: catalogHref,
       startHref: `/empezar/${product.slug}`,
       demos: ((demosPorProducto as Record<string, StorefrontDemo[]>)[product.slug] ?? []),
+      disenos: disenosDe(product.slug),
       error: options.searchParams.get('error'),
     },
     purchase: {

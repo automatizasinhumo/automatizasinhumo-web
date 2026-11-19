@@ -276,6 +276,19 @@ const { model, purchase } = Astro.props;
           class="block h-[70vh] min-h-[420px] w-full bg-white"
         ></iframe>
       </div>
+      {model.disenos.length > 0 && (
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-sm" data-elegir-diseno>
+          <span class="text-muted">¿Te gusta uno? Empieza gratis con:</span>
+          {model.disenos.map((d) => (
+            <a
+              href={`${model.startHref}?diseno=${encodeURIComponent(d.plantilla)}`}
+              class="inline-flex rounded-full bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand/20"
+            >
+              {d.titulo} →
+            </a>
+          ))}
+        </div>
+      )}
       <p class="mt-4 text-sm text-muted">
         ¿Te encaja? <a href="#comprar" class="font-semibold text-brand hover:underline">Contrátalo arriba</a> o{' '}
         <a href={model.startHref} class="font-semibold text-brand hover:underline">pruébalo gratis con tus datos</a>.

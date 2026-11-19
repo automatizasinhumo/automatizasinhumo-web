@@ -8,6 +8,7 @@ import { formatPrice } from '../../config';
 import { resolverPedido } from '../../features/solicitudes/pedido';
 import { firmaFormulario } from '../../features/solicitudes/borrador';
 import { mensajeDesdeBusqueda } from '../../features/search/sinResultados';
+import { disenoElegido } from '../../features/solicitudes/diseno';
 
 export const prerender = false;
 
@@ -31,6 +32,8 @@ const precioMontado = producto && conModalidad
 const precioDe = (valor: string) =>
   producto ? formatPrice(valor === 'Te lo montamos' && precioMontado ? precioMontado : producto.price_cents, producto.currency) : '';
 const q = Astro.url.searchParams;
+// «Quiero este diseño» desde la ficha: solo una plantilla que este servicio ofrece.
+const diseno = producto ? disenoElegido(producto.slug, q.get('diseno')) : null;
 const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Plantilla + guía';
 // Campos que el servidor ha rellenado desde la URL: solo esos mandan sobre el borrador.
 // Un parámetro que no inicializa nada (?nombre=Ana) no debe vaciar lo guardado.
@@ -133,6 +136,14 @@ const label = 'block text-sm font-medium text-ink';
             <button type="button" class="shrink-0 font-semibold text-brand underline-offset-2 hover:underline" data-borrador-borrar>Empezar de cero</button>
           </p>
           <input type="hidden" name="slug" value={slug} />
+          {diseno && (
+            <>
+              <input type="hidden" name="diseno" value={diseno.plantilla} />
+              <p class="rounded-lg border border-line bg-surface px-4 py-3 text-sm text-muted" data-diseno-elegido>
+                Diseño elegido: <strong class="text-ink">{diseno.titulo}</strong>. Prepararemos tu vista previa sobre él.
+              </p>
+            </>
+          )}
           {/* Un token por formulario mostrado: el doble envío devuelve la misma solicitud. */}
           <input type="hidden" name="envio" value={crypto.randomUUID()} />
           {verificado && <input type="hidden" name="pedido" value={pedidoToken} />}
