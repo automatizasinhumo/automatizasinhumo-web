@@ -53,6 +53,8 @@ async function estabilizar(pg: Page) {
 for (const ancho of ANCHOS) {
   test.describe(`${ancho}px`, () => {
     test.use({ viewport: { width: ancho, height: 800 } });
+    // El aviso del tour (primera visita) tapa parte de la portada: se da por visto.
+    test.beforeEach(({ page }) => page.addInitScript(() => localStorage.setItem('tour:v1:estado', 'visto')));
     for (const [nombre, ruta] of PAGINAS) {
       test(`${nombre}`, async ({ page }) => {
         const r = await page.goto(ruta, { waitUntil: 'load' });

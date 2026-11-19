@@ -344,3 +344,6 @@ def barra_contacto(html, p):
 
 if __name__ == '__main__':
     fabricar(sys.argv[1], '--no-deploy' not in sys.argv)
+    from empaquetar import empaquetar  # escalón 1: el ZIP «Toma tu web» de cada pedido
+    destino = empaquetar(sys.argv[1])
+    print('paquete de entrega generado' if PUBLICO else f'paquete: {destino}')
