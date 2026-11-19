@@ -350,6 +350,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Alérgenos e idiomas
 - Cambios ilimitados de precios
 
+## No incluye
+- Impresión física de cartas o códigos QR
+- Fotografía profesional de los platos
+- Rediseños completos de la carta
+- Traducciones profesionales a nuevos idiomas
+- Integración con TPV o sistemas de caja
+
 ## Campos que rellenas
 - Nombre del local
 - Platos (nombre, precio, alérgenos)
@@ -396,6 +403,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Opción recoger / a domicilio
 - Sin comisiones por pedido
 
+## No incluye
+- Cobro online con tarjeta o Bizum
+- Repartidores y gestión física de entregas
+- Integración con TPV o impresoras de cocina
+- Respuesta automática con inteligencia artificial
+- Campañas publicitarias para atraer pedidos
+
 ## Campos que rellenas
 - Carta y precios
 - Número de WhatsApp
@@ -438,6 +452,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Panel para ver y confirmar reservas
 - Avisos al cliente
 - Control de aforo por turno
+
+## No incluye
+- Integración con TPV o programas de hostelería
+- Costes de SMS u otros servicios externos
+- Gestión presencial de mesas y camareros
+- Cobro de señales o depósitos con tarjeta
+- Personal para atender o confirmar reservas
 
 ## Campos que rellenas
 - Turnos y aforo
@@ -483,6 +504,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Pedido resumido para cocina
 - Informe de preguntas frecuentes
 
+## No incluye
+- Consumo de la API de inteligencia artificial
+- Comisiones de pasarelas de pago externas
+- Integración con TPV o impresoras de cocina
+- Revisión profesional de alérgenos y composición
+- Atención humana y resolución de reclamaciones
+
 ## Campos que rellenas
 - Carta completa
 - Preguntas frecuentes
@@ -526,6 +554,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Tipos de cita (15, 30, 60 min…)
 - Confirmación y recordatorio por email
 - Enlace para tu web, Instagram o firma
+
+## No incluye
+- Cobros online o depósitos por reserva
+- Costes de SMS o WhatsApp Business API
+- Sincronización con calendarios no indicados
+- Gestión de historiales clínicos
+- Dominio personalizado y su renovación
 
 ## Campos que rellenas
 - Tipos de cita y duración
@@ -572,6 +607,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Recordatorios
 - Widget para tu web
 
+## No incluye
+- TPV, facturación o cobro de los servicios
+- Costes de SMS o mensajería de terceros
+- Historia clínica o gestión de datos sanitarios
+- Programas de nóminas y comisiones del personal
+- Campañas de captación y publicidad
+
 ## Campos que rellenas
 - Servicios, duración y precio
 - Profesionales y horarios
@@ -615,6 +657,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Formulario de confirmación de asistencia con menú y alergias
 - Lista de confirmados descargable
 - Preguntas frecuentes
+
+## No incluye
+- Dominio personalizado y su renovación
+- Fotografía o vídeo profesional de la boda
+- Invitaciones impresas y gastos de imprenta
+- Envío postal de invitaciones
+- Organización presencial del evento
 
 ## Campos que rellenas
 - Nombres y fecha
@@ -663,6 +712,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Botón de mapa y confirmación
 - Enlace para compartir
 
+## No incluye
+- Impresión de invitaciones en papel
+- Dominio personalizado y su renovación
+- Fotografía o vídeo profesional
+- Envíos masivos mediante SMS de pago
+- Animaciones de vídeo hechas desde cero
+
 ## Campos que rellenas
 - Tipo de evento
 - Nombres
@@ -707,6 +763,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Favoritas y descarga
 - Panel de administración
 
+## No incluye
+- Fotógrafo o videógrafo para el evento
+- Impresión de fotografías o álbumes
+- Retoque profesional de las imágenes
+- Almacenamiento adicional de pago
+- Conservación indefinida sin alojamiento activo
+
 ## Campos que rellenas
 - Nombre del evento
 - Fotos iniciales
@@ -748,6 +811,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Seguimiento de confirmaciones
 - Plano de mesas imprimible
 - Exportación a Excel
+
+## No incluye
+- Impresión física de planos y tarjetas
+- Servicio presencial de organización de mesas
+- Costes de SMS o plataformas de mensajería
+- Integración con programas externos no indicados
+- Gestión de proveedores y pagos del evento
 
 ## Campos que rellenas
 - Lista de invitados
@@ -792,6 +862,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - QR para imprimir
 - Enlaces a redes y WhatsApp
 
+## No incluye
+- Impresión de tarjetas físicas
+- Tarjetas NFC o dispositivos físicos
+- Dominio personalizado y su renovación
+- Diseño de un logotipo nuevo
+- Campañas publicitarias o captación de contactos
+
 ## Campos que rellenas
 - Nombre y cargo
 - Foto
@@ -833,6 +910,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Estadísticas de clics
 - Bloques de vídeo, formulario y productos
 - Panel para editar
+
+## No incluye
+- Dominio personalizado y su renovación
+- Comisiones de pagos de plataformas externas
+- Tienda online con cobro y gestión de pedidos
+- Producción de vídeos y fotografías
+- Publicidad en Instagram, TikTok o Google
 
 ## Campos que rellenas
 - Nombre o marca
@@ -877,6 +961,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Palabras clave para pasar los filtros automáticos de selección
 - Versión web opcional
 
+## No incluye
+- Fotografía profesional para el currículum
+- Traducción profesional a otros idiomas
+- Carta de presentación personalizada
+- Versión web si no se contrata como opcional
+- Garantía de entrevistas o contratación
+
 ## Campos que rellenas
 - Experiencia
 - Formación
@@ -920,6 +1011,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Muro/widget para tu web
 - Opiniones con foto y estrellas
 
+## No incluye
+- Compra o generación de opiniones de clientes
+- Importación automática desde cualquier plataforma
+- Campañas de captación de reseñas
+- Moderación manual continua por nuestro equipo
+- Dominio personalizado y su renovación
+
 ## Campos que rellenas
 - Nombre del negocio
 - Preguntas para el cliente
@@ -962,6 +1060,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Protección antispam
 - Histórico de mensajes
 
+## No incluye
+- Envío de SMS o llamadas telefónicas
+- Integración con CRM no especificados
+- Campañas de email marketing
+- Dominio y alojamiento de una web completa
+- Gestión humana de los mensajes recibidos
+
 ## Campos que rellenas
 - Campos del formulario
 - Canal de aviso
@@ -1002,6 +1107,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Enlace de referido por persona
 - Ranking y exportación
 - Correo de bienvenida
+
+## No incluye
+- Publicidad para captar inscritos
+- Envíos de newsletters periódicas
+- Costes de proveedores externos de email
+- Integración con CRM no indicados
+- Premios o incentivos para los referidos
 
 ## Campos que rellenas
 - Nombre del producto
@@ -1045,6 +1157,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Reglas de aviso por canal
 - Histórico consultable
 
+## No incluye
+- Costes de SMS, WhatsApp API u otros canales
+- Integraciones no contempladas en la configuración
+- Atención humana cuando llega un aviso
+- Resolución automática del problema notificado
+- Envíos ilimitados en servicios externos de pago
+
 ## Campos que rellenas
 - Herramientas que envían eventos
 - Canales de aviso
@@ -1085,6 +1204,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Personalidad e instrucciones a medida
 - Control de quién puede usarlo
 - Alojamiento sin servidor
+
+## No incluye
+- Consumo de la API de OpenAI u otros modelos
+- Integración con ERP o CRM externos
+- Entrenamiento de un modelo de IA propio
+- Supervisión humana permanente de respuestas
+- Atención mediante WhatsApp u otros canales
 
 ## Campos que rellenas
 - Nombre del bot
@@ -1128,6 +1254,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Avisos programados
 - Panel de mensajes
 
+## No incluye
+- Integraciones adicionales a Google Sheets
+- Consumo de servicios externos de pago
+- Pasarelas de pago y sus comisiones
+- Atención humana de los mensajes recibidos
+- Desarrollo de una aplicación móvil propia
+
 ## Campos que rellenas
 - Opciones del menú
 - Datos (productos, horarios)
@@ -1169,6 +1302,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Embudo de oportunidades
 - Difusiones
 
+## No incluye
+- Tarifas de WhatsApp Business Platform o proveedores
+- Costes de plantillas y mensajes de pago
+- Obtención del consentimiento de los contactos
+- Compra de bases de datos de clientes
+- Integración con ERP o programas no indicados
+- Personal para atender las conversaciones
+
 ## Campos que rellenas
 - Números de WhatsApp Business
 - Agentes
@@ -1209,6 +1350,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Registro en Google Sheets
 - Correo automático al cliente
 - Aviso a Telegram
+
+## No incluye
+- Publicidad para conseguir visitantes o contactos
+- Cuotas de n8n, servidor o servicios externos
+- Compra de bases de datos de potenciales clientes
+- Integraciones distintas de las indicadas
+- Gestión comercial humana de los contactos
 
 ## Campos que rellenas
 - Formulario de origen
@@ -1252,6 +1400,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Hoja de cálculo ordenada
 - Copia del PDF en tu nube
 
+## No incluye
+- Programa de contabilidad o presentación de impuestos
+- Revisión contable manual de cada factura
+- Garantía de extracción perfecta en PDFs difíciles
+- Cuotas de OCR, IA o servicios externos
+- Conexión con ERP no especificados
+
 ## Campos que rellenas
 - Correo donde llegan las facturas
 - Hoja de destino
@@ -1293,6 +1448,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Borradores de respuesta
 - Envío por email o Telegram
 
+## No incluye
+- Publicación automática de respuestas a reseñas
+- Costes de API de inteligencia artificial
+- Eliminación de reseñas negativas
+- Campañas para conseguir nuevas opiniones
+- Gestión de reclamaciones de clientes
+
 ## Campos que rellenas
 - Dónde están tus reseñas
 - Correo o Telegram de destino
@@ -1333,6 +1495,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Prueba con datos reales
 - Guía de uso de 1 página
 
+## No incluye
+- Instalación de varios flujos distintos
+- Cuotas de servicios externos utilizados
+- Desarrollo de integraciones no contempladas
+- Mantenimiento y vigilancia continua del flujo
+- Cambios importantes de funcionamiento posteriores
+
 ## Campos que rellenas
 - Qué tarea repetitiva quieres quitarte
 - Herramientas que usas
@@ -1372,6 +1541,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Proceso en la nube con reintentos
 - Registro de ejecuciones
 - Aviso si algo falla
+
+## No incluye
+- Desarrollo de nuevas tareas no contratadas
+- Cuotas de API y aplicaciones de terceros
+- Atención humana permanente a incidencias
+- Garantía de disponibilidad del 100 %
+- Gestión continuada fuera del mantenimiento contratado
 
 ## Campos que rellenas
 - Qué hay que hacer
@@ -1415,7 +1591,10 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Panel de gestión
 
 ## No incluye
-- Compra del dominio
+- Compra del dominio y su renovación
+- Diseño o impresión de flyers y carteles
+- Campañas de publicidad para generar clics
+- Integración con herramientas de analítica no indicadas
 
 ## Campos que rellenas
 - Dominio o subdominio
@@ -1456,6 +1635,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Enlaces editables después de imprimir
 - Medición de escaneos
 
+## No incluye
+- Más de 10 códigos QR en el pack inicial
+- Impresión de pegatinas, carteles o soportes
+- Dominio personalizado y su renovación
+- Publicidad para conseguir escaneos
+- Identificación personal de quien escanea
+
 ## Campos que rellenas
 - Destinos de cada QR
 - Colores / logo
@@ -1494,6 +1680,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Panel de analítica privado
 - Instalación en tu web
 - Informe mensual por email (con plan)
+
+## No incluye
+- Informe mensual sin el plan correspondiente
+- Auditoría legal completa de privacidad y RGPD
+- Integración con herramientas no indicadas
+- Gestión de campañas publicitarias
+- Garantía de identificar a todos los visitantes
 
 ## Campos que rellenas
 - Web(s) a medir
@@ -1534,6 +1727,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Entrega automática del archivo
 - Panel de pedidos
 - Correos de compra
+
+## No incluye
+- Comisiones de Stripe u otras pasarelas de pago
+- Dominio personalizado y su renovación
+- Creación de los productos digitales que vendas
+- Asesoramiento fiscal y redacción de textos legales
+- Publicidad y captación de compradores
+- Atención al cliente y gestión de devoluciones
 
 ## Campos que rellenas
 - Productos y precios
@@ -1577,6 +1778,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Pagos con tarjeta
 - Gestión de stock y envíos
 - Panel de administración
+
+## No incluye
+- Comisiones de pasarelas de pago
+- Gastos de mensajería y transporte de pedidos
+- Fotografía profesional de productos
+- Redacción jurídica de textos legales y condiciones
+- Carga masiva de catálogos no presupuestados
+- Campañas de publicidad y posicionamiento continuo
 
 ## Campos que rellenas
 - Productos, variantes y fotos
@@ -1623,6 +1832,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Pagos y descargas protegidas
 - Panel de vendedores
 
+## No incluye
+- Comisiones de Stripe Connect y otros proveedores
+- Verificación legal y fiscal de cada vendedor
+- Creación de los productos de los vendedores
+- Moderación humana continua del catálogo
+- Gestión fiscal y reparto contable de ingresos
+- Publicidad para atraer vendedores y compradores
+
 ## Campos que rellenas
 - Nombre y nicho
 - Comisión
@@ -1665,6 +1882,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Archivos compartidos
 - Facturas y presupuestos
 
+## No incluye
+- Integración con programas contables externos
+- Firma electrónica avanzada o certificada
+- Licencias de herramientas externas de pago
+- Gestión humana de proyectos y clientes
+- Dominio personalizado y su renovación
+
 ## Campos que rellenas
 - Logo y colores
 - Clientes y proyectos iniciales
@@ -1705,6 +1929,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Bloques prediseñados
 - Formación de 30 min
 - Alojamiento propio
+
+## No incluye
+- Dominio personalizado y su renovación
+- Redacción profesional de todos los contenidos
+- Fotografía y vídeo profesional
+- Integraciones avanzadas no presupuestadas
+- Mantenimiento y cambios hechos por nuestro equipo
+- Campañas de SEO o publicidad continuadas
 
 ## Campos que rellenas
 - Secciones que necesitas
@@ -1748,6 +1980,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - 30 min de cambios al mes
 - Vigilancia de caídas
 
+## No incluye
+- Cambios que superen los 30 minutos mensuales
+- Rediseño completo o creación de nuevas páginas
+- Dominio y alojamiento si se contratan aparte
+- Licencias de plugins o herramientas de terceros
+- Nuevas funciones o integraciones complejas
+- Recuperación de daños ajenos al servicio contratado
+
 ## Campos que rellenas
 - Web a mantener
 - Accesos (te guiamos)
@@ -1773,6 +2013,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Alojamiento rápido con SSL
 - Gestión del dominio
 - Correo de reenvío
+
+## No incluye
+- Diseño o creación de la página web
+- Buzón de correo completo: solo reenvío
+- Dominios adicionales o extensiones especiales
+- Mantenimiento de contenidos de la web
+- Licencias de programas y plugins de pago
+- Servidores dedicados o recursos exclusivos
 
 ## Campos que rellenas
 - Dominio deseado
@@ -1800,6 +2048,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Vigilancia de errores
 - 1 flujo nuevo pequeño al mes
 
+## No incluye
+- Más de un flujo nuevo pequeño al mes
+- Desarrollo de automatizaciones complejas
+- Consumo de API de IA o servicios de terceros
+- Licencias externas de aplicaciones conectadas
+- Gestión humana de los resultados de cada flujo
+
 ## Campos que rellenas
 - Automatizaciones actuales
 - Canal de aviso
@@ -1825,6 +2080,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Informe PDF de 5–8 páginas
 - Lista priorizada de mejoras
 - Presupuesto cerrado para arreglarlo
+
+## No incluye
+- Aplicación de las mejoras detectadas
+- Rediseño o programación de la web
+- Compra de herramientas y licencias externas
+- Campañas de SEO o publicidad
+- Seguimiento mensual después de la auditoría
 
 ## Campos que rellenas
 - URL de la web
@@ -1852,6 +2114,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Aviso por Telegram o email
 - Página de estado con tu logo
 - Informe mensual de disponibilidad
+
+## No incluye
+- Reparación de las averías detectadas
+- Alojamiento o mantenimiento de la web vigilada
+- Atención humana de urgencias
+- Garantía de disponibilidad del 100 %
+- Costes de canales de aviso externos de pago
 
 ## Campos que rellenas
 - Webs a vigilar (URLs)
@@ -1893,6 +2162,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Plantilla con tu logo y datos fiscales
 - Descarga en PDF y envío por email
 - Guía de uso de 1 página
+
+## No incluye
+- Asesoramiento fiscal o contable
+- Adaptación a VeriFactu o factura electrónica
+- Presentación de impuestos ante Hacienda
+- Integración con programas contables externos
+- Cuotas de servicios de email externos, si se usan
 
 ## Campos que rellenas
 - Razón social y NIF
@@ -1936,6 +2212,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Envío automático por email
 - Código QR de verificación
 
+## No incluye
+- Acreditación oficial de cursos o formaciones
+- Impresión y envío postal de diplomas
+- Costes de plataformas externas de email
+- Firma electrónica cualificada o certificada
+- Integración con plataformas educativas no indicadas
+
 ## Campos que rellenas
 - Logo y firma
 - Texto del certificado
@@ -1978,6 +2261,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Resumen con puntos y tareas
 - Copia en Google Docs o email
 
+## No incluye
+- Costes de IA o transcripción de terceros
+- Traducción profesional a otros idiomas
+- Corrección humana palabra por palabra
+- Identificación garantizada de todos los hablantes
+- Grabación presencial de reuniones
+- Transcripción fiable de audios ininteligibles
+
 ## Campos que rellenas
 - Dónde te llegan los audios (WhatsApp, Telegram, carpeta)
 - Dónde quieres el texto
@@ -2018,6 +2309,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Entrenado con tus textos, PDFs y preguntas frecuentes
 - Aviso cuando alguien deja sus datos
 - Panel para revisar conversaciones
+
+## No incluye
+- Consumo de la API de OpenAI u otros proveedores
+- Atención humana en directo
+- Garantía de respuestas siempre correctas
+- Entrenamiento de un modelo exclusivo desde cero
+- Integración con CRM no contemplados
+- Asesoramiento legal sobre tratamiento de datos
 
 ## Campos que rellenas
 - Web donde va el chat
@@ -2061,6 +2360,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Modo claro/oscuro y versión móvil
 - Fácil de ampliar escribiendo textos
 
+## No incluye
+- Redacción completa de los artículos de ayuda
+- Traducción profesional a otros idiomas
+- Servicio humano de atención al cliente
+- Gestión de tickets o incidencias
+- Dominio personalizado y su renovación
+
 ## Campos que rellenas
 - Nombre del producto o servicio
 - Temas y preguntas
@@ -2102,6 +2408,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Formulario de alta para tu web
 - Plantilla de email con tu marca
 - Doble confirmación y baja (RGPD)
+
+## No incluye
+- Cuota de alojamiento y envío de emails externos
+- Redacción periódica de boletines
+- Compra o captación de suscriptores
+- Garantía de entrega en todas las bandejas de entrada
+- Revisión jurídica de los textos de privacidad
+- Publicidad y campañas de captación
 
 ## Campos que rellenas
 - Nombre del boletín
@@ -2239,6 +2553,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Enlace y QR para pedir reseñas
 - Checklist mensual de publicaciones
 
+## No incluye
+- Publicidad de pago en Google Ads
+- Garantía de aparecer primero en Google Maps
+- Fotografía profesional del establecimiento
+- Publicación mensual de contenidos por nuestro equipo
+- Compra o generación de reseñas
+- Aprobación garantizada de la ficha por Google
+
 ## Campos que rellenas
 - Nombre y dirección del negocio
 - Servicios principales
@@ -2281,6 +2603,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Tamaños para web, Amazon e Instagram
 - Carpeta compartida para nuevas tandas
 
+## No incluye
+- Más de 50 fotos en el lote inicial
+- Sesión fotográfica o desplazamiento al negocio
+- Retoque artístico o fotomontajes complejos
+- Modelos humanos para mostrar productos
+- Garantía de aprobación en plataformas externas
+
 ## Campos que rellenas
 - Fotos (carpeta o zip)
 - Color de fondo
@@ -2320,6 +2649,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Firma HTML probada en Gmail y Outlook
 - Versión para todo tu equipo
 - Guía de instalación en 2 minutos
+
+## No incluye
+- Diseño de un logotipo corporativo nuevo
+- Compra de dominios y cuentas de correo
+- Licencias de Gmail, Outlook u otros programas
+- Campañas de email marketing
+- Seguimiento estadístico de aperturas y clics
 
 ## Campos que rellenas
 - Nombre y cargo de cada persona
@@ -2362,6 +2698,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Bibliotecas de iconos para tu sector
 - Exportación a PNG y PDF
 
+## No incluye
+- Dominio personalizado y su renovación
+- Videollamadas o chat de voz integrados
+- Integración con Jira, Trello u otros gestores
+- Diseño técnico o arquitectónico certificado
+- Asistencia humana para organizar proyectos
+
 ## Campos que rellenas
 - Subdominio deseado
 - Uso principal (planos, esquemas, clases)
@@ -2403,6 +2746,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Historial de precios de cada producto
 - Cambio de la lista cuando quieras
 
+## No incluye
+- Más de 25 productos vigilados simultáneamente
+- Acceso a webs privadas o protegidas
+- Garantía de detectar precios ocultos
+- Cambio automático de tus precios de venta
+- Análisis de rentabilidad o estrategia comercial
+
 ## Campos que rellenas
 - Enlaces de los productos
 - Precio a partir del cual avisar
@@ -2430,6 +2780,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Hasta 15 páginas vigiladas
 - Solo te avisa si cambia la parte que te importa
 - Resumen del cambio en el aviso
+
+## No incluye
+- Más de 15 páginas vigiladas simultáneamente
+- Acceso a páginas privadas sin permisos
+- Vigilancia en tiempo real de cada segundo
+- Modificación automática de las webs vigiladas
+- Garantía ante bloqueos del sitio de origen
 
 ## Campos que rellenas
 - Páginas a vigilar
@@ -2459,6 +2816,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Códigos CODE128 o EAN-13
 - Tamaño adaptado a tu hoja o impresora
 - Plantilla para volver a generarlas tú
+
+## No incluye
+- Más de 100 etiquetas en la entrega inicial
+- Impresión de etiquetas, papel o consumibles
+- Impresora de etiquetas o lector de códigos
+- Compra o asignación oficial de códigos GS1
+- Integración con TPV o programas de inventario
 
 ## Campos que rellenas
 - Lista de referencias (Excel o CSV)
@@ -2550,6 +2914,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Favicon e icono de app
 - Versión en blanco para fondos oscuros
 
+## No incluye
+- Creación de un logotipo nuevo desde cero
+- Rediseño completo de la identidad de marca
+- Registro de marca y trámites de propiedad industrial
+- Impresión de tarjetas, rótulos o merchandising
+- Ilustración manual de detalles inexistentes
+
 ## Campos que rellenas
 - Logo actual (el mejor archivo que tengas)
 - Colores corporativos
@@ -2590,6 +2961,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Columnas unificadas (nombres, teléfonos, emails)
 - Informe de lo que se ha corregido
 - Formato listo para tu CRM o tienda
+
+## No incluye
+- Investigación manual de datos incorrectos
+- Eliminación garantizada de duplicados no exactos
+- Obtención de emails o teléfonos que falten
+- Integración automática con CRM o tiendas
+- Mantenimiento periódico de la base de datos
 
 ## Campos que rellenas
 - Archivo (Excel o CSV)
@@ -2633,6 +3011,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Valoración del inventario
 - Hoja de entradas y salidas
 
+## No incluye
+- Recuento físico del inventario en el almacén
+- Integración con TPV, ERP o lectores de códigos
+- Actualización diaria por nuestro equipo
+- Licencias de Microsoft Excel, si se necesitan
+- Auditoría contable o certificación de existencias
+
 ## Campos que rellenas
 - Categorías
 - Lista de productos
@@ -2673,6 +3058,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - PDF con hasta 10 gráficos
 - Resumen en una página
 - Plantilla para repetirlo cada mes
+
+## No incluye
+- Más de 10 gráficos en el informe inicial
+- Recopilación de datos que no se hayan facilitado
+- Corrección manual de datos de origen incorrectos
+- Elaboración mensual del informe por nuestro equipo
+- Panel interactivo conectado en tiempo real
 
 ## Campos que rellenas
 - Archivo de datos
@@ -2715,6 +3107,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Versión ligera para WhatsApp
 - Archivo editable para actualizar precios
 
+## No incluye
+- Páginas adicionales a las 4 contratadas
+- Impresión física y gastos de imprenta
+- Fotografía profesional de productos o instalaciones
+- Traducción profesional a otros idiomas
+- Distribución del dossier a potenciales clientes
+
 ## Campos que rellenas
 - Nombre comercial y logo
 - Servicios y precios
@@ -2755,6 +3154,13 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Hasta 5 diagramas
 - Formatos SVG, PNG y PDF
 - Archivo de texto para editarlos tú
+
+## No incluye
+- Más de 5 diagramas en la entrega inicial
+- Auditoría o consultoría de procesos empresariales
+- Implantación de los procesos dibujados
+- Licencias de programas externos de pago
+- Certificación técnica o legal de los diagramas
 
 ## Campos que rellenas
 - Pasos del proceso o personas del equipo
@@ -2798,6 +3204,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Archivo CSV listo para importar
 - Guía de tono para las siguientes
 
+## No incluye
+- Más de 20 productos en el lote inicial
+- Fotografía profesional de productos
+- Traducción profesional a otros idiomas
+- Publicación manual de fichas en cada plataforma
+- Garantía de posicionamiento en Google
+- Campañas de publicidad de los productos
+
 ## Campos que rellenas
 - Catálogo (nombre y características)
 - Público al que vendes
@@ -2839,6 +3253,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Plantilla con tus colores y tipografías
 - Textos de publicación sugeridos
 - Regeneración desde una hoja de cálculo
+
+## No incluye
+- Más de 10 carruseles en el pack inicial
+- Carruseles de más de 8 diapositivas
+- Grabación y edición de vídeos o reels
+- Publicación y programación en redes sociales
+- Publicidad de pago y gestión de campañas
+- Fotografía profesional o sesiones de estudio
 
 ## Campos que rellenas
 - Temas o textos
@@ -2936,6 +3358,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Bloques de tu sector listos para usar
 - Formación de 30 minutos
 
+## No incluye
+- Más de 4 páginas en la web inicial
+- Dominio personalizado y su renovación
+- Redacción profesional de contenidos completos
+- Fotografía y vídeo profesional
+- Mantenimiento y modificaciones por nuestro equipo
+- SEO continuado y campañas de publicidad
+
 ## Campos que rellenas
 - Sector
 - Páginas que necesitas
@@ -2978,6 +3408,14 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Portal privado para cada cliente
 - CRM con fichas y tareas
 - Cobros recurrentes con Stripe (con tus claves)
+
+## No incluye
+- Comisiones de Stripe por pagos y suscripciones
+- Dominio personalizado y su renovación
+- Licencias y consumo de servicios externos
+- Gestión fiscal o contable de los cobros
+- Captación comercial de clientes para la agencia
+- Mantenimiento y ampliaciones futuras no contratadas
 
 ## Campos que rellenas
 - Nombre de la agencia y logo
