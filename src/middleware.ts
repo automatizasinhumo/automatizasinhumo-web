@@ -10,6 +10,7 @@ import {
   parseStoreSettings,
   STORE_SETTINGS_SQL,
 } from './features/settings/db';
+import { conCache, esLectura, olvidarCacheTienda, ttlDesdeEnv } from './features/storefront/cacheTienda';
 import {
   MENU_ITEMS_SQL,
   EMPTY_MENUS,
@@ -69,6 +70,8 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
   // the storefront/admin can reflect wizard-set values without a redeploy. APIs and
   // static assets skip it (one indexed D1 read per page, not per asset/API call).
   const path = context.url.pathname;
+  // Cualquier escritura vacía la caché de ajustes y menús de este isolate (ver cacheTienda).
+  if (!esLectura(context.request.method)) olvidarCacheTienda();
   const isDocument =
     !path.startsWith('/api/') &&
     !path.startsWith('/_') &&
@@ -80,10 +83,15 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
     const wantsMenus = !path.startsWith('/admin');
     try {
       if (wantsMenus) {
-        const [settings, menus] = await env.DB.batch<Record<string, string>>([
-          env.DB.prepare(STORE_SETTINGS_SQL),
-          env.DB.prepare(MENU_ITEMS_SQL),
-        ]);
+        // En la memoria del isolate durante TTL_MS: era el 75 % de las filas leídas de D1.
+        const [settings, menus] = await conCache(() =>
+          env.DB.batch<Record<string, string>>([
+            env.DB.prepare(STORE_SETTINGS_SQL),
+            env.DB.prepare(MENU_ITEMS_SQL),
+          ]),
+          Date.now(),
+          ttlDesdeEnv((env as { STORE_CACHE_TTL_MS?: unknown }).STORE_CACHE_TTL_MS),
+        );
         context.locals.settings = parseStoreSettings(
           (settings.results ?? []) as Array<{ key: string; value: string }>,
         );
@@ -225,11 +233,19 @@ async function route(context: APIContext, next: MiddlewareNext): Promise<Respons
   const path = context.url.pathname;
   const productError = path.startsWith('/products/') && context.url.searchParams.has('error');
 
-  let response = isForbiddenFormOrigin(context.request, context.url)
-    ? new Response(`Cross-site ${context.request.method} form submissions are forbidden`, {
-        status: 403,
-      })
-    : await gate(context, next);
+  let response: Response;
+  try {
+    response = isForbiddenFormOrigin(context.request, context.url)
+      ? new Response(`Cross-site ${context.request.method} form submissions are forbidden`, {
+          status: 403,
+        })
+      : await gate(context, next);
+  } finally {
+    // Segundo vaciado tras la escritura, también si la ruta lanza después de confirmarla:
+    // una lectura que empezó entre el primer vaciado (en gate) y el commit podría haber
+    // guardado los ajustes anteriores.
+    if (!esLectura(context.request.method)) olvidarCacheTienda();
+  }
 
   // Workers Caching heuristically stores headerless responses, so make every
   // response explicit: only allowlisted public successes/301s are shared.

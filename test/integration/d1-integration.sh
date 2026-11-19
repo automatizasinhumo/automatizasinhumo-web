@@ -70,6 +70,7 @@ npx wrangler dev \
   --persist-to "$state_dir" \
   --var CANONICAL_ORIGIN:https://canonical.example \
   --var AUTH_SECRET:integration-auth-secret \
+  --var STORE_CACHE_TTL_MS:0 \
   --ip 127.0.0.1 \
   --port "$test_port" >"$worker_log" 2>&1 &
 worker_pid="$!"
