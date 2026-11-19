@@ -10,11 +10,11 @@ pedido.json (lo rellena el formulario/checkout; ver ejemplo-pedido.json):
 Pasos: copia la plantilla de C:/GIT/automatizasinhumo-demos/site/<plantilla> a
 clientes/<id>/site, quita la barra de la plantilla y el aviso de demo, reescribe los textos con
 Workers AI (capa gratuita de la cuenta Cloudflare) usando los datos del cliente, cambia nombre,
-correo y teléfono, y despliega un Worker estático «web-<id>» con wrangler.
+correo y teléfono, y la publica en el Worker único «vistas» (Workers KV, /<id>/); si falla, Worker «web-<id>».
 Credencial: la sesión local de wrangler (wrangler login). En Actions: CLOUDFLARE_API_TOKEN y
 CLOUDFLARE_ACCOUNT_ID.
 """
-import html as H, json, os, re, shutil, subprocess, sys, tempfile, urllib.parse, urllib.request
+import base64, html as H, json, os, re, shutil, subprocess, sys, tempfile, urllib.parse, urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup, NavigableString, Comment
 import fastjsonschema  # BSD-3-Clause, https://github.com/horejsek/python-fastjsonschema
@@ -25,6 +25,12 @@ DEMOS_URL = 'https://automatizasinhumo-demos.davidpd89.workers.dev'
 # En GitHub Actions los registros son públicos: no se escriben datos ni URLs de clientes.
 PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))
 MODELO = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+# Vistas previas en un único Worker («vistas/») que sirve /<id>/ruta desde Workers KV: sin un Worker por
+# cliente (tope de 100 por cuenta) ni R2. Cada clave caduca sola a los VISTAS_TTL segundos.
+# FABRICA_DESTINO=worker vuelve al Worker estático «web-<id>» de antes.
+VISTAS_KV = os.environ.get('VISTAS_KV_ID', '1aaaeec9eb4749349137728fee3c6881')
+VISTAS_URL = os.environ.get('VISTAS_URL', 'https://vistas.davidpd89.workers.dev')
+VISTAS_TTL = 60 * 60 * 24 * 60
 OMITIR_TAGS = {'script', 'style', 'code', 'pre', 'svg', 'template', 'textarea'}
 LOTE = 25
 
@@ -203,19 +209,53 @@ def fabricar(ruta_pedido, desplegar=True):
     # Una vista previa no es la web del cliente: que ningún buscador la indexe.
     (site / '_headers').write_text('/*\n  X-Robots-Tag: noindex\n', encoding='utf-8')
 
+    if not desplegar:
+        print('generada sin publicar en', site)
+        return None
+    if os.environ.get('FABRICA_DESTINO') == 'worker':
+        return desplegar_worker(base, p)
+    # Si KV falla (permiso del token, cupo de escrituras), no se pierde la vista previa: Worker propio.
+    return publicar_kv(site, p) or desplegar_worker(base, p)
+
+
+def pares_kv(site, ident):
+    """Una clave «sites/<id>/<ruta>» por fichero, en base64 y con caducidad (formato de `wrangler kv bulk put`)."""
+    pares = []
+    for f in sorted(site.rglob('*')):
+        if f.is_file() and f.name != '_headers':
+            pares.append({'key': f'sites/{ident}/{f.relative_to(site).as_posix()}', 'base64': True,
+                          'value': base64.b64encode(f.read_bytes()).decode('ascii'), 'expiration_ttl': VISTAS_TTL})
+    return pares
+
+
+def publicar_kv(site, p):
+    ident = re.sub(r'[^a-z0-9-]', '-', p['id'].lower())[:50]
+    with tempfile.TemporaryDirectory() as tmp:
+        lote = Path(tmp, 'kv.json')
+        lote.write_text(json.dumps(pares_kv(site, ident)), encoding='utf-8')
+        r = subprocess.run(['npx', 'wrangler', 'kv', 'bulk', 'put', str(lote), '--namespace-id', VISTAS_KV, '--remote'],
+                           shell=os.name == 'nt', capture_output=True, text=True, encoding='utf-8', timeout=900,
+                           stdin=subprocess.DEVNULL)
+    if r.returncode != 0:
+        print(f'publicación fallida (código {r.returncode})' if PUBLICO else 'publicación fallida: ' + (r.stdout + r.stderr)[-800:])
+        return None
+    url = f'{VISTAS_URL}/{ident}/'
+    print('publicada' if PUBLICO else f'publicada: {url}')
+    return url
+
+
+def desplegar_worker(base, p):
     nombre = 'web-' + re.sub(r'[^a-z0-9-]', '-', p['id'].lower())[:50]
     (base / 'wrangler.jsonc').write_text(json.dumps(
         {'name': nombre, 'compatibility_date': '2026-11-01', 'assets': {'directory': './site'}}, indent=2), encoding='utf-8')
-    if desplegar:
-        r = subprocess.run('npx wrangler deploy', shell=True, cwd=base, capture_output=True, text=True, encoding='utf-8',
-                           timeout=600, stdin=subprocess.DEVNULL)
-        url = re.search(r'https://\S+\.workers\.dev', r.stdout + r.stderr)
-        if PUBLICO:
-            print('publicada' if url else f'despliegue fallido (código {r.returncode})')
-        else:
-            print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
-        return url.group(0) if url else None
-    print('generada sin publicar en', site)
+    r = subprocess.run('npx wrangler deploy', shell=True, cwd=base, capture_output=True, text=True, encoding='utf-8',
+                       timeout=600, stdin=subprocess.DEVNULL)
+    url = re.search(r'https://\S+\.workers\.dev', r.stdout + r.stderr)
+    if PUBLICO:
+        print('publicada' if url else f'despliegue fallido (código {r.returncode})')
+    else:
+        print('publicada:', url.group(0) if url else (r.stdout + r.stderr)[-800:])
+    return url.group(0) if url else None
 
 
 def comprobar_adaptacion(textos, nuevos, marca=''):

@@ -1,0 +1,8 @@
+// Worker único de vistas previas: sirve /<id>/ruta desde la clave KV «sites/<id>/ruta».
+// Lo rellena manual/fabrica/fabricar.py con `wrangler kv bulk put` (cada clave caduca sola).
+{
+  "name": "vistas",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "kv_namespaces": [{ "binding": "VISTAS", "id": "1aaaeec9eb4749349137728fee3c6881" }]
+}
