@@ -124,7 +124,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                   ) : (
                     <a
                       href={`/order/${token}/download/${item.public_id}`}
-                      class="rounded-md bg-brand px-4 py-2 text-sm font-medium text-on-brand hover:bg-brand-hover"
+                      class="boton boton-principal boton-compacto"
                     >Descargar</a>
                   )}
                 </li>
@@ -165,7 +165,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                     <p class="mt-1 text-sm text-muted">2-3 minutos: textos, contacto y, si quieres, fotos o logo. Lo que no tengas a mano te lo preguntamos.</p>
                     <a
                       href={`/empezar/${s.slug}?pedido=${encodeURIComponent(token ?? '')}`}
-                      class="mt-4 inline-block rounded-full bg-brand px-5 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+                      class="boton boton-principal mt-4"
                     >Enviar mis datos →</a>
                   </Fragment>
                 ) : (

@@ -1,0 +1,94 @@
+---
+/**
+ * Borde luminoso que sigue al puntero en todas las `.tarjeta` del tema (el
+ * efecto «magic card»). Se monta una sola vez, desde la cabecera, y cubre
+ * cualquier tarjeta de cualquier página: nada que repetir en cada componente.
+ *
+ * - Solo con ratón (hover:hover y pointer:fine): en táctil no existe.
+ * - Un único listener delegado en el documento, agrupado por frame; solo
+ *   escribe dos variables CSS en la tarjeta bajo el puntero.
+ * - El anillo es un ::before enmascarado al borde, encima del contenido y sin
+ *   recibir clics; con movimiento reducido aparece fijo, sin seguir al ratón.
+ */
+---
+
+<style is:global>
+  @media (hover: hover) and (pointer: fine) {
+    .tarjeta {
+      position: relative;
+    }
+    /* El anillo hace de borde activo: el borde base no cambia de color, así
+       la luz se ve venir del puntero en vez de pintar toda la tarjeta. */
+    .tarjeta.tarjeta:hover {
+      border-color: var(--color-line);
+    }
+    .tarjeta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit;
+      padding: 2px;
+      background: radial-gradient(
+        22rem circle at var(--luz-x, 50%) var(--luz-y, 0%),
+        var(--color-brand),
+        color-mix(in oklab, #1f9a7d 55%, transparent) 35%,
+        transparent 75%
+      );
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      opacity: 0;
+      transition: opacity var(--ds-mov-normal) var(--ds-curva);
+      pointer-events: none;
+    }
+    /* Foco de luz muy suave dentro, sobre el contenido y sin tapar nada. */
+    .tarjeta::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit;
+      background: radial-gradient(
+        18rem circle at var(--luz-x, 50%) var(--luz-y, 0%),
+        color-mix(in oklab, var(--color-brand) 7%, transparent),
+        transparent 70%
+      );
+      opacity: 0;
+      transition: opacity var(--ds-mov-normal) var(--ds-curva);
+      pointer-events: none;
+    }
+    .tarjeta:hover::before,
+    .tarjeta:hover::after,
+    .tarjeta:focus-visible::before {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  const fino = matchMedia('(hover: hover) and (pointer: fine)');
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+  let pendiente: PointerEvent | null = null;
+
+  function pintar() {
+    const e = pendiente;
+    pendiente = null;
+    if (!e) return;
+    const tarjeta = (e.target as Element | null)?.closest?.<HTMLElement>('.tarjeta');
+    if (!tarjeta) return;
+    const r = tarjeta.getBoundingClientRect();
+    tarjeta.style.setProperty('--luz-x', `${e.clientX - r.left}px`);
+    tarjeta.style.setProperty('--luz-y', `${e.clientY - r.top}px`);
+  }
+
+  document.addEventListener(
+    'pointermove',
+    (e) => {
+      if (!fino.matches || quieto.matches) return;
+      if (!pendiente) requestAnimationFrame(pintar);
+      pendiente = e;
+    },
+    { passive: true },
+  );
+</script>

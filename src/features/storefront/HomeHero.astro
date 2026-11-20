@@ -64,8 +64,8 @@ const muestras = [
         Elige entre hacerlo con nuestra guía o recibirlo listo para usar. Compra directamente o pide una muestra gratis. Te atiende una persona.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="#catalogo" class="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover">Elegir servicio</a>
-        <a href="/empezar/consulta" data-tour="consulta" class="rounded-full border border-brand bg-surface px-6 py-3 text-sm font-semibold text-brand hover:bg-brand hover:text-on-brand">Cuéntanos qué necesitas →</a>
+        <a href="#catalogo" class="boton boton-principal">Elegir servicio</a>
+        <a href="/empezar/consulta" data-tour="consulta" class="boton boton-secundario">Cuéntanos qué necesitas →</a>
       </div>
       <p class="mt-3 text-sm text-muted">¿No sabes cuál elegir? <a href="/elige" class="font-semibold text-brand underline-offset-2 hover:underline">Responde tres preguntas</a> y te lo decimos.</p>
       {precios.length > 0 && (
@@ -80,9 +80,9 @@ const muestras = [
         </p>
       )}
       <ul class="mt-6 flex flex-wrap gap-2 text-sm font-medium text-ink">
-        <li class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5"><Icono name="shield-check" class="h-4 w-4 text-brand" /> La muestra es gratuita y no necesitas tarjeta</li>
-        <li class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5"><Icono name="mood-smile" class="h-4 w-4 text-brand" /> Atendido por una persona real</li>
-        <li class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5"><Icono name="receipt-euro" class="h-4 w-4 text-brand" /> Precio cerrado</li>
+        <li class="pildora"><Icono name="shield-check" class="h-4 w-4 text-brand" /> La muestra es gratuita y no necesitas tarjeta</li>
+        <li class="pildora"><Icono name="mood-smile" class="h-4 w-4 text-brand" /> Atendido por una persona real</li>
+        <li class="pildora"><Icono name="receipt-euro" class="h-4 w-4 text-brand" /> Precio cerrado</li>
       </ul>
     </div>
 

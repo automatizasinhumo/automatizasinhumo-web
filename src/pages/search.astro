@@ -88,12 +88,12 @@ const fillerCards = fillers.map((product) =>
       <Icono name="search" class="h-5 w-5 shrink-0 text-muted" />
       <input type="search" name="q" value={q} placeholder="Ej.: restaurante, reservas, web, boda…" aria-label="Buscar servicios" autofocus={!q}
         class="min-w-0 flex-1 border-0 bg-transparent py-2 text-base focus:outline-none" />
-      <button type="submit" class="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Buscar</button>
+      <button type="submit" class="boton boton-principal">Buscar</button>
     </form>
     <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
       <span class="text-muted">Populares:</span>
       {POPULARES.map((p) => (
-        <a href={`/search?q=${encodeURIComponent(p)}`} class="rounded-full border border-line bg-surface px-3 py-1 font-medium text-ink hover:border-brand hover:text-brand">{p}</a>
+        <a href={`/search?q=${encodeURIComponent(p)}`} class="pildora">{p}</a>
       ))}
     </div>
   </section>
@@ -152,7 +152,7 @@ const fillerCards = fillers.map((product) =>
       <div class="mb-8 rounded-2xl border border-dashed border-line px-6 py-8 text-center" role="status">
         <p class="text-lg font-semibold text-ink">No encontramos nada para “{q}”.</p>
         <p class="mt-1 text-muted">Prueba con otra palabra o una de las populares, mira las categorías o cuéntanos qué necesitas: te respondemos con una propuesta.</p>
-        <a href={enlaceConsulta(q)} data-sin-resultados-cta class="mt-4 inline-block rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Cuéntanos qué necesitas</a>
+        <a href={enlaceConsulta(q)} data-sin-resultados-cta class="boton boton-principal mt-4">Cuéntanos qué necesitas</a>
       </div>
     )
   }

@@ -50,7 +50,7 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g
       {principal && (
         <a
           href={`/empezar/${principal.slug}`}
-          class="inline-flex rounded-full bg-brand px-6 py-3 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+          class="boton boton-principal"
         >
           Empieza gratis: {principal.name} →
         </a>
@@ -141,7 +141,7 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g
     <ul class="mt-3 flex flex-wrap gap-3">
       {SECTORS.filter((otro) => otro.slug !== sector.slug).map((otro) => (
         <li>
-          <a href={`/webs/${otro.slug}`} class="inline-flex rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink hover:border-brand hover:text-brand">
+          <a href={`/webs/${otro.slug}`} class="pildora">
             {otro.label}
           </a>
         </li>

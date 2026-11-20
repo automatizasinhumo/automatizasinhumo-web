@@ -143,7 +143,7 @@ const { model, purchase } = Astro.props;
       </ol>
       <a
         href={model.startHref}
-        class="mt-4 flex w-full items-center justify-center rounded-full border-2 border-brand bg-surface px-6 py-3 text-base font-semibold text-brand transition hover:bg-brand hover:text-on-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        class="boton boton-secundario mt-4 w-full"
       >
         Empieza gratis →
       </a>
@@ -246,7 +246,7 @@ const { model, purchase } = Astro.props;
               <a
                 href={demo.url}
                 target="vista-demo"
-                class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
+                class="pildora"
               >
                 <span class={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase ${demo.tipo === 'interactiva' ? 'bg-brand text-on-brand' : 'bg-line text-muted'}`}>
                   {demo.tipo === 'interactiva' ? 'Pruébala' : 'Diseño'}
@@ -318,10 +318,10 @@ const { model, purchase } = Astro.props;
   data-cta-fijo
   hidden
 >
-  <a href="#comprar" class="flex-1 rounded-full bg-brand px-4 py-3 text-center text-sm font-semibold text-on-brand">
+  <a href="#comprar" class="boton boton-principal flex-1">
     Contratar · {model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice}
   </a>
-  <a href={model.startHref} class="flex-1 rounded-full border-2 border-brand px-4 py-3 text-center text-sm font-semibold text-brand">
+  <a href={model.startHref} class="boton boton-secundario flex-1">
     Pruébalo gratis
   </a>
 </div>
