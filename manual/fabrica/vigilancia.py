@@ -124,10 +124,11 @@ def reconciliar_issue(repositorio: str, tipo: str, activo: bool, titulo: str, cu
     elif accion == "comentar":
         numero = str(issue["number"])
         cambia = issue["title"] != titulo
-        if cambia:
-            ejecutar_gh("issue", "edit", numero, "--repo", repositorio, "--title", titulo)
+        # Primero el comentario: si falla, el título no cambia y la próxima pasada lo reintenta.
         if cambia or comentar_siempre:
             ejecutar_gh("issue", "comment", numero, "--repo", repositorio, "--body", cuerpo)
+        if cambia:
+            ejecutar_gh("issue", "edit", numero, "--repo", repositorio, "--title", titulo)
     elif accion == "cerrar":
         ejecutar_gh("issue", "close", str(issue["number"]), "--repo", repositorio, "--comment", recuperado)
 
@@ -242,10 +243,15 @@ def lecturas_d1(token: str, cuenta: str, ahora: datetime) -> dict[str, int]:
     return horas
 
 
-def estado_cupo_d1(horas: dict[str, int]) -> tuple[bool, str, str]:
-    """(activo, título, cuerpo) del aviso de cupo a partir de las lecturas por hora de hoy."""
+def estado_cupo_d1(horas: dict[str, int], ahora: datetime) -> tuple[bool, str, str]:
+    """(activo, título, cuerpo) del aviso de cupo a partir de las lecturas por hora de hoy.
+
+    El ritmo se mide en la hora de reloj actual y la anterior (UTC), no en las últimas
+    horas con datos: un pico de hace horas no debe seguir avisando."""
     total = sum(horas.values())
-    recientes = [horas[h] for h in sorted(horas)[-2:]]
+    hora = ahora.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    claves = [(hora - timedelta(hours=n)).strftime("%Y-%m-%dT%H:%M:%SZ") for n in (0, 1)]
+    recientes = [horas.get(c, 0) for c in claves]
     pico = max(recientes, default=0)
     porcentaje = round(100 * total / CUPO_D1)
     activo = total >= AVISO_DIA * CUPO_D1 or pico >= AVISO_HORA
@@ -257,8 +263,8 @@ def estado_cupo_d1(horas: dict[str, int]) -> tuple[bool, str, str]:
     return activo, titulo, cuerpo
 
 
-def vigilar_cupo_d1(repositorio: str, horas: dict[str, int]) -> None:
-    activo, titulo, cuerpo = estado_cupo_d1(horas)
+def vigilar_cupo_d1(repositorio: str, horas: dict[str, int], ahora: datetime) -> None:
+    activo, titulo, cuerpo = estado_cupo_d1(horas, ahora)
     print(f"D1: {sum(horas.values()):,} filas leídas hoy")
     reconciliar_issue(repositorio, "d1", activo, titulo, cuerpo,
                       "Lecturas de D1 por debajo del umbral de aviso.", comentar_siempre=False)
@@ -291,9 +297,10 @@ def main(argv: list[str] | None = None) -> int:
         except RuntimeError as error:
             errores.append(str(error))
         try:
+            ahora = datetime.now(timezone.utc)
             horas = lecturas_d1(os.environ.get("CLOUDFLARE_API_TOKEN", ""),
-                                os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip(), datetime.now(timezone.utc))
-            vigilar_cupo_d1(repositorio, horas)
+                                os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip(), ahora)
+            vigilar_cupo_d1(repositorio, horas, ahora)
         except RuntimeError as error:
             errores.append(str(error))
 
