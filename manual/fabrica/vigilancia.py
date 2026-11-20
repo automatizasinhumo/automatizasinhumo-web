@@ -7,9 +7,13 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+import proveedores_ia  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[2]
 ETIQUETA = "vigilancia"
@@ -272,6 +276,54 @@ def vigilar_cupo_d1(repositorio: str, horas: dict[str, int], ahora: datetime) ->
                       "Lecturas de D1 por debajo del umbral de aviso.", comentar_siempre=False)
 
 
+AVISO_RETIRADA = timedelta(days=30)
+
+
+def ficha_modelo(token: str, cuenta: str, nombre: str) -> dict | None:
+    """Ficha del modelo en el catálogo de Workers AI; None si ya no está."""
+    if not re.fullmatch(r"[0-9a-f]{32}", cuenta):
+        raise RuntimeError("CLOUDFLARE_ACCOUNT_ID no tiene la forma esperada")
+    url = (f"https://api.cloudflare.com/client/v4/accounts/{cuenta}/ai/models/search?"
+           + urllib.parse.urlencode({"search": nombre.rsplit("/", 1)[-1], "per_page": 50}))
+    peticion = urllib.request.Request(url, headers={"Authorization": "Bearer " + token})
+    try:
+        with urllib.request.urlopen(peticion, timeout=60) as respuesta:
+            modelos = json.load(respuesta)["result"]
+    except (OSError, ValueError, KeyError, TypeError):
+        raise RuntimeError("No se pudo leer el catálogo de Workers AI (¿falta «Workers AI: Read» en el token?)") from None
+    return next((m for m in modelos if isinstance(m, dict) and m.get("name") == nombre), None)
+
+
+def estado_modelo_ia(nombre: str, ficha: dict | None, ahora: datetime) -> tuple[bool, str, str]:
+    """(activo, título, cuerpo) del aviso de modelo: desaparecido o con retirada anunciada en ≤30 días."""
+    if ficha is None:
+        return True, f"IA: {nombre} ya no está en Workers AI", (
+            f"El modelo de la fábrica ({nombre}) no aparece en el catálogo: las llamadas fallarán.\n\n"
+            "Elegir otro de Text Generation en GET /ai/models/search (precio en «price») y cambiar "
+            "MODELO_CLOUDFLARE en manual/fabrica/proveedores_ia.py (o la variable IA_MODELO).")
+    fechas = [str(p.get("value")) for p in ficha.get("properties") or []
+              if isinstance(p, dict) and "deprecat" in str(p.get("property_id", ""))]
+    for fecha in fechas:
+        try:
+            dia = datetime.fromisoformat(fecha[:10]).replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        if dia - ahora <= AVISO_RETIRADA:
+            return True, f"IA: Workers AI retira {nombre} el {fecha[:10]}", (
+                f"Cloudflare anuncia la retirada de {nombre} el {fecha[:10]}. Cambiar MODELO_CLOUDFLARE en "
+                "manual/fabrica/proveedores_ia.py por otro de Text Generation (GET /ai/models/search) y "
+                "probarlo con una vista previa antes de esa fecha.")
+    return False, "", ""
+
+
+def vigilar_modelo_ia(repositorio: str, token: str, cuenta: str, ahora: datetime) -> None:
+    nombre = proveedores_ia.MODELO_CLOUDFLARE
+    activo, titulo, cuerpo = estado_modelo_ia(nombre, ficha_modelo(token, cuenta, nombre), ahora)
+    print(f"IA: {nombre} {'con aviso' if activo else 'en catálogo, sin retirada anunciada'}")
+    reconciliar_issue(repositorio, "modelo-ia", activo, titulo, cuerpo,
+                      f"{nombre} sigue en el catálogo sin retirada anunciada.", comentar_siempre=False)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--d1", action="store_true", help="consultar D1 (usa D1_DATABASE_ID)")
@@ -303,6 +355,11 @@ def main(argv: list[str] | None = None) -> int:
             horas = lecturas_d1(os.environ.get("CLOUDFLARE_API_TOKEN", ""),
                                 os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip(), ahora)
             vigilar_cupo_d1(repositorio, horas, ahora)
+        except RuntimeError as error:
+            errores.append(str(error))
+        try:
+            vigilar_modelo_ia(repositorio, os.environ.get("CLOUDFLARE_API_TOKEN", ""),
+                              os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip(), datetime.now(timezone.utc))
         except RuntimeError as error:
             errores.append(str(error))
 

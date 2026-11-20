@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from fabricar import CupoIAAgotado, fabricar, nombre_publico  # noqa: E402
 from navegador import qa_navegador  # noqa: E402
+import proveedores_ia  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[2]
 args = sys.argv[1:]
@@ -294,11 +295,13 @@ def main():
             continue  # reclamación perdida: no consume el límite
         hechas += 1
         if SIN_CUPO:
-            print('::warning::cupo diario de Workers AI agotado: el lote para hasta las 00:00 UTC')
+            print('::warning::ningún proveedor de IA con cupo: el lote para hasta que se reponga (Workers AI, 00:00 UTC)')
             break
         if hechas >= MAXIMO:
             break
     print('vistas previas intentadas:', hechas)
+    if proveedores_ia.ALERTAS:  # modelo retirado o clave rechazada: la cadena sigue, pero alguien tiene que cambiarlo
+        sys.exit('IA: ' + '; '.join(sorted(set(proveedores_ia.ALERTAS))) + ' (cambiar modelo o clave en proveedores_ia.py)')
     if FALLOS_D1:
         sys.exit(f'D1 falló {len(FALLOS_D1)} veces: revisar la ejecución')
     if A_MANO or (hechas and len(FALLOS_FABRICA) >= hechas):

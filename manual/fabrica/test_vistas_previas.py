@@ -89,6 +89,22 @@ class CupoIAAgotadoEspera(unittest.TestCase):
         self.assertNotIn('revisar a mano', notas[0])
 
 
+class AlertaDeIA(unittest.TestCase):
+    """Modelo retirado o clave rechazada: la cadena contesta con otro proveedor, pero la pasada acaba en rojo."""
+
+    def test_alerta_de_proveedor_termina_en_rojo(self):
+        fila = {'public_id': 'S-1', 'slug': 'web', 'producto': 'Web', 'nombre': 'Ana', 'email': 'a@b.es',
+                'telefono': '', 'campos': '{}', 'mensaje': '', 'nota': '', 'estado': 'nueva'}
+        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}), \
+                patch.object(vp, 'd1', side_effect=lambda sql: [fila] if sql.startswith('SELECT') else [{'public_id': 'S-1'}]), \
+                patch.object(vp, 'fabricar', side_effect=lambda _r, **_: 'https://x.pages.dev'), \
+                patch.object(vp, 'qa', return_value=[]), patch.object(vp, 'FALLOS_FABRICA', []), \
+                patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []), \
+                patch.object(vp.proveedores_ia, 'ALERTAS', ['workers-ai: retirado (gemma)']):
+            with self.assertRaises(SystemExit) as fin:
+                vp.main()
+        self.assertIn('retirado', str(fin.exception.code))
+
 
 if __name__ == '__main__':
     unittest.main()
