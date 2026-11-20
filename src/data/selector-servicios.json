@@ -1,6 +1,12 @@
 {
   "objetivos": [
     {
+      "id": "trabajo",
+      "label": "Buscar trabajo",
+      "detalle": "Currículum con diseño, tu CV en una web propia y tarjetas a juego.",
+      "servicios": ["cv-profesional", "portfolio-editable", "link-in-bio"]
+    },
+    {
       "id": "llamadas",
       "label": "Que me encuentren y me llamen",
       "detalle": "Una web con tus servicios, zona, horario y botón de llamar.",
@@ -41,6 +47,12 @@
       "label": "Conseguir más reseñas y clientes fieles",
       "detalle": "Pedir reseñas, mostrar testimonios o abrir una lista de espera.",
       "servicios": ["auto-resenas", "muro-testimonios", "lista-espera"]
+    },
+    {
+      "id": "automatizar",
+      "label": "Automatizar mi negocio",
+      "detalle": "Reseñas, pedidos y listas de espera que funcionan solos.",
+      "servicios": ["auto-resenas", "asistente-ia-pedidos", "lista-espera"]
     }
   ],
   "modalidades": [

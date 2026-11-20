@@ -1,0 +1,346 @@
+---
+import type { ProductDetailModel, ProductPurchaseModel } from '../../features/storefront/models';
+import ProductCard from './ProductCard.astro';
+import { REGLA_PLAZOS } from './plazos';
+import ProductGallery from '../../features/storefront/controls/ProductGallery.astro';
+import ProductPurchaseForm from '../../features/storefront/controls/ProductPurchaseForm.astro';
+import ComparativaModalidades from '../../features/storefront/controls/ComparativaModalidades.astro';
+import StoreBreadcrumbs from '../../features/storefront/controls/StoreBreadcrumbs.astro';
+
+/**
+ * STORE-OWNED. Edit freely — this file belongs to your store.
+ *
+ * Composition only. Every price, URL, availability flag, and image on `model`
+ * is already resolved; the route owns the 404, the metadata, and the JSON-LD.
+ *
+ * Keep <ProductGallery> and <ProductPurchaseForm>. The gallery owns the anchors
+ * the variant selector scrolls to and the LCP treatment on the first frame; the
+ * purchase form owns the field names, the sold-out states, and `data-fullpage`,
+ * without which Buy now is captured by the cart drawer instead of navigating.
+ *
+ * See CUSTOMIZING.md for the full contract.
+ */
+interface Props {
+  model: ProductDetailModel;
+  purchase: ProductPurchaseModel;
+}
+
+const { model, purchase } = Astro.props;
+---
+
+<StoreBreadcrumbs trail={model.breadcrumbs} class="text-sm" />
+
+{
+  model.error && (
+    <p class="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+      {model.error}
+    </p>
+  )
+}
+
+
+<div class="mt-6 grid gap-10 md:grid-cols-2 md:gap-16">
+  <ProductGallery
+    images={model.images}
+    hero={model.heroImage}
+    soldOut={model.soldOut}
+    class="reveal"
+  />
+
+  <div class="reveal flex flex-col" style="animation-delay:90ms">
+    {
+      model.categories.length > 0 && (
+        <div class="mb-4 flex flex-wrap gap-2">
+          {model.categories.map((category) => (
+            <a href={category.href} class="etiqueta hover:bg-brand hover:text-on-brand">
+              {category.text}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    <h1 class="font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl">{model.name}</h1>
+    {model.digitalDelivery && <p class="mt-2 text-sm font-medium text-brand">Entrega digital · sin envíos</p>}
+    <p
+      class="mt-4 w-fit rounded-full bg-brand px-5 py-2 text-xl font-semibold tabular-nums text-on-brand"
+      data-price-display
+      data-base={model.priceCents}
+      data-currency={model.currency}
+    >
+      {model.priceVaries && <span class="text-base font-medium opacity-80">desde </span>}
+      {model.formattedPrice}
+    </p>
+
+    {
+      model.demos.length > 0 && (
+        <a href="#demo" class="mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-brand hover:underline" data-ver-demo>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7s10 7 10 7s-3.5 7-10 7s-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+          Ver cómo queda, aquí mismo ↓
+        </a>
+      )
+    }
+
+    <ComparativaModalidades
+      variants={purchase.variants.filter((variant) => !variant.soldOut)}
+    />
+
+    <p class="mt-5 text-sm font-semibold text-ink">Tienes dos opciones: contratar el servicio directamente o probarlo gratis y pagar solo si te convence.</p>
+
+    {/* Dos caminos visibles, sin desplegables: compra directa (precio cerrado) y,
+        para quien duda, la vista previa gratis. */}
+    <div id="comprar" class="mt-3 scroll-mt-20 rounded-2xl border-2 border-brand bg-surface p-5" data-compra-directa>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand">Opción 1 · Compra directa</p>
+      <p class="mt-1 text-lg font-bold text-ink">Contrátalo ya, a precio cerrado</p>
+      <ol class="mt-2 space-y-1 text-sm text-muted" data-que-pasa>
+        <li><strong class="text-ink">1.</strong> Pagas con tarjeta en una página segura.</li>
+        <li><strong class="text-ink">2.</strong> Nos mandas tus datos en un formulario (2-3 minutos).</li>
+        <li><strong class="text-ink">3.</strong> Te enseñamos el resultado en 24-72 h laborables.</li>
+        <li><strong class="text-ink">4.</strong> Una ronda de ajustes y te lo entregamos.</li>
+      </ol>
+      {/* Lo que se pregunta justo antes de pagar, con las mismas reglas que las preguntas
+          frecuentes: nada de cifras que no estén en la ficha. */}
+      <dl class="mt-4 grid gap-2 rounded-xl bg-brand/5 p-4 text-xs leading-relaxed sm:grid-cols-2" data-antes-de-pagar>
+        <div>
+          <dt class="font-semibold text-ink">Pagas hoy</dt>
+          <dd class="text-muted"><span data-pagas-hoy>{model.priceVaries ? `Desde ${model.formattedPrice}, según la modalidad que elijas.` : `${model.formattedPrice}.`}</span> Precio cerrado y con factura.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-ink">Posibles costes después</dt>
+          <dd class="text-muted">Ninguna cuota obligatoria. Solo pagarías aparte lo de terceros que tú elijas (por ejemplo, un dominio propio), el mantenimiento mensual o los cambios por horas más allá de la ronda incluida, si los pides.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-ink">Qué podrás cambiar tú</dt>
+          <dd class="text-muted">Es tuya: te entregamos la web y su código para publicarla donde quieras. Si prefieres que la alojemos nosotros, es una cuota aparte y opcional. Con «Te lo montamos» pides ajustes sobre lo pedido; con «Plantilla + guía» te resolvemos las dudas por email.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-ink">Si no te convence</dt>
+          <dd class="text-muted">Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero. Y si empiezas gratis, no pagas nada hasta ver la vista previa.</dd>
+        </div>
+      </dl>
+      <ProductPurchaseForm model={purchase} />
+      <p class="mt-3 text-xs leading-relaxed text-faint" data-garantia>
+        Pago seguro con tarjeta. Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero. Factura incluida.
+      </p>
+      <p class="mt-2 text-xs leading-relaxed text-faint" data-regla-plazos>{REGLA_PLAZOS}</p>
+    </div>
+
+    <div class="mt-4 rounded-2xl border border-line bg-brand/5 p-5" data-empieza-gratis>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand">Opción 2 · Sin tarjeta · sin compromiso</p>
+      <p class="mt-1 text-lg font-bold text-ink">¿Prefieres verlo antes de pagar?</p>
+      <ol class="relative mt-4 space-y-3 border-l-2 border-dashed border-brand/30 pl-5 text-sm">
+        {[
+          ['1', 'Solicitas', 'Rellenas tus datos en 2-3 minutos. Sin tarjeta.'],
+          ['2', 'Recibes la vista previa', 'Con tu información real, en 24-72 h laborables.'],
+          ['3', 'Decides si pagas', 'Si te gusta, pagas y lo recibes según la modalidad elegida. Si no, no pagas nada.'],
+        ].map(([n, t, d]) => (
+          <li class="relative">
+            <span class="absolute -left-[31px] top-0 grid h-5 w-5 place-items-center rounded-full bg-brand text-[11px] font-bold text-on-brand">{n}</span>
+            <span class="block font-semibold text-ink">{t}</span>
+            <span class="block text-muted">{d}</span>
+          </li>
+        ))}
+      </ol>
+      <a
+        href={model.startHref}
+        class="mt-4 flex w-full items-center justify-center rounded-full border-2 border-brand bg-surface px-6 py-3 text-base font-semibold text-brand transition hover:bg-brand hover:text-on-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+      >
+        Empieza gratis →
+      </a>
+      <p class="mt-3 text-center text-xs text-faint">Te atiende una persona: David Porto Díaz revisa cada solicitud y responde tus dudas.</p>
+    </div>
+
+    {/* Qué recibes / qué necesito / qué pasa después: decisión sin sorpresas. */}
+    <dl class="mt-6 grid gap-3 sm:grid-cols-3" data-decision>
+      {[
+        ['Qué recibes', 'Exactamente lo que describe esta ficha, con tus datos y tu marca. Precio cerrado.', 'M5 12l5 5l10 -10'],
+        ['Qué necesito de ti', 'Los datos del formulario: textos, contacto y, si quieres, fotos o logo.', 'M4 20h4l10.5 -10.5a2.8 2.8 0 1 0 -4 -4l-10.5 10.5v4'],
+        ['Qué pasa después', 'Te escribimos con la vista previa. Ajustes incluidos antes de entregar.', 'M3 7l9 6l9 -6M3 7v10h18v-10'],
+      ].map(([t, d, path]) => (
+        <div class="rounded-xl border border-line bg-surface p-4">
+          <dt class="flex items-center gap-2 text-sm font-semibold text-ink">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-brand" aria-hidden="true"><path d={path} /></svg>
+            {t}
+          </dt>
+          <dd class="mt-1.5 text-xs leading-relaxed text-muted">{d}</dd>
+        </div>
+      ))}
+    </dl>
+
+    {/* Qué no incluye: límites claros para que el precio cerrado no tenga letra pequeña. */}
+    <details class="group mt-3 rounded-xl border border-line bg-surface p-4" data-no-incluye>
+      <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-accent" aria-hidden="true"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0M5.7 5.7l12.6 12.6" /></svg>
+        Qué no incluye
+        <span class="ml-auto text-xs font-normal text-faint group-open:hidden">Ver</span>
+        <span class="ml-auto hidden text-xs font-normal text-faint group-open:inline">Ocultar</span>
+      </summary>
+      <ul class="mt-3 space-y-1.5 text-xs leading-relaxed text-muted">
+        <li>· Cuotas de terceros: dominio, hosting de pago o herramientas con suscripción (te decimos cuáles son gratis).</li>
+        <li>· Textos a medida o sesiones de fotos. Si te faltan, usamos textos de partida e imágenes libres de derechos.</li>
+        <li>· Funciones que no aparecen en esta ficha. Si necesitas algo más, te damos precio antes.</li>
+        <li>· Cambios después de la entrega más allá de la ronda incluida: van con mantenimiento o por horas.</li>
+      </ul>
+    </details>
+    {
+      /* data-low-stock is the contract, not the wording. Reword or restyle it
+         freely; keep the marker so scarcity stays distinguishable from normal
+         availability without pinning copy. */
+      model.lowStock && (
+        <p data-low-stock class="mt-2 text-sm text-amber-700">
+          Últimas plazas
+        </p>
+      )
+    }
+    {
+      model.descriptionHtml && (
+        <div class="markdown-content mt-6 max-w-prose text-muted" style="--prose-h2-size:1.2rem" set:html={model.descriptionHtml} />
+      )
+    }
+
+
+    {/* Share — hidden until JS confirms the browser can share or copy. Uses the
+        Web Share API (mobile/native sheet) with a clipboard-copy fallback. */}
+    <button
+      type="button"
+      data-share
+      data-share-title={model.name}
+      class="mt-6 hidden w-fit items-center gap-2 text-xs uppercase tracking-widest text-faint transition hover:text-brand"
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+        <line x1="15.4" y1="6.5" x2="8.6" y2="10.5" />
+      </svg>
+      <span data-share-label>Compartir</span>
+    </button>
+  </div>
+</div>
+
+{
+  /* Demo DENTRO de la ficha: el cliente la ve y la toca sin salir de la tienda.
+     Las pestañas son enlaces con target al iframe, así que funciona sin JS. */
+  model.demos.length > 0 && (
+    <section id="demo" class="mt-16 scroll-mt-20" data-demo-visor>
+      <h2 class="text-2xl font-bold text-ink">Míralo funcionando</h2>
+      <p class="mt-1 text-sm text-muted">
+        {model.demos[0].tipo === 'interactiva' ? 'Pulsa y prueba: es una demo real. ' : ''}
+        Son ejemplos de muestra; tu versión irá en español, con tus textos, tu marca y tus datos.
+      </p>
+      {model.demos.length > 1 && (
+        <ul class="mt-4 flex flex-wrap gap-2" role="list">
+          {model.demos.map((demo) => (
+            <li>
+              <a
+                href={demo.url}
+                target="vista-demo"
+                class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
+              >
+                <span class={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase ${demo.tipo === 'interactiva' ? 'bg-brand text-on-brand' : 'bg-line text-muted'}`}>
+                  {demo.tipo === 'interactiva' ? 'Pruébala' : 'Diseño'}
+                </span>
+                {demo.titulo}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div class="mt-4 overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
+        <div class="flex items-center gap-2 border-b border-line px-4 py-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-line" aria-hidden="true"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-line" aria-hidden="true"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-line" aria-hidden="true"></span>
+          <span class="ml-2 truncate text-xs text-faint">Demo · {model.name}</span>
+          <a href={model.demos[0].url} target="_blank" rel="noopener" class="ml-auto shrink-0 text-xs font-medium text-brand hover:underline">
+            Abrir a pantalla completa ↗
+          </a>
+        </div>
+        <iframe
+          name="vista-demo"
+          src={model.demos[0].url}
+          title={`Demo de ${model.name}`}
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          class="block h-[70vh] min-h-[420px] w-full bg-white"
+        ></iframe>
+      </div>
+      {model.disenos.length > 0 && (
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-sm" data-elegir-diseno>
+          <span class="text-muted">¿Te gusta uno? Empieza gratis con:</span>
+          {model.disenos.map((d) => (
+            <a
+              href={`${model.startHref}?diseno=${encodeURIComponent(d.plantilla)}`}
+              class="inline-flex rounded-full bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand/20"
+            >
+              {d.titulo} →
+            </a>
+          ))}
+        </div>
+      )}
+      <p class="mt-4 text-sm text-muted">
+        ¿Te encaja? <a href="#comprar" class="font-semibold text-brand hover:underline">Contrátalo arriba</a> o{' '}
+        <a href={model.startHref} class="font-semibold text-brand hover:underline">pruébalo gratis con tus datos</a>.
+      </p>
+    </section>
+  )
+}
+
+{
+  model.related.length > 0 && (
+    <section class="mt-20 border-t border-line pt-12">
+      <h2 class="mb-6 text-2xl font-bold text-ink">También te puede interesar</h2>
+      <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {model.related.map((card, i) => (
+          <ProductCard card={card} index={i} headingLevel="h3" />
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{/* CTA fijo en móvil (ronda 24, ejemplo «Bottom banner» de Flowbite, MIT, sin su JS).
+    Se oculta mientras la zona de compra, «Empieza gratis» o el pie están a la vista:
+    no tapa los botones originales, ni el pie, ni duplica lo que ya se ve. */}
+<div
+  class="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-line bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-lg transition-transform md:hidden"
+  data-cta-fijo
+  hidden
+>
+  <a href="#comprar" class="flex-1 rounded-full bg-brand px-4 py-3 text-center text-sm font-semibold text-on-brand">
+    Contratar · {model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice}
+  </a>
+  <a href={model.startHref} class="flex-1 rounded-full border-2 border-brand px-4 py-3 text-center text-sm font-semibold text-brand">
+    Pruébalo gratis
+  </a>
+</div>
+
+<script>
+  const barra = document.querySelector<HTMLElement>('[data-cta-fijo]');
+  const zonas = [
+    document.getElementById('comprar'),
+    document.querySelector('[data-empieza-gratis]'),
+    [...document.querySelectorAll('footer')].at(-1) ?? null,
+  ].filter(
+    (z): z is HTMLElement => z !== null,
+  );
+  if (barra && zonas.length && 'IntersectionObserver' in window) {
+    const visibles = new Set<Element>();
+    const obs = new IntersectionObserver((entradas) => {
+      for (const e of entradas) e.isIntersecting ? visibles.add(e.target) : visibles.delete(e.target);
+      barra.hidden = visibles.size > 0;
+    });
+    zonas.forEach((z) => obs.observe(z));
+  }
+</script>

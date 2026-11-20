@@ -1,0 +1,54 @@
+---
+import type { StorefrontShellModel } from '../../features/storefront/models';
+import Logo from './Logo.astro';
+
+/**
+ * STORE-OWNED. Edit freely — this file belongs to your store.
+ *
+ * Footer links come from the merchant's navigation menu, already filtered to
+ * targets that are actually publishable, so nothing here can render a dead
+ * link. Like the header, this renders on every page.
+ */
+interface Props {
+  model: StorefrontShellModel;
+}
+
+const { model } = Astro.props;
+---
+
+<footer class="mt-16 border-t border-line bg-ink text-white">
+  <div class="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-[1.4fr_1fr]">
+    <div>
+      <span class="inline-block rounded-xl bg-paper px-3 py-2"><Logo /></span>
+      <p class="mt-5 max-w-sm text-sm leading-relaxed text-white/75">
+        Creamos páginas web, automatizaciones y otros servicios digitales a un precio cerrado. Puedes contratar cada servicio directamente o pedir una prueba gratuita antes de pagar. David Porto Díaz atiende personalmente tus consultas.
+      </p>
+    </div>
+    {
+      model.footerLinks.length > 0 && (
+        <nav aria-label="Pie de página" class="grid grid-cols-2 content-start gap-x-6 gap-y-3 text-sm">
+          {model.footerLinks.map((link) => (
+            <a href={link.href} class="text-white/80 hover:text-white hover:underline">
+              {link.text}
+            </a>
+          ))}
+        </nav>
+      )
+    }
+  </div>
+  {
+    model.sectorLinks.length > 0 && (
+      <section aria-labelledby="pie-sectores" class="mx-auto max-w-6xl px-6 pb-10 text-sm">
+        <h2 id="pie-sectores" class="font-semibold text-white">Webs por sector</h2>
+        <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          {model.sectorLinks.map((link) => (
+            <li><a href={link.href} class="text-white/80 hover:text-white hover:underline">{link.text}</a></li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+  <div class="border-t border-white/10">
+    <p class="mx-auto max-w-6xl px-6 py-5 text-xs text-white/60">&copy; {new Date().getFullYear()} {model.storeName} · Sin complicaciones y con una persona detrás. · <a href="/#guia" class="underline-offset-2 hover:text-white hover:underline">Ver guía de la web</a></p>
+  </div>
+</footer>
