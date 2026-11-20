@@ -20,5 +20,12 @@
     ::view-transition-new(root) {
       animation-duration: 200ms;
     }
+    /* El grupo con nombre interpolaría posición y tamaño y fundiría las dos
+       capturas de la cabecera: sin animación, queda quieta de verdad. */
+    ::view-transition-group(cabecera),
+    ::view-transition-old(cabecera),
+    ::view-transition-new(cabecera) {
+      animation: none;
+    }
   }
 </style>
