@@ -41,10 +41,10 @@ class FabricaEnRojo(unittest.TestCase):
         def d1(sql):
             return [fila] if sql.startswith('SELECT') else [{'public_id': 'S-ABC123'}]
 
-        def bloqueada(_ruta):
+        def bloqueada(_ruta, **_):
             raise RuntimeError('FabricaBloqueada')
 
-        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=(lambda _r: fabricada) if fabricada else bloqueada), patch.object(vp, 'qa', return_value=list(problemas)),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
+        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=(lambda _r, **_: fabricada) if fabricada else bloqueada), patch.object(vp, 'qa', return_value=list(problemas)),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
             vp.main()
 
     def test_todas_fallidas_termina_en_rojo(self):
@@ -117,9 +117,8 @@ class CambiosSinAplicar(unittest.TestCase):
             consultas.append(sql)
             return [{'public_id': 'S-1'}]
 
-        def fabricar(ruta):
-            p = json.loads(Path(ruta).read_text(encoding='utf-8'))
-            Path(ruta).write_text(json.dumps({**p, 'sin_aplicar': sin_aplicar}), encoding='utf-8')
+        def fabricar(ruta, informe):
+            informe['sin_aplicar'] = sin_aplicar
             return 'https://vistas.example/s-1/'
         with patch.object(vp, 'd1', d1), patch.object(vp, 'fabricar', fabricar), patch.object(vp, 'qa', lambda u, p: []), \
                 patch.object(vp, 'A_MANO', []):

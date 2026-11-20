@@ -39,6 +39,38 @@ class PedirAjustesTests(unittest.TestCase):
         self.assertIn('logo más grande', vistos[0])
 
 
+class RondasPorBloques(unittest.TestCase):
+    """Ninguna ronda se queda fuera por longitud; en lo que se contradice, manda la más reciente."""
+
+    def test_rondas_largas_van_en_varios_bloques_sin_perder_ninguna(self):
+        rondas = ['nueva ' + 'n' * 2000, 'media ' + 'm' * 2000, 'vieja: color #123456 ' + 'v' * 2000]
+        b = ajustes.bloques(rondas)
+        self.assertEqual(len(b), 3)
+        self.assertTrue(b[0].startswith('vieja'))
+        self.assertTrue(all(len(x) <= ajustes.BLOQUE for x in b))
+
+    def test_ronda_mayor_que_un_bloque_se_parte(self):
+        b = ajustes.bloques(['x' * (ajustes.BLOQUE * 2 + 5)])
+        self.assertEqual([len(x) for x in b], [ajustes.BLOQUE, ajustes.BLOQUE, 5])
+
+    def test_la_mas_reciente_manda_y_lo_antiguo_no_se_pierde(self):
+        respuestas = iter([
+            '{"logo": null, "texto": null, "color": "#123456", "sin_aplicar": ["otra foto"]}',  # ronda vieja
+            '{"logo": "mas_grande", "texto": null, "color": null, "sin_aplicar": []}',
+            '{"logo": "mas_pequeno", "texto": null, "color": null, "sin_aplicar": ["vídeo"]}',  # la más reciente
+        ])
+        r = ajustes.pedir_ajustes(['n' * 2900, 'm' * 2900, 'v' * 2900], lambda s, u: next(respuestas))
+        self.assertEqual(r['color'], '#123456')
+        self.assertEqual(r['logo'], 'mas_pequeno')
+        self.assertEqual(r['sin_aplicar'], ['otra foto', 'vídeo'])
+
+    def test_rondas_cortas_en_una_sola_llamada(self):
+        llamadas = []
+        ajustes.pedir_ajustes(['logo más grande', 'color azul'], lambda s, u: llamadas.append(u) or '{"sin_aplicar": []}')
+        self.assertEqual(len(llamadas), 1)
+        self.assertLess(llamadas[0].index('color azul'), llamadas[0].index('logo más grande'))
+
+
 class CssTests(unittest.TestCase):
     def test_logo_mas_grande_solo_en_la_cabecera(self):
         css = ajustes.css_de({'logo': 'mas_grande'})

@@ -51,24 +51,49 @@ def validar(respuesta):
     return salida
 
 
+BLOQUE = 3000  # caracteres por llamada a la IA
+
+
+def bloques(rondas):
+    """Rondas (la más reciente primero) en bloques de hasta BLOQUE caracteres, sin perder ninguna.
+
+    Una ronda más larga que un bloque se parte; los bloques salen de la más antigua a la más reciente."""
+    trozos = [r[i:i + BLOQUE] for r in reversed(rondas) for i in range(0, len(r), BLOQUE)]
+    salida, actual = [], ''
+    for t in trozos:
+        if actual and len(actual) + 1 + len(t) > BLOQUE:
+            salida.append(actual)
+            actual = ''
+        actual = f'{actual}\n{t}' if actual else t
+    return salida + ([actual] if actual else [])
+
+
 def pedir_ajustes(cambios, ia):
-    """`ia(sistema, usuario) -> str`. Sin cambios pedidos no se llama a la IA."""
-    if not (cambios or '').strip():
-        return {'sin_aplicar': []}
-    r = ia(SISTEMA, f'Cambios pedidos por el cliente:\n{cambios.strip()[:3000]}')
-    return validar(json.loads(r[r.index('{'): r.rindex('}') + 1]))
+    """`ia(sistema, usuario) -> str`. `cambios`: texto o lista de rondas (la más reciente primero).
+
+    Sin cambios pedidos no se llama a la IA. Si no caben en una llamada se piden por bloques:
+    en logo, texto y color manda la ronda más reciente que diga algo; «sin_aplicar» se suma."""
+    rondas = [r.strip() for r in ([cambios] if isinstance(cambios, str) else cambios or []) if r and r.strip()]
+    salida = {'sin_aplicar': []}
+    for bloque in bloques(rondas):
+        r = ia(SISTEMA, f'Cambios pedidos por el cliente:\n{bloque}')
+        parcial = validar(json.loads(r[r.index('{'): r.rindex('}') + 1]))
+        salida['sin_aplicar'] += parcial.pop('sin_aplicar')
+        salida.update({k: v for k, v in parcial.items() if v is not None or k not in salida})
+    return salida
 
 
 # Solo el logo de cabecera (no los logos de clientes de más abajo) y solo el elemento exterior:
 # .navbar-brand > .logo no se agranda dos veces.
 LOGO = ':is(header, nav) :is([class*="logo"], [class*="brand"]):not(:is([class*="logo"], [class*="brand"]) *)'
-VARIABLE_COLOR = re.compile(r'(--[\w-]*(?:primary|accent|brand|main|theme)[\w-]*)\s*:', re.I)
+VARIABLE_CSS = re.compile(r'(--[\w-]+)\s*:')  # sin cuantificadores anidados: lineal
+NOMBRE_COLOR = re.compile(r'primary|accent|brand|main|theme', re.I)
 
 
 def variables_de_color(site):
     """Variables CSS de la plantilla con pinta de color principal (las de cada plantilla cambian de nombre)."""
     textos = [f.read_text(encoding='utf-8', errors='ignore') for f in Path(site).rglob('*') if f.suffix in ('.css', '.html')]
-    return sorted({m.group(1) for t in textos for m in VARIABLE_COLOR.finditer(t)})
+    return sorted({m.group(1) for t in textos for m in VARIABLE_CSS.finditer(t) if NOMBRE_COLOR.search(m.group(1))})
 
 
 def luminancia(color):

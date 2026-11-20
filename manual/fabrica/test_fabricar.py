@@ -277,9 +277,10 @@ class CambiosDeAspecto(unittest.TestCase):
             with patch.object(modulo_fabricar, 'DEMOS', demos), \
                     patch.object(modulo_fabricar, 'credenciales', return_value=('t', 'c')), \
                     patch.object(modulo_fabricar, 'ia', side_effect=ia_simulada):
-                modulo_fabricar.fabricar(ruta, desplegar=False)
+                informe = {}
+                modulo_fabricar.fabricar(ruta, desplegar=False, informe=informe)
             html = (demos / 'clientes' / p['id'] / 'site' / 'index.html').read_text(encoding='utf-8')
-            return html, json.loads(ruta.read_text(encoding='utf-8'))['sin_aplicar']
+            return html, informe['sin_aplicar']
 
     def test_logo_mas_grande_llega_a_la_web_y_la_foto_queda_pendiente(self):
         html, sin_aplicar = self.fabricar_con({'logo': 'mas_grande', 'sin_aplicar': ['otra foto']})

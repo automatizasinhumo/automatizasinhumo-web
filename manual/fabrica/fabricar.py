@@ -188,7 +188,9 @@ def bajar_plantilla(plantilla):
         shutil.copytree(bajada, destino)
 
 
-def fabricar(ruta_pedido, desplegar=True):
+def fabricar(ruta_pedido, desplegar=True, informe=None):
+    """Fabrica (y despliega) la vista previa del pedido. Si se pasa `informe` (dict), deja en él
+    «sin_aplicar»: los cambios de aspecto pedidos que no se han podido hacer."""
     p = json.loads(Path(ruta_pedido).read_text(encoding='utf-8'))
     base = DEMOS / 'clientes' / p['id']
     site = base / 'site'
@@ -239,8 +241,8 @@ def fabricar(ruta_pedido, desplegar=True):
             print('  ajustes visuales:', type(e).__name__)
             pedidos = {'sin_aplicar': ['no se pudieron leer los cambios de aspecto']}
         final = ajustes.aplicar(final, ajustes.css_de(pedidos, ajustes.variables_de_color(site)))
-        p['sin_aplicar'] = pedidos['sin_aplicar']
-        Path(ruta_pedido).write_text(json.dumps(p, ensure_ascii=False), encoding='utf-8')
+        if informe is not None:
+            informe['sin_aplicar'] = pedidos['sin_aplicar']
     restos = restos_de_plantilla(final, marca, nombre_publico(p))
     if restos:
         raise FabricaBloqueada('restos de la plantilla: ' + ', '.join(restos))
