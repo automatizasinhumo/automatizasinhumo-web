@@ -52,10 +52,8 @@ const { planName, price, description, features, featured = false } = Astro.props
   <a
     href="#comprar"
     class:list={[
-      'inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
-      featured
-        ? 'bg-brand text-on-brand hover:bg-brand-hover'
-        : 'border border-brand text-brand hover:bg-brand/5',
+      'boton boton-compacto min-h-11',
+      featured ? 'boton-principal' : 'boton-secundario',
     ]}
   >
     Ver opciones de compra
