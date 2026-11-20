@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -40,10 +41,10 @@ class FabricaEnRojo(unittest.TestCase):
         def d1(sql):
             return [fila] if sql.startswith('SELECT') else [{'public_id': 'S-ABC123'}]
 
-        def bloqueada(_ruta):
+        def bloqueada(_ruta, **_):
             raise RuntimeError('FabricaBloqueada')
 
-        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=(lambda _r: fabricada) if fabricada else bloqueada), patch.object(vp, 'qa', return_value=list(problemas)),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
+        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=(lambda _r, **_: fabricada) if fabricada else bloqueada), patch.object(vp, 'qa', return_value=list(problemas)),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
             vp.main()
 
     def test_todas_fallidas_termina_en_rojo(self):
@@ -78,7 +79,7 @@ class CupoIAAgotadoEspera(unittest.TestCase):
                 notas.append(sql)
             return [{'public_id': 'S-1'}]
 
-        def sin_cupo(_ruta):
+        def sin_cupo(_ruta, **_):
             raise vp.CupoIAAgotado('cupo diario de Workers AI agotado')
 
         with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=sin_cupo) as fab,                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []),                 patch.object(vp, 'FALLOS_D1', []), patch.object(vp, 'SIN_CUPO', []):
@@ -104,6 +105,34 @@ class AlertaDeIA(unittest.TestCase):
             with self.assertRaises(SystemExit) as fin:
                 vp.main()
         self.assertIn('retirado', str(fin.exception.code))
+
+
+class CambiosSinAplicar(unittest.TestCase):
+    """Un cambio de aspecto que la fábrica no sabe hacer no sale al cliente como «QA ok»."""
+
+    def procesar(self, sin_aplicar):
+        consultas = []
+
+        def d1(sql):
+            consultas.append(sql)
+            return [{'public_id': 'S-1'}]
+
+        def fabricar(ruta, informe):
+            informe['sin_aplicar'] = sin_aplicar
+            return 'https://vistas.example/s-1/'
+        with patch.object(vp, 'd1', d1), patch.object(vp, 'fabricar', fabricar), patch.object(vp, 'qa', lambda u, p: []), \
+                patch.object(vp, 'A_MANO', []):
+            vp.procesar('S-1', {'id': 's-1', 'cambios': 'x'})
+        return consultas[-1]
+
+    def test_con_todo_aplicado_queda_qa_ok(self):
+        self.assertIn('· QA ok', self.procesar([]))
+
+    def test_lo_no_aplicado_va_a_revision_a_mano(self):
+        nota = self.procesar(['otra foto'])
+        self.assertNotIn('QA ok', nota)
+        self.assertIn('cambio sin aplicar: otra foto', nota)
+        self.assertIn('revisar a mano', nota)
 
 
 if __name__ == '__main__':

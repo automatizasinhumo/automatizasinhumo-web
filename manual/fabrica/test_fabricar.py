@@ -254,6 +254,56 @@ class ContextoDePagina(unittest.TestCase):
         self.assertEqual(elegir({'Nombre comercial y logo': 'Peluquería Ana'}), 'Peluquería Ana')
 
 
+class CambiosDeAspecto(unittest.TestCase):
+    """Ronda de cambios: «logo más grande» llega a la web; lo que no encaja vuelve en «sin_aplicar»."""
+
+    def fabricar_con(self, respuesta_ajustes):
+        textos = ia_que_adapta()
+
+        def ia_simulada(t, c, sistema, usuario):
+            if sistema == modulo_fabricar.ajustes.SISTEMA:
+                if isinstance(respuesta_ajustes, Exception):
+                    raise respuesta_ajustes
+                return json.dumps(respuesta_ajustes)
+            return textos(t, c, sistema, usuario)
+        p = {**PEDIDO_BLOQUEO, 'cambios': 'Cambios pedidos sobre la versión 1: el logo más grande y otra foto'}
+        plantilla = PLANTILLA_BLOQUEO.replace('<body>', '<body><header><a class="logo">x</a></header>')
+        with tempfile.TemporaryDirectory() as temporal:
+            demos = Path(temporal) / 'demos'
+            (demos / 'site' / p['plantilla']).mkdir(parents=True)
+            (demos / 'site' / p['plantilla'] / 'index.html').write_text(plantilla, encoding='utf-8')
+            ruta = Path(temporal) / 'pedido.json'
+            ruta.write_text(json.dumps(p, ensure_ascii=False), encoding='utf-8')
+            with patch.object(modulo_fabricar, 'DEMOS', demos), \
+                    patch.object(modulo_fabricar, 'credenciales', return_value=('t', 'c')), \
+                    patch.object(modulo_fabricar, 'ia', side_effect=ia_simulada):
+                informe = {}
+                modulo_fabricar.fabricar(ruta, desplegar=False, informe=informe)
+            html = (demos / 'clientes' / p['id'] / 'site' / 'index.html').read_text(encoding='utf-8')
+            return html, informe['sin_aplicar']
+
+    def test_logo_mas_grande_llega_a_la_web_y_la_foto_queda_pendiente(self):
+        html, sin_aplicar = self.fabricar_con({'logo': 'mas_grande', 'sin_aplicar': ['otra foto']})
+        self.assertIn('<style id="ash-ajustes">', html)
+        self.assertLess(html.index('ash-ajustes'), html.index('</head>'))
+        self.assertEqual(sin_aplicar, ['otra foto'])
+
+    def test_si_la_ia_falla_el_cambio_no_se_da_por_hecho(self):
+        html, sin_aplicar = self.fabricar_con(OSError('sin red'))
+        self.assertNotIn('ash-ajustes', html)
+        self.assertEqual(sin_aplicar, ['no se pudieron leer los cambios de aspecto'])
+
+    def test_sin_cupo_la_solicitud_espera_entera(self):
+        with self.assertRaises(modulo_fabricar.CupoIAAgotado):
+            self.fabricar_con(modulo_fabricar.CupoIAAgotado('x'))
+
+    def test_sin_ronda_de_cambios_no_se_pregunta_a_la_ia(self):
+        def ia_simulada(t, c, sistema, usuario):
+            self.assertNotEqual(sistema, modulo_fabricar.ajustes.SISTEMA)
+            return ia_que_adapta()(t, c, sistema, usuario)
+        self.assertNotIn('ash-ajustes', renderizar(PEDIDO_BLOQUEO, PLANTILLA_BLOQUEO, ia_simulada))
+
+
 if __name__ == '__main__':
     unittest.main()
 

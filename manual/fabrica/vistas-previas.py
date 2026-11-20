@@ -181,11 +181,13 @@ def pedido_de(fila, plantilla):
     negocio = nombre_negocio_evento(campos)
     texto = '. '.join(f'{k}: {v}' for k, v in campos.items() if v) + ('. ' + fila['mensaje'] if fila.get('mensaje') else '')
     # Los cambios pedidos van delante (la última ronda primero): el recorte a 1500 caracteres no debe dejarlos fuera.
-    rondas = ' '.join(reversed(re.findall(r'Cambios pedidos sobre la versión \d+: .*?(?=\n\nCambios pedidos sobre la versión|\Z)',
-                                          fila.get('mensaje') or '', re.S)))  # la más reciente primero
+    lista = list(reversed(re.findall(r'Cambios pedidos sobre la versión \d+: .*?(?=\n\nCambios pedidos sobre la versión|\Z)',
+                                     fila.get('mensaje') or '', re.S)))  # la más reciente primero
+    rondas = ' '.join(lista)
     if rondas:
         texto = f'{rondas}. {texto}'
     return {
+        'cambios': lista,  # fabricar.py saca de aquí los cambios de aspecto (logo, letra, color), ronda a ronda
         'id': fila['public_id'].lower(),
         'plantilla': plantilla,
         'negocio': negocio.split('\n')[0][:60],
@@ -223,10 +225,12 @@ def procesar(public_id, p, intentos=0, mensaje=None):
         with tempfile.TemporaryDirectory() as tmp:  # el pedido lleva datos de contacto: se borra al salir
             ruta = Path(tmp, 'pedido.json')
             ruta.write_text(json.dumps(p, ensure_ascii=False), encoding='utf-8')
-            url = fabricar(str(ruta))
+            informe = {}
+            url = fabricar(str(ruta), informe=informe)
+            sin_aplicar = informe.get('sin_aplicar') or []
         if not url:
             raise RuntimeError('despliegue sin URL')
-        problemas = qa(url, p)
+        problemas = qa(url, p) + [f'cambio sin aplicar: {c}' for c in sin_aplicar]
         if problemas:
             A_MANO.append(1)  # vista previa hecha pero sin correo: alguien tiene que mirarla
         print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))

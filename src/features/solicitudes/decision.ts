@@ -54,7 +54,13 @@ export type Accion = 'aprobar' | 'cambios';
  * antepone a la nota para que Admin lo vea sin perder lo anterior.
  */
 export async function decidir(db: D1Database, e: Enlace, accion: Accion, cambios: string): Promise<boolean> {
-  const texto = cambios.trim().slice(0, MAX_CAMBIOS);
+  // Una línea en blanco separa lo escrito de la nota anterior (y la fábrica corta ahí): dentro
+  // del texto del cliente, los párrafos quedan en líneas seguidas.
+  const texto = cambios
+    .replace(/\r\n?/g, '\n')
+    .replace(/\n[ \t]*(?:\n[ \t]*)+/g, '\n')
+    .trim()
+    .slice(0, MAX_CAMBIOS);
   if (accion === 'cambios' && !texto) return false;
   const nota =
     accion === 'aprobar'
