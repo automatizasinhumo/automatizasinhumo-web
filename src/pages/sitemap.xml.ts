@@ -5,6 +5,7 @@ import { listProducts, countProducts } from '../features/products/db';
 import { listCategories } from '../features/categories/db';
 import { listPublishedPages } from '../features/pages/db';
 import { catalogPath } from '../features/settings/home';
+import { PORTADA_DEL_TEMA } from '../features/settings/themeHome';
 import { publicOrigin } from '../features/http/origin';
 import { getCollection } from 'astro:content';
 import { SECTORS } from '../features/blog/sectors';
@@ -33,6 +34,8 @@ export function sitemapLocs(
   },
 ): string[] {
   return [
+    // La portada propia del tema es contenido propio en `/`: va además del catálogo.
+    ...(homePage === PORTADA_DEL_TEMA ? [`${origin}/`] : []),
     `${origin}${catalogPath(homePage)}`,
     ...data.categories.map((c) => `${origin}/categories/${c.slug}`),
     ...data.products.map((p) => `${origin}/products/${p.slug}`),

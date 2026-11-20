@@ -23,6 +23,11 @@ describe('sitemapLocs', () => {
     '/webs/talleres',
   ];
 
+  it('con portada propia del tema lista / y el catálogo en /products', () => {
+    const locs = sitemapLocs(origin, 'theme', data);
+    expect(locs.slice(0, 2)).toEqual([`${origin}/`, `${origin}/products`]);
+  });
+
   it('lists the catalog at / when the home page is the catalog', () => {
     const locs = sitemapLocs(origin, null, data);
     expect(locs[0]).toBe(`${origin}/`);
