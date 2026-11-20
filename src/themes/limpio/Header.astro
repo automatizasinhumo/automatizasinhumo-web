@@ -55,13 +55,13 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
 
 <header class="cabecera">
   <div class="isla">
-    <a href="/" aria-label={model.storeName} class="shrink-0">
+    <a href="/" aria-label={model.storeName} class="min-w-0 max-w-full shrink-0">
       {
         model.logo ? (
           /* Not lazy: the header logo is above the fold on every page. The
              store name stays the alt text, so the header still reads the
              same to a screen reader or when the image fails. */
-          <img src={model.logo.src} alt={model.logo.alt} class="h-8 max-w-48 object-contain sm:h-10" />
+          <img src={model.logo.src} alt={model.logo.alt} class="h-8 max-w-[min(12rem,100%)] object-contain sm:h-10" />
         ) : (
           <Logo />
         )

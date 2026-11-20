@@ -91,7 +91,7 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
         {OBJETIVOS.map((o) => (
           <label class={tarjeta}>
             <input type="radio" name="objetivo" value={o.id} checked={o.id === objetivoActual} class="mt-1 accent-[var(--color-brand)]" />
-            <span>
+            <span class="min-w-0">
               <span class="block font-semibold text-ink">{o.label}</span>
               <span class="block text-sm text-muted">{o.detalle}</span>
             </span>
@@ -118,7 +118,7 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
         {MODALIDADES.map((m) => (
           <label class={tarjeta}>
             <input type="radio" name="modalidad" value={m.id} checked={m.id === modalidadActual} class="mt-1 accent-[var(--color-brand)]" />
-            <span>
+            <span class="min-w-0">
               <span class="block font-semibold text-ink">{m.label}</span>
               <span class="block text-sm text-muted">{m.detalle}</span>
             </span>

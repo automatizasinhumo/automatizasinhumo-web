@@ -93,11 +93,12 @@ const { model } = Astro.props;
   .llamada p { margin-top: var(--ds-hueco-2); max-width: 34rem; color: rgb(255 255 255 / 0.8); }
   .columnas {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--ds-hueco-8);
     padding-block: var(--ds-hueco-12) var(--ds-hueco-8);
   }
-  @media (min-width: 40rem) { .columnas { grid-template-columns: 1.4fr 1fr; } }
-  .chapa { display: inline-block; border-radius: 0.75rem; padding: 0.5rem 0.75rem; background: var(--color-paper); }
+  @media (min-width: 40rem) { .columnas { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } }
+  .chapa { display: inline-block; max-width: 100%; border-radius: 0.75rem; padding: 0.5rem 0.75rem; background: var(--color-paper); }
   .lema { margin-top: var(--ds-hueco-6); max-width: 24rem; font-size: 0.875rem; line-height: 1.65; color: rgb(255 255 255 / 0.75); }
   .enlaces { display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: var(--ds-hueco-3) var(--ds-hueco-6); font-size: 0.875rem; }
   .pie a { color: rgb(255 255 255 / 0.8); text-underline-offset: 3px; transition: color var(--ds-mov-rapido); }

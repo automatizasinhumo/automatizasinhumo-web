@@ -43,6 +43,10 @@ const { pasos, etiqueta } = Astro.props;
     gap: var(--ds-hueco-4);
     align-items: flex-start;
   }
+  /* El texto puede encoger: si no, una palabra larga empuja el paso fuera. */
+  li > div {
+    min-width: 0;
+  }
   .num {
     position: relative;
     z-index: 1;
@@ -88,7 +92,7 @@ const { pasos, etiqueta } = Astro.props;
     color: var(--color-muted);
   }
   @media (min-width: 48rem) {
-    .pasos { grid-template-columns: repeat(var(--n, 3), 1fr); grid-auto-flow: column; gap: var(--ds-hueco-8); }
+    .pasos { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); grid-auto-flow: column; gap: var(--ds-hueco-8); }
     li { flex-direction: column; }
     li:not(:last-child)::after {
       top: 1.375rem;
