@@ -18,7 +18,7 @@ const PERSONALIZABLE = { plantilla: 'onyx', color: '#b34a28', decoracion: { form
 
 const tipos = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.woff': 'font/woff', '.woff2': 'font/woff2' };
 const srv = createServer((req, res) => {
-  const ruta = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const ruta = decodeURIComponent((req.url ?? '/').split('?')[0]);
   if (ruta === '/') {
     res.writeHead(200, { 'content-type': 'text/html' });
     return res.end('<!doctype html><meta charset=utf-8><div id=v></div><script type=module src="/cv/estudio/motor/estudio.js"></script>');
