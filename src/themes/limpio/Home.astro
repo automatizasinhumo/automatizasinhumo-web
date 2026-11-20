@@ -1,10 +1,15 @@
 ---
 /**
- * STORE-OWNED. Portada del tema «limpio»: eslogan, dos botones y un test corto.
+ * STORE-OWNED. Portada del tema «limpio»: la primera pantalla es solo el eslogan y
+ * dos botones, en forma de pirámide invertida (cada línea más estrecha que la de
+ * arriba, hasta acabar en una flecha). El test «¿Qué estás buscando?» está en la
+ * página pero oculto: se despliega al pulsar «Haz el test» (enlace a #test, :target),
+ * sin JS.
  *
- * Solo bloques que ya se adaptan solos (rejilla y tipografía de los tokens del
- * tema): nada se ajusta a mano por dispositivo. El test son enlaces normales a
- * /elige, que calcula la recomendación con los precios del catálogo; sin JS.
+ * Efectos adaptados a CSS de Magic UI (MIT, licencias/magicui.txt): rejilla de fondo
+ * con casillas resaltadas (GridPattern), texto con degradado en movimiento
+ * (AuroraText), borde con brillo (ShineBorder) y botón con destello (ShimmerButton).
+ * Medidas fluidas (clamp) en lugar de ajustes por dispositivo.
  */
 import Icono from './IconoCat.astro';
 
@@ -24,7 +29,7 @@ interface Props {
 
 const { objetivos, catalogHref } = Astro.props;
 
-// Qué respuestas enseña la portada y en qué orden. Un id que no exista se ignora.
+// Qué respuestas enseña el test y en qué orden. Un id que no exista se ignora.
 const PRIMERA_PREGUNTA: [string, string][] = [
   ['trabajo', 'id-badge-2'],
   ['llamadas', 'world-www'],
@@ -37,32 +42,59 @@ const opciones = PRIMERA_PREGUNTA.flatMap(([id, icono]) => {
   const o = objetivos.find((x) => x.id === id);
   return o ? [{ ...o, icono }] : [];
 });
+
+// Casillas resaltadas de la rejilla (columna, fila), como las «squares» de GridPattern.
+const CELDA = 48;
+const CASILLAS: [number, number, 'brand' | 'accent'][] = [
+  [2, 1, 'brand'], [5, 3, 'accent'], [9, 2, 'brand'], [14, 1, 'brand'], [18, 4, 'accent'],
+  [22, 2, 'brand'], [26, 5, 'brand'], [3, 7, 'accent'], [11, 8, 'brand'], [24, 9, 'accent'],
+  [30, 3, 'brand'], [34, 7, 'brand'], [1, 11, 'brand'], [16, 11, 'accent'], [29, 12, 'brand'],
+];
 ---
 
-<section class="py-10 text-center sm:py-16">
-  <h1 class="mx-auto max-w-3xl text-4xl font-bold leading-tight text-ink sm:text-6xl">
-    Tu negocio, tu evento, tu idea, <span class="text-brand">en marcha sin complicaciones</span>
+<div class="fondo" aria-hidden="true">
+  <svg class="rejilla">
+    <defs>
+      <pattern id="rejilla-celda" width={CELDA} height={CELDA} patternUnits="userSpaceOnUse" x="-1" y="-1">
+        <path d={`M.5 ${CELDA}V.5H${CELDA}`} fill="none" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#rejilla-celda)" />
+    {CASILLAS.map(([c, f, tono], i) => (
+      <rect class={`casilla ${tono}`} style={`animation-delay:${(i % 5) * 1.3}s`} width={CELDA - 1} height={CELDA - 1} x={c * CELDA} y={f * CELDA} />
+    ))}
+  </svg>
+  <div class="halo halo-a"></div>
+  <div class="halo halo-b"></div>
+</div>
+
+<section class="piramide" aria-labelledby="portada-titulo">
+  <h1 id="portada-titulo">
+    <span class="fila fila-1">Tu negocio, tu evento,</span>
+    <span class="fila fila-2">tu idea, <span class="aurora">en marcha</span></span>
+    <span class="fila fila-3"><span class="aurora">sin complicaciones</span></span>
   </h1>
-  <p class="mx-auto mt-5 max-w-xl text-lg text-muted">
-    Eliges, rellenas tus datos y lo tienes listo. Con precio cerrado desde el principio.
-  </p>
-  <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-    <a href="#test" class="w-full rounded-full bg-brand px-6 py-3 font-semibold text-on-brand hover:bg-brand-hover sm:w-auto">
-      Haz el test y te recomendamos
+  <p class="subtitulo">Eliges, rellenas tus datos y lo tienes listo. Con precio cerrado desde el principio.</p>
+  <div class="botones">
+    <a href="#test" class="destello">
+      <span>Haz el test y te recomendamos</span>
     </a>
-    <a href={catalogHref} class="w-full rounded-full border border-line bg-surface px-6 py-3 font-semibold text-ink hover:border-brand sm:w-auto">
-      Ver todos los servicios
-    </a>
+    <a href={catalogHref} class="secundario">Ver todos los servicios</a>
   </div>
+  <p class="punta">Precio cerrado · 100 % automático</p>
+  <svg class="flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
 </section>
 
-<section id="test" class="scroll-mt-24 pb-16" aria-labelledby="test-titulo">
-  <h2 id="test-titulo" class="text-center text-2xl font-bold text-ink sm:text-3xl">¿Qué estás buscando?</h2>
-  <ul class="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+<section id="test" class="test" aria-labelledby="test-titulo">
+  <div class="test-cabecera">
+    <h2 id="test-titulo">¿Qué estás buscando?</h2>
+    <a href="#" class="cerrar">Cerrar</a>
+  </div>
+  <ul>
     {opciones.map((o) => (
       <li>
-        <a href={o.href} class="flex h-full items-start gap-3 rounded-2xl border border-line bg-surface p-5 text-left transition-colors hover:border-brand hover:bg-brand/5">
-          <Icono name={o.icono} class="mt-0.5 h-6 w-6 shrink-0 text-brand" />
+        <a href={o.href} class="tarjeta brillo">
+          <span class="icono"><Icono name={o.icono} class="h-6 w-6" /></span>
           <span>
             <span class="block font-semibold text-ink">{o.label}</span>
             <span class="mt-1 block text-sm text-muted">{o.detalle}</span>
@@ -72,3 +104,234 @@ const opciones = PRIMERA_PREGUNTA.flatMap(([id, icono]) => {
     ))}
   </ul>
 </section>
+
+<style>
+  /* ── Fondo: rejilla difuminada + dos halos de color, fijo detrás de toda la página ── */
+  .fondo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .rejilla {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke: color-mix(in oklab, var(--color-brand) 16%, transparent);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 25%, transparent 100%);
+  }
+  .casilla {
+    stroke: none;
+    animation: latido 6s ease-in-out infinite;
+  }
+  .casilla.brand { fill: color-mix(in oklab, var(--color-brand) 14%, transparent); }
+  .casilla.accent { fill: color-mix(in oklab, var(--color-accent) 12%, transparent); }
+  .halo {
+    position: absolute;
+    width: min(60vw, 40rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+  }
+  .halo-a { background: var(--color-brand); top: -20%; left: -15%; }
+  .halo-b { background: var(--color-accent); top: 10%; right: -20%; opacity: 0.18; }
+
+  /* ── Primera pantalla: pirámide invertida, cada bloque más estrecho que el anterior ── */
+  .piramide {
+    display: flex;
+    min-height: calc(100svh - 9rem);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-block: clamp(2rem, 8vh, 6rem);
+    text-align: center;
+  }
+  .piramide h1 {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--color-ink);
+  }
+  /* Tres filas fijas, cada una con letra más pequeña: más estrecha que la de arriba en
+     cualquier pantalla. El tamaño va con el ancho (vw), así que nunca hace falta partirlas. */
+  .fila {
+    display: block;
+    white-space: nowrap;
+  }
+  .fila-1 { font-size: clamp(1.6rem, 7vw, 4.6rem); }
+  .fila-2 { font-size: clamp(1.45rem, 6.3vw, 4.1rem); }
+  .fila-3 { font-size: clamp(1.3rem, 5.6vw, 3.6rem); }
+  .aurora {
+    background: linear-gradient(135deg, var(--color-brand), #1f8a72, var(--color-accent), #1f8a72, var(--color-brand));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aurora 8s ease-in-out infinite alternate;
+  }
+  .subtitulo {
+    max-width: 42ch;
+    margin-top: clamp(1.5rem, 4vh, 2.5rem);
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    line-height: 1.5;
+    color: var(--color-muted);
+    text-wrap: balance;
+  }
+  .botones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: clamp(1.75rem, 5vh, 3rem);
+  }
+  .botones a {
+    border-radius: 999px;
+    padding: 0.9rem 1.6rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .botones a:hover { transform: translateY(-2px); }
+  /* ShimmerButton: una luz recorre el borde del botón principal. */
+  .destello {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: var(--color-on-brand);
+    background: var(--color-brand);
+    box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--color-brand) 70%, transparent);
+  }
+  .destello::before {
+    content: '';
+    position: absolute;
+    inset: -150% -10%;
+    z-index: -2;
+    background: conic-gradient(from 0deg, transparent 0 300deg, rgb(255 255 255 / 0.85) 360deg);
+    animation: giro 3s linear infinite;
+  }
+  .destello::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(180deg, color-mix(in oklab, var(--color-brand) 85%, #fff), var(--color-brand));
+  }
+  .destello:hover { box-shadow: 0 14px 34px -10px color-mix(in oklab, var(--color-brand) 85%, transparent); }
+  .secundario {
+    border: 1px solid var(--color-line);
+    color: var(--color-ink);
+    background: color-mix(in oklab, var(--color-surface) 70%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .secundario:hover { border-color: var(--color-brand); }
+  .punta {
+    margin-top: clamp(1.75rem, 5vh, 3rem);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .flecha {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 0.5rem;
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: baja 2s ease-in-out infinite;
+  }
+
+  /* ── Test: oculto hasta que se pulsa «Haz el test» ── */
+  .test {
+    scroll-margin-top: 6rem;
+    padding-bottom: 4rem;
+  }
+  .test:not(:target) { display: none; }
+  .test:target { animation: aparece 0.5s ease-out; }
+  .test-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+  }
+  .test h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .cerrar {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    text-decoration: underline;
+  }
+  .test ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: 1rem;
+    max-width: 60rem;
+    margin: 2rem auto 0;
+  }
+  .tarjeta {
+    position: relative;
+    display: flex;
+    height: 100%;
+    align-items: flex-start;
+    gap: 0.9rem;
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    text-align: left;
+    background: color-mix(in oklab, var(--color-surface) 80%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -18px color-mix(in oklab, var(--color-brand) 45%, transparent);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .tarjeta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 20px 40px -18px color-mix(in oklab, var(--color-brand) 60%, transparent);
+  }
+  .icono {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.8rem;
+    color: var(--color-on-brand);
+    background: linear-gradient(135deg, var(--color-brand), color-mix(in oklab, var(--color-brand) 60%, var(--color-accent)));
+  }
+  /* ShineBorder: un brillo de colores recorre el borde (máscara que deja solo el borde). */
+  .brillo::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: radial-gradient(transparent, transparent, var(--color-brand), var(--color-accent), transparent, transparent);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box exclude, linear-gradient(#fff 0 0);
+    animation: brillo 14s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes aurora { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+  @keyframes giro { to { transform: rotate(360deg); } }
+  @keyframes brillo { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+  @keyframes latido { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+  @keyframes baja { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+  @keyframes aparece { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora, .casilla, .destello::before, .brillo::before, .flecha, .test:target { animation: none; }
+    .botones a, .tarjeta { transition: none; }
+  }
+</style>
