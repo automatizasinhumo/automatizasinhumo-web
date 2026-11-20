@@ -30,38 +30,6 @@ h1, h2, h3, .font-serif {
   letter-spacing: -0.02em;
 }
 
-/* Textura de marca: retícula de puntos tipo papel técnico. Solo en portada,
-   separadores y cabeceras de ficha, nunca detrás de texto largo. */
-.fondo-tecnico {
-  background-color: var(--color-paper);
-  background-image: radial-gradient(#81938c55 0.7px, transparent 0.8px);
-  background-size: 24px 24px;
-}
-
-/* Fichas de servicio: tarjeta blanca, borde fino, sin sombras pesadas. */
-.tarjeta {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 1rem;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.tarjeta:hover {
-  border-color: var(--color-brand);
-  transform: translateY(-2px);
-}
-
-.etiqueta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  border-radius: 999px;
-  background: #176b5a14;
-  color: var(--color-brand);
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
 /* La base (Minshop) usa rótulos en mayúsculas espaciadas de estilo editorial.
    La marca es un taller cercano: rótulos en minúscula con peso medio. */
 .uppercase[class*='tracking-'] {
@@ -178,6 +146,59 @@ h1, h2, h3, .font-serif {
     }
   }
 
+  /* Textura de marca: retícula de puntos tipo papel técnico. Solo en portada,
+     separadores y cabeceras, nunca detrás de texto largo. */
+  .fondo-tecnico {
+    background-color: var(--color-paper);
+    background-image: radial-gradient(color-mix(in oklab, var(--color-faint) 33%, transparent) 0.7px, transparent 0.8px);
+    background-size: 24px 24px;
+  }
+
+  /* Cabecera de página interior (búsqueda, test, sectores, blog…): panel con
+     textura, borde fino y aire fluido. La colocación (mb-*) va aparte. */
+  .cabecera-pagina {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-panel, 1.5rem);
+    padding: clamp(2rem, 5vw, 3.25rem) clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  /* Tarjeta: superficie blanca, borde fino y sombra apoyada; si es (o contiene)
+     un enlace, flota un poco al pasar el ratón. En el tema limpio el borde de
+     luz lo añade LuzTarjetas. */
+  .tarjeta {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta, 1rem);
+    box-shadow: var(--ds-sombra-1, none);
+    transition:
+      transform var(--ds-mov-normal, 240ms) var(--ds-curva, ease),
+      box-shadow var(--ds-mov-normal, 240ms) var(--ds-curva, ease),
+      border-color var(--ds-mov-normal, 240ms);
+  }
+  a.tarjeta:hover,
+  .tarjeta:has(a):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ds-sombra-2, 0 12px 32px -12px rgb(0 0 0 / 0.2));
+  }
+
+  /* Antetítulo: rótulo corto sobre un titular. */
+  .etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--ds-radio-pildora, 999px);
+    background: color-mix(in oklab, var(--color-brand) 8%, transparent);
+    color: var(--color-brand);
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: background-color var(--ds-mov-rapido, 160ms), color var(--ds-mov-rapido, 160ms);
+  }
+  a.etiqueta:hover {
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+  }
+
   /* Píldora: etiqueta, filtro o atajo pequeño y redondo. Con enlace se eleva al
      pasar el ratón; en un <label> con radio o checkbox marca la opción elegida. */
   .pildora {
@@ -228,6 +249,12 @@ h1, h2, h3, .font-serif {
       transition: none;
     }
     a.pildora:hover {
+      transform: none;
+    }
+    .tarjeta,
+    a.tarjeta:hover,
+    .tarjeta:has(a):hover {
+      transition: none;
       transform: none;
     }
   }

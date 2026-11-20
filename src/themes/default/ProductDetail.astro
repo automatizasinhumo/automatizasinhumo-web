@@ -52,7 +52,7 @@ const { model, purchase } = Astro.props;
       model.categories.length > 0 && (
         <div class="mb-4 flex flex-wrap gap-2">
           {model.categories.map((category) => (
-            <a href={category.href} class="etiqueta hover:bg-brand hover:text-on-brand">
+            <a href={category.href} class="etiqueta">
               {category.text}
             </a>
           ))}
