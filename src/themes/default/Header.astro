@@ -79,6 +79,8 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
       aria-label="Principal"
       class="ml-auto flex min-w-0 items-center gap-2 text-sm font-medium text-ink min-[400px]:gap-3 sm:gap-6"
     >
+      {/* Constructor de CV gratuito: puerta de entrada fija, no depende del menú de D1. */}
+      <a href="/cv" class="whitespace-nowrap font-semibold text-brand hover:underline">Haz tu CV</a>
       <StoreMegaMenu
         label="Servicios"
         areas={menuAreas}
