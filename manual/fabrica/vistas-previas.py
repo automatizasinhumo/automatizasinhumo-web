@@ -14,7 +14,7 @@ import html as H, json, os, re, subprocess, sys, tempfile, time, urllib.parse, u
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from fabricar import fabricar, nombre_publico  # noqa: E402
+from fabricar import CupoIAAgotado, fabricar, nombre_publico  # noqa: E402
 from navegador import qa_navegador  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -232,6 +232,11 @@ def procesar(public_id, p, intentos=0, mensaje=None):
         # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
         nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
                 f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')
+    except CupoIAAgotado:
+        # No es fallo de la solicitud: no gasta reintento. La reserva caduca y otra pasada la recoge.
+        print('  cupo diario de Workers AI agotado: la solicitud espera sin gastar reintento')
+        nota = f'{EN_CURSO} · reintento {intentos} #{uuid.uuid4().hex}'
+        SIN_CUPO.append(1)
     except Exception as e:  # noqa: BLE001 — una solicitud fallida no para las demás
         print('  fallo:', type(e).__name__ if PUBLICO else f'{type(e).__name__}: {e}')
         FALLOS_FABRICA.append(type(e).__name__)
@@ -256,6 +261,9 @@ FALLOS_D1 = []  # el lote sigue, pero la ejecución termina en rojo para que se 
 # pasar por una ejecución en verde. Rojo si alguna queda para revisar a mano o fallan todas las intentadas.
 FALLOS_FABRICA = []
 A_MANO = []
+# Cupo de Workers AI agotado: el lote para (las demás también fallarían) y la pasada queda en verde con
+# aviso; si dura, la vigilancia abre «Fábrica: N solicitudes sin vista previa».
+SIN_CUPO = []
 
 
 def main():
@@ -285,6 +293,9 @@ def main():
         elif not procesar(f['public_id'], p, int((re.search(r'reintento (\d+)', f.get('nota') or '') or [0, 0])[1]), mensaje):
             continue  # reclamación perdida: no consume el límite
         hechas += 1
+        if SIN_CUPO:
+            print('::warning::cupo diario de Workers AI agotado: el lote para hasta las 00:00 UTC')
+            break
         if hechas >= MAXIMO:
             break
     print('vistas previas intentadas:', hechas)

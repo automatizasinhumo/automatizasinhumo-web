@@ -63,5 +63,32 @@ class FabricaEnRojo(unittest.TestCase):
             self.lote(vp.REINTENTOS)
 
 
+class CupoIAAgotadoEspera(unittest.TestCase):
+    """20/11: con el cupo diario agotado, tres pasadas gastaban los reintentos y la solicitud acababa a mano."""
+
+    def test_no_gasta_reintento_para_el_lote_y_queda_en_verde(self):
+        filas = [{'public_id': f'S-{i}', 'slug': 'web', 'producto': 'Web', 'nombre': 'Ana', 'email': 'a@b.es',
+                  'telefono': '', 'campos': '{}', 'mensaje': '', 'nota': 'reintento 2', 'estado': 'nueva'} for i in (1, 2)]
+        notas = []
+
+        def d1(sql):
+            if sql.startswith('SELECT'):
+                return filas
+            if 'SET nota = ' in sql:
+                notas.append(sql)
+            return [{'public_id': 'S-1'}]
+
+        def sin_cupo(_ruta):
+            raise vp.CupoIAAgotado('cupo diario de Workers AI agotado')
+
+        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=sin_cupo) as fab,                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []),                 patch.object(vp, 'FALLOS_D1', []), patch.object(vp, 'SIN_CUPO', []):
+            vp.main()  # sin SystemExit
+        self.assertEqual(fab.call_count, 1)
+        self.assertEqual(len(notas), 1)
+        self.assertIn('reintento 2 #', notas[0])
+        self.assertNotIn('revisar a mano', notas[0])
+
+
+
 if __name__ == '__main__':
     unittest.main()

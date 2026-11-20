@@ -366,3 +366,44 @@ class PublicacionKV(unittest.TestCase):
         self.assertEqual([p['key'] for p in pares], ['sites/abc-1/css/a.css', 'sites/abc-1/index.html'])
         self.assertEqual(base64.b64decode(pares[1]['value']), b'<p>hola</p>')
         self.assertTrue(all(p['base64'] and p['expiration_ttl'] == modulo_fabricar.VISTAS_TTL for p in pares))
+
+
+
+class CupoIA(unittest.TestCase):
+    @staticmethod
+    def error(codigo, cuerpo):
+        import io, urllib.error
+        return urllib.error.HTTPError('https://api', codigo, 'x', {}, io.BytesIO(cuerpo))
+
+    def test_429_4006_es_cupo_agotado(self):
+        cuerpo = b'{"errors":[{"message":"you have used up your daily free allocation of 10,000 neurons","code":4006}]}'
+        with patch.object(modulo_fabricar.urllib.request, 'urlopen', side_effect=self.error(429, cuerpo)):
+            with self.assertRaises(modulo_fabricar.CupoIAAgotado):
+                modulo_fabricar.ia('t', 'a', 's', 'u')
+
+    def test_otro_429_sigue_siendo_error_normal(self):
+        import urllib.error
+        with patch.object(modulo_fabricar.urllib.request, 'urlopen', side_effect=self.error(429, b'{"code":3040}')):
+            with self.assertRaises(urllib.error.HTTPError):
+                modulo_fabricar.ia('t', 'a', 's', 'u')
+
+    def test_4006_fuera_de_errors_code_no_es_cupo(self):
+        import urllib.error
+        cuerpo = b'{"errors":[{"code":3040}],"request_id":"ab4006cd"}'
+        with patch.object(modulo_fabricar.urllib.request, 'urlopen', side_effect=self.error(429, cuerpo)):
+            with self.assertRaises(urllib.error.HTTPError):
+                modulo_fabricar.ia('t', 'a', 's', 'u')
+
+    def test_cuerpo_no_json_sigue_siendo_error_normal(self):
+        import urllib.error
+        with patch.object(modulo_fabricar.urllib.request, 'urlopen', side_effect=self.error(429, b'<html>4006</html>')):
+            with self.assertRaises(urllib.error.HTTPError):
+                modulo_fabricar.ia('t', 'a', 's', 'u')
+
+    def test_reescribir_no_traga_el_cupo_agotado(self):
+        textos = [{'ruta': 'p', 'anterior': '', 'texto': 'Hola', 'siguiente': ''}]
+        p = {'negocio': 'X', 'actividad': 'a', 'ciudad': 'c'}
+        with patch.object(modulo_fabricar, 'ia', side_effect=modulo_fabricar.CupoIAAgotado('x')) as ia:
+            with self.assertRaises(modulo_fabricar.CupoIAAgotado):
+                modulo_fabricar.reescribir(textos, p, ('t', 'a'))
+        self.assertEqual(ia.call_count, 1)  # ni los otros dos intentos
