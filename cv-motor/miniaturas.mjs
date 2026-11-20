@@ -16,7 +16,7 @@ mkdirSync(salida, { recursive: true });
 
 const TIPOS = { '.js': 'text/javascript', '.json': 'application/json', '.html': 'text/html' };
 const servidor = createServer((req, res) => {
-  const ruta = normalize(join(publico, decodeURIComponent(new URL(req.url, 'http://x').pathname)));
+  const ruta = normalize(join(publico, decodeURIComponent(new URL(req.url, 'https://local.invalid').pathname)));
   if (!ruta.startsWith(publico)) return res.writeHead(403).end();
   if (ruta.endsWith('vacia.html')) return res.writeHead(200, { 'content-type': 'text/html' }).end('<!doctype html><title>.</title>');
   try {
