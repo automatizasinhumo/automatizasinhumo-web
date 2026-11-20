@@ -76,6 +76,15 @@ describe('decidir', () => {
     expect(fila(db, 'S-2')).toEqual({ estado: 'cambios_pedidos', nota: 'Cambios pedidos por el cliente (sobre la versión 1):\nLogo más grande' });
   });
 
+  it('los párrafos del cliente no dejan líneas en blanco (la fábrica corta la nota en la primera)', async () => {
+    const db = d1();
+    alta(db, 'S-5', 'en_espera_cliente', 'Vista previa automática: https://x · QA ok');
+    expect(await decidir(db, { id: 'S-5', version: 1 }, 'cambios', 'Logo más grande.\r\n\r\n  \nY el teléfono nuevo.')).toBe(true);
+    expect(fila(db, 'S-5').nota).toBe(
+      'Cambios pedidos por el cliente (sobre la versión 1):\nLogo más grande.\nY el teléfono nuevo.\n\nVista previa automática: https://x · QA ok',
+    );
+  });
+
   it('no toca solicitudes en otros estados', async () => {
     const db = d1();
     alta(db, 'S-3', 'en_preparacion', null);

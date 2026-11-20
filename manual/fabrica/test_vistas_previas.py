@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -104,6 +105,35 @@ class AlertaDeIA(unittest.TestCase):
             with self.assertRaises(SystemExit) as fin:
                 vp.main()
         self.assertIn('retirado', str(fin.exception.code))
+
+
+class CambiosSinAplicar(unittest.TestCase):
+    """Un cambio de aspecto que la fábrica no sabe hacer no sale al cliente como «QA ok»."""
+
+    def procesar(self, sin_aplicar):
+        consultas = []
+
+        def d1(sql):
+            consultas.append(sql)
+            return [{'public_id': 'S-1'}]
+
+        def fabricar(ruta):
+            p = json.loads(Path(ruta).read_text(encoding='utf-8'))
+            Path(ruta).write_text(json.dumps({**p, 'sin_aplicar': sin_aplicar}), encoding='utf-8')
+            return 'https://vistas.example/s-1/'
+        with patch.object(vp, 'd1', d1), patch.object(vp, 'fabricar', fabricar), patch.object(vp, 'qa', lambda u, p: []), \
+                patch.object(vp, 'A_MANO', []):
+            vp.procesar('S-1', {'id': 's-1', 'cambios': 'x'})
+        return consultas[-1]
+
+    def test_con_todo_aplicado_queda_qa_ok(self):
+        self.assertIn('· QA ok', self.procesar([]))
+
+    def test_lo_no_aplicado_va_a_revision_a_mano(self):
+        nota = self.procesar(['otra foto'])
+        self.assertNotIn('QA ok', nota)
+        self.assertIn('cambio sin aplicar: otra foto', nota)
+        self.assertIn('revisar a mano', nota)
 
 
 if __name__ == '__main__':

@@ -186,6 +186,7 @@ def pedido_de(fila, plantilla):
     if rondas:
         texto = f'{rondas}. {texto}'
     return {
+        'cambios': rondas,  # fabricar.py saca de aquí los cambios de aspecto (logo, letra, color)
         'id': fila['public_id'].lower(),
         'plantilla': plantilla,
         'negocio': negocio.split('\n')[0][:60],
@@ -224,9 +225,10 @@ def procesar(public_id, p, intentos=0, mensaje=None):
             ruta = Path(tmp, 'pedido.json')
             ruta.write_text(json.dumps(p, ensure_ascii=False), encoding='utf-8')
             url = fabricar(str(ruta))
+            sin_aplicar = json.loads(ruta.read_text(encoding='utf-8')).get('sin_aplicar') or []
         if not url:
             raise RuntimeError('despliegue sin URL')
-        problemas = qa(url, p)
+        problemas = qa(url, p) + [f'cambio sin aplicar: {c}' for c in sin_aplicar]
         if problemas:
             A_MANO.append(1)  # vista previa hecha pero sin correo: alguien tiene que mirarla
         print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))

@@ -22,6 +22,7 @@ import phonenumbers  # Apache-2.0, https://github.com/daviddrysdale/python-phone
 sys.path.insert(0, str(Path(__file__).parent))
 import proveedores_ia  # noqa: E402
 from proveedores_ia import CupoIAAgotado  # noqa: E402,F401  (vistas-previas.py lo importa de aquí)
+import ajustes  # noqa: E402
 
 DEMOS = Path(os.environ.get('DEMOS_DIR', 'C:/GIT/automatizasinhumo-demos'))
 DEMOS_URL = 'https://automatizasinhumo-demos.davidpd89.workers.dev'
@@ -220,7 +221,8 @@ def fabricar(ruta_pedido, desplegar=True):
     textos = contexto_nodos(nodos)
     print(f"  {len(textos)} textos a adaptar" if PUBLICO else
           f"{p['id']}: {len(textos)} textos a adaptar (marca de la plantilla: {marca or '?'})")
-    nuevos = reescribir(textos, p, credenciales())
+    cred = credenciales()
+    nuevos = reescribir(textos, p, cred)
     comprobar_adaptacion(textos, nuevos, marca)
     for i, n in enumerate(nodos):
         t = nuevos.get(str(i))
@@ -228,6 +230,17 @@ def fabricar(ruta_pedido, desplegar=True):
             n.replace_with(n[: len(n) - len(n.lstrip())] + t + n[len(n.rstrip()):])
 
     final = barra_contacto(poner_datos(str(sopa), p, marca), p)
+    # Cambios de aspecto de la ronda de cambios: CSS acotado; lo que no encaja vuelve en «sin_aplicar»
+    # (el pedido se reescribe con esa lista) y la vista previa va a revisión a mano.
+    if p.get('cambios'):
+        try:
+            pedidos = ajustes.pedir_ajustes(p['cambios'], lambda s, u: ia(*cred, s, u))
+        except Exception as e:  # noqa: BLE001 — sin leer los cambios no se manda una versión que los ignora
+            print('  ajustes visuales:', type(e).__name__)
+            pedidos = {'sin_aplicar': ['no se pudieron leer los cambios de aspecto']}
+        final = ajustes.aplicar(final, ajustes.css_de(pedidos, ajustes.variables_de_color(site)))
+        p['sin_aplicar'] = pedidos['sin_aplicar']
+        Path(ruta_pedido).write_text(json.dumps(p, ensure_ascii=False), encoding='utf-8')
     restos = restos_de_plantilla(final, marca, nombre_publico(p))
     if restos:
         raise FabricaBloqueada('restos de la plantilla: ' + ', '.join(restos))
