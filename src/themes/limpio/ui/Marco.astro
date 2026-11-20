@@ -1,0 +1,56 @@
+---
+/**
+ * Marco de navegador (como el Safari de Magic UI, MIT, pasado a HTML y CSS):
+ * barra con tres puntos y la dirección, y el contenido debajo. Sirve para enseñar
+ * webs y demos con el mismo aspecto en toda la web.
+ */
+interface Props {
+  /** Dirección que se ve en la barra (decorativa). */
+  url: string;
+  class?: string;
+}
+const { url, class: cls } = Astro.props;
+---
+<div class:list={['marco', cls]}>
+  <div class="barra"><i></i><i></i><i></i><span>{url}</span></div>
+  <div class="contenido"><slot /></div>
+</div>
+
+<style>
+  .marco {
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-marco);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-3);
+  }
+  .barra {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    height: 1.75rem;
+    padding-inline: 0.65rem;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in oklab, var(--color-paper) 70%, var(--color-surface));
+  }
+  .barra i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-line);
+  }
+  .barra span {
+    flex: 1;
+    margin-inline: 0.75rem 1.4rem;
+    overflow: hidden;
+    border-radius: var(--ds-radio-pildora);
+    padding: 0.1rem 0.6rem;
+    font-size: 0.68rem;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-faint);
+    background: var(--color-surface);
+  }
+  .contenido { position: relative; }
+</style>

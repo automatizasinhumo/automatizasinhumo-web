@@ -1,0 +1,68 @@
+---
+/**
+ * Sección de página del tema limpio: separación vertical común, antetítulo, título y
+ * entradilla opcionales, y el contenido. Todas las secciones de la web usan esta pieza
+ * para que los huecos y los encabezados sean iguales en todas partes.
+ * Sin `titulo`, el antetítulo hace de encabezado (h2) de la sección.
+ */
+interface Props {
+  id: string;
+  antetitulo?: string;
+  titulo?: string;
+  entradilla?: string;
+  /** Línea fina arriba para separarla de la anterior. */
+  separada?: boolean;
+}
+const { id, antetitulo, titulo, entradilla, separada = false } = Astro.props;
+const tituloId = `${id}-titulo`;
+---
+<section id={id} class:list={['seccion', { separada }]} aria-labelledby={tituloId}>
+  {(antetitulo || titulo) && (
+    <header>
+      {titulo ? (
+        <>
+          {antetitulo && <p class="antetitulo">{antetitulo}</p>}
+          <h2 id={tituloId} class="titulo">{titulo}</h2>
+        </>
+      ) : (
+        <h2 id={tituloId} class="antetitulo">{antetitulo}</h2>
+      )}
+      {entradilla && <p class="entradilla">{entradilla}</p>}
+    </header>
+  )}
+  <slot />
+</section>
+
+<style>
+  .seccion { padding-block: var(--ds-seccion); }
+  .separada { border-top: 1px solid var(--color-line); }
+  header {
+    max-width: 40rem;
+    margin: 0 auto var(--ds-hueco-8);
+    text-align: center;
+  }
+  .antetitulo {
+    font-family: inherit;
+    font-size: var(--ds-texto-etiqueta);
+    font-weight: 600;
+    letter-spacing: var(--ds-tracking-etiqueta);
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+  .titulo {
+    margin-top: var(--ds-hueco-2);
+    font-size: var(--ds-texto-h2);
+    font-weight: 700;
+    letter-spacing: var(--ds-tracking-titular);
+    line-height: 1.1;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .entradilla {
+    margin-top: var(--ds-hueco-3);
+    font-size: var(--ds-texto-lead);
+    line-height: 1.5;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+</style>
