@@ -326,6 +326,24 @@ class BloqueoDePublicacion(unittest.TestCase):
             salida = modulo_fabricar.reescribir(textos, pedido(), ('t', 'a'))
         self.assertEqual(salida, {'0': 'Bienvenida a la peluquería de Ana'})
 
+    def test_el_nodo_devuelto_entero_vale_por_su_texto(self):
+        # Respuesta real de llama-3.3 (20/11): copia el nodo recibido, como objeto o como cadena JSON.
+        textos = [{'texto': 'Relax your body and mind'}, {'texto': 'Book now'}]
+        respuesta = json.dumps({
+            '0': {'ruta': 'h1', 'anterior': '', 'texto': 'Relaja cuerpo y mente', 'siguiente': 'Book now'},
+            '1': json.dumps({'ruta': 'a', 'texto': 'Reserva ahora'}),
+        })
+        with patch.object(modulo_fabricar, 'ia', return_value=respuesta):
+            salida = modulo_fabricar.reescribir(textos, pedido(), ('t', 'a'))
+        self.assertEqual(salida, {'0': 'Relaja cuerpo y mente', '1': 'Reserva ahora'})
+
+    def test_un_valor_invalido_no_tira_el_lote(self):
+        textos = [{'texto': 'Relax your body and mind'}, {'texto': 'Book now'}]
+        respuestas = iter(['{"0": "Relaja cuerpo y mente", "1": ""}', '{"1": "Reserva ahora"}'])
+        with patch.object(modulo_fabricar, 'ia', side_effect=lambda *a: next(respuestas)):
+            salida = modulo_fabricar.reescribir(textos, pedido(), ('t', 'a'))
+        self.assertEqual(salida, {'0': 'Relaja cuerpo y mente', '1': 'Reserva ahora'})
+
     def test_la_marca_suelta_bloquea_aunque_el_nombre_la_contenga(self):
         self.assertEqual(modulo_fabricar.restos_de_plantilla('<p>Lumen Ana</p><p>ESTUDIO LUMEN</p>', 'Lumen', 'Lumen Ana'),
                          ['marca de la plantilla'])

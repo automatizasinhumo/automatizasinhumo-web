@@ -226,17 +226,21 @@ def procesar(public_id, p, intentos=0, mensaje=None):
         if not url:
             raise RuntimeError('despliegue sin URL')
         problemas = qa(url, p)
+        if problemas:
+            A_MANO.append(1)  # vista previa hecha pero sin correo: alguien tiene que mirarla
         print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))
         # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
         nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
                 f'Vista previa automática: {url} · QA con problemas: {"; ".join(problemas)[:300]} (revisar a mano)')
     except Exception as e:  # noqa: BLE001 — una solicitud fallida no para las demás
         print('  fallo:', type(e).__name__ if PUBLICO else f'{type(e).__name__}: {e}')
+        FALLOS_FABRICA.append(type(e).__name__)
         if url is None and intentos < REINTENTOS:
             nota = f'{EN_CURSO} · reintento {intentos + 1} #{uuid.uuid4().hex}'
             print(f'  se reintentará (intento {intentos + 1} de {REINTENTOS})')
         else:
             nota = f'Vista previa automática: falló ({type(e).__name__}, revisar a mano)'
+            A_MANO.append(1)
     try:
         if not d1(f"UPDATE solicitudes SET nota = {sql_txt(nota)}, updated_at = datetime('now') "
                   f"WHERE {donde} AND estado = 'en_preparacion' AND nota = {sql_txt(reserva)} RETURNING public_id"):
@@ -248,6 +252,10 @@ def procesar(public_id, p, intentos=0, mensaje=None):
 
 
 FALLOS_D1 = []  # el lote sigue, pero la ejecución termina en rojo para que se vea
+# Igual con la fábrica: un fallo sistemático (p. ej. la IA cambia el formato de su respuesta) no puede
+# pasar por una ejecución en verde. Rojo si alguna queda para revisar a mano o fallan todas las intentadas.
+FALLOS_FABRICA = []
+A_MANO = []
 
 
 def main():
@@ -282,6 +290,9 @@ def main():
     print('vistas previas intentadas:', hechas)
     if FALLOS_D1:
         sys.exit(f'D1 falló {len(FALLOS_D1)} veces: revisar la ejecución')
+    if A_MANO or (hechas and len(FALLOS_FABRICA) >= hechas):
+        sys.exit(f'la fábrica falló en {len(FALLOS_FABRICA)} de {hechas} '
+                 f'({", ".join(sorted(set(FALLOS_FABRICA)))}); {len(A_MANO)} quedan para revisar a mano')
 
 
 if __name__ == '__main__':
