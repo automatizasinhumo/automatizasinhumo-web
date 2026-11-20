@@ -1,7 +1,7 @@
 {
   "extends": ["astro/tsconfigs/strict", "./tsconfig.theme.json"],
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "mcp", "tests/visual"],
+  "exclude": ["dist", "mcp", "tests/visual", "cv-estudio", "public/cv/estudio"],
   "compilerOptions": {
     "types": ["@cloudflare/workers-types"]
   }

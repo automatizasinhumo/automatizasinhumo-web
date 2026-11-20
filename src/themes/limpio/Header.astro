@@ -108,6 +108,18 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
 <LuzTarjetas />
 <Transiciones />
 
+<script>
+  // Publica la altura real de la cabecera fija en --alto-cabecera para que lo que se pega
+  // debajo (barras de pasos, anclas) no quede tapado; con zoom de texto la isla baja de línea
+  // y la altura cambia, por eso se mide en vez de fijarla.
+  const cabecera = document.querySelector<HTMLElement>('.cabecera');
+  if (cabecera && 'ResizeObserver' in window) {
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--alto-cabecera', `${cabecera.offsetHeight}px`);
+    }).observe(cabecera);
+  }
+</script>
+
 <style>
   .cabecera {
     position: sticky;
