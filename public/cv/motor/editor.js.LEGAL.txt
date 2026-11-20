@@ -1,0 +1,4 @@
+Bundled license information:
+
+@json-editor/json-editor/dist/jsoneditor.js:
+  /*! For license information please see jsoneditor.js.LICENSE.txt */

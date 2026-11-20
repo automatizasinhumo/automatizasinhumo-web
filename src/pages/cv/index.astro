@@ -1,0 +1,131 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Constructor de CV: todo ocurre en el navegador del cliente (formulario, 160 diseños,
+// vista previa y descargas). El servidor solo sirve la página y el motor estático.
+const boton =
+  'inline-flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink hover:border-brand hover:text-brand';
+const principal =
+  'inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover';
+const selector = 'rounded-lg border border-line bg-surface px-2 py-1.5 text-sm text-ink';
+---
+
+<Layout
+  title="Haz tu CV gratis: 160 diseños y vista previa al momento"
+  description="Rellena tus datos una vez y elige entre 160 diseños de currículum en español. Ves el resultado al instante y lo descargas en PDF o como página web."
+>
+  <div id="cv-constructor" data-motor="/cv/motor/" class="mx-auto max-w-7xl px-4 py-8">
+    <p class="text-xs font-semibold uppercase tracking-widest text-brand">Gratis · sin registro · al momento</p>
+    <h1 class="mt-2 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl">Haz tu CV y cambia de diseño cuando quieras</h1>
+    <p class="mt-3 max-w-prose text-muted">
+      Rellena tus datos y mira el resultado al momento. Con un clic pruebas cualquiera de los
+      160 diseños sin volver a escribir nada. Lo que escribes se queda en este navegador.
+    </p>
+
+    <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <section aria-labelledby="cv-datos-titulo" class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 id="cv-datos-titulo" class="mr-auto text-lg font-semibold text-ink">Tus datos</h2>
+          <label class={boton}>
+            Importar JSON Resume
+            <input id="cv-importar" type="file" accept="application/json,.json" class="sr-only" />
+          </label>
+          <button id="cv-ejemplo" type="button" class={boton}>Ejemplo</button>
+          <button id="cv-vaciar" type="button" class={boton}>En blanco</button>
+        </div>
+        <p id="cv-aviso" role="status" class="mt-2 text-sm text-muted"></p>
+        <div id="cv-formulario" class="cv-form mt-3">
+          <p class="text-muted">Cargando el formulario…</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="cv-vista-titulo" class="min-w-0 lg:sticky lg:top-4 lg:self-start">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 id="cv-vista-titulo" class="sr-only">Vista previa</h2>
+          <button id="cv-anterior" type="button" class={boton} aria-label="Diseño anterior">&larr;</button>
+          <p id="cv-plantilla-nombre" class="min-w-0 flex-1 truncate text-sm font-semibold text-ink" aria-live="polite">…</p>
+          <button id="cv-siguiente" type="button" class={boton} aria-label="Diseño siguiente">&rarr;</button>
+          <button id="cv-azar" type="button" class={boton}>Sorpréndeme</button>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button id="cv-pdf" type="button" class={principal}>Descargar PDF</button>
+          <button id="cv-html" type="button" class={boton}>Descargar web (HTML)</button>
+          <button id="cv-json" type="button" class={boton}>Guardar mis datos</button>
+        </div>
+        <p class="mt-2 text-xs text-faint">PDF: en la ventana de impresión elige «Guardar como PDF».</p>
+        <p id="cv-estado" role="status" class="mt-2 text-xs text-faint">Cargando los diseños…</p>
+        <div id="cv-lienzo" class="mt-2 overflow-hidden rounded-lg border border-line bg-white shadow-sm">
+          <iframe
+            id="cv-vista"
+            title="Vista previa de tu CV"
+            sandbox="allow-same-origin allow-modals"
+            class="block origin-top-left border-0"
+          ></iframe>
+        </div>
+      </section>
+    </div>
+
+    <section aria-labelledby="cv-disenos-titulo" class="mt-12">
+      <div class="flex flex-wrap items-end gap-3">
+        <h2 id="cv-disenos-titulo" class="mr-auto font-serif text-2xl font-bold text-ink">Todos los diseños</h2>
+        <label class="text-sm text-muted">Estilo
+          <select id="cv-filtro-estilo" class={selector}><option value="">Todos</option></select>
+        </label>
+        <label class="text-sm text-muted">Maquetación
+          <select id="cv-filtro-maquetacion" class={selector}><option value="">Todas</option></select>
+        </label>
+        <label class="text-sm text-muted">Color
+          <select id="cv-filtro-color" class={selector}><option value="">Todos</option></select>
+        </label>
+      </div>
+      <p id="cv-cuenta" class="mt-2 text-sm text-faint" aria-live="polite"></p>
+      <div id="cv-rejilla" class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6"></div>
+      <p class="mt-8 text-xs text-faint">
+        Diseños de <a class="underline" href="https://jsonresume.org" rel="noopener">JSON Resume</a> (licencia MIT).
+        Tus datos usan el formato abierto JSON Resume: puedes llevártelos a otras webs.
+      </p>
+    </section>
+  </div>
+</Layout>
+
+<script>
+  import { iniciarConstructor } from '../../features/cv/constructor';
+
+  iniciarConstructor().catch((e) => {
+    console.error('cv: no se pudo iniciar', e);
+    const estado = document.querySelector('#cv-estado');
+    if (estado) estado.textContent = 'No se ha podido cargar el constructor. Recarga la página.';
+  });
+</script>
+
+<style is:global>
+  /* json-editor (tema «html») con el aspecto de la tienda. */
+  .cv-form .je-object__container,
+  .cv-form .je-indented-panel { border: 0 !important; margin: 0 !important; padding: 0 !important; }
+  .cv-form h3, .cv-form .je-object__title, .cv-form .je-array__title { font-weight: 600; color: var(--color-ink); margin: 1rem 0 0.5rem; }
+  .cv-form > div > .je-object__title { display: none; }
+  .cv-form label, .cv-form .je-form-input-label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--color-ink); margin-top: 0.6rem; }
+  .cv-form input[type='text'], .cv-form input[type='email'], .cv-form input[type='tel'], .cv-form input[type='url'],
+  .cv-form input[type='month'], .cv-form textarea {
+    display: block; width: 100%; margin-top: 0.25rem; padding: 0.5rem 0.75rem; border: 1px solid var(--color-line);
+    border-radius: 0.5rem; background: var(--color-surface); color: var(--color-ink); font-size: 1rem;
+  }
+  .cv-form textarea { min-height: 5rem; }
+  .cv-form input:focus, .cv-form textarea:focus { outline: 2px solid color-mix(in srgb, var(--color-brand) 30%, transparent); border-color: var(--color-brand); }
+  .cv-form p.je-form-input-label, .cv-form .je-desc, .cv-form p.form-text { font-weight: 400; font-size: 0.8rem; color: var(--color-faint); margin: 0.15rem 0 0; }
+  .cv-form button {
+    margin: 0.4rem 0.4rem 0 0; padding: 0.3rem 0.8rem; border: 1px solid var(--color-line); border-radius: 999px;
+    background: var(--color-surface); color: var(--color-ink); font-size: 0.8rem; font-weight: 600;
+  }
+  .cv-form button:hover { border-color: var(--color-brand); color: var(--color-brand); }
+  .cv-form table { width: 100%; border-collapse: collapse; }
+  .cv-form td, .cv-form th { padding: 0.15rem 0.25rem; vertical-align: top; text-align: left; font-size: 0.8rem; }
+  .cv-form .row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .cv-form .row > * { flex: 1 1 12rem; }
+  .cv-form [data-schematype='object'] > div > [data-schematype] { margin-bottom: 0.25rem; }
+  .cv-miniatura { position: relative; display: flex; flex-direction: column; gap: 0.4rem; text-align: left; font-size: 0.8rem; color: var(--color-ink); }
+  .cv-miniatura img { width: 100%; height: auto; aspect-ratio: 160 / 226; object-fit: cover; object-position: top; border: 1px solid var(--color-line); border-radius: 0.5rem; background: #fff; }
+  .cv-miniatura:hover img { border-color: var(--color-brand); }
+  .cv-miniatura[aria-pressed='true'] img { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+  .cv-miniatura em { position: absolute; top: 0.4rem; left: 0.4rem; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--color-brand); color: #fff; font-size: 0.65rem; font-style: normal; font-weight: 600; }
+</style>
