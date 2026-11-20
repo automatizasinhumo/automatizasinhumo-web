@@ -4,6 +4,7 @@
  * previa con marca de agua generada por el motor (cv-estudio/), que se carga al elegir diseño.
  */
 import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
 type Fila = Record<string, string | number>;
@@ -86,6 +87,7 @@ export function iniciarEstudioCv() {
   const vista = $('[data-vista]')!;
   const lienzo = $('[data-lienzo]')!;
   const estadoVista = $('[data-estado]')!;
+  protegerVista(vista);
 
   const g = leer();
   const estado: Estado = {
@@ -205,7 +207,7 @@ export function iniciarEstudioCv() {
       });
       if (mio !== turno) return;
       const tmp = document.createElement('div');
-      const ancho = Math.min(1200, Math.round((lienzo.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1)));
+      const ancho = Math.min(ANCHO_MAX_VISTA, Math.round((lienzo.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1)));
       const paginas = await E.pintarPdf(blob, tmp, { ancho, maxPaginas: actual === 'revisa' ? 3 : 2 });
       if (mio !== turno) return;
       lienzo.replaceChildren(...tmp.childNodes);
@@ -365,6 +367,12 @@ export function iniciarEstudioCv() {
   form.addEventListener('submit', (ev) => ev.preventDefault());
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.name === 'ver') {
+      // Filtro de la galería: no es estado del CV, no se guarda ni repinta la vista previa.
+      for (const t of $$('[data-filtros]')) t.hidden = !(t.dataset.filtros ?? '').split(' ').includes(c.value);
+      for (const n of $$('[data-nota-filtro]')) n.hidden = n.dataset.notaFiltro !== c.value;
+      return;
+    }
     if (c.name === 'diseno') {
       if (c.value === 'personalizable' && idsDiseno.has(estado.diseno)) estado.base = estado.diseno;
       estado.diseno = c.value;

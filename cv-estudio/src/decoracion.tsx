@@ -28,13 +28,15 @@ export type Decoracion = {
 export const DECORACION_VACIA: Decoracion = { forma: "ninguna", color: "#176b5a", intensidad: 0.5, sombreado: false };
 
 let actual: Decoracion = DECORACION_VACIA;
-let marca: string | null = null;
+export const MARCA_POR_DEFECTO = "VISTA PREVIA";
+let marca: string = MARCA_POR_DEFECTO;
 
 export function fijarCapas(decoracion: Decoracion | null | undefined, marcaAgua: string | null | undefined) {
 	actual = { ...DECORACION_VACIA, ...(decoracion ?? {}) };
 	if (!/^#[0-9a-f]{6}$/i.test(actual.color)) actual.color = DECORACION_VACIA.color;
 	actual.intensidad = Math.min(1, Math.max(0, Number(actual.intensidad) || 0));
-	marca = marcaAgua ? String(marcaAgua).slice(0, 60) : null;
+	// Nunca sin marca: el PDF limpio no sale del navegador.
+	marca = String(marcaAgua ?? "").trim().slice(0, 60) || MARCA_POR_DEFECTO;
 }
 
 // Lienzo lógico A4 en puntos; el SVG se estira a la página real (A4 o carta).
@@ -106,13 +108,14 @@ export function capaDecoracion() {
 export function capaMarcaAgua() {
 	if (!marca) return null;
 	const filas = [];
-	for (let i = 0; i < 7; i++)
+	// Mosaico mayor que la página (rotado) para que no quede ninguna esquina limpia.
+	for (let i = 0; i < 14; i++)
 		filas.push(
-			h(Text, { key: i, style: { fontSize: 26, fontFamily: "Helvetica-Bold", color: "#000000", opacity: 0.1, marginBottom: 70, textAlign: "center" } }, `${marca}   ·   ${marca}`),
+			h(Text, { key: i, style: { fontSize: 26, fontFamily: "Helvetica-Bold", color: "#000000", opacity: 0.13, marginBottom: 52, textAlign: "center" } }, `${marca}   ·   ${marca}   ·   ${marca}`),
 		);
 	return h(
 		View,
 		{ fixed: true, style: { ...capa, justifyContent: "center", alignItems: "center", overflow: "hidden" } },
-		h(View, { style: { transform: "rotate(-32deg)", width: 900, alignItems: "center" } }, ...filas),
+		h(View, { style: { transform: "rotate(-32deg)", width: 1300, alignItems: "center" } }, ...filas),
 	);
 }

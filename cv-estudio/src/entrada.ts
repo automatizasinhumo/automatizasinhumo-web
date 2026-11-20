@@ -5,7 +5,7 @@ import { parseResumeData, type ResumeData } from "../vendor/schema/resume/data";
 import { newResume, sanitizeResume } from "./adoptado/resume-model";
 import { reactiveTemplates } from "./adoptado/templates";
 import { ESPACIADOS, ESTILOS_LETRA, TAMANOS } from "./catalogo-formato";
-import { FORMAS, fijarCapas, type Decoracion } from "./decoracion";
+import { FORMAS, MARCA_POR_DEFECTO, fijarCapas, type Decoracion } from "./decoracion";
 import { crearDatos, FORM_EJEMPLO, FORM_VACIO } from "./formulario";
 
 export const plantillas = reactiveTemplates.map((t) => ({ id: t.id, color: t.color }));
@@ -60,7 +60,10 @@ export type OpcionesPdf = {
 	/** Color principal de la plantilla (#rrggbb). */
 	color?: string;
 	decoracion?: Partial<Decoracion> | null;
-	/** Texto de la marca de agua; null o vacío para el PDF final. */
+	/**
+	 * Texto de la marca de agua. El motor del navegador SIEMPRE la pone (vacío o null usan
+	 * MARCA_POR_DEFECTO): el PDF final sin marca no se genera en el cliente.
+	 */
 	marcaAgua?: string | null;
 	/** Ids de catalogo-formato.ts. Si faltan o no existen, se queda lo que traigan los datos. */
 	letra?: string;
@@ -99,7 +102,7 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra
 			if (plantilla && plantillas.some((p) => p.id === plantilla)) d.metadata.template = plantilla as ResumeData["metadata"]["template"];
 			if (color && /^#[0-9a-f]{6}$/i.test(color)) d.metadata.design.colors.primary = color;
 			aplicarFormato(d, { letra, tamano, espaciado });
-			fijarCapas(decoracion as Decoracion | undefined, marcaAgua);
+			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO);
 			return createResumePdfBlob({ data: d });
 		});
 	cola = trabajo;
