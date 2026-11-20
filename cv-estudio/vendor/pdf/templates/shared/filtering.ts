@@ -25,8 +25,10 @@ type FilterableData = {
 
 const primaryTitleFields = {
 	profiles: "network",
-	experience: "company",
-	education: "school",
+	// Local (automatizasinhumo): cualquiera de los campos basta; antes una experiencia sin
+	// empresa o una formación sin centro desaparecían del PDF aunque tuvieran puesto o título.
+	experience: ["company", "position"],
+	education: ["school", "area", "degree"],
 	projects: "name",
 	skills: "name",
 	languages: "language",
@@ -36,7 +38,7 @@ const primaryTitleFields = {
 	publications: "title",
 	volunteer: "organization",
 	references: "name",
-} satisfies Record<TitleBackedSectionType, string>;
+} satisfies Record<TitleBackedSectionType, string | readonly string[]>;
 
 const isItemSection = (section: unknown): section is ItemSectionLike => {
 	return typeof section === "object" && section !== null && "items" in section;
@@ -50,7 +52,7 @@ const hasText = (value: unknown): value is string => {
 	return typeof value === "string" && value.trim().length > 0;
 };
 
-const getPrimaryTitleField = (sectionType?: string): string | undefined => {
+const getPrimaryTitleField = (sectionType?: string): string | readonly string[] | undefined => {
 	return primaryTitleFields[sectionType as TitleBackedSectionType];
 };
 
@@ -59,7 +61,8 @@ const hasValidPrimaryTitle = (item: HiddenItem, sectionType?: string): boolean =
 
 	if (!titleField) return true;
 
-	return hasText((item as Record<string, unknown>)[titleField]);
+	const fields: readonly string[] = typeof titleField === "string" ? [titleField] : titleField;
+	return fields.some((field) => hasText((item as Record<string, unknown>)[field]));
 };
 
 const hasVisibleExperienceRole = (role: unknown): boolean => {

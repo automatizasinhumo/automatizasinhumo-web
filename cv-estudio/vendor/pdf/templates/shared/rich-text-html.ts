@@ -150,8 +150,17 @@ const isInlineNode = (node: Node): boolean => {
 // Allow optional leading whitespace + LRM/RLM marks before the bullet character.
 const PSEUDO_BULLET_LEAD = /^[\s\u200e\u200f]*[-•*]\s+/;
 
-const stripEmptyInlineWrappers = (html: string): string =>
-	html.replace(/<(strong|b|em|i|u|span)\b[^>]*>\s*<\/\1>/gi, "");
+// Local (automatizasinhumo): se repite hasta que no cambia, para que los envoltorios anidados
+// (<b><i></i></b>) también desaparezcan de una vez.
+const stripEmptyInlineWrappers = (html: string): string => {
+	let previo: string;
+	let actual = html;
+	do {
+		previo = actual;
+		actual = actual.replace(/<(strong|b|em|i|u|span)\b[^>]*>\s*<\/\1>/gi, "");
+	} while (actual !== previo);
+	return actual;
+};
 
 // Treat a bare <br> or one wrapped in an inline tag (e.g. `<strong><br></strong>` from
 // the editor) as the segment separator.
