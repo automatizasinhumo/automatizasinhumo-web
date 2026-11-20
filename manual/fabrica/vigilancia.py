@@ -7,6 +7,8 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.request
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -97,10 +99,13 @@ def issue_abierta(repositorio: str, tipo: str):
             return issue
         if tipo == "staging" and titulo == "Staging caído":
             return issue
+        if tipo == "d1" and titulo.startswith("D1: "):
+            return issue
     return None
 
 
-def reconciliar_issue(repositorio: str, tipo: str, activo: bool, titulo: str, cuerpo: str, recuperado: str) -> None:
+def reconciliar_issue(repositorio: str, tipo: str, activo: bool, titulo: str, cuerpo: str, recuperado: str,
+                      comentar_siempre: bool = True) -> None:
     issue = issue_abierta(repositorio, tipo)
     accion = decidir_accion(int(activo), issue is not None)
     if accion == "abrir":
@@ -118,9 +123,11 @@ def reconciliar_issue(repositorio: str, tipo: str, activo: bool, titulo: str, cu
         )
     elif accion == "comentar":
         numero = str(issue["number"])
-        if issue["title"] != titulo:
+        cambia = issue["title"] != titulo
+        if cambia:
             ejecutar_gh("issue", "edit", numero, "--repo", repositorio, "--title", titulo)
-        ejecutar_gh("issue", "comment", numero, "--repo", repositorio, "--body", cuerpo)
+        if cambia or comentar_siempre:
+            ejecutar_gh("issue", "comment", numero, "--repo", repositorio, "--body", cuerpo)
     elif accion == "cerrar":
         ejecutar_gh("issue", "close", str(issue["number"]), "--repo", repositorio, "--comment", recuperado)
 
@@ -198,6 +205,65 @@ def vigilar_staging(repositorio: str, estado: str) -> None:
     )
 
 
+# Cupo gratuito de D1: 5 M de filas leídas al día por cuenta, se renueva a las 00:00 UTC.
+# El 19/11 una consulta sin caché lo agotó (5,19 M) y staging dio 500 hasta medianoche:
+# se avisa antes, con margen para reaccionar.
+CUPO_D1 = 5_000_000
+AVISO_DIA = 0.4  # 2 M leídas en el día
+AVISO_HORA = 300_000  # a este ritmo el cupo se acaba en menos de 17 h
+GRAPHQL = "https://api.cloudflare.com/client/v4/graphql"
+CONSULTA_D1 = """query($cuenta: String!, $desde: Time!, $hasta: Time!) { viewer { accounts(filter: {accountTag: $cuenta}) {
+  d1AnalyticsAdaptiveGroups(limit: 1000, filter: {datetimeHour_geq: $desde, datetimeHour_leq: $hasta}) {
+    sum { rowsRead } dimensions { datetimeHour } } } } }"""
+
+
+def lecturas_d1(token: str, cuenta: str, ahora: datetime) -> dict[str, int]:
+    """Filas leídas por hora (todas las bases de la cuenta) desde las 00:00 UTC de hoy."""
+    if not re.fullmatch(r"[0-9a-f]{32}", cuenta):
+        raise RuntimeError("CLOUDFLARE_ACCOUNT_ID no tiene la forma esperada")
+    hoy = ahora.astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    cuerpo = json.dumps({"query": CONSULTA_D1, "variables": {
+        "cuenta": cuenta, "desde": hoy.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "hasta": (hoy + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")}}).encode()
+    peticion = urllib.request.Request(GRAPHQL, data=cuerpo, method="POST", headers={
+        "Authorization": "Bearer " + token, "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(peticion, timeout=60) as respuesta:
+            documento = json.load(respuesta)
+        if documento.get("errors"):
+            raise ValueError
+        grupos = documento["data"]["viewer"]["accounts"][0]["d1AnalyticsAdaptiveGroups"]
+    except (OSError, ValueError, KeyError, IndexError, TypeError):
+        raise RuntimeError("No se pudo leer el uso de D1 (¿falta «Account Analytics: Read» en el token?)") from None
+    horas: dict[str, int] = {}
+    for grupo in grupos:
+        hora = grupo["dimensions"]["datetimeHour"]
+        horas[hora] = horas.get(hora, 0) + int(grupo["sum"]["rowsRead"])
+    return horas
+
+
+def estado_cupo_d1(horas: dict[str, int]) -> tuple[bool, str, str]:
+    """(activo, título, cuerpo) del aviso de cupo a partir de las lecturas por hora de hoy."""
+    total = sum(horas.values())
+    recientes = [horas[h] for h in sorted(horas)[-2:]]
+    pico = max(recientes, default=0)
+    porcentaje = round(100 * total / CUPO_D1)
+    activo = total >= AVISO_DIA * CUPO_D1 or pico >= AVISO_HORA
+    titulo = f"D1: lecturas al {porcentaje // 10 * 10} % del cupo diario" if activo else ""
+    cuerpo = (f"Filas leídas hoy (UTC): {total:,} de {CUPO_D1:,} ({porcentaje} %).\n"
+              f"Máximo de las dos últimas horas: {pico:,} filas/h (aviso desde {AVISO_HORA:,}).\n\n"
+              "Si se agota, staging da 500 hasta las 00:00 UTC. Buscar la consulta sin caché o el "
+              "proceso (carga, explorador, QA) que la dispara.")
+    return activo, titulo, cuerpo
+
+
+def vigilar_cupo_d1(repositorio: str, horas: dict[str, int]) -> None:
+    activo, titulo, cuerpo = estado_cupo_d1(horas)
+    print(f"D1: {sum(horas.values()):,} filas leídas hoy")
+    reconciliar_issue(repositorio, "d1", activo, titulo, cuerpo,
+                      "Lecturas de D1 por debajo del umbral de aviso.", comentar_siempre=False)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--d1", action="store_true", help="consultar D1 (usa D1_DATABASE_ID)")
@@ -222,6 +288,12 @@ def main(argv: list[str] | None = None) -> int:
                 vigilar_fabrica(repositorio, consultar_ids(configuracion))
             finally:
                 Path(configuracion).unlink(missing_ok=True)
+        except RuntimeError as error:
+            errores.append(str(error))
+        try:
+            horas = lecturas_d1(os.environ.get("CLOUDFLARE_API_TOKEN", ""),
+                                os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip(), datetime.now(timezone.utc))
+            vigilar_cupo_d1(repositorio, horas)
         except RuntimeError as error:
             errores.append(str(error))
 
