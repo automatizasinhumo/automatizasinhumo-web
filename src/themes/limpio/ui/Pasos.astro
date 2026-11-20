@@ -34,6 +34,7 @@ const { pasos, etiqueta } = Astro.props;
 <style>
   .pasos {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--ds-hueco-6);
     counter-reset: paso;
   }
