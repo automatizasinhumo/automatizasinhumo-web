@@ -47,6 +47,31 @@ TOLERANCIA_SIN_ADAPTAR = 0.2
 RESTOS = re.compile(r'lorem ipsum|dolor sit amet', re.I)
 
 
+def aplanar_respuesta(respuesta):
+    """Textos válidos de la respuesta de la IA, por clave.
+
+    El modelo a veces devuelve el nodo entero que recibió ({"ruta": …, "texto": …}), o ese objeto
+    escrito como cadena, en vez del texto: entonces vale su «texto». Cada clave se valida por separado
+    para que un valor malo no tire el lote entero; lo que no valga sigue pendiente para otro intento.
+    """
+    if not isinstance(respuesta, dict):
+        raise ValueError('la respuesta no es un objeto JSON')
+    salida = {}
+    for clave, valor in respuesta.items():
+        if isinstance(valor, str) and valor.lstrip().startswith('{'):
+            try:
+                valor = json.loads(valor)
+            except ValueError:
+                pass
+        if isinstance(valor, dict):
+            valor = valor.get('texto')
+        try:
+            salida.update(validar_respuesta({clave: valor}))
+        except fastjsonschema.JsonSchemaException:
+            continue
+    return salida
+
+
 class FabricaBloqueada(RuntimeError):
     """La vista previa saldría con textos de la plantilla o datos de otro negocio: no se publica."""
 
@@ -113,7 +138,7 @@ def reescribir(textos, p, cred):
                'Los textos cortos (menú, botones, etiquetas, nombres de personas, clientes o proyectos) también se adaptan: '
                'nombres inventados de la plantilla pasan a ser genéricos del negocio o evento. Recibes un objeto JSON '
                'con nodos numerados; cada nodo contiene su ruta y las frases vecinas en orden. Responde SOLO con un '
-               'objeto JSON con las mismas claves y un texto adaptado como valor.')
+               'objeto JSON con las mismas claves y, como valor, solo la cadena del texto adaptado (no el objeto del nodo).')
     nombre = nombre_publico(p)
     datos = (f"Negocio o evento: {nombre}. Actividad: {p['actividad']}. Ciudad: {p['ciudad']}. "
              f"Servicios: {', '.join(p.get('servicios', []))}. Lo que cuenta el cliente: {p.get('descripcion', '')}")
@@ -126,7 +151,7 @@ def reescribir(textos, p, cred):
             try:
                 r = ia(*cred, sistema, f'{datos}\n\nNodos de la página (orden de lectura):\n'
                        f'{json.dumps(pend, ensure_ascii=False)}')
-                nuevo = validar_respuesta(json.loads(r[r.index('{'): r.rindex('}') + 1]))
+                nuevo = aplanar_respuesta(json.loads(r[r.index('{'): r.rindex('}') + 1]))
                 for k in [k for k in pend if k in nuevo]:
                     salida[k] = nuevo[k]
                     # Devuelto tal cual: se guarda, pero sigue pendiente para otro intento.

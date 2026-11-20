@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.argv = sys.argv[:1]  # vistas-previas.py lee --config/--max de la línea de órdenes al importarse
 _spec = importlib.util.spec_from_file_location('vistas_previas', Path(__file__).parent / 'vistas-previas.py')
@@ -26,6 +27,32 @@ class RondaDeCambios(unittest.TestCase):
         self.assertIn('Teléfono 600 000 000', vp.pedido_de(fila, 'plantillas-negocio/x')['descripcion'])
         largo = {**fila, 'campos': '{"Historia": "%s"}' % ('x' * 2000)}
         self.assertIn('Teléfono 600 000 000', vp.pedido_de(largo, 'plantillas-negocio/x')['descripcion'])
+
+
+class FabricaEnRojo(unittest.TestCase):
+    """Un fallo de la fábrica no puede quedar en una ejecución verde (20/11: 3 de 3 bloqueadas en verde)."""
+
+    def lote(self, intentos_previos):
+        fila = {'public_id': 'S-ABC123', 'slug': 'web', 'producto': 'Web', 'nombre': 'Ana', 'email': 'a@b.es',
+                'telefono': '', 'campos': '{}', 'mensaje': '', 'nota': f'reintento {intentos_previos}' if intentos_previos else '',
+                'estado': 'nueva'}
+
+        def d1(sql):
+            return [fila] if sql.startswith('SELECT') else [{'public_id': 'S-ABC123'}]
+
+        def bloqueada(_ruta):
+            raise RuntimeError('FabricaBloqueada')
+
+        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=bloqueada),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
+            vp.main()
+
+    def test_todas_fallidas_termina_en_rojo(self):
+        with self.assertRaises(SystemExit):
+            self.lote(0)
+
+    def test_agotados_los_reintentos_termina_en_rojo(self):
+        with self.assertRaises(SystemExit):
+            self.lote(vp.REINTENTOS)
 
 
 if __name__ == '__main__':
