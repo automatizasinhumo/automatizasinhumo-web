@@ -38,6 +38,12 @@ const familias = FAMILIAS.map((f) => ({
           </ul>
         </section>
       ))}
+      <section class="mt-10" data-proximas>
+        <h2 class="font-serif text-2xl font-bold text-ink">Y después</h2>
+        <ul class="mt-4 flex flex-wrap gap-2">
+          {PROXIMAS.map((p) => <li class="tarjeta px-4 py-2 text-muted">{p.nombre}</li>)}
+        </ul>
+      </section>
     </div>
   )}
 </Layout>
