@@ -1,15 +1,27 @@
 ---
 /**
- * STORE-OWNED. Portada del tema «limpio»: una sola pantalla con el eslogan en forma
- * de pirámide invertida (cada línea más estrecha que la de arriba), dos botones y la
- * lista corta de servicios. El test vive en su propia página (/elige).
+ * STORE-OWNED. Portada del tema «limpio». Una pantalla: el eslogan (pirámide invertida,
+ * cada fila más estrecha), la escena que enseña lo que se vende, dos botones, los
+ * servicios y, debajo, «Así funciona».
  *
- * Efectos adaptados a CSS de Magic UI (MIT, licencias/magicui.txt): rejilla de fondo
- * con casillas resaltadas (GridPattern), texto con degradado (AuroraText) y botón con
- * destello (ShimmerButton). En reposo solo se mueve el destello, que es una rotación
- * (la compone la GPU sin repintar). Medidas fluidas (clamp), sin ajustes por dispositivo.
+ * Animación de la portada (CSS puro, sin JavaScript): un ciclo de 9 s con tres turnos.
+ * En cada turno se enciende una parte del título («Tu negocio», «tu evento», «tu idea»)
+ * como una bombilla y a la vez aparece su escena: la web y la ficha de mapa de un
+ * negocio, la invitación de una boda y un flujo automático. Todas las piezas usan el
+ * mismo keyframe desfasado (0, -6 y -3 s), así que nunca se descoordinan. Solo se animan
+ * opacity y transform (los compone la GPU) y con prefers-reduced-motion queda quieta.
+ *
+ * Inspirado en Word Rotate, Safari y Animated Beam de Magic UI (MIT, licencias/magicui.txt),
+ * reescritos en CSS. Las palabras encendidas son una capa ::after con el mismo texto
+ * (content: attr() / "" para que el lector de pantalla no lo lea dos veces).
  */
 import Icono from './IconoCat.astro';
+import Boton from './ui/Boton.astro';
+import Fondo from './ui/Fondo.astro';
+import Marco from './ui/Marco.astro';
+import Pasos from './ui/Pasos.astro';
+import Pildora from './ui/Pildora.astro';
+import Seccion from './ui/Seccion.astro';
 
 interface Opcion {
   id: string;
@@ -42,109 +54,320 @@ const servicios = SERVICIOS.flatMap(([id, icono, nombre]) => {
   return o ? [{ href: o.href, icono, nombre }] : [];
 });
 
-// Casillas resaltadas de la rejilla (columna, fila), como las «squares» de GridPattern.
-const CELDA = 48;
-const CASILLAS: [number, number, 'brand' | 'accent'][] = [
-  [2, 1, 'brand'], [5, 3, 'accent'], [9, 2, 'brand'], [14, 1, 'brand'], [18, 4, 'accent'],
-  [22, 2, 'brand'], [26, 5, 'brand'], [3, 7, 'accent'], [11, 8, 'brand'], [24, 9, 'accent'],
-  [30, 3, 'brand'], [34, 7, 'brand'], [1, 11, 'brand'], [16, 11, 'accent'], [29, 12, 'brand'],
+const PASOS = [
+  { icono: 'hand-click', titulo: 'Elige', texto: 'Una plantilla del catálogo o la que te recomiende el test en un minuto.' },
+  { icono: 'pencil', titulo: 'Rellena tus datos', texto: 'Textos, fotos y colores. Ves la vista previa mientras lo personalizas.' },
+  { icono: 'rocket', titulo: 'Listo al momento', texto: 'Pagas el precio cerrado y lo descargas o publicas al instante.' },
 ];
 ---
 
-<div class="fondo" aria-hidden="true">
-  <svg class="rejilla">
-    <defs>
-      <pattern id="rejilla-celda" width={CELDA} height={CELDA} patternUnits="userSpaceOnUse" x="-1" y="-1">
-        <path d={`M.5 ${CELDA}V.5H${CELDA}`} fill="none" />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#rejilla-celda)" />
-    {CASILLAS.map(([c, f, tono], i) => (
-      <rect class={`casilla ${tono}`} opacity={[1, 0.45, 0.7][i % 3]} width={CELDA - 1} height={CELDA - 1} x={c * CELDA} y={f * CELDA} />
-    ))}
-  </svg>
-</div>
+<Fondo />
 
-<section class="piramide" aria-labelledby="portada-titulo">
-  <h1 id="portada-titulo">
-    <span class="fila fila-1">Tu negocio, tu evento,</span>
-    <span class="fila fila-2">tu idea, <span class="aurora">en marcha</span></span>
-    <span class="fila fila-3"><span class="aurora">sin complicaciones</span></span>
-  </h1>
-  <p class="subtitulo">Eliges, rellenas tus datos y lo tienes listo. Con precio cerrado desde el principio.</p>
-  <div class="botones">
-    <a href={testHref} class="destello"><span>Haz el test y te recomendamos</span></a>
-    <a href={catalogHref} class="secundario">Ver todos los servicios</a>
+<section class="portada" aria-labelledby="portada-titulo">
+  <div class="titulo-caja">
+    <h1 id="portada-titulo">
+      <span class="fila fila-1"><span class="luz t1" data-t="Tu negocio">Tu negocio</span>, <span class="luz t2" data-t="tu evento">tu evento</span>,</span>
+      <span class="fila fila-2"><span class="luz t3" data-t="tu idea">tu idea</span>, <span class="marca">en marcha</span></span>
+      <span class="fila fila-3"><span class="marca">sin complicaciones</span></span>
+    </h1>
   </div>
-  {servicios.length > 0 && (
-    <ul class="servicios" aria-label="Servicios">
-      {servicios.map((s) => (
-        <li><a href={s.href}><Icono name={s.icono} class="h-4 w-4" />{s.nombre}</a></li>
-      ))}
-    </ul>
-  )}
-  <p class="punta">Precio cerrado · 100 % automático</p>
+
+  <div class="escenario" aria-hidden="true">
+    <span class="chispa"><Icono name="bulb" class="h-5 w-5" /><Icono name="arrow-right" class="flecha h-4 w-4" /></span>
+
+    <div class="escena t1">
+      <Marco url="cafeterialuna.es">
+        <img src="/images/demos/cafe-coffee-shop-640.webp" width="640" height="430" alt="" fetchpriority="high" decoding="async" />
+      </Marco>
+      <div class="flotante abajo-izq">
+        <span class="icono-redondo"><Icono name="map-pin" class="h-4 w-4" /></span>
+        <span>
+          <b>Cafetería Luna</b>
+          <span class="estrellas"><Icono name="star" class="h-3 w-3" /> 4,9 · 128 reseñas</span>
+          <span class="estado">Abierto · Cómo llegar</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="escena t2">
+      <Marco url="lauraydani.es">
+        <img src="/images/demos/wedding-640.webp" width="640" height="430" alt="" decoding="async" />
+      </Marco>
+      <div class="flotante abajo-der">
+        <span class="icono-redondo ok"><Icono name="circle-check" class="h-4 w-4" /></span>
+        <span>
+          <b>Asistencia confirmada</b>
+          <span class="estado">86 invitados · 14 de junio</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="escena t3">
+      <div class="flujo">
+        <p class="flujo-cabecera"><Icono name="route" class="h-4 w-4" /> Automatización · Pedidos</p>
+        <ol class="nodos">
+          <li><span class="icono-redondo"><Icono name="shopping-cart" class="h-4 w-4" /></span>Nuevo pedido</li>
+          <li><span class="icono-redondo"><Icono name="file-invoice" class="h-4 w-4" /></span>Factura PDF</li>
+          <li><span class="icono-redondo"><Icono name="mail-fast" class="h-4 w-4" /></span>Aviso al cliente</li>
+        </ol>
+        <div class="carril"><span class="progreso"></span></div>
+      </div>
+      <div class="flotante arriba-der">
+        <span class="icono-redondo ok"><Icono name="bolt" class="h-4 w-4" /></span>
+        <span>
+          <b>Hecho solo</b>
+          <span class="estado">en 4 segundos, sin tocar nada</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="resto">
+    <p class="subtitulo">Crea tu web, automatiza tu negocio y lanza tu evento en pocos pasos. Todo automático, a precio cerrado y con vista previa antes de pagar.</p>
+    <div class="botones">
+      <Boton href={testHref}>Haz el test y te recomendamos</Boton>
+      <Boton href={catalogHref} variante="secundario">Ver todos los servicios</Boton>
+    </div>
+    {servicios.length > 0 && (
+      <ul class="servicios" aria-label="Servicios">
+        {servicios.map((s) => (
+          <li><Pildora href={s.href} icono={s.icono}>{s.nombre}</Pildora></li>
+        ))}
+      </ul>
+    )}
+    <p class="punta">Precio cerrado · 100 % automático</p>
+  </div>
 </section>
 
-<style>
-  /* ── Fondo: rejilla difuminada + dos halos de color, fijo detrás de toda la página.
-     Los halos son degradados radiales (sin filter: blur, que es caro en el móvil). ── */
-  .fondo {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-    background:
-      radial-gradient(circle at 0% 0%, color-mix(in oklab, var(--color-brand) 30%, transparent), transparent min(45vw, 30rem)),
-      radial-gradient(circle at 100% 30%, color-mix(in oklab, var(--color-accent) 16%, transparent), transparent min(50vw, 32rem));
-  }
-  .rejilla {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    stroke: color-mix(in oklab, var(--color-brand) 16%, transparent);
-    mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 25%, transparent 100%);
-  }
-  .casilla { stroke: none; }
-  .casilla.brand { fill: color-mix(in oklab, var(--color-brand) 14%, transparent); }
-  .casilla.accent { fill: color-mix(in oklab, var(--color-accent) 12%, transparent); }
+<Seccion id="como" antetitulo="Así funciona" separada>
+  <Pasos pasos={PASOS} etiqueta="Pasos para tenerlo listo" />
+</Seccion>
 
-  /* ── Pirámide invertida: cada bloque más estrecho que el anterior, pegada arriba ── */
-  .piramide {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* La página ya deja 3rem bajo la cabecera: aquí solo un poco más en pantallas altas. */
-    padding-block: clamp(0rem, 2.5vh, 1.5rem) clamp(2rem, 6vh, 4rem);
+<style>
+  /* ── Disposición: en el móvil todo en columna y centrado (título, escena, resto);
+     desde 60rem, texto a la izquierda y escena a la derecha. ── */
+  .portada {
+    display: grid;
+    grid-template-areas: 'titulo' 'escena' 'resto';
+    gap: var(--ds-hueco-8);
+    justify-items: center;
+    padding-block: clamp(0rem, 2vh, 1.5rem) var(--ds-hueco-8);
     text-align: center;
   }
-  .piramide h1 {
+  .titulo-caja { grid-area: titulo; width: 100%; container-type: inline-size; }
+  .escenario { grid-area: escena; }
+  .resto {
+    display: flex;
+    grid-area: resto;
+    flex-direction: column;
+    align-items: center;
+  }
+  @media (min-width: 60rem) {
+    .portada {
+      grid-template-areas: 'titulo escena' 'resto escena';
+      grid-template-columns: 1.08fr 1fr;
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(2.5rem, 5vw, 4.5rem);
+      row-gap: var(--ds-hueco-6);
+      align-items: center;
+      justify-items: start;
+      text-align: left;
+    }
+    .titulo-caja { align-self: end; }
+    .resto { align-self: start; align-items: flex-start; }
+    .escenario { align-self: center; }
+  }
+
+  /* ── Título: tres filas fijas, cada una más pequeña. Tamaño en cqi (ancho de su
+     columna), así no se parte ni desborda en ningún ancho. ── */
+  h1 {
     font-weight: 700;
-    letter-spacing: -0.03em;
+    letter-spacing: var(--ds-tracking-titular);
     line-height: 1.05;
     color: var(--color-ink);
   }
-  /* Tres filas fijas, cada una con letra más pequeña: más estrecha que la de arriba en
-     cualquier pantalla. El tamaño va con el ancho (vw), así que nunca hace falta partirlas. */
-  .fila {
-    display: block;
-    white-space: nowrap;
-  }
-  .fila-1 { font-size: clamp(1.6rem, 7vw, 4.6rem); }
-  .fila-2 { font-size: clamp(1.45rem, 6.3vw, 4.1rem); }
-  .fila-3 { font-size: clamp(1.3rem, 5.6vw, 3.6rem); }
-  .aurora {
-    background: linear-gradient(120deg, var(--color-brand) 10%, #1f8a72 45%, var(--color-accent) 95%);
+  .fila { display: block; white-space: nowrap; }
+  .fila-1 { font-size: min(9.2cqi, 4.4rem); }
+  .fila-2 { font-size: min(8.3cqi, 4rem); }
+  .fila-3 { font-size: min(7.4cqi, 3.55rem); }
+  .marca {
+    background: var(--ds-degradado-marca);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+
+  /* Palabras que se encienden: halo cálido (::before) y el mismo texto en degradado de
+     luz (::after) por encima. Solo cambia su opacidad. */
+  /* inline-block: la capa ::after ocupa la misma caja que el texto y cae encima exacta. */
+  .luz { position: relative; display: inline-block; isolation: isolate; }
+  .luz::before,
+  .luz::after { position: absolute; opacity: 0; pointer-events: none; }
+  .luz::before {
+    content: '';
+    inset: -0.15em -0.3em;
+    z-index: -1;
+    border-radius: 0.4em;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--color-accent) 22%, transparent), transparent);
+  }
+  .luz::after {
+    content: attr(data-t);
+    content: attr(data-t) / '';
+    inset: 0;
+    background: var(--ds-degradado-luz);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ── Escena: las tres capas en la misma celda de rejilla; la caja mide lo que la más
+     alta, así nunca se solapa con lo de debajo ni mueve la página al cambiar. ── */
+  .escenario {
+    position: relative;
+    display: grid;
+    align-items: center;
+    width: min(100%, 34rem);
+  }
+  .escena {
+    position: relative;
+    grid-area: 1 / 1;
+    padding: 0 1.25rem 2.5rem 0;
+    opacity: 0;
+  }
+  .escena.t3 { padding: 0 0 3.25rem; }
+  .escena img { display: block; width: 100%; height: auto; }
+
+  .chispa {
+    position: absolute;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+    top: -1.1rem;
+    left: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-pildora);
+    padding: 0.4rem 0.55rem;
+    color: var(--color-accent);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-2);
+  }
+  .chispa :global(.flecha) { rotate: 90deg; color: var(--color-faint); }
+  .chispa::before {
+    content: '';
+    position: absolute;
+    inset: -0.6rem;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--color-accent) 35%, transparent), transparent);
+    opacity: 0;
+  }
+  @media (min-width: 60rem) {
+    .chispa { top: 38%; left: -1.1rem; translate: -100% 0; }
+    .chispa :global(.flecha) { rotate: 0deg; }
+  }
+
+  /* Tarjetas flotantes encima del marco: el «resultado» de cada escena. */
+  .flotante {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: var(--ds-hueco-3);
+    max-width: 15rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    padding: 0.7rem 0.95rem 0.7rem 0.7rem;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    text-align: left;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-3);
+  }
+  .flotante b { display: block; font-size: 0.88rem; color: var(--color-ink); }
+  .flotante > span:last-child > span { display: block; }
+  .abajo-izq { bottom: 0; left: -0.5rem; }
+  .abajo-der { bottom: 0; right: 0; }
+  .arriba-der { bottom: 0; right: 0; }
+  @media (min-width: 60rem) {
+    .escena.t3 { padding: 2.25rem 0 0; }
+    .arriba-der { top: 0; bottom: auto; }
+  }
+  .estrellas { display: inline-flex !important; align-items: center; gap: 0.2rem; color: #b7791f; }
+  .estrellas :global(svg) { fill: currentColor; }
+  .estado { color: var(--color-brand); font-weight: 600; }
+  .icono-redondo {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    color: var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 12%, var(--color-surface));
+  }
+  .icono-redondo.ok { color: var(--color-brand); background: color-mix(in oklab, var(--color-brand) 12%, var(--color-surface)); }
+
+  /* Flujo automático: tres nodos y un carril que se llena. */
+  .flujo {
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-marco);
+    padding: 1.1rem 1.25rem 1.4rem;
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-3);
+    text-align: left;
+  }
+  .flujo-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--ds-texto-etiqueta);
+    font-weight: 600;
+    letter-spacing: var(--ds-tracking-etiqueta);
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+  .nodos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--ds-hueco-3);
+    margin-top: var(--ds-hueco-6);
+  }
+  .nodos li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-marco);
+    padding: 1rem 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+  .nodos li:nth-child(2) .icono-redondo,
+  .nodos li:nth-child(3) .icono-redondo { color: var(--color-brand); background: color-mix(in oklab, var(--color-brand) 12%, var(--color-surface)); }
+  .carril {
+    height: 0.35rem;
+    margin-top: var(--ds-hueco-6);
+    overflow: hidden;
+    border-radius: var(--ds-radio-pildora);
+    background: var(--color-line);
+  }
+  .progreso {
+    display: block;
+    height: 100%;
+    background: var(--ds-degradado-marca);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  /* ── Resto ── */
   .subtitulo {
-    max-width: 42ch;
-    margin-top: clamp(1.25rem, 3.5vh, 2.25rem);
-    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    max-width: 44ch;
+    font-size: var(--ds-texto-lead);
     line-height: 1.5;
     color: var(--color-muted);
     text-wrap: balance;
@@ -152,87 +375,64 @@ const CASILLAS: [number, number, 'brand' | 'accent'][] = [
   .botones {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: clamp(1.5rem, 4.5vh, 2.75rem);
+    justify-content: inherit;
+    gap: var(--ds-hueco-3);
+    margin-top: var(--ds-hueco-8);
   }
-  .botones a {
-    border-radius: 999px;
-    padding: 0.9rem 1.6rem;
-    font-weight: 600;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  }
-  .botones a:hover { transform: translateY(-2px); }
-  /* ShimmerButton: una luz recorre el borde del botón principal. */
-  .destello {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    color: var(--color-on-brand);
-    background: var(--color-brand);
-    box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--color-brand) 70%, transparent);
-  }
-  .destello::before {
-    content: '';
-    position: absolute;
-    inset: -150% -10%;
-    z-index: -2;
-    background: conic-gradient(from 0deg, transparent 0 300deg, rgb(255 255 255 / 0.85) 360deg);
-    animation: giro 3s linear infinite;
-    will-change: transform;
-  }
-  .destello::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    z-index: -1;
-    border-radius: inherit;
-    background: linear-gradient(180deg, color-mix(in oklab, var(--color-brand) 85%, #fff), var(--color-brand));
-  }
-  .destello:hover { box-shadow: 0 14px 34px -10px color-mix(in oklab, var(--color-brand) 85%, transparent); }
-  .secundario {
-    border: 1px solid var(--color-line);
-    color: var(--color-ink);
-    background: var(--color-surface);
-  }
-  .secundario:hover { border-color: var(--color-brand); }
-
-  /* ── Servicios: una fila de etiquetas pequeñas, más estrecha que los botones ── */
+  .resto .botones { justify-content: center; }
   .servicios {
     display: flex;
-    max-width: 46rem;
+    max-width: 40rem;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.5rem;
-    margin-top: clamp(1.75rem, 5vh, 2.75rem);
+    gap: var(--ds-hueco-2);
+    margin-top: var(--ds-hueco-8);
   }
-  .servicios a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    border: 1px solid color-mix(in oklab, var(--color-brand) 18%, var(--color-line));
-    border-radius: 999px;
-    padding: 0.3rem 0.75rem;
-    font-size: 0.85rem;
-    color: var(--color-ink);
-    background: color-mix(in oklab, var(--color-surface) 75%, transparent);
-    transition: border-color 0.2s, color 0.2s;
+  @media (min-width: 60rem) {
+    .resto .botones,
+    .servicios { justify-content: flex-start; }
   }
-  .servicios a:hover { border-color: var(--color-brand); color: var(--color-brand); }
-  .servicios :global(svg) { color: var(--color-brand); }
   .punta {
-    margin-top: clamp(1.25rem, 3.5vh, 2rem);
-    font-size: 0.8rem;
+    margin-top: var(--ds-hueco-6);
+    font-size: var(--ds-texto-etiqueta);
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--ds-tracking-etiqueta);
     text-transform: uppercase;
     color: var(--color-accent);
   }
 
-  @keyframes giro { to { transform: rotate(360deg); } }
-
+  /* ── El ciclo: un keyframe para todo, desfasado por turno ── */
+  @media (prefers-reduced-motion: no-preference) {
+    .luz::before,
+    .luz::after { animation: enciende 9s ease-in-out infinite; }
+    .escena { animation: turno 9s var(--ds-curva) infinite; }
+    .escena { will-change: opacity, transform; }
+    .t2::before, .t2::after, .escena.t2 { animation-delay: -6s; }
+    .t3::before, .t3::after, .escena.t3 { animation-delay: -3s; }
+    .escena.t3 .progreso { animation: progreso 9s var(--ds-curva) -3s infinite; }
+    .chispa::before { animation: chispa 3s ease-out infinite; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .destello::before { animation: none; }
-    .botones a, .servicios a { transition: none; }
+    .escena.t1 { opacity: 1; }
+    .progreso { transform: none; }
+  }
+  @keyframes turno {
+    0% { opacity: 0; transform: translateY(0.5rem) scale(0.985); }
+    5%, 30% { opacity: 1; transform: none; }
+    35%, 100% { opacity: 0; transform: translateY(-0.35rem) scale(0.99); }
+  }
+  @keyframes enciende {
+    0% { opacity: 0; }
+    6%, 30% { opacity: 1; }
+    36%, 100% { opacity: 0; }
+  }
+  @keyframes progreso {
+    0%, 6% { transform: scaleX(0); }
+    26%, 100% { transform: scaleX(1); }
+  }
+  @keyframes chispa {
+    0% { opacity: 0; }
+    12% { opacity: 1; }
+    60%, 100% { opacity: 0; }
   }
 </style>

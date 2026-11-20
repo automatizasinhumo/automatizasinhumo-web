@@ -88,3 +88,51 @@
   --prose-h2-tracking: -0.01em;
   --prose-h3-size: 1.125rem;
 }
+
+/*
+ * ── Sistema de diseño del tema limpio ────────────────────────────────────
+ * Escala única para toda la web: los componentes de ui/ (Boton, Pildora, Seccion,
+ * Marco, Fondo, Pasos) solo leen estas variables. Una página nueva no define
+ * tamaños, sombras ni tiempos propios: si falta algo, se añade aquí.
+ */
+:root {
+  /* Tipografía: titulares fluidos (no dependen del aparato, solo del ancho). */
+  --ds-texto-display: clamp(2.25rem, 5vw, 4.6rem);
+  --ds-texto-h2: clamp(1.75rem, 3.4vw, 2.75rem);
+  --ds-texto-h3: clamp(1.15rem, 1.8vw, 1.4rem);
+  --ds-texto-lead: clamp(1.05rem, 1.6vw, 1.25rem);
+  --ds-texto-small: 0.875rem;
+  --ds-texto-etiqueta: 0.78rem; /* versalitas: «PRECIO CERRADO», antetítulos */
+  --ds-tracking-titular: -0.03em;
+  --ds-tracking-etiqueta: 0.08em;
+
+  /* Espaciado: múltiplos de 4 px y huecos de sección fluidos. */
+  --ds-hueco-1: 0.25rem;
+  --ds-hueco-2: 0.5rem;
+  --ds-hueco-3: 0.75rem;
+  --ds-hueco-4: 1rem;
+  --ds-hueco-6: 1.5rem;
+  --ds-hueco-8: 2rem;
+  --ds-hueco-12: 3rem;
+  --ds-seccion: clamp(3.5rem, 8vw, 6.5rem);
+
+  /* Formas. */
+  --ds-radio-tarjeta: 1.25rem;
+  --ds-radio-marco: 0.9rem;
+  --ds-radio-pildora: 999px;
+
+  /* Degradados de marca, interpolados en oklch para que no pasen por tonos sucios. */
+  --ds-degradado-marca: linear-gradient(115deg in oklch, var(--color-brand) 0%, #1f9a7d 55%, #2fae8c 100%);
+  --ds-degradado-luz: linear-gradient(115deg in oklch, var(--color-accent) 0%, #e3912f 100%);
+
+  /* Sombras: una escala, de apoyada a flotante. */
+  --ds-sombra-1: 0 1px 2px rgb(23 45 45 / 0.06), 0 2px 8px -2px rgb(23 45 45 / 0.08);
+  --ds-sombra-2: 0 12px 32px -12px rgb(23 45 45 / 0.22), 0 2px 6px -2px rgb(23 45 45 / 0.08);
+  --ds-sombra-3: 0 30px 60px -20px rgb(23 45 45 / 0.35), 0 8px 20px -8px rgb(23 45 45 / 0.15);
+  --ds-sombra-marca: 0 10px 30px -10px color-mix(in oklab, var(--color-brand) 70%, transparent);
+
+  /* Movimiento: solo transform y opacity en bucle (los compone la GPU). */
+  --ds-mov-rapido: 160ms;
+  --ds-mov-normal: 240ms;
+  --ds-curva: cubic-bezier(0.22, 1, 0.36, 1);
+}

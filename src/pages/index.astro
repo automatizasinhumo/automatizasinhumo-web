@@ -48,7 +48,11 @@ if (showHero && !ThemeHome) {
 ---
 
 {showHero && ThemeHome ? (
-  <Layout title="Tu negocio, tu evento, tu idea, en marcha sin complicaciones" sinAviso>
+  <Layout
+    title="Webs y automatizaciones a precio cerrado"
+    description="Webs, tiendas online, reservas, automatizaciones, CV e invitaciones a precio cerrado. Eliges, lo personalizas, ves la vista previa y lo tienes listo."
+    sinAviso
+  >
     <ThemeHome
       objetivos={OBJETIVOS.map((o) => ({ id: o.id, href: `/elige?objetivo=${o.id}#resultado` }))}
       testHref="/elige"

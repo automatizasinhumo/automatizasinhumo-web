@@ -1,0 +1,50 @@
+---
+/**
+ * Fondo de marca del tema limpio, fijo detrás de la página: rejilla con casillas
+ * resaltadas (GridPattern de Magic UI, MIT) y dos halos de color. Todo estático:
+ * los halos son degradados radiales (sin filter: blur, caro en el móvil).
+ */
+const CELDA = 48;
+const CASILLAS: [number, number, 'brand' | 'accent'][] = [
+  [2, 1, 'brand'], [5, 3, 'accent'], [9, 2, 'brand'], [14, 1, 'brand'], [18, 4, 'accent'],
+  [22, 2, 'brand'], [26, 5, 'brand'], [3, 7, 'accent'], [11, 8, 'brand'], [24, 9, 'accent'],
+  [30, 3, 'brand'], [34, 7, 'brand'], [1, 11, 'brand'], [16, 11, 'accent'], [29, 12, 'brand'],
+];
+---
+<div class="fondo" aria-hidden="true">
+  <svg class="rejilla">
+    <defs>
+      <pattern id="rejilla-celda" width={CELDA} height={CELDA} patternUnits="userSpaceOnUse" x="-1" y="-1">
+        <path d={`M.5 ${CELDA}V.5H${CELDA}`} fill="none" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#rejilla-celda)" />
+    {CASILLAS.map(([c, f, tono], i) => (
+      <rect class={`casilla ${tono}`} opacity={[1, 0.45, 0.7][i % 3]} width={CELDA - 1} height={CELDA - 1} x={c * CELDA} y={f * CELDA} />
+    ))}
+  </svg>
+</div>
+
+<style>
+  .fondo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 0% 0%, color-mix(in oklab, var(--color-brand) 30%, transparent), transparent min(45vw, 30rem)),
+      radial-gradient(circle at 100% 30%, color-mix(in oklab, var(--color-accent) 16%, transparent), transparent min(50vw, 32rem));
+  }
+  .rejilla {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke: color-mix(in oklab, var(--color-brand) 16%, transparent);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 25%, transparent 100%);
+  }
+  .casilla { stroke: none; }
+  .casilla.brand { fill: color-mix(in oklab, var(--color-brand) 14%, transparent); }
+  .casilla.accent { fill: color-mix(in oklab, var(--color-accent) 12%, transparent); }
+</style>
