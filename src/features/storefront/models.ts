@@ -84,6 +84,8 @@ export interface StorefrontShellModel {
   headerLinks: StorefrontLink[];
   /** Ruta real del catálogo: / salvo que la portada apunte a otra página. */
   catalogHref: string;
+  /** Catálogo nuevo por familias (/servicios): destino de «Ver todos los servicios» en los temas que lo usan. */
+  serviciosHref: string;
   footerLinks: StorefrontLink[];
   /** Páginas «Web para …» de cada oficio: enlazadas en todas las rutas para que no queden huérfanas. */
   sectorLinks: StorefrontLink[];

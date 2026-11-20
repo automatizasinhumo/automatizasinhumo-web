@@ -9,9 +9,10 @@ import { hasCatalogParams } from '../features/storefront/campaignParams';
 import { resolveHomePath } from '../features/settings/home';
 import { getConfig } from '../config';
 import { OBJETIVOS } from '../features/storefront/selector';
+import { CATALOGO_HREF } from '../features/servicios/catalogo';
 
 // Un tema puede traer su propia portada (Home.astro): entonces `/` pinta solo esa
-// portada y el catálogo completo sigue en /products. Sin Home.astro, la de siempre.
+// portada, que enlaza al catálogo nuevo (/servicios); el antiguo sigue en /products. Sin Home.astro, la de siempre.
 const ThemeHome = Object.values(import.meta.glob<{ default: unknown }>('#theme/Home.astro', { eager: true }))[0]?.default as
   | ((props: Record<string, unknown>) => unknown)
   | undefined;
@@ -56,7 +57,7 @@ if (showHero && !ThemeHome) {
     <ThemeHome
       objetivos={OBJETIVOS.map((o) => ({ id: o.id, href: `/elige?objetivo=${o.id}#resultado` }))}
       testHref="/elige"
-      catalogHref="/products"
+      catalogHref={CATALOGO_HREF}
     />
   </Layout>
 ) : (

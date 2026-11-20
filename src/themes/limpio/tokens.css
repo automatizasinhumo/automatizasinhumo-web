@@ -126,6 +126,22 @@
   --ds-degradado-marca: linear-gradient(115deg in oklch, var(--color-brand) 0%, #1a8770 55%, #1f9a7d 100%);
   --ds-degradado-luz: linear-gradient(115deg in oklch, var(--color-accent) 0%, #c8741f 100%);
 
+  /* Familias de servicios: cada familia tiene su color (texto, viñetas, iconos; contraste
+     de 4,5:1 o más sobre blanco) y un segundo tono para su degradado. Un elemento con
+     data-familia="<id>" recibe --familia y --familia-2; las piezas solo leen esas dos. */
+  --ds-familia-cv: #6b3fa0;
+  --ds-familia-cv-2: #b0549b;
+  --ds-familia-webs: #1f5c99;
+  --ds-familia-webs-2: #1f8fa8;
+  --ds-familia-tiendas: #a8441f;
+  --ds-familia-tiendas-2: #c8741f;
+  --ds-familia-reservas: #176b5a;
+  --ds-familia-reservas-2: #1f9a7d;
+  --ds-familia-automatizar: #3b4cb8;
+  --ds-familia-automatizar-2: #6b5fd8;
+  --ds-familia-eventos: #a3123a;
+  --ds-familia-eventos-2: #d6457a;
+
   /* Sombras: una escala, de apoyada a flotante. */
   --ds-sombra-1: 0 1px 2px rgb(23 45 45 / 0.06), 0 2px 8px -2px rgb(23 45 45 / 0.08);
   --ds-sombra-2: 0 12px 32px -12px rgb(23 45 45 / 0.22), 0 2px 6px -2px rgb(23 45 45 / 0.08);
@@ -157,3 +173,17 @@
     }
   }
 }
+
+/* Familia → color. Fuera de :root para que cualquier bloque (tarjeta, sección, píldora)
+   tome el color de su familia con un atributo; sin atributo, el color de marca. */
+:root,
+[data-familia] {
+  --familia: var(--color-brand);
+  --familia-2: #1f9a7d;
+}
+[data-familia='cv'] { --familia: var(--ds-familia-cv); --familia-2: var(--ds-familia-cv-2); }
+[data-familia='webs'] { --familia: var(--ds-familia-webs); --familia-2: var(--ds-familia-webs-2); }
+[data-familia='tiendas'] { --familia: var(--ds-familia-tiendas); --familia-2: var(--ds-familia-tiendas-2); }
+[data-familia='reservas'] { --familia: var(--ds-familia-reservas); --familia-2: var(--ds-familia-reservas-2); }
+[data-familia='automatizar'] { --familia: var(--ds-familia-automatizar); --familia-2: var(--ds-familia-automatizar-2); }
+[data-familia='eventos'] { --familia: var(--ds-familia-eventos); --familia-2: var(--ds-familia-eventos-2); }

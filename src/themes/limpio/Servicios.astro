@@ -1,0 +1,396 @@
+---
+/**
+ * STORE-OWNED. Catálogo nuevo del tema limpio (/servicios), con el mismo lenguaje que la
+ * portada: fondo de marca, titular con degradado, píldoras y secciones de ui/.
+ *
+ * Los servicios van por familias (primero el CV y lo que lo acompaña, luego las webs…).
+ * Cada familia se distingue por su color, sin texto extra: data-familia="<id>" da
+ * --familia y --familia-2 (tokens.css) y todo lo de dentro los lee: el sello con
+ * degradado, la franja de cada tarjeta, las viñetas en rombo, el icono y el precio.
+ * Un servicio nuevo o una familia nueva no tocan este fichero: solo los datos y, si es
+ * una familia nueva, sus dos tokens.
+ */
+import Icono from './IconoCat.astro';
+import Boton from './ui/Boton.astro';
+import Fondo from './ui/Fondo.astro';
+import Pildora from './ui/Pildora.astro';
+import Seccion from './ui/Seccion.astro';
+
+interface Servicio {
+  id: string;
+  nombre: string;
+  texto: string;
+  icono: string;
+  puntos: readonly string[];
+  href?: string;
+  /** Precio ya formateado («9 €»). */
+  desde?: string;
+  imagen?: string;
+}
+interface Familia {
+  id: string;
+  nombre: string;
+  texto: string;
+  icono: string;
+  servicios: readonly Servicio[];
+}
+interface Props {
+  familias: readonly Familia[];
+  proximas: readonly { id: string; nombre: string; icono: string }[];
+}
+const { familias, proximas } = Astro.props;
+---
+
+<Fondo />
+
+<section class="cabeza" aria-labelledby="servicios-titulo">
+  <p class="antetitulo">Servicios</p>
+  <h1 id="servicios-titulo">Elige qué quieres <span class="marca">tener listo hoy</span></h1>
+  <p class="subtitulo">Cada servicio se hace paso a paso, con vista previa al momento y precio cerrado. Pagas solo cuando te guste.</p>
+  <ul class="atajos" aria-label="Familias de servicios">
+    {familias.map((f) => (
+      <li data-familia={f.id}><Pildora href={`#familia-${f.id}`} icono={f.icono}>{f.nombre}</Pildora></li>
+    ))}
+  </ul>
+</section>
+
+{familias.map((f) => {
+  const listos = f.servicios.filter((s) => s.href).length;
+  return (
+    <section id={`familia-${f.id}`} class="familia" data-familia={f.id} aria-labelledby={`familia-${f.id}-titulo`}>
+      <header class="familia-cabeza">
+        <span class="sello"><Icono name={f.icono} class="h-6 w-6" /></span>
+        <div class="familia-texto">
+          <h2 id={`familia-${f.id}-titulo`}>{f.nombre}</h2>
+          <p>{f.texto}</p>
+        </div>
+        <p class="cuenta">{listos > 0 ? `${listos} de ${f.servicios.length} disponibles` : 'Muy pronto'}</p>
+      </header>
+
+      <ul class="rejilla">
+        {f.servicios.map((s) => (
+          <li class:list={['servicio', { listo: s.href, principal: s.href && s.imagen }]}>
+            {s.imagen && s.href && (
+              <span class="foto"><img src={s.imagen} alt="" width="480" height="679" loading="eager" decoding="async" /></span>
+            )}
+            <div class="cuerpo">
+              <span class="icono"><Icono name={s.icono} class="h-5 w-5" /></span>
+              <h3>{s.href ? <a href={s.href} class="enlace">{s.nombre}</a> : s.nombre}</h3>
+              <p class="texto">{s.texto}</p>
+              <ul class="puntos">
+                {s.puntos.map((p) => <li>{p}</li>)}
+              </ul>
+              <div class="pie">
+                {s.href ? (
+                  <>
+                    {s.desde && <p class="precio"><span>Desde</span> {s.desde}</p>}
+                    <Boton href={s.href} talla="compacta" class="ir">Empezar</Boton>
+                  </>
+                ) : (
+                  <p class="pronto"><Icono name="clock" class="h-4 w-4" />Muy pronto</p>
+                )}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+})}
+
+{proximas.length > 0 && (
+  <Seccion id="despues" antetitulo="Y después" entradilla="Los siguientes servicios entran aquí con el mismo método: eliges, rellenas, lo ves y lo tienes." separada>
+    <ul class="proximas" aria-label="Servicios en preparación">
+      {proximas.map((p) => (
+        <li data-familia={p.id}><Pildora icono={p.icono}>{p.nombre}</Pildora></li>
+      ))}
+    </ul>
+  </Seccion>
+)}
+
+<style>
+  /* ── Cabecera: la misma voz que la portada (titular con degradado de marca). ── */
+  .cabeza {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-block: clamp(1rem, 4vh, 2.5rem) var(--ds-hueco-12);
+    text-align: center;
+  }
+  .antetitulo {
+    font-size: var(--ds-texto-etiqueta);
+    font-weight: 600;
+    letter-spacing: var(--ds-tracking-etiqueta);
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+  h1 {
+    max-width: 18ch;
+    margin-top: var(--ds-hueco-3);
+    font-family: var(--font-serif);
+    font-size: var(--ds-texto-display);
+    font-weight: 700;
+    letter-spacing: var(--ds-tracking-titular);
+    line-height: 1.02;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .marca {
+    background: var(--ds-degradado-marca);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .subtitulo {
+    max-width: 38rem;
+    margin-top: var(--ds-hueco-6);
+    font-size: var(--ds-texto-lead);
+    line-height: 1.5;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  .atajos,
+  .proximas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ds-hueco-2);
+  }
+  .atajos { margin-top: var(--ds-hueco-8); }
+
+  /* Píldora con el color de su familia (fondo tenue, texto y borde del color). */
+  [data-familia] > :global(.pildora) {
+    border-color: color-mix(in oklab, var(--familia) 30%, transparent);
+    background: color-mix(in oklab, var(--familia) 9%, var(--color-surface));
+    color: var(--familia);
+  }
+
+  /* ── Familia: panel con un velo de su color arriba y una franja con degradado. ── */
+  .familia {
+    position: relative;
+    margin-block-end: var(--ds-hueco-12);
+    border: 1px solid color-mix(in oklab, var(--familia) 18%, var(--color-line));
+    border-radius: var(--ds-radio-panel);
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--familia) 7%, transparent), transparent 14rem),
+      color-mix(in oklab, var(--color-surface) 70%, transparent);
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    scroll-margin-top: calc(var(--alto-cabecera, 5.5rem) + var(--ds-hueco-4));
+  }
+  .familia::before {
+    position: absolute;
+    inset: -1px -1px auto;
+    height: 4px;
+    border-radius: var(--ds-radio-panel) var(--ds-radio-panel) 0 0;
+    background: linear-gradient(90deg in oklch, var(--familia), var(--familia-2));
+    content: '';
+  }
+  .familia-cabeza {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--ds-hueco-4);
+    align-items: center;
+    margin-bottom: var(--ds-hueco-8);
+  }
+  .sello {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg in oklch, var(--familia), var(--familia-2));
+    box-shadow: 0 10px 24px -12px var(--familia);
+    color: #fff;
+  }
+  .familia-texto h2 {
+    font-family: var(--font-serif);
+    font-size: var(--ds-texto-h2);
+    font-weight: 700;
+    letter-spacing: var(--ds-tracking-titular);
+    line-height: 1.1;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .familia-texto p {
+    margin-top: var(--ds-hueco-1);
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  .cuenta {
+    grid-column: 1 / -1;
+    justify-self: start;
+    border-radius: var(--ds-radio-pildora);
+    background: color-mix(in oklab, var(--familia) 10%, transparent);
+    padding: 0.2rem 0.75rem;
+    font-size: var(--ds-texto-etiqueta);
+    font-weight: 600;
+    letter-spacing: var(--ds-tracking-etiqueta);
+    text-transform: uppercase;
+    color: var(--familia);
+  }
+  @media (min-width: 48rem) {
+    .familia-cabeza { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .cuenta { grid-column: auto; justify-self: end; }
+  }
+
+  /* ── Tarjetas ── */
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--ds-hueco-6);
+  }
+  .servicio {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-1);
+    transition:
+      transform var(--ds-mov-normal) var(--ds-curva),
+      box-shadow var(--ds-mov-normal);
+  }
+  .servicio.listo:hover,
+  .servicio.listo:focus-within {
+    transform: translateY(-3px);
+    box-shadow: var(--ds-sombra-2);
+  }
+  /* El que tiene foto ocupa dos columnas cuando caben: es el servicio de entrada. */
+  .principal { grid-column: 1 / -1; }
+  @media (min-width: 48rem) {
+    .principal { grid-column: span 2; }
+  }
+  .foto {
+    display: none;
+    flex: 0 0 42%;
+    align-items: center;
+    background: linear-gradient(160deg in oklch, color-mix(in oklab, var(--familia) 14%, #fff), color-mix(in oklab, var(--familia-2) 10%, #fff));
+    padding: var(--ds-hueco-4);
+  }
+  .foto img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.4rem;
+    box-shadow: var(--ds-sombra-2);
+    transform: rotate(-2deg);
+  }
+  @media (min-width: 36rem) {
+    .foto { display: flex; }
+  }
+  .cuerpo {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--ds-hueco-6);
+  }
+  .icono {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: color-mix(in oklab, var(--familia) 11%, transparent);
+    color: var(--familia);
+  }
+  h3 {
+    margin-top: var(--ds-hueco-4);
+    font-family: var(--font-serif);
+    font-size: var(--ds-texto-h3);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+  /* Toda la tarjeta es clicable sin anidar enlaces: el ::after del título la cubre. */
+  .enlace {
+    color: inherit;
+    text-decoration: none;
+  }
+  .enlace::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+  }
+  .enlace:focus-visible { outline: none; }
+  .servicio:has(.enlace:focus-visible) {
+    outline: 3px solid var(--familia);
+    outline-offset: 3px;
+  }
+  .texto {
+    margin-top: var(--ds-hueco-2);
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  /* Viñetas en rombo con el degradado de la familia. */
+  .puntos {
+    display: grid;
+    gap: var(--ds-hueco-2);
+    margin-top: var(--ds-hueco-4);
+    font-size: var(--ds-texto-small);
+    color: var(--color-ink);
+  }
+  .puntos li {
+    position: relative;
+    padding-left: 1.25rem;
+  }
+  .puntos li::before {
+    position: absolute;
+    top: 0.45em;
+    left: 0.15rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 2px;
+    background: linear-gradient(135deg in oklch, var(--familia), var(--familia-2));
+    transform: rotate(45deg);
+    content: '';
+  }
+  .pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-hueco-3);
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--ds-hueco-6);
+  }
+  .precio {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--familia);
+  }
+  .precio span {
+    font-family: var(--font-sans);
+    font-size: var(--ds-texto-small);
+    font-weight: 500;
+    color: var(--color-faint);
+  }
+  /* El botón queda por encima de la capa clicable de la tarjeta. */
+  .pie :global(.ir) { position: relative; z-index: 1; }
+  .pronto {
+    display: inline-flex;
+    gap: var(--ds-hueco-1);
+    align-items: center;
+    font-size: var(--ds-texto-small);
+    font-weight: 600;
+    color: var(--color-faint);
+  }
+  /* Lo que aún no está: misma tarjeta, más callada (sin sombra ni elevación). */
+  .servicio:not(.listo) {
+    border-style: dashed;
+    background: color-mix(in oklab, var(--color-surface) 75%, transparent);
+    box-shadow: none;
+  }
+  /* En móvil, lo que aún no está ocupa poco: sin viñetas, para llegar antes a lo que sí. */
+  @media (max-width: 35.99rem) {
+    .servicio:not(.listo) .puntos { display: none; }
+    .servicio:not(.listo) .pie { padding-top: var(--ds-hueco-3); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .servicio { transition: none; }
+    .servicio.listo:hover,
+    .servicio.listo:focus-within { transform: none; }
+  }
+</style>

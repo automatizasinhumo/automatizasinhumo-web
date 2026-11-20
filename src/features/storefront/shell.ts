@@ -3,6 +3,7 @@ import { mediaUrl } from '../media/url';
 import type { StorefrontLink, StorefrontShellModel } from './models';
 // Datos puros del JSON: sectors.ts arrastra consultas a D1 y este módulo no debe.
 import sectores from '../../data/sectores.json';
+import { CATALOGO_HREF } from '../servicios/catalogo';
 
 /**
  * Builds the header/footer model.
@@ -54,6 +55,7 @@ export function buildShellModel(input: ShellInput): StorefrontShellModel {
       : null,
     headerLinks: input.headerItems.map(toLink),
     catalogHref: input.catalogHref,
+    serviciosHref: CATALOGO_HREF,
     footerLinks: input.footerItems.map(toLink),
     sectorLinks: (sectores as { slug: string; label: string }[]).map((sector) => ({ text: `Web para ${sector.label.toLowerCase()}`, href: `/webs/${sector.slug}` })),
     search: { action: '/search', query: input.searchQuery },
