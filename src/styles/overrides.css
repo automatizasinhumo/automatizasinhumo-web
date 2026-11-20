@@ -47,6 +47,7 @@ h1, h2, h3, .font-serif {
  * components para que cualquier utilidad (hidden, w-full, mt-4…) las pise.
  * Lee los tokens --ds-* del tema; con otro tema caen a valores neutros.
  *   .boton + .boton-principal | .boton-secundario   [+ .boton-compacto]
+ *   sobre fondo de marca: .boton-inverso | .boton-contorno
  *   .boton-destello: brillo que recorre el borde, solo en la acción clave
  *   de la pantalla (ShimmerButton de Magic UI, MIT, licencias/magicui.txt).
  */
@@ -66,6 +67,9 @@ h1, h2, h3, .font-serif {
     font-weight: 600;
     line-height: 1.25;
     text-align: center;
+    /* Un botón nunca parte palabras con guion; reparte las líneas a lo ancho. */
+    hyphens: manual;
+    text-wrap: balance;
     text-decoration: none;
     cursor: pointer;
     transition:
@@ -107,6 +111,24 @@ h1, h2, h3, .font-serif {
   }
   .boton-secundario:hover {
     border-color: var(--color-brand);
+  }
+  /* Sobre un panel de marca: relleno claro (principal) o solo borde (secundario). */
+  .boton-inverso {
+    color: var(--color-brand);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-2, 0 12px 32px -12px rgb(0 0 0 / 0.2));
+  }
+  .boton-contorno {
+    color: inherit;
+    border-color: currentColor;
+    background: transparent;
+  }
+  .boton-contorno:hover {
+    background: color-mix(in oklab, currentColor 12%, transparent);
+  }
+  .boton-inverso:focus-visible,
+  .boton-contorno:focus-visible {
+    outline-color: var(--color-on-brand);
   }
   .boton-destello {
     border: 0;
