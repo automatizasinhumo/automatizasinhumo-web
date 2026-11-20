@@ -43,7 +43,7 @@ const r = await build({
   minify: true,
   jsx: 'automatic',
   legalComments: 'linked',
-  banner: { js: '/* Contiene software MIT/Apache-2.0 de terceros (Reactive Resume, Resumv, react-pdf, pdf.js, React, Phosphor). Licencias: /cv/estudio/motor/LICENCIAS.txt */' },
+  banner: { js: '/* Contiene software MIT/Apache-2.0 de terceros (Reactive Resume, Resumv, react-pdf, pdf.js, React, Phosphor) y fuentes OFL-1.1. Licencias: /cv/estudio/motor/LICENCIAS.txt */' },
   entryNames: '[name]',
   chunkNames: 'c/[hash]',
   assetNames: 'f/[name]-[hash]',
@@ -81,7 +81,10 @@ writeFileSync(
     licencia('pdf.js (Apache-2.0)', path.join(dirPaquete('pdfjs-dist'), 'LICENSE')),
     licencia('React (MIT)', path.join(dirPaquete('react'), 'LICENSE')),
     licencia('Phosphor Icons (MIT) vía phosphor-icons-react-pdf', path.join(dirPaquete('phosphor-icons-react-pdf'), 'LICENSE')),
-    licencia('Lato (OFL-1.1) vía @fontsource/lato', path.join(dirPaquete('@fontsource/lato'), 'LICENSE')),
+    // Una entrada por paquete de fuente: la lista sale de package.json para no olvidar ninguna.
+    ...Object.keys(JSON.parse(readFileSync(aqui('./package.json'), 'utf8')).dependencies)
+      .filter((p) => p.startsWith('@fontsource/'))
+      .map((p) => licencia(`${p.slice('@fontsource/'.length)} (OFL-1.1) vía ${p}`, path.join(dirPaquete(p), 'LICENSE'))),
   ].join(SEP) + '\n',
 );
 console.log('Motor del estudio listo en public/cv/estudio/motor/');

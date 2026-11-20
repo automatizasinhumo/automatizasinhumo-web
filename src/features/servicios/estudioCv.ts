@@ -3,7 +3,7 @@
  * (el botón Atrás del navegador funciona), datos guardados en este navegador y vista
  * previa con marca de agua generada por el motor (cv-estudio/), que se carga al elegir diseño.
  */
-import { PASOS_CV, euros, type DisenoCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ModalidadCv, type PaqueteCv } from './cv';
 
 type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
 type Fila = Record<string, string | number>;
@@ -13,7 +13,16 @@ interface Motor {
   crearDatos(f: FormCv, plantilla: string): unknown;
   formEjemplo: FormCv;
   formVacio: FormCv;
-  crearPdf(o: { datos: unknown; plantilla: string; color?: string; decoracion?: Decoracion | null; marcaAgua: string }): Promise<Blob>;
+  crearPdf(o: {
+    datos: unknown;
+    plantilla: string;
+    color?: string;
+    decoracion?: Decoracion | null;
+    marcaAgua: string;
+    letra?: string;
+    tamano?: string;
+    espaciado?: string;
+  }): Promise<Blob>;
   pintarPdf(b: Blob, c: HTMLElement, o: { ancho: number; maxPaginas: number }): Promise<number>;
 }
 interface Config {
@@ -29,6 +38,9 @@ interface Estado {
   forma: string;
   intensidad: number;
   sombreado: boolean;
+  letra: string;
+  tamano: string;
+  espaciado: string;
   alcanzado: number;
   form: FormCv | null;
 }
@@ -39,6 +51,11 @@ const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'resumen'
 const PASOS = PASOS_CV.map((p) => p.id) as string[];
 const MARCA = 'VISTA PREVIA';
 const NUMERICOS = new Set(['nivel', 'puntos']);
+/** Opciones de formato que se guardan y se mandan tal cual al motor. */
+const FORMATO = { letra: ESTILOS_LETRA, tamano: TAMANOS, espaciado: ESPACIADOS } as const;
+type ClaveFormato = keyof typeof FORMATO;
+const CLAVES_FORMATO = Object.keys(FORMATO) as ClaveFormato[];
+const valido = (k: ClaveFormato, v: unknown) => FORMATO[k].some((o) => o.id === v);
 
 function leer(): Partial<Estado> {
   try {
@@ -78,6 +95,9 @@ export function iniciarEstudioCv() {
     forma: typeof g.forma === 'string' ? g.forma : 'circulos',
     intensidad: Number(g.intensidad) || 0.7,
     sombreado: g.sombreado ?? true,
+    letra: valido('letra', g.letra) ? g.letra! : FORMATO_INICIAL.letra,
+    tamano: valido('tamano', g.tamano) ? g.tamano! : FORMATO_INICIAL.tamano,
+    espaciado: valido('espaciado', g.espaciado) ? g.espaciado! : FORMATO_INICIAL.espaciado,
     alcanzado: Math.min(PASOS.length - 1, Math.max(0, Number(g.alcanzado) || 0)),
     form: g.form && typeof g.form === 'object' ? g.form : null,
   };
@@ -151,6 +171,7 @@ export function iniciarEstudioCv() {
     for (const r of $$<HTMLInputElement>('input[name="forma"]')) r.checked = r.value === estado.forma;
     campo<HTMLInputElement>('intensidad').value = String(estado.intensidad);
     campo<HTMLInputElement>('sombreado').checked = estado.sombreado;
+    for (const k of CLAVES_FORMATO) for (const r of $$<HTMLInputElement>(`input[name="${k}"]`)) r.checked = r.value === estado[k];
     const m = modalidad();
     for (const el of $$('[data-solo]')) el.hidden = el.dataset.solo !== m;
     const dif = $('[data-diferencia]');
@@ -178,6 +199,9 @@ export function iniciarEstudioCv() {
         color: personal ? estado.color : undefined,
         decoracion: personal ? { forma: estado.forma, color: estado.color, intensidad: estado.intensidad, sombreado: estado.sombreado } : null,
         marcaAgua: MARCA,
+        letra: estado.letra,
+        tamano: estado.tamano,
+        espaciado: estado.espaciado,
       });
       if (mio !== turno) return;
       const tmp = document.createElement('div');
@@ -350,6 +374,7 @@ export function iniciarEstudioCv() {
     else if (c.name === 'color') estado.color = c.value;
     else if (c.name === 'forma') estado.forma = c.value;
     else if (c.name === 'sombreado') estado.sombreado = c.checked;
+    else if ((CLAVES_FORMATO as string[]).includes(c.name) && valido(c.name as ClaveFormato, c.value)) estado[c.name as ClaveFormato] = c.value;
     persistir();
     if (actual === 'personaliza') pintarControles();
     programar();

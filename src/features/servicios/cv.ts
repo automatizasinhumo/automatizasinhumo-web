@@ -21,7 +21,7 @@ export const PAQUETES_CV: Record<ModalidadCv, PaqueteCv> = {
     nombre: 'Diseño listo',
     precio: 900,
     resumen: 'Eliges uno de nuestros diseños y lo rellenas con tus datos.',
-    incluye: ['PDF listo para enviar', 'Tus datos guardados en este navegador', 'Cambios de diseño sin volver a escribir'],
+    incluye: ['PDF listo para enviar', 'Seis estilos de letra, tamaño y espaciado', 'Tus datos guardados en este navegador', 'Cambios de diseño sin volver a escribir'],
   },
   personalizable: {
     id: 'personalizable',
@@ -59,6 +59,9 @@ export const DISENOS_CV: readonly DisenoCv[] = [
 ];
 
 export const DISENO_POR_DEFECTO = 'onyx';
+
+/** Letra, tamaño y espaciado: el mismo catálogo que usa el motor, para que página y PDF no se desfasen. */
+export { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, TAMANOS } from '../../../cv-estudio/src/catalogo-formato';
 export const MOTOR_CV = '/cv/estudio/motor/estudio.js';
 export const miniaturaCv = (id: string) => `/cv/estudio/miniaturas/${id}.jpg`;
 

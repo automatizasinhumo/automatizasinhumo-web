@@ -1,9 +1,10 @@
 // API del motor del estudio de CV para la página (/servicios/cv).
-// window.CvEstudio = { plantillas, formas, datosEjemplo, crearDatos, formEjemplo, formVacio, crearPdf, pintarPdf }.
+// window.CvEstudio = { plantillas, formas, estilosLetra, tamanos, espaciados, datosEjemplo, crearDatos, formEjemplo, formVacio, crearPdf, pintarPdf }.
 import { createResumePdfBlob } from "../vendor/pdf/browser";
 import { parseResumeData, type ResumeData } from "../vendor/schema/resume/data";
 import { newResume, sanitizeResume } from "./adoptado/resume-model";
 import { reactiveTemplates } from "./adoptado/templates";
+import { ESPACIADOS, ESTILOS_LETRA, TAMANOS } from "./catalogo-formato";
 import { FORMAS, fijarCapas, type Decoracion } from "./decoracion";
 import { crearDatos, FORM_EJEMPLO, FORM_VACIO } from "./formulario";
 
@@ -61,10 +62,35 @@ export type OpcionesPdf = {
 	decoracion?: Partial<Decoracion> | null;
 	/** Texto de la marca de agua; null o vacío para el PDF final. */
 	marcaAgua?: string | null;
+	/** Ids de catalogo-formato.ts. Si faltan o no existen, se queda lo que traigan los datos. */
+	letra?: string;
+	tamano?: string;
+	espaciado?: string;
 };
 
+/** Aplica letra, tamaño y espaciado del catálogo a los metadatos del CV. */
+function aplicarFormato(d: ResumeData, { letra, tamano, espaciado }: Pick<OpcionesPdf, "letra" | "tamano" | "espaciado">) {
+	const t = d.metadata.typography;
+	const estilo = ESTILOS_LETRA.find((e) => e.id === letra);
+	if (estilo) {
+		t.heading.fontFamily = estilo.titulos;
+		t.body.fontFamily = estilo.texto;
+	}
+	const medida = TAMANOS.find((m) => m.id === tamano);
+	if (medida) {
+		t.body.fontSize = medida.texto;
+		t.heading.fontSize = medida.titulos;
+	}
+	const aire = ESPACIADOS.find((e) => e.id === espaciado);
+	if (aire) {
+		t.body.lineHeight = aire.interlineado;
+		d.metadata.page.marginX = aire.margenX;
+		d.metadata.page.marginY = aire.margenY;
+	}
+}
+
 /** Genera el PDF. Los renders van en cola porque la decoración es estado del módulo. */
-export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua }: OpcionesPdf): Promise<Blob> {
+export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra, tamano, espaciado }: OpcionesPdf): Promise<Blob> {
 	const trabajo = cola
 		.catch(() => {})
 		.then(async () => {
@@ -72,6 +98,7 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua }: Opc
 			d.metadata.page.locale = "es-ES";
 			if (plantilla && plantillas.some((p) => p.id === plantilla)) d.metadata.template = plantilla as ResumeData["metadata"]["template"];
 			if (color && /^#[0-9a-f]{6}$/i.test(color)) d.metadata.design.colors.primary = color;
+			aplicarFormato(d, { letra, tamano, espaciado });
 			fijarCapas(decoracion as Decoracion | undefined, marcaAgua);
 			return createResumePdfBlob({ data: d });
 		});
@@ -112,5 +139,5 @@ declare global {
 		CvEstudio: typeof api;
 	}
 }
-const api = { plantillas, formas, datosEjemplo, crearDatos, formEjemplo: FORM_EJEMPLO, formVacio: FORM_VACIO, crearPdf, pintarPdf };
+const api = { plantillas, formas, estilosLetra: ESTILOS_LETRA, tamanos: TAMANOS, espaciados: ESPACIADOS, datosEjemplo, crearDatos, formEjemplo: FORM_EJEMPLO, formVacio: FORM_VACIO, crearPdf, pintarPdf };
 window.CvEstudio = api;
