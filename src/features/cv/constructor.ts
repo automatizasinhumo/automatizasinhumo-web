@@ -41,9 +41,16 @@ const $ = <T = HTMLElement>(sel: string) => document.querySelector(sel) as T | n
 const cargarModulo = <T>(url: string): Promise<T> =>
   import(/* @vite-ignore */ new URL(url, location.href).href) as Promise<T>;
 
+function leer(clave: string): string | null {
+  try {
+    return localStorage.getItem(clave);
+  } catch {
+    return null; // almacenamiento bloqueado: se trabaja sin recordar
+  }
+}
 function leerGuardado(): unknown {
   try {
-    const t = localStorage.getItem(CLAVE_DATOS);
+    const t = leer(CLAVE_DATOS);
     return t ? JSON.parse(t) : null;
   } catch {
     return null;
@@ -84,7 +91,7 @@ export async function iniciarConstructor(): Promise<void> {
   const disponibles = new Set(motor.PLANTILLAS);
   const pedida = new URLSearchParams(location.search).get('plantilla');
   let plantilla =
-    [pedida, localStorage.getItem(CLAVE_PLANTILLA), POR_DEFECTO].find((s): s is string => !!s && disponibles.has(s)) ??
+    [pedida, leer(CLAVE_PLANTILLA), POR_DEFECTO].find((s): s is string => !!s && disponibles.has(s)) ??
     motor.PLANTILLAS[0]!;
 
   // ---------- Formulario ----------
@@ -112,6 +119,8 @@ export async function iniciarConstructor(): Promise<void> {
   let espera: ReturnType<typeof setTimeout> | undefined;
 
   const ajustar = () => {
+    // Altura mínima antes de medir: si no, un CV largo anterior deja el marco alto para siempre.
+    marco.style.height = '1123px';
     const doc = marco.contentDocument;
     const alto = Math.max(1123, doc?.documentElement.scrollHeight ?? 1123);
     const escala = Math.min(1, lienzo.clientWidth / ANCHO_A4);
@@ -126,11 +135,14 @@ export async function iniciarConstructor(): Promise<void> {
   const pintar = async () => {
     const mio = ++turno;
     estado.textContent = 'Actualizando…';
+    ultimoHtml = ''; // sin descargas de una versión anterior mientras se pinta la nueva
     try {
       const html = await motor.renderizar(plantilla, prepararCv(editor.getValue()));
       if (mio !== turno) return; // llegó otra versión mientras tanto
-      ultimoHtml = html;
       marco.srcdoc = html;
+      await new Promise((ok) => marco.addEventListener('load', ok, { once: true }));
+      if (mio !== turno) return;
+      ultimoHtml = html;
       estado.textContent = 'Vista previa al día';
     } catch (e) {
       console.error('cv: no se pudo pintar', e);
@@ -139,7 +151,17 @@ export async function iniciarConstructor(): Promise<void> {
   };
   const programar = () => {
     clearTimeout(espera);
+    ultimoHtml = '';
     espera = setTimeout(pintar, 250);
+  };
+
+  // HTML de la versión vigente: si hay un repintado pendiente o en curso, se espera a él.
+  const htmlVigente = async (): Promise<string> => {
+    if (!ultimoHtml) {
+      clearTimeout(espera);
+      await pintar();
+    }
+    return ultimoHtml;
   };
 
   editor.on('change', () => {
@@ -237,13 +259,14 @@ export async function iniciarConstructor(): Promise<void> {
 
   // ---------- Descargas ----------
   const nombre = () => (prepararCv(editor.getValue()).basics as Record<string, unknown>).name;
-  $('#cv-pdf')?.addEventListener('click', () => {
-    if (!ultimoHtml) return;
+  $('#cv-pdf')?.addEventListener('click', async () => {
+    if (!(await htmlVigente())) return;
     marco.contentWindow?.focus();
     marco.contentWindow?.print();
   });
-  $('#cv-html')?.addEventListener('click', () => {
-    if (ultimoHtml) descargar(nombreFichero(nombre(), 'html'), 'text/html;charset=utf-8', ultimoHtml);
+  $('#cv-html')?.addEventListener('click', async () => {
+    const html = await htmlVigente();
+    if (html) descargar(nombreFichero(nombre(), 'html'), 'text/html;charset=utf-8', html);
   });
   $('#cv-json')?.addEventListener('click', () => {
     descargar(nombreFichero(nombre(), 'json'), 'application/json', `${JSON.stringify(prepararCv(editor.getValue()), null, 2)}\n`);

@@ -20,6 +20,10 @@ const temas = Object.keys(pkg.dependencies)
   .map((nombre) => ({ nombre, slug: /(?:^|\/)jsonresume-theme-(.+)$/.exec(nombre)?.[1] }))
   .filter((t) => t.slug)
   .sort((a, b) => a.slug.localeCompare(b.slug));
+// Los nombres acaban dentro del código generado: solo se admiten nombres de paquete npm normales.
+for (const t of temas) {
+  if (!/^(@[a-z0-9-]+\/)?[a-z0-9._-]+$/.test(t.nombre)) throw new Error(`Nombre de paquete inesperado: ${t.nombre}`);
+}
 
 const ESTILO = {
   classic: 'Clásico', minimal: 'Minimalista', modern: 'Moderno', editorial: 'Editorial', bold: 'Llamativo',
@@ -73,6 +77,8 @@ await build({
   target: 'es2022',
   minify: true,
   legalComments: 'linked',
+  // Aviso en cada fichero generado; los textos completos van en licencias/.
+  banner: { js: '/* Contiene software MIT de terceros (JSON Resume themes, React, json-editor). Licencias: /cv/motor/LICENCIAS.txt */' },
   entryNames: '[name]',
   chunkNames: 'c/[hash]',
   alias: { stream: `${gen}vacio.js` },
@@ -81,6 +87,12 @@ await build({
   logLevel: 'warning',
 });
 
+// Textos completos de las licencias junto al código servido.
+const licencias = ['jsonresume-themes', 'jsonresume-theme-primitives', 'jsonresume-theme-metadata', 'json-editor', 'react'];
+writeFileSync(
+  `${salida}LICENCIAS.txt`,
+  licencias.map((l) => readFileSync(aqui(`../licencias/${l}.txt`), 'utf8')).join('\n\n----------------------------------------\n\n'),
+);
 writeFileSync(
   `${salida}catalogo.json`,
   `${JSON.stringify({ estilos: ESTILO, maquetaciones: MAQUETACION, colores: COLOR, plantillas: catalogo })}\n`,

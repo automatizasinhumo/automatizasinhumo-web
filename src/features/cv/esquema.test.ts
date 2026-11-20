@@ -34,6 +34,12 @@ describe('leerJsonResume', () => {
     expect(leerJsonResume('[1,2]')).toBeNull();
     expect(leerJsonResume('{roto')).toBeNull();
   });
+  it('rechaza secciones con el tipo equivocado', () => {
+    expect(leerJsonResume('{"basics":null}')).toBeNull();
+    expect(leerJsonResume('{"work":{}}')).toBeNull();
+    expect(leerJsonResume('{"skills":["a"]}')).toBeNull();
+    expect(leerJsonResume('{"basics":{"name":"A"},"work":[]}')).not.toBeNull();
+  });
 });
 
 describe('nombreFichero', () => {

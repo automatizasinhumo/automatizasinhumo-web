@@ -10,7 +10,10 @@
 type Esquema = Record<string, unknown>;
 
 const texto = (title: string, extra: Esquema = {}): Esquema => ({ type: 'string', title, ...extra });
-const fecha = (title: string): Esquema => texto(title, { format: 'month', options: { input_width: '12rem' } });
+// Texto libre y no `month`: JSON Resume admite 2024, 2024-06 y 2024-06-29, y el campo de mes
+// del navegador vaciaba las fechas con día o solo con año al importar.
+const fecha = (title: string): Esquema =>
+  texto(title, { options: { input_width: '12rem', inputAttributes: { placeholder: 'AAAA-MM' } } });
 const lista = (title: string, item: string): Esquema => ({
   type: 'array',
   title,
@@ -191,8 +194,12 @@ export function leerJsonResume(texto: string): Record<string, unknown> | null {
     const v = JSON.parse(texto) as unknown;
     if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
     const o = v as Record<string, unknown>;
-    const claves = ['basics', 'work', 'education', 'skills', 'languages', 'projects'];
-    return claves.some((k) => k in o) ? o : null;
+    const esObjeto = (x: unknown) => !!x && typeof x === 'object' && !Array.isArray(x);
+    const listas = ['work', 'education', 'skills', 'languages', 'projects'];
+    // Cada sección presente debe tener el tipo del esquema; si no, no se toca el formulario.
+    if ('basics' in o && !esObjeto(o.basics)) return null;
+    if (listas.some((k) => k in o && !(Array.isArray(o[k]) && (o[k] as unknown[]).every(esObjeto)))) return null;
+    return 'basics' in o || listas.some((k) => k in o) ? o : null;
   } catch {
     return null;
   }
