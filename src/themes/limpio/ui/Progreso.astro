@@ -1,0 +1,126 @@
+---
+/**
+ * Barra de progreso de un asistente por pasos (estudio de CV y los servicios que vengan).
+ * Cada paso es un botón con `data-ir="<id>"`; el script de la página marca el actual con
+ * aria-current="step" y los hechos con data-hecho. Sin JS se ve la lista de pasos.
+ * Patrón: stepper de USWDS (dominio público), con los tokens del tema limpio.
+ */
+interface Paso {
+  id: string;
+  titulo: string;
+}
+interface Props {
+  pasos: readonly Paso[];
+  /** Título accesible de la lista. */
+  etiqueta: string;
+}
+const { pasos, etiqueta } = Astro.props;
+---
+<nav class="progreso" aria-label={etiqueta}>
+  <ol>
+    {pasos.map((p, i) => (
+      <li>
+        <button type="button" data-ir={p.id} aria-current={i === 0 ? 'step' : undefined} disabled={i > 0}>
+          <span class="num" aria-hidden="true">{i + 1}</span>
+          <span class="texto">{p.titulo}</span>
+        </button>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .progreso ol {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: var(--ds-hueco-2);
+    counter-reset: paso;
+  }
+  li {
+    position: relative;
+  }
+  /* Raíl bajo cada paso: se rellena con el color de marca al completarlo. */
+  li::before {
+    content: '';
+    display: block;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-line);
+    transition: background-color var(--ds-mov-normal) var(--ds-curva);
+  }
+  li:has([data-hecho])::before,
+  li:has([aria-current='step'])::before {
+    background: var(--color-brand);
+  }
+  button {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-hueco-2);
+    width: 100%;
+    padding-top: var(--ds-hueco-2);
+    font-size: var(--ds-texto-small);
+    font-weight: 600;
+    color: var(--color-faint);
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: default;
+  }
+  button:not(:disabled):hover .texto {
+    color: var(--color-brand);
+  }
+  [aria-current='step'],
+  [data-hecho] {
+    color: var(--color-ink);
+  }
+  .num {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+  [aria-current='step'] .num {
+    border-color: var(--color-brand);
+    background: var(--color-brand);
+    color: #fff;
+  }
+  [data-hecho] .num {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+  /* En el móvil solo se lee el texto del paso actual; los demás quedan en su número. */
+  @media (max-width: 40rem) {
+    /* El paso actual se lleva el sitio para que su nombre quepa en una línea. */
+    .progreso ol {
+      display: flex;
+    }
+    li {
+      flex: 1 1 2rem;
+      min-width: 0;
+    }
+    li:has([aria-current='step']) {
+      flex: 3 0 auto;
+    }
+    [aria-current='step'] .texto {
+      white-space: nowrap;
+    }
+    button:not([aria-current='step']) .texto {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+</style>
