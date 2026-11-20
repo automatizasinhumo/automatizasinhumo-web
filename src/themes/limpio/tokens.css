@@ -118,6 +118,7 @@
 
   /* Formas. */
   --ds-radio-tarjeta: 1.25rem;
+  --ds-radio-panel: 1.5rem; /* cabeceras de página y paneles grandes */
   --ds-radio-marco: 0.9rem;
   --ds-radio-pildora: 999px;
 

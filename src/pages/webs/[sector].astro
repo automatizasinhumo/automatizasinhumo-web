@@ -40,7 +40,7 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g
 
 <Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
   <script is:inline type="application/ld+json" set:html={jsonLd}></script>
-  <section class="fondo-tecnico rounded-3xl border border-line px-6 py-10 sm:px-10 sm:py-12">
+  <section class="fondo-tecnico cabecera-pagina">
     <span class="etiqueta">Webs para negocios locales</span>
     <h1 class="mt-4 max-w-3xl font-serif text-4xl font-bold leading-tight text-ink sm:text-5xl">
       {sector.heading}
