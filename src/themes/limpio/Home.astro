@@ -156,6 +156,9 @@ const PASOS = [
   .portada {
     display: grid;
     grid-template-areas: 'titulo' 'escena' 'resto';
+    /* minmax(0, …): la pista no crece hasta el min-content de sus hijos (con letra
+       grande sacaba la portada de la pantalla); el contenido se adapta a ella. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--ds-hueco-8);
     justify-items: center;
     padding-block: clamp(0rem, 2vh, 1.5rem) var(--ds-hueco-8);
@@ -179,7 +182,7 @@ const PASOS = [
   @media (min-width: 60rem) {
     .portada {
       grid-template-areas: 'titulo escena' 'resto escena';
-      grid-template-columns: 1.08fr 1fr;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
       grid-template-rows: auto 1fr;
       column-gap: clamp(2.5rem, 5vw, 4.5rem);
       row-gap: var(--ds-hueco-6);
@@ -241,6 +244,7 @@ const PASOS = [
   .escenario {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
     width: 100%;
   }
@@ -345,7 +349,7 @@ const PASOS = [
   }
   .nodos {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--ds-hueco-3);
     margin-top: var(--ds-hueco-6);
   }
@@ -360,6 +364,7 @@ const PASOS = [
     font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
+    overflow-wrap: anywhere;
     color: var(--color-ink);
     background: var(--color-paper);
   }

@@ -85,9 +85,9 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
   )}
 
   <form method="get" action="/elige#resultado" class="my-10 space-y-6">
-    <fieldset class="rounded-2xl border border-line p-5">
+    <fieldset class="min-w-0 rounded-2xl border border-line p-5">
       <legend class="px-1 text-sm font-semibold text-ink">1. ¿Qué quieres conseguir?</legend>
-      <div class="mt-2 grid gap-3 sm:grid-cols-2">
+      <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {OBJETIVOS.map((o) => (
           <label class={tarjeta}>
             <input type="radio" name="objetivo" value={o.id} checked={o.id === objetivoActual} class="mt-1 accent-[var(--color-brand)]" />
@@ -100,7 +100,7 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
       </div>
     </fieldset>
 
-    <fieldset class="rounded-2xl border border-line p-5">
+    <fieldset class="min-w-0 rounded-2xl border border-line p-5">
       <legend class="px-1 text-sm font-semibold text-ink">2. ¿A qué te dedicas?</legend>
       <div class="mt-2 flex flex-wrap gap-2">
         {[...SECTORS.map((s) => [s.slug, s.label]), ['', 'Otro / no es un negocio']].map(([valor, texto]) => (
@@ -112,9 +112,9 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
       </div>
     </fieldset>
 
-    <fieldset class="rounded-2xl border border-line p-5">
+    <fieldset class="min-w-0 rounded-2xl border border-line p-5">
       <legend class="px-1 text-sm font-semibold text-ink">3. ¿Cómo lo prefieres?</legend>
-      <div class="mt-2 grid gap-3 sm:grid-cols-2">
+      <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {MODALIDADES.map((m) => (
           <label class={tarjeta}>
             <input type="radio" name="modalidad" value={m.id} checked={m.id === modalidadActual} class="mt-1 accent-[var(--color-brand)]" />
