@@ -30,7 +30,7 @@ const { href, variante = 'principal', class: cls } = Astro.props;
     transition: transform var(--ds-mov-normal) var(--ds-curva), box-shadow var(--ds-mov-normal), border-color var(--ds-mov-rapido);
   }
   .boton:hover { transform: translateY(-2px); }
-  .boton:focus-visible { outline: 3px solid color-mix(in oklab, var(--color-brand) 45%, transparent); outline-offset: 3px; }
+  .boton:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 3px; }
   .principal {
     color: var(--color-on-brand);
     background: var(--color-brand);

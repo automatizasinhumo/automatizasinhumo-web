@@ -122,8 +122,8 @@
   --ds-radio-pildora: 999px;
 
   /* Degradados de marca, interpolados en oklch para que no pasen por tonos sucios. */
-  --ds-degradado-marca: linear-gradient(115deg in oklch, var(--color-brand) 0%, #1f9a7d 55%, #2fae8c 100%);
-  --ds-degradado-luz: linear-gradient(115deg in oklch, var(--color-accent) 0%, #e3912f 100%);
+  --ds-degradado-marca: linear-gradient(115deg in oklch, var(--color-brand) 0%, #1a8770 55%, #1f9a7d 100%);
+  --ds-degradado-luz: linear-gradient(115deg in oklch, var(--color-accent) 0%, #c8741f 100%);
 
   /* Sombras: una escala, de apoyada a flotante. */
   --ds-sombra-1: 0 1px 2px rgb(23 45 45 / 0.06), 0 2px 8px -2px rgb(23 45 45 / 0.08);

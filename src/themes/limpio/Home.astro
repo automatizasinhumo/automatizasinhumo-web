@@ -72,6 +72,7 @@ const PASOS = [
     </h1>
   </div>
 
+  <div class="escena-caja">
   <div class="escenario" aria-hidden="true">
     <span class="chispa"><Icono name="bulb" class="h-5 w-5" /><Icono name="arrow-right" class="flecha h-4 w-4" /></span>
 
@@ -121,6 +122,12 @@ const PASOS = [
       </div>
     </div>
   </div>
+  <!-- WCAG 2.2.2: lo que se mueve más de 5 s debe poder pararse. Sin JS no se muestra. -->
+  <button type="button" class="pausa" data-pausa-anim hidden>
+    <span class="si-mueve"><Icono name="player-pause" class="h-4 w-4" />Pausar animación</span>
+    <span class="si-pausa"><Icono name="player-play" class="h-4 w-4" />Reanudar animación</span>
+  </button>
+  </div>
 
   <div class="resto">
     <p class="subtitulo">Crea tu web, automatiza tu negocio y lanza tu evento en pocos pasos. Todo automático, a precio cerrado y con vista previa antes de pagar.</p>
@@ -155,7 +162,14 @@ const PASOS = [
     text-align: center;
   }
   .titulo-caja { grid-area: titulo; width: 100%; container-type: inline-size; }
-  .escenario { grid-area: escena; }
+  .escena-caja {
+    grid-area: escena;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ds-hueco-3);
+    width: min(100%, 34rem);
+  }
   .resto {
     display: flex;
     grid-area: resto;
@@ -175,7 +189,7 @@ const PASOS = [
     }
     .titulo-caja { align-self: end; }
     .resto { align-self: start; align-items: flex-start; }
-    .escenario { align-self: center; }
+    .escena-caja { align-self: center; }
   }
 
   /* ── Título: tres filas fijas, cada una más pequeña. Tamaño en cqi (ancho de su
@@ -186,10 +200,12 @@ const PASOS = [
     line-height: 1.05;
     color: var(--color-ink);
   }
-  .fila { display: block; white-space: nowrap; }
-  .fila-1 { font-size: min(9.2cqi, 4.4rem); }
-  .fila-2 { font-size: min(8.3cqi, 4rem); }
-  .fila-3 { font-size: min(7.4cqi, 3.55rem); }
+  /* Mínimo y máximo en rem: siguen el tamaño de letra que elija el usuario. Si con
+     una base grande la fila no cabe, se parte en vez de desbordar. */
+  .fila { display: block; text-wrap: balance; }
+  .fila-1 { font-size: clamp(1.5rem, 9.2cqi, 4.4rem); }
+  .fila-2 { font-size: clamp(1.35rem, 8.3cqi, 4rem); }
+  .fila-3 { font-size: clamp(1.2rem, 7.4cqi, 3.55rem); }
   .marca {
     background: var(--ds-degradado-marca);
     -webkit-background-clip: text;
@@ -226,7 +242,7 @@ const PASOS = [
     position: relative;
     display: grid;
     align-items: center;
-    width: min(100%, 34rem);
+    width: 100%;
   }
   .escena {
     position: relative;
@@ -416,6 +432,31 @@ const PASOS = [
     .escena.t1 { opacity: 1; }
     .progreso { transform: none; }
   }
+  .pausa {
+    align-self: flex-end;
+    display: inline-flex;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-pildora);
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: color var(--ds-mov-rapido), border-color var(--ds-mov-rapido);
+  }
+  .pausa:hover { color: var(--color-ink); border-color: var(--color-faint); }
+  .pausa:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+  .pausa > span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .pausa .si-pausa,
+  .portada[data-pausa] .pausa .si-mueve { display: none; }
+  .portada[data-pausa] .pausa .si-pausa { display: inline-flex; }
+  /* Pausa todo lo que se repite en la portada, también el destello de los botones. */
+  .portada[data-pausa] :global(*),
+  .portada[data-pausa] :global(*)::before,
+  .portada[data-pausa] :global(*)::after { animation-play-state: paused !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .pausa { display: none; }
+  }
   @keyframes turno {
     0% { opacity: 0; transform: translateY(0.5rem) scale(0.985); }
     5%, 30% { opacity: 1; transform: none; }
@@ -436,3 +477,24 @@ const PASOS = [
     60%, 100% { opacity: 0; }
   }
 </style>
+
+<script>
+  // Botón de pausa de la portada; recuerda la elección del visitante.
+  const CLAVE = 'ash-portada-pausa';
+  const boton = document.querySelector<HTMLButtonElement>('[data-pausa-anim]');
+  const portada = boton?.closest<HTMLElement>('.portada');
+  if (boton && portada) {
+    const aplicar = (pausa: boolean) => {
+      portada.toggleAttribute('data-pausa', pausa);
+    };
+    let pausa = false;
+    try { pausa = localStorage.getItem(CLAVE) === '1'; } catch { /* sin almacenamiento */ }
+    aplicar(pausa);
+    boton.hidden = false;
+    boton.addEventListener('click', () => {
+      pausa = !pausa;
+      aplicar(pausa);
+      try { localStorage.setItem(CLAVE, pausa ? '1' : '0'); } catch { /* sin almacenamiento */ }
+    });
+  }
+</script>
