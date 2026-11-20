@@ -8,6 +8,7 @@ import { sampleResumeData } from "../../vendor/schema/resume/sample";
 import samplePicture from "../../vendor/schema/resume/sample-picture.json";
 import { defaultResumeData } from "../../vendor/schema/resume/default";
 import { reactiveTemplates } from "./templates";
+import { FAMILIAS_FUENTE } from "../catalogo-formato";
 
 export type { ResumeData };
 export const STORAGE_KEY = "resumv.documents.v1";
@@ -201,7 +202,7 @@ export function sanitizeResume(input: unknown): ResumeData {
   }
   for (const name of ["body", "heading"] as const) {
     const t = d.metadata.typography[name];
-    if (!["Lato", "Helvetica", "Times-Roman", "Courier"].includes(t.fontFamily))
+    if (!(FAMILIAS_FUENTE as readonly string[]).includes(t.fontFamily))
       t.fontFamily = "Lato";
   }
   d.metadata.page.locale = "en-US";

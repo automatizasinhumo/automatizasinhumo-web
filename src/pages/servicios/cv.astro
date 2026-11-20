@@ -5,9 +5,12 @@ import {
   COLORES_CV,
   DISENO_POR_DEFECTO,
   DISENOS_CV,
+  ESPACIADOS,
+  ESTILOS_LETRA,
   MOTOR_CV,
   PAQUETES_CV,
   PASOS_CV,
+  TAMANOS,
   euros,
   miniaturaCv,
 } from '../../features/servicios/cv';
@@ -161,11 +164,48 @@ const campo = 'campo';
       <!-- 3 · Personaliza -->
       <section data-paso="personaliza" aria-labelledby="paso-personaliza" hidden>
         <h2 id="paso-personaliza" class="paso-titulo">Dale tu toque</h2>
-        <p class="paso-entradilla" data-solo="personalizable">Cambia la base, el color y las formas. La vista previa se actualiza sola.</p>
+        <p class="paso-entradilla">Elige la letra y el tamaño<span data-solo="personalizable">, y cambia la base, el color y las formas</span>. La vista previa se actualiza sola.</p>
         <div class="con-vista">
           <div class="min-w-0">
+            <fieldset class="bloque">
+              <legend>Letra</legend>
+              <div class="letras">
+                {ESTILOS_LETRA.map((e) => (
+                  <label class="letra">
+                    <input type="radio" name="letra" value={e.id} class="sr-only" />
+                    <strong>{e.nombre}</strong>
+                    <span>{e.descripcion}</span>
+                  </label>
+                ))}
+              </div>
+              <div class="medidas">
+                <div role="radiogroup" aria-label="Tamaño de letra">
+                  <span class="medida-titulo" aria-hidden="true">Tamaño</span>
+                  <div class="formas">
+                    {TAMANOS.map((t) => (
+                      <label class="forma">
+                        <input type="radio" name="tamano" value={t.id} class="sr-only" />
+                        <span>{t.nombre}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div role="radiogroup" aria-label="Espaciado">
+                  <span class="medida-titulo" aria-hidden="true">Espaciado</span>
+                  <div class="formas">
+                    {ESPACIADOS.map((t) => (
+                      <label class="forma">
+                        <input type="radio" name="espaciado" value={t.id} class="sr-only" />
+                        <span>{t.nombre}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
             <div class="tarjeta mejora" data-solo="disenada">
-              <p class="font-semibold text-ink">Tu diseño va tal cual, como en la miniatura.</p>
+              <p class="font-semibold text-ink">Los colores y las formas van tal cual, como en la miniatura.</p>
               <p class="mt-1 text-muted">
                 Con la versión personalizable eliges el color y añades círculos, rombos, ondas o sombreado
                 por <strong class="text-ink" data-diferencia></strong> más.
@@ -640,6 +680,51 @@ const campo = 'campo';
   .forma:has(input:focus-visible) span {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+  .letras {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: var(--ds-hueco-2);
+  }
+  .letra {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: var(--ds-hueco-3);
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-control, 0.5rem);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: border-color var(--ds-mov-rapido, 150ms) var(--ds-curva, ease);
+  }
+  .letra strong {
+    color: var(--color-ink);
+  }
+  .letra span {
+    font-size: var(--ds-texto-small);
+    line-height: 1.35;
+    color: var(--color-muted);
+  }
+  .letra:has(input:checked) {
+    border-color: var(--color-brand);
+    box-shadow: inset 0 0 0 1px var(--color-brand);
+  }
+  .letra:has(input:focus-visible) {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  .medidas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-hueco-4) var(--ds-hueco-6);
+    margin-top: var(--ds-hueco-4);
+  }
+  .medida-titulo {
+    display: block;
+    margin-bottom: var(--ds-hueco-2);
+    font-size: var(--ds-texto-small);
+    font-weight: 600;
+    color: var(--color-muted);
   }
   .casilla {
     display: flex;
