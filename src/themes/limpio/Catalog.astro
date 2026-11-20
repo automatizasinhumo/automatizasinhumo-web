@@ -44,7 +44,7 @@ const H = headingLevel;
 
 {
   model.categories.length > 0 && (
-    <nav aria-label="Categorías" data-tour="categorias" class="-mx-4 mb-8 overflow-x-auto px-4 pb-1">
+    <nav aria-label="Categorías" data-tour="categorias" class="carril -mx-4 mb-8 px-4 pb-1">
       <ul class="flex gap-2 text-sm md:flex-wrap">
         {model.categories.map((category) => {
           const slug = category.href.split('/').pop() ?? '';
