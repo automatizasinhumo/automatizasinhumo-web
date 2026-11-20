@@ -7,6 +7,7 @@ import StoreAccountControl from '../../features/storefront/controls/StoreAccount
 import Logo from './Logo.astro';
 import Boton from './ui/Boton.astro';
 import LuzTarjetas from './ui/LuzTarjetas.astro';
+import Transiciones from './ui/Transiciones.astro';
 import StoreMegaMenu from '../../features/storefront/controls/StoreMegaMenu.astro';
 import { menuAreas, coveredByMegaMenu } from './menuAreas';
 
@@ -103,8 +104,9 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
     </nav>
   </div>
 </header>
-{/* Efecto global del sistema: borde luminoso de las .tarjeta (una vez por página). */}
+{/* Efectos globales del sistema (una vez por página): borde luminoso de las .tarjeta y transición entre páginas. */}
 <LuzTarjetas />
+<Transiciones />
 
 <style>
   .cabecera {

@@ -1,0 +1,24 @@
+---
+/**
+ * Transición entre páginas del propio sitio (View Transitions entre documentos,
+ * solo CSS): al navegar, la cabecera se queda quieta y el resto funde en
+ * 200 ms en vez de parpadear en blanco. Los navegadores sin soporte navegan
+ * como siempre; con movimiento reducido no hay transición. Se monta una vez,
+ * desde la cabecera.
+ */
+---
+
+<style is:global>
+  @media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+      navigation: auto;
+    }
+    .cabecera {
+      view-transition-name: cabecera;
+    }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 200ms;
+    }
+  }
+</style>
