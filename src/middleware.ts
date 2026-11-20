@@ -11,6 +11,7 @@ import {
   parseStoreSettings,
   STORE_SETTINGS_SQL,
 } from './features/settings/db';
+import { conPortadaDelTema } from './features/settings/themeHome';
 import { conCache, esLectura, olvidarCacheTienda, ttlDesdeEnv } from './features/storefront/cacheTienda';
 import {
   MENU_ITEMS_SQL,
@@ -107,15 +108,15 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
           Date.now(),
           ttlDesdeEnv((env as { STORE_CACHE_TTL_MS?: unknown }).STORE_CACHE_TTL_MS),
         );
-        context.locals.settings = parseStoreSettings(
-          (settings.results ?? []) as Array<{ key: string; value: string }>,
+        context.locals.settings = conPortadaDelTema(
+          parseStoreSettings((settings.results ?? []) as Array<{ key: string; value: string }>),
         );
         context.locals.menus = groupMenus(
           (menus.results ?? []) as unknown as MenuItemRow[],
           context.locals.settings.homePage,
         );
       } else {
-        context.locals.settings = await getStoreSettings(env.DB);
+        context.locals.settings = conPortadaDelTema(await getStoreSettings(env.DB));
       }
     } catch {
       // A batch is all-or-nothing, so a missing `menu_items` table (pre-migration)
@@ -124,7 +125,7 @@ async function gate(context: APIContext, next: MiddlewareNext): Promise<Response
       // Empty menus render a bare header and a copyright-only footer: degraded
       // but navigable. Losing settings is not.
       try {
-        context.locals.settings = await getStoreSettings(env.DB);
+        context.locals.settings = conPortadaDelTema(await getStoreSettings(env.DB));
         context.locals.menus = EMPTY_MENUS;
       } catch {
         // Settings table missing too → fall back to build-time defaults.

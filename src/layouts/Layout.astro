@@ -22,9 +22,11 @@ interface Props {
   /** Override the canonical URL. Used where two routes render the same content
    *  — the catalog is at both / and /products — so only one is indexable. */
   canonical?: string;
+  /** Sin barra de aviso en esta página (p. ej. la portada propia de un tema). */
+  sinAviso?: boolean;
 }
 
-const { title, description, image, canonical: canonicalOverride } = Astro.props;
+const { title, description, image, canonical: canonicalOverride, sinAviso = false } = Astro.props;
 const config = getConfig();
 const { features } = config;
 // Runtime override (set by the setup wizard) wins over the build-time default.
@@ -58,7 +60,7 @@ const accountsOn =
     : false;
 // Announcement bar: the message is its own on/off switch (empty = hidden). Astro
 // escapes both values on render, so admin-entered text can't inject markup.
-const announcement = Astro.locals.settings?.announcement ?? '';
+const announcement = sinAviso ? '' : (Astro.locals.settings?.announcement ?? '');
 const announcementHref = Astro.locals.settings?.announcementHref ?? '';
 // Contacto humano flotante: solo los canales rellenados en Admin → Ajustes.
 // Los valores se validan y normalizan al guardarse, así que aquí solo se componen URLs.

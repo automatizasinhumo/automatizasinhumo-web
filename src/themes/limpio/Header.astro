@@ -30,7 +30,26 @@ const shopHref = model.catalogHref;
 const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !coveredByMegaMenu(link.href));
 ---
 
-{/* Portada limpia: sin barra de aviso. */}
+{/* Announcement bar. Deliberately NOT fixed: the header below is sticky, so a
+    fixed bar would need the header offset by the bar's height — which varies
+    as the message wraps on narrow screens. Static means it's seen on load,
+    scrolls away, and costs no vertical space on mobile. */}
+{
+  model.announcement && (
+    <div class="bg-brand text-on-brand">
+      <div class="mx-auto max-w-6xl px-6 py-2 text-center text-[13px] font-medium">
+        {model.announcement.href ? (
+          <a href={model.announcement.href} class="underline-offset-2 hover:underline">
+            {model.announcement.text}
+          </a>
+        ) : (
+          model.announcement.text
+        )}
+      </div>
+    </div>
+  )
+}
+
 <header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
   <div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-4 sm:gap-6 sm:px-6">
     <a href="/" aria-label={model.storeName} class="shrink-0">

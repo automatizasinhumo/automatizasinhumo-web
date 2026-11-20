@@ -48,7 +48,7 @@ if (showHero && !ThemeHome) {
 ---
 
 {showHero && ThemeHome ? (
-  <Layout title="Tu negocio, tu evento, tu idea, en marcha sin complicaciones">
+  <Layout title="Tu negocio, tu evento, tu idea, en marcha sin complicaciones" sinAviso>
     <ThemeHome
       objetivos={OBJETIVOS.map((o) => ({ id: o.id, label: o.label, detalle: o.detalle, href: `/elige?objetivo=${o.id}#resultado` }))}
       catalogHref="/products"
