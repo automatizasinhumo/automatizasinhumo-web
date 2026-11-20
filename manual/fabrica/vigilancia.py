@@ -105,6 +105,8 @@ def issue_abierta(repositorio: str, tipo: str):
             return issue
         if tipo == "d1" and titulo.startswith("D1: "):
             return issue
+        if tipo == "modelo-ia" and titulo.startswith("IA: "):
+            return issue
     return None
 
 

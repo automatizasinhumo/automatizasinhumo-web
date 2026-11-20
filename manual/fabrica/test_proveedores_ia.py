@@ -55,6 +55,9 @@ class Clasificar(Base):
         self.assertEqual(pia.clasificar(429, b'{}', {'retry-after': '3600'}), 'cupo')
         self.assertEqual(pia.clasificar(429, b'<html>4006</html>'), 'espera:5')
 
+    def test_mensaje_de_nivel_superior_cuenta(self):
+        self.assertEqual(pia.clasificar(429, b'{"message":"Too many requests per day"}'), 'cupo')
+
     def test_codigo_dentro_de_otro_campo_no_cuenta(self):
         self.assertEqual(pia.clasificar(429, b'{"errors":[{"code":3040}],"request_id":"ab4006cd"}'), 'espera:5')
 
@@ -105,6 +108,15 @@ class Cadena(Base):
             with self.assertRaises(urllib.error.HTTPError):
                 pia.completar([CF], 's', 'u')
         self.assertNotIn('workers-ai', pia.FUERA)  # la próxima llamada lo vuelve a probar
+
+    def test_clave_rechazada_no_se_confunde_con_cupo_en_la_siguiente_llamada(self):
+        with self.urlopen(error(401, b'')):
+            with self.assertRaises(urllib.error.HTTPError):
+                pia.completar([CF], 's', 'u')
+        with self.urlopen() as abrir, self.assertRaises(RuntimeError) as fin:
+            pia.completar([CF], 's', 'u')
+        abrir.assert_not_called()
+        self.assertNotIsInstance(fin.exception, pia.CupoIAAgotado)
 
     def test_un_proveedor_con_cupo_y_otro_caido_no_es_cupo(self):
         with self.urlopen(CUPO_CF(), *[urllib.error.URLError('dns')] * 3):

@@ -123,6 +123,7 @@ jobs:
       issues: write
     env:
       GH_TOKEN: ${{ github.token }}
+      IA_MODELO: ${{ vars.IA_MODELO }}  # el mismo modelo que usa la fábrica
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}

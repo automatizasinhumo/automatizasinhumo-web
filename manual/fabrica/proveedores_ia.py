@@ -69,7 +69,8 @@ def leer_error(cuerpo):
     if isinstance(doc.get('error'), dict):
         errores = errores + [doc['error']]
     codigos = {e.get('code') for e in errores if isinstance(e, dict)}
-    texto = ' '.join(str(e.get('message', '')) for e in errores if isinstance(e, dict)).lower()
+    mensajes = [e.get('message', '') for e in errores if isinstance(e, dict)] + [doc.get('message', '')]
+    texto = ' '.join(str(m) for m in mensajes if m).lower()
     return codigos, texto
 
 
@@ -142,6 +143,7 @@ def completar(proveedores, sistema, usuario):
                 if tipo != 'cupo':
                     ALERTAS.append(f'{nombre}: {tipo} ({modelo})')
             break  # siguiente proveedor
-    if ultimo is None or all(FUERA.get(n) == 'cupo' for n, *_ in proveedores):
-        raise CupoIAAgotado('ningún proveedor de IA con cupo: ' + ', '.join(f'{n} ({FUERA.get(n, "?")})' for n, *_ in proveedores))
-    raise ultimo
+    motivos = ', '.join(f'{n} ({FUERA.get(n, "error")})' for n, *_ in proveedores)
+    if all(FUERA.get(n) == 'cupo' for n, *_ in proveedores):
+        raise CupoIAAgotado('ningún proveedor de IA con cupo: ' + motivos)
+    raise ultimo or RuntimeError('ningún proveedor de IA disponible: ' + motivos)
