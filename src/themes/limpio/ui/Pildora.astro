@@ -1,7 +1,7 @@
 ---
 /**
  * Etiqueta redonda y pequeña con icono opcional: servicios, filtros, atajos.
- * Con `href` es un enlace; sin él, un texto.
+ * Con `href` es un enlace; sin él, un texto. Estilo global: .pildora en overrides.css.
  */
 import Icono from '../IconoCat.astro';
 
@@ -13,24 +13,3 @@ const { href, icono } = Astro.props;
 const Tag = href ? 'a' : 'span';
 ---
 <Tag href={href} class="pildora">{icono && <Icono name={icono} class="h-4 w-4" />}<slot /></Tag>
-
-<style>
-  .pildora {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    border: 1px solid color-mix(in oklab, var(--color-brand) 18%, var(--color-line));
-    border-radius: var(--ds-radio-pildora);
-    padding: 0.3rem 0.75rem;
-    font-size: var(--ds-texto-small);
-    color: var(--color-ink);
-    background: color-mix(in oklab, var(--color-surface) 75%, transparent);
-    transition: border-color var(--ds-mov-rapido), color var(--ds-mov-rapido), transform var(--ds-mov-rapido);
-  }
-  a.pildora:hover { border-color: var(--color-brand); color: var(--color-brand); transform: translateY(-1px); }
-  .pildora :global(svg) { color: var(--color-brand); }
-  @media (prefers-reduced-motion: reduce) {
-    .pildora { transition: none; }
-    a.pildora:hover { transform: none; }
-  }
-</style>

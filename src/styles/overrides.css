@@ -177,6 +177,60 @@ h1, h2, h3, .font-serif {
       animation: none;
     }
   }
+
+  /* Píldora: etiqueta, filtro o atajo pequeño y redondo. Con enlace se eleva al
+     pasar el ratón; en un <label> con radio o checkbox marca la opción elegida. */
+  .pildora {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid color-mix(in oklab, var(--color-brand) 18%, var(--color-line));
+    border-radius: var(--ds-radio-pildora, 999px);
+    padding: 0.4rem 0.875rem;
+    font-size: var(--ds-texto-small, 0.875rem);
+    line-height: 1.25;
+    color: var(--color-ink);
+    background: color-mix(in oklab, var(--color-surface) 75%, transparent);
+    transition:
+      border-color var(--ds-mov-rapido, 160ms),
+      color var(--ds-mov-rapido, 160ms),
+      background-color var(--ds-mov-rapido, 160ms),
+      transform var(--ds-mov-rapido, 160ms);
+  }
+  .pildora svg {
+    flex-shrink: 0;
+    color: var(--color-brand);
+  }
+  a.pildora:hover,
+  label.pildora:hover {
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+  }
+  a.pildora:hover {
+    transform: translateY(-1px);
+  }
+  a.pildora:focus-visible,
+  label.pildora:has(:focus-visible) {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  label.pildora {
+    cursor: pointer;
+  }
+  label.pildora:has(:checked) {
+    border-color: var(--color-brand);
+    background: color-mix(in oklab, var(--color-brand) 8%, var(--color-surface));
+    color: var(--color-brand);
+    font-weight: 600;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pildora {
+      transition: none;
+    }
+    a.pildora:hover {
+      transform: none;
+    }
+  }
 }
 
 /* Panel de administración (fuera del sistema de diseño): botones de marca en píldora. */

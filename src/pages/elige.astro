@@ -104,7 +104,7 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
       <legend class="px-1 text-sm font-semibold text-ink">2. ¿A qué te dedicas?</legend>
       <div class="mt-2 flex flex-wrap gap-2">
         {[...SECTORS.map((s) => [s.slug, s.label]), ['', 'Otro / no es un negocio']].map(([valor, texto]) => (
-          <label class="cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand has-[:checked]:border-brand has-[:checked]:bg-brand/5 has-[:checked]:font-semibold">
+          <label class="pildora">
             <input type="radio" name="oficio" value={valor} checked={valor === oficioActual} class="sr-only" />
             {texto}
           </label>
