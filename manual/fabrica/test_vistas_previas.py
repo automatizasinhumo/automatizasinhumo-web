@@ -79,7 +79,7 @@ class CupoIAAgotadoEspera(unittest.TestCase):
                 notas.append(sql)
             return [{'public_id': 'S-1'}]
 
-        def sin_cupo(_ruta):
+        def sin_cupo(_ruta, **_):
             raise vp.CupoIAAgotado('cupo diario de Workers AI agotado')
 
         with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=sin_cupo) as fab,                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []),                 patch.object(vp, 'FALLOS_D1', []), patch.object(vp, 'SIN_CUPO', []):

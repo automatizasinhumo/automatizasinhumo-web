@@ -237,6 +237,8 @@ def fabricar(ruta_pedido, desplegar=True, informe=None):
     if p.get('cambios'):
         try:
             pedidos = ajustes.pedir_ajustes(p['cambios'], lambda s, u: ia(*cred, s, u))
+        except CupoIAAgotado:
+            raise  # sin cupo la solicitud espera entera (vistas-previas.py), no sale con los cambios a medias
         except Exception as e:  # noqa: BLE001 — sin leer los cambios no se manda una versión que los ignora
             print('  ajustes visuales:', type(e).__name__)
             pedidos = {'sin_aplicar': ['no se pudieron leer los cambios de aspecto']}

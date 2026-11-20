@@ -293,6 +293,10 @@ class CambiosDeAspecto(unittest.TestCase):
         self.assertNotIn('ash-ajustes', html)
         self.assertEqual(sin_aplicar, ['no se pudieron leer los cambios de aspecto'])
 
+    def test_sin_cupo_la_solicitud_espera_entera(self):
+        with self.assertRaises(modulo_fabricar.CupoIAAgotado):
+            self.fabricar_con(modulo_fabricar.CupoIAAgotado('x'))
+
     def test_sin_ronda_de_cambios_no_se_pregunta_a_la_ia(self):
         def ia_simulada(t, c, sistema, usuario):
             self.assertNotEqual(sistema, modulo_fabricar.ajustes.SISTEMA)
