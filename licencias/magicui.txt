@@ -4,6 +4,7 @@ Adapted to plain CSS in src/themes/limpio/Home.astro (no code copied verbatim):
 - apps/www/registry/magicui/aurora-text.tsx
 - apps/www/registry/magicui/shine-border.tsx
 - apps/www/registry/magicui/shimmer-button.tsx
+- apps/www/registry/magicui/blur-fade.tsx (src/styles/overrides.css, .tarjeta)
 
 MIT License
 

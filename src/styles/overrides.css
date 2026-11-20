@@ -209,6 +209,27 @@ h1, h2, h3, .font-serif {
     transform: translateY(-2px);
     box-shadow: var(--ds-sombra-2, 0 12px 32px -12px rgb(0 0 0 / 0.2));
   }
+  /* Aparición al entrar en pantalla (BlurFade de Magic UI, MIT, licencias/magicui.txt),
+     solo con CSS: animación ligada al scroll, sin JS. Anima translate/opacity, no
+     transform, para no pisar la elevación del hover. Sin desenfoque y acotada a los
+     primeros 5rem visibles: con el scroll parado, lo que se lee ya está opaco y nítido
+     (contraste AA). Con foco dentro, sin animación. Sin soporte o con movimiento
+     reducido, la tarjeta está quieta y visible desde el principio. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .tarjeta:not(:focus-within) {
+        animation: tarjeta-aparece linear both;
+        animation-timeline: view();
+        animation-range: entry 0 entry 5rem;
+      }
+    }
+  }
+  @keyframes tarjeta-aparece {
+    from {
+      opacity: 0;
+      translate: 0 1.25rem;
+    }
+  }
 
   /* Antetítulo: rótulo corto sobre un titular. */
   .etiqueta {
