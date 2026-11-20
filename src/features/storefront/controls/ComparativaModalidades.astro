@@ -16,17 +16,17 @@ const modalities = classifyDeliveryModalities(variants);
   modalities.template && modalities.setup ? (
     <ComparativaModalidadesSection variants={variants} />
   ) : modalities.template ? (
-    <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-quien-monta>
+    <p class="mt-4 aviso text-muted" data-quien-monta>
       <strong class="text-ink">¿Lo tienes que montar tú?</strong>{' '}
       Sí. Tú la publicas siguiendo la guía paso a paso.
     </p>
   ) : modalities.setup ? (
-    <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-quien-monta>
+    <p class="mt-4 aviso text-muted" data-quien-monta>
       <strong class="text-ink">¿Lo tienes que montar tú?</strong>{' '}
       No. Lo montamos nosotros; tú solo nos das los datos.
     </p>
   ) : variants.length === 0 ? (
-    <p class="mt-4 rounded-xl bg-brand/5 px-4 py-3 text-sm text-muted" data-modalidad-no-disponible>
+    <p class="mt-4 aviso text-muted" data-modalidad-no-disponible>
       No hay modalidades disponibles en este momento.
     </p>
   ) : (
