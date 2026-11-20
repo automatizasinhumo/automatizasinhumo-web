@@ -85,7 +85,9 @@ h1, h2, h3, .font-serif {
   .boton:hover {
     transform: translateY(-2px);
   }
-  .boton:focus-visible {
+  /* Un <label class="boton"> con su control oculto marca el foco en el propio botón. */
+  .boton:focus-visible,
+  label.boton:has(:focus-visible) {
     outline: 3px solid var(--color-brand);
     outline-offset: 3px;
   }
@@ -126,9 +128,13 @@ h1, h2, h3, .font-serif {
   .boton-contorno:hover {
     background: color-mix(in oklab, currentColor 12%, transparent);
   }
-  .boton-inverso:focus-visible,
-  .boton-contorno:focus-visible {
+  .boton-inverso:focus-visible {
     outline-color: var(--color-on-brand);
+  }
+  /* El contorno hereda el color del fondo en que va: el foco usa ese mismo color. */
+  .boton-contorno:focus-visible,
+  label.boton-contorno:has(:focus-visible) {
+    outline-color: currentColor;
   }
   .boton-destello {
     border: 0;
