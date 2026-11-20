@@ -51,5 +51,12 @@ const {
     d.addEventListener('toggle', () => {
       if (d.open) d.querySelector<HTMLInputElement>('input[name="q"]')?.focus();
     });
+    // Escape closes it and hands focus back to the magnifier (disclosure
+    // pattern); a native <details> has no key to close it otherwise.
+    d.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !d.open) return;
+      d.open = false;
+      d.querySelector<HTMLElement>('summary')?.focus();
+    });
   }
 </script>

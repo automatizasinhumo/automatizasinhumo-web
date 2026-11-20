@@ -136,3 +136,23 @@
   --ds-mov-normal: 240ms;
   --ds-curva: cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/*
+ * Texto que nunca desborda. Con letra grande (zoom de texto al 200 %, WCAG
+ * 1.4.10) una palabra larga como «complicaciones» no cabe a 320 px:
+ * - break-word solo actúa cuando una palabra no cabe sola en su línea, así que
+ *   no cambia nada en el uso normal;
+ * - en pantallas estrechas, además, se parte con guion por sílabas (lang="es").
+ *   En escritorio no hay guiones.
+ * Los hijos de flex o grid con texto necesitan además min-width: 0.
+ */
+@layer base {
+  html {
+    overflow-wrap: break-word;
+  }
+  @media (max-width: 30rem) {
+    html {
+      hyphens: auto;
+    }
+  }
+}

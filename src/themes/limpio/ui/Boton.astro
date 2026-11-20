@@ -4,16 +4,18 @@
  * - `principal`: relleno de marca con un destello que recorre el borde (ShimmerButton
  *   de Magic UI, MIT, licencias/magicui.txt). Solo uno por pantalla: es la acción clave.
  * - `secundario`: contorno sobre superficie.
+ * Dos tallas: `normal` (portada y secciones) y `compacta` (cabecera, barras).
  * El destello es una rotación (la compone la GPU) y se para con prefers-reduced-motion.
  */
 interface Props {
   href: string;
   variante?: 'principal' | 'secundario';
+  talla?: 'normal' | 'compacta';
   class?: string;
 }
-const { href, variante = 'principal', class: cls } = Astro.props;
+const { href, variante = 'principal', talla = 'normal', class: cls } = Astro.props;
 ---
-<a href={href} class:list={['boton', variante, cls]}><span><slot /></span></a>
+<a href={href} class:list={['boton', variante, talla, cls]}><span><slot /></span></a>
 
 <style>
   .boton {
@@ -29,6 +31,7 @@ const { href, variante = 'principal', class: cls } = Astro.props;
     font-weight: 600;
     transition: transform var(--ds-mov-normal) var(--ds-curva), box-shadow var(--ds-mov-normal), border-color var(--ds-mov-rapido);
   }
+  .compacta { padding: 0.5rem 1rem; font-size: 0.875rem; }
   .boton:hover { transform: translateY(-2px); }
   .boton:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 3px; }
   .principal {

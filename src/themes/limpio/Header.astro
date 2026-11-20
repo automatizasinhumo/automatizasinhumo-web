@@ -1,16 +1,19 @@
 ---
 import type { StorefrontShellModel } from '../../features/storefront/models';
 import StoreNav from '../../features/storefront/controls/StoreNav.astro';
-import StoreSearch from '../../features/storefront/controls/StoreSearch.astro';
 import StoreSearchToggle from '../../features/storefront/controls/StoreSearchToggle.astro';
 import StoreCartControl from '../../features/storefront/controls/StoreCartControl.astro';
 import StoreAccountControl from '../../features/storefront/controls/StoreAccountControl.astro';
 import Logo from './Logo.astro';
+import Boton from './ui/Boton.astro';
 import StoreMegaMenu from '../../features/storefront/controls/StoreMegaMenu.astro';
 import { menuAreas, coveredByMegaMenu } from './menuAreas';
 
 /**
- * STORE-OWNED. Tema «limpio»: la portada nueva (logo, buscador, Servicios y carrito).
+ * STORE-OWNED. Tema «limpio»: cabecera en isla flotante (logo, Servicios, lupa,
+ * carrito y una llamada a la acción). Arriba del todo es transparente y se funde con
+ * la página; al bajar se vuelve cristal con borde y sombra (ligado al scroll, sin JS).
+ * Sin soporte de animation-timeline queda siempre en cristal.
  *
  * It renders on EVERY page, including cart, checkout, payment, account, and
  * Admin login. A broken header is a broken checkout, so keep the core controls
@@ -50,25 +53,20 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
   )
 }
 
-<header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-4 sm:gap-6 sm:px-6">
-    <a href="/" aria-label={model.storeName} class="shrink-0">
+<header class="cabecera">
+  <div class="isla">
+    <a href="/" aria-label={model.storeName} class="min-w-0 max-w-full shrink-0">
       {
         model.logo ? (
           /* Not lazy: the header logo is above the fold on every page. The
              store name stays the alt text, so the header still reads the
              same to a screen reader or when the image fails. */
-          <img src={model.logo.src} alt={model.logo.alt} class="h-8 max-w-48 object-contain sm:h-10" />
+          <img src={model.logo.src} alt={model.logo.alt} class="h-8 max-w-[min(12rem,100%)] object-contain sm:h-10" />
         ) : (
           <Logo />
         )
       }
     </a>
-    <StoreSearch
-      action={model.search.action}
-      query={model.search.query}
-      class="ml-auto hidden flex-1 justify-end sm:flex"
-    />
     {/* ml-auto pins the whole nav to the right edge of the header row, so it
         stays flush right no matter how few items a merchant has.
         min-w-0 is what lets long labels ellipsize instead of overflowing the
@@ -77,7 +75,7 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
         putting min-w-0 only on the links themselves is not enough. */}
     <nav
       aria-label="Principal"
-      class="ml-auto flex min-w-0 items-center gap-2 text-sm font-medium text-ink min-[400px]:gap-3 sm:gap-6"
+      class="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-3 text-sm font-medium text-ink sm:gap-5"
     >
       <StoreMegaMenu
         label="Servicios"
@@ -90,17 +88,65 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
       {/* Sin fila en línea: en xl la sustituye el mega menú; la hamburguesa
           (xl:hidden) sigue llevando todos los enlaces del menú de D1. */}
       <StoreNav links={model.headerLinks} inline={false} />
-      {/* The inline field is hidden below sm; the magnifier opens it in place.
-          The panel hangs from the sticky header (its positioned ancestor), full
-          width minus the gutters, because the magnifier is not at the edge. */}
+      {/* La búsqueda es una lupa en todos los anchos: la cabecera queda limpia y el
+          formulario (GET real, funciona sin JS) se abre colgado de la isla. */}
       <StoreSearchToggle
         action={model.search.action}
         query={model.search.query}
-        class="sm:hidden"
-        panelClass="absolute inset-x-4 top-full z-40 mt-1 border border-line bg-surface p-3 shadow-lg"
+        class=""
+        panelClass="absolute right-2 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-3 shadow-lg"
       />
       {model.cart.enabled && <StoreCartControl href={model.cart.href} />}
       {model.account.enabled && <StoreAccountControl href={model.account.href} />}
+      <span class="hidden sm:contents"><Boton href="/elige" variante="secundario" talla="compacta">Haz el test</Boton></span>
     </nav>
   </div>
 </header>
+
+<style>
+  .cabecera {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: var(--ds-hueco-2) var(--ds-hueco-2) 0;
+  }
+  .isla {
+    position: relative;
+    display: flex;
+    /* Con letra grande (zoom de texto 200 %) los controles bajan de línea en
+       vez de sacar la página de la pantalla; a tamaño normal caben en una. */
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-hueco-3);
+    max-width: 72rem;
+    margin-inline: auto;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    padding: 0.6rem 0.9rem;
+    background: color-mix(in oklab, var(--color-surface) 82%, transparent);
+    box-shadow: var(--ds-sombra-2);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  }
+  @media (min-width: 40rem) {
+    .cabecera { padding: var(--ds-hueco-3) var(--ds-hueco-4) 0; }
+    .isla { border-radius: var(--ds-radio-pildora); padding: 0.55rem 0.7rem 0.55rem 1.4rem; gap: var(--ds-hueco-6); }
+  }
+  /* Arriba del todo, sin caja; al bajar 0-96 px aparece el cristal. Solo cambia
+     color, borde y sombra: no mueve nada, así que vale también con movimiento reducido. */
+  @supports (animation-timeline: scroll()) {
+    .isla {
+      animation: cristal linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 6rem;
+    }
+  }
+  @keyframes cristal {
+    from {
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
+</style>
