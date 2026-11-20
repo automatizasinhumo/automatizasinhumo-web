@@ -1,5 +1,5 @@
 // API del motor del estudio de CV para la página (/servicios/cv).
-// window.CvEstudio = { plantillas, formas, estilosLetra, tamanos, espaciados, datosEjemplo, crearDatos, formEjemplo, formVacio, crearPdf, pintarPdf }.
+// window.CvEstudio = { plantillas, formas, estilosLetra, tamanos, espaciados, datosEjemplo, crearDatos, formEjemplo, formVacio, crearPdf, pintarPdf, importar }.
 import { createResumePdfBlob } from "../vendor/pdf/browser";
 import { parseResumeData, type ResumeData } from "../vendor/schema/resume/data";
 import { newResume, sanitizeResume } from "./adoptado/resume-model";
@@ -109,10 +109,19 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra
 	return trabajo;
 }
 
+// El worker se copia junto a estudio.js; la URL se calcula aquí (entrada), no en un chunk de c/.
+const WORKER_PDF = new URL("./pdf.worker.min.mjs", import.meta.url).href;
+
+/** pdf.js con el worker ya apuntado. Único punto de carga para la vista previa y el importador. */
+async function cargarPdfjs() {
+	const pdfjs = await import("pdfjs-dist");
+	pdfjs.GlobalWorkerOptions.workerSrc = WORKER_PDF;
+	return pdfjs;
+}
+
 /** Pinta las páginas de un PDF en lienzos (sirve en móvil, donde no hay visor de PDF). */
 export async function pintarPdf(blob: Blob, contenedor: HTMLElement, { ancho = 800, maxPaginas = 3 } = {}) {
-	const pdfjs = await import("pdfjs-dist");
-	pdfjs.GlobalWorkerOptions.workerSrc = new URL("./pdf.worker.min.mjs", import.meta.url).href;
+	const pdfjs = await cargarPdfjs();
 	const tarea = pdfjs.getDocument({ data: await blob.arrayBuffer(), useSystemFonts: true });
 	try {
 		const pdf = await tarea.promise;
@@ -142,5 +151,8 @@ declare global {
 		CvEstudio: typeof api;
 	}
 }
-const api = { plantillas, formas, estilosLetra: ESTILOS_LETRA, tamanos: TAMANOS, espaciados: ESPACIADOS, datosEjemplo, crearDatos, formEjemplo: FORM_EJEMPLO, formVacio: FORM_VACIO, crearPdf, pintarPdf };
+/** Lee un CV que el cliente ya tiene (PDF, Word, LinkedIn .zip, JSON Resume). Carga los lectores solo al usarlo. */
+const importar = async (fichero: Blob & { name?: string }) => (await import("./importar")).importarCv(fichero, cargarPdfjs);
+
+const api = { plantillas, formas, estilosLetra: ESTILOS_LETRA, tamanos: TAMANOS, espaciados: ESPACIADOS, datosEjemplo, crearDatos, formEjemplo: FORM_EJEMPLO, formVacio: FORM_VACIO, crearPdf, pintarPdf, importar };
 window.CvEstudio = api;

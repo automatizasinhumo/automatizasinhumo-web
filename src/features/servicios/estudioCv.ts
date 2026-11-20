@@ -25,7 +25,16 @@ interface Motor {
     espaciado?: string;
   }): Promise<Blob>;
   pintarPdf(b: Blob, c: HTMLElement, o: { ancho: number; maxPaginas: number }): Promise<number>;
+  importar(f: File): Promise<{ ok: true; tipo: string; form: FormCv } | { ok: false; motivo: 'tipo' | 'vacio' | 'lectura' }>;
 }
+
+const AVISO_IMPORTAR = {
+  leyendo: 'Leyendo tu CV…',
+  ok: 'Listo: hemos rellenado tus datos con tu CV. Repásalos, por si falta algo.',
+  tipo: 'Ese archivo no se puede leer. Sube un PDF, un Word (.docx), la exportación de LinkedIn (.zip) o un JSON Resume.',
+  vacio: 'No hemos encontrado texto en ese archivo (¿es una foto o un escaneo?). Prueba con otro o escribe tus datos.',
+  lectura: 'No hemos podido leer ese archivo. Prueba con otro formato o escribe tus datos.',
+} as const;
 interface Config {
   motor: string;
   porDefecto: string;
@@ -314,6 +323,27 @@ export function iniciarEstudioCv() {
     guardar(estado);
   }
 
+  // ---------- Importar un CV existente ----------
+  async function importar(fichero: File) {
+    const nota = $('[data-estado-importar]');
+    const avisar = (clave: keyof typeof AVISO_IMPORTAR) => {
+      if (!nota) return;
+      nota.textContent = AVISO_IMPORTAR[clave];
+      nota.dataset.tono = clave === 'ok' || clave === 'leyendo' ? '' : 'error';
+    };
+    avisar('leyendo');
+    try {
+      const r = await (await motor()).importar(fichero);
+      if (!r.ok) return avisar(r.motivo);
+      volcar(r.form);
+      persistir();
+      programar(true);
+      avisar('ok');
+    } catch {
+      avisar('lectura');
+    }
+  }
+
   // ---------- Eventos ----------
   raiz.addEventListener('click', (ev) => {
     const b = (ev.target as Element).closest<HTMLElement>('button');
@@ -367,6 +397,12 @@ export function iniciarEstudioCv() {
   form.addEventListener('submit', (ev) => ev.preventDefault());
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.name === 'importar') {
+      const fichero = c.files?.[0];
+      c.value = ''; // permite volver a elegir el mismo archivo
+      if (fichero) void importar(fichero);
+      return;
+    }
     if (c.name === 'ver') {
       // Filtro de la galería: no es estado del CV, no se guarda ni repinta la vista previa.
       for (const t of $$('[data-filtros]')) t.hidden = !(t.dataset.filtros ?? '').split(' ').includes(c.value);
@@ -389,6 +425,7 @@ export function iniciarEstudioCv() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.type === 'file') return;
     if (c.name === 'colorLibre') estado.color = c.value;
     else if (c.name === 'intensidad') estado.intensidad = Number(c.value);
     else if (c.name === 'nombre' && c.value.trim()) c.removeAttribute('aria-invalid');

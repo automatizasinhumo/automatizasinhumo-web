@@ -14,6 +14,8 @@ const aqui = (p) => fileURLToPath(new URL(p, import.meta.url));
 const require = createRequire(import.meta.url);
 const salida = aqui('../public/cv/estudio/motor/');
 const vendor = aqui('./vendor/');
+// Lectores de CV (PDF, Word, LinkedIn, JSON) de Reactive Resume: paquetes con su propia estructura upstream.
+const vendorImport = aqui('./vendor-import/');
 
 // Alias de Resumv (tsconfig paths) y los «?url» de Vite, en esbuild.
 const resolver = {
@@ -24,6 +26,11 @@ const resolver = {
     b.onResolve({ filter: /^phosphor-icons-react-pdf\/dynamic$/ }, () => ({ path: aqui('./src/iconos.ts') }));
     b.onResolve({ filter: /^@reactive-resume\// }, async (args) => {
       const resto = args.path.slice('@reactive-resume/'.length);
+      // Dentro de vendor-import/ se respetan los «exports» upstream: @reactive-resume/<paquete>/<ruta> → <paquete>/src/<ruta>.
+      if (args.importer.startsWith(vendorImport)) {
+        const [paquete, ...ruta] = resto.split('/');
+        return b.resolve(`./${paquete}/src/${ruta.join('/')}`, { resolveDir: vendorImport, kind: args.kind });
+      }
       return b.resolve(`./${resto}`, { resolveDir: vendor, kind: args.kind });
     });
     b.onResolve({ filter: /\?url$/ }, (args) => ({ path: require.resolve(args.path.slice(0, -4), { paths: [args.resolveDir] }) }));
@@ -76,11 +83,16 @@ writeFileSync(
   path.join(salida, 'LICENCIAS.txt'),
   [
     licencia('Reactive Resume — plantillas PDF (MIT)', aqui('./vendor/LICENSE')),
+    licencia('Reactive Resume — lectores de CV para importar (MIT)', aqui('./vendor-import/LICENSE')),
     licencia('Resumv (MIT)', aqui('./vendor/LICENSE-resumv')),
     licencia('@react-pdf/renderer (MIT)', path.join(dirPaquete('@react-pdf/renderer'), 'LICENSE')),
     licencia('pdf.js (Apache-2.0)', path.join(dirPaquete('pdfjs-dist'), 'LICENSE')),
     licencia('React (MIT)', path.join(dirPaquete('react'), 'LICENSE')),
     licencia('Phosphor Icons (MIT) vía phosphor-icons-react-pdf', path.join(dirPaquete('phosphor-icons-react-pdf'), 'LICENSE')),
+    licencia('fflate (MIT)', path.join(dirPaquete('fflate'), 'LICENSE')),
+    licencia('uuid (MIT)', path.join(dirPaquete('uuid'), 'LICENSE.md')),
+    licencia('wink-porter2-stemmer (MIT)', path.join(dirPaquete('wink-porter2-stemmer'), 'LICENSE')),
+    licencia('zod (MIT)', path.join(dirPaquete('zod'), 'LICENSE')),
     // Una entrada por paquete de fuente: la lista sale de package.json para no olvidar ninguna.
     ...Object.keys(JSON.parse(readFileSync(aqui('./package.json'), 'utf8')).dependencies)
       .filter((p) => p.startsWith('@fontsource/'))
