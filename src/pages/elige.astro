@@ -63,7 +63,7 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
               <h3 class="mt-1 font-serif text-xl font-semibold text-ink">{s.name}</h3>
               <p class="mt-2 text-sm text-muted">Desde {s.formattedPrice}. El precio de cada modalidad está en la ficha.</p>
               <div class="mt-4 flex flex-wrap gap-3">
-                <a href={empezarHref(s.slug, rec.modalidad)} class="inline-flex rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover">Empieza gratis →</a>
+                <a href={empezarHref(s.slug, rec.modalidad)} class="boton boton-principal">Empieza gratis →</a>
                 <a href={`/products/${s.slug}`} class="inline-flex items-center text-sm font-semibold text-brand hover:underline">Ver servicio y precios</a>
               </div>
               {s.demos[0] && (
@@ -127,7 +127,7 @@ const tarjeta = 'flex cursor-pointer gap-3 rounded-xl border border-line bg-surf
       </div>
     </fieldset>
 
-    <button type="submit" class="w-full rounded-full bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover sm:w-auto">
+    <button type="submit" class="boton boton-principal w-full sm:w-auto">
       Ver mi recomendación →
     </button>
   </form>

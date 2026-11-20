@@ -73,7 +73,113 @@ h1, h2, h3, .font-serif {
   font-size: 0.8125rem;
 }
 
-/* Botones de acción redondeados, como en la portada. */
+/*
+ * Botón del sistema de diseño: UNA definición para toda la web. Las páginas
+ * usan estas clases (y el tema limpio, su componente ui/Boton). Van en la capa
+ * components para que cualquier utilidad (hidden, w-full, mt-4…) las pise.
+ * Lee los tokens --ds-* del tema; con otro tema caen a valores neutros.
+ *   .boton + .boton-principal | .boton-secundario   [+ .boton-compacto]
+ *   .boton-destello: brillo que recorre el borde, solo en la acción clave
+ *   de la pantalla (ShimmerButton de Magic UI, MIT, licencias/magicui.txt).
+ */
+@layer components {
+  .boton {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ds-hueco-2, 0.5rem);
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: var(--ds-radio-pildora, 999px);
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform var(--ds-mov-normal, 240ms) var(--ds-curva, ease),
+      box-shadow var(--ds-mov-normal, 240ms),
+      border-color var(--ds-mov-rapido, 160ms),
+      background-color var(--ds-mov-rapido, 160ms);
+  }
+  .boton-compacto {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  .boton:hover {
+    transform: translateY(-2px);
+  }
+  .boton:focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 3px;
+  }
+  .boton:disabled,
+  .boton[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+  }
+  .boton-principal {
+    color: var(--color-on-brand);
+    background: linear-gradient(180deg, color-mix(in oklab, var(--color-brand) 85%, #fff), var(--color-brand));
+    box-shadow: var(--ds-sombra-marca, 0 8px 24px -12px var(--color-brand));
+  }
+  .boton-principal:hover {
+    box-shadow: 0 14px 34px -10px color-mix(in oklab, var(--color-brand) 85%, transparent);
+  }
+  .boton-secundario {
+    border-color: var(--color-line);
+    color: var(--color-ink);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-1, none);
+  }
+  .boton-secundario:hover {
+    border-color: var(--color-brand);
+  }
+  .boton-destello {
+    border: 0;
+    background: var(--color-brand);
+  }
+  .boton-destello::before {
+    content: '';
+    position: absolute;
+    inset: -150% -10%;
+    z-index: -2;
+    background: conic-gradient(from 0deg, transparent 0 300deg, rgb(255 255 255 / 0.85) 360deg);
+    animation: boton-giro 3s linear infinite;
+    will-change: transform;
+  }
+  .boton-destello::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(180deg, color-mix(in oklab, var(--color-brand) 85%, #fff), var(--color-brand));
+  }
+  @keyframes boton-giro {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .boton {
+      transition: none;
+    }
+    .boton:hover {
+      transform: none;
+    }
+    .boton-destello::before {
+      animation: none;
+    }
+  }
+}
+
+/* Panel de administración (fuera del sistema de diseño): botones de marca en píldora. */
 button.bg-brand,
 a.bg-brand,
 button.bg-ink,

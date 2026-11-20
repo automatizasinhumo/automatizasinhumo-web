@@ -100,7 +100,7 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
       />
       {model.cart.enabled && <StoreCartControl href={model.cart.href} />}
       {model.account.enabled && <StoreAccountControl href={model.account.href} />}
-      <span class="hidden sm:contents"><Boton href="/elige" variante="secundario" talla="compacta">Haz el test</Boton></span>
+      <Boton href="/elige" variante="secundario" talla="compacta" class="hidden sm:inline-flex">Haz el test</Boton>
     </nav>
   </div>
 </header>
