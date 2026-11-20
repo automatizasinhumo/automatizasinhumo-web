@@ -48,6 +48,7 @@ h1, h2, h3, .font-serif {
  * Lee los tokens --ds-* del tema; con otro tema caen a valores neutros.
  *   .boton + .boton-principal | .boton-secundario   [+ .boton-compacto]
  *   sobre fondo de marca: .boton-inverso | .boton-contorno
+ *   también: .pildora [+ .pildora-flotante], .aviso, .carril (fila deslizable)
  *   .boton-destello: brillo que recorre el borde, solo en la acción clave
  *   de la pantalla (ShimmerButton de Magic UI, MIT, licencias/magicui.txt).
  */
@@ -221,6 +222,35 @@ h1, h2, h3, .font-serif {
     color: var(--color-on-brand);
   }
 
+  /* Carril: fila deslizable de píldoras o filtros. Se detiene en cada elemento,
+     oculta la barra y se desvanece en los bordes (el relleno lateral la absorbe). */
+  .carril {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 1rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 1rem, #000 calc(100% - 1rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 1rem, #000 calc(100% - 1rem), transparent);
+  }
+  .carril::-webkit-scrollbar {
+    display: none;
+  }
+  .carril > *,
+  .carril > ul > li {
+    scroll-snap-align: start;
+  }
+
+  /* Aviso: nota breve sobre fondo de marca (estado, aclaración, condición). */
+  .aviso {
+    border-radius: var(--ds-radio-tarjeta, 0.75rem);
+    background: color-mix(in oklab, var(--color-brand) 6%, var(--color-surface));
+    border: 1px solid color-mix(in oklab, var(--color-brand) 14%, transparent);
+    padding: 0.75rem 1rem;
+    font-size: var(--ds-texto-small, 0.875rem);
+    line-height: 1.5;
+  }
+
   /* Píldora: etiqueta, filtro o atajo pequeño y redondo. Con enlace se eleva al
      pasar el ratón; en un <label> con radio o checkbox marca la opción elegida. */
   .pildora {
@@ -239,6 +269,15 @@ h1, h2, h3, .font-serif {
       color var(--ds-mov-rapido, 160ms),
       background-color var(--ds-mov-rapido, 160ms),
       transform var(--ds-mov-rapido, 160ms);
+  }
+  /* Insignia superpuesta a una imagen: opaca, pequeña y con sombra. */
+  .pildora-flotante {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(6px);
+    box-shadow: var(--ds-sombra-1, 0 4px 12px -6px rgb(0 0 0 / 0.25));
   }
   .pildora svg {
     flex-shrink: 0;

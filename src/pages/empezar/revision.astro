@@ -83,12 +83,12 @@ if (fallo && Astro.response.status !== 503) Astro.response.status = 503;
     )}
 
     {s && hecho === 'aprobar' && (
-      <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 font-medium text-ink" data-revision-hecho="aprobar">
+      <p class="mt-6 aviso text-base font-medium text-ink" data-revision-hecho="aprobar">
         ¡Gracias! Hemos registrado tu aprobación de {servicio}. Te escribiremos con el siguiente paso.
       </p>
     )}
     {s && hecho === 'cambios' && (
-      <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 font-medium text-ink" data-revision-hecho="cambios">
+      <p class="mt-6 aviso text-base font-medium text-ink" data-revision-hecho="cambios">
         Hemos recibido tus cambios para {servicio}. Te avisaremos cuando la nueva versión esté lista.
       </p>
     )}

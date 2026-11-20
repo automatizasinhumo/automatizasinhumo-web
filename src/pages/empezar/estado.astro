@@ -75,10 +75,10 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
         )}
 
         {esPedido && paso >= 0 && (
-          <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 text-sm font-medium text-ink" data-estado-pedido>{textoPedido(solicitud.estado)} Tu pedido ya está pagado.</p>
+          <p class="mt-6 aviso font-medium text-ink" data-estado-pedido>{textoPedido(solicitud.estado)} Tu pedido ya está pagado.</p>
         )}
         {!esPedido && paso >= 0 && paso < 3 && (
-          <p class="mt-6 rounded-xl bg-brand/5 px-4 py-3 text-sm font-medium text-ink">Todavía no has pagado nada. Solo pagas si la vista previa te gusta.</p>
+          <p class="mt-6 aviso font-medium text-ink">Todavía no has pagado nada. Solo pagas si la vista previa te gusta.</p>
         )}
       </section>
     )}
