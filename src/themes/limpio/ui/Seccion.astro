@@ -35,6 +35,8 @@ const tituloId = `${id}-titulo`;
 
 <style>
   .seccion { padding-block: var(--ds-seccion); }
+  /* La última de la página no suma su hueco al del pie (quedaba un vacío doble). */
+  .seccion:last-of-type { padding-bottom: 0; }
   .separada { border-top: 1px solid var(--color-line); }
   header {
     max-width: 40rem;

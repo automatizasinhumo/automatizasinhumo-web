@@ -348,6 +348,21 @@ h1, h2, h3, .font-serif {
   }
 }
 
+/* Contacto flotante: en el móvil aparece al empezar a bajar (primeros 12rem, o todo el recorrido si la página es más corta), así no tapa
+   el texto ni los botones de la primera pantalla. Solo opacidad y visibilidad (oculto solo
+   arriba del todo); sin soporte o en una página sin desplazamiento, siempre visible.
+   Abierto, nunca se oculta. */
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 39.99rem) {
+    .contacto-flotante:not([open]) {
+      animation: contacto-aparece linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 min(12rem, 100%);
+    }
+  }
+}
+@keyframes contacto-aparece { from { opacity: 0; visibility: hidden; } }
+
 /* Panel de administración (fuera del sistema de diseño): botones de marca en píldora. */
 button.bg-brand,
 a.bg-brand,

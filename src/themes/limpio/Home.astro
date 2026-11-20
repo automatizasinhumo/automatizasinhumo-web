@@ -129,12 +129,15 @@ const PASOS = [
   </button>
   </div>
 
-  <div class="resto">
+  <div class="accion">
     <p class="subtitulo">Crea tu web, automatiza tu negocio y lanza tu evento en pocos pasos. Todo automático, a precio cerrado y con vista previa antes de pagar.</p>
     <div class="botones">
       <Boton href={testHref}>Haz el test y te recomendamos</Boton>
       <Boton href={catalogHref} variante="secundario">Ver todos los servicios</Boton>
     </div>
+  </div>
+
+  <div class="resto">
     {servicios.length > 0 && (
       <ul class="servicios" aria-label="Servicios">
         {servicios.map((s) => (
@@ -151,11 +154,12 @@ const PASOS = [
 </Seccion>
 
 <style>
-  /* ── Disposición: en el móvil todo en columna y centrado (título, escena, resto);
-     desde 60rem, texto a la izquierda y escena a la derecha. ── */
+  /* ── Disposición: en el móvil todo en columna y centrado (título, acción, escena,
+     resto): el subtítulo y los botones caben en la primera pantalla, antes de la
+     maqueta. Desde 60rem, texto a la izquierda y escena a la derecha. ── */
   .portada {
     display: grid;
-    grid-template-areas: 'titulo' 'escena' 'resto';
+    grid-template-areas: 'titulo' 'accion' 'escena' 'resto';
     /* minmax(0, …): la pista no crece hasta el min-content de sus hijos (con letra
        grande sacaba la portada de la pantalla); el contenido se adapta a ella. */
     grid-template-columns: minmax(0, 1fr);
@@ -173,17 +177,22 @@ const PASOS = [
     gap: var(--ds-hueco-3);
     width: min(100%, 34rem);
   }
+  .accion,
   .resto {
     display: flex;
-    grid-area: resto;
     flex-direction: column;
     align-items: center;
   }
+  .accion { grid-area: accion; }
+  .resto { grid-area: resto; }
+  /* El hueco lo pone la rejilla; en escritorio se suma lo que falta para igualar
+     el margen de antes entre los botones y los servicios. */
+  .resto .servicios { margin-top: 0; }
   @media (min-width: 60rem) {
     .portada {
-      grid-template-areas: 'titulo escena' 'resto escena';
+      grid-template-areas: 'titulo escena' 'accion escena' 'resto escena';
       grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       column-gap: clamp(2.5rem, 5vw, 4.5rem);
       row-gap: var(--ds-hueco-6);
       align-items: center;
@@ -191,7 +200,8 @@ const PASOS = [
       text-align: left;
     }
     .titulo-caja { align-self: end; }
-    .resto { align-self: start; align-items: flex-start; }
+    .accion { align-items: flex-start; }
+    .resto { align-self: start; align-items: flex-start; margin-top: var(--ds-hueco-2); }
     .escena-caja { align-self: center; }
   }
 
@@ -400,7 +410,7 @@ const PASOS = [
     gap: var(--ds-hueco-3);
     margin-top: var(--ds-hueco-8);
   }
-  .resto .botones { justify-content: center; }
+  .accion .botones { justify-content: center; }
   .servicios {
     display: flex;
     max-width: 40rem;
@@ -410,7 +420,7 @@ const PASOS = [
     margin-top: var(--ds-hueco-8);
   }
   @media (min-width: 60rem) {
-    .resto .botones,
+    .accion .botones,
     .servicios { justify-content: flex-start; }
   }
   .punta {
