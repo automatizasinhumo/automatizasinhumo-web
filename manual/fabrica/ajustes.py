@@ -33,18 +33,21 @@ SISTEMA = (
 
 
 def validar(respuesta):
-    """Se queda con cada clave válida por separado: una mal formada no anula las demás."""
+    """Se queda con cada clave válida por separado: una mal formada no anula las demás.
+
+    Una clave con valor no válido (p. ej. "logo": "enorme") se pidió pero no se sabe aplicar:
+    pasa a sin_aplicar para que la vista previa no salga como «QA ok» sin ese cambio."""
     if not isinstance(respuesta, dict):
         raise ValueError('la respuesta no es un objeto JSON')
-    salida = {}
+    salida, invalidas = {}, []
     for clave, validador in _VALIDADORES.items():
         if clave not in respuesta:
             continue
         try:
             salida[clave] = validador(respuesta[clave])
         except fastjsonschema.JsonSchemaException:
-            continue
-    salida.setdefault('sin_aplicar', [])
+            invalidas.append(clave)
+    salida['sin_aplicar'] = (salida.get('sin_aplicar') or []) + [f'{c} (no se entendió el cambio)' for c in invalidas]
     return salida
 
 
@@ -68,9 +71,21 @@ def variables_de_color(site):
     return sorted({m.group(1) for t in textos for m in VARIABLE_COLOR.finditer(t)})
 
 
+def luminancia(color):
+    """Luminancia relativa WCAG 2.x de un #rrggbb."""
+    def canal(v):
+        v /= 255
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (canal(int(color[i:i + 2], 16)) for i in (1, 3, 5))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
 def contraste(color):
-    r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
-    return '#111111' if 0.299 * r + 0.587 * g + 0.114 * b > 150 else '#ffffff'
+    """Texto (#111111 o blanco) con mayor razón de contraste sobre el color de fondo."""
+    fondo = luminancia(color)
+    oscuro = (fondo + 0.05) / (luminancia('#111111') + 0.05)
+    claro = 1.05 / (fondo + 0.05)
+    return '#111111' if oscuro >= claro else '#ffffff'
 
 
 def css_de(ajustes, variables=()):

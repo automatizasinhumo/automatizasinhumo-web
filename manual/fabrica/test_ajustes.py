@@ -7,13 +7,15 @@ import ajustes
 
 
 class ValidarTests(unittest.TestCase):
-    def test_se_queda_con_lo_valido_y_descarta_lo_demas(self):
+    def test_se_queda_con_lo_valido_y_lo_no_valido_queda_sin_aplicar(self):
+        # Lo que no se entiende se pidió igual: no puede salir como «QA ok» sin aplicarse.
         r = ajustes.validar({'logo': 'mas_grande', 'texto': 'enorme', 'color': 'azul', 'sin_aplicar': ['otra foto']})
-        self.assertEqual(r, {'logo': 'mas_grande', 'sin_aplicar': ['otra foto']})
+        self.assertEqual(r, {'logo': 'mas_grande', 'sin_aplicar': [
+            'otra foto', 'texto (no se entendió el cambio)', 'color (no se entendió el cambio)']})
 
     def test_sin_aplicar_mal_formado_no_tira_lo_demas(self):
         self.assertEqual(ajustes.validar({'color': '#0a3d62', 'sin_aplicar': 'foto'}),
-                         {'color': '#0a3d62', 'sin_aplicar': []})
+                         {'color': '#0a3d62', 'sin_aplicar': ['sin_aplicar (no se entendió el cambio)']})
 
     def test_no_es_objeto(self):
         with self.assertRaises(ValueError):
@@ -63,6 +65,15 @@ class CssTests(unittest.TestCase):
                                '<style id="ash-ajustes">x</style>')
         self.assertLess(html.index('a.css'), html.index('ash-ajustes'))
         self.assertLess(html.index('ash-ajustes'), html.index('</HEAD>'))
+
+
+class Contraste(unittest.TestCase):
+    def test_por_razon_wcag(self):
+        # Con la fórmula de brillo, #00bb00 daba blanco (2,6:1); el texto oscuro pasa de 4,5:1.
+        self.assertEqual(ajustes.contraste('#00bb00'), '#111111')
+        self.assertEqual(ajustes.contraste('#1a237e'), '#ffffff')
+        self.assertEqual(ajustes.contraste('#ffffff'), '#111111')
+        self.assertEqual(ajustes.contraste('#000000'), '#ffffff')
 
 
 if __name__ == '__main__':
