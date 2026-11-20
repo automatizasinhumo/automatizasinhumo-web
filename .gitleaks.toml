@@ -32,4 +32,4 @@ regexes = ['''^secreto-de-prueba-0123456789abcdef$''']
 # Por forma (nombre de 1-4 letras que pone el minificador + compile*), no por ruta.
 description = "Exportaciones compile* de css-select minificado"
 regexTarget = "secret"
-regexes = ['''^[A-Za-z$_]{1,4}\._?compile(Unsafe|Token)?(=[A-Za-z$_]{1,4}\._?compile(Unsafe|Token)?)*$''']
+regexes = ['''^[A-Za-z$_]{1,4}\._?compile(Unsafe|Token)?(=[A-Za-z$_]{1,4}\._?compile(Unsafe|Token)?)*(=void)?$''']
