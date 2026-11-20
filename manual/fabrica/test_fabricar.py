@@ -387,6 +387,19 @@ class CupoIA(unittest.TestCase):
             with self.assertRaises(urllib.error.HTTPError):
                 modulo_fabricar.ia('t', 'a', 's', 'u')
 
+    def test_4006_fuera_de_errors_code_no_es_cupo(self):
+        import urllib.error
+        cuerpo = b'{"errors":[{"code":3040}],"request_id":"ab4006cd"}'
+        with patch.object(modulo_fabricar.urllib.request, 'urlopen', side_effect=self.error(429, cuerpo)):
+            with self.assertRaises(urllib.error.HTTPError):
+                modulo_fabricar.ia('t', 'a', 's', 'u')
+
+    def test_cuerpo_no_json_sigue_siendo_error_normal(self):
+        import urllib.error
+        with patch.object(modulo_fabricar.urllib.request, 'urlopen', side_effect=self.error(429, b'<html>4006</html>')):
+            with self.assertRaises(urllib.error.HTTPError):
+                modulo_fabricar.ia('t', 'a', 's', 'u')
+
     def test_reescribir_no_traga_el_cupo_agotado(self):
         textos = [{'ruta': 'p', 'anterior': '', 'texto': 'Hola', 'siguiente': ''}]
         p = {'negocio': 'X', 'actividad': 'a', 'ciudad': 'c'}

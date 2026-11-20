@@ -91,6 +91,15 @@ def credenciales():
     return tok, acc
 
 
+def codigos_error(cuerpo):
+    """Códigos de errors[].code de una respuesta de la API de Cloudflare; vacío si no se entiende."""
+    try:
+        errores = json.loads(cuerpo or b'{}').get('errors') or []
+        return {e.get('code') for e in errores if isinstance(e, dict)}
+    except (ValueError, AttributeError):
+        return set()
+
+
 def ia(tok, acc, sistema, usuario):
     body = {'messages': [{'role': 'system', 'content': sistema}, {'role': 'user', 'content': usuario}], 'max_tokens': 4096}
     req = urllib.request.Request(f'https://api.cloudflare.com/client/v4/accounts/{acc}/ai/run/{MODELO}',
@@ -99,7 +108,7 @@ def ia(tok, acc, sistema, usuario):
         r = json.load(urllib.request.urlopen(req, timeout=180))['result']['response']
     except urllib.error.HTTPError as e:
         # 4006: «you have used up your daily free allocation of 10,000 neurons».
-        if e.code == 429 and b'4006' in (e.read() or b''):
+        if e.code == 429 and 4006 in codigos_error(e.read()):
             raise CupoIAAgotado('cupo diario de Workers AI agotado') from None
         raise
     return r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
