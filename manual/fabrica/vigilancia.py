@@ -219,12 +219,14 @@ CONSULTA_D1 = """query($cuenta: String!, $desde: Time!, $hasta: Time!) { viewer 
 
 
 def lecturas_d1(token: str, cuenta: str, ahora: datetime) -> dict[str, int]:
-    """Filas leídas por hora (todas las bases de la cuenta) desde las 00:00 UTC de hoy."""
+    """Filas leídas por hora (todas las bases de la cuenta) desde las 23:00 UTC de ayer.
+
+    La hora anterior a medianoche entra para medir el ritmo a las 00:xx; no cuenta en el total del día."""
     if not re.fullmatch(r"[0-9a-f]{32}", cuenta):
         raise RuntimeError("CLOUDFLARE_ACCOUNT_ID no tiene la forma esperada")
     hoy = ahora.astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     cuerpo = json.dumps({"query": CONSULTA_D1, "variables": {
-        "cuenta": cuenta, "desde": hoy.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "cuenta": cuenta, "desde": (hoy - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "hasta": (hoy + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")}}).encode()
     peticion = urllib.request.Request(GRAPHQL, data=cuerpo, method="POST", headers={
         "Authorization": "Bearer " + token, "Content-Type": "application/json"})
@@ -248,8 +250,8 @@ def estado_cupo_d1(horas: dict[str, int], ahora: datetime) -> tuple[bool, str, s
 
     El ritmo se mide en la hora de reloj actual y la anterior (UTC), no en las últimas
     horas con datos: un pico de hace horas no debe seguir avisando."""
-    total = sum(horas.values())
     hora = ahora.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    total = sum(v for h, v in horas.items() if h.startswith(hora.strftime("%Y-%m-%dT")))
     claves = [(hora - timedelta(hours=n)).strftime("%Y-%m-%dT%H:%M:%SZ") for n in (0, 1)]
     recientes = [horas.get(c, 0) for c in claves]
     pico = max(recientes, default=0)
@@ -265,7 +267,7 @@ def estado_cupo_d1(horas: dict[str, int], ahora: datetime) -> tuple[bool, str, s
 
 def vigilar_cupo_d1(repositorio: str, horas: dict[str, int], ahora: datetime) -> None:
     activo, titulo, cuerpo = estado_cupo_d1(horas, ahora)
-    print(f"D1: {sum(horas.values()):,} filas leídas hoy")
+    print(f"D1: {cuerpo.splitlines()[0]}")
     reconciliar_issue(repositorio, "d1", activo, titulo, cuerpo,
                       "Lecturas de D1 por debajo del umbral de aviso.", comentar_siempre=False)
 

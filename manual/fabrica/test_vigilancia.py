@@ -74,6 +74,12 @@ class CupoD1Tests(unittest.TestCase):
         self.assertTrue(estado_cupo_d1(horas, A_LAS(2))[0])
         self.assertFalse(estado_cupo_d1(horas, A_LAS(6))[0])
 
+    def test_a_las_00_30_cuenta_el_ritmo_de_ayer_pero_no_su_total(self):
+        horas = {"2026-11-19T22:00:00Z": 4000000, "2026-11-19T23:00:00Z": AVISO_HORA, "2026-11-20T00:00:00Z": 10}
+        activo, _, cuerpo = estado_cupo_d1(horas, datetime(2026, 11, 20, 0, 30, tzinfo=timezone.utc))
+        self.assertTrue(activo)
+        self.assertIn("Filas leídas hoy (UTC): 10 de", cuerpo)
+
 
 class ReconciliarIssueTests(unittest.TestCase):
     def test_comenta_antes_de_cambiar_el_titulo(self):
