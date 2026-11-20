@@ -32,7 +32,7 @@ class RondaDeCambios(unittest.TestCase):
 class FabricaEnRojo(unittest.TestCase):
     """Un fallo de la fábrica no puede quedar en una ejecución verde (20/11: 3 de 3 bloqueadas en verde)."""
 
-    def lote(self, intentos_previos):
+    def lote(self, intentos_previos, fabricada=None, problemas=()):
         fila = {'public_id': 'S-ABC123', 'slug': 'web', 'producto': 'Web', 'nombre': 'Ana', 'email': 'a@b.es',
                 'telefono': '', 'campos': '{}', 'mensaje': '', 'nota': f'reintento {intentos_previos}' if intentos_previos else '',
                 'estado': 'nueva'}
@@ -43,12 +43,20 @@ class FabricaEnRojo(unittest.TestCase):
         def bloqueada(_ruta):
             raise RuntimeError('FabricaBloqueada')
 
-        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=bloqueada),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
+        with patch.object(vp, 'disenos', return_value={'web': ['plantillas-negocio/x']}),                 patch.object(vp, 'd1', side_effect=d1), patch.object(vp, 'fabricar', side_effect=(lambda _r: fabricada) if fabricada else bloqueada), patch.object(vp, 'qa', return_value=list(problemas)),                 patch.object(vp, 'FALLOS_FABRICA', []), patch.object(vp, 'A_MANO', []), patch.object(vp, 'FALLOS_D1', []):
             vp.main()
 
     def test_todas_fallidas_termina_en_rojo(self):
         with self.assertRaises(SystemExit):
             self.lote(0)
+
+    def test_qa_con_problemas_termina_en_rojo(self):
+        # La vista previa existe pero no sale correo: nadie se entera si la pasada queda en verde.
+        with self.assertRaises(SystemExit):
+            self.lote(0, fabricada='https://x.pages.dev', problemas=['sin teléfono'])
+
+    def test_qa_ok_termina_en_verde(self):
+        self.lote(0, fabricada='https://x.pages.dev')
 
     def test_agotados_los_reintentos_termina_en_rojo(self):
         with self.assertRaises(SystemExit):

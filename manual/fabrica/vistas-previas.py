@@ -226,6 +226,8 @@ def procesar(public_id, p, intentos=0, mensaje=None):
         if not url:
             raise RuntimeError('despliegue sin URL')
         problemas = qa(url, p)
+        if problemas:
+            A_MANO.append(1)  # vista previa hecha pero sin correo: alguien tiene que mirarla
         print('  QA:', 'ok' if not problemas else (f'{len(problemas)} problemas' if PUBLICO else '; '.join(problemas)))
         # «QA ok» es la marca que usa el cron del Worker para mandar el correo de revisión.
         nota = (f'Vista previa automática: {url} · QA ok' if not problemas else
