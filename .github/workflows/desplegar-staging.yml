@@ -125,7 +125,7 @@ jobs:
       - name: Comprobar la portada
         run: |
           for _ in 1 2 3 4 5 6; do
-            if curl -fsS "$URL_PORTADA/" | grep -q 'Qué estás buscando'; then echo "Portada nueva servida en $URL_PORTADA"; exit 0; fi
+            if curl -fsS "$URL_PORTADA/" | grep -q 'sin complicaciones'; then echo "Portada nueva servida en $URL_PORTADA"; exit 0; fi
             sleep 10
           done
           echo "::error::$URL_PORTADA no sirve la portada nueva"; exit 1
