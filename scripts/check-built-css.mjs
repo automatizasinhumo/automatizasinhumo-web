@@ -38,12 +38,20 @@ const CLASS_ATTR = /class(?:Name)?=(?:"([^"]*)"|\{`([^`]*)`\})/g;
 // interpolation fragments, no quotes from ternaries.
 const PLAIN_CLASS = /^[a-z][a-zA-Z0-9:/\[\]().,%_'-]*$/;
 
+const STYLE_BLOCK = /<style\b[^>]*>([\s\S]*?)<\/style>/g;
+
 function classesIn(file) {
   const out = new Set();
   const source = readFileSync(file, 'utf8');
+  // Classes the component styles itself in its own <style> block are not Tailwind
+  // utilities: Astro emits them in the component's chunk, not in the storefront sheet.
+  const own = new Set();
+  for (const block of source.matchAll(STYLE_BLOCK)) {
+    for (const sel of block[1].matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) own.add(sel[1]);
+  }
   for (const match of source.matchAll(CLASS_ATTR)) {
     for (const token of (match[1] ?? match[2] ?? '').split(/\s+/)) {
-      if (token && PLAIN_CLASS.test(token) && !token.includes('$')) out.add(token);
+      if (token && PLAIN_CLASS.test(token) && !token.includes('$') && !own.has(token)) out.add(token);
     }
   }
   return out;
