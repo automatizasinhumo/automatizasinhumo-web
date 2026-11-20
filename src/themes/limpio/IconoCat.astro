@@ -1,0 +1,20 @@
+---
+/**
+ * Icono Tabler (MIT) para el tema: misma lógica que src/components/Icono.astro, pero
+ * dentro del tema para respetar la frontera de plantillas. `cat` resuelve el icono
+ * por slug de categoría (mismo mapa que src/features/storefront/iconos.ts).
+ */
+interface Props { name?: string; cat?: string; class?: string }
+const CAT: Record<string, string> = {
+  webs: 'world-www', hosteleria: 'tools-kitchen-2', reservas: 'calendar-check', bodas: 'heart',
+  identidad: 'id-badge-2', captacion: 'forms', bots: 'message-chatbot', automatizaciones: 'route',
+  enlaces: 'qrcode', tiendas: 'shopping-bag', portales: 'layout-dashboard', documentos: 'file-text',
+  contenido: 'photo-edit', planes: 'calendar-repeat',
+};
+const { name, cat, class: cls = 'h-5 w-5' } = Astro.props;
+const nombre = name ?? CAT[cat ?? ''] ?? 'sparkles';
+const iconos = import.meta.glob<string>('../../icons/*.svg', { query: '?raw', import: 'default', eager: true });
+const raw = iconos[`../../icons/${nombre}.svg`] ?? '';
+const interior = raw.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+---
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class={cls} aria-hidden="true" focusable="false" set:html={interior} />

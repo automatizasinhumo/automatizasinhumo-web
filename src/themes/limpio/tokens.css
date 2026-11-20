@@ -1,0 +1,90 @@
+/*
+ * ── Brand theming surface ────────────────────────────────────────────────
+ * THIS is the file to edit when you rebrand a clone — colors, fonts, radii.
+ * Upstream (the template) keeps structural CSS in global.css and doesn't touch
+ * this file, so your theme never conflicts when you pull updates.
+ *
+ * Tailwind v4 turns each --color-* into utilities (bg-brand, text-accent, …)
+ * and uses --font-sans / --radius-* as global defaults. See README → Theming.
+ */
+@theme {
+  /* Primary brand — solid buttons, primary actions, focus ring */
+  --color-brand: #176b5a;        /* swap for your brand color */
+  --color-brand-hover: #0f5547;  /* hover shade of the above */
+
+  /* Body text (tinta). Tokenized alongside the page colour so a theme can
+     change both together. */
+  --color-ink: #172d2d;
+
+  /* Accent — terracota: numeración, detalles y flechas */
+  --color-accent: #b34a28;
+
+  /* Surfaces — papel claro + líneas finas */
+  --color-paper: #f5f7f4;
+  --color-line: #d5ddd8;
+
+  /* Raised panels: cards, form wells, the checkout summary. Distinct from
+     `paper` so a panel can sit *on* the page rather than dissolving into it. */
+  --color-surface: #ffffff;
+
+  /* Tokens que pide el menú de Starwind UI (src/features/storefront/controls/starwind), con nuestra paleta. */
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  --color-foreground: var(--color-ink);
+  --color-outline: var(--color-brand);
+  --color-muted-foreground: var(--color-muted);
+
+  /* Secondary and tertiary text. Two levels, not one — the storefront leans on
+     the distinction between a supporting line and an incidental one, and
+     collapsing them flattens every summary and product meta block.
+
+     Both clear 4.5:1 on `surface`. `faint` was gray-400 in a dozen places
+     before these became tokens, which is 2.6:1 on white — legible to us,
+     invisible to anyone else. */
+  --color-muted: #435653;
+  --color-faint: #5a6b67;
+
+  /* Label colour on a `brand` fill. A token rather than a hardcoded white,
+     because a theme is free to pick a light brand — and then white fails
+     contrast on every primary button at once. */
+  --color-on-brand: #ffffff;
+
+  /* Tipografía de marca autoalojada (@font-face en src/styles/overrides.css) */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', Roboto, Arial,
+    sans-serif;
+  --font-serif: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui,
+    sans-serif; /* titulares: grotesca de marca */
+
+  /* Corner radius (Tailwind defaults, surfaced here for one-place editing) */
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+}
+
+/*
+ * Content-page prose scale.
+ *
+ * Ordinary custom properties, intentionally OUTSIDE @theme: the core
+ * `.markdown-content` rules consume them directly, and they define no Tailwind
+ * utility namespace. Moving them into @theme would imply a utility-token role
+ * they do not have.
+ *
+ * Every rule that reads one also carries today's value as its final fallback,
+ * so deleting a line here — or replacing this whole file with a design system's
+ * tokens — degrades to the current design rather than to browser defaults.
+ */
+/* Page container. The default is a centred editorial column. */
+:root {
+  --page-max: 72rem;
+  --page-pad-x: 1.5rem;
+  --page-pad-y: 3rem;
+}
+
+:root {
+  --prose-measure: 48rem;
+  --prose-leading: 1.75;
+  --prose-h1-size: 2.25rem;
+  --prose-h1-tracking: -0.03em;
+  --prose-h2-size: 1.5rem;
+  --prose-h2-tracking: -0.01em;
+  --prose-h3-size: 1.125rem;
+}

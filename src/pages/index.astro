@@ -8,6 +8,13 @@ import { loadHomeServices } from '../features/storefront/homeServices';
 import { hasCatalogParams } from '../features/storefront/campaignParams';
 import { resolveHomePath } from '../features/settings/home';
 import { getConfig } from '../config';
+import { OBJETIVOS } from '../features/storefront/selector';
+
+// Un tema puede traer su propia portada (Home.astro): entonces `/` pinta solo esa
+// portada y el catálogo completo sigue en /products. Sin Home.astro, la de siempre.
+const ThemeHome = Object.values(import.meta.glob<{ default: unknown }>('#theme/Home.astro', { eager: true }))[0]?.default as
+  | ((props: Record<string, unknown>) => unknown)
+  | undefined;
 
 // A store can point `/` at a page or a single product instead of the catalog.
 // Rewriting rather than duplicating those templates keeps one implementation of
@@ -24,7 +31,7 @@ const config = getConfig();
 let homeServices: Awaited<ReturnType<typeof loadHomeServices>>['services'] = [];
 // Portada incompleta por un fallo de D1: que ninguna caché compartida la guarde.
 const noStore = () => Astro.response.headers.set('cache-control', 'no-store');
-if (showHero) {
+if (showHero && !ThemeHome) {
   try {
     const result = await loadHomeServices(env.DB, {
       currency: config.currency,
@@ -40,8 +47,17 @@ if (showHero) {
 }
 ---
 
-<Layout title={showHero ? 'Webs para negocios a precio cerrado: la ves gratis antes de pagar' : undefined}>
-  {showHero && <HomeHero services={homeServices} />}
-  <ProductList belowHero={showHero} />
-  {showHero && <TourInvitacion />}
-</Layout>
+{showHero && ThemeHome ? (
+  <Layout title="Tu negocio, tu evento, tu idea, en marcha sin complicaciones" sinAviso>
+    <ThemeHome
+      objetivos={OBJETIVOS.map((o) => ({ id: o.id, label: o.label, detalle: o.detalle, href: `/elige?objetivo=${o.id}#resultado` }))}
+      catalogHref="/products"
+    />
+  </Layout>
+) : (
+  <Layout title={showHero ? 'Webs para negocios a precio cerrado: la ves gratis antes de pagar' : undefined}>
+    {showHero && <HomeHero services={homeServices} />}
+    <ProductList belowHero={showHero} />
+    {showHero && <TourInvitacion />}
+  </Layout>
+)}

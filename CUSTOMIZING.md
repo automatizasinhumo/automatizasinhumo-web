@@ -16,6 +16,7 @@ theme engine and no code editor in Admin — you edit source, build, and deploy.
 | `src/themes/<your-theme>/Footer.astro` | Footer navigation and store attribution. |
 | `src/themes/<your-theme>/ProductCard.astro` | Every product card — catalog, category, search, and the "You may also like" row. |
 | `src/themes/<your-theme>/Catalog.astro` | The catalog page at both `/` and `/products`: headings, category links, grid, empty state. |
+| `src/themes/<your-theme>/Home.astro` (optional) | If present, `/` renders only this page (props: `objetivos` with `href` to `/elige`, `catalogHref`); the catalog stays at `/products`. Without it, `/` keeps the hero plus catalog. |
 | `src/themes/<your-theme>/ProductDetail.astro` | The product page: gallery, details, purchase panel, and recommendations. |
 | `src/themes/<your-theme>/ContentPage.astro` | The frame around a merchant's Markdown page. |
 | `src/themes/<your-theme>/tokens.css` | Your theme's design tokens: the `@theme` block (colors, fonts, radii) plus the prose and container scales. |

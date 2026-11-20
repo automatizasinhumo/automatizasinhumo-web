@@ -1,0 +1,74 @@
+---
+/**
+ * STORE-OWNED. Portada del tema «limpio»: eslogan, dos botones y un test corto.
+ *
+ * Solo bloques que ya se adaptan solos (rejilla y tipografía de los tokens del
+ * tema): nada se ajusta a mano por dispositivo. El test son enlaces normales a
+ * /elige, que calcula la recomendación con los precios del catálogo; sin JS.
+ */
+import Icono from './IconoCat.astro';
+
+interface Opcion {
+  id: string;
+  label: string;
+  detalle: string;
+  href: string;
+}
+
+interface Props {
+  /** Respuestas a «¿Qué estás buscando?», ya con su enlace al resultado. */
+  objetivos: readonly Opcion[];
+  /** Listado completo de servicios. */
+  catalogHref: string;
+}
+
+const { objetivos, catalogHref } = Astro.props;
+
+// Qué respuestas enseña la portada y en qué orden. Un id que no exista se ignora.
+const PRIMERA_PREGUNTA: [string, string][] = [
+  ['trabajo', 'id-badge-2'],
+  ['llamadas', 'world-www'],
+  ['automatizar', 'route'],
+  ['evento', 'heart'],
+  ['vender', 'shopping-bag'],
+  ['citas', 'calendar-check'],
+];
+const opciones = PRIMERA_PREGUNTA.flatMap(([id, icono]) => {
+  const o = objetivos.find((x) => x.id === id);
+  return o ? [{ ...o, icono }] : [];
+});
+---
+
+<section class="py-10 text-center sm:py-16">
+  <h1 class="mx-auto max-w-3xl text-4xl font-bold leading-tight text-ink sm:text-6xl">
+    Tu negocio, tu evento, tu idea, <span class="text-brand">en marcha sin complicaciones</span>
+  </h1>
+  <p class="mx-auto mt-5 max-w-xl text-lg text-muted">
+    Eliges, rellenas tus datos y lo tienes listo. Con precio cerrado desde el principio.
+  </p>
+  <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+    <a href="#test" class="w-full rounded-full bg-brand px-6 py-3 font-semibold text-on-brand hover:bg-brand-hover sm:w-auto">
+      Haz el test y te recomendamos
+    </a>
+    <a href={catalogHref} class="w-full rounded-full border border-line bg-surface px-6 py-3 font-semibold text-ink hover:border-brand sm:w-auto">
+      Ver todos los servicios
+    </a>
+  </div>
+</section>
+
+<section id="test" class="scroll-mt-24 pb-16" aria-labelledby="test-titulo">
+  <h2 id="test-titulo" class="text-center text-2xl font-bold text-ink sm:text-3xl">¿Qué estás buscando?</h2>
+  <ul class="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {opciones.map((o) => (
+      <li>
+        <a href={o.href} class="flex h-full items-start gap-3 rounded-2xl border border-line bg-surface p-5 text-left transition-colors hover:border-brand hover:bg-brand/5">
+          <Icono name={o.icono} class="mt-0.5 h-6 w-6 shrink-0 text-brand" />
+          <span>
+            <span class="block font-semibold text-ink">{o.label}</span>
+            <span class="mt-1 block text-sm text-muted">{o.detalle}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
