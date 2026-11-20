@@ -99,5 +99,26 @@ class ReconciliarIssueTests(unittest.TestCase):
         self.assertEqual(llamadas, ["comment"])  # el título sigue viejo: la próxima pasada reintenta
 
 
+class ModeloIA(unittest.TestCase):
+    AHORA = datetime(2026, 11, 20, tzinfo=timezone.utc)
+
+    def ficha(self, fecha=None):
+        props = [{"property_id": "context_window", "value": "256000"}]
+        if fecha:
+            props.append({"property_id": "planned_deprecation_date", "value": fecha})
+        return {"name": "@cf/x/m", "properties": props}
+
+    def test_desaparecido_avisa(self):
+        activo, titulo, _ = vigilancia.estado_modelo_ia("@cf/x/m", None, self.AHORA)
+        self.assertTrue(activo)
+        self.assertIn("ya no está", titulo)
+
+    def test_retirada_en_30_dias_avisa_y_lejana_no(self):
+        self.assertTrue(vigilancia.estado_modelo_ia("@cf/x/m", self.ficha("2026-12-10"), self.AHORA)[0])
+        self.assertFalse(vigilancia.estado_modelo_ia("@cf/x/m", self.ficha("2027-06-01"), self.AHORA)[0])
+        self.assertFalse(vigilancia.estado_modelo_ia("@cf/x/m", self.ficha(), self.AHORA)[0])
+        self.assertFalse(vigilancia.estado_modelo_ia("@cf/x/m", self.ficha("pronto"), self.AHORA)[0])
+
+
 if __name__ == "__main__":
     unittest.main()

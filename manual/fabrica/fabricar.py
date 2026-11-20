@@ -19,12 +19,14 @@ from pathlib import Path
 from bs4 import BeautifulSoup, NavigableString, Comment
 import fastjsonschema  # BSD-3-Clause, https://github.com/horejsek/python-fastjsonschema
 import phonenumbers  # Apache-2.0, https://github.com/daviddrysdale/python-phonenumbers (libphonenumber de Google)
+sys.path.insert(0, str(Path(__file__).parent))
+import proveedores_ia  # noqa: E402
+from proveedores_ia import CupoIAAgotado  # noqa: E402,F401  (vistas-previas.py lo importa de aquí)
 
 DEMOS = Path(os.environ.get('DEMOS_DIR', 'C:/GIT/automatizasinhumo-demos'))
 DEMOS_URL = 'https://automatizasinhumo-demos.davidpd89.workers.dev'
 # En GitHub Actions los registros son públicos: no se escriben datos ni URLs de clientes.
 PUBLICO = bool(os.environ.get('GITHUB_ACTIONS'))
-MODELO = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 # Vistas previas en un único Worker («vistas/») que sirve /<id>/ruta desde Workers KV: sin un Worker por
 # cliente (tope de 100 por cuenta) ni R2. Cada clave caduca sola a los VISTAS_TTL segundos.
 # FABRICA_DESTINO=worker vuelve al Worker estático «web-<id>» de antes.
@@ -72,10 +74,6 @@ def aplanar_respuesta(respuesta):
     return salida
 
 
-class CupoIAAgotado(RuntimeError):
-    """Workers AI agotó el cupo gratuito del día (se repone a las 00:00 UTC): reintentar antes no sirve."""
-
-
 class FabricaBloqueada(RuntimeError):
     """La vista previa saldría con textos de la plantilla o datos de otro negocio: no se publica."""
 
@@ -91,27 +89,9 @@ def credenciales():
     return tok, acc
 
 
-def codigos_error(cuerpo):
-    """Códigos de errors[].code de una respuesta de la API de Cloudflare; vacío si no se entiende."""
-    try:
-        errores = json.loads(cuerpo or b'{}').get('errors') or []
-        return {e.get('code') for e in errores if isinstance(e, dict)}
-    except (ValueError, AttributeError):
-        return set()
-
-
 def ia(tok, acc, sistema, usuario):
-    body = {'messages': [{'role': 'system', 'content': sistema}, {'role': 'user', 'content': usuario}], 'max_tokens': 4096}
-    req = urllib.request.Request(f'https://api.cloudflare.com/client/v4/accounts/{acc}/ai/run/{MODELO}',
-                                 data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json'})
-    try:
-        r = json.load(urllib.request.urlopen(req, timeout=180))['result']['response']
-    except urllib.error.HTTPError as e:
-        # 4006: «you have used up your daily free allocation of 10,000 neurons».
-        if e.code == 429 and 4006 in codigos_error(e.read()):
-            raise CupoIAAgotado('cupo diario de Workers AI agotado') from None
-        raise
-    return r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
+    """Respuesta de la cadena de proveedores (proveedores_ia.py): Workers AI y, sin cupo, los siguientes."""
+    return proveedores_ia.completar(proveedores_ia.cadena(tok, acc), sistema, usuario)
 
 
 def nombre_publico(p):

@@ -370,6 +370,13 @@ class PublicacionKV(unittest.TestCase):
 
 
 class CupoIA(unittest.TestCase):
+    def setUp(self):
+        modulo_fabricar.proveedores_ia.FUERA.clear()
+        espera = patch.object(modulo_fabricar.proveedores_ia.time, 'sleep')
+        espera.start()
+        self.addCleanup(espera.stop)
+        self.addCleanup(modulo_fabricar.proveedores_ia.FUERA.clear)
+
     @staticmethod
     def error(codigo, cuerpo):
         import io, urllib.error
