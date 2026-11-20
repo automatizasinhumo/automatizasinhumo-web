@@ -102,14 +102,25 @@ function separarLugar(nombre: string, lugar: string): [string, string] {
 /** La línea de contacto entera acaba a veces en «ubicación»: se queda el trozo que no es email, teléfono ni web. */
 function soloLugar(texto: string): string {
 	if (!/@|\d{3}|https?:|www\./i.test(texto)) return texto;
-	const trozos = texto.split(/\s*[·•|]\s*|\s{2,}/).filter((t) => t && !/@|\d{3}|https?:|www\./i.test(t));
+	const trozos = texto
+		.split(/[·•|]| {2}/)
+		.map((t) => t.trim())
+		.filter((t) => t && !/@|\d{3}|https?:|www\./i.test(t));
 	return trozos.at(-1) ?? "";
+}
+
+/** Corta «Inglés: C1» / «Francés (B2)» sin regex con retroceso: busca el primer separador a mano. */
+function partirIdioma(texto: string): [string, string] {
+	const t = texto.trim();
+	const abre = t.indexOf("(");
+	if (abre > 0 && t.endsWith(")")) return [t.slice(0, abre), t.slice(abre + 1, -1)];
+	const corte = t.search(/[:–—-]/);
+	return corte > 0 ? [t.slice(0, corte), t.slice(corte + 1)] : [t, ""];
 }
 
 /** «Inglés: C1», «Francés (B2)», «Español – nativo» → idioma, nivel y puntos. */
 function idioma(nombre: string, nivel: string, puntos: number) {
-	const m = nivel ? null : /^([^:()–—-]+?)\s*(?:[:–—-]\s*(.+)|\((.+)\))$/.exec(nombre);
-	const [i, n] = m ? [m[1], m[2] ?? m[3] ?? ""] : [nombre, nivel];
+	const [i, n] = nivel ? [nombre, nivel] : partirIdioma(nombre);
 	const k = n.toLowerCase();
 	const deducido = /nativ|bilin|materna|c2/.test(k) ? 5 : /c1|avanzad|fluid/.test(k) ? 4 : /b2|b1|intermed/.test(k) ? 3 : /a2|a1|b[áa]sic/.test(k) ? 2 : 0;
 	return { idioma: i.trim(), nivel: n.trim(), puntos: puntos || deducido || 3 };
