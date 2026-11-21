@@ -123,9 +123,16 @@ const campo = 'campo';
         <div class="con-vista">
           <div class="min-w-0">
             <div class="flex flex-wrap gap-2">
+              <label class="boton boton-principal boton-compacto importar">
+                <input type="file" name="importar" class="sr-only" accept=".pdf,.docx,.zip,.json,application/pdf" data-importar />
+                Usar mi CV actual
+              </label>
               <button type="button" class="boton boton-secundario boton-compacto" data-ejemplo>Rellenar con un ejemplo</button>
               <button type="button" class="boton boton-secundario boton-compacto" data-vaciar>Empezar en blanco</button>
             </div>
+            <p class="importar-nota" data-estado-importar role="status" aria-live="polite">
+              ¿Ya tienes un CV? Súbelo en PDF o Word, o la exportación de LinkedIn (.zip), y rellenamos los campos por ti. Se lee en tu navegador.
+            </p>
 
             <fieldset class="bloque">
               <legend>Sobre ti</legend>
@@ -569,6 +576,21 @@ const campo = 'campo';
   }
   .bloque {
     margin-top: var(--ds-hueco-6);
+  }
+  .importar {
+    cursor: pointer;
+  }
+  .importar:focus-within {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .importar-nota {
+    margin-top: var(--ds-hueco-2);
+    font-size: var(--ds-texto-small);
+    color: var(--color-muted);
+  }
+  .importar-nota[data-tono='error'] {
+    color: var(--color-ink);
   }
   .bloque legend {
     margin-bottom: var(--ds-hueco-2);
