@@ -387,6 +387,23 @@ class BloqueoDePublicacion(unittest.TestCase):
             salida = modulo_fabricar.reescribir(textos, pedido(), ('t', 'a'))
         self.assertEqual(salida, {'0': 'Relaja cuerpo y mente', '1': 'Reserva ahora'})
 
+    def test_la_repesca_adapta_uno_a_uno_lo_que_el_lote_dejo(self):
+        # Run 44949430159 (21/11): 3 intentos por lote y aun así 1-2 de 41 textos quedaban igual.
+        textos = [{'texto': 'Relax your body and mind'}, {'texto': 'Our team of experts will pamper you'}]
+        llamadas = []
+
+        def ia_falsa(_tok, _acc, _sistema, usuario):
+            llamadas.append(usuario)
+            if 'no lo devuelvas igual' in usuario:
+                return '{"1": "Nuestro equipo de Ana te cuida"}'
+            return '{"0": "Relaja cuerpo y mente", "1": "Our team of experts will pamper you"}'
+
+        with patch.object(modulo_fabricar, 'ia', side_effect=ia_falsa):
+            salida = modulo_fabricar.reescribir(textos, pedido(), ('t', 'a'))
+        self.assertEqual(salida, {'0': 'Relaja cuerpo y mente', '1': 'Nuestro equipo de Ana te cuida'})
+        self.assertEqual(len(llamadas), 4)  # 3 del lote + 1 de repesca, que solo lleva el nodo pendiente
+        self.assertNotIn('Relax your body', llamadas[-1])
+
     def test_un_valor_invalido_no_tira_el_lote(self):
         textos = [{'texto': 'Relax your body and mind'}, {'texto': 'Book now'}]
         respuestas = iter(['{"0": "Relaja cuerpo y mente", "1": ""}', '{"1": "Reserva ahora"}'])
