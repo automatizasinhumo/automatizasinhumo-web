@@ -37,6 +37,8 @@ interface Estado {
   tamano: 'movil' | 'escritorio';
   /** Pedido cuya web publicada hay en el formulario ('' si es un diseño nuevo sin publicar). */
   pedido: string;
+  /** Último lema y presentación que escribimos nosotros: si el cliente no los ha tocado, se rehacen. */
+  escritos: { lema: string; sobre: string };
 }
 interface RespuestaDominio {
   ok?: boolean;
@@ -110,6 +112,10 @@ export function iniciarEstudioWeb() {
     contenido: g.contenido && typeof g.contenido === 'object' ? g.contenido : null,
     tamano: g.tamano === 'escritorio' ? 'escritorio' : 'movil',
     pedido: typeof g.pedido === 'string' ? g.pedido : '',
+    escritos: {
+      lema: typeof g.escritos?.lema === 'string' ? g.escritos.lema : '',
+      sobre: typeof g.escritos?.sobre === 'string' ? g.escritos.sobre : '',
+    },
   };
   if (!estado.plantilla) estado.alcanzado = 0;
   let actual = 'plantilla';
@@ -161,8 +167,8 @@ export function iniciarEstudioWeb() {
    * Textos de partida de su sector (sectores.ts) en lo que el cliente aún no ha escrito: frase,
    * «Quiénes somos» y servicios. Lo escrito no se toca. Devuelve si ha rellenado algo.
    */
-  /** Último lema y presentación que escribimos nosotros: si el cliente no los ha tocado, se rehacen. */
-  const escritos = { lema: '', sobre: '' };
+  // Se guardan con el borrador: tras recargar, la frase y la presentación nuestras se siguen poniendo al día.
+  const escritos = estado.escritos;
   function rellenarTextos(): boolean {
     const c = recoger();
     const t = textosDeSector(c.sector, c.negocio, c.direccion);
