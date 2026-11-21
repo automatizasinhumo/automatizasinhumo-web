@@ -42,9 +42,9 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
 {
   model.announcement && (
     <div class="bg-brand text-on-brand">
-      <div class="mx-auto max-w-6xl px-6 py-2 text-center text-[13px] font-medium">
+      <div class="mx-auto max-w-6xl px-6 py-1 text-center text-[13px] font-medium">
         {model.announcement.href ? (
-          <a href={model.announcement.href} class="underline-offset-2 hover:underline">
+          <a href={model.announcement.href} class="inline-block py-1 underline-offset-2 hover:underline">
             {model.announcement.text}
           </a>
         ) : (
@@ -151,14 +151,15 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
   }
   /* Alto táctil mínimo (44 px) en todos los controles de la isla: logo, menú, lupa, carrito,
      cuenta y botón. La caja crece, el icono y el texto no. */
+  .isla > a,
+  .isla nav :global(a),
+  .isla nav :global(summary),
+  .isla nav :global(button) { min-height: var(--ds-toque); align-items: center; }
+  /* display solo si no está oculto por una utilidad (p. ej. «hidden sm:inline-flex»). */
   .isla > a:not(.hidden),
   .isla nav :global(a:not(.hidden)),
   .isla nav :global(summary:not(.hidden)),
-  .isla nav :global(button:not(.hidden)) {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--ds-toque);
-  }
+  .isla nav :global(button:not(.hidden)) { display: inline-flex; }
   .isla nav :global(summary),
   .isla nav :global(button) { min-width: var(--ds-toque); justify-content: center; }
   /* Arriba del todo, sin caja; al bajar 0-96 px aparece el cristal. Solo cambia
