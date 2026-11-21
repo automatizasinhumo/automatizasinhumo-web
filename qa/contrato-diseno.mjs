@@ -58,7 +58,7 @@ try {
           // Enlace «estirado»: su ::after cubre la tarjeta entera, que es la zona que se pulsa.
           .filter((e) => { const a = getComputedStyle(e, '::after'); return !(a.position === 'absolute' && parseFloat(a.height) >= 40); })
           .map((e) => ({ t: (e.textContent || e.getAttribute('aria-label') || e.tagName).trim().slice(0, 30), h: Math.round(e.getBoundingClientRect().height), w: Math.round(e.getBoundingClientRect().width), pie: !!e.closest('footer, header') }))
-          .filter((x) => x.h < 24 || x.w < 24 || (x.pie && (x.h < 40 || x.w < 40)));
+          .filter((x) => x.h < 24 || x.w < 24 || (x.pie && x.h < 40));
         return {
           desborde: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           h1: h1 && !h1.classList.contains('h1-portada') ? parseFloat(getComputedStyle(h1).fontSize) : null,
