@@ -83,7 +83,7 @@ describe('renderWeb', () => {
     expect(doc).not.toContain('class="w-marca"');
     expect(doc).toContain('<link rel="canonical" href="https://x.es/w/peluqueria-lola">');
     // Sin JavaScript: el único <script> es la ficha de datos para buscadores.
-    expect(doc.match(/<script[^>]*>/g)).toEqual(['<script type="application/ld+json">']);
+    expect(doc.match(/<script[^>]*>/gi)).toEqual(['<script type="application/ld+json">']);
   });
 
   it('desde el dominio del cliente, el pie y el icono apuntan a nuestra tienda', () => {
