@@ -7,11 +7,13 @@ import {
   DISENOS_CV,
   ESPACIADOS,
   ESTILOS_LETRA,
+  FILTROS_DISENO,
   MOTOR_CV,
   PAQUETES_CV,
   PASOS_CV,
   TAMANOS,
   euros,
+  filtrosDe,
   miniaturaCv,
 } from '../../features/servicios/cv';
 
@@ -83,9 +85,18 @@ const campo = 'campo';
           </label>
 
           <p class="rejilla-titulo">O elige uno de nuestros diseños listos · <strong>{euros(disenada.precio)}</strong></p>
+          <div class="filtros" role="radiogroup" aria-label="Ver diseños" data-filtros-diseno>
+            {FILTROS_DISENO.map((f, i) => (
+              <label class="forma">
+                <input type="radio" name="ver" value={f.id} class="sr-only" checked={i === 0} />
+                <span>{f.nombre} <small>{DISENOS_CV.filter(f.cumple).length}</small></span>
+              </label>
+            ))}
+          </div>
+          <p class="filtro-nota" data-nota-filtro="una-columna" hidden>Los filtros automáticos de las empresas leen mejor los diseños de una columna.</p>
           <div class="rejilla">
             {DISENOS_CV.map((d) => (
-              <label class="tarjeta diseno">
+              <label class="tarjeta diseno" data-filtros={filtrosDe(d)}>
                 <input type="radio" name="diseno" value={d.id} class="sr-only" />
                 <img src={miniaturaCv(d.id)} alt={`Diseño ${d.nombre}: ${d.estilo.toLowerCase()}`} width="480" height="679" loading="lazy" decoding="async" />
                 <span class="diseno-pie">
@@ -498,6 +509,22 @@ const campo = 'campo';
     margin-top: var(--ds-hueco-8);
     color: var(--color-muted);
   }
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-hueco-2);
+    margin-top: var(--ds-hueco-3);
+  }
+  .filtros small {
+    margin-left: 0.25rem;
+    font-weight: 400;
+    opacity: 0.75;
+  }
+  .filtro-nota {
+    margin-top: var(--ds-hueco-2);
+    font-size: var(--ds-texto-small);
+    color: var(--color-muted);
+  }
   .rejilla {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
@@ -506,6 +533,9 @@ const campo = 'campo';
   }
   .diseno {
     overflow: hidden;
+  }
+  .diseno[hidden] {
+    display: none;
   }
   .diseno img {
     aspect-ratio: 480 / 679;
@@ -759,6 +789,23 @@ const campo = 'campo';
     border-radius: 0.5rem;
     background: #fff;
     box-shadow: var(--ds-sombra-2);
+  }
+  /* Protección disuasoria (src/features/servicios/protegerVista.ts). */
+  .vista-lienzo {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .vista-lienzo :global(canvas) {
+    transition: filter var(--ds-mov-rapido);
+  }
+  .vista[data-protegida='oculta'] .vista-lienzo :global(canvas) {
+    filter: blur(14px);
+  }
+  @media print {
+    .vista {
+      display: none !important;
+    }
   }
   .vista[aria-busy='true'] .vista-lienzo {
     opacity: 0.6;

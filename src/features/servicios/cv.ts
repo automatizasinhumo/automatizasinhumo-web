@@ -37,28 +37,41 @@ export interface DisenoCv {
   id: string;
   nombre: string;
   estilo: string;
+  /** Sobrio (blanco y negro con un toque) o con bloques de color: lo primero que decide el cliente. */
+  tono: 'sobrio' | 'color';
+  /** Una columna: la que mejor leen los filtros automáticos de las empresas. */
+  columnas: 1 | 2;
 }
 
 /** Los 15 diseños del motor, con nombre propio y una pista de estilo. */
 export const DISENOS_CV: readonly DisenoCv[] = [
-  { id: 'onyx', nombre: 'Ónix', estilo: 'Clásico con columna lateral' },
-  { id: 'azurill', nombre: 'Celeste', estilo: 'Cabecera centrada' },
-  { id: 'bronzor', nombre: 'Bronce', estilo: 'Apartados al margen' },
-  { id: 'chikorita', nombre: 'Hoja', estilo: 'Lateral de color a la derecha' },
-  { id: 'ditgar', nombre: 'Lavanda', estilo: 'Columna de color con tu nombre' },
-  { id: 'ditto', nombre: 'Grafito', estilo: 'Banda oscura arriba' },
-  { id: 'gengar', nombre: 'Violeta', estilo: 'Lateral y cabecera de color' },
-  { id: 'glalie', nombre: 'Glaciar', estilo: 'Lateral azul' },
-  { id: 'kakuna', nombre: 'Esencial', estilo: 'Centrado y simétrico' },
-  { id: 'lapras', nombre: 'Marcos', estilo: 'Bloques enmarcados' },
-  { id: 'leafish', nombre: 'Brote', estilo: 'Cabecera suave' },
-  { id: 'meowth', nombre: 'Elegante', estilo: 'Títulos en mayúsculas' },
-  { id: 'pikachu', nombre: 'Ámbar', estilo: 'Cabecera en bloque' },
-  { id: 'rhyhorn', nombre: 'Lineal', estilo: 'Una columna, sin adornos' },
-  { id: 'scizor', nombre: 'Carmín', estilo: 'Filete de color, títulos marcados' },
+  { id: 'onyx', nombre: 'Ónix', estilo: 'Clásico con columna lateral', tono: 'sobrio', columnas: 2 },
+  { id: 'azurill', nombre: 'Celeste', estilo: 'Cabecera centrada', tono: 'sobrio', columnas: 2 },
+  { id: 'bronzor', nombre: 'Bronce', estilo: 'Apartados al margen', tono: 'sobrio', columnas: 1 },
+  { id: 'chikorita', nombre: 'Hoja', estilo: 'Lateral de color a la derecha', tono: 'color', columnas: 2 },
+  { id: 'ditgar', nombre: 'Lavanda', estilo: 'Columna de color con tu nombre', tono: 'color', columnas: 2 },
+  { id: 'ditto', nombre: 'Grafito', estilo: 'Banda oscura arriba', tono: 'color', columnas: 2 },
+  { id: 'gengar', nombre: 'Violeta', estilo: 'Lateral y cabecera de color', tono: 'color', columnas: 2 },
+  { id: 'glalie', nombre: 'Glaciar', estilo: 'Lateral azul', tono: 'color', columnas: 2 },
+  { id: 'kakuna', nombre: 'Esencial', estilo: 'Centrado y simétrico', tono: 'sobrio', columnas: 2 },
+  { id: 'lapras', nombre: 'Marcos', estilo: 'Bloques enmarcados', tono: 'sobrio', columnas: 2 },
+  { id: 'leafish', nombre: 'Brote', estilo: 'Cabecera suave', tono: 'color', columnas: 2 },
+  { id: 'meowth', nombre: 'Elegante', estilo: 'Títulos en mayúsculas', tono: 'sobrio', columnas: 2 },
+  { id: 'pikachu', nombre: 'Ámbar', estilo: 'Cabecera en bloque', tono: 'color', columnas: 2 },
+  { id: 'rhyhorn', nombre: 'Lineal', estilo: 'Una columna, sin adornos', tono: 'sobrio', columnas: 1 },
+  { id: 'scizor', nombre: 'Carmín', estilo: 'Filete de color, títulos marcados', tono: 'sobrio', columnas: 1 },
 ];
 
 export const DISENO_POR_DEFECTO = 'onyx';
+
+/** Filtros de la galería de diseños. `cumple` es la única fuente: la página y el script la usan tal cual. */
+export const FILTROS_DISENO = [
+  { id: 'todos', nombre: 'Todos', cumple: () => true },
+  { id: 'sobrio', nombre: 'Sobrios', cumple: (d: DisenoCv) => d.tono === 'sobrio' },
+  { id: 'color', nombre: 'Con color', cumple: (d: DisenoCv) => d.tono === 'color' },
+  { id: 'una-columna', nombre: 'Una columna', cumple: (d: DisenoCv) => d.columnas === 1 },
+] as const;
+export const filtrosDe = (d: DisenoCv) => FILTROS_DISENO.filter((f) => f.cumple(d)).map((f) => f.id).join(' ');
 
 /** Letra, tamaño y espaciado: el mismo catálogo que usa el motor, para que página y PDF no se desfasen. */
 export { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, TAMANOS } from '../../../cv-estudio/src/catalogo-formato';

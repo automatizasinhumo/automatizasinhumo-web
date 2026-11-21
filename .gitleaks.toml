@@ -29,7 +29,7 @@ regexes = ['''^secreto-de-prueba-0123456789abcdef$''']
 [[allowlists]]
 # css-select (BSD-2) compilado en public/cv/estudio/motor: la cadena de exportaciones
 # «X.compileToken=X.compileUnsafe=X.compile=void 0» parece una clave para generic-api-key.
-# Por forma (nombre de 1-4 letras que pone el minificador + compile*), no por ruta.
+# Por forma (identificador de 1-4 caracteres que pone el minificador, p. ej. «_0» + compile*), no por ruta.
 description = "Exportaciones compile* de css-select minificado"
 regexTarget = "secret"
-regexes = ['''^[A-Za-z$_]{1,4}\._?compile(Unsafe|Token)?(=[A-Za-z$_]{1,4}\._?compile(Unsafe|Token)?)*(=void)?$''']
+regexes = ['''^[A-Za-z$_][A-Za-z0-9$_]{0,3}\._?compile(Unsafe|Token)?(=[A-Za-z$_][A-Za-z0-9$_]{0,3}\._?compile(Unsafe|Token)?)*(=void)?$''']
