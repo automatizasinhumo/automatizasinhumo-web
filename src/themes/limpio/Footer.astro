@@ -16,6 +16,20 @@ interface Props {
 }
 
 const { model } = Astro.props;
+
+// El menú del pie llega plano desde D1: aquí se agrupa por destino para que sea fácil de recorrer.
+// Un enlace que no encaje en ningún grupo cae en «Empresa»; ninguno se pierde.
+const GRUPOS: { titulo: string; coincide: RegExp }[] = [
+  { titulo: 'Servicios', coincide: /^\/(categories?|category|products?|servicios|webs|elige)(\/|$)/ },
+  { titulo: 'Ayuda', coincide: /contacto|preguntas|faq|como-funciona|herramientas|blog/ },
+  { titulo: 'Legal', coincide: /aviso|privacidad|condiciones|cookies|legal/ },
+];
+const grupos = [...GRUPOS.map((g) => ({ titulo: g.titulo, links: [] as typeof model.footerLinks })), { titulo: 'Empresa', links: [] as typeof model.footerLinks }]
+for (const link of model.footerLinks) {
+  const i = GRUPOS.findIndex((g) => g.coincide.test(link.href));
+  grupos[i === -1 ? GRUPOS.length : i].links.push(link);
+}
+const gruposVisibles = grupos.filter((g) => g.links.length > 0);
 ---
 
 <footer class="pie">
@@ -36,10 +50,17 @@ const { model } = Astro.props;
         </p>
       </div>
       {
-        model.footerLinks.length > 0 && (
+        gruposVisibles.length > 0 && (
           <nav aria-label="Pie de página" class="enlaces">
-            {model.footerLinks.map((link) => (
-              <a href={link.href}>{link.text}</a>
+            {gruposVisibles.map((g) => (
+              <div>
+                <h2>{g.titulo}</h2>
+                <ul>
+                  {g.links.map((link) => (
+                    <li><a href={link.href}>{link.text}</a></li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </nav>
         )
@@ -97,10 +118,13 @@ const { model } = Astro.props;
     gap: var(--ds-hueco-8);
     padding-block: var(--ds-hueco-12) var(--ds-hueco-8);
   }
-  @media (min-width: 40rem) { .columnas { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } }
+  @media (min-width: 60rem) { .columnas { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
   .chapa { display: inline-block; max-width: 100%; border-radius: 0.75rem; padding: 0.5rem 0.75rem; background: var(--color-paper); }
   .lema { margin-top: var(--ds-hueco-6); max-width: 24rem; font-size: 0.875rem; line-height: 1.65; color: rgb(255 255 255 / 0.75); }
-  .enlaces { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: start; gap: var(--ds-hueco-3) var(--ds-hueco-6); font-size: 0.875rem; }
+  .enlaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); align-content: start; gap: var(--ds-hueco-6); font-size: 0.875rem; }
+  .enlaces h2 { margin-bottom: var(--ds-hueco-2); font-size: var(--ds-texto-etiqueta); font-weight: 600; letter-spacing: var(--ds-tracking-etiqueta); text-transform: uppercase; color: rgb(255 255 255 / 0.55); }
+  /* Alto táctil mínimo en cada enlace, sin agrandar el texto. */
+  .pie a { display: inline-flex; align-items: center; min-height: 2.5rem; }
   .pie a { color: rgb(255 255 255 / 0.8); text-underline-offset: 3px; transition: color var(--ds-mov-rapido); }
   .pie a:hover { color: #fff; text-decoration: underline; }
   .pie a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }

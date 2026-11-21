@@ -15,7 +15,7 @@ interface Props {
 const {
   model,
   class: className =
-    'mb-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-xs uppercase tracking-widest text-muted',
+    'mb-8 flex flex-wrap items-center gap-x-4 gap-y-0 text-xs uppercase tracking-widest text-muted',
 } = Astro.props;
 ---
 
@@ -26,7 +26,7 @@ const {
       <a
         href={option.href}
         aria-current={option.current ? 'true' : undefined}
-        class={`hover:text-brand ${option.current ? 'text-brand' : ''}`}
+        class={`inline-flex min-h-11 items-center hover:text-brand ${option.current ? 'text-brand' : ''}`}
       >
         {option.label}
         {option.direction === 'asc' ? ' ↑' : option.direction === 'desc' ? ' ↓' : ''}

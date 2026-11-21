@@ -149,6 +149,18 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
     .cabecera { padding: var(--ds-hueco-3) var(--ds-hueco-4) 0; }
     .isla { border-radius: var(--ds-radio-pildora); padding: 0.55rem 0.7rem 0.55rem 1.4rem; gap: var(--ds-hueco-6); }
   }
+  /* Alto táctil mínimo (44 px) en todos los controles de la isla: logo, menú, lupa, carrito,
+     cuenta y botón. La caja crece, el icono y el texto no. */
+  .isla > a,
+  .isla nav :global(a),
+  .isla nav :global(summary),
+  .isla nav :global(button) {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--ds-toque);
+  }
+  .isla nav :global(summary),
+  .isla nav :global(button) { min-width: var(--ds-toque); justify-content: center; }
   /* Arriba del todo, sin caja; al bajar 0-96 px aparece el cristal. Solo cambia
      color, borde y sombra: no mueve nada, así que vale también con movimiento reducido. */
   @supports (animation-timeline: scroll()) {
