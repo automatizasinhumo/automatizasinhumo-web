@@ -156,6 +156,8 @@ const ARTES: Record<Arte, (L: Lienzo) => Capas> = {
 
 	// Lateral oscuro en degradado con panal de hexágonos abajo.
 	hexagonos: (L) => {
+		// Sin columna (página a todo el ancho) no hay sobre qué pintarlo.
+		if (!L.lat) return { fija: [], cabecera: [] };
 		const { H, c } = L;
 		const x = L.lat?.x ?? 0;
 		const w = L.lat?.w ?? 180;
@@ -251,6 +253,8 @@ const ARTES: Record<Arte, (L: Lienzo) => Capas> = {
 
 	// Columna lateral en forma de arco, con un sol en la cúpula.
 	arco: (L) => {
+		// Sin columna (página a todo el ancho) no hay sobre qué pintarlo.
+		if (!L.lat) return { fija: [], cabecera: [] };
 		const { H, c } = L;
 		const x = L.lat?.x ?? 0;
 		const w = L.lat?.w ?? 180;
@@ -270,6 +274,8 @@ const ARTES: Record<Arte, (L: Lienzo) => Capas> = {
 
 	// Lateral oscuro con rayas diagonales arriba.
 	rayas: (L) => {
+		// Sin columna (página a todo el ancho) no hay sobre qué pintarlo.
+		if (!L.lat) return { fija: [], cabecera: [] };
 		const { c } = L;
 		const x = L.lat?.x ?? 0;
 		const w = L.lat?.w ?? 180;

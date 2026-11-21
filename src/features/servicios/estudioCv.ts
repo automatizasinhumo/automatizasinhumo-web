@@ -195,10 +195,11 @@ export function iniciarEstudioCv() {
     if (b) b.hidden = lleno;
     if (aviso) aviso.hidden = !lleno;
   }
-  function anadir(lista: Lista, valores: Fila = {}) {
+  /** `restaurar`: filas de un CV guardado; entran todas aunque superen el límite (que solo frena las nuevas). */
+  function anadir(lista: Lista, valores: Fila = {}, restaurar = false) {
     const t = document.getElementById(`t-${lista}`) as HTMLTemplateElement | null;
     const caja = $(`[data-lista="${lista}"] [data-items]`);
-    if (!t || !caja || $$('.item', caja).length >= LIMITES_CV.items[lista]) return null;
+    if (!t || !caja || (!restaurar && $$('.item', caja).length >= LIMITES_CV.items[lista])) return null;
     const item = t.content.firstElementChild!.cloneNode(true) as HTMLElement;
     for (const c of $$<HTMLInputElement>('[data-k]', item)) {
       const v = valores[c.dataset.k!];
@@ -216,7 +217,7 @@ export function iniciarEstudioCv() {
     }
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)?.replaceChildren();
-      for (const fila of Array.isArray(f[l]) ? f[l] : []) anadir(l, fila);
+      for (const fila of Array.isArray(f[l]) ? f[l] : []) anadir(l, fila, true);
       limitar(l);
     }
     for (const c of $$<HTMLTextAreaElement>('textarea[data-cuenta]')) {
@@ -461,7 +462,8 @@ export function iniciarEstudioCv() {
     }
   };
   const guardarBorrador = () => {
-    const d: Record<string, unknown> = { modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
+    // `ref`: de qué pedido es el borrador ('borrador' antes de pagar), para no mezclar ediciones de otro.
+    const d: Record<string, unknown> = { ref: pedido.pagado?.ref ?? 'borrador', modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
     for (const k of CAMPOS_T) d[k] = campoT(k).value;
     try {
       localStorage.setItem(CLAVE_TARJETA, JSON.stringify(d));
@@ -523,7 +525,9 @@ export function iniciarEstudioCv() {
     st.replaceChildren();
     const f = recoger();
     const b = leerBorrador();
-    const g = (pagada ? pedido.pagado!.tarjeta!.datos : null) ?? b;
+    // Prioridad: tus ediciones sin publicar de este pedido > lo publicado > el borrador de antes de pagar.
+    const previo = b && (b.ref === undefined || b.ref === 'borrador') ? b : null;
+    const g = b && b.ref === ref ? b : ((pagada ? pedido.pagado!.tarjeta!.datos : null) ?? previo);
     const v = (k: string, alt: string) => (g && typeof g[k] === 'string' ? (g[k] as string) : alt);
     campoT('nombre').value = v('nombre', f.nombre);
     campoT('cargo').value = v('cargo', f.titular);

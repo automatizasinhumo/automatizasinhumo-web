@@ -101,7 +101,8 @@ const TAMANO_PAGINA = { A4: [595.28, 841.89], LETTER: [612, 792] } as const;
 
 type Estilos = Omit<TemplateStyleSlots, "page"> & Record<string, Style | TemplateStyleSlots[keyof TemplateStyleSlots]> & { page: Style };
 
-function usarVariante(v: Variante) {
+/** `sinLateral`: la página no tiene columna (variante sin lateral o página a todo el ancho). */
+function usarVariante(v: Variante, sinLateral = false) {
 	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
@@ -113,7 +114,7 @@ function usarVariante(v: Variante) {
 		const fh = metadata.typography.heading.fontSize;
 		const H = metrics.page.paddingHorizontal;
 		const V = metrics.page.paddingVertical;
-		const enColumna = !!v.columna && v.lateral !== "ninguno";
+		const enColumna = !!v.columna && v.lateral !== "ninguno" && !sinLateral;
 		const fondoPagina = v.fondoPagina === "tinte" ? mezclar(primary, "#ffffff", 0.95) : v.fondoPagina === "crema" ? "#fbf8f1" : null;
 
 		const titulo: Style = (() => {
@@ -204,7 +205,7 @@ function usarVariante(v: Variante) {
 		} as unknown as Estilos;
 
 		return { colors, styles, c, primary, foreground, lateralFondo, lateralTexto, enColumna, fondoPagina };
-	}, [metadata, r.row, r.headerIdentity, primary, foreground, background, base, metrics, v]);
+	}, [metadata, r.row, r.headerIdentity, primary, foreground, background, base, metrics, v, sinLateral]);
 }
 
 function Contactos({ estilo, item }: { estilo: Style; item: Style }) {
@@ -323,16 +324,19 @@ export function crearPagina(v: Variante) {
 		const pageNodeKey = semanticNodeKeys.page(pageNumber);
 		const { style: semanticPageStyle, size: semanticPageSize, ...semanticPageProps } = useResolvedNode(pageNodeKey);
 		const { metadata } = data;
-		const e = usarVariante(v);
+		const sinLateral = v.lateral === "ninguno" || !!page.fullWidth;
+		// Página a todo el ancho en una variante con columna: la cabecera que iba dentro de la
+		// columna pasa a la izquierda, sobre el fondo de la página (texto oscuro, no blanco).
+		const vp = useMemo<Variante>(() => (sinLateral && v.cabecera === "lateral" ? { ...v, cabecera: "izquierda" } : v), [v, sinLateral]);
+		const e = usarVariante(vp, sinLateral);
 		const s = e.styles as unknown as Record<string, Style>;
 		const metrics = getTemplateMetrics(metadata.page);
 		const principales = useRenderedSectionIds(pageNodeKey, filterSections(page.main, data));
 		const laterales = useRenderedSectionIds(pageNodeKey, filterSections(page.sidebar, data));
-		const sinLateral = v.lateral === "ninguno" || page.fullWidth;
 		const izquierda = v.lateral === "izquierda";
 		const cuerpo = sinLateral ? [...principales, ...laterales] : principales;
-		const enColumna = e.enColumna && !sinLateral;
-		const cabeceraEnLateral = v.cabecera === "lateral" && !sinLateral;
+		const enColumna = e.enColumna;
+		const cabeceraEnLateral = vp.cabecera === "lateral";
 
 		const [W, H] = typeof pageSize === "string" ? TAMANO_PAGINA[pageSize as keyof typeof TAMANO_PAGINA] ?? TAMANO_PAGINA.A4 : [pageSize.width, TAMANO_PAGINA.A4[1]];
 		const anchoLateral = (W * metadata.layout.sidebarWidth) / 100;
@@ -360,13 +364,13 @@ export function crearPagina(v: Variante) {
 					region="sidebar"
 					style={{ width: anchoLateral, paddingHorizontal: metrics.gapX(1.1), paddingTop: v.lateralArriba ?? 0, rowGap: metrics.sectionGap }}
 				>
-					{showHeader && cabeceraEnLateral && <Cabecera v={v} e={e} pageNodeKey={pageNodeKey} />}
+					{showHeader && cabeceraEnLateral && <Cabecera v={vp} e={e} pageNodeKey={pageNodeKey} />}
 					{secciones(laterales, "sidebar")}
 				</SemanticRegionView>
 			);
 			const principal = (
 				<SemanticRegionView region="main" style={composeStyles(s.columna, { paddingHorizontal: metrics.page.paddingHorizontal * 0.85, rowGap: metrics.sectionGap })}>
-					{showHeader && !cabeceraEnLateral && <Cabecera v={v} e={e} pageNodeKey={pageNodeKey} />}
+					{showHeader && !cabeceraEnLateral && <Cabecera v={vp} e={e} pageNodeKey={pageNodeKey} />}
 					{secciones(cuerpo, "main")}
 				</SemanticRegionView>
 			);
@@ -394,7 +398,7 @@ export function crearPagina(v: Variante) {
 			);
 			contenido = (
 				<>
-					{showHeader && <Cabecera v={v} e={e} pageNodeKey={pageNodeKey} />}
+					{showHeader && <Cabecera v={vp} e={e} pageNodeKey={pageNodeKey} />}
 					<View style={{ flexDirection: "row", columnGap: metrics.columnGap, alignItems: "stretch", flexGrow: 1 }}>
 						{izquierda && lateral}
 						{principal}
