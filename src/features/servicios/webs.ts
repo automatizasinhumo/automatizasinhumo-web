@@ -407,7 +407,7 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
   if (descripcion) ficha.description = descripcion.slice(0, 300);
   if (d.telefono) ficha.telephone = d.telefono;
   if (d.email) ficha.email = d.email;
-  if (d.direccion) ficha.address = { '@type': 'PostalAddress', streetAddress: d.direccion, addressCountry: 'ES' };
+  if (d.direccion) ficha.address = { '@type': 'PostalAddress', streetAddress: d.direccion };
   const redes = d.enlaces.map((e) => e.url).filter(Boolean);
   if (redes.length) ficha.sameAs = redes;
   const servicios = d.servicios.filter((s) => s.nombre);
