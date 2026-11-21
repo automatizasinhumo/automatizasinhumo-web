@@ -67,7 +67,7 @@ export function textosDeSector(sector: string, negocio: string, direccion = ''):
   const lugar = lugarDe(direccion);
   return {
     lema: lugar ? `${s.lema} en ${lugar}.` : `${s.lema}.`,
-    sobre: s.sobre.replaceAll('{negocio}', negocio.trim() || 'nuestro negocio'),
+    sobre: s.sobre.replaceAll('{negocio}', () => negocio.trim() || 'nuestro negocio'),
     servicios: s.servicios.map(([nombre, texto]) => ({ nombre, precio: '', texto })),
   };
 }

@@ -62,6 +62,10 @@ describe('textosDeSector', () => {
     }
   });
 
+  it('el nombre del negocio va tal cual, aunque lleve $& o $1', () => {
+    expect(textosDeSector('bar', 'Bar $& $1', '').sobre).toContain('Bar $& $1');
+  });
+
   it('ids únicos', () => {
     const ids = SECTORES_WEB.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);

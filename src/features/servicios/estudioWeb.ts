@@ -161,18 +161,31 @@ export function iniciarEstudioWeb() {
    * Textos de partida de su sector (sectores.ts) en lo que el cliente aún no ha escrito: frase,
    * «Quiénes somos» y servicios. Lo escrito no se toca. Devuelve si ha rellenado algo.
    */
+  /** Último lema y presentación que escribimos nosotros: si el cliente no los ha tocado, se rehacen. */
+  const escritos = { lema: '', sobre: '' };
   function rellenarTextos(): boolean {
     const c = recoger();
     const t = textosDeSector(c.sector, c.negocio, c.direccion);
     let algo = false;
-    if (!c.lema) (campo('lema').value = t.lema), (algo = true);
-    if (!c.sobre) (campo<HTMLTextAreaElement>('sobre').value = t.sobre), (algo = true);
+    if (!c.lema) (campo('lema').value = escritos.lema = t.lema), (algo = true);
+    if (!c.sobre) (campo<HTMLTextAreaElement>('sobre').value = escritos.sobre = t.sobre), (algo = true);
     if (c.servicios.every((s) => !s.nombre && !s.precio && !s.texto)) {
       $('[data-lista="servicios"] [data-items]')!.replaceChildren();
       for (const s of t.servicios.slice(0, cfg.maxServicios)) anadir('servicios', { ...s });
       limitar();
       algo = true;
     }
+    return algo;
+  }
+  /** Nombre o dirección escritos después del sector: la frase y la presentación nuestras se ponen al día. */
+  function actualizarTextos(): boolean {
+    const c = recoger();
+    const t = textosDeSector(c.sector, c.negocio, c.direccion);
+    let algo = false;
+    if (escritos.lema && c.lema === escritos.lema.trim() && t.lema !== escritos.lema)
+      (campo('lema').value = escritos.lema = t.lema), (algo = true);
+    if (escritos.sobre && c.sobre === escritos.sobre.trim() && t.sobre !== escritos.sobre)
+      (campo<HTMLTextAreaElement>('sobre').value = escritos.sobre = t.sobre), (algo = true);
     return algo;
   }
   const datos = (): DatosWeb => ({ ...recoger(), plantilla: estado.plantilla || cfg.porDefecto.plantilla, color: estado.color, letra: estado.letra }) as DatosWeb;
@@ -541,7 +554,7 @@ export function iniciarEstudioWeb() {
       const st = $('[data-estado-textos]')!;
       st.textContent = rellenarTextos()
         ? 'Listo: hemos escrito la frase, la presentación y los servicios. Cámbialos a tu gusto.'
-        : 'Ya tienes todo escrito. Borra lo que quieras rehacer y vuelve a pulsar.';
+        : 'Ya tienes todo escrito. Para rehacer algo, vacía la frase, la presentación o todos los servicios y vuelve a pulsar.';
       persistir();
       return programar(true);
     }
@@ -582,6 +595,10 @@ export function iniciarEstudioWeb() {
     // Al decir a qué se dedica, la web se rellena sola con los textos de su sector.
     if (c.name === 'sector' && c.value.trim() && rellenarTextos()) {
       $('[data-estado-textos]')!.textContent = 'Hemos escrito unos textos para tu sector. Cámbialos a tu gusto.';
+      persistir();
+      return programar(true);
+    }
+    if ((c.name === 'negocio' || c.name === 'direccion') && actualizarTextos()) {
       persistir();
       return programar(true);
     }
