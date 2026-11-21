@@ -1,3 +1,4 @@
+import { stripTags } from "@reactive-resume/utils/string";
 import { unzipEntries, ZipEntryTooLargeError } from "./zip";
 
 const DOCUMENT_XML_PATH = "word/document.xml";
@@ -106,15 +107,15 @@ const visibleXml = (xml: string) =>
 /** The visible text of one OOXML part: paragraphs on their own lines, tabs and line breaks kept. */
 function partText(xml: string) {
 	// ponytail: minimal OOXML text extraction (deletions and hidden runs dropped); add a DOCX parser if fields matter.
+	// A literal «<» in OOXML text is always &lt; (decoded after stripping): any left is broken markup.
 	return decodeEntities(
+		stripTags(
 		// `[^<>]` keeps each match from scanning past the next tag, so malformed markup costs linear time.
 		visibleXml(xml)
 			.replace(/<w:tab\b[^<>]*\/>/g, "\t")
 			.replace(/<w:br\b[^<>]*\/>/g, "\n")
-			.replace(/<\/w:p>/g, "\n")
-			.replace(/<[^<>]*>/g, "")
-			// A literal «<» in OOXML text is always &lt; (decoded below): any left here is broken markup.
-			.replace(/</g, ""),
+			.replace(/<\/w:p>/g, "\n"),
+		),
 	)
 		.replace(/\r/g, "")
 		.split("\n")

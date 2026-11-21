@@ -116,10 +116,19 @@ export function filterOptions<T extends { value: string; label: string; keywords
 	);
 }
 
+/** Removes markup until nothing changes; a stray «<» left over is broken markup (text uses &lt;). */
+export function stripTags(text: string): string {
+	let previous: string;
+	do {
+		previous = text;
+		text = text.replace(/<[^<>]*>/g, "");
+	} while (text !== previous);
+	return text.replace(/</g, "");
+}
+
 export function stripHtml(html: string | undefined): string {
 	if (!html) return "";
-	// A literal «<» in HTML text is &lt;: one left after removing tags is broken markup, never text.
-	return html.replace(/<[^<>]*>/g, "").replace(/</g, "").trim();
+	return stripTags(html).trim();
 }
 
 /**
