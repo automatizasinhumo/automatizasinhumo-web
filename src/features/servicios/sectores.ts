@@ -16,10 +16,10 @@ export interface SectorWeb {
 }
 
 // Los datos viven en src/data/sectores-web.json; aquí solo el tipo y la lógica.
-export const SECTORES_WEB: SectorWeb[] = datos.sectores as SectorWeb[];
+export const SECTORES_WEB: SectorWeb[] = datos.sectores as unknown as SectorWeb[];
 
 /** Para lo que no encaja en ningún sector: textos que valen para cualquier negocio. */
-export const SECTOR_GENERICO: SectorWeb = datos.generico as SectorWeb;
+export const SECTOR_GENERICO: SectorWeb = datos.generico as unknown as SectorWeb;
 
 const sinTildes = (s: string) =>
   s
