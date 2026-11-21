@@ -11,6 +11,7 @@
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
+import { textosDeSector } from './sectores';
 import { MARCA_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces';
@@ -156,6 +157,24 @@ export function iniciarEstudioWeb() {
     const { plantilla: _p, color: _c, letra: _l, ...c } = cfg.ejemplo;
     return c;
   };
+  /**
+   * Textos de partida de su sector (sectores.ts) en lo que el cliente aún no ha escrito: frase,
+   * «Quiénes somos» y servicios. Lo escrito no se toca. Devuelve si ha rellenado algo.
+   */
+  function rellenarTextos(): boolean {
+    const c = recoger();
+    const t = textosDeSector(c.sector, c.negocio, c.direccion);
+    let algo = false;
+    if (!c.lema) (campo('lema').value = t.lema), (algo = true);
+    if (!c.sobre) (campo<HTMLTextAreaElement>('sobre').value = t.sobre), (algo = true);
+    if (c.servicios.every((s) => !s.nombre && !s.precio && !s.texto)) {
+      $('[data-lista="servicios"] [data-items]')!.replaceChildren();
+      for (const s of t.servicios.slice(0, cfg.maxServicios)) anadir('servicios', { ...s });
+      limitar();
+      algo = true;
+    }
+    return algo;
+  }
   const datos = (): DatosWeb => ({ ...recoger(), plantilla: estado.plantilla || cfg.porDefecto.plantilla, color: estado.color, letra: estado.letra }) as DatosWeb;
   const nombrePlantilla = (id: string) => PLANTILLAS_WEB.find((p) => p.id === id)?.nombre ?? id;
 
@@ -518,6 +537,14 @@ export function iniciarEstudioWeb() {
       persistir();
       return programar(true);
     }
+    if (b.hasAttribute('data-textos')) {
+      const st = $('[data-estado-textos]')!;
+      st.textContent = rellenarTextos()
+        ? 'Listo: hemos escrito la frase, la presentación y los servicios. Cámbialos a tu gusto.'
+        : 'Ya tienes todo escrito. Borra lo que quieras rehacer y vuelve a pulsar.';
+      persistir();
+      return programar(true);
+    }
     if (b.hasAttribute('data-ejemplo')) {
       volcar(ejemplo());
       $('[data-error="datos"]')!.hidden = true;
@@ -552,6 +579,12 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    // Al decir a qué se dedica, la web se rellena sola con los textos de su sector.
+    if (c.name === 'sector' && c.value.trim() && rellenarTextos()) {
+      $('[data-estado-textos]')!.textContent = 'Hemos escrito unos textos para tu sector. Cámbialos a tu gusto.';
+      persistir();
+      return programar(true);
+    }
     if (c.name === 'tamano-vista') {
       estado.tamano = c.value === 'escritorio' ? 'escritorio' : 'movil';
       escalar();

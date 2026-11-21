@@ -15,6 +15,7 @@ import {
   PLANTILLAS_WEB,
   WEB_POR_DEFECTO,
 } from '../../features/servicios/webs';
+import { SECTORES_WEB } from '../../features/servicios/sectores';
 
 // Estudio de webs: mismo esquema que el de CV (/servicios/cv). Todo ocurre en el navegador:
 // elegir diseño, escribir los datos del negocio, color y letra, y verla al momento con marca
@@ -96,13 +97,16 @@ const campo = 'campo';
             <div class="flex flex-wrap gap-2">
               <button type="button" class="boton boton-secundario boton-compacto" data-ejemplo>Rellenar con un ejemplo</button>
               <button type="button" class="boton boton-secundario boton-compacto" data-vaciar>Empezar en blanco</button>
+              <button type="button" class="boton boton-secundario boton-compacto" data-textos>Escribir los textos por mí</button>
             </div>
+            <p class="ayuda mt-2 text-sm" data-estado-textos role="status"></p>
 
             <fieldset class="bloque">
               <legend>Tu negocio</legend>
               <div class="filas">
                 <label class={campo}>Nombre del negocio *<input name="negocio" autocomplete="organization" required maxlength="80" /></label>
-                <label class={campo}>A qué te dedicas<input name="sector" maxlength="60" placeholder="Ej.: Fontanería" /></label>
+                <label class={campo}>A qué te dedicas<input name="sector" maxlength="60" list="sectores-web" placeholder="Ej.: Fontanería" /></label>
+                <datalist id="sectores-web">{SECTORES_WEB.map((s) => <option value={s.nombre} />)}</datalist>
               </div>
               <label class={campo}>Frase de presentación<input name="lema" maxlength="140" placeholder="Qué ofreces y dónde, en una frase." /></label>
               <label class={campo}>Quiénes sois<textarea name="sobre" rows="4" maxlength="900" placeholder="Unas líneas sobre ti o tu equipo."></textarea></label>
