@@ -130,6 +130,16 @@ jobs:
           done
           echo "::error::$URL_PORTADA no sirve la portada nueva"; exit 1
 
+      - name: Instalar Playwright
+        run: |
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          mkdir -p node_modules
+          for p in playwright playwright-core; do ln -sfn "$PWD/qa/navegador/node_modules/$p" "node_modules/$p"; done
+          qa/navegador/node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Contrato de diseño
+        run: node qa/contrato-diseno.mjs "$URL_PORTADA"
+
   recorrido:
     needs: desplegar
     if: ${{ always() && needs.desplegar.result != 'failure' && needs.desplegar.result != 'cancelled' }}

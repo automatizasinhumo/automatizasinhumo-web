@@ -65,7 +65,7 @@ const PASOS = [
 
 <section class="portada" aria-labelledby="portada-titulo">
   <div class="titulo-caja">
-    <h1 id="portada-titulo">
+    <h1 id="portada-titulo" class="h1-portada">
       <span class="fila fila-1"><span class="luz t1" data-t="Tu negocio">Tu negocio</span>, <span class="luz t2" data-t="tu evento">tu evento</span>,</span>
       <span class="fila fila-2"><span class="luz t3" data-t="tu idea">tu idea</span>, <span class="marca">en marcha</span></span>
       <span class="fila fila-3"><span class="marca">sin complicaciones</span></span>
@@ -74,8 +74,6 @@ const PASOS = [
 
   <div class="escena-caja">
   <div class="escenario" aria-hidden="true">
-    <span class="chispa"><Icono name="bulb" class="h-5 w-5" /><Icono name="arrow-right" class="flecha h-4 w-4" /></span>
-
     <div class="escena t1">
       <Marco url="cafeterialuna.es">
         <img src="/images/demos/cafe-coffee-shop-640.webp" width="640" height="430" alt="" fetchpriority="high" decoding="async" />
@@ -149,7 +147,7 @@ const PASOS = [
   </div>
 </section>
 
-<Seccion id="como" antetitulo="Así funciona" separada>
+<Seccion id="como" antetitulo="Así de fácil" titulo="De tu idea al resultado, en tres pasos" entradilla="Sin llamadas ni presupuestos: eliges, rellenas y listo." separada>
   <Pasos pasos={PASOS} etiqueta="Pasos para tenerlo listo" />
 </Seccion>
 
@@ -266,36 +264,6 @@ const PASOS = [
   }
   .escena.t3 { padding: 0 0 3.25rem; }
   .escena img { display: block; width: 100%; height: auto; }
-
-  .chispa {
-    position: absolute;
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.1rem;
-    top: -1.1rem;
-    left: 0.75rem;
-    border: 1px solid var(--color-line);
-    border-radius: var(--ds-radio-pildora);
-    padding: 0.4rem 0.55rem;
-    color: var(--color-accent);
-    background: var(--color-surface);
-    box-shadow: var(--ds-sombra-2);
-  }
-  .chispa :global(.flecha) { rotate: 90deg; color: var(--color-faint); }
-  .chispa::before {
-    content: '';
-    position: absolute;
-    inset: -0.6rem;
-    z-index: -1;
-    border-radius: inherit;
-    background: radial-gradient(closest-side, color-mix(in oklab, var(--color-accent) 35%, transparent), transparent);
-    opacity: 0;
-  }
-  @media (min-width: 60rem) {
-    .chispa { top: 38%; left: -1.1rem; translate: -100% 0; }
-    .chispa :global(.flecha) { rotate: 0deg; }
-  }
 
   /* Tarjetas flotantes encima del marco: el «resultado» de cada escena. */
   .flotante {
@@ -441,7 +409,6 @@ const PASOS = [
     .t2::before, .t2::after, .escena.t2 { animation-delay: -6s; }
     .t3::before, .t3::after, .escena.t3 { animation-delay: -3s; }
     .escena.t3 .progreso { animation: progreso 9s var(--ds-curva) -3s infinite; }
-    .chispa::before { animation: chispa 3s ease-out infinite; }
   }
   @media (prefers-reduced-motion: reduce) {
     .escena.t1 { opacity: 1; }
@@ -485,11 +452,6 @@ const PASOS = [
   @keyframes progreso {
     0%, 6% { transform: scaleX(0); }
     26%, 100% { transform: scaleX(1); }
-  }
-  @keyframes chispa {
-    0% { opacity: 0; }
-    12% { opacity: 1; }
-    60%, 100% { opacity: 0; }
   }
 </style>
 

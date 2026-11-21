@@ -97,7 +97,8 @@
  */
 :root {
   /* Tipografía: titulares fluidos (no dependen del aparato, solo del ancho). */
-  --ds-texto-display: clamp(2.25rem, 5vw, 4.6rem);
+  --ds-texto-display: clamp(2.25rem, 5vw, 4.6rem); /* solo el titular de la portada */
+  --ds-texto-h1: clamp(2rem, 1.4rem + 2.6vw, 3.25rem); /* h1 de TODAS las demás páginas */
   --ds-texto-h2: clamp(1.75rem, 3.4vw, 2.75rem);
   --ds-texto-h3: clamp(1.15rem, 1.8vw, 1.4rem);
   --ds-texto-lead: clamp(1.05rem, 1.6vw, 1.25rem);
@@ -115,6 +116,8 @@
   --ds-hueco-8: 2rem;
   --ds-hueco-12: 3rem;
   --ds-seccion: clamp(3.5rem, 8vw, 6.5rem);
+  --ds-cabecera-pagina: clamp(2rem, 5vw, 3.25rem); /* aire interior de las cabeceras de página */
+  --ds-toque: 2.75rem; /* 44 px: alto mínimo de un control táctil principal */
 
   /* Formas. */
   --ds-radio-tarjeta: 1.25rem;
@@ -152,6 +155,20 @@
   --ds-mov-rapido: 160ms;
   --ds-mov-normal: 240ms;
   --ds-curva: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * El h1 de cualquier página sale de un solo sitio. Sin capa, para ganar a las utilidades
+ * (text-4xl, sm:text-5xl…) que cada página ponía por su cuenta: una página nueva ya no
+ * decide el tamaño de su título. La portada (.h1-portada) es la única excepción.
+ */
+.page-shell h1:not(.h1-portada) {
+  font-family: var(--font-serif);
+  font-size: var(--ds-texto-h1);
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-titular);
+  line-height: 1.1;
+  text-wrap: balance;
 }
 
 /*
