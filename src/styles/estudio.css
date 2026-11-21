@@ -404,9 +404,12 @@
     transition: border-color var(--ds-mov-rapido, 150ms) var(--ds-curva, ease);
   }
   .letra strong {
+    font-family: var(--letra-titulos), var(--font-sans, sans-serif);
+    font-size: 1.15rem;
     color: var(--color-ink);
   }
   .letra span {
+    font-family: var(--letra-texto), var(--font-sans, sans-serif);
     font-size: var(--ds-texto-small);
     line-height: 1.35;
     color: var(--color-muted);

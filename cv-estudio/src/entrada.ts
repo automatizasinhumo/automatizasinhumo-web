@@ -59,10 +59,18 @@ export function datosEjemplo(plantilla = "onyx"): ResumeData {
 	return parseResumeData(d);
 }
 
-/** Las plantillas creativas traen su forma de nivel (barras, puntos, cuadros…). */
+/** Secciones de lista corta que, sin columna lateral, van en rejilla en vez de una debajo de otra. */
+const EN_REJILLA = ["skills", "languages", "interests"] as const;
+
+/**
+ * Las plantillas creativas traen su forma de nivel (barras, puntos, cuadros…). Las de una sola
+ * columna reparten habilidades, idiomas e intereses en tres columnas: apiladas a todo el ancho
+ * dejaban media hoja en blanco y empujaban dos líneas a una segunda página.
+ */
 function nivelDePlantilla(d: ResumeData) {
-	const nivel = VARIANTES[d.metadata.template]?.nivel;
-	if (nivel) d.metadata.design.level.type = nivel;
+	const v = VARIANTES[d.metadata.template];
+	if (v?.nivel) d.metadata.design.level.type = v.nivel;
+	if (v?.lateral === "ninguno") for (const id of EN_REJILLA) if (d.sections[id].columns === 1) d.sections[id].columns = 3;
 }
 
 let cola: Promise<unknown> = Promise.resolve();

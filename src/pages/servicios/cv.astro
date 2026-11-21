@@ -123,9 +123,11 @@ const ejemploTarjeta: DatosTarjeta = {
 
             <fieldset class="bloque" data-guia="letra">
               <legend>2 · Letra</legend>
+              {/* Las mismas fuentes que el PDF (las emite el motor), para ver cada letra antes de elegirla. */}
+              <link rel="stylesheet" href="/cv/estudio/motor/fuentes.css" />
               <div class="letras">
                 {ESTILOS_LETRA.map((e) => (
-                  <label class="letra">
+                  <label class="letra" style={`--letra-titulos:"CV ${e.titulos}";--letra-texto:"CV ${e.texto}"`}>
                     <input type="radio" name="letra" value={e.id} class="sr-only" />
                     <strong>{e.nombre}</strong>
                     <span>{e.descripcion}</span>

@@ -366,14 +366,22 @@ const ARTES: Record<Arte, (L: Lienzo) => Capas> = {
 	}),
 };
 
-const capaSvg = (L: Lienzo, hijos: ReactElement[], fija: boolean, clave: string) =>
-	hijos.length ? (
-		<View key={clave} fixed={fija} style={{ position: "absolute", top: 0, left: 0, width: L.W, height: L.H }}>
-			<Svg width={L.W} height={L.H} viewBox={`0 0 ${L.W} ${L.H}`}>
+/**
+ * La capa fija ocupa la hoja entera y se repite en cada hoja. La de cabecera va solo en la primera
+ * y ocupa media hoja: con alto H no cabía en el área útil (el padding inferior la desbordaba) y
+ * react-pdf la partía en una 2.ª hoja vacía. Ningún arte de cabecera baja de la mitad.
+ */
+const capaSvg = (L: Lienzo, hijos: ReactElement[], fija: boolean, clave: string) => {
+	if (!hijos.length) return null;
+	const alto = fija ? L.H : L.H / 2;
+	return (
+		<View key={clave} fixed={fija} style={{ position: "absolute", top: 0, left: 0, width: L.W, height: alto }}>
+			<Svg width={L.W} height={alto} viewBox={`0 0 ${L.W} ${alto}`}>
 				{hijos}
 			</Svg>
 		</View>
-	) : null;
+	);
+};
 
 /** Capas de arte de una plantilla. `conCabecera`: esta página lleva la cabecera. */
 export function capasArte(arte: Arte | undefined, L: Lienzo, conCabecera: boolean) {
