@@ -14,6 +14,7 @@ import {
   contraste,
   documentoWeb,
   fichaNegocio,
+  MAX_FOTO_WEB,
   enlaceWhatsapp,
   esc,
   renderWeb,
@@ -147,5 +148,30 @@ describe('fichaNegocio', () => {
     const json = fichaNegocio(r.datos, 'https://x.es/w/a');
     expect(json).not.toContain('<');
     expect(JSON.parse(json).description).toContain('</script>');
+  });
+});
+
+describe('foto de portada', () => {
+  const foto = 'data:image/webp;base64,UklGRhIAAABXRUJQVlA4TAYAAAAvAAAAAAA=';
+  it('se guarda y se pinta si es una imagen reducida válida', () => {
+    const r = validarWeb({ ...base, foto });
+    if (!r.ok) throw new Error(r.error);
+    expect(r.datos.foto).toBe(foto);
+    expect(renderWeb(r.datos)).toContain(`<img src="${foto}"`);
+  });
+
+  it('se descarta sin error si no es una foto válida o es demasiado grande', () => {
+    for (const mala of [
+      'javascript:alert(1)',
+      'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+      'data:image/webp;base64,AAA" onerror="alert(1)',
+      'data:image/webp;base64,' + 'A'.repeat(MAX_FOTO_WEB),
+      42,
+    ]) {
+      const r = validarWeb({ ...base, foto: mala });
+      if (!r.ok) throw new Error(r.error);
+      expect(r.datos.foto).toBe('');
+      expect(renderWeb(r.datos)).not.toContain('w-portada');
+    }
   });
 });

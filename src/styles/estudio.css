@@ -324,6 +324,15 @@
     text-decoration: underline;
   }
 
+  .foto img {
+    display: block;
+    max-width: 100%;
+    max-height: 180px;
+    margin-top: var(--ds-hueco-3);
+    border-radius: var(--ds-radio-tarjeta);
+    object-fit: cover;
+  }
+
   /* Paso 3. */
   .mejora {
     padding: var(--ds-hueco-6);
