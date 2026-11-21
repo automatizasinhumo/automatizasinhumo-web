@@ -112,7 +112,9 @@ function partText(xml: string) {
 			.replace(/<w:tab\b[^<>]*\/>/g, "\t")
 			.replace(/<w:br\b[^<>]*\/>/g, "\n")
 			.replace(/<\/w:p>/g, "\n")
-			.replace(/<[^<>]*>/g, ""),
+			.replace(/<[^<>]*>/g, "")
+			// A literal «<» in OOXML text is always &lt; (decoded below): any left here is broken markup.
+			.replace(/</g, ""),
 	)
 		.replace(/\r/g, "")
 		.split("\n")

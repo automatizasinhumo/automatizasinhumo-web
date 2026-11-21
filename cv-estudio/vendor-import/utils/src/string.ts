@@ -118,7 +118,8 @@ export function filterOptions<T extends { value: string; label: string; keywords
 
 export function stripHtml(html: string | undefined): string {
 	if (!html) return "";
-	return html.replace(/<[^<>]*>/g, "").trim();
+	// A literal «<» in HTML text is &lt;: one left after removing tags is broken markup, never text.
+	return html.replace(/<[^<>]*>/g, "").replace(/</g, "").trim();
 }
 
 /**
