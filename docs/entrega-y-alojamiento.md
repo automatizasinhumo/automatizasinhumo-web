@@ -155,5 +155,10 @@ web publicada; si quieres usar tu dominio o llevártela, escríbenos y te lo pre
 - [ ] P1. Desplegar sitedrop tal cual, publicar 10 webs de prueba y sustituir `wrangler deploy web-<id>`.
 - [x] P1. Vistas previas en un solo Worker con KV y sin R2 (ronda 29, PR #105). Worker `vistas/`, namespace `automatizasinhumo-vistas`, caducidad de 60 días y respaldo a `web-<id>`. Límites Free: 1.000 escrituras al día (unas 33 webs de 30 archivos), 100.000 lecturas al día y 1 GB.
 - [ ] P1. Suscripciones de Stripe y portal de cliente.
-- [ ] P2. Dominios del cliente y tickets de mantenimiento.
+- [x] P2a. Dominio del cliente para las webs del estudio (`/servicios/web`), sin pasos a mano: el cliente
+  escribe su dominio, se crea la zona en nuestra cuenta de Cloudflare y se le muestran los dos servidores
+  DNS; el cron del Worker conecta dominio y www (Workers Custom Domains, HTTPS automático), comprueba que
+  responde y le escribe. Enrutado por Host en `src/worker.ts`; código en `src/features/servicios/dominios.ts`.
+  Activo cuando existan `CF_DOMINIOS_TOKEN` (secreto), `CF_ACCOUNT_ID` y `CF_WORKER_NOMBRE`.
+- [ ] P2b. Tickets de mantenimiento.
 - [ ] Publicar los textos de la FAQ del apartado 4 cuando su parte esté en verde, adaptados antes a los escalones: qué incluye «te la montamos» (349 €) y que el alojamiento es aparte.

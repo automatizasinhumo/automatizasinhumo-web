@@ -37,6 +37,13 @@ interface Estado {
   /** Pedido cuya web publicada hay en el formulario ('' si es un diseño nuevo sin publicar). */
   pedido: string;
 }
+interface RespuestaDominio {
+  ok?: boolean;
+  disponible?: boolean;
+  error?: string;
+  dominio?: { dominio: string; estado: 'esperando_dns' | 'conectando' | 'activo' | 'error'; servidores: string[]; detalle: string | null } | null;
+}
+
 interface Pagado {
   ref: string;
   slug: string | null;
@@ -246,6 +253,96 @@ export function iniciarEstudioWeb() {
     const b = $('[data-comprar] span');
     if (b) b.textContent = pedido.pagado ? (pedido.pagado.slug ? 'Guardar los cambios en mi web' : 'Publicar mi web') : `Comprar y publicar · ${euros(cfg.precio)}`;
     if (pedido.pagado?.slug && !$('[data-estado-compra] a')) avisar(`/w/${pedido.pagado.slug}`, 'Tu web está publicada en');
+    if (pedido.pagado?.slug && dominioDe !== pedido.token) {
+      dominioDe = pedido.token;
+      void dominio();
+    }
+  }
+
+  // ---------- Dominio propio (/api/web/dominio; ver dominios.ts) ----------
+  // La tarjeta solo aparece con la web publicada y la conexión activa en el servidor. Mientras
+  // el dominio no está listo, el estudio pregunta cada minuto (y el cron del Worker, cada 5).
+  let dominioDe: string | null = null;
+  let cambiando = false;
+  let sondeo: ReturnType<typeof setTimeout> | undefined;
+  async function dominio(cuerpo: { dominio?: string } = {}) {
+    const token = pedido.token;
+    if (!token || !pedido.pagado?.slug) return;
+    clearTimeout(sondeo);
+    let d: RespuestaDominio;
+    try {
+      const r = await fetch('/api/web/dominio', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, ...cuerpo }) });
+      d = (await r.json().catch(() => ({}))) as RespuestaDominio;
+    } catch {
+      d = { ok: false, error: 'No hemos podido comprobar tu dominio. Revisa tu conexión.' };
+    }
+    if (!pedido.vigente(token)) return;
+    if (d.ok) cambiando = false;
+    pintarDominio(d);
+  }
+  function pintarDominio(d: RespuestaDominio) {
+    const caja = $('[data-dominio]')!;
+    const st = $('[data-estado-dominio]')!;
+    if (!d.ok) {
+      st.dataset.tono = 'error';
+      st.textContent = d.error ?? 'No se ha podido conectar el dominio. Inténtalo de nuevo en un momento.';
+      return;
+    }
+    const v = d.dominio ?? null;
+    caja.hidden = !d.disponible && !v;
+    if (caja.hidden) return;
+    st.dataset.tono = '';
+    $('[data-dominio-pedir]')!.hidden = !!v && !cambiando;
+    $('[data-dominio-pasos]')!.hidden = !v || v.estado === 'activo' || cambiando;
+    if (!v) return void st.replaceChildren();
+    $('[data-dominio-nombre]')!.textContent = v.dominio;
+    $('[data-dominio-ns]')!.replaceChildren(
+      ...v.servidores.map((ns) => {
+        const li = document.createElement('li');
+        const code = document.createElement('code');
+        code.className = 'select-all font-semibold';
+        code.textContent = ns;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ml-2 text-xs underline';
+        b.dataset.copiar = ns;
+        b.textContent = 'Copiar';
+        li.appendChild(code);
+        li.appendChild(b);
+        return li;
+      }),
+    );
+    if (v.estado === 'activo') {
+      const a = document.createElement('a');
+      a.href = `https://${v.dominio}/`;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'font-semibold underline';
+      a.textContent = v.dominio;
+      st.replaceChildren('Tu web ya está en ', a, '. Los cambios que publiques aquí salen también allí.');
+      return;
+    }
+    st.textContent =
+      v.estado === 'conectando'
+        ? 'Servidores DNS cambiados. Estamos preparando el certificado https; tarda unos minutos.'
+        : 'Esperando a que cambies los servidores DNS. Puedes cerrar esta página: te escribimos cuando esté.';
+    sondeo = setTimeout(() => {
+      if (actual === 'publica' && !document.hidden) void dominio();
+      else dominioDe = null; // se vuelve a preguntar al volver a este paso
+    }, 60_000);
+  }
+  function conectarDominio() {
+    const c = campo('dominio');
+    const valor = c.value.trim();
+    const st = $('[data-estado-dominio]')!;
+    if (!valor) {
+      st.dataset.tono = 'error';
+      st.textContent = 'Escribe tu dominio, por ejemplo peluquerialola.es.';
+      return c.focus();
+    }
+    st.dataset.tono = '';
+    st.textContent = 'Conectando…';
+    void dominio({ dominio: valor });
   }
 
   // ---------- Compra y publicación ----------
@@ -418,10 +515,32 @@ export function iniciarEstudioWeb() {
       persistir();
       return programar(true);
     }
+    if (b.hasAttribute('data-conectar')) return conectarDominio();
+    if (b.hasAttribute('data-dominio-cambiar')) {
+      cambiando = true;
+      $('[data-dominio-pedir]')!.hidden = false;
+      $('[data-dominio-pasos]')!.hidden = true;
+      return campo('dominio').focus();
+    }
+    if (b.dataset.copiar) {
+      const t = b.textContent;
+      void navigator.clipboard?.writeText(b.dataset.copiar).then(() => {
+        b.textContent = 'Copiado';
+        setTimeout(() => (b.textContent = t), 1500);
+      });
+      return;
+    }
     if (b.hasAttribute('data-comprar')) return void (pedido.cargando ? undefined : pedido.pagado ? publicar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
   });
 
   form.addEventListener('submit', (ev) => ev.preventDefault());
+  // Sin botón de envío el formulario no se envía con Enter: en el campo del dominio, Enter conecta.
+  form.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && (ev.target as HTMLInputElement).name === 'dominio') {
+      ev.preventDefault();
+      conectarDominio();
+    }
+  });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.name === 'tamano-vista') {
@@ -440,7 +559,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
-    if (c.type === 'radio') return;
+    if (c.type === 'radio' || c.name === 'dominio') return;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;
       pintarControles();

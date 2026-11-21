@@ -83,6 +83,14 @@ describe('renderWeb', () => {
     expect(doc).toContain('<link rel="canonical" href="https://x.es/w/peluqueria-lola">');
     expect(doc).not.toMatch(/<script/);
   });
+
+  it('desde el dominio del cliente, el pie y el icono apuntan a nuestra tienda', () => {
+    const doc = documentoWeb(EJEMPLO_WEB, 'https://lola.es/', 'https://tienda.example');
+    expect(doc).toContain('<link rel="canonical" href="https://lola.es/">');
+    expect(doc).toContain('href="https://tienda.example/servicios/web"');
+    expect(doc).toContain('<link rel="icon" href="https://tienda.example/favicon.svg">');
+    expect(documentoWeb(EJEMPLO_WEB, 'https://x.es/w/a')).toContain('href="/servicios/web"');
+  });
 });
 
 describe('ayudas', () => {

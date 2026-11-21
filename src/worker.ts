@@ -10,6 +10,8 @@ import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoC
 import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
 import { getConfig } from './config';
 import { firmadorDecision } from './features/solicitudes/decision';
+import { avanzarDominios, avisarDominiosActivos, configDominios, servirDominio } from './features/servicios/dominios';
+import { documentoWeb, webPorSlug } from './features/servicios/webs';
 
 /**
  * Worker entrypoint.
@@ -99,6 +101,17 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     console.error('Scheduled Stripe reconciliation failed:', err instanceof Error ? err.message : 'error');
   }
 
+  // Dominios propios de las webs publicadas: zona activa -> conectar dominio y www al Worker;
+  // responde por HTTPS -> «activo» y correo al cliente. No-op sin CF_DOMINIOS_TOKEN (dominios.ts).
+  try {
+    await avanzarDominios(db, configDominios(env));
+    const s = await getStoreSettings(db);
+    const email = await getEmailProvider(s);
+    if (email) await avisarDominiosActivos(db, ({ para, dominio }) => email.send(correoDominioActivo(para, dominio)).then(() => undefined));
+  } catch (err) {
+    console.error('Scheduled domain sweep failed:', err instanceof Error ? err.message : 'error');
+  }
+
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
   // No-op sin GITHUB_DISPATCH_TOKEN y GITHUB_DISPATCH_REPO (ver respaldoCron.ts).
   try {
@@ -108,8 +121,38 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
   }
 }
 
+function correoDominioActivo(to: string, dominio: string) {
+  const url = `https://${dominio}/`;
+  const cierre = 'También responde con www, y el certificado HTTPS se renueva solo. Puedes seguir cambiando la web desde el estudio: los cambios salen en tu dominio en un minuto.';
+  return {
+    to,
+    subject: `Tu web ya está en ${dominio}`,
+    text: `Tu web ya está publicada en tu dominio:\n\n${url}\n\n${cierre}`,
+    html: `<p>Tu web ya está publicada en tu dominio:</p><p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p><p>${cierre}</p>`,
+    idempotencyKey: `dominio-activo/${dominio}`,
+  };
+}
+
+/** Origen de nuestra tienda para los enlaces de una web servida desde el dominio de un cliente. */
+async function origenTienda(): Promise<string> {
+  const o = env.CANONICAL_ORIGIN || (await getSetting(env.DB, 'store_url').catch(() => null)) || '';
+  return o.replace(/\/$/, '');
+}
+
 export default {
-  fetch: handle,
+  // Las peticiones que llegan con el dominio de un cliente (dominios_paginas) son su web; el
+  // resto, la tienda de Astro. Un fallo al consultar el dominio nunca tumba la tienda.
+  async fetch(request, entorno, ctx) {
+    const propia = await servirDominio(request, env.DB, async (tipo, slug, url) => {
+      if (tipo !== 'web') return null;
+      const w = await webPorSlug(env.DB, slug);
+      return w ? documentoWeb(w.datos, url, await origenTienda()) : null;
+    }).catch((err) => {
+      console.error('Custom domain lookup failed:', err instanceof Error ? err.message : 'error');
+      return null;
+    });
+    return propia ?? handle(request, entorno, ctx);
+  },
 
   // Each sweep catches its own errors, so one failing job never strands the
   // others. waitUntil keeps the invocation alive for the whole pass.

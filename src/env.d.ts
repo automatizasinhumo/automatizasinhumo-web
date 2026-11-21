@@ -83,6 +83,12 @@ declare namespace Cloudflare {
     // Set when a custom domain is the sole ingress; fresh workers.dev instances
     // omit it and use their request origin until a custom domain is attached.
     CANONICAL_ORIGIN?: string;
+    // Dominio propio de las webs (src/features/servicios/dominios.ts): token de API con
+    // Zone: Edit, DNS: Edit y Workers Routes: Edit; la cuenta y el nombre de este Worker.
+    // Sin los tres, el estudio dice que la conexión de dominio aún no está disponible.
+    CF_DOMINIOS_TOKEN?: string;
+    CF_ACCOUNT_ID?: string;
+    CF_WORKER_NOMBRE?: string;
     // Clave de IndexNow (src/features/seo/indexnow.ts): secreto; sin ella /<clave>.txt da 404.
     INDEXNOW_KEY?: string;
     // Admin auth (src/middleware.ts): the password is set in the first-run setup
