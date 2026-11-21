@@ -45,11 +45,11 @@ export const categorias = [
 export const productos = [
   // ── Webs ───────────────────────────────────────────────
   {
-    slug: 'web-una-pagina', cat: 'webs', nombre: 'Web de una página para tu negocio', p: [149, 349], plazo: '48 h',
-    resumen: 'Tu negocio en internet con una sola página clara: quién eres, qué ofreces y cómo contactarte.',
-    recibes: ['Web de una página adaptada a móvil', 'Hasta 6 servicios', 'Botones de llamada y WhatsApp', 'Horario, dirección y mapa', 'Espacio para tus fotos', 'En «Te lo montamos»: publicada en una dirección gratuita o en tu dominio si ya lo tienes'],
-    campos: ['Nombre del negocio', 'Sector', 'Hasta 6 servicios (con precio, si quieres mostrarlo)', 'Teléfono y WhatsApp', 'Dirección y horario', '¿Tienes logo y fotos? (hasta 8; te diremos cómo enviarlas)'],
-    noIncluye: ['Compra del dominio', 'Correo corporativo', 'Sistema de reservas', 'Tienda online', 'Textos legales', 'Mantenimiento continuo'],
+    slug: 'web-una-pagina', cat: 'webs', nombre: 'Web de una página para tu negocio', ...autoservicio('web-una-pagina'),
+    resumen: 'Eliges diseño, color y letra, escribes tus datos viendo el resultado y tu web queda publicada al momento en tu propio enlace.',
+    recibes: ['Web de una página adaptada a móvil, publicada al pagar', 'Alojamiento incluido en nuestro servidor', 'Hasta 6 servicios con precio', 'Botones de llamada y WhatsApp', 'Horario, dirección y mapa', 'Cambios cuando quieras desde el estudio'],
+    campos: ['Nombre del negocio', 'Sector', 'Hasta 6 servicios (con precio, si quieres mostrarlo)', 'Teléfono y WhatsApp', 'Dirección y horario'],
+    noIncluye: ['Compra del dominio', 'Correo corporativo', 'Sistema de reservas', 'Tienda online', 'Textos legales', 'Redacción de los textos por nuestra parte'],
     ejemplo: 'Peluquería Lola: portada con foto, lista de servicios con precios, botón «Pide cita por WhatsApp» y mapa.',
     repos: ['ColorlibHQ/bootstrap-templates', 'mmrahmanbappi/100-free-html-templates', 'micah-masuka/free-website-templates'],
   },

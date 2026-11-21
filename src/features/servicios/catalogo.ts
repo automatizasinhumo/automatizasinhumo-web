@@ -7,6 +7,7 @@
  * Un servicio «pronto» se enseña pero no se enlaza: así el cliente ve lo que viene sin
  * acabar en una página a medias.
  */
+import { AUTOSERVICIO, SLUG_WEB } from './autoservicio';
 import { EXTRAS_CV, PAQUETES_CV, miniaturaCv } from './cv';
 
 export type IdFamilia = 'cv' | 'webs' | 'tiendas' | 'reservas' | 'automatizar' | 'eventos';
@@ -89,7 +90,9 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         nombre: 'Web de una página',
         texto: 'Quién eres, qué ofreces y cómo contactarte, en una sola página clara.',
         icono: 'browser',
-        puntos: ['Llamada y WhatsApp a un toque', 'Horario, dirección y mapa', 'Publicada al terminar'],
+        puntos: ['3 diseños, tu color y tu letra', 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
+        href: '/servicios/web',
+        desde: AUTOSERVICIO[SLUG_WEB]!.precio,
       },
       {
         id: 'portafolio',

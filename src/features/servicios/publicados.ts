@@ -3,7 +3,19 @@
  * Aquí solo lo propio de la tarjeta (validación y vCard); la publicación y la dirección
  * son las comunes a todas las páginas publicadas (paginas.ts).
  */
-import { SLUG_PAGINA_VALIDO, paginaDePedido, paginaPorSlug, publicarPagina, slugBase as slugComun } from './paginas';
+import {
+  EMAIL,
+  SLUG_PAGINA_VALIDO,
+  TELEFONO,
+  paginaDePedido,
+  paginaPorSlug,
+  publicarPagina,
+  slugBase as slugComun,
+  texto,
+  urlSegura,
+} from './paginas';
+
+export { urlSegura };
 
 export interface EnlaceTarjeta {
   etiqueta: string;
@@ -24,27 +36,6 @@ export interface DatosTarjeta {
 
 export const COLOR_POR_DEFECTO = '#2563eb';
 const MAX_ENLACES = 6;
-
-const texto = (v: unknown, max: number): string =>
-  typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, max) : '';
-
-/** Solo http(s); «linkedin.com/in/x» se completa con https://. Cualquier otro esquema se descarta. */
-export function urlSegura(v: unknown): string {
-  const t = texto(v, 300);
-  if (!t) return '';
-  const conEsquema = /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
-  try {
-    const u = new URL(conEsquema);
-    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
-    if (!u.hostname.includes('.')) return '';
-    return u.href;
-  } catch {
-    return '';
-  }
-}
-
-const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
-const TELEFONO = /^\+?[0-9 ().-]{6,24}$/;
 
 export type ResultadoTarjeta = { ok: true; datos: DatosTarjeta } | { ok: false; error: string };
 

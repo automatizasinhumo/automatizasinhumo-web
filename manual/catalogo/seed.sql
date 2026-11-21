@@ -22,15 +22,15 @@ INSERT INTO categories (name, slug, public_id) VALUES ('Portales y webs editable
 INSERT INTO categories (name, slug, public_id) VALUES ('Documentos, PDF e IA', 'documentos', 'cat_mk106fra47');
 INSERT INTO categories (name, slug, public_id) VALUES ('Contenido y redes', 'contenido', 'cat_kykrhx1j2c');
 INSERT INTO categories (name, slug, public_id) VALUES ('Planes mensuales', 'planes', 'cat_f889dgxpd9');
-INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Web de una página para tu negocio', 'Tu negocio en internet con una sola página clara: quién eres, qué ofreces y cómo contactarte.
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Web de una página para tu negocio', 'Eliges diseño, color y letra, escribes tus datos viendo el resultado y tu web queda publicada al momento en tu propio enlace.
 
 ## Qué recibes
-- Web de una página adaptada a móvil
-- Hasta 6 servicios
+- Web de una página adaptada a móvil, publicada al pagar
+- Alojamiento incluido en nuestro servidor
+- Hasta 6 servicios con precio
 - Botones de llamada y WhatsApp
 - Horario, dirección y mapa
-- Espacio para tus fotos
-- En «Te lo montamos»: publicada en una dirección gratuita o en tu dominio si ya lo tienes
+- Cambios cuando quieras desde el estudio
 
 ## No incluye
 - Compra del dominio
@@ -38,7 +38,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Sistema de reservas
 - Tienda online
 - Textos legales
-- Mantenimiento continuo
+- Redacción de los textos por nuestra parte
 
 ## Campos que rellenas
 - Nombre del negocio
@@ -46,31 +46,19 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Hasta 6 servicios (con precio, si quieres mostrarlo)
 - Teléfono y WhatsApp
 - Dirección y horario
-- ¿Tienes logo y fotos? (hasta 8; te diremos cómo enviarlas)
 
 ## Ejemplo
 > Peluquería Lola: portada con foto, lista de servicios con precios, botón «Pide cita por WhatsApp» y mapa.
 
-**Plazo:** primera versión en 24–72 horas laborables desde que recibimos los datos necesarios. Incluye una ronda de ajustes que puedes solicitar durante los 7 días siguientes a la primera versión. Entrega definitiva tras tu aprobación.
-
-## Plantilla + guía o te lo montamos
-**Te lo montamos:** nos encargamos de poner en funcionamiento lo incluido y te pasamos el enlace. **Plantilla + guía:** te lo entregamos preparado con tus datos y con una guía paso a paso para publicarlo tú.
-
-| | Plantilla + guía | Te lo montamos |
-|---|---|---|
-| Precio | **149 €** | **349 €** |
-| Preparado con tus datos | Sí | Sí |
-| Guía paso a paso para publicarlo | Sí | No hace falta |
-| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
-| Ronda de ajustes | Sí | Sí |
+**Plazo:** al momento. Lo preparas tú en el estudio y, al pagar, lo descargas o queda publicado sin esperas.
 
 ## Cómo funciona
-**Compra directa:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos la primera versión y, tras la ronda de ajustes, te lo entregamos.
+**Hazlo ahora en el [estudio](/servicios/web):** eliges el diseño, rellenas tus datos y lo ves al momento con una marca de agua de vista previa.
 
-**Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
+**Al pagar** se quita la marca: descargas la versión final o se publica en tu enlace, y queda guardado en tu pedido.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 14900, 'eur', 999, 1, 'web-una-pagina', 'Modalidad', 0, 'prod_pv3z0zenn8', datetime('2026-01-01', '-0 minutes'));
+', 4900, 'eur', 999, 1, 'web-una-pagina', NULL, 0, 'prod_pv3z0zenn8', datetime('2026-01-01', '-0 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-una-pagina' AND c.slug='webs';
 UPDATE products SET image_key='productos/web-una-pagina.jpg' WHERE slug='web-una-pagina';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-una-pagina.jpg', 0, 'pimg_v27teqvrma' FROM products WHERE slug='web-una-pagina';
@@ -78,8 +66,6 @@ INSERT INTO product_images (product_id, image_key, position, public_id) SELECT i
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'demos/business-template.png', 2, 'pimg_g7fwe7d9fv' FROM products WHERE slug='web-una-pagina';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'demos/product-launch.png', 3, 'pimg_0gc6ske6hw' FROM products WHERE slug='web-una-pagina';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'demos/plantillas-eventos.png', 4, 'pimg_d152t2r4d5' FROM products WHERE slug='web-una-pagina';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Plantilla + guía (la publicas tú)', 14900, 999, 'web-una-pagina-diy', 0, 1, 'var_q47vd909gz' FROM products WHERE slug='web-una-pagina';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 34900, 999, 'web-una-pagina-pro', 1, 1, 'var_4eqzhf9t3v' FROM products WHERE slug='web-una-pagina';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Web corporativa de hasta 5 páginas', 'Inicio, servicios, sobre nosotros, opiniones y contacto. Para empresas que necesitan algo más que una tarjeta.
 
 ## Qué recibes
