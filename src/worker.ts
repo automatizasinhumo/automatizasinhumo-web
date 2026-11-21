@@ -146,7 +146,9 @@ export default {
     const propia = await servirDominio(request, env.DB, async (tipo, slug, url) => {
       if (tipo !== 'web') return null;
       const w = await webPorSlug(env.DB, slug);
-      return w ? documentoWeb(w.datos, url, await origenTienda()) : null;
+      if (!w) return null;
+      const tienda = await origenTienda();
+      return documentoWeb(w.datos, url, tienda, `${tienda || new URL(url).origin}/w/${w.slug}/foto`);
     }).catch((err) => {
       console.error('Custom domain lookup failed:', err instanceof Error ? err.message : 'error');
       return null;
