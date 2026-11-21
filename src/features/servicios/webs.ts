@@ -397,6 +397,30 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
 }
 
 /**
+ * Ficha del negocio para buscadores (schema.org LocalBusiness en JSON-LD): nombre, teléfono,
+ * dirección, servicios y redes. Solo lo que el cliente rellenó. Va en un <script> de datos,
+ * no ejecutable, y se escapa `<` para que ningún texto pueda cerrar la etiqueta.
+ */
+export function fichaNegocio(d: DatosWeb, url: string): string {
+  const ficha: Record<string, unknown> = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: d.negocio, url };
+  const descripcion = (d.sobre || d.lema).replace(/\s+/g, ' ').trim();
+  if (descripcion) ficha.description = descripcion.slice(0, 300);
+  if (d.telefono) ficha.telephone = d.telefono;
+  if (d.email) ficha.email = d.email;
+  if (d.direccion) ficha.address = { '@type': 'PostalAddress', streetAddress: d.direccion };
+  const redes = d.enlaces.map((e) => e.url).filter(Boolean);
+  if (redes.length) ficha.sameAs = redes;
+  const servicios = d.servicios.filter((s) => s.nombre);
+  if (servicios.length) {
+    ficha.makesOffer = servicios.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: s.nombre, ...(s.texto ? { description: s.texto } : {}) },
+    }));
+  }
+  return JSON.stringify(ficha).replace(/</g, '\\u003c');
+}
+
+/**
  * Página publicada completa (/w/<slug> o el dominio del cliente): ligera, sin JavaScript ni
  * recursos externos. `tienda` es el origen de nuestra tienda para el enlace del pie y el icono
  * cuando la página se sirve desde otro dominio ('' = mismo origen).
@@ -419,6 +443,7 @@ export function documentoWeb(d: DatosWeb, url: string, tienda = ''): string {
 <meta property="og:url" content="${esc(url)}">
 <meta name="theme-color" content="${esc(d.color)}">
 <link rel="icon" href="${esc(tienda)}/favicon.svg">
+<script type="application/ld+json">${fichaNegocio(d, url)}</script>
 <style>body{margin:0}${CSS_WEB}</style>
 </head>
 <body>
