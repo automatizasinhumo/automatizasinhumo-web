@@ -1,0 +1,18 @@
+{
+  "$comentario": "Servicios que el cliente se hace solo y se entregan al momento. Fuente única de precio (céntimos) e ids públicos: la leen el estudio (cv.ts), el seed (manual/catalogo/gen-sql.mjs) y la página del pedido. Los ids son pid() de gen-sql; el seed comprueba que coinciden.",
+  "cv-profesional": {
+    "producto": "prod_4mkgycmnyq",
+    "nombre": "Currículum en PDF",
+    "estudio": "/servicios/cv",
+    "variantes": {
+      "disenada": { "sku": "cv-profesional-disenada", "id": "var_hhtaskams3", "etiqueta": "Diseño listo", "precio": 900 },
+      "personalizable": { "sku": "cv-profesional-personalizable", "id": "var_r46jprwdtc", "etiqueta": "Personalizable", "precio": 1400 }
+    }
+  },
+  "tarjeta-digital": {
+    "producto": "prod_j021nz6hke",
+    "nombre": "Tarjeta digital con QR",
+    "estudio": "/servicios/cv",
+    "precio": 500
+  }
+}

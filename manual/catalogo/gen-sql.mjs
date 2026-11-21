@@ -49,7 +49,14 @@ for (const p of productos) {
     vistas.add(key);
     out.push(`INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, ${q(key)}, ${n++}, ${q(pid('pimg', `${p.slug}:${key}`))} FROM products WHERE slug=${q(p.slug)};`);
   }
-  if (varios) {
+  if (p.auto) {
+    // Los ids viven en autoservicio.json (los usa la web para el carrito): deben ser los de pid().
+    if (pid('prod', p.slug) !== p.auto.producto) throw new Error(`autoservicio.json: id de ${p.slug} debe ser ${pid('prod', p.slug)}`);
+    (p.auto.variantes ?? []).forEach((v, i) => {
+      if (pid('var', v.sku) !== v.id) throw new Error(`autoservicio.json: id de ${v.sku} debe ser ${pid('var', v.sku)}`);
+      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(v.etiqueta)}, ${v.precio}, 999, ${q(v.sku)}, ${i}, 1, ${q(v.id)} FROM products WHERE slug=${q(p.slug)};`);
+    });
+  } else if (varios) {
     [['Plantilla + guía (la publicas tú)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(label)}, ${eur * 100}, 999, ${q(`${p.slug}-${i ? 'pro' : 'diy'}`)}, ${i}, 1, ${q(pid('var', `${p.slug}-${i ? 'pro' : 'diy'}`))} FROM products WHERE slug=${q(p.slug)};`));
   }

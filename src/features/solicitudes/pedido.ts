@@ -13,6 +13,8 @@ export interface PedidoVerificado {
   publicId: string;
   /** «Plantilla + guía» | «Te lo montamos» | null si el servicio no tiene modalidades. */
   modalidad: string | null;
+  /** sku de la variante pagada (los servicios de autoservicio lo usan para saber qué se compró). */
+  sku: string | null;
   /** Lo pagado por esa línea (precio unitario × cantidad), en céntimos. */
   pagadoCents: number;
   currency: string;
@@ -42,7 +44,7 @@ export async function resolverPedido(
   if (order.refunded_cents > 0 && order.refunded_cents >= order.amount_total_cents) return null;
   const linea = await db
     .prepare(
-      `SELECT oi.price_cents, oi.quantity, v.label AS variante
+      `SELECT oi.price_cents, oi.quantity, v.label AS variante, v.sku
          FROM order_items oi
          JOIN products p ON p.id = oi.product_id
          LEFT JOIN product_variants v ON v.id = oi.variant_id
@@ -50,12 +52,13 @@ export async function resolverPedido(
         ORDER BY oi.id LIMIT 1`,
     )
     .bind(order.id, slug)
-    .first<{ price_cents: number; quantity: number; variante: string | null }>();
+    .first<{ price_cents: number; quantity: number; variante: string | null; sku: string | null }>();
   if (!linea) return null;
   return {
     ref: publicIdToken(order.public_id ?? '', 'order') ?? publicId,
     publicId,
     modalidad: modalidadDeEtiqueta(linea.variante),
+    sku: linea.sku,
     pagadoCents: linea.price_cents * linea.quantity,
     currency: order.currency,
   };

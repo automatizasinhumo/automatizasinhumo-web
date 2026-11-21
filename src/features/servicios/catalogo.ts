@@ -7,7 +7,7 @@
  * Un servicio «pronto» se enseña pero no se enlaza: así el cliente ve lo que viene sin
  * acabar en una página a medias.
  */
-import { PAQUETES_CV, miniaturaCv } from './cv';
+import { EXTRAS_CV, PAQUETES_CV, miniaturaCv } from './cv';
 
 export type IdFamilia = 'cv' | 'webs' | 'tiendas' | 'reservas' | 'automatizar' | 'eventos';
 
@@ -59,6 +59,8 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         texto: 'Tu contacto en un QR: quien lo escanea te guarda en el móvil con un toque.',
         icono: 'qrcode',
         puntos: ['Con los datos de tu CV', 'Botón «Guardar contacto»', 'QR para imprimir'],
+        href: '/servicios/cv#tarjeta',
+        desde: EXTRAS_CV[0]!.precio,
       },
       {
         id: 'cv-web',

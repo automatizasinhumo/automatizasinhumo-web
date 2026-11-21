@@ -7,6 +7,8 @@ import { describe, expect, it } from 'vitest';
 
 const seed = readFileSync('manual/catalogo/seed.sql', 'utf8');
 const demos = JSON.parse(readFileSync('src/data/demos-producto.json', 'utf8'));
+// Autoservicio (lo hace el cliente en un estudio): sus modalidades salen de autoservicio.json.
+const { $comentario: _c, ...autoservicio } = JSON.parse(readFileSync('src/features/servicios/autoservicio.json', 'utf8'));
 
 const literal = String.raw`'((?:[^']|'')*)'`;
 const filaProducto = new RegExp(
@@ -51,11 +53,17 @@ describe('tarjetas iguales en todo el catálogo', () => {
     expect(activos.filter((p) => !(p.precio > 0)).map((p) => p.slug)).toEqual([]);
   });
 
-  it('modalidad clara: o plantilla y «te lo montamos» (más caro), o un servicio de precio único', () => {
+  it('modalidad clara: plantilla y «te lo montamos» (más caro), autoservicio por modalidades o precio único', () => {
     const malos = activos
       .filter((p) => {
         const v = variantes.get(p.slug);
         if (!v) return false; // precio único: «lo hacemos nosotros»
+        const auto = autoservicio[p.slug]?.variantes;
+        if (auto) {
+          // Autoservicio: exactamente las modalidades de autoservicio.json, de menor a mayor precio.
+          const esperadas = Object.values(auto).map((x) => ({ etiqueta: x.etiqueta.toLocaleLowerCase('es'), precio: x.precio }));
+          return JSON.stringify(v) !== JSON.stringify(esperadas) || v.some((x, i) => i && x.precio <= v[i - 1].precio);
+        }
         const plantilla = v.find((x) => x.etiqueta.includes('plantilla') && !x.etiqueta.includes('te lo montamos'));
         const montaje = v.find((x) => x.etiqueta.includes('te lo montamos'));
         return !(plantilla && montaje && montaje.precio > plantilla.precio);
