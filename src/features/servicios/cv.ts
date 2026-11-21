@@ -74,7 +74,7 @@ export interface DisenoCv {
   columnas: 1 | 2;
 }
 
-/** Los 15 diseños del motor, con nombre propio y una pista de estilo. */
+/** Los 25 diseños del motor, con nombre propio y una pista de estilo. */
 export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'onyx', nombre: 'Ónix', estilo: 'Clásico con columna lateral', tono: 'sobrio', columnas: 2 },
   { id: 'azurill', nombre: 'Celeste', estilo: 'Cabecera centrada', tono: 'sobrio', columnas: 2 },
@@ -91,6 +91,16 @@ export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'pikachu', nombre: 'Ámbar', estilo: 'Cabecera en bloque', tono: 'color', columnas: 2 },
   { id: 'rhyhorn', nombre: 'Lineal', estilo: 'Una columna, sin adornos', tono: 'sobrio', columnas: 1 },
   { id: 'scizor', nombre: 'Carmín', estilo: 'Filete de color, títulos marcados', tono: 'sobrio', columnas: 1 },
+  { id: 'aurora', nombre: 'Aurora', estilo: 'Banda de color y títulos en etiqueta', tono: 'color', columnas: 2 },
+  { id: 'coral', nombre: 'Coral', estilo: 'Columna de color con monograma', tono: 'color', columnas: 2 },
+  { id: 'lienzo', nombre: 'Lienzo', estilo: 'Centrado, editorial, con monograma', tono: 'sobrio', columnas: 1 },
+  { id: 'nocturno', nombre: 'Nocturno', estilo: 'Columna oscura con tu nombre', tono: 'color', columnas: 2 },
+  { id: 'mosaico', nombre: 'Mosaico', estilo: 'Secciones en tarjetas', tono: 'color', columnas: 1 },
+  { id: 'prisma', nombre: 'Prisma', estilo: 'Banda oscura y columna de color', tono: 'color', columnas: 2 },
+  { id: 'brisa', nombre: 'Brisa', estilo: 'Centrado con columna suave', tono: 'sobrio', columnas: 2 },
+  { id: 'vertice', nombre: 'Vértice', estilo: 'Nombre enorme sobre banda', tono: 'color', columnas: 1 },
+  { id: 'oasis', nombre: 'Oasis', estilo: 'Monograma y filetes punteados', tono: 'sobrio', columnas: 2 },
+  { id: 'zafiro', nombre: 'Zafiro', estilo: 'Lateral oscuro a la derecha', tono: 'color', columnas: 2 },
 ];
 
 export const DISENO_POR_DEFECTO = 'onyx';
