@@ -7,6 +7,11 @@ import {
   MAX_SERVICIOS_WEB,
   PLANTILLAS_WEB,
   WEB_POR_DEFECTO,
+  CONTRASTE_AA,
+  FONDO_TEXTO_CLARO,
+  FONDO_TEXTO_OSCURO,
+  acentoSobre,
+  contraste,
   documentoWeb,
   enlaceWhatsapp,
   esc,
@@ -37,6 +42,8 @@ describe('validarWeb', () => {
     expect(validarWeb({ ...base, telefono: 'llámame' })).toEqual({ ok: false, error: 'telefono' });
     expect(validarWeb({ ...base, whatsapp: 'no' })).toEqual({ ok: false, error: 'whatsapp' });
     expect(validarWeb({ ...base, email: 'pepe@' })).toEqual({ ok: false, error: 'email' });
+    expect(validarWeb({ ...base, telefono: '......' })).toEqual({ ok: false, error: 'telefono' });
+    expect(validarWeb({ ...base, whatsapp: '(  ) -' })).toEqual({ ok: false, error: 'whatsapp' });
   });
   it('quita servicios sin nombre, enlaces peligrosos y respeta los máximos', () => {
     const servicios = [{ nombre: '' }, ...Array.from({ length: 10 }, (_, i) => ({ nombre: `S${i}` }))];
@@ -58,7 +65,7 @@ describe('renderWeb', () => {
     const r = validarWeb({ ...base, negocio: '<script>x</script>', lema: '"><img src=x onerror=alert(1)>', servicios: [{ nombre: '<b>', precio: '<i>' }] });
     if (!r.ok) throw new Error(r.error);
     const html = renderWeb(r.datos);
-    expect(html).not.toMatch(/<script|<img|<b>|<i>/);
+    expect(html).not.toMatch(/<script|<img|<b>|<i>/i);
     expect(html).toContain('&lt;script&gt;');
   });
   it('cada plantilla y letra cambia solo la clase y las variables', () => {
@@ -85,7 +92,19 @@ describe('ayudas', () => {
     expect(enlaceWhatsapp('0044 7700 900123')).toBe('https://wa.me/447700900123');
   });
   it('texto legible sobre el acento', () => {
-    expect(sobreAcento('#ffffff')).toBe('#111827');
+    expect(sobreAcento('#ffffff')).toBe('#000000');
     expect(sobreAcento('#1f2937')).toBe('#ffffff');
+    // Con luminancia lineal: el gris medio lleva texto negro (el blanco se queda en 3,9:1).
+    expect(sobreAcento('#808080')).toBe('#000000');
+  });
+  it('cualquier acento cumple AA como texto en claro y en oscuro, y sobre el acento', () => {
+    const muestras = ['#ffffff', '#000000', '#808080', '#2563eb', '#facc15', '#22c55e', '#0f172a', '#f472b6'];
+    for (const c of muestras) {
+      expect(contraste(acentoSobre(c, FONDO_TEXTO_CLARO), FONDO_TEXTO_CLARO)).toBeGreaterThanOrEqual(CONTRASTE_AA);
+      expect(contraste(acentoSobre(c, '#ffffff'), '#ffffff')).toBeGreaterThanOrEqual(CONTRASTE_AA);
+      expect(contraste(acentoSobre(c, FONDO_TEXTO_OSCURO), FONDO_TEXTO_OSCURO)).toBeGreaterThanOrEqual(CONTRASTE_AA);
+      expect(contraste(sobreAcento(c), c)).toBeGreaterThanOrEqual(CONTRASTE_AA);
+    }
+    expect(acentoSobre('#1d4ed8', FONDO_TEXTO_CLARO)).toBe('#1d4ed8');
   });
 });

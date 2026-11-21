@@ -8,7 +8,7 @@
  * «#pedido=<token>»: el estudio lo comprueba en /api/web/pedido y la publica en /w/<nombre>
  * con /api/web/publicar. Volver a publicar actualiza la misma dirección.
  */
-import { guardarToken, llenarCarrito, tokenGuardado, tomarTokenDelHash } from './compraEstudio';
+import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { MARCA_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
@@ -40,6 +40,7 @@ interface Estado {
 interface Pagado {
   ref: string;
   slug: string | null;
+  datos: DatosWeb | null;
 }
 
 const CLAVE = 'servicios:web';
@@ -57,7 +58,9 @@ const ERROR_PUBLICAR: Record<string, string> = {
   pedido: 'Este pedido no incluye la web.',
 };
 /** Estilos solo de la vista previa: sin seleccionar texto y la miniatura a escala. */
-const CSS_VISTA = ':host{display:block;user-select:none;-webkit-user-select:none}.mini{width:250%;transform:scale(.4);transform-origin:0 0}';
+/** Ancho al que se pinta la vista «Ordenador» antes de escalarla al panel: pasa los cortes de 640 y 960 px. */
+const ANCHO_ESCRITORIO = 1100;
+const CSS_VISTA = `:host{display:block;user-select:none;-webkit-user-select:none}.mini{width:250%;transform:scale(.4);transform-origin:0 0}:host([data-escritorio]) .w{width:${ANCHO_ESCRITORIO}px;zoom:var(--escala,1)}`;
 
 function leer(): Partial<Estado> {
   try {
@@ -157,7 +160,7 @@ export function iniciarEstudioWeb() {
     const v = muestra ? { ...cfg.ejemplo, plantilla: d.plantilla, color: d.color, letra: d.letra } : paraVista(d);
     sombra.innerHTML = `<style>${cfg.css}${CSS_VISTA}</style>${renderWeb(v, { marca: MARCA_WEB })}`;
     barra.textContent = `${location.host}/w/${slugDe(v.negocio)}`;
-    vista.dataset.tamano = estado.tamano;
+    escalar();
     $('[data-estado]')!.textContent = muestra ? 'Ejemplo: escribe tus datos y aparecerán aquí' : `Vista previa · diseño ${nombrePlantilla(v.plantilla)}`;
   }
   /**
@@ -170,6 +173,14 @@ export function iniciarEstudioWeb() {
     if (!r.ok) return { ...cfg.ejemplo, plantilla: d.plantilla, color: d.color, letra: d.letra, negocio: d.negocio };
     return { ...r.datos, telefono: vale('telefono') ? d.telefono : '', whatsapp: vale('whatsapp') ? d.whatsapp : '', email: vale('email') ? d.email : '' };
   }
+  /** «Ordenador»: la web a ancho de escritorio real, reducida para caber en el panel. */
+  function escalar() {
+    vista.dataset.tamano = estado.tamano;
+    const escritorio = estado.tamano === 'escritorio';
+    host.toggleAttribute('data-escritorio', escritorio);
+    if (escritorio && host.clientWidth) host.style.setProperty('--escala', String(Math.min(1, host.clientWidth / ANCHO_ESCRITORIO)));
+  }
+  new ResizeObserver(escalar).observe(host);
   let temporizador = 0;
   function programar(inmediato = false) {
     window.clearTimeout(temporizador);
@@ -229,17 +240,20 @@ export function iniciarEstudioWeb() {
     const res = (k: string) => $(`[data-res="${k}"]`)!;
     res('negocio').textContent = campo('negocio').value.trim();
     res('plantilla').textContent = nombrePlantilla(estado.plantilla);
-    $('[data-solo-compra]')!.hidden = !!pagado;
-    $('[data-solo-pagado]')!.hidden = !pagado;
-    if (pagado) res('ref').textContent = pagado.ref;
+    $('[data-solo-compra]')!.hidden = !!pedido.pagado;
+    $('[data-solo-pagado]')!.hidden = !pedido.pagado;
+    if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
     const b = $('[data-comprar] span');
-    if (b) b.textContent = pagado ? (pagado.slug ? 'Guardar los cambios en mi web' : 'Publicar mi web') : `Comprar y publicar · ${euros(cfg.precio)}`;
-    if (pagado?.slug && !$('[data-estado-compra] a')) avisar(`/w/${pagado.slug}`, 'Tu web está publicada en');
+    if (b) b.textContent = pedido.pagado ? (pedido.pagado.slug ? 'Guardar los cambios en mi web' : 'Publicar mi web') : `Comprar y publicar · ${euros(cfg.precio)}`;
+    if (pedido.pagado?.slug && !$('[data-estado-compra] a')) avisar(`/w/${pedido.pagado.slug}`, 'Tu web está publicada en');
   }
 
   // ---------- Compra y publicación ----------
-  let pagado: Pagado | null = null;
-  let token = '';
+  const destinoPedido = () => (estado.plantilla && estado.alcanzado >= PASOS.length - 1 ? '#publica' : '');
+  const pedido = pedidoEstudio<Pagado>(CLAVE_PEDIDO, '/api/web/pedido', (d) => {
+    if (d) recuperar(d);
+    if (actual === 'publica') resumir();
+  });
   async function comprar(b: HTMLButtonElement) {
     const st = $('[data-estado-compra]')!;
     persistir();
@@ -267,21 +281,24 @@ export function iniciarEstudioWeb() {
   }
   async function publicar(b: HTMLButtonElement) {
     const st = $('[data-estado-compra]')!;
+    // Solo con el pedido del token vigente ya cargado: nunca el token de B con lo escrito para A.
+    const token = pedido.token;
+    const pagado = pedido.pagado;
+    if (!pagado || !pedido.vigente(token)) return;
     b.disabled = true;
     st.textContent = 'Publicando…';
     try {
       const r = await fetch('/api/web/publicar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, datos: datos() }) });
       const d = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; slug?: string; error?: string };
+      if (!pedido.vigente(token)) return;
       if (!d.ok || !d.url) {
         st.dataset.tono = 'error';
         st.textContent = ERROR_PUBLICAR[d.error ?? ''] ?? 'No se ha podido publicar. Inténtalo de nuevo en un momento.';
         return;
       }
-      if (pagado) {
-        pagado.slug = d.slug ?? null;
-        estado.pedido = pagado.ref;
-        persistir();
-      }
+      pagado.slug = d.slug ?? null;
+      estado.pedido = pagado.ref;
+      persistir();
       avisar(d.url, 'Publicada en');
       resumir();
     } catch (e) {
@@ -292,39 +309,32 @@ export function iniciarEstudioWeb() {
       b.disabled = false;
     }
   }
-  async function cargarPedido() {
-    try {
-      const r = await fetch('/api/web/pedido', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) });
-      if (r.status === 404) {
-        guardarToken(CLAVE_PEDIDO, '');
-        token = '';
-        return;
-      }
-      if (!r.ok) return;
-      const d = (await r.json()) as { ref: string; slug: string | null; datos: DatosWeb | null };
-      pagado = { ref: d.ref, slug: d.slug };
-      // Se recupera lo publicado para seguir editándolo si el formulario está vacío (otro navegador)
-      // o tiene la web de otro pedido (#pedido=B tras A en la misma pestaña): nunca se publica
-      // en un pedido lo escrito para otro. Un diseño nuevo aún sin publicar se conserva.
-      const ajeno = !!estado.pedido && estado.pedido !== d.ref;
-      if (d.datos && (ajeno || !campo('negocio').value.trim())) {
-        const { plantilla, color, letra, ...c } = d.datos;
-        Object.assign(estado, { plantilla, color, letra, alcanzado: PASOS.length - 1, pedido: d.ref });
-        volcar(c);
-        persistir();
-        pintarControles();
-      }
-      if (actual === 'publica') resumir();
-    } catch (e) {
-      console.error(e);
+  /**
+   * Pedido recién comprobado. Se recupera lo publicado para seguir editándolo si el formulario está
+   * vacío (otro navegador) o tiene la web de otro pedido (#pedido=B tras A en la misma pestaña):
+   * nunca se publica en un pedido lo escrito para otro; si B aún no tiene web, el formulario se
+   * vacía. Un diseño nuevo aún sin publicar se conserva y se publica solo al volver del pago.
+   */
+  function recuperar(d: Pagado) {
+    const ajeno = !!estado.pedido && estado.pedido !== d.ref;
+    if (d.datos && (ajeno || !campo('negocio').value.trim())) {
+      const { plantilla, color, letra, ...c } = d.datos;
+      Object.assign(estado, { plantilla, color, letra, alcanzado: PASOS.length - 1, pedido: d.ref });
+      volcar(c);
+      persistir();
+      pintarControles();
+      programar(true);
+      return;
     }
-  }
-  function tomarPedido(): boolean {
-    const t = tomarTokenDelHash(CLAVE_PEDIDO, estado.plantilla && estado.alcanzado >= PASOS.length - 1 ? '#publica' : '');
-    if (t === null) return false;
-    token = t;
-    void cargarPedido();
-    return true;
+    if (ajeno) {
+      estado.pedido = d.ref;
+      volcar(vacio());
+      persistir();
+      programar(true);
+      return;
+    }
+    const b = $<HTMLButtonElement>('[data-comprar]');
+    if (!d.slug && b && validar('plantilla') && validar('datos')) void publicar(b);
   }
 
   function mostrar(paso: string, enfocar: boolean) {
@@ -408,7 +418,7 @@ export function iniciarEstudioWeb() {
       persistir();
       return programar(true);
     }
-    if (b.hasAttribute('data-comprar')) return void (pagado ? publicar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
+    if (b.hasAttribute('data-comprar')) return void (pedido.cargando ? undefined : pedido.pagado ? publicar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
   });
 
   form.addEventListener('submit', (ev) => ev.preventDefault());
@@ -416,7 +426,7 @@ export function iniciarEstudioWeb() {
     const c = ev.target as HTMLInputElement;
     if (c.name === 'tamano-vista') {
       estado.tamano = c.value === 'escritorio' ? 'escritorio' : 'movil';
-      vista.dataset.tamano = estado.tamano;
+      escalar();
       return guardar(estado);
     }
     if (c.name === 'plantilla' || c.name === 'plantilla-rapida') {
@@ -439,7 +449,7 @@ export function iniciarEstudioWeb() {
     programar();
   });
   window.addEventListener('hashchange', () => {
-    tomarPedido();
+    pedido.tomar(destinoPedido());
     desdeHash(true);
   });
 
@@ -447,9 +457,6 @@ export function iniciarEstudioWeb() {
   volcar(estado.contenido ?? vacio());
   pintarControles();
   miniaturas();
-  if (!tomarPedido()) {
-    token = tokenGuardado(CLAVE_PEDIDO);
-    if (token) void cargarPedido();
-  }
+  pedido.arrancar(destinoPedido());
   desdeHash(false);
 }

@@ -9,7 +9,7 @@
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
 import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
-import { guardarToken, llenarCarrito, tokenGuardado, tomarTokenDelHash } from './compraEstudio';
+import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
@@ -292,7 +292,7 @@ export function iniciarEstudioCv() {
       }),
     );
   }
-  const extraPagado = (x: ExtraCv) => x.id === 'tarjeta' && !!pagado?.tarjeta;
+  const extraPagado = (x: ExtraCv) => x.id === 'tarjeta' && !!pedido.pagado?.tarjeta;
   const extraMarcado = (x: ExtraCv) => !extraPagado(x) && !!$<HTMLInputElement>(`[data-extra="${x.producto}"]`)?.checked;
   /** Las casillas de extras reflejan `estado.extras` (una sola fuente). */
   function marcarExtras() {
@@ -305,7 +305,7 @@ export function iniciarEstudioCv() {
     const m = modalidad();
     const p = cfg.paquetes[m];
     const res = (k: string) => $(`[data-res="${k}"]`)!;
-    const cvPagado = !!pagado?.cv;
+    const cvPagado = !!pedido.pagado?.cv;
     // Un extra ya pagado no se vuelve a ofrecer.
     for (const x of cfg.extras) $(`[data-extra="${x.producto}"]`)!.closest('label')!.hidden = extraPagado(x);
     const total = p.precio + cfg.extras.reduce((t, x) => t + (extraMarcado(x) ? x.precio : 0), 0);
@@ -314,7 +314,7 @@ export function iniciarEstudioCv() {
     res('precio').textContent = euros(total);
     $('[data-solo-compra]')!.hidden = cvPagado;
     $('[data-solo-pagado]')!.hidden = !cvPagado;
-    if (pagado) res('ref').textContent = pagado.ref;
+    if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
     rellenarTarjeta();
     res('incluye').replaceChildren(
       ...p.incluye.map((x) => {
@@ -326,13 +326,16 @@ export function iniciarEstudioCv() {
     const comprar = $('[data-comprar] span');
     if (comprar) comprar.textContent = cvPagado ? 'Descargar mi PDF' : `Comprar y descargar · ${euros(total)}`;
     const st = $('[data-estado-compra]');
-    if (st && cvPagado && pagado!.cv === 'disenada' && m === 'personalizable')
+    if (st && cvPagado && pedido.pagado!.cv === 'disenada' && m === 'personalizable')
       st.textContent = 'Tu pedido es del diseño listo: el PDF sale con el diseño base, sin tu color ni las formas.';
   }
 
   // ---------- Compra y pedido pagado ----------
-  let pagado: Pagado | null = null;
-  let token = '';
+  /** El token sale de la barra de direcciones (y del historial) y, si ya hay CV, va directo a descargar. */
+  const destinoPedido = () => (estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
+  const pedido = pedidoEstudio<Pagado>(CLAVE_PEDIDO, '/api/cv/pedido', () => {
+    if (actual === 'descarga') resumir();
+  });
   /** Deja el carrito exactamente con lo elegido (cantidad 1, sin la otra modalidad) y va al pago. */
   async function comprar(b: HTMLButtonElement) {
     const st = $('[data-estado-compra]')!;
@@ -357,7 +360,7 @@ export function iniciarEstudioCv() {
     st.textContent = 'Preparando tu PDF…';
     try {
       // Solo sale personalizado si eso es lo que se pagó.
-      const personal = modalidad() === 'personalizable' && pagado?.cv === 'personalizable';
+      const personal = modalidad() === 'personalizable' && pedido.pagado?.cv === 'personalizable';
       const blob = await crearPdf(await motor(), '', personal);
       const nombre = recoger().nombre.replace(/[\\/:*?"<>|]+/g, '').trim();
       const a = document.createElement('a');
@@ -374,30 +377,6 @@ export function iniciarEstudioCv() {
     } finally {
       b.disabled = false;
     }
-  }
-  async function cargarPedido() {
-    try {
-      const r = await fetch('/api/cv/pedido', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) });
-      if (r.status === 404) {
-        guardarToken(CLAVE_PEDIDO, '');
-        token = '';
-        return;
-      }
-      if (!r.ok) return;
-      const d = (await r.json()) as Pagado & { ok: boolean };
-      pagado = { ref: d.ref, cv: d.cv, tarjeta: d.tarjeta };
-      if (actual === 'descarga') resumir();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  function tomarPedido(): boolean {
-    // Fuera de la barra de direcciones (y del historial) y directo a descargar si ya hay CV.
-    const t = tomarTokenDelHash(CLAVE_PEDIDO, estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
-    if (t === null) return false;
-    token = t;
-    void cargarPedido();
-    return true;
   }
   /** `#tarjeta` (o el id de cualquier extra) llega desde /servicios: deja ese extra elegido. */
   function tomarExtra(): boolean {
@@ -419,14 +398,14 @@ export function iniciarEstudioCv() {
   let tarjetaDe = '';
   function rellenarTarjeta() {
     const caja = $('[data-tarjeta-form]')!;
-    caja.hidden = !pagado?.tarjeta;
-    if (!pagado?.tarjeta || tarjetaDe === pagado.ref) return;
-    tarjetaDe = pagado.ref;
+    caja.hidden = !pedido.pagado?.tarjeta;
+    if (!pedido.pagado?.tarjeta || tarjetaDe === pedido.pagado.ref) return;
+    tarjetaDe = pedido.pagado.ref;
     const st = $('[data-estado-tarjeta]')!;
     st.dataset.tono = '';
     st.replaceChildren();
     const f = recoger();
-    const g = pagado.tarjeta.datos;
+    const g = pedido.pagado.tarjeta.datos;
     const v = (k: string, alt: string) => (g && typeof g[k] === 'string' ? (g[k] as string) : alt);
     campoT('nombre').value = v('nombre', f.nombre);
     campoT('cargo').value = v('cargo', f.titular);
@@ -437,7 +416,7 @@ export function iniciarEstudioCv() {
     campoT('resumen').value = v('resumen', f.resumen.slice(0, 280));
     campoT('color').value = v('color', estado.color);
     campoT('linkedin').value = g?.enlaces?.find((e) => /linkedin\./i.test(e.url))?.url ?? '';
-    if (pagado.tarjeta.slug) avisarTarjeta(`/c/${pagado.tarjeta.slug}`, 'Ya está publicada en');
+    if (pedido.pagado.tarjeta.slug) avisarTarjeta(`/c/${pedido.pagado.tarjeta.slug}`, 'Ya está publicada en');
   }
   function avisarTarjeta(url: string, texto: string) {
     const st = $('[data-estado-tarjeta]')!;
@@ -467,17 +446,21 @@ export function iniciarEstudioCv() {
       color: val('color'),
       enlaces: linkedin ? [{ etiqueta: 'LinkedIn', url: linkedin }] : [],
     };
+    // Solo con el pedido del token vigente ya cargado: nunca el token de B con lo escrito para A.
+    const token = pedido.token;
+    if (!pedido.vigente(token)) return;
     b.disabled = true;
     st.textContent = 'Publicando…';
     try {
       const r = await fetch('/api/cv/publicar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, datos }) });
       const d = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; slug?: string; error?: string };
+      if (!pedido.vigente(token)) return;
       if (!d.ok || !d.url) {
         st.dataset.tono = 'error';
         st.textContent = ERROR_TARJETA[d.error ?? ''] ?? 'No se ha podido publicar. Inténtalo de nuevo en un momento.';
         return;
       }
-      if (pagado?.tarjeta) pagado.tarjeta = { slug: d.slug ?? null, datos };
+      if (pedido.pagado?.tarjeta) pedido.pagado.tarjeta = { slug: d.slug ?? null, datos };
       avisarTarjeta(d.url, 'Publicada en');
     } catch (e) {
       console.error(e);
@@ -597,7 +580,8 @@ export function iniciarEstudioCv() {
       pintarControles();
       return programar(true);
     }
-    if (b.hasAttribute('data-comprar')) return void (pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
+    if (pedido.cargando && (b.hasAttribute('data-comprar') || b.hasAttribute('data-publicar'))) return;
+    if (b.hasAttribute('data-comprar')) return void (pedido.pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
     if (b.hasAttribute('data-publicar')) return void publicar(b as HTMLButtonElement);
   });
 
@@ -649,7 +633,7 @@ export function iniciarEstudioCv() {
     programar();
   });
   window.addEventListener('hashchange', () => {
-    tomarPedido();
+    pedido.tomar(destinoPedido());
     tomarExtra();
     desdeHash(true);
   });
@@ -659,9 +643,6 @@ export function iniciarEstudioCv() {
   pintarControles();
   marcarExtras();
   tomarExtra();
-  if (!tomarPedido()) {
-    token = tokenGuardado(CLAVE_PEDIDO);
-    if (token) void cargarPedido();
-  }
+  pedido.arrancar(destinoPedido());
   desdeHash(false);
 }

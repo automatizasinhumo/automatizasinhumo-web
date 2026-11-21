@@ -121,6 +121,10 @@ export type ResultadoWeb = { ok: true; datos: DatosWeb } | { ok: false; error: s
 const esDe = <T extends readonly { id: string }[]>(lista: T, v: unknown): v is T[number]['id'] =>
   lista.some((x) => x.id === v);
 
+/** Formato de teléfono y, además, cifras suficientes para marcar (no «......»). */
+const MIN_CIFRAS = 6;
+const esTelefono = (t: string) => TELEFONO.test(t) && t.replace(/\D/g, '').length >= MIN_CIFRAS;
+
 /** Comprueba y limpia lo que manda el navegador (o lo que hay guardado): nunca se confía en él. */
 export function validarWeb(x: unknown): ResultadoWeb {
   if (!x || typeof x !== 'object') return { ok: false, error: 'datos' };
@@ -128,9 +132,9 @@ export function validarWeb(x: unknown): ResultadoWeb {
   const negocio = texto(o.negocio, 80);
   if (!negocio) return { ok: false, error: 'negocio' };
   const telefono = texto(o.telefono, 24);
-  if (telefono && !TELEFONO.test(telefono)) return { ok: false, error: 'telefono' };
+  if (telefono && !esTelefono(telefono)) return { ok: false, error: 'telefono' };
   const whatsapp = texto(o.whatsapp, 24);
-  if (whatsapp && !TELEFONO.test(whatsapp)) return { ok: false, error: 'whatsapp' };
+  if (whatsapp && !esTelefono(whatsapp)) return { ok: false, error: 'whatsapp' };
   const email = texto(o.email, 254);
   if (email && !EMAIL.test(email)) return { ok: false, error: 'email' };
   if (!telefono && !whatsapp && !email) return { ok: false, error: 'contacto' };
@@ -204,11 +208,47 @@ const parrafosHtml = (s: string) =>
     .map((p) => `<p>${conSaltos(p)}</p>`)
     .join('');
 
-/** Texto legible sobre el color de acento: oscuro si el acento es claro. */
-export function sobreAcento(hex: string): string {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! > 0.55 ? '#111827' : '#ffffff';
+const canales = (hex: string) => [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16));
+/** Luminancia relativa WCAG (canales sRGB linealizados). */
+function luminancia(hex: string): number {
+  const [r, g, b] = canales(hex).map((v) => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
 }
+/** Relación de contraste WCAG entre dos colores #rrggbb (de 1 a 21). */
+export function contraste(a: string, b: string): number {
+  const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p);
+  return (x! + 0.05) / (y! + 0.05);
+}
+/** Mínimo WCAG AA para texto normal. */
+export const CONTRASTE_AA = 4.5;
+
+/** Texto legible sobre el color de acento: negro o blanco, el de más contraste (siempre ≥ 4,58:1). */
+export function sobreAcento(hex: string): string {
+  return contraste(hex, '#000000') >= contraste(hex, '#ffffff') ? '#000000' : '#ffffff';
+}
+
+const mezclar = (hex: string, hacia: number, t: number) =>
+  `#${canales(hex)
+    .map((v) => Math.round(v + (hacia - v) * t).toString(16).padStart(2, '0'))
+    .join('')}`;
+/**
+ * El acento como texto sobre `fondo`: el color elegido si ya cumple AA; si no, oscurecido (fondo
+ * claro) o aclarado (fondo oscuro) lo justo para cumplirlo. Fondos y bordes siguen con el elegido.
+ */
+export function acentoSobre(hex: string, fondo: string): string {
+  const hacia = luminancia(fondo) > 0.18 ? 0 : 255;
+  for (let t = 0; t <= 1; t += 0.05) {
+    const c = mezclar(hex, hacia, t);
+    if (contraste(c, fondo) >= CONTRASTE_AA) return c;
+  }
+  return hacia ? '#ffffff' : '#000000';
+}
+/** Fondos sobre los que el acento se usa como texto: el más desfavorable de cada familia. */
+export const FONDO_TEXTO_CLARO = '#f9fafb';
+export const FONDO_TEXTO_OSCURO = '#111c33';
 
 const digitos = (t: string) => t.replace(/[^\d+]/g, '');
 /** wa.me quiere el número con prefijo de país y sin «+»; los móviles españoles se completan con 34. */
@@ -240,22 +280,22 @@ function fondoMarca(marca: string): string {
 
 /** CSS de todas las plantillas, con ámbito en `.w`: sirve igual en la página publicada y en el Shadow DOM. */
 export const CSS_WEB = `
-.w{--w-fondo:#fff;--w-tinta:#111827;--w-suave:#4b5563;--w-borde:#e5e7eb;--w-panel:#f9fafb;
+.w{--w-ct:var(--w-ct-claro);--w-fondo:#fff;--w-tinta:#111827;--w-suave:#4b5563;--w-borde:#e5e7eb;--w-panel:#f9fafb;
   position:relative;container-type:inline-size;background:var(--w-fondo);color:var(--w-tinta);
   font-family:var(--w-ft-texto);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-wrap:anywhere}
 .w *,.w *::before,.w *::after{box-sizing:border-box}
 .w h1,.w h2,.w h3{font-family:var(--w-ft-titulo);line-height:1.15;margin:0;color:inherit}
 .w p{margin:0}
-.w a{color:inherit}
+.w :where(a){color:inherit}
 .w-in{width:100%;max-width:1040px;margin:0 auto;padding:0 20px}
 .w-ico{width:1.15em;height:1.15em;flex:none}
 .w-cab{padding:56px 0 48px;text-align:center}
-.w-sector{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--w-c)}
+.w-sector{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--w-ct)}
 .w-cab h1{font-size:clamp(2rem,9cqi,3.6rem);margin-top:10px}
 .w-lema{max-width:36rem;margin:14px auto 0;font-size:1.15rem;color:var(--w-suave)}
 .w-acciones{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:28px}
 .w-boton{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:600;
-  text-decoration:none;border:2px solid var(--w-c);color:var(--w-c);background:transparent}
+  text-decoration:none;border:2px solid var(--w-c);color:var(--w-ct);background:transparent}
 .w-boton-lleno{background:var(--w-c);color:var(--w-s)}
 .w-boton:focus-visible{outline:3px solid var(--w-c);outline-offset:3px}
 .w-sec{padding:44px 0}
@@ -267,7 +307,7 @@ export const CSS_WEB = `
 .w-servicio{border:1px solid var(--w-borde);border-radius:16px;padding:18px 20px;background:var(--w-fondo)}
 .w-servicio-cab{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .w-servicio h3{font-size:1.15rem}
-.w-precio{font-weight:700;color:var(--w-c);white-space:nowrap}
+.w-precio{font-weight:700;color:var(--w-ct);white-space:nowrap}
 .w-servicio p{margin-top:6px;color:var(--w-suave)}
 .w-contacto{display:grid;gap:12px;grid-template-columns:1fr;list-style:none;margin:0;padding:0}
 .w-dato{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--w-panel);text-decoration:none}
@@ -295,7 +335,7 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-clara{border-top:6px solid var(--w-c)}
 .w-clara .w-servicios-sec{border-top:1px solid var(--w-borde)}
 /* Noche: fondo oscuro */
-.w-noche{--w-fondo:#0f172a;--w-tinta:#f1f5f9;--w-suave:#94a3b8;--w-borde:#1e293b;--w-panel:#111c33}
+.w-noche{--w-ct:var(--w-ct-oscuro);--w-fondo:#0f172a;--w-tinta:#f1f5f9;--w-suave:#94a3b8;--w-borde:#1e293b;--w-panel:#111c33}
 .w-noche .w-cab{background:radial-gradient(60rem 30rem at 50% -10%,color-mix(in srgb,var(--w-c) 35%,transparent),transparent)}
 .w-noche .w-servicio{background:var(--w-panel)}
 .w-noche .w-boton{color:var(--w-tinta);border-color:var(--w-c)}
@@ -313,7 +353,7 @@ export interface OpcionesWeb {
 /** HTML de la web (solo el contenido, con ámbito en `.w`). Todo texto del cliente va escapado. */
 export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const letra = LETRAS_WEB.find((l) => l.id === d.letra) ?? LETRAS_WEB[0];
-  const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
+  const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, FONDO_TEXTO_CLARO)};--w-ct-oscuro:${acentoSobre(d.color, FONDO_TEXTO_OSCURO)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
   const acciones = [
     d.whatsapp && `<a class="w-boton w-boton-lleno" href="${esc(enlaceWhatsapp(d.whatsapp))}" rel="noopener">${icono('wa')}WhatsApp</a>`,
     d.telefono && `<a class="w-boton${d.whatsapp ? '' : ' w-boton-lleno'}" href="tel:${esc(digitos(d.telefono))}">${icono('tel')}Llamar</a>`,

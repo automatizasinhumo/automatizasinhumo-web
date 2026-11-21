@@ -61,7 +61,9 @@ export function urlSegura(v: unknown): string {
     const u = new URL(conEsquema);
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
     if (!u.hostname.includes('.')) return '';
-    return u.href;
+    // El límite se aplica a la forma normalizada (URL codifica «é» como %C3%A9): lo que se acepta
+    // se guarda tal cual y vuelve a validar igual al leerlo, nunca recortado.
+    return u.href.length <= 300 ? u.href : '';
   } catch {
     return '';
   }
