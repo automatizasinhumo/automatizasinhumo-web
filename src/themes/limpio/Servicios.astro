@@ -41,7 +41,7 @@ interface Props {
 const { familias, proximas } = Astro.props;
 
 const todos = familias.flatMap((f) => f.servicios.map((s) => ({ ...s, familia: f })));
-const listos = todos.filter((s) => s.href);
+const listos = todos.flatMap((s) => (s.href ? [{ ...s, href: s.href }] : []));
 const pronto = todos.filter((s) => !s.href);
 const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
 ---
