@@ -1,8 +1,9 @@
 /**
- * Tarjetas digitales publicadas por el propio cliente desde el estudio del CV.
- * Se sirven todas desde el mismo Worker en /c/<slug>: sin despliegue por cliente,
- * sin alojamiento aparte y publicadas en cuanto el pedido está pagado.
+ * Tarjeta digital publicada por el cliente desde el estudio del CV, en /c/<slug>.
+ * Aquí solo lo propio de la tarjeta (validación y vCard); la publicación y la dirección
+ * son las comunes a todas las páginas publicadas (paginas.ts).
  */
+import { SLUG_PAGINA_VALIDO, paginaDePedido, paginaPorSlug, publicarPagina, slugBase as slugComun } from './paginas';
 
 export interface EnlaceTarjeta {
   etiqueta: string;
@@ -84,19 +85,9 @@ export function validarTarjeta(x: unknown): ResultadoTarjeta {
 }
 
 /** «José Pérez Núñez» → «jose-perez-nunez». */
-export function slugBase(nombre: string): string {
-  const s = nombre
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 40)
-    .replace(/-+$/, '');
-  return s || 'tarjeta';
-}
+export const slugBase = (nombre: string) => slugComun(nombre, 'tarjeta');
 
-export const SLUG_TARJETA_VALIDO = /^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/;
+export const SLUG_TARJETA_VALIDO = SLUG_PAGINA_VALIDO;
 
 const escVcard = (s: string) => s.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1');
 
@@ -122,50 +113,12 @@ export interface TarjetaPublicada {
   updated_at: string;
 }
 
-const fila = (r: { slug: string; datos: string; updated_at: string } | null): TarjetaPublicada | null => {
-  if (!r) return null;
-  const v = validarTarjeta(JSON.parse(r.datos));
-  return v.ok ? { slug: r.slug, datos: v.datos, updated_at: r.updated_at } : null;
-};
+export const tarjetaPorSlug = (db: D1Database, slug: string): Promise<TarjetaPublicada | null> =>
+  paginaPorSlug(db, 'tarjeta', slug, validarTarjeta);
 
-export async function tarjetaPorSlug(db: D1Database, slug: string): Promise<TarjetaPublicada | null> {
-  if (!SLUG_TARJETA_VALIDO.test(slug)) return null;
-  return fila(await db.prepare('SELECT slug, datos, updated_at FROM tarjetas_publicadas WHERE slug = ?').bind(slug).first());
-}
+export const tarjetaDePedido = (db: D1Database, pedido: string): Promise<TarjetaPublicada | null> =>
+  paginaDePedido(db, 'tarjeta', pedido, validarTarjeta);
 
-export async function tarjetaDePedido(db: D1Database, pedido: string): Promise<TarjetaPublicada | null> {
-  return fila(
-    await db.prepare('SELECT slug, datos, updated_at FROM tarjetas_publicadas WHERE pedido_public_id = ?').bind(pedido).first(),
-  );
-}
-
-/**
- * Publica (o vuelve a publicar) la tarjeta del pedido. La dirección se fija la primera vez
- * a partir del nombre y no cambia aunque luego cambien los datos: el QR impreso sigue valiendo.
- */
-export async function publicarTarjeta(db: D1Database, pedido: string, datos: DatosTarjeta): Promise<string> {
-  const json = JSON.stringify(datos);
-  const ya = await db
-    .prepare("UPDATE tarjetas_publicadas SET datos = ?, updated_at = datetime('now') WHERE pedido_public_id = ? RETURNING slug")
-    .bind(json, pedido)
-    .first<{ slug: string }>();
-  if (ya) return ya.slug;
-  const base = slugBase(datos.nombre);
-  const candidatos = [base, ...Array.from({ length: 8 }, (_, i) => `${base}-${i + 2}`)];
-  for (let intento = 0; intento < 4; intento++)
-    candidatos.push(`${base}-${crypto.getRandomValues(new Uint32Array(1))[0]!.toString(36).slice(0, 5)}`);
-  for (const slug of candidatos) {
-    const r = await db
-      .prepare(
-        `INSERT INTO tarjetas_publicadas (slug, pedido_public_id, datos) VALUES (?, ?, ?)
-         ON CONFLICT DO NOTHING RETURNING slug`,
-      )
-      .bind(slug, pedido, json)
-      .first<{ slug: string }>();
-    if (r) return r.slug;
-    // Carrera: otra petición del mismo pedido la acaba de crear.
-    const otra = await tarjetaDePedido(db, pedido);
-    if (otra) return otra.slug;
-  }
-  throw new Error('No se encontró una dirección libre para la tarjeta');
-}
+/** La dirección se fija con el nombre la primera vez; republicar no la cambia (el QR impreso sigue valiendo). */
+export const publicarTarjeta = (db: D1Database, pedido: string, datos: DatosTarjeta): Promise<string> =>
+  publicarPagina(db, 'tarjeta', pedido, datos.nombre, datos);
