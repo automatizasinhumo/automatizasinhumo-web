@@ -854,13 +854,13 @@ INSERT INTO product_images (product_id, image_key, position, public_id) SELECT i
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'demos/registry-template.png', 2, 'pimg_7z817q58n8' FROM products WHERE slug='gestion-invitados-mesas';
 INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Plantilla + guía (la publicas tú)', 7900, 999, 'gestion-invitados-mesas-diy', 0, 1, 'var_pm9kngbcsm' FROM products WHERE slug='gestion-invitados-mesas';
 INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 17900, 999, 'gestion-invitados-mesas-pro', 1, 1, 'var_s2j86nkqkz' FROM products WHERE slug='gestion-invitados-mesas';
-INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Tarjeta de visita digital con QR', 'Tu tarjeta en el móvil: un QR y el cliente guarda tu contacto con un toque.
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Tarjeta de visita digital con QR', 'Tu tarjeta en el móvil, publicada al momento con los datos de tu CV: enseñas el QR y el cliente guarda tu contacto con un toque.
 
 ## Qué recibes
-- Tarjeta web personal
+- Tarjeta web personal en tu propio enlace
 - Botón «Guardar contacto» (vCard)
 - QR para imprimir
-- Enlaces a redes y WhatsApp
+- Enlaces a tu web y redes
 
 ## No incluye
 - Impresión de tarjetas físicas
@@ -876,33 +876,20 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Redes sociales
 
 ## Ejemplo
-> Javier, comercial: enseña el QR en una feria y el contacto queda guardado en el móvil del cliente.
+> Javier, comercial: añade la tarjeta al comprar su CV, enseña el QR en una feria y el contacto queda guardado en el móvil del cliente.
 
-**Plazo:** primera versión en 24–72 horas laborables desde que recibimos los datos necesarios. Incluye una ronda de ajustes que puedes solicitar durante los 7 días siguientes a la primera versión. Entrega definitiva tras tu aprobación.
-
-## Plantilla + guía o te lo montamos
-**Te lo montamos:** nos encargamos de poner en funcionamiento lo incluido y te pasamos el enlace. **Plantilla + guía:** te lo entregamos preparado con tus datos y con una guía paso a paso para publicarlo tú.
-
-| | Plantilla + guía | Te lo montamos |
-|---|---|---|
-| Precio | **29 €** | **69 €** |
-| Preparado con tus datos | Sí | Sí |
-| Guía paso a paso para publicarlo | Sí | No hace falta |
-| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
-| Ronda de ajustes | Sí | Sí |
+**Plazo:** al momento. Lo preparas tú en el estudio y, al pagar, lo descargas o queda publicado sin esperas.
 
 ## Cómo funciona
-**Compra directa:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos la primera versión y, tras la ronda de ajustes, te lo entregamos.
+**Hazlo ahora en el [estudio](/servicios/cv):** eliges el diseño, rellenas tus datos y lo ves al momento con una marca de agua de vista previa.
 
-**Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
+**Al pagar** se quita la marca: descargas la versión final o se publica en tu enlace, y queda guardado en tu pedido.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'tarjeta-digital', 'Modalidad', 0, 'prod_j021nz6hke', datetime('2026-01-01', '-16 minutes'));
+', 500, 'eur', 999, 1, 'tarjeta-digital', NULL, 0, 'prod_j021nz6hke', datetime('2026-01-01', '-16 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tarjeta-digital' AND c.slug='identidad';
 UPDATE products SET image_key='productos/tarjeta-digital.jpg' WHERE slug='tarjeta-digital';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tarjeta-digital.jpg', 0, 'pimg_w9121dqbmd' FROM products WHERE slug='tarjeta-digital';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Plantilla + guía (la publicas tú)', 2900, 999, 'tarjeta-digital-diy', 0, 1, 'var_qkm880jvdn' FROM products WHERE slug='tarjeta-digital';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 6900, 999, 'tarjeta-digital-pro', 1, 1, 'var_g0t44r63tc' FROM products WHERE slug='tarjeta-digital';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Página de enlaces para tu bio con estadísticas', 'Tu alternativa a Linktree, en tu dominio y sin cuota mensual, con clics medidos.
 
 ## Qué recibes
@@ -953,19 +940,19 @@ INSERT INTO product_images (product_id, image_key, position, public_id) SELECT i
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'demos/link-in-bio.png', 1, 'pimg_ddsfw5sd3e' FROM products WHERE slug='link-in-bio';
 INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Plantilla + guía (la publicas tú)', 3900, 999, 'link-in-bio-diy', 0, 1, 'var_kzbdnsyxw8' FROM products WHERE slug='link-in-bio';
 INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 9900, 999, 'link-in-bio-pro', 1, 1, 'var_1xyaj8h7g0' FROM products WHERE slug='link-in-bio';
-INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Currículum profesional en PDF que pasa los filtros de empresas', 'CV preparado para pasar los filtros automáticos de selección, en PDF y Word.
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Currículum profesional en PDF que pasa los filtros de empresas', 'Eliges plantilla, letra y colores, rellenas tus datos (o importas tu CV actual) y descargas tu currículum en PDF al momento, legible por los filtros automáticos de selección.
 
 ## Qué recibes
-- CV en PDF y Word
-- Plantilla a elegir
-- Palabras clave para pasar los filtros automáticos de selección
-- Versión web opcional
+- CV en PDF listo para enviar
+- Plantilla, tipo de letra y colores a elegir
+- Texto real y seleccionable que leen los filtros automáticos de selección
+- Importación de tu CV actual desde PDF, Word o LinkedIn
 
 ## No incluye
 - Fotografía profesional para el currículum
 - Traducción profesional a otros idiomas
 - Carta de presentación personalizada
-- Versión web si no se contrata como opcional
+- Redacción del contenido por nuestra parte
 - Garantía de entrevistas o contratación
 
 ## Campos que rellenas
@@ -975,34 +962,27 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 - Puesto al que aspiras
 
 ## Ejemplo
-> Elena, enfermera: CV de 1 página con las palabras clave de la oferta del hospital.
+> Elena, enfermera: elige una plantilla de 1 página, importa su CV antiguo, añade las palabras clave de la oferta del hospital y descarga el PDF.
 
-**Plazo:** primera versión en 24–72 horas laborables desde que recibimos los datos necesarios. Incluye una ronda de ajustes que puedes solicitar durante los 7 días siguientes a la primera versión. Entrega definitiva tras tu aprobación.
+**Plazo:** al momento. Lo preparas tú en el estudio y, al pagar, lo descargas o queda publicado sin esperas.
 
-## Plantilla + guía o te lo montamos
-**Te lo montamos:** nos encargamos de poner en funcionamiento lo incluido y te pasamos el enlace. **Plantilla + guía:** te lo entregamos preparado con tus datos y con una guía paso a paso para publicarlo tú.
-
-| | Plantilla + guía | Te lo montamos |
-|---|---|---|
-| Precio | **29 €** | **79 €** |
-| Preparado con tus datos | Sí | Sí |
-| Guía paso a paso para publicarlo | Sí | No hace falta |
-| Publicado y funcionando | Lo publicas tú | Sí, te pasamos el enlace |
-| Ronda de ajustes | Sí | Sí |
+## Modalidades
+- **Diseño listo:** 9 €
+- **Personalizable:** 14 €
 
 ## Cómo funciona
-**Compra directa:** pagas, nos mandas tus datos (2-3 minutos), te enseñamos la primera versión y, tras la ronda de ajustes, te lo entregamos.
+**Hazlo ahora en el [estudio](/servicios/cv):** eliges el diseño, rellenas tus datos y lo ves al momento con una marca de agua de vista previa.
 
-**Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
+**Al pagar** se quita la marca: descargas la versión final o se publica en tu enlace, y queda guardado en tu pedido.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'cv-profesional', 'Modalidad', 0, 'prod_4mkgycmnyq', datetime('2026-01-01', '-18 minutes'));
+', 900, 'eur', 999, 1, 'cv-profesional', 'Modalidad', 0, 'prod_4mkgycmnyq', datetime('2026-01-01', '-18 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='cv-profesional' AND c.slug='identidad';
 UPDATE products SET image_key='productos/cv-profesional.jpg' WHERE slug='cv-profesional';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/cv-profesional.jpg', 0, 'pimg_ap1gsrzgk4' FROM products WHERE slug='cv-profesional';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'demos/resume-cv.png', 1, 'pimg_jcb8by614g' FROM products WHERE slug='cv-profesional';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Plantilla + guía (la publicas tú)', 2900, 999, 'cv-profesional-diy', 0, 1, 'var_z6x76tcv1b' FROM products WHERE slug='cv-profesional';
-INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Te lo montamos', 7900, 999, 'cv-profesional-pro', 1, 1, 'var_yct4hwst1h' FROM products WHERE slug='cv-profesional';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Diseño listo', 900, 999, 'cv-profesional-disenada', 0, 1, 'var_hhtaskams3' FROM products WHERE slug='cv-profesional';
+INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, 'Personalizable', 1400, 999, 'cv-profesional-personalizable', 1, 1, 'var_r46jprwdtc' FROM products WHERE slug='cv-profesional';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Muro de opiniones de clientes', 'Recoge opiniones con un enlace, apruébalas y muéstralas en tu web.
 
 ## Qué recibes

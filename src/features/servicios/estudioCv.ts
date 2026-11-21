@@ -2,8 +2,13 @@
  * Lógica del estudio de CV (/servicios/cv): asistente por pasos con el estado en el hash
  * (el botón Atrás del navegador funciona), datos guardados en este navegador y vista
  * previa con marca de agua generada por el motor (cv-estudio/), que se carga al elegir diseño.
+ *
+ * Compra: «Comprar» deja en el carrito la modalidad elegida (y los extras marcados) y lleva al
+ * pago. El pedido pagado vuelve aquí con «#pedido=<token>» (el hash no llega a ningún servidor):
+ * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
+ * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
@@ -40,6 +45,13 @@ interface Config {
   porDefecto: string;
   disenos: DisenoCv[];
   paquetes: Record<ModalidadCv, PaqueteCv>;
+  extras: ExtraCv[];
+}
+type DatosTarjeta = Record<string, unknown> & { enlaces?: { etiqueta: string; url: string }[] };
+interface Pagado {
+  ref: string;
+  cv: ModalidadCv | null;
+  tarjeta: { slug: string | null; datos: DatosTarjeta | null } | null;
 }
 interface Estado {
   diseno: string;
@@ -56,6 +68,15 @@ interface Estado {
 }
 
 const CLAVE = 'servicios:cv';
+/** Token del pedido pagado: solo en esta pestaña (sessionStorage), nunca en la URL visible. */
+const CLAVE_PEDIDO = 'servicios:cv:pedido';
+const ERROR_TARJETA: Record<string, string> = {
+  nombre: 'Falta el nombre.',
+  email: 'Revisa el correo: no parece válido.',
+  telefono: 'Revisa el teléfono: solo números, espacios y +.',
+  contacto: 'Añade al menos un correo, un teléfono, una web o tu LinkedIn.',
+  pedido: 'Este pedido no incluye la tarjeta digital.',
+};
 const LISTAS: Lista[] = ['experiencia', 'formacion', 'habilidades', 'idiomas'];
 const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'resumen'];
 const PASOS = PASOS_CV.map((p) => p.id) as string[];
@@ -190,6 +211,18 @@ export function iniciarEstudioCv() {
   }
 
   // ---------- Vista previa ----------
+  function crearPdf(E: Motor, marcaAgua: string, personal: boolean) {
+    return E.crearPdf({
+      datos: E.crearDatos(recoger(), plantilla()),
+      plantilla: plantilla(),
+      color: personal ? estado.color : undefined,
+      decoracion: personal ? { forma: estado.forma, color: estado.color, intensidad: estado.intensidad, sombreado: estado.sombreado } : null,
+      marcaAgua,
+      letra: estado.letra,
+      tamano: estado.tamano,
+      espaciado: estado.espaciado,
+    });
+  }
   let temporizador = 0;
   let turno = 0;
   function programar(inmediato = false) {
@@ -204,16 +237,7 @@ export function iniciarEstudioCv() {
     try {
       const E = await motor();
       const personal = modalidad() === 'personalizable';
-      const blob = await E.crearPdf({
-        datos: E.crearDatos(recoger(), plantilla()),
-        plantilla: plantilla(),
-        color: personal ? estado.color : undefined,
-        decoracion: personal ? { forma: estado.forma, color: estado.color, intensidad: estado.intensidad, sombreado: estado.sombreado } : null,
-        marcaAgua: MARCA,
-        letra: estado.letra,
-        tamano: estado.tamano,
-        espaciado: estado.espaciado,
-      });
+      const blob = await crearPdf(E, MARCA, personal);
       if (mio !== turno) return;
       const tmp = document.createElement('div');
       const ancho = Math.min(ANCHO_MAX_VISTA, Math.round((lienzo.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1)));
@@ -264,13 +288,23 @@ export function iniciarEstudioCv() {
       }),
     );
   }
+  const extraPagado = (x: ExtraCv) => x.id === 'tarjeta' && !!pagado?.tarjeta;
+  const extraMarcado = (x: ExtraCv) => !extraPagado(x) && !!$<HTMLInputElement>(`[data-extra="${x.producto}"]`)?.checked;
   function resumir() {
     const m = modalidad();
     const p = cfg.paquetes[m];
     const res = (k: string) => $(`[data-res="${k}"]`)!;
+    const cvPagado = !!pagado?.cv;
+    // Un extra ya pagado no se vuelve a ofrecer.
+    for (const x of cfg.extras) $(`[data-extra="${x.producto}"]`)!.closest('label')!.hidden = extraPagado(x);
+    const total = p.precio + cfg.extras.reduce((t, x) => t + (extraMarcado(x) ? x.precio : 0), 0);
     res('diseno').textContent = nombreDiseno(plantilla());
     res('modalidad').textContent = p.nombre;
-    res('precio').textContent = euros(p.precio);
+    res('precio').textContent = euros(total);
+    $('[data-solo-compra]')!.hidden = cvPagado;
+    $('[data-solo-pagado]')!.hidden = !cvPagado;
+    if (pagado) res('ref').textContent = pagado.ref;
+    rellenarTarjeta();
     res('incluye').replaceChildren(
       ...p.incluye.map((x) => {
         const li = document.createElement('li');
@@ -279,7 +313,169 @@ export function iniciarEstudioCv() {
       }),
     );
     const comprar = $('[data-comprar] span');
-    if (comprar) comprar.textContent = `Comprar y descargar · ${euros(p.precio)}`;
+    if (comprar) comprar.textContent = cvPagado ? 'Descargar mi PDF' : `Comprar y descargar · ${euros(total)}`;
+    const st = $('[data-estado-compra]');
+    if (st && cvPagado && pagado!.cv === 'disenada' && m === 'personalizable')
+      st.textContent = 'Tu pedido es del diseño listo: el PDF sale con el diseño base, sin tu color ni las formas.';
+  }
+
+  // ---------- Compra y pedido pagado ----------
+  let pagado: Pagado | null = null;
+  let token = '';
+  /** Deja el carrito exactamente con lo elegido (cantidad 1, sin la otra modalidad) y va al pago. */
+  async function comprar(b: HTMLButtonElement) {
+    const st = $('[data-estado-compra]')!;
+    const m = modalidad();
+    const lineas: [string, boolean][] = (Object.keys(cfg.paquetes) as ModalidadCv[]).map((k) => [`${cfg.paquetes[k].producto}:${cfg.paquetes[k].variante}`, k === m]);
+    for (const x of cfg.extras) if (!extraPagado(x)) lineas.push([x.producto, extraMarcado(x)]);
+    persistir();
+    b.disabled = true;
+    st.textContent = 'Preparando tu pedido…';
+    try {
+      for (const [key, poner] of lineas) {
+        const fd = new FormData();
+        fd.set('_action', poner ? 'update' : 'remove');
+        fd.set('key', key);
+        if (poner) fd.set('qty', '1');
+        const r = await fetch('/api/cart', { method: 'POST', body: fd, headers: { 'x-partial': '1' }, credentials: 'same-origin' });
+        if (!r.ok) throw new Error(`carrito ${r.status}`);
+      }
+      location.assign('/cart');
+    } catch (e) {
+      console.error(e);
+      st.textContent = 'No hemos podido preparar el pedido. Inténtalo de nuevo en un momento; tus datos siguen guardados.';
+      b.disabled = false;
+    }
+  }
+  async function descargar(b: HTMLButtonElement) {
+    const st = $('[data-estado-compra]')!;
+    b.disabled = true;
+    st.textContent = 'Preparando tu PDF…';
+    try {
+      // Solo sale personalizado si eso es lo que se pagó.
+      const personal = modalidad() === 'personalizable' && pagado?.cv === 'personalizable';
+      const blob = await crearPdf(await motor(), '', personal);
+      const nombre = recoger().nombre.replace(/[\\/:*?"<>|]+/g, '').trim();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `CV ${nombre || 'currículum'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
+      st.textContent = 'Listo: lo tienes en tus descargas. Puedes cambiar lo que quieras y volver a descargarlo.';
+    } catch (e) {
+      console.error(e);
+      st.textContent = 'No se ha podido generar el PDF. Recarga la página e inténtalo otra vez.';
+    } finally {
+      b.disabled = false;
+    }
+  }
+  async function cargarPedido() {
+    try {
+      const r = await fetch('/api/cv/pedido', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) });
+      if (r.status === 404) {
+        try {
+          sessionStorage.removeItem(CLAVE_PEDIDO);
+        } catch {
+          /* sin almacenamiento */
+        }
+        token = '';
+        return;
+      }
+      if (!r.ok) return;
+      const d = (await r.json()) as Pagado & { ok: boolean };
+      pagado = { ref: d.ref, cv: d.cv, tarjeta: d.tarjeta };
+      if (actual === 'descarga') resumir();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  function tomarPedido(): boolean {
+    const m = /^#pedido=([^&]+)/.exec(location.hash);
+    if (!m) return false;
+    try {
+      token = decodeURIComponent(m[1]!);
+      sessionStorage.setItem(CLAVE_PEDIDO, token);
+    } catch {
+      /* sin almacenamiento: el token vale para esta visita */
+    }
+    // Fuera de la barra de direcciones (y del historial) y directo a descargar si ya hay CV.
+    const destino = estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
+    history.replaceState(null, '', `${location.pathname}${location.search}${destino}`);
+    void cargarPedido();
+    return true;
+  }
+
+  // ---------- Tarjeta digital ----------
+  const campoT = (k: string) => $<HTMLInputElement>(`[data-t="${k}"]`)!;
+  let tarjetaRellena = false;
+  function rellenarTarjeta() {
+    const caja = $('[data-tarjeta-form]')!;
+    caja.hidden = !pagado?.tarjeta;
+    if (!pagado?.tarjeta || tarjetaRellena) return;
+    tarjetaRellena = true;
+    const f = recoger();
+    const g = pagado.tarjeta.datos;
+    const v = (k: string, alt: string) => (g && typeof g[k] === 'string' ? (g[k] as string) : alt);
+    campoT('nombre').value = v('nombre', f.nombre);
+    campoT('cargo').value = v('cargo', f.titular);
+    campoT('email').value = v('email', f.email);
+    campoT('telefono').value = v('telefono', f.telefono);
+    campoT('web').value = v('web', '');
+    campoT('ubicacion').value = v('ubicacion', f.ubicacion);
+    campoT('resumen').value = v('resumen', f.resumen.slice(0, 280));
+    campoT('color').value = v('color', estado.color);
+    campoT('linkedin').value = g?.enlaces?.find((e) => /linkedin\./i.test(e.url))?.url ?? '';
+    if (pagado.tarjeta.slug) avisarTarjeta(`/c/${pagado.tarjeta.slug}`, 'Ya está publicada en');
+  }
+  function avisarTarjeta(url: string, texto: string) {
+    const st = $('[data-estado-tarjeta]')!;
+    const enlace = (href: string, t: string) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = t;
+      return a;
+    };
+    st.dataset.tono = '';
+    st.replaceChildren(`${texto} `, enlace(url, `${location.host}${url}`), ' · ', enlace(`${url}/qr.svg`, 'QR para imprimir'));
+  }
+  async function publicar(b: HTMLButtonElement) {
+    const st = $('[data-estado-tarjeta]')!;
+    const val = (k: string) => campoT(k).value.trim();
+    const linkedin = val('linkedin');
+    const datos = {
+      nombre: val('nombre'),
+      cargo: val('cargo'),
+      email: val('email'),
+      telefono: val('telefono'),
+      web: val('web'),
+      ubicacion: val('ubicacion'),
+      resumen: val('resumen'),
+      color: val('color'),
+      enlaces: linkedin ? [{ etiqueta: 'LinkedIn', url: linkedin }] : [],
+    };
+    b.disabled = true;
+    st.textContent = 'Publicando…';
+    try {
+      const r = await fetch('/api/cv/publicar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, datos }) });
+      const d = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; slug?: string; error?: string };
+      if (!d.ok || !d.url) {
+        st.dataset.tono = 'error';
+        st.textContent = ERROR_TARJETA[d.error ?? ''] ?? 'No se ha podido publicar. Inténtalo de nuevo en un momento.';
+        return;
+      }
+      if (pagado?.tarjeta) pagado.tarjeta = { slug: d.slug ?? null, datos };
+      avisarTarjeta(d.url, 'Publicada en');
+    } catch (e) {
+      console.error(e);
+      st.dataset.tono = 'error';
+      st.textContent = 'No se ha podido publicar. Revisa tu conexión e inténtalo de nuevo.';
+    } finally {
+      b.disabled = false;
+    }
   }
 
   function mostrar(paso: string, enfocar: boolean) {
@@ -387,16 +583,16 @@ export function iniciarEstudioCv() {
       pintarControles();
       return programar(true);
     }
-    if (b.hasAttribute('data-comprar')) {
-      raiz.dispatchEvent(new CustomEvent('estudio-cv:comprar', { bubbles: true, detail: { modalidad: modalidad(), plantilla: plantilla() } }));
-      const st = $('[data-estado-compra]');
-      if (st) st.textContent = 'Muy pronto podrás completar la compra aquí mismo. Tus datos quedan guardados en este navegador.';
-    }
+    if (b.hasAttribute('data-comprar')) return void (pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
+    if (b.hasAttribute('data-publicar')) return void publicar(b as HTMLButtonElement);
   });
 
   form.addEventListener('submit', (ev) => ev.preventDefault());
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    // La tarjeta y los extras no son estado del CV: ni se guardan ni repintan la vista previa.
+    if (c.closest('[data-tarjeta-form]')) return;
+    if (c.dataset.extra !== undefined) return resumir();
     if (c.name === 'importar') {
       const fichero = c.files?.[0];
       c.value = ''; // permite volver a elegir el mismo archivo
@@ -425,7 +621,7 @@ export function iniciarEstudioCv() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
-    if (c.type === 'file') return;
+    if (c.type === 'file' || c.closest('[data-tarjeta-form]') || c.dataset.extra !== undefined) return;
     if (c.name === 'colorLibre') estado.color = c.value;
     else if (c.name === 'intensidad') estado.intensidad = Number(c.value);
     else if (c.name === 'nombre' && c.value.trim()) c.removeAttribute('aria-invalid');
@@ -433,10 +629,21 @@ export function iniciarEstudioCv() {
     persistir();
     programar();
   });
-  window.addEventListener('hashchange', () => desdeHash(true));
+  window.addEventListener('hashchange', () => {
+    tomarPedido();
+    desdeHash(true);
+  });
 
   // ---------- Arranque ----------
   volcar(estado.form ?? vacio());
   pintarControles();
+  if (!tomarPedido()) {
+    try {
+      token = sessionStorage.getItem(CLAVE_PEDIDO) ?? '';
+    } catch {
+      token = '';
+    }
+    if (token) void cargarPedido();
+  }
   desdeHash(false);
 }

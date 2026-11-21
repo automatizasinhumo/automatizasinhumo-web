@@ -5,32 +5,63 @@
  * en la galería es exactamente lo que el cliente descarga.
  */
 
+import { AUTOSERVICIO, SLUG_CV, SLUG_TARJETA } from './autoservicio';
+
 export type ModalidadCv = 'disenada' | 'personalizable';
 
 export interface PaqueteCv {
   id: ModalidadCv;
   nombre: string;
   precio: number;
+  /** Ids públicos del producto y la variante en la tienda (para el carrito). */
+  producto: string;
+  variante: string;
   resumen: string;
   incluye: readonly string[];
 }
 
+const CV = AUTOSERVICIO[SLUG_CV]!;
+const variante = (m: ModalidadCv) => {
+  const v = CV.variantes?.[m];
+  if (!v) throw new Error(`autoservicio.json: falta la variante ${m} del CV`);
+  return { nombre: v.etiqueta, precio: v.precio, producto: CV.producto, variante: v.id };
+};
+
 export const PAQUETES_CV: Record<ModalidadCv, PaqueteCv> = {
   disenada: {
     id: 'disenada',
-    nombre: 'Diseño listo',
-    precio: 900,
+    ...variante('disenada'),
     resumen: 'Eliges uno de nuestros diseños y lo rellenas con tus datos.',
     incluye: ['PDF listo para enviar', 'Seis estilos de letra, tamaño y espaciado', 'Tus datos guardados en este navegador', 'Cambios de diseño sin volver a escribir'],
   },
   personalizable: {
     id: 'personalizable',
-    nombre: 'Personalizable',
-    precio: 1400,
+    ...variante('personalizable'),
     resumen: 'Partes de cualquier diseño y le cambias el color, las formas y el sombreado.',
     incluye: ['Todo lo del diseño listo', 'Color a tu elección', 'Círculos, rombos, ondas, puntos y más', 'Sombreado de fondo'],
   },
 };
+
+/** Extras que se compran junto al CV y se publican solos con los mismos datos. */
+export interface ExtraCv {
+  id: 'tarjeta';
+  slug: string;
+  nombre: string;
+  precio: number;
+  producto: string;
+  resumen: string;
+}
+const TARJETA = AUTOSERVICIO[SLUG_TARJETA]!;
+export const EXTRAS_CV: readonly ExtraCv[] = [
+  {
+    id: 'tarjeta',
+    slug: SLUG_TARJETA,
+    nombre: TARJETA.nombre,
+    precio: TARJETA.precio ?? 0,
+    producto: TARJETA.producto,
+    resumen: 'Tu página de contacto con QR y botón «Guardar contacto», publicada al momento con los datos de tu CV.',
+  },
+];
 
 export interface DisenoCv {
   /** Identificador de la plantilla en el motor. */

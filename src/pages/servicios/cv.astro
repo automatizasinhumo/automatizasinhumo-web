@@ -7,6 +7,7 @@ import {
   DISENOS_CV,
   ESPACIADOS,
   ESTILOS_LETRA,
+  EXTRAS_CV,
   FILTROS_DISENO,
   MOTOR_CV,
   PAQUETES_CV,
@@ -37,6 +38,7 @@ const config = JSON.stringify({
   porDefecto: DISENO_POR_DEFECTO,
   disenos: DISENOS_CV,
   paquetes: PAQUETES_CV,
+  extras: EXTRAS_CV,
 });
 const campo = 'campo';
 ---
@@ -305,9 +307,44 @@ const campo = 'campo';
             <div><dt>Modalidad</dt><dd data-res="modalidad"></dd></div>
           </dl>
           <ul class="incluye" data-res="incluye"></ul>
-          <p class="total"><span>Total</span><strong data-res="precio"></strong></p>
+          <div data-solo-compra>
+            {
+              EXTRAS_CV.map((x) => (
+                <label class="extra" id={x.id}>
+                  <input type="checkbox" value={x.id} data-extra={x.producto} />
+                  <span>
+                    <strong>
+                      Añadir {x.nombre.toLowerCase()} · {euros(x.precio)}
+                    </strong>
+                    <small>{x.resumen}</small>
+                  </span>
+                </label>
+              ))
+            }
+            <p class="total"><span>Total</span><strong data-res="precio"></strong></p>
+          </div>
+          <p class="pagado" data-solo-pagado hidden>Pedido <strong data-res="ref"></strong> pagado. Tu PDF sale sin marca de agua.</p>
           <button type="button" class="boton boton-principal boton-destello w-full" data-comprar><span>Comprar y descargar el PDF</span></button>
           <p class="mt-3 text-sm text-faint" role="status" data-estado-compra>PDF sin marca de agua, listo para enviar.</p>
+        </div>
+
+        <!-- Tarjeta digital pagada: se publica aquí mismo con los datos del CV. -->
+        <div class="tarjeta publicar" data-tarjeta-form hidden>
+          <h3 class="font-serif text-xl font-bold text-ink">Tu tarjeta digital</h3>
+          <p class="mt-1 text-sm text-muted">Hemos rellenado los datos de tu CV. Cámbialos si quieres y publícala: queda en línea al momento.</p>
+          <div class="filas mt-4">
+            <label class="campo">Nombre<input data-t="nombre" maxlength="80" autocomplete="name" /></label>
+            <label class="campo">Cargo<input data-t="cargo" maxlength="100" /></label>
+            <label class="campo">Correo<input data-t="email" type="email" maxlength="254" autocomplete="email" /></label>
+            <label class="campo">Teléfono<input data-t="telefono" type="tel" maxlength="24" autocomplete="tel" /></label>
+            <label class="campo">Web<input data-t="web" maxlength="300" placeholder="tuweb.com" /></label>
+            <label class="campo">Ciudad<input data-t="ubicacion" maxlength="80" /></label>
+            <label class="campo">LinkedIn<input data-t="linkedin" maxlength="300" placeholder="linkedin.com/in/tu-nombre" /></label>
+            <label class="campo">Color<input data-t="color" type="color" /></label>
+          </div>
+          <label class="campo">Presentación breve<textarea data-t="resumen" rows="2" maxlength="280"></textarea></label>
+          <button type="button" class="boton boton-principal mt-4" data-publicar>Publicar mi tarjeta</button>
+          <p class="mt-3 text-sm" role="status" data-estado-tarjeta></p>
         </div>
         <div class="paso-acciones">
           <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
@@ -322,7 +359,7 @@ const campo = 'campo';
     </aside>
 
     <p class="mt-12 text-xs text-faint">
-      Diseños basados en <a class="underline" href="https://github.com/amruthpillai/reactive-resume" rel="noopener">Reactive Resume</a> (licencia MIT).
+      Diseños basados en <a class="underline" href="https://github.com/amruthpillai/reactive-resume" rel="noopener">Reactive Resume</a> (licencia MIT).{' '}
       <a class="underline" href="/cv/estudio/motor/LICENCIAS.txt">Licencias</a>.
     </p>
   </div>
@@ -436,11 +473,11 @@ const campo = 'campo';
   }
 
   /* Paso 1: galería con precio debajo. */
-  .tarjeta:has(input:checked) {
+  label.tarjeta:has(input:checked) {
     border-color: var(--color-brand);
     box-shadow: 0 0 0 2px var(--color-brand), var(--ds-sombra-2);
   }
-  .tarjeta:has(input:focus-visible) {
+  label.tarjeta:has(input:focus-visible) {
     outline: 2px solid var(--color-brand);
     outline-offset: 3px;
   }
@@ -883,5 +920,52 @@ const campo = 'campo';
   .total strong {
     font-size: var(--ds-texto-h2);
     font-variant-numeric: tabular-nums;
+  }
+  .extra {
+    display: flex;
+    gap: var(--ds-hueco-3);
+    align-items: flex-start;
+    margin-top: var(--ds-hueco-4);
+    padding: var(--ds-hueco-3);
+    border: 1px dashed var(--color-line);
+    border-radius: var(--ds-radio-2, 0.75rem);
+    cursor: pointer;
+  }
+  .extra:has(input:checked) {
+    border-style: solid;
+    border-color: var(--color-brand);
+  }
+  .extra input {
+    margin-top: 0.3rem;
+    accent-color: var(--color-brand);
+  }
+  .extra span {
+    display: grid;
+    gap: 0.15rem;
+  }
+  .extra small {
+    color: var(--color-muted);
+  }
+  .pagado {
+    margin-block: var(--ds-hueco-6) var(--ds-hueco-4);
+    color: var(--color-ink);
+  }
+  .publicar {
+    max-width: 40rem;
+    margin-top: var(--ds-hueco-6);
+    padding: var(--ds-hueco-6);
+  }
+  .publicar input[type='color'] {
+    block-size: 2.75rem;
+    padding: 0.25rem;
+    cursor: pointer;
+  }
+  .publicar [data-estado-tarjeta][data-tono='error'] {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  .publicar :global([data-estado-tarjeta] a) {
+    font-weight: 600;
+    text-decoration: underline;
   }
 </style>

@@ -7,6 +7,22 @@
 //   - "Plantilla + guía": plantilla rellenada + guía paso a paso (la publica el cliente).
 //   - "Te lo montamos": nosotros lo publicamos con tus datos.
 
+// Servicios de autoservicio (el cliente lo hace solo en un estudio y lo recibe al momento):
+// precio, modalidades e ids salen de src/features/servicios/autoservicio.json, la misma fuente
+// que lee la web. Aquí no se escriben a mano para que tienda y estudio no se desalineen.
+import AUTO from '../../src/features/servicios/autoservicio.json' with { type: 'json' };
+
+const autoservicio = (slug) => {
+  const s = AUTO[slug];
+  if (!s) throw new Error(`autoservicio.json: falta ${slug}`);
+  const variantes = s.variantes ? Object.values(s.variantes) : null;
+  return {
+    auto: { estudio: s.estudio, producto: s.producto, variantes },
+    p: variantes ? variantes.map((v) => v.precio / 100) : [s.precio / 100],
+    plazo: 'Al momento',
+  };
+};
+
 export const categorias = [
   { slug: 'webs', nombre: 'Webs para tu negocio', corto: 'Webs', menu: 'header' },
   { slug: 'hosteleria', nombre: 'Restaurantes y bares', menu: 'footer' },
@@ -181,12 +197,12 @@ export const productos = [
 
   // ── Identidad ──────────────────────────────────────────
   {
-    slug: 'tarjeta-digital', cat: 'identidad', nombre: 'Tarjeta de visita digital con QR', p: [29, 69], plazo: '24 h',
-    resumen: 'Tu tarjeta en el móvil: un QR y el cliente guarda tu contacto con un toque.',
-    recibes: ['Tarjeta web personal', 'Botón «Guardar contacto» (vCard)', 'QR para imprimir', 'Enlaces a redes y WhatsApp'],
+    slug: 'tarjeta-digital', cat: 'identidad', nombre: 'Tarjeta de visita digital con QR', ...autoservicio('tarjeta-digital'),
+    resumen: 'Tu tarjeta en el móvil, publicada al momento con los datos de tu CV: enseñas el QR y el cliente guarda tu contacto con un toque.',
+    recibes: ['Tarjeta web personal en tu propio enlace', 'Botón «Guardar contacto» (vCard)', 'QR para imprimir', 'Enlaces a tu web y redes'],
     campos: ['Nombre y cargo', 'Foto', 'Teléfono, email y web', 'Redes sociales'],
     noIncluye: ['Impresión de tarjetas físicas', 'Tarjetas NFC o dispositivos físicos', 'Dominio personalizado y su renovación', 'Diseño de un logotipo nuevo', 'Campañas publicitarias o captación de contactos'],
-    ejemplo: 'Javier, comercial: enseña el QR en una feria y el contacto queda guardado en el móvil del cliente.',
+    ejemplo: 'Javier, comercial: añade la tarjeta al comprar su CV, enseña el QR en una feria y el contacto queda guardado en el móvil del cliente.',
     repos: ['Kahaan83/digital-cards'],
   },
   {
@@ -199,12 +215,12 @@ export const productos = [
     repos: ['MrDemonWolf/linkden', 'Mrbarnx/Open-Link-Hub', 'dimasmong/MoBio'],
   },
   {
-    slug: 'cv-profesional', cat: 'identidad', nombre: 'Currículum profesional en PDF que pasa los filtros de empresas', p: [29, 79], plazo: '48 h',
-    resumen: 'CV preparado para pasar los filtros automáticos de selección, en PDF y Word.',
-    recibes: ['CV en PDF y Word', 'Plantilla a elegir', 'Palabras clave para pasar los filtros automáticos de selección', 'Versión web opcional'],
+    slug: 'cv-profesional', cat: 'identidad', nombre: 'Currículum profesional en PDF que pasa los filtros de empresas', ...autoservicio('cv-profesional'),
+    resumen: 'Eliges plantilla, letra y colores, rellenas tus datos (o importas tu CV actual) y descargas tu currículum en PDF al momento, legible por los filtros automáticos de selección.',
+    recibes: ['CV en PDF listo para enviar', 'Plantilla, tipo de letra y colores a elegir', 'Texto real y seleccionable que leen los filtros automáticos de selección', 'Importación de tu CV actual desde PDF, Word o LinkedIn'],
     campos: ['Experiencia', 'Formación', 'Habilidades', 'Puesto al que aspiras'],
-    noIncluye: ['Fotografía profesional para el currículum', 'Traducción profesional a otros idiomas', 'Carta de presentación personalizada', 'Versión web si no se contrata como opcional', 'Garantía de entrevistas o contratación'],
-    ejemplo: 'Elena, enfermera: CV de 1 página con las palabras clave de la oferta del hospital.',
+    noIncluye: ['Fotografía profesional para el currículum', 'Traducción profesional a otros idiomas', 'Carta de presentación personalizada', 'Redacción del contenido por nuestra parte', 'Garantía de entrevistas o contratación'],
+    ejemplo: 'Elena, enfermera: elige una plantilla de 1 página, importa su CV antiguo, añade las palabras clave de la oferta del hospital y descarga el PDF.',
     repos: ['gianfrancodemarco/resume-builder', 'samuelbelo/cvfree', 'akhil-dara/CVAurum'],
   },
   {

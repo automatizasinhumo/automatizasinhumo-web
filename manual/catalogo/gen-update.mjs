@@ -15,7 +15,16 @@ if (slugs.length && lista.length !== slugs.length) {
 const out = ['-- Generado por manual/catalogo/gen-update.mjs. No editar a mano.'];
 for (const p of lista) {
   out.push(`UPDATE products SET name=${q(p.nombre)}, description=${q(descripcion(p))}, price_cents=${p.p[0] * 100}, active=${p.activo === false ? 0 : 1} WHERE slug=${q(p.slug)};`);
-  if (p.p.length === 2)
+  if (p.auto) {
+    // Autoservicio: sus modalidades salen de autoservicio.json; se crean si faltan y las
+    // genéricas (diy/pro) se desactivan sin borrarlas (pueden tener pedidos).
+    out.push(`UPDATE product_variants SET active=0 WHERE sku IN (${q(`${p.slug}-diy`)}, ${q(`${p.slug}-pro`)});`);
+    out.push(`UPDATE products SET variant_label=${p.auto.variantes ? q('Modalidad') : 'NULL'} WHERE slug=${q(p.slug)};`);
+    (p.auto.variantes ?? []).forEach((v, i) => {
+      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(v.etiqueta)}, ${v.precio}, 999, ${q(v.sku)}, ${i}, 1, ${q(v.id)} FROM products WHERE slug=${q(p.slug)} AND NOT EXISTS (SELECT 1 FROM product_variants WHERE sku=${q(v.sku)});`);
+      out.push(`UPDATE product_variants SET label=${q(v.etiqueta)}, price_cents=${v.precio}, position=${i}, active=1 WHERE sku=${q(v.sku)};`);
+    });
+  } else if (p.p.length === 2)
     p.p.forEach((eur, i) => out.push(`UPDATE product_variants SET price_cents=${eur * 100} WHERE sku=${q(`${p.slug}-${i ? 'pro' : 'diy'}`)};`));
 }
 process.stdout.write(out.join('\n') + '\n');
