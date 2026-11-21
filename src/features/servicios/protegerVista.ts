@@ -13,14 +13,17 @@ export const ANCHO_MAX_VISTA = 900;
 export function protegerVista(el: HTMLElement): () => void {
   const ocultar = () => el.setAttribute('data-protegida', 'oculta');
   const mostrar = () => el.setAttribute('data-protegida', '');
+  // Solo se vuelve a ver con la pestaña visible y la ventana con foco: si tras Impr Pant
+  // el usuario cambia de app, sigue desenfocada hasta que vuelva (evento `focus`).
+  const restaurar = () => (!document.hidden && document.hasFocus() ? mostrar() : ocultar());
   const bloquear = (ev: Event) => ev.preventDefault();
   const tecla = (ev: KeyboardEvent) => {
     if (ev.key === 'PrintScreen' || (ev.key.toLowerCase() === 's' && ev.shiftKey && (ev.metaKey || ev.ctrlKey))) {
       ocultar();
-      window.setTimeout(mostrar, 1500);
+      window.setTimeout(restaurar, 1500);
     }
   };
-  const visibilidad = () => (document.hidden ? ocultar() : mostrar());
+  const visibilidad = () => (document.hidden ? ocultar() : restaurar());
 
   mostrar();
   el.addEventListener('contextmenu', bloquear);
