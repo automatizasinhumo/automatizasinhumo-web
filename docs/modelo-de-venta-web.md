@@ -117,6 +117,9 @@ gratis en su cuenta y tiene una copia completa.
 
 ## 5. Tareas
 
+Hecho fuera de esta lista: las webs del estudio ya se conectan solas al dominio que el cliente ya tiene
+(zona en nuestra cuenta, ver `docs/entrega-y-alojamiento.md`, P2a). Registrar dominios nuevos sigue pendiente.
+
 - [x] Cambiar «publicadas con tu dominio» (`introCategorias.ts`) por algo cierto hoy (esta PR).
 - [x] Comprobar qué TLD admite Cloudflare Registrar: `.com`, `.net`, `.org`, `.dev` y similares, sí; `.es`,
       `.eu`, `.cat` y geográficos, no (van por OVHcloud). Falta anotar precios desde la API con un token propio.

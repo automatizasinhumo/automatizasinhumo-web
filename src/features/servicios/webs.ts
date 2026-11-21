@@ -396,11 +396,15 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   ].join('');
 }
 
-/** Página publicada completa (/w/<slug>): ligera, sin JavaScript ni recursos externos. */
-export function documentoWeb(d: DatosWeb, url: string): string {
+/**
+ * Página publicada completa (/w/<slug> o el dominio del cliente): ligera, sin JavaScript ni
+ * recursos externos. `tienda` es el origen de nuestra tienda para el enlace del pie y el icono
+ * cuando la página se sirve desde otro dominio ('' = mismo origen).
+ */
+export function documentoWeb(d: DatosWeb, url: string, tienda = ''): string {
   const titulo = d.sector ? `${d.negocio} · ${d.sector}` : d.negocio;
   const descripcion = (d.lema || d.sobre.replace(/\s+/g, ' ') || titulo).slice(0, 160);
-  const pie = 'Web hecha con <a href="/servicios/web">Automatiza sin humo</a>';
+  const pie = `Web hecha con <a href="${esc(tienda)}/servicios/web">Automatiza sin humo</a>`;
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -414,7 +418,7 @@ export function documentoWeb(d: DatosWeb, url: string): string {
 <meta property="og:description" content="${esc(descripcion)}">
 <meta property="og:url" content="${esc(url)}">
 <meta name="theme-color" content="${esc(d.color)}">
-<link rel="icon" href="/favicon.svg">
+<link rel="icon" href="${esc(tienda)}/favicon.svg">
 <style>body{margin:0}${CSS_WEB}</style>
 </head>
 <body>

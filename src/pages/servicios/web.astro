@@ -220,6 +220,27 @@ const campo = 'campo';
           <button type="button" class="boton boton-principal boton-destello w-full" data-comprar><span>Comprar y publicar · {euros(precio)}</span></button>
           <p class="mt-3 text-sm text-faint" role="status" data-estado-compra>Se publica en cuanto termines el pago.</p>
         </div>
+        <!-- Dominio propio: solo con la web ya publicada (estudioWeb.ts + /api/web/dominio). -->
+        <div class="tarjeta dominio mt-4" data-dominio hidden>
+          <h3 class="text-lg font-semibold">Tu dominio</h3>
+          <p class="mt-1 text-sm text-faint">Si tienes un dominio (por ejemplo, peluquerialola.es), conéctalo y tu web saldrá en él con https. Si aún no lo tienes, cómpralo en cualquier registrador y vuelve aquí.</p>
+          <div class="mt-3 flex flex-wrap items-end gap-2" data-dominio-pedir>
+            <label class={`${campo} min-w-0 flex-1`}>Dominio<input name="dominio" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="253" placeholder="peluquerialola.es" /></label>
+            <button type="button" class="boton boton-principal" data-conectar>Conectar</button>
+          </div>
+          <div class="mt-3" data-dominio-pasos hidden>
+            <p class="text-sm">Para <strong data-dominio-nombre></strong>, falta un paso que solo puedes dar tú:</p>
+            <ol class="mt-2 list-decimal space-y-2 pl-5 text-sm">
+              <li>Entra en la web donde compraste el dominio y busca «Servidores DNS» (o «Nameservers»).</li>
+              <li>Cambia los que haya por estos dos:
+                <ul class="mt-1 space-y-1" data-dominio-ns></ul>
+              </li>
+              <li>Ya está. Lo comprobamos solos cada pocos minutos y te escribimos cuando tu web esté en tu dominio. Suele tardar menos de una hora, aunque algunos registradores tardan hasta un día.</li>
+            </ol>
+            <button type="button" class="mt-3 text-sm underline" data-dominio-cambiar>Me he equivocado de dominio</button>
+          </div>
+          <p class="mt-3 text-sm" role="status" data-estado-dominio></p>
+        </div>
         <div class="paso-acciones">
           <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
         </div>
