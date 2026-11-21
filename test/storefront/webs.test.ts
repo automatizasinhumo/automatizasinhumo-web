@@ -13,6 +13,7 @@ import {
   acentoSobre,
   contraste,
   documentoWeb,
+  fichaNegocio,
   enlaceWhatsapp,
   esc,
   renderWeb,
@@ -81,7 +82,8 @@ describe('renderWeb', () => {
     const doc = documentoWeb(EJEMPLO_WEB, 'https://x.es/w/peluqueria-lola');
     expect(doc).not.toContain('class="w-marca"');
     expect(doc).toContain('<link rel="canonical" href="https://x.es/w/peluqueria-lola">');
-    expect(doc).not.toMatch(/<script/);
+    // Sin JavaScript: el único <script> es la ficha de datos para buscadores.
+    expect(doc.match(/<script[^>]*>/g)).toEqual(['<script type="application/ld+json">']);
   });
 
   it('desde el dominio del cliente, el pie y el icono apuntan a nuestra tienda', () => {
@@ -114,5 +116,36 @@ describe('ayudas', () => {
       expect(contraste(sobreAcento(c), c)).toBeGreaterThanOrEqual(CONTRASTE_AA);
     }
     expect(acentoSobre('#1d4ed8', FONDO_TEXTO_CLARO)).toBe('#1d4ed8');
+  });
+});
+
+describe('fichaNegocio', () => {
+  it('describe el negocio para buscadores con lo que el cliente rellenó', () => {
+    const f = JSON.parse(fichaNegocio(EJEMPLO_WEB, 'https://lola.es/'));
+    expect(f['@type']).toBe('LocalBusiness');
+    expect(f.name).toBe(EJEMPLO_WEB.negocio);
+    expect(f.url).toBe('https://lola.es/');
+    expect(f.telephone).toBe(EJEMPLO_WEB.telefono);
+    expect(f.makesOffer.length).toBe(EJEMPLO_WEB.servicios.filter((s) => s.nombre).length);
+    const doc = documentoWeb(EJEMPLO_WEB, 'https://lola.es/');
+    expect(doc).toContain(`<script type="application/ld+json">${fichaNegocio(EJEMPLO_WEB, 'https://lola.es/')}</script>`);
+  });
+
+  it('omite lo vacío', () => {
+    const r = validarWeb(base);
+    if (!r.ok) throw new Error(r.error);
+    const f = JSON.parse(fichaNegocio(r.datos, 'https://x.es/w/bar-pepe'));
+    expect(f).not.toHaveProperty('email');
+    expect(f).not.toHaveProperty('address');
+    expect(f).not.toHaveProperty('sameAs');
+    expect(f).not.toHaveProperty('makesOffer');
+  });
+
+  it('ningún texto puede cerrar la etiqueta <script>', () => {
+    const r = validarWeb({ ...base, sobre: 'Hola </script><script>alert(1)</script>' });
+    if (!r.ok) throw new Error(r.error);
+    const json = fichaNegocio(r.datos, 'https://x.es/w/a');
+    expect(json).not.toContain('<');
+    expect(JSON.parse(json).description).toContain('</script>');
   });
 });
