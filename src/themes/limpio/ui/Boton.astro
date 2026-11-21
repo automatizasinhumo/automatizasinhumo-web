@@ -12,15 +12,17 @@ interface Props {
   href: string;
   variante?: 'principal' | 'secundario';
   talla?: 'normal' | 'compacta';
+  /** Destello del principal; se apaga cuando hay varios en pantalla (tarjetas de un catálogo). */
+  destello?: boolean;
   class?: string;
 }
-const { href, variante = 'principal', talla = 'normal', class: cls } = Astro.props;
+const { href, variante = 'principal', talla = 'normal', destello = true, class: cls } = Astro.props;
 ---
 <a
   href={href}
   class:list={[
     'boton',
-    variante === 'principal' ? 'boton-principal boton-destello' : 'boton-secundario',
+    variante === 'principal' ? ['boton-principal', destello && 'boton-destello'] : 'boton-secundario',
     talla === 'compacta' && 'boton-compacto',
     cls,
   ]}><span><slot /></span></a>

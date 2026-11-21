@@ -1,0 +1,178 @@
+---
+/**
+ * Muestra del producto real en la tarjeta de un servicio del catálogo (/servicios).
+ * Nada es una ilustración hecha a mano: cada forma sale del propio producto.
+ *
+ *   abanico  miniaturas del estudio (las genera `npm run miniaturas` en cv-estudio).
+ *   tarjeta  la tarjeta de contacto con un QR de verdad (vCard, uqr, en el build).
+ *   web      la web de ejemplo pintada con renderWeb, el mismo motor que publica, en un
+ *            Shadow DOM declarativo para que ni sus estilos ni los de la tienda se crucen.
+ *
+ * Colores: lee --familia y --familia-2 del tema (con valores de respaldo). Decorativa:
+ * va con aria-hidden, el nombre y el texto del servicio ya están en la tarjeta.
+ */
+import { renderSVG } from 'uqr';
+import type { MuestraServicio } from '../../servicios/catalogo';
+import { CSS_WEB, renderWeb } from '../../servicios/webs';
+
+interface Props {
+  muestra: MuestraServicio;
+  /** Primera de la página: sus imágenes no esperan al scroll. */
+  prioritaria?: boolean;
+  class?: string;
+}
+const { muestra, prioritaria = false, class: cls } = Astro.props;
+
+/** Ancho al que se pinta la web antes de reducirla (como un portátil pequeño). */
+const ANCHO_WEB = 900;
+
+let qr = '';
+if (muestra.tipo === 'tarjeta') {
+  const vcard = ['BEGIN:VCARD', 'VERSION:3.0', `FN:${muestra.nombre}`, `TITLE:${muestra.cargo}`, `TEL:${muestra.telefono}`, `EMAIL:${muestra.email}`, 'END:VCARD'].join('\n');
+  qr = renderSVG(vcard, { border: 0, blackColor: 'currentColor', whiteColor: 'transparent' });
+}
+const sombraWeb =
+  muestra.tipo === 'web'
+    ? `<style>:host{display:block}.escala{width:${ANCHO_WEB}px;transform:scale(var(--escala,.36));transform-origin:0 0;pointer-events:none}${CSS_WEB}</style><div class="escala">${renderWeb(muestra.datos)}</div>`
+    : '';
+const iniciales = muestra.tipo === 'tarjeta' ? muestra.nombre.split(/\s+/).slice(0, 2).map((p) => p[0]).join('') : '';
+---
+
+<div class:list={['muestra', `muestra-${muestra.tipo}`, cls]} aria-hidden="true">
+  {muestra.tipo === 'abanico' && (
+    <div class="abanico">
+      {muestra.imagenes.map((src, i) => (
+        <img src={src} alt="" width="480" height="679" loading={prioritaria ? 'eager' : 'lazy'} decoding="async" style={`--i:${i - (muestra.imagenes.length - 1) / 2};--a:${Math.abs(i - (muestra.imagenes.length - 1) / 2)}`} />
+      ))}
+    </div>
+  )}
+
+  {muestra.tipo === 'tarjeta' && (
+    <div class="tarjeta">
+      <div class="tarjeta-cara">
+        <span class="avatar">{iniciales}</span>
+        <b>{muestra.nombre}</b>
+        <span class="cargo">{muestra.cargo}</span>
+        <span class="guardar">Guardar contacto</span>
+      </div>
+      <div class="qr" set:html={qr} />
+    </div>
+  )}
+
+  {muestra.tipo === 'web' && (
+    <div class="navegador">
+      <div class="barra"><i></i><i></i><i></i><span>{muestra.url}</span></div>
+      <div class="pantalla">
+        <template shadowrootmode="open" set:html={sombraWeb} />
+      </div>
+    </div>
+  )}
+</div>
+
+<style>
+  .muestra {
+    --m-c: var(--familia, #4f46e5);
+    --m-c2: var(--familia-2, #0ea5e9);
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Abanico: tres diseños abiertos como cartas. ── */
+  .abanico {
+    position: relative;
+    width: min(100%, 20rem);
+    aspect-ratio: 20 / 15;
+  }
+  .abanico img {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 46%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 10px 28px -12px rgb(15 23 42 / 0.45), 0 0 0 1px rgb(15 23 42 / 0.06);
+    transform: translateX(calc(-50% + var(--i) * 52%)) translateY(calc(var(--a) * 6%)) rotate(calc(var(--i) * 9deg));
+    transform-origin: 50% 100%;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .abanico img:nth-child(2) { z-index: 1; }
+  /* Al pasar por la tarjeta que la contiene, el abanico se abre un poco más. */
+  :global(:is(li, article):hover) .abanico img {
+    transform: translateX(calc(-50% + var(--i) * 62%)) translateY(calc(var(--a) * 4%)) rotate(calc(var(--i) * 12deg));
+  }
+
+  /* ── Tarjeta digital: cara con el contacto y su QR al lado. ── */
+  .tarjeta {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    width: min(100%, 19rem);
+    border-radius: 14px;
+    background: linear-gradient(135deg in oklch, var(--m-c), color-mix(in oklch, var(--m-c2) 70%, #000));
+    padding: 1rem;
+    color: #fff;
+    box-shadow: 0 18px 36px -18px color-mix(in oklab, var(--m-c) 70%, #000);
+    transform: rotate(-3deg);
+  }
+  .tarjeta-cara { display: grid; flex: 1; gap: 0.15rem; min-width: 0; font-size: 0.72rem; line-height: 1.25; }
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    margin-bottom: 0.3rem;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.22);
+    font-weight: 700;
+  }
+  .tarjeta-cara b { font-size: 0.85rem; }
+  .cargo { opacity: 0.85; }
+  .guardar {
+    width: fit-content;
+    margin-top: 0.45rem;
+    border-radius: 999px;
+    background: #fff;
+    padding: 0.2rem 0.6rem;
+    font-weight: 700;
+    color: color-mix(in oklch, var(--m-c) 80%, #000);
+  }
+  .qr {
+    flex: none;
+    width: 5.4rem;
+    border-radius: 8px;
+    background: #fff;
+    padding: 0.4rem;
+    color: #0f172a;
+  }
+  .qr :global(svg) { display: block; width: 100%; height: auto; }
+
+  /* ── Web: la página real reducida dentro de una ventana de navegador. ── */
+  .navegador {
+    width: min(100%, 20rem);
+    overflow: hidden;
+    border: 1px solid rgb(15 23 42 / 0.08);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 18px 36px -20px rgb(15 23 42 / 0.45);
+  }
+  .barra {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    border-bottom: 1px solid rgb(15 23 42 / 0.06);
+    background: #f8fafc;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.6rem;
+    color: #64748b;
+  }
+  .barra i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #cbd5e1; }
+  .barra span { flex: 1; margin-left: 0.4rem; text-align: center; }
+  /* 20rem de ventana: 320 px / 900 px de web = 0,356. */
+  .pantalla { --escala: 0.356; height: 13.5rem; overflow: hidden; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .abanico img { transition: none; }
+  }
+</style>

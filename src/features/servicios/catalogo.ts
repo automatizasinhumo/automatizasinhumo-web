@@ -8,7 +8,8 @@
  * acabar en una página a medias.
  */
 import { AUTOSERVICIO, SLUG_WEB } from './autoservicio';
-import { EXTRAS_CV, PAQUETES_CV, miniaturaCv } from './cv';
+import { DISENOS_CV, EXTRAS_CV, PAQUETES_CV, miniaturaCv } from './cv';
+import { EJEMPLO_WEB } from './webs';
 
 export type IdFamilia = 'cv' | 'webs' | 'tiendas' | 'reservas' | 'automatizar' | 'eventos';
 
@@ -23,8 +24,20 @@ export interface ServicioCatalogo {
   href?: string;
   /** Precio mínimo en céntimos. */
   desde?: number;
-  imagen?: string;
+  /** Muestra del producto real en la tarjeta del catálogo (ver Servicios.astro). */
+  muestra?: MuestraServicio;
 }
+
+/**
+ * Lo que se ve en la cabecera de la tarjeta, siempre sacado del producto de verdad:
+ * - abanico: miniaturas del propio estudio (las primeras del catálogo de diseños);
+ * - tarjeta: la tarjeta de contacto con su QR (vCard) generado en el build;
+ * - web: la web de ejemplo pintada con el mismo motor que publica (renderWeb).
+ */
+export type MuestraServicio =
+  | { tipo: 'abanico'; imagenes: readonly string[] }
+  | { tipo: 'tarjeta'; nombre: string; cargo: string; telefono: string; email: string }
+  | { tipo: 'web'; url: string; datos: typeof EJEMPLO_WEB };
 
 export interface FamiliaCatalogo {
   id: IdFamilia;
@@ -52,10 +65,10 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         nombre: 'Currículum con buen diseño',
         texto: 'Eliges un diseño, escribes tus datos y lo ves al momento. Lo descargas en PDF.',
         icono: 'file-text',
-        puntos: ['15 diseños listos o uno a tu gusto', 'Vista previa mientras escribes', 'PDF listo para enviar'],
+        puntos: [`${DISENOS_CV.length} diseños listos o uno a tu gusto`, 'Vista previa mientras escribes', 'PDF listo para enviar'],
         href: '/servicios/cv',
         desde: desdeCv,
-        imagen: miniaturaCv('onyx'),
+        muestra: { tipo: 'abanico', imagenes: DISENOS_CV.slice(0, 3).map((d) => miniaturaCv(d.id)) },
       },
       {
         id: 'tarjeta',
@@ -65,6 +78,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         puntos: ['Con los datos de tu CV', 'Botón «Guardar contacto»', 'QR para imprimir'],
         href: '/servicios/cv#tarjeta',
         desde: EXTRAS_CV[0]!.precio,
+        muestra: { tipo: 'tarjeta', nombre: 'Lucía Martín Ortega', cargo: 'Responsable de atención al cliente', telefono: '+34 600 123 456', email: 'lucia.martin@correo.es' },
       },
       {
         id: 'cv-web',
@@ -97,6 +111,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         puntos: ['3 diseños, tu color y tu letra', 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
         href: '/servicios/web',
         desde: AUTOSERVICIO[SLUG_WEB]!.precio,
+        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, plantilla: 'banda' } },
       },
       {
         id: 'portafolio',

@@ -5,10 +5,14 @@
  *
  * Cada tarjeta lleva el color de su familia (data-familia="<id>" da --familia y
  * --familia-2, tokens.css): la cabecera visual, el icono, las viñetas y el precio lo leen.
+ * La cabecera de cada tarjeta es una muestra del producto real (control MuestraServicio:
+ * miniaturas del estudio, la tarjeta con su QR, la web pintada por su motor), no un icono.
  * Lo disponible va primero y con todo su peso; lo que viene después, en una banda aparte
  * y callada. Un servicio nuevo o una familia nueva no tocan este fichero: solo los datos.
  * El filtro es mejora progresiva: sin JavaScript se ve todo.
  */
+import type { MuestraServicio as Muestra } from '../../features/storefront/models';
+import MuestraServicio from '../../features/storefront/controls/MuestraServicio.astro';
 import Icono from './IconoCat.astro';
 import Boton from './ui/Boton.astro';
 import Fondo from './ui/Fondo.astro';
@@ -24,7 +28,7 @@ interface Servicio {
   href?: string;
   /** Precio ya formateado («9 €»). */
   desde?: string;
-  imagen?: string;
+  muestra?: Muestra;
 }
 interface Familia {
   id: string;
@@ -70,9 +74,9 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
 
   <ul class="rejilla" aria-label="Servicios disponibles">
     {listos.map((s, i) => (
-      <li class:list={['servicio', { principal: i === 0 && s.imagen }]} data-familia={s.familia.id} data-grupo={s.familia.id}>
+      <li class:list={['servicio', { principal: i === 0 }]} data-familia={s.familia.id} data-grupo={s.familia.id}>
         <span class="visual" aria-hidden="true">
-          {s.imagen ? <img src={s.imagen} alt="" width="480" height="679" loading="eager" decoding="async" /> : <Icono name={s.icono} class="grande" />}
+          {s.muestra ? <MuestraServicio muestra={s.muestra} prioritaria={i === 0} /> : <Icono name={s.icono} class="grande" />}
         </span>
         <div class="cuerpo">
           <p class="etiqueta-familia"><Icono name={s.icono} class="h-4 w-4" />{s.familia.corto}</p>
@@ -83,7 +87,7 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
           </ul>
           <div class="pie">
             {s.desde && <p class="precio"><span>Desde</span> {s.desde}</p>}
-            <Boton href={s.href} talla="compacta" class="ir">Empezar</Boton>
+            <Boton href={s.href} talla="compacta" destello={false} class="ir">Empezar</Boton>
           </div>
         </div>
       </li>
@@ -93,7 +97,7 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
   <p class="vacio" data-vacio hidden>No hay servicios en esta categoría todavía.</p>
 
   {(pronto.length > 0 || proximas.length > 0) && (
-    <Seccion id="despues" antetitulo="Próximamente" titulo="Lo que viene después" entradilla="Entra aquí con el mismo método: eliges, rellenas, lo ves y lo tienes." separada>
+    <Seccion id="despues" antetitulo="Próximamente" titulo="Lo que viene después" entradilla="Entra aquí con el mismo método: eliges, rellenas, lo ves y lo tienes.">
       <ul class="proximas" aria-label="Servicios en preparación">
         {pronto.map((s) => (
           <li data-familia={s.familia.id} data-grupo={s.familia.id}><Pildora icono={s.icono}>{s.nombre}</Pildora></li>
@@ -198,13 +202,21 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
     color: #fff;
   }
   .filtro input:focus-visible + span { outline: 3px solid var(--familia); outline-offset: 2px; }
+  /* En el móvil caben las tres opciones sin desplazar: menos aire, mismo toque. */
+  @media (max-width: 30rem) {
+    .filtro { flex: 1 1 auto; }
+    .filtro span { justify-content: center; gap: var(--ds-hueco-1); padding-inline: var(--ds-hueco-3); }
+  }
 
   /* ── Rejilla: una tarjeta por servicio, sin paneles dentro de paneles. ── */
+  /* Flex y no grid: las tarjetas de cada fila crecen hasta llenarla, así no queda nunca
+     una columna vacía, sea cual sea el número de servicios disponibles. */
   .rejilla {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--ds-hueco-6);
   }
+  .rejilla > li { flex: 1 1 18rem; }
   .servicio {
     position: relative;
     display: flex;
@@ -224,24 +236,18 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
     transform: translateY(-3px);
     box-shadow: var(--ds-sombra-2);
   }
-  /* El de la foto es el servicio de entrada: ocupa dos columnas cuando caben. */
+  /* El primero es el servicio de entrada: toda la fila y la muestra al lado del texto. */
+  .rejilla > .principal { flex-basis: 100%; }
   @media (min-width: 48rem) {
-    .principal { grid-column: 1 / -1; flex-direction: row; }
-    .principal .visual { flex: 0 0 44%; }
+    .principal { flex-direction: row; }
+    .principal .visual { flex: 0 0 46%; min-height: 19rem; }
   }
   .visual {
     display: grid;
     place-items: center;
-    min-height: 9rem;
+    min-height: 13rem;
     background: linear-gradient(160deg in oklch, color-mix(in oklab, var(--familia) 16%, #fff), color-mix(in oklab, var(--familia-2) 10%, #fff));
     padding: var(--ds-hueco-6);
-  }
-  .visual img {
-    width: min(100%, 11rem);
-    height: auto;
-    border-radius: var(--ds-radio-sutil);
-    box-shadow: var(--ds-sombra-2);
-    transform: rotate(-2deg);
   }
   .visual :global(.grande) {
     width: 4rem;
