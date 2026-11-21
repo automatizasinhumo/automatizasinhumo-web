@@ -52,6 +52,7 @@ export async function dominioLibre(d: string, f: typeof fetch = fetch): Promise<
   try {
     const r = await f(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(d)}&type=NS`, {
       headers: { accept: 'application/dns-json' },
+      signal: AbortSignal.timeout(3000),
     });
     if (!r.ok) return null;
     const j = (await r.json()) as { Status?: unknown };

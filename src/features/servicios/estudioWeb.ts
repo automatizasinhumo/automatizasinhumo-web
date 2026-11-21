@@ -442,7 +442,8 @@ export function iniciarEstudioWeb() {
     }
     if (!pedido.vigente(token)) return;
     const caja = $('[data-dominio-ideas]')!;
-    caja.hidden = !ideas.length;
+    // Si mientras tanto se ha conectado un dominio, la caja de pedirlo ya no está a la vista.
+    caja.hidden = !ideas.length || $('[data-dominio-pedir]')!.hidden;
     $('[data-dominio-ideas-lista]')!.replaceChildren(
       ...ideas.map((d) => {
         const b = document.createElement('button');
