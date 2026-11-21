@@ -12,7 +12,7 @@ import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { textosDeSector } from './sectores';
-import { MARCA_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, MARCA_WEB, MAX_FOTO_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces';
 type Fila = Record<string, string>;
@@ -56,7 +56,28 @@ interface Pagado {
 const CLAVE = 'servicios:web';
 const CLAVE_PEDIDO = 'servicios:web:pedido';
 const PASOS = PASOS_WEB.map((p) => p.id) as string[];
-const CAMPOS = ['negocio', 'sector', 'lema', 'sobre', 'telefono', 'whatsapp', 'email', 'direccion', 'horario'] as const;
+const CAMPOS = ['negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario'] as const;
+
+/**
+ * Reduce la foto en el navegador (lado mayor 1200 px) y la devuelve como data URL que quepa en
+ * MAX_FOTO_WEB: WebP si el navegador lo sabe escribir, si no JPEG, bajando calidad hasta que entre.
+ */
+async function reducirFoto(f: File): Promise<string> {
+  const bmp = await createImageBitmap(f);
+  const k = Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
+  const lienzo = document.createElement('canvas');
+  lienzo.width = Math.max(1, Math.round(bmp.width * k));
+  lienzo.height = Math.max(1, Math.round(bmp.height * k));
+  lienzo.getContext('2d')!.drawImage(bmp, 0, 0, lienzo.width, lienzo.height);
+  bmp.close();
+  for (const tipo of ['image/webp', 'image/jpeg'])
+    for (const q of [0.82, 0.7, 0.55, 0.4]) {
+      const url = lienzo.toDataURL(tipo, q);
+      if (!url.startsWith(`data:${tipo}`)) break;
+      if (url.length <= MAX_FOTO_WEB) return url;
+    }
+  return '';
+}
 const LISTAS: Lista[] = ['servicios', 'enlaces'];
 const COLOR = /^#[0-9a-f]{6}$/i;
 const ERROR_PUBLICAR: Record<string, string> = {
@@ -141,6 +162,8 @@ export function iniciarEstudioWeb() {
       $('[data-anadir]', fs)!.hidden = $$('[data-items] > .item', fs).length >= max;
     }
   }
+  /** Sube con cada foto elegida, quitada o formulario cargado: una reducción tardía no pisa a la vigente. */
+  let genFoto = 0;
   function volcar(c: Partial<Contenido>) {
     for (const k of CAMPOS) campo(k).value = typeof c[k] === 'string' ? c[k] : '';
     for (const l of LISTAS) {
@@ -148,6 +171,27 @@ export function iniciarEstudioWeb() {
       for (const fila of Array.isArray(c[l]) ? (c[l] as unknown as Fila[]) : []) anadir(l, fila);
     }
     limitar();
+    genFoto++;
+    pintarFoto();
+  }
+  /** Miniatura y botón «Quitar» según haya o no foto guardada. */
+  function pintarFoto(aviso = '') {
+    const v = campo('foto').value;
+    const url = fotoValida(v) ? v : '';
+    const vista = $<HTMLImageElement>('[data-foto-vista]')!;
+    vista.hidden = !url;
+    if (url) vista.src = url;
+    else vista.removeAttribute('src');
+    $('[data-foto-quitar]')!.hidden = !url;
+    const a = $('[data-foto-aviso]')!;
+    a.textContent = aviso;
+    a.hidden = !aviso;
+  }
+  function ponerFoto(url: string, aviso = '') {
+    campo('foto').value = url;
+    pintarFoto(aviso);
+    persistir();
+    programar(true);
   }
   function recoger(): Contenido {
     const c = {} as Record<string, unknown>;
@@ -525,6 +569,10 @@ export function iniciarEstudioWeb() {
   raiz.addEventListener('click', (ev) => {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('button, [data-ir]');
     if (!b) return;
+    if (b.hasAttribute('data-foto-quitar')) {
+      genFoto++;
+      return ponerFoto('');
+    }
     if (b.dataset.ir) {
       ev.preventDefault();
       if (PASOS.indexOf(b.dataset.ir) <= estado.alcanzado) ir(b.dataset.ir);
@@ -598,6 +646,23 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.hasAttribute('data-foto-elegir')) {
+      const f = c.files?.[0];
+      c.value = '';
+      const gen = ++genFoto;
+      if (!f) return;
+      if (!f.type.startsWith('image/')) return pintarFoto('Ese archivo no es una imagen.');
+      reducirFoto(f)
+        .then((url) => {
+          if (gen !== genFoto) return;
+          if (url) ponerFoto(url);
+          else pintarFoto('No hemos podido reducir esa foto. Prueba con otra.');
+        })
+        .catch(() => {
+          if (gen === genFoto) pintarFoto('No hemos podido abrir esa foto. Prueba con otra (JPG o PNG).');
+        });
+      return;
+    }
     // Al decir a qué se dedica, la web se rellena sola con los textos de su sector.
     if (c.name === 'sector' && c.value.trim() && rellenarTextos()) {
       $('[data-estado-textos]')!.textContent = 'Hemos escrito unos textos para tu sector. Cámbialos a tu gusto.';
@@ -624,7 +689,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
-    if (c.type === 'radio' || c.name === 'dominio') return;
+    if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio') return;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;
       pintarControles();

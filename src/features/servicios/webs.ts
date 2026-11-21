@@ -108,7 +108,19 @@ export interface DatosWeb {
   direccion: string;
   horario: string;
   enlaces: EnlaceWeb[];
+  /** Foto del negocio ya reducida en el navegador (data URL WebP/JPEG), o ''. */
+  foto: string;
 }
+
+/**
+ * Foto de portada: el navegador la reduce (1200 px, WebP) antes de guardarla, y viaja dentro de los
+ * datos de la web. Así la página publicada sigue siendo un único documento, igual en /w/<slug> que
+ * en el dominio del cliente, sin almacenamiento aparte. Lo que no cumpla el formato o el tamaño se
+ * descarta (la web se publica sin foto).
+ */
+export const MAX_FOTO_WEB = 400_000;
+const FOTO = /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/;
+export const fotoValida = (v: unknown): v is string => typeof v === 'string' && v.length <= MAX_FOTO_WEB && FOTO.test(v);
 
 export const WEB_POR_DEFECTO: Pick<DatosWeb, 'plantilla' | 'color' | 'letra'> = {
   plantilla: 'clara',
@@ -170,6 +182,7 @@ export function validarWeb(x: unknown): ResultadoWeb {
       direccion: texto(o.direccion, 160),
       horario: parrafos(o.horario, 300),
       enlaces,
+      foto: fotoValida(o.foto) ? o.foto : '',
     },
   };
 }
@@ -194,6 +207,7 @@ export const EJEMPLO_WEB: DatosWeb = {
   direccion: 'Rúa da Raíña 1, Lugo',
   horario: 'Lunes a viernes: 9:30 – 20:00\nSábados: 9:30 – 14:00',
   enlaces: [{ etiqueta: 'Instagram', url: 'https://www.instagram.com/' }],
+  foto: '',
 };
 
 // ---------- Pintado ----------
@@ -290,6 +304,7 @@ export const CSS_WEB = `
 .w-in{width:100%;max-width:1040px;margin:0 auto;padding:0 20px}
 .w-ico{width:1.15em;height:1.15em;flex:none}
 .w-cab{padding:56px 0 48px;text-align:center}
+.w-portada img{display:block;width:100%;max-height:440px;object-fit:cover;border-radius:16px}
 .w-sector{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--w-ct)}
 .w-cab h1{font-size:clamp(2rem,9cqi,3.6rem);margin-top:10px}
 .w-lema{max-width:36rem;margin:14px auto 0;font-size:1.15rem;color:var(--w-suave)}
@@ -386,6 +401,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     acciones.length ? `<div class="w-acciones">${acciones.join('')}</div>` : '',
     `</div></header>`,
     `<main>`,
+    d.foto ? `<div class="w-portada"><div class="w-in"><img src="${esc(d.foto)}" alt="${esc(d.negocio)}" decoding="async"></div></div>` : '',
     d.sobre ? `<section class="w-sec"><div class="w-in"><h2>Quiénes somos</h2><div class="w-sobre">${parrafosHtml(d.sobre)}</div></div></section>` : '',
     servicios ? `<section class="w-sec w-servicios-sec"><div class="w-in"><h2>Servicios</h2><ul class="w-servicios">${servicios}</ul></div></section>` : '',
     `<section class="w-sec"><div class="w-in"><h2>Contacto</h2><ul class="w-contacto">${contacto.join('')}</ul></div></section>`,
