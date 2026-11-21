@@ -72,10 +72,26 @@ export interface DisenoCv {
   tono: 'sobrio' | 'color';
   /** Una columna: la que mejor leen los filtros automáticos de las empresas. */
   columnas: 1 | 2;
+  /** Plantilla creativa propia del estudio, con dibujo de fondo. */
+  creativo?: boolean;
 }
 
-/** Los 25 diseños del motor, con nombre propio y una pista de estilo. */
+/** Los 29 diseños del motor: primero las creativas propias, con nombre propio y una pista de estilo. */
 export const DISENOS_CV: readonly DisenoCv[] = [
+  { id: 'aurora', nombre: 'Aurora', estilo: 'Ola de color degradada', tono: 'color', columnas: 2, creativo: true },
+  { id: 'coral', nombre: 'Coral', estilo: 'Columna con burbujas', tono: 'color', columnas: 2, creativo: true },
+  { id: 'cometa', nombre: 'Cometa', estilo: 'Planeta tras tus iniciales', tono: 'color', columnas: 2, creativo: true },
+  { id: 'tinta', nombre: 'Tinta', estilo: 'Pinceladas y rotulador', tono: 'color', columnas: 2, creativo: true },
+  { id: 'nocturno', nombre: 'Nocturno', estilo: 'Panal degradado oscuro', tono: 'color', columnas: 2, creativo: true },
+  { id: 'pixel', nombre: 'Píxel', estilo: 'Píxeles en cascada', tono: 'color', columnas: 2, creativo: true },
+  { id: 'lienzo', nombre: 'Lienzo', estilo: 'Arcos sobre papel crema', tono: 'color', columnas: 1, creativo: true },
+  { id: 'prisma', nombre: 'Prisma', estilo: 'Diagonales de color', tono: 'color', columnas: 2, creativo: true },
+  { id: 'brisa', nombre: 'Brisa', estilo: 'Manchas orgánicas', tono: 'color', columnas: 2, creativo: true },
+  { id: 'vertice', nombre: 'Vértice', estilo: 'Franja y nombre gigante', tono: 'color', columnas: 1, creativo: true },
+  { id: 'oasis', nombre: 'Oasis', estilo: 'Arco con sol', tono: 'color', columnas: 2, creativo: true },
+  { id: 'zafiro', nombre: 'Zafiro', estilo: 'Columna oscura a rayas', tono: 'color', columnas: 2, creativo: true },
+  { id: 'mosaico', nombre: 'Mosaico', estilo: 'Mosaico y tarjetas', tono: 'color', columnas: 1, creativo: true },
+  { id: 'trazo', nombre: 'Trazo', estilo: 'Trazos a mano alzada', tono: 'color', columnas: 1, creativo: true },
   { id: 'onyx', nombre: 'Ónix', estilo: 'Clásico con columna lateral', tono: 'sobrio', columnas: 2 },
   { id: 'azurill', nombre: 'Celeste', estilo: 'Cabecera centrada', tono: 'sobrio', columnas: 2 },
   { id: 'bronzor', nombre: 'Bronce', estilo: 'Apartados al margen', tono: 'sobrio', columnas: 1 },
@@ -91,23 +107,14 @@ export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'pikachu', nombre: 'Ámbar', estilo: 'Cabecera en bloque', tono: 'color', columnas: 2 },
   { id: 'rhyhorn', nombre: 'Lineal', estilo: 'Una columna, sin adornos', tono: 'sobrio', columnas: 1 },
   { id: 'scizor', nombre: 'Carmín', estilo: 'Filete de color, títulos marcados', tono: 'sobrio', columnas: 1 },
-  { id: 'aurora', nombre: 'Aurora', estilo: 'Banda de color y títulos en etiqueta', tono: 'color', columnas: 2 },
-  { id: 'coral', nombre: 'Coral', estilo: 'Columna de color con monograma', tono: 'color', columnas: 2 },
-  { id: 'lienzo', nombre: 'Lienzo', estilo: 'Centrado, editorial, con monograma', tono: 'sobrio', columnas: 1 },
-  { id: 'nocturno', nombre: 'Nocturno', estilo: 'Columna oscura con tu nombre', tono: 'color', columnas: 2 },
-  { id: 'mosaico', nombre: 'Mosaico', estilo: 'Secciones en tarjetas', tono: 'color', columnas: 1 },
-  { id: 'prisma', nombre: 'Prisma', estilo: 'Banda oscura y columna de color', tono: 'color', columnas: 2 },
-  { id: 'brisa', nombre: 'Brisa', estilo: 'Centrado con columna suave', tono: 'sobrio', columnas: 2 },
-  { id: 'vertice', nombre: 'Vértice', estilo: 'Nombre enorme sobre banda', tono: 'color', columnas: 1 },
-  { id: 'oasis', nombre: 'Oasis', estilo: 'Monograma y filetes punteados', tono: 'sobrio', columnas: 2 },
-  { id: 'zafiro', nombre: 'Zafiro', estilo: 'Lateral oscuro a la derecha', tono: 'color', columnas: 2 },
 ];
 
-export const DISENO_POR_DEFECTO = 'onyx';
+export const DISENO_POR_DEFECTO = 'aurora';
 
 /** Filtros de la galería de diseños. `cumple` es la única fuente: la página y el script la usan tal cual. */
 export const FILTROS_DISENO = [
   { id: 'todos', nombre: 'Todos', cumple: () => true },
+  { id: 'creativo', nombre: 'Creativos', cumple: (d: DisenoCv) => d.creativo === true },
   { id: 'sobrio', nombre: 'Sobrios', cumple: (d: DisenoCv) => d.tono === 'sobrio' },
   { id: 'color', nombre: 'Con color', cumple: (d: DisenoCv) => d.tono === 'color' },
   { id: 'una-columna', nombre: 'Una columna', cumple: (d: DisenoCv) => d.columnas === 1 },
@@ -157,7 +164,7 @@ export interface PasoGuiaCv {
 export const GUIA_CV: Record<string, readonly PasoGuiaCv[]> = {
   diseno: [
     { guia: 'vista', titulo: 'Así queda tu CV', texto: 'Aquí ves el diseño con un ejemplo. Se actualiza solo cada vez que cambias algo. La marca de agua desaparece en el PDF que compras.' },
-    { guia: 'filtros', titulo: 'Filtra los diseños', texto: 'Sobrios, con color o de una columna (la que mejor leen los filtros automáticos de las empresas).' },
+    { guia: 'filtros', titulo: 'Filtra los diseños', texto: 'Creativos, sobrios, con color o de una columna (la que mejor leen los filtros automáticos de las empresas).' },
     { guia: 'galeria', titulo: 'Elige uno', texto: 'Toca el que te guste y míralo a la derecha. Desplázate: hay 25. Puedes cambiarlo cuando quieras sin perder lo que escribas.' },
     { guia: 'letra', titulo: 'Letra, tamaño y espaciado', texto: 'Pruébalos: la vista previa cambia al momento. Con mucho texto, un tamaño menor y espaciado compacto te ahorran una página.' },
     { guia: 'personalizar', titulo: 'Ponle tu toque', texto: 'Activa esta casilla para cambiar los colores, añadir formas, sombreado y fondo. Si no lo activas, el diseño va tal cual.' },

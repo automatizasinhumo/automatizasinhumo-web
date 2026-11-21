@@ -195,7 +195,7 @@ export function capaMarcaAgua() {
 	// Mosaico mayor que la página (rotado) para que no quede ninguna esquina limpia.
 	for (let i = 0; i < 14; i++)
 		filas.push(
-			h(Text, { key: i, style: { fontSize: 26, fontFamily: "Helvetica-Bold", color: "#000000", opacity: 0.13, marginBottom: 52, textAlign: "center" } }, `${marca}   ·   ${marca}   ·   ${marca}`),
+			h(Text, { key: i, style: { fontSize: 22, fontFamily: "Helvetica-Bold", color: "#000000", opacity: 0.08, marginBottom: 52, textAlign: "center" } }, `${marca}   ·   ${marca}   ·   ${marca}`),
 		);
 	return h(
 		View,
