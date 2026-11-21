@@ -30,8 +30,9 @@ function contar(texto) {
   let n = (texto.match(ARBITRARIA) ?? []).length;
   for (const m of texto.matchAll(DECLARACION)) {
     const valor = m[1];
-    if (/var\(/.test(valor) || /clamp\(|calc\(|min\(|max\(/.test(valor)) continue; // fluido o con token
-    if (/\b0*\.?\d+(?:\.\d+)?(?:px|rem|em)\b/.test(valor) && !/^\s*0(?:px|rem)?\s*$/.test(valor)) n += 1;
+    if (/clamp\(|calc\(|min\(|max\(/.test(valor)) continue; // fluido
+    const sinTokens = valor.replace(/var\([^)]*\)/g, ' '); // un literal junto a un token también cuenta
+    if (/\b0*\.?\d+(?:\.\d+)?(?:px|rem|em)\b/.test(sinTokens) && !/^\s*0(?:px|rem)?\s*$/.test(sinTokens)) n += 1;
   }
   return n;
 }
@@ -43,6 +44,12 @@ for (const f of ficheros(RAIZ)) {
 }
 
 if (process.argv.includes('--actualizar')) {
+  const previa = existsSync(BASE) ? JSON.parse(readFileSync(BASE, 'utf8')) : null;
+  const sube = previa ? Object.entries(actual).filter(([f, n]) => n > (previa[f] ?? 0)) : [];
+  if (sube.length) {
+    console.error('tokens-diseno: --actualizar solo baja la base; suben: ' + sube.map(([f]) => f).join(', '));
+    process.exit(1);
+  }
   const orden = Object.fromEntries(Object.entries(actual).sort(([a], [b]) => a.localeCompare(b)));
   writeFileSync(BASE, JSON.stringify(orden, null, 2) + '\n');
   console.log(`tokens-diseno: base guardada (${Object.values(actual).reduce((a, b) => a + b, 0)} valores a mano en ${Object.keys(actual).length} ficheros)`);

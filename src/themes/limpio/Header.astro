@@ -151,10 +151,10 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
   }
   /* Alto táctil mínimo (44 px) en todos los controles de la isla: logo, menú, lupa, carrito,
      cuenta y botón. La caja crece, el icono y el texto no. */
-  .isla > a,
-  .isla nav :global(a),
-  .isla nav :global(summary),
-  .isla nav :global(button) {
+  .isla > a:not(.hidden),
+  .isla nav :global(a:not(.hidden)),
+  .isla nav :global(summary:not(.hidden)),
+  .isla nav :global(button:not(.hidden)) {
     display: inline-flex;
     align-items: center;
     min-height: var(--ds-toque);

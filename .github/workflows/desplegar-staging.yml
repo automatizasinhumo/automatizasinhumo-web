@@ -133,7 +133,8 @@ jobs:
       - name: Instalar Playwright
         run: |
           npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
-          ln -s qa/navegador/node_modules node_modules
+          mkdir -p node_modules
+          for p in playwright playwright-core; do ln -sfn "$PWD/qa/navegador/node_modules/$p" "node_modules/$p"; done
           qa/navegador/node_modules/.bin/playwright install --with-deps chromium
 
       - name: Contrato de diseño
