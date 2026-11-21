@@ -276,3 +276,6 @@ export interface ContentPageModel {
   /** Inline custom properties for the preset's measure and title alignment. */
   layoutStyle: string;
 }
+
+/** Muestra del producto en la tarjeta del catálogo de servicios (control MuestraServicio). */
+export type { MuestraServicio } from '../servicios/catalogo';
