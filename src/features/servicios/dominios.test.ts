@@ -112,6 +112,32 @@ describe('pedirDominio', () => {
     const r = await pedirDominio(db, CFG, 'web', 'p2', 'noexiste.es', api({ 'POST /zones': () => fallo(1097) }).f);
     expect(r).toMatchObject({ ok: false, error: 'cloudflare', detalle: expect.stringContaining('no está registrado') });
   });
+
+  it('no entrega una zona ya activa de nuestra cuenta que no tiene fila (sería de otro pedido)', async () => {
+    const db = d1();
+    publicada(db);
+    const { f } = api({
+      'POST /zones': () => fallo(1061),
+      'GET /zones?name=lola.es': () => ok([{ id: 'z9', name: 'lola.es', status: 'active', name_servers: ['a.ns'] }]),
+    });
+    expect(await pedirDominio(db, CFG, 'web', 'p1', 'lola.es', f)).toMatchObject({ ok: false, error: 'cloudflare' });
+    expect(db.sql.prepare('SELECT count(*) AS n FROM dominios_paginas').get()).toEqual({ n: 0 });
+  });
+
+  it('no sustituye un dominio que el cron activó mientras se creaba la zona nueva', async () => {
+    const db = d1();
+    publicada(db);
+    await pedirDominio(db, CFG, 'web', 'p1', 'lol.es', api({ 'POST /zones': () => ok({ id: 'z0', name_servers: [] }) }).f);
+    db.sql.prepare("UPDATE dominios_paginas SET estado = 'conectando'").run();
+    const { f } = api({
+      'POST /zones': () => {
+        db.sql.prepare("UPDATE dominios_paginas SET estado = 'activo'").run();
+        return ok({ id: 'z1', name_servers: [] });
+      },
+    });
+    expect(await pedirDominio(db, CFG, 'web', 'p1', 'lola.es', f)).toEqual({ ok: false, error: 'ocupado', detalle: 'lol.es' });
+    expect(db.sql.prepare('SELECT dominio, estado FROM dominios_paginas').all()).toEqual([{ dominio: 'lol.es', estado: 'activo' }]);
+  });
 });
 
 describe('avanzarDominios', () => {
@@ -160,6 +186,10 @@ describe('avanzarDominios', () => {
     });
     const [b] = await avanzarDominios(db, CFG, 20, f);
     expect(b).toMatchObject({ estado: 'conectando', detalle: null });
+    // El intento fallido cuenta: la fila pasa al final de la cola del cron.
+    db.sql.prepare("UPDATE dominios_paginas SET updated_at = '2000-01-01 00:00:00'").run();
+    await avanzarDominios(db, CFG, 20, f);
+    expect(db.sql.prepare('SELECT updated_at > ? AS movido FROM dominios_paginas').get('2000-01-01 00:00:00')).toEqual({ movido: 1 });
   });
 
   it('sin configuración no hace nada', async () => {

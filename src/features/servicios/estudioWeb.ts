@@ -256,6 +256,13 @@ export function iniciarEstudioWeb() {
     if (pedido.pagado?.slug && dominioDe !== pedido.token) {
       dominioDe = pedido.token;
       void dominio();
+    } else if (!pedido.pagado?.slug && dominioDe) {
+      // Otro pedido sin web publicada: la tarjeta no debe enseñar el dominio del anterior.
+      clearTimeout(sondeo);
+      dominioDe = null;
+      cambiando = false;
+      $('[data-dominio]')!.hidden = true;
+      $('[data-estado-dominio]')!.replaceChildren();
     }
   }
 
@@ -277,6 +284,8 @@ export function iniciarEstudioWeb() {
       d = { ok: false, error: 'No hemos podido comprobar tu dominio. Revisa tu conexión.' };
     }
     if (!pedido.vigente(token)) return;
+    // Si falla la consulta del estado, se vuelve a preguntar al pasar otra vez por «Publicar».
+    if (!d.ok && !cuerpo.dominio) dominioDe = null;
     if (d.ok) cambiando = false;
     pintarDominio(d);
   }

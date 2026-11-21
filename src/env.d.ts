@@ -84,7 +84,7 @@ declare namespace Cloudflare {
     // omit it and use their request origin until a custom domain is attached.
     CANONICAL_ORIGIN?: string;
     // Dominio propio de las webs (src/features/servicios/dominios.ts): token de API con
-    // Zone: Edit, DNS: Edit y Workers Routes: Edit; la cuenta y el nombre de este Worker.
+    // Zone Edit, DNS Edit y Workers Routes Write (zona) y Workers Scripts Write (cuenta); la cuenta y el nombre de este Worker.
     // Sin los tres, el estudio dice que la conexión de dominio aún no está disponible.
     CF_DOMINIOS_TOKEN?: string;
     CF_ACCOUNT_ID?: string;

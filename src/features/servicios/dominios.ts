@@ -12,7 +12,8 @@
  *    robots.txt y sitemap.xml. «www» redirige al dominio sin www.
  *
  * Sin Cloudflare for SaaS (pide tarjeta) ni un Worker por cliente: un registro en D1 por dominio
- * (migración 0049). Necesita CF_DOMINIOS_TOKEN (Zone: Edit, DNS: Edit, Workers Routes: Edit),
+ * (migración 0049). Necesita CF_DOMINIOS_TOKEN (zona: Zone Edit, DNS Edit y Workers Routes
+ * Write; cuenta: Workers Scripts Write, que pide PUT /accounts/{id}/workers/domains),
  * CF_ACCOUNT_ID y CF_WORKER_NOMBRE; sin ellos el estudio dice que aún no está disponible.
  */
 import type { TipoPagina } from './paginas';
@@ -120,10 +121,11 @@ export async function crearZona(cfg: ConfigDominios, dominio: string, f: typeof 
   try {
     return await cf<Zona>(cfg, '/zones', { method: 'POST', body: JSON.stringify({ name: dominio, account: { id: cfg.cuenta }, type: 'full' }) }, f);
   } catch (e) {
-    // 1061: la zona ya existe. Si es nuestra (un reintento), se reutiliza; si es de otra cuenta, error.
+    // 1061: la zona ya existe. Si es nuestra y aún no está activa (un reintento), se reutiliza.
+    // Una zona ya activa sin fila en D1 sería de otro pedido: no se entrega a quien la pida.
     if (!(e instanceof ErrorCloudflare) || !e.codigos.includes(1061)) throw e;
     const zonas = await cf<Zona[]>(cfg, `/zones?name=${encodeURIComponent(dominio)}&account.id=${cfg.cuenta}`, {}, f);
-    if (!zonas[0]) throw e;
+    if (!zonas[0] || zonas[0].status === 'active') throw e;
     return zonas[0];
   }
 }
@@ -202,7 +204,14 @@ export async function pedirDominio(
   } catch (e) {
     return { ok: false, error: 'cloudflare', detalle: motivo(e) };
   }
-  if (previo) await db.prepare('DELETE FROM dominios_paginas WHERE dominio = ?').bind(previo.dominio).run();
+  if (previo) {
+    // El cron pudo activarlo mientras se creaba la zona: un dominio activo no se sustituye.
+    const borrado = await db
+      .prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado != 'activo'")
+      .bind(previo.dominio)
+      .run();
+    if (!borrado.meta.changes) return { ok: false, error: 'ocupado', detalle: previo.dominio };
+  }
   await db
     .prepare(
       `INSERT INTO dominios_paginas (dominio, tipo, pedido_public_id, estado, zona_id, servidores)
@@ -240,7 +249,12 @@ export async function avanzarDominio(db: D1Database, cfg: ConfigDominios, fila: 
       await guardar(db, d, { estado: 'conectando', detalle: null });
       fila = { ...fila, estado: 'conectando', detalle: null };
     }
-    if (fila.estado === 'conectando' && (await responde(d, f))) {
+    if (fila.estado === 'conectando') {
+      // Se guarda también el intento fallido: así este dominio pasa al final de la cola del cron.
+      if (!(await responde(d, f))) {
+        await guardar(db, d, { detalle: null });
+        return { ...fila, detalle: null };
+      }
       await guardar(db, d, { estado: 'activo', detalle: null });
       return { ...fila, estado: 'activo', detalle: null };
     }
