@@ -9,6 +9,7 @@
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
 import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { guardarToken, llenarCarrito, tokenGuardado, tomarTokenDelHash } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
@@ -342,14 +343,7 @@ export function iniciarEstudioCv() {
     b.disabled = true;
     st.textContent = 'Preparando tu pedido…';
     try {
-      for (const [key, poner] of lineas) {
-        const fd = new FormData();
-        fd.set('_action', poner ? 'update' : 'remove');
-        fd.set('key', key);
-        if (poner) fd.set('qty', '1');
-        const r = await fetch('/api/cart', { method: 'POST', body: fd, headers: { 'x-partial': '1' }, credentials: 'same-origin' });
-        if (!r.ok) throw new Error(`carrito ${r.status}`);
-      }
+      await llenarCarrito(lineas);
       location.assign('/cart');
     } catch (e) {
       console.error(e);
@@ -385,11 +379,7 @@ export function iniciarEstudioCv() {
     try {
       const r = await fetch('/api/cv/pedido', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) });
       if (r.status === 404) {
-        try {
-          sessionStorage.removeItem(CLAVE_PEDIDO);
-        } catch {
-          /* sin almacenamiento */
-        }
+        guardarToken(CLAVE_PEDIDO, '');
         token = '';
         return;
       }
@@ -402,17 +392,10 @@ export function iniciarEstudioCv() {
     }
   }
   function tomarPedido(): boolean {
-    const m = /^#pedido=([^&]+)/.exec(location.hash);
-    if (!m) return false;
-    try {
-      token = decodeURIComponent(m[1]!);
-      sessionStorage.setItem(CLAVE_PEDIDO, token);
-    } catch {
-      /* sin almacenamiento: el token vale para esta visita */
-    }
     // Fuera de la barra de direcciones (y del historial) y directo a descargar si ya hay CV.
-    const destino = estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
-    history.replaceState(null, '', `${location.pathname}${location.search}${destino}`);
+    const t = tomarTokenDelHash(CLAVE_PEDIDO, estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
+    if (t === null) return false;
+    token = t;
     void cargarPedido();
     return true;
   }
@@ -431,12 +414,17 @@ export function iniciarEstudioCv() {
 
   // ---------- Tarjeta digital ----------
   const campoT = (k: string) => $<HTMLInputElement>(`[data-t="${k}"]`)!;
-  let tarjetaRellena = false;
+  // Pedido cuyos datos hay en el formulario: las ediciones a medias se conservan solo mientras
+  // siga activo el mismo pedido; si llega otro (#pedido=B en la misma pestaña) se vuelca el suyo.
+  let tarjetaDe = '';
   function rellenarTarjeta() {
     const caja = $('[data-tarjeta-form]')!;
     caja.hidden = !pagado?.tarjeta;
-    if (!pagado?.tarjeta || tarjetaRellena) return;
-    tarjetaRellena = true;
+    if (!pagado?.tarjeta || tarjetaDe === pagado.ref) return;
+    tarjetaDe = pagado.ref;
+    const st = $('[data-estado-tarjeta]')!;
+    st.dataset.tono = '';
+    st.replaceChildren();
     const f = recoger();
     const g = pagado.tarjeta.datos;
     const v = (k: string, alt: string) => (g && typeof g[k] === 'string' ? (g[k] as string) : alt);
@@ -542,16 +530,20 @@ export function iniciarEstudioCv() {
   }
 
   // ---------- Importar un CV existente ----------
+  // Si se elige otro fichero antes de que termine el anterior, solo cuenta el último.
+  let importacion = 0;
   async function importar(fichero: File) {
+    const turno = ++importacion;
     const nota = $('[data-estado-importar]');
     const avisar = (clave: keyof typeof AVISO_IMPORTAR) => {
-      if (!nota) return;
+      if (!nota || turno !== importacion) return;
       nota.textContent = AVISO_IMPORTAR[clave];
       nota.dataset.tono = clave === 'ok' || clave === 'leyendo' ? '' : 'error';
     };
     avisar('leyendo');
     try {
       const r = await (await motor()).importar(fichero);
+      if (turno !== importacion) return;
       if (!r.ok) return avisar(r.motivo);
       volcar(r.form);
       persistir();
@@ -668,11 +660,7 @@ export function iniciarEstudioCv() {
   marcarExtras();
   tomarExtra();
   if (!tomarPedido()) {
-    try {
-      token = sessionStorage.getItem(CLAVE_PEDIDO) ?? '';
-    } catch {
-      token = '';
-    }
+    token = tokenGuardado(CLAVE_PEDIDO);
     if (token) void cargarPedido();
   }
   desdeHash(false);

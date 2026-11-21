@@ -5,7 +5,7 @@ import { newResume } from "./adoptado/resume-model";
 
 // Tipos y formulario vacío viven en formulario-datos.ts (sin dependencias: los usan el
 // importador y sus pruebas sin cargar el modelo ni DOMPurify).
-import { FORM_VACIO, type FormCv } from "./formulario-datos";
+import { FORM_VACIO, type Experiencia, type FormCv, type Formacion, type Habilidad, type Idioma } from "./formulario-datos";
 export * from "./formulario-datos";
 
 export const FORM_EJEMPLO: FormCv = {

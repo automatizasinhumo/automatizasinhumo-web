@@ -32,6 +32,44 @@ export function slugBase(nombre: string, porDefecto = 'pagina'): string {
   return s || porDefecto;
 }
 
+// ---------- Validación común a los tipos ----------
+
+/** Texto de una línea: sin caracteres de control, recortado y con longitud máxima. */
+export const texto = (v: unknown, max: number): string =>
+  typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, max) : '';
+
+/** Texto de varias líneas: conserva los saltos (como mucho una línea en blanco seguida). */
+export const parrafos = (v: unknown, max: number): string =>
+  typeof v === 'string'
+    ? v
+        .replace(/\r\n?/g, '\n')
+        .replace(/[\u0000-\u0009\u000b-\u001f\u007f]+/g, ' ')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+        .slice(0, max)
+    : '';
+
+export const COLOR_VALIDO = /^#[0-9a-f]{6}$/i;
+
+/** Solo http(s); «linkedin.com/in/x» se completa con https://. Cualquier otro esquema se descarta. */
+export function urlSegura(v: unknown): string {
+  const t = texto(v, 300);
+  if (!t) return '';
+  const conEsquema = /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
+  try {
+    const u = new URL(conEsquema);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+    if (!u.hostname.includes('.')) return '';
+    return u.href;
+  } catch {
+    return '';
+  }
+}
+
+export const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
+export const TELEFONO = /^\+?[0-9 ().-]{6,24}$/;
+
 export interface PaginaPublicada<T> {
   slug: string;
   datos: T;

@@ -14,5 +14,11 @@
     "nombre": "Tarjeta digital con QR",
     "estudio": "/servicios/cv",
     "precio": 500
+  },
+  "web-una-pagina": {
+    "producto": "prod_pv3z0zenn8",
+    "nombre": "Web de una página",
+    "estudio": "/servicios/web",
+    "precio": 4900
   }
 }

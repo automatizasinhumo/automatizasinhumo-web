@@ -1,0 +1,270 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/estudio.css';
+import Progreso from '../../themes/limpio/ui/Progreso.astro';
+import { AUTOSERVICIO, SLUG_WEB } from '../../features/servicios/autoservicio';
+import { euros } from '../../features/servicios/cv';
+import {
+  COLORES_WEB,
+  CSS_WEB,
+  EJEMPLO_WEB,
+  LETRAS_WEB,
+  MAX_ENLACES_WEB,
+  MAX_SERVICIOS_WEB,
+  PASOS_WEB,
+  PLANTILLAS_WEB,
+  WEB_POR_DEFECTO,
+} from '../../features/servicios/webs';
+
+// Estudio de webs: mismo esquema que el de CV (/servicios/cv). Todo ocurre en el navegador:
+// elegir diseño, escribir los datos del negocio, color y letra, y verla al momento con marca
+// de agua. Con el pedido pagado se publica en /w/<nombre> sin marca, sin pasos manuales.
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+
+const servicio = AUTOSERVICIO[SLUG_WEB]!;
+const precio = servicio.precio ?? 0;
+const config = JSON.stringify({
+  producto: servicio.producto,
+  precio,
+  css: CSS_WEB,
+  ejemplo: EJEMPLO_WEB,
+  porDefecto: WEB_POR_DEFECTO,
+  plantillas: PLANTILLAS_WEB.map((p) => p.id),
+  letras: LETRAS_WEB.map((l) => l.id),
+  maxServicios: MAX_SERVICIOS_WEB,
+  maxEnlaces: MAX_ENLACES_WEB,
+});
+const campo = 'campo';
+---
+
+<Layout
+  title="Tu web de una página: elige diseño, escribe y publícala"
+  description="Elige un diseño, escribe los datos de tu negocio y mira tu web al momento. Con tu color y tu letra, publicada en cuanto la compras."
+  sinAviso
+>
+  <div id="estudio-web" class="estudio" data-config={config}>
+    <header class="fondo-tecnico cabecera-pagina">
+      <span class="etiqueta">Servicios · Web</span>
+      <h1 class="mt-4 max-w-3xl font-serif text-4xl font-bold leading-tight text-ink sm:text-5xl">Tu web, paso a paso</h1>
+      <p class="mt-5 max-w-2xl text-lg leading-7 text-muted">
+        Elige un diseño, escribe lo que haces y cómo contactarte, y mírala al momento en móvil y en ordenador. Al comprarla queda
+        publicada, y puedes cambiarla cuando quieras.
+      </p>
+    </header>
+
+    <div class="progreso-fijo">
+      <Progreso pasos={PASOS_WEB} etiqueta="Pasos para hacer tu web" />
+    </div>
+
+    <form id="estudio-form" class="mt-8" novalidate autocomplete="on">
+      <!-- 1 · Diseño -->
+      <section data-paso="plantilla" aria-labelledby="paso-plantilla">
+        <h2 id="paso-plantilla" class="paso-titulo">Elige el diseño de tu web</h2>
+        <p class="paso-entradilla">Todos cuestan lo mismo, {euros(precio)}. Podrás cambiarlo después sin volver a escribir nada.</p>
+        <fieldset class="mt-6">
+          <legend class="sr-only">Diseño de la web</legend>
+          <div class="rejilla">
+            {
+              PLANTILLAS_WEB.map((p) => (
+                <label class="tarjeta diseno">
+                  <input type="radio" name="plantilla" value={p.id} class="sr-only" />
+                  <span class="mini-web" data-mini={p.id} aria-hidden="true" />
+                  <span class="diseno-pie">
+                    <span class="min-w-0">
+                      <strong class="block truncate text-ink">{p.nombre}</strong>
+                      <span class="block text-xs text-faint">{p.descripcion}</span>
+                    </span>
+                    <span class="precio">{euros(precio)}</span>
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+        <p class="aviso" role="alert" data-error="plantilla" hidden>Elige un diseño para seguir.</p>
+        <div class="paso-acciones">
+          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: tu negocio</button>
+        </div>
+      </section>
+
+      <!-- 2 · Datos -->
+      <section data-paso="datos" aria-labelledby="paso-datos" hidden>
+        <h2 id="paso-datos" class="paso-titulo">Cuéntanos de tu negocio</h2>
+        <p class="paso-entradilla">Lo que escribes se guarda solo en este navegador. A la derecha ves cómo queda.</p>
+        <div class="con-vista">
+          <div class="min-w-0">
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="boton boton-secundario boton-compacto" data-ejemplo>Rellenar con un ejemplo</button>
+              <button type="button" class="boton boton-secundario boton-compacto" data-vaciar>Empezar en blanco</button>
+            </div>
+
+            <fieldset class="bloque">
+              <legend>Tu negocio</legend>
+              <div class="filas">
+                <label class={campo}>Nombre del negocio *<input name="negocio" autocomplete="organization" required maxlength="80" /></label>
+                <label class={campo}>A qué te dedicas<input name="sector" maxlength="60" placeholder="Ej.: Fontanería" /></label>
+              </div>
+              <label class={campo}>Frase de presentación<input name="lema" maxlength="140" placeholder="Qué ofreces y dónde, en una frase." /></label>
+              <label class={campo}>Quiénes sois<textarea name="sobre" rows="4" maxlength="900" placeholder="Unas líneas sobre ti o tu equipo."></textarea></label>
+            </fieldset>
+
+            <fieldset class="bloque" data-lista="servicios" data-max={MAX_SERVICIOS_WEB}>
+              <legend>Servicios <span class="ayuda">(hasta {MAX_SERVICIOS_WEB})</span></legend>
+              <div data-items></div>
+              <button type="button" class="anadir" data-anadir>+ Añadir servicio</button>
+            </fieldset>
+
+            <fieldset class="bloque">
+              <legend>Contacto <span class="ayuda">(al menos uno)</span></legend>
+              <div class="filas">
+                <label class={campo}>Teléfono<input name="telefono" type="tel" autocomplete="tel" maxlength="24" /></label>
+                <label class={campo}>WhatsApp<input name="whatsapp" type="tel" maxlength="24" placeholder="600 000 000" /></label>
+                <label class={campo}>Correo<input name="email" type="email" autocomplete="email" maxlength="254" /></label>
+                <label class={campo}>Dirección<input name="direccion" autocomplete="street-address" maxlength="160" /></label>
+              </div>
+              <label class={campo}>Horario<textarea name="horario" rows="2" maxlength="300" placeholder="Lunes a viernes: 9:00 – 14:00"></textarea></label>
+            </fieldset>
+
+            <fieldset class="bloque" data-lista="enlaces" data-max={MAX_ENLACES_WEB}>
+              <legend>Redes y enlaces <span class="ayuda">(hasta {MAX_ENLACES_WEB})</span></legend>
+              <div data-items></div>
+              <button type="button" class="anadir" data-anadir>+ Añadir enlace</button>
+            </fieldset>
+          </div>
+          <div data-hueco-vista></div>
+        </div>
+        <p class="aviso" role="alert" data-error="datos" hidden>Escribe el nombre del negocio y al menos un teléfono, un WhatsApp o un correo.</p>
+        <div class="paso-acciones">
+          <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
+          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: color y letra</button>
+        </div>
+      </section>
+
+      <!-- 3 · Personaliza -->
+      <section data-paso="personaliza" aria-labelledby="paso-personaliza" hidden>
+        <h2 id="paso-personaliza" class="paso-titulo">Dale tu toque</h2>
+        <p class="paso-entradilla">Elige el color de tu marca y la letra. La vista previa se actualiza sola.</p>
+        <div class="con-vista">
+          <div class="min-w-0">
+            <fieldset class="bloque">
+              <legend>Color</legend>
+              <div class="muestras">
+                {
+                  COLORES_WEB.map((c) => (
+                    <label class="muestra" title={c.nombre}>
+                      <input type="radio" name="color" value={c.valor} class="sr-only" />
+                      <span style={`--muestra:${c.valor}`} aria-hidden="true" />
+                      <span class="sr-only">{c.nombre}</span>
+                    </label>
+                  ))
+                }
+                <label class="muestra muestra-libre" title="Otro color">
+                  <input type="color" name="colorLibre" value={WEB_POR_DEFECTO.color} aria-label="Otro color" />
+                </label>
+              </div>
+            </fieldset>
+            <fieldset class="bloque">
+              <legend>Letra</legend>
+              <div class="letras">
+                {
+                  LETRAS_WEB.map((l) => (
+                    <label class="letra">
+                      <input type="radio" name="letra" value={l.id} class="sr-only" />
+                      <strong style={`font-family:${l.titulo}`}>{l.nombre}</strong>
+                      <span>{l.descripcion}</span>
+                    </label>
+                  ))
+                }
+              </div>
+            </fieldset>
+            <fieldset class="bloque">
+              <legend>Diseño</legend>
+              <div class="formas">
+                {
+                  PLANTILLAS_WEB.map((p) => (
+                    <label class="forma">
+                      <input type="radio" name="plantilla-rapida" value={p.id} class="sr-only" />
+                      <span>{p.nombre}</span>
+                    </label>
+                  ))
+                }
+              </div>
+            </fieldset>
+          </div>
+          <div data-hueco-vista></div>
+        </div>
+        <div class="paso-acciones">
+          <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
+          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: publica</button>
+        </div>
+      </section>
+
+      <!-- 4 · Publica -->
+      <section data-paso="publica" aria-labelledby="paso-publica" hidden>
+        <h2 id="paso-publica" class="paso-titulo">Publica tu web</h2>
+        <div class="tarjeta resumen">
+          <dl>
+            <div><dt>Negocio</dt><dd data-res="negocio"></dd></div>
+            <div><dt>Diseño</dt><dd data-res="plantilla"></dd></div>
+          </dl>
+          <ul class="incluye">
+            <li>Publicada al momento, sin marca de agua</li>
+            <li>Alojamiento incluido y certificado de seguridad (https)</li>
+            <li>Botones de llamar, WhatsApp y correo</li>
+            <li>Cámbiala cuando quieras desde aquí</li>
+          </ul>
+          <div data-solo-compra>
+            <p class="total"><span>Total</span><strong>{euros(precio)}</strong></p>
+          </div>
+          <p class="pagado" data-solo-pagado hidden>Pedido <strong data-res="ref"></strong> pagado. Tu web se publica sin marca de agua.</p>
+          <button type="button" class="boton boton-principal boton-destello w-full" data-comprar><span>Comprar y publicar · {euros(precio)}</span></button>
+          <p class="mt-3 text-sm text-faint" role="status" data-estado-compra>Se publica en cuanto termines el pago.</p>
+        </div>
+        <div class="paso-acciones">
+          <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
+        </div>
+      </section>
+    </form>
+
+    <!-- Vista previa: un único panel que el script mueve al paso activo. -->
+    <aside class="vista" aria-label="Vista previa de la web" data-vista data-tamano="movil" hidden>
+      <div class="web-tamanos formas" role="radiogroup" aria-label="Ver como">
+        <label class="forma"><input type="radio" name="tamano-vista" value="movil" class="sr-only" checked /><span>Móvil</span></label>
+        <label class="forma"><input type="radio" name="tamano-vista" value="escritorio" class="sr-only" /><span>Ordenador</span></label>
+      </div>
+      <p class="vista-estado" role="status" data-estado>Vista previa con marca de agua</p>
+      <div class="vista-lienzo" data-lienzo>
+        <div class="web-marco">
+          <div class="web-barra" data-barra>tuweb</div>
+          <div class="web-host" data-host></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <template id="t-servicios">
+    <div class="item servicio-web">
+      <div class="filas">
+        <label class={campo}>Servicio<input data-k="nombre" maxlength="60" /></label>
+        <label class={campo}>Precio<input data-k="precio" maxlength="20" placeholder="desde 20 €" /></label>
+      </div>
+      <label class={campo}>Descripción<input data-k="texto" maxlength="200" /></label>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-enlaces">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Nombre<input data-k="etiqueta" maxlength="30" placeholder="Instagram" /></label>
+        <label class={campo}>Dirección<input data-k="url" maxlength="300" placeholder="instagram.com/tunegocio" /></label>
+      </div>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+</Layout>
+
+<script>
+  import { iniciarEstudioWeb } from '../../features/servicios/estudioWeb';
+
+  iniciarEstudioWeb();
+</script>

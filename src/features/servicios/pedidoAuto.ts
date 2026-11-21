@@ -3,7 +3,7 @@
  * el token del pedido llega del navegador y aquí se vuelve a verificar contra D1.
  */
 import { resolverPedido } from '../solicitudes/pedido';
-import { SLUG_CV, SLUG_TARJETA, varianteDeSku } from './autoservicio';
+import { SLUG_CV, SLUG_TARJETA, SLUG_WEB, varianteDeSku } from './autoservicio';
 
 export interface PedidoAuto {
   ref: string;
@@ -24,4 +24,11 @@ export async function pedidoAuto(db: D1Database, token: unknown): Promise<Pedido
     cv: cv ? (varianteDeSku(SLUG_CV, cv.sku) ?? 'disenada') : null,
     tarjeta: Boolean(tarjeta),
   };
+}
+
+/** Pedido que lleva la web de una página (estudio /servicios/web). */
+export async function pedidoWeb(db: D1Database, token: unknown): Promise<{ ref: string; publicId: string } | null> {
+  if (typeof token !== 'string' || token.length > 120) return null;
+  const w = await resolverPedido(db, token, SLUG_WEB);
+  return w ? { ref: w.ref, publicId: w.publicId } : null;
 }
