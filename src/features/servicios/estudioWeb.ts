@@ -385,7 +385,11 @@ export function iniciarEstudioWeb() {
     st.dataset.tono = '';
     $('[data-dominio-pedir]')!.hidden = !!v && !cambiando;
     $('[data-dominio-pasos]')!.hidden = !v || v.estado === 'activo' || cambiando;
-    if (!v) return void st.replaceChildren();
+    if (!v) {
+      void cargarIdeas();
+      return void st.replaceChildren();
+    }
+    if (!cambiando) $('[data-dominio-ideas]')!.hidden = true;
     $('[data-dominio-nombre]')!.textContent = v.dominio;
     $('[data-dominio-ns]')!.replaceChildren(
       ...v.servidores.map((ns) => {
@@ -421,6 +425,34 @@ export function iniciarEstudioWeb() {
       if (actual === 'publica' && !document.hidden) void dominio();
       else dominioDe = null; // se vuelve a preguntar al volver a este paso
     }, 60_000);
+  }
+  // Para quien aún no tiene dominio: nombres sacados de su negocio que el DNS da por libres.
+  let ideasDe: string | null = null;
+  async function cargarIdeas() {
+    const token = pedido.token;
+    if (!token || ideasDe === token) return;
+    ideasDe = token;
+    let ideas: string[] = [];
+    try {
+      const r = await fetch('/api/web/dominio', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, ideas: true }) });
+      const j = (await r.json().catch(() => ({}))) as { ideas?: unknown };
+      if (Array.isArray(j.ideas)) ideas = j.ideas.filter((x): x is string => typeof x === 'string').slice(0, 5);
+    } catch {
+      ideasDe = null;
+    }
+    if (!pedido.vigente(token)) return;
+    const caja = $('[data-dominio-ideas]')!;
+    caja.hidden = !ideas.length;
+    $('[data-dominio-ideas-lista]')!.replaceChildren(
+      ...ideas.map((d) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'idea-dominio';
+        b.dataset.idea = d;
+        b.textContent = d;
+        return b;
+      }),
+    );
   }
   function conectarDominio() {
     const c = campo('dominio');
@@ -619,6 +651,10 @@ export function iniciarEstudioWeb() {
       return programar(true);
     }
     if (b.hasAttribute('data-conectar')) return conectarDominio();
+    if (b.dataset.idea) {
+      campo('dominio').value = b.dataset.idea;
+      return campo('dominio').focus();
+    }
     if (b.hasAttribute('data-dominio-cambiar')) {
       cambiando = true;
       $('[data-dominio-pedir]')!.hidden = false;
