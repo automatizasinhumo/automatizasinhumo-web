@@ -8,14 +8,14 @@
  * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, PASOS_CV, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
 type Fila = Record<string, string | number>;
 type FormCv = Record<string, string> & Record<Lista, Fila[]>;
-type Decoracion = { forma: string; color: string; intensidad: number; sombreado: boolean };
+type Decoracion = { forma: string; color: string; color2: string; intensidad: number; posicion: string; sombreado: string; fondo: string };
 interface Motor {
   crearDatos(f: FormCv, plantilla: string): unknown;
   formEjemplo: FormCv;
@@ -56,11 +56,15 @@ interface Pagado {
 }
 interface Estado {
   diseno: string;
-  base: string;
+  /** Con el diseño personalizado (color, formas, sombreado y fondo propios): modalidad de pago más alta. */
+  personalizar: boolean;
   color: string;
+  color2: string;
   forma: string;
+  posicion: string;
   intensidad: number;
-  sombreado: boolean;
+  sombreado: string;
+  fondo: string;
   letra: string;
   tamano: string;
   espaciado: string;
@@ -90,6 +94,8 @@ const FORMATO = { letra: ESTILOS_LETRA, tamano: TAMANOS, espaciado: ESPACIADOS }
 type ClaveFormato = keyof typeof FORMATO;
 const CLAVES_FORMATO = Object.keys(FORMATO) as ClaveFormato[];
 const valido = (k: ClaveFormato, v: unknown) => FORMATO[k].some((o) => o.id === v);
+const HEX = /^#[0-9a-f]{6}$/i;
+const entre = (tabla: Record<string, string>, v: unknown, defecto: string) => (typeof v === 'string' && v in tabla ? v : defecto);
 
 function leer(): Partial<Estado> {
   try {
@@ -122,14 +128,21 @@ export function iniciarEstudioCv() {
   const estadoVista = $('[data-estado]')!;
   protegerVista(vista);
 
-  const g = leer();
+  // Lo guardado por versiones anteriores: «personalizable» era un diseño aparte, con su base en `base`,
+  // y el sombreado era un sí/no.
+  const g = leer() as Partial<Omit<Estado, 'sombreado'>> & { base?: string; sombreado?: unknown };
+  const antiguo = g.diseno === 'personalizable';
+  const disenoGuardado = antiguo ? g.base : g.diseno;
   const estado: Estado = {
-    diseno: g.diseno === 'personalizable' || idsDiseno.has(g.diseno ?? '') ? g.diseno! : '',
-    base: idsDiseno.has(g.base ?? '') ? g.base! : cfg.porDefecto,
-    color: /^#[0-9a-f]{6}$/i.test(g.color ?? '') ? g.color! : '#176b5a',
-    forma: typeof g.forma === 'string' ? g.forma : 'circulos',
-    intensidad: Number(g.intensidad) || 0.7,
-    sombreado: g.sombreado ?? true,
+    diseno: idsDiseno.has(disenoGuardado ?? '') ? disenoGuardado! : cfg.porDefecto,
+    personalizar: antiguo || g.personalizar === true,
+    color: HEX.test(g.color ?? '') ? g.color! : '#176b5a',
+    color2: HEX.test(g.color2 ?? '') ? g.color2! : '#e0a526',
+    forma: entre(FORMAS, g.forma, 'burbujas'),
+    posicion: entre(POSICIONES, g.posicion, 'ambas'),
+    intensidad: Math.min(1, Math.max(0.1, Number(g.intensidad) || 0.7)),
+    sombreado: g.sombreado === true ? 'cabecera' : g.sombreado === false ? 'ninguno' : entre(SOMBREADOS, g.sombreado, 'cabecera'),
+    fondo: entre(FONDOS, g.fondo, 'blanco'),
     letra: valido('letra', g.letra) ? g.letra! : FORMATO_INICIAL.letra,
     tamano: valido('tamano', g.tamano) ? g.tamano! : FORMATO_INICIAL.tamano,
     espaciado: valido('espaciado', g.espaciado) ? g.espaciado! : FORMATO_INICIAL.espaciado,
@@ -137,8 +150,7 @@ export function iniciarEstudioCv() {
     form: g.form && typeof g.form === 'object' ? g.form : null,
     extras: Array.isArray(g.extras) ? cfg.extras.map((x) => x.id).filter((id) => g.extras!.includes(id)) : [],
   };
-  if (!estado.diseno) estado.alcanzado = 0;
-  let actual = 'plantilla';
+  let actual = 'diseno';
 
   // Motor: se pide una vez y se reutiliza.
   let motorP: Promise<Motor> | null = null;
@@ -151,8 +163,8 @@ export function iniciarEstudioCv() {
       throw e;
     }));
 
-  const modalidad = (): ModalidadCv => (estado.diseno === 'personalizable' ? 'personalizable' : 'disenada');
-  const plantilla = () => (modalidad() === 'personalizable' ? estado.base : estado.diseno || cfg.porDefecto);
+  const modalidad = (): ModalidadCv => (estado.personalizar ? 'personalizable' : 'disenada');
+  const plantilla = () => estado.diseno;
   const nombreDiseno = (id: string) => cfg.disenos.find((d) => d.id === id)?.nombre ?? id;
 
   // ---------- Formulario ----------
@@ -193,34 +205,44 @@ export function iniciarEstudioCv() {
   const vacio = (): FormCv => ({ ...Object.fromEntries(CAMPOS.map((k) => [k, ''])), experiencia: [], formacion: [], habilidades: [], idiomas: [] }) as unknown as FormCv;
 
   // ---------- Personalización ----------
+  const MUESTRAS: [string, string, 'color' | 'color2'][] = [
+    ['color', 'colorLibre', 'color'],
+    ['color2', 'colorLibre2', 'color2'],
+  ];
   function pintarControles() {
     for (const r of $$<HTMLInputElement>('input[name="diseno"]')) r.checked = r.value === estado.diseno;
-    const base = campo<HTMLSelectElement>('base');
-    base.value = estado.base;
-    let fijo = false;
-    for (const r of $$<HTMLInputElement>('input[name="color"]')) {
-      r.checked = r.value.toLowerCase() === estado.color.toLowerCase();
-      fijo ||= r.checked;
+    for (const [nombre, libre, clave] of MUESTRAS) {
+      let fijo = false;
+      for (const r of $$<HTMLInputElement>(`input[name="${nombre}"]`)) {
+        r.checked = r.value.toLowerCase() === estado[clave].toLowerCase();
+        fijo ||= r.checked;
+      }
+      const l = campo<HTMLInputElement>(libre);
+      l.value = estado[clave];
+      l.closest('.muestra-libre')?.toggleAttribute('data-activo', !fijo);
     }
-    campo<HTMLInputElement>('colorLibre').value = estado.color;
-    $('.muestra-libre')?.toggleAttribute('data-activo', !fijo);
-    for (const r of $$<HTMLInputElement>('input[name="forma"]')) r.checked = r.value === estado.forma;
+    for (const k of ['forma', 'posicion', 'sombreado', 'fondo'] as const) for (const r of $$<HTMLInputElement>(`input[name="${k}"]`)) r.checked = r.value === estado[k];
     campo<HTMLInputElement>('intensidad').value = String(estado.intensidad);
-    campo<HTMLInputElement>('sombreado').checked = estado.sombreado;
+    campo<HTMLInputElement>('personalizar').checked = estado.personalizar;
     for (const k of CLAVES_FORMATO) for (const r of $$<HTMLInputElement>(`input[name="${k}"]`)) r.checked = r.value === estado[k];
-    const m = modalidad();
-    for (const el of $$('[data-solo]')) el.hidden = el.dataset.solo !== m;
+    const panel = $('[data-solo-personal]');
+    if (panel) panel.hidden = !estado.personalizar;
     const dif = $('[data-diferencia]');
     if (dif) dif.textContent = euros(cfg.paquetes.personalizable.precio - cfg.paquetes.disenada.precio);
   }
 
   // ---------- Vista previa ----------
   function crearPdf(E: Motor, marcaAgua: string, personal: boolean) {
+    // Al elegir el diseño aún no hay datos: se enseña el ejemplo, para ver cómo queda de verdad.
+    const f = recoger();
+    const conEjemplo = actual === 'diseno' && !f.nombre;
     return E.crearPdf({
-      datos: E.crearDatos(recoger(), plantilla()),
+      datos: E.crearDatos(conEjemplo ? E.formEjemplo : f, plantilla()),
       plantilla: plantilla(),
       color: personal ? estado.color : undefined,
-      decoracion: personal ? { forma: estado.forma, color: estado.color, intensidad: estado.intensidad, sombreado: estado.sombreado } : null,
+      decoracion: personal
+        ? { forma: estado.forma, color: estado.color, color2: estado.color2, intensidad: estado.intensidad, posicion: estado.posicion, sombreado: estado.sombreado, fondo: estado.fondo }
+        : null,
       marcaAgua,
       letra: estado.letra,
       tamano: estado.tamano,
@@ -231,7 +253,7 @@ export function iniciarEstudioCv() {
   let turno = 0;
   function programar(inmediato = false) {
     window.clearTimeout(temporizador);
-    if (actual === 'plantilla' || actual === 'descarga') return;
+    if (actual === 'descarga') return;
     temporizador = window.setTimeout(pintar, inmediato ? 0 : 400);
   }
   async function pintar() {
@@ -261,7 +283,6 @@ export function iniciarEstudioCv() {
   // ---------- Pasos ----------
   function validar(paso: string) {
     let ok = true;
-    if (paso === 'plantilla') ok = !!estado.diseno;
     if (paso === 'datos') {
       const nombre = campo<HTMLInputElement>('nombre');
       ok = !!nombre.value.trim();
@@ -332,7 +353,7 @@ export function iniciarEstudioCv() {
 
   // ---------- Compra y pedido pagado ----------
   /** El token sale de la barra de direcciones (y del historial) y, si ya hay CV, va directo a descargar. */
-  const destinoPedido = () => (estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
+  const destinoPedido = () => (estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
   const pedido = pedidoEstudio<Pagado>(CLAVE_PEDIDO, '/api/cv/pedido', () => {
     if (actual === 'descarga') resumir();
   });
@@ -385,7 +406,7 @@ export function iniciarEstudioCv() {
     if (!estado.extras.includes(id)) estado.extras.push(id);
     guardar(estado);
     marcarExtras();
-    const destino = estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
+    const destino = estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
     history.replaceState(null, '', `${location.pathname}${location.search}${destino}`);
     resumir();
     return true;
@@ -488,7 +509,7 @@ export function iniciarEstudioCv() {
       vista.hidden = false;
       programar(true);
     } else vista.hidden = true;
-    if (paso === 'personaliza') pintarControles();
+    if (paso === 'diseno') pintarControles();
     if (paso === 'revisa') repasar();
     if (paso === 'descarga') resumir();
     if (enfocar) {
@@ -573,13 +594,6 @@ export function iniciarEstudioCv() {
       });
       return;
     }
-    if (b.hasAttribute('data-pasar-personalizable')) {
-      estado.base = idsDiseno.has(estado.diseno) ? estado.diseno : estado.base;
-      estado.diseno = 'personalizable';
-      persistir();
-      pintarControles();
-      return programar(true);
-    }
     if (pedido.cargando && (b.hasAttribute('data-comprar') || b.hasAttribute('data-publicar'))) return;
     if (b.hasAttribute('data-comprar')) return void (pedido.pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
     if (b.hasAttribute('data-publicar')) return void publicar(b as HTMLButtonElement);
@@ -608,27 +622,23 @@ export function iniciarEstudioCv() {
       for (const n of $$('[data-nota-filtro]')) n.hidden = n.dataset.notaFiltro !== c.value;
       return;
     }
-    if (c.name === 'diseno') {
-      if (c.value === 'personalizable' && idsDiseno.has(estado.diseno)) estado.base = estado.diseno;
-      estado.diseno = c.value;
-      $('[data-error="plantilla"]')!.hidden = true;
-      void motor().catch(() => {}); // precarga mientras el cliente lee el siguiente paso
-    } else if (c.name === 'base') estado.base = c.value;
-    else if (c.name === 'color') estado.color = c.value;
-    else if (c.name === 'forma') estado.forma = c.value;
-    else if (c.name === 'sombreado') estado.sombreado = c.checked;
+    if (c.name === 'diseno') estado.diseno = c.value;
+    else if (c.name === 'personalizar') estado.personalizar = c.checked;
+    else if (c.name === 'color' || c.name === 'color2') estado[c.name] = c.value;
+    else if (c.name === 'forma' || c.name === 'posicion' || c.name === 'sombreado' || c.name === 'fondo') estado[c.name] = c.value;
     else if ((CLAVES_FORMATO as string[]).includes(c.name) && valido(c.name as ClaveFormato, c.value)) estado[c.name as ClaveFormato] = c.value;
     persistir();
-    if (actual === 'personaliza') pintarControles();
+    if (actual === 'diseno') pintarControles();
     programar();
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.type === 'file' || c.closest('[data-tarjeta-form]') || c.dataset.extra !== undefined) return;
     if (c.name === 'colorLibre') estado.color = c.value;
+    else if (c.name === 'colorLibre2') estado.color2 = c.value;
     else if (c.name === 'intensidad') estado.intensidad = Number(c.value);
     else if (c.name === 'nombre' && c.value.trim()) c.removeAttribute('aria-invalid');
-    if (c.name === 'colorLibre') pintarControles();
+    if (c.name === 'colorLibre' || c.name === 'colorLibre2') pintarControles();
     persistir();
     programar();
   });
@@ -641,6 +651,7 @@ export function iniciarEstudioCv() {
   // ---------- Arranque ----------
   volcar(estado.form ?? vacio());
   pintarControles();
+  void motor().catch(() => {}); // la vista previa del primer paso ya la necesita
   marcarExtras();
   tomarExtra();
   pedido.arrancar(destinoPedido());

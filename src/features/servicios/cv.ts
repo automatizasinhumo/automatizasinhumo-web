@@ -38,7 +38,7 @@ export const PAQUETES_CV: Record<ModalidadCv, PaqueteCv> = {
     id: 'personalizable',
     ...variante('personalizable'),
     resumen: 'Partes de cualquier diseño y le cambias el color, las formas y el sombreado.',
-    incluye: ['Todo lo del diseño listo', 'Color a tu elección', 'Círculos, rombos, ondas, puntos y más', 'Sombreado de fondo'],
+    incluye: ['Todo lo del diseño listo', 'Color principal y de acento a tu elección', '16 formas, arriba, abajo o en ambos lados', 'Sombreado y fondo a tu gusto'],
   },
 };
 
@@ -119,6 +119,9 @@ export { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, TAMANOS } from '../../../cv
 export const MOTOR_CV = '/cv/estudio/motor/estudio.js';
 export const miniaturaCv = (id: string) => `/cv/estudio/miniaturas/${id}.jpg`;
 
+/** Formas, posición, sombreado y fondo de la personalizable: el mismo catálogo que dibuja el motor. */
+export { DECORACION_VACIA, FONDOS, FORMAS, POSICIONES, SOMBREADOS } from '../../../cv-estudio/src/catalogo-decoracion';
+
 /** Colores sugeridos para la personalizable (el selector admite cualquiera). */
 export const COLORES_CV: readonly { valor: string; nombre: string }[] = [
   { valor: '#176b5a', nombre: 'Verde pino' },
@@ -130,9 +133,8 @@ export const COLORES_CV: readonly { valor: string; nombre: string }[] = [
 ];
 
 export const PASOS_CV = [
-  { id: 'plantilla', titulo: 'Diseño' },
+  { id: 'diseno', titulo: 'Diseño y estilo' },
   { id: 'datos', titulo: 'Tus datos' },
-  { id: 'personaliza', titulo: 'Personaliza' },
   { id: 'revisa', titulo: 'Revisa' },
   { id: 'descarga', titulo: 'Descarga' },
 ] as const;
