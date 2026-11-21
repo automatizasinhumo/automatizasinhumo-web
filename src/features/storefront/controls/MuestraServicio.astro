@@ -38,7 +38,7 @@ const sombraWeb =
 const iniciales = muestra.tipo === 'tarjeta' ? muestra.nombre.split(/\s+/).slice(0, 2).map((p) => p[0]).join('') : '';
 ---
 
-<div class:list={['muestra', `muestra-${muestra.tipo}`, cls]} aria-hidden="true">
+<div class:list={['muestra', `muestra-${muestra.tipo}`, cls]} aria-hidden="true" inert>
   {muestra.tipo === 'abanico' && (
     <div class="abanico">
       {muestra.imagenes.map((src, i) => (
