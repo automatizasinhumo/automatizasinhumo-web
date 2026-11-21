@@ -175,7 +175,8 @@ export const GUIA_CV: Record<string, readonly PasoGuiaCv[]> = {
   ],
   descarga: [
     { guia: 'comprar', titulo: 'Compra y descarga', texto: 'Pagas una vez y descargas el PDF sin marca de agua. Puedes volver a descargarlo con cambios.' },
-    { guia: 'extras', titulo: 'Tarjeta digital con QR', texto: 'Si la añades, después del pago la configuras aquí mismo: eliges un modelo y la publicamos con tus datos.' },
+    { guia: 'extras', titulo: 'Tarjeta digital con QR', texto: 'Márcala y aparece su configurador: eliges modelo, color y datos, y la ves al momento. Se publica al pagar.' },
+    { guia: 'tarjeta', titulo: 'Diseña tu tarjeta', texto: 'Prueba los seis modelos con tu color y tus datos. Con el QR, quien lo escanee guarda tu contacto en un toque.' },
   ],
 };
 

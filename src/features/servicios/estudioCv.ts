@@ -9,6 +9,7 @@
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
 import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { guiarEstudio, guiaPendiente, recordarGuia } from './guiaCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
@@ -79,6 +80,8 @@ interface Estado {
 const CLAVE = 'servicios:cv';
 /** Token del pedido pagado: solo en esta pestaña (sessionStorage), nunca en la URL visible. */
 const CLAVE_PEDIDO = 'servicios:cv:pedido';
+/** Borrador de la tarjeta digital (modelo, color, textos): sobrevive al pago y a recargar. */
+const CLAVE_TARJETA = 'servicios:cv:tarjeta';
 const ERROR_TARJETA: Record<string, string> = {
   nombre: 'Falta el nombre.',
   email: 'Revisa el correo: no parece válido.',
@@ -445,19 +448,82 @@ export function iniciarEstudioCv() {
 
   // ---------- Tarjeta digital ----------
   const campoT = (k: string) => $<HTMLInputElement>(`[data-t="${k}"]`)!;
+  const caja = $('[data-tarjeta-form]')!;
+  const vistaT = $('[data-tarjeta-vista]')!;
+  const CAMPOS_T = ['nombre', 'cargo', 'email', 'telefono', 'web', 'ubicacion', 'resumen', 'linkedin'] as const;
+  const modeloT = () => $<HTMLInputElement>('input[name="tj-modelo"]:checked')?.value ?? MODELO_TARJETA_POR_DEFECTO;
+  const leerBorrador = (): Record<string, unknown> | null => {
+    try {
+      const v = JSON.parse(localStorage.getItem(CLAVE_TARJETA) ?? 'null');
+      return v && typeof v === 'object' ? v : null;
+    } catch {
+      return null;
+    }
+  };
+  const guardarBorrador = () => {
+    const d: Record<string, unknown> = { modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
+    for (const k of CAMPOS_T) d[k] = campoT(k).value;
+    try {
+      localStorage.setItem(CLAVE_TARJETA, JSON.stringify(d));
+    } catch {
+      /* sin almacenamiento: el borrador solo vive en esta visita */
+    }
+  };
+  /** Vista previa en vivo: los mismos nodos de la tarjeta pública, con tus datos y tu color. */
+  function pintarTarjeta() {
+    const color = HEX.test(campoT('color').value) ? campoT('color').value : '#176b5a';
+    const { sobre, acento2 } = coloresTarjeta(color);
+    caja.style.setProperty('--acento', color);
+    caja.style.setProperty('--acento2', acento2);
+    caja.style.setProperty('--sobre', sobre);
+    const tj = $('.tj', vistaT)!;
+    tj.dataset.modelo = modeloT();
+    const v = (k: string) => campoT(k).value.trim();
+    const nombre = v('nombre') || 'Tu nombre';
+    const web = v('web');
+    let host = web;
+    try {
+      host = new URL(/^https?:\/\//i.test(web) ? web : `https://${web}`).hostname.replace(/^www\./, '');
+    } catch {
+      /* se enseña tal cual */
+    }
+    const texto: Record<string, string> = {
+      nombre,
+      iniciales: nombre.split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase() ?? '').join(''),
+      cargo: v('cargo'),
+      ubicacion: v('ubicacion'),
+      resumen: v('resumen'),
+      telefono: v('telefono'),
+      email: v('email'),
+      web: host,
+    };
+    for (const [k, t] of Object.entries(texto)) for (const n of $$(`[data-campo="${k}"]`, vistaT)) n.textContent = t;
+    const hay: Record<string, boolean> = { cargo: !!texto.cargo, ubicacion: !!texto.ubicacion, resumen: !!texto.resumen, telefono: !!texto.telefono, email: !!texto.email, web: !!web, linkedin: !!v('linkedin'), qr: campoT('qr').checked };
+    for (const [k, ok] of Object.entries(hay)) for (const n of $$(`[data-bloque="${k}"]`, vistaT)) n.hidden = !ok;
+    const cuenta = $('[data-tj-cuenta]');
+    if (cuenta) cuenta.textContent = `${campoT('resumen').value.length}/${campoT('resumen').maxLength}`;
+  }
   // Pedido cuyos datos hay en el formulario: las ediciones a medias se conservan solo mientras
   // siga activo el mismo pedido; si llega otro (#pedido=B en la misma pestaña) se vuelca el suyo.
   let tarjetaDe = '';
+  let tarjetaTocada = false;
   function rellenarTarjeta() {
-    const caja = $('[data-tarjeta-form]')!;
-    caja.hidden = !pedido.pagado?.tarjeta;
-    if (!pedido.pagado?.tarjeta || tarjetaDe === pedido.pagado.ref) return;
-    tarjetaDe = pedido.pagado.ref;
+    const pagada = !!pedido.pagado?.tarjeta;
+    caja.hidden = !(pagada || estado.extras.includes('tarjeta'));
+    const pub = $<HTMLButtonElement>('[data-publicar]')!;
+    pub.disabled = !pagada;
+    $('[data-tarjeta-nota]')!.hidden = pagada;
+    if (caja.hidden) return;
+    const ref = pedido.pagado?.ref ?? 'borrador';
+    // Mientras no toques la tarjeta, sigue a los datos del CV (puedes volver atrás y cambiarlos).
+    if (tarjetaDe === ref && tarjetaTocada) return pintarTarjeta();
+    tarjetaDe = ref;
     const st = $('[data-estado-tarjeta]')!;
     st.dataset.tono = '';
     st.replaceChildren();
     const f = recoger();
-    const g = pedido.pagado.tarjeta.datos;
+    const b = leerBorrador();
+    const g = (pagada ? pedido.pagado!.tarjeta!.datos : null) ?? b;
     const v = (k: string, alt: string) => (g && typeof g[k] === 'string' ? (g[k] as string) : alt);
     campoT('nombre').value = v('nombre', f.nombre);
     campoT('cargo').value = v('cargo', f.titular);
@@ -467,9 +533,25 @@ export function iniciarEstudioCv() {
     campoT('ubicacion').value = v('ubicacion', f.ubicacion);
     campoT('resumen').value = v('resumen', f.resumen.slice(0, 280));
     campoT('color').value = v('color', estado.color);
-    campoT('linkedin').value = g?.enlaces?.find((e) => /linkedin\./i.test(e.url))?.url ?? '';
-    if (pedido.pagado.tarjeta.slug) avisarTarjeta(`/c/${pedido.pagado.tarjeta.slug}`, 'Ya está publicada en');
+    campoT('linkedin').value = (pagada && pedido.pagado!.tarjeta!.datos ? (g as DatosTarjeta).enlaces?.find((e) => /linkedin\./i.test(e.url))?.url : undefined) ?? v('linkedin', '');
+    campoT('qr').checked = g?.qr !== false;
+    const m = g?.modelo;
+    const modelo = esModeloTarjeta(m) ? m : MODELO_TARJETA_POR_DEFECTO;
+    for (const r of $$<HTMLInputElement>('input[name="tj-modelo"]')) r.checked = r.value === modelo;
+    tarjetaTocada = !!b || (pagada && !!pedido.pagado!.tarjeta!.datos);
+    pintarTarjeta();
+    if (pedido.pagado?.tarjeta?.slug) avisarTarjeta(`/c/${pedido.pagado.tarjeta.slug}`, 'Ya está publicada en');
   }
+  caja.addEventListener('input', () => {
+    tarjetaTocada = true;
+    guardarBorrador();
+    pintarTarjeta();
+  });
+  caja.addEventListener('change', () => {
+    tarjetaTocada = true;
+    guardarBorrador();
+    pintarTarjeta();
+  });
   function avisarTarjeta(url: string, texto: string) {
     const st = $('[data-estado-tarjeta]')!;
     const enlace = (href: string, t: string) => {
@@ -496,6 +578,8 @@ export function iniciarEstudioCv() {
       ubicacion: val('ubicacion'),
       resumen: val('resumen'),
       color: val('color'),
+      modelo: modeloT(),
+      qr: campoT('qr').checked,
       enlaces: linkedin ? [{ etiqueta: 'LinkedIn', url: linkedin }] : [],
     };
     // Solo con el pedido del token vigente ya cargado: nunca el token de B con lo escrito para A.
