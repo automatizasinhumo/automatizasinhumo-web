@@ -92,7 +92,7 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
 
   <p class="vacio" data-vacio hidden>No hay servicios en esta categoría todavía.</p>
 
-  {pronto.length > 0 && (
+  {(pronto.length > 0 || proximas.length > 0) && (
     <Seccion id="despues" antetitulo="Próximamente" titulo="Lo que viene después" entradilla="Entra aquí con el mismo método: eliges, rellenas, lo ves y lo tienes." separada>
       <ul class="proximas" aria-label="Servicios en preparación">
         {pronto.map((s) => (
@@ -193,7 +193,8 @@ const filtrables = familias.filter((f) => f.servicios.some((s) => s.href));
   }
   .filtro:hover span { color: var(--color-ink); }
   .filtro input:checked + span {
-    background: linear-gradient(135deg in oklch, var(--familia), var(--familia-2));
+    /* Texto blanco: el degradado solo oscurece (de --familia a una mezcla con tinta) para llegar a 4,5:1. */
+    background: linear-gradient(135deg in oklch, var(--familia), color-mix(in oklch, var(--familia) 70%, #000));
     color: #fff;
   }
   .filtro input:focus-visible + span { outline: 3px solid var(--familia); outline-offset: 2px; }
