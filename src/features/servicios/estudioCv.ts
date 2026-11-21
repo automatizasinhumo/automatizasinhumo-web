@@ -8,7 +8,8 @@
  * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { guiarEstudio, guiaPendiente, recordarGuia } from './guiaCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
@@ -47,6 +48,7 @@ interface Config {
   disenos: DisenoCv[];
   paquetes: Record<ModalidadCv, PaqueteCv>;
   extras: ExtraCv[];
+  guia: Record<string, { guia: string; titulo: string; texto: string }[]>;
 }
 type DatosTarjeta = Record<string, unknown> & { enlaces?: { etiqueta: string; url: string }[] };
 interface Pagado {
@@ -168,16 +170,40 @@ export function iniciarEstudioCv() {
   const nombreDiseno = (id: string) => cfg.disenos.find((d) => d.id === id)?.nombre ?? id;
 
   // ---------- Formulario ----------
+  /** Contador «n/máx» de un campo y tope de líneas: nada de lo escrito rompe la maqueta. */
+  function acotar(c: HTMLInputElement | HTMLTextAreaElement) {
+    const lineas = Number(c.dataset.lineas) || 0;
+    if (lineas) {
+      const l = c.value.split('\n');
+      if (l.length > lineas) c.value = l.slice(0, lineas).join('\n');
+    }
+    if (c.hasAttribute('data-cuenta')) {
+      const n = c.parentElement?.querySelector('.cuenta');
+      if (n) n.textContent = `${c.value.length}/${c.maxLength}`;
+    }
+  }
+  /** Sin hueco para otra fila: se oculta «Añadir» y se explica por qué. */
+  function limitar(lista: Lista) {
+    const caja = $<HTMLElement>(`[data-lista="${lista}"]`);
+    if (!caja) return;
+    const lleno = $$('[data-items] > .item', caja).length >= LIMITES_CV.items[lista];
+    const b = $<HTMLElement>('[data-anadir]', caja);
+    const aviso = $<HTMLElement>('[data-limite]', caja);
+    if (b) b.hidden = lleno;
+    if (aviso) aviso.hidden = !lleno;
+  }
   function anadir(lista: Lista, valores: Fila = {}) {
     const t = document.getElementById(`t-${lista}`) as HTMLTemplateElement | null;
     const caja = $(`[data-lista="${lista}"] [data-items]`);
-    if (!t || !caja) return null;
+    if (!t || !caja || $$('.item', caja).length >= LIMITES_CV.items[lista]) return null;
     const item = t.content.firstElementChild!.cloneNode(true) as HTMLElement;
     for (const c of $$<HTMLInputElement>('[data-k]', item)) {
       const v = valores[c.dataset.k!];
       if (v !== undefined && v !== null) c.value = String(v);
     }
     caja.appendChild(item);
+    for (const c of $$<HTMLTextAreaElement>('textarea', item)) acotar(c);
+    limitar(lista);
     return item;
   }
   function volcar(f: FormCv) {
@@ -188,6 +214,11 @@ export function iniciarEstudioCv() {
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)?.replaceChildren();
       for (const fila of Array.isArray(f[l]) ? f[l] : []) anadir(l, fila);
+      limitar(l);
+    }
+    for (const c of $$<HTMLTextAreaElement>('textarea[data-cuenta]')) {
+      c.value = c.value.slice(0, c.maxLength);
+      acotar(c);
     }
   }
   function recoger(): FormCv {
@@ -577,7 +608,9 @@ export function iniciarEstudioCv() {
       return persistir();
     }
     if (b.hasAttribute('data-quitar')) {
+      const lista = b.closest<HTMLElement>('[data-lista]')?.dataset.lista as Lista | undefined;
       b.closest('.item')?.remove();
+      if (lista) limitar(lista);
       persistir();
       return programar();
     }
@@ -598,6 +631,23 @@ export function iniciarEstudioCv() {
     if (b.hasAttribute('data-comprar')) return void (pedido.pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
     if (b.hasAttribute('data-publicar')) return void publicar(b as HTMLButtonElement);
   });
+
+  // ---------- Guía ----------
+  const aviso = $('[data-guia-aviso]');
+  const abrirGuia = () => {
+    if (aviso) aviso.hidden = true;
+    recordarGuia('visto');
+    void guiarEstudio(cfg.guia[actual] ?? [], raiz);
+  };
+  raiz.addEventListener('click', (ev) => {
+    const b = (ev.target as Element).closest<HTMLElement>('button');
+    if (b?.hasAttribute('data-guia-abrir')) abrirGuia();
+    else if (b?.hasAttribute('data-guia-no')) {
+      recordarGuia('no');
+      if (aviso) aviso.hidden = true;
+    }
+  });
+  if (aviso && guiaPendiente()) aviso.hidden = false;
 
   form.addEventListener('submit', (ev) => ev.preventDefault());
   form.addEventListener('change', (ev) => {
@@ -634,6 +684,7 @@ export function iniciarEstudioCv() {
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.type === 'file' || c.closest('[data-tarjeta-form]') || c.dataset.extra !== undefined) return;
+    if (c.tagName === 'TEXTAREA') acotar(c);
     if (c.name === 'colorLibre') estado.color = c.value;
     else if (c.name === 'colorLibre2') estado.color2 = c.value;
     else if (c.name === 'intensidad') estado.intensidad = Number(c.value);

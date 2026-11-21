@@ -132,6 +132,53 @@ export const COLORES_CV: readonly { valor: string; nombre: string }[] = [
   { valor: '#2f3b45', nombre: 'Pizarra' },
 ];
 
+/**
+ * Límites del contenido: lo que cabe sin que el diseño se rompa (dos páginas como mucho) y lo que un
+ * seleccionador lee de verdad. La página los pone en los campos y el estudio los aplica al pegar o importar.
+ */
+export const LIMITES_CV = {
+  items: { experiencia: 6, formacion: 5, habilidades: 12, idiomas: 5 },
+  /** Caracteres. */
+  resumen: 600,
+  descripcion: 700,
+  /** Líneas (logros) por experiencia. */
+  lineasDescripcion: 6,
+} as const;
+
+/**
+ * Guía con ventanitas (Driver.js, la misma del resto de la web): por paso, qué es cada zona y qué
+ * hacer. `guia` es el atributo `data-guia` del bloque al que señala; si no se ve, se salta.
+ */
+export interface PasoGuiaCv {
+  guia: string;
+  titulo: string;
+  texto: string;
+}
+export const GUIA_CV: Record<string, readonly PasoGuiaCv[]> = {
+  diseno: [
+    { guia: 'vista', titulo: 'Así queda tu CV', texto: 'Aquí ves el diseño con un ejemplo. Se actualiza solo cada vez que cambias algo. La marca de agua desaparece en el PDF que compras.' },
+    { guia: 'filtros', titulo: 'Filtra los diseños', texto: 'Sobrios, con color o de una columna (la que mejor leen los filtros automáticos de las empresas).' },
+    { guia: 'galeria', titulo: 'Elige uno', texto: 'Toca el que te guste y míralo a la derecha. Desplázate: hay 25. Puedes cambiarlo cuando quieras sin perder lo que escribas.' },
+    { guia: 'letra', titulo: 'Letra, tamaño y espaciado', texto: 'Pruébalos: la vista previa cambia al momento. Con mucho texto, un tamaño menor y espaciado compacto te ahorran una página.' },
+    { guia: 'personalizar', titulo: 'Ponle tu toque', texto: 'Activa esta casilla para cambiar los colores, añadir formas, sombreado y fondo. Si no lo activas, el diseño va tal cual.' },
+    { guia: 'siguiente', titulo: 'Y ahora, tus datos', texto: 'Cuando te guste, sigue: escribirás tus datos una sola vez y el diseño se queda como lo has dejado.' },
+  ],
+  datos: [
+    { guia: 'importar', titulo: 'No empieces de cero', texto: 'Sube tu CV actual (PDF, Word o la exportación de LinkedIn) y rellenamos los campos por ti; o prueba con un ejemplo. Se lee en tu navegador, no se envía a ningún sitio.' },
+    { guia: 'sobre-ti', titulo: 'Tus datos básicos', texto: 'Solo el nombre es obligatorio. Los contadores te avisan de lo que cabe sin que el diseño se estropee.' },
+    { guia: 'listas', titulo: 'Experiencia, formación y más', texto: 'Añade cada puesto o estudio con su botón. Hay un máximo por apartado para que el CV se lea bien en dos páginas.' },
+    { guia: 'vista', titulo: 'Lo ves mientras escribes', texto: 'La vista previa se actualiza con tus datos. Todo se guarda en este navegador.' },
+  ],
+  revisa: [
+    { guia: 'repaso', titulo: 'Un repaso rápido', texto: 'Te decimos qué falta (contacto, resumen, experiencia…). No es obligatorio, pero ayuda mucho.' },
+    { guia: 'vista', titulo: 'Revisa página a página', texto: 'Mira que todo está donde quieres. Si no, vuelve atrás desde la barra de pasos: no pierdes nada.' },
+  ],
+  descarga: [
+    { guia: 'comprar', titulo: 'Compra y descarga', texto: 'Pagas una vez y descargas el PDF sin marca de agua. Puedes volver a descargarlo con cambios.' },
+    { guia: 'extras', titulo: 'Tarjeta digital con QR', texto: 'Si la añades, después del pago la configuras aquí mismo: eliges un modelo y la publicamos con tus datos.' },
+  ],
+};
+
 export const PASOS_CV = [
   { id: 'diseno', titulo: 'Diseño y estilo' },
   { id: 'datos', titulo: 'Tus datos' },
