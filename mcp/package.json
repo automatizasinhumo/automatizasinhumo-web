@@ -12,6 +12,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260617.1",
-    "@types/node": "^26.1.1"
+    "@types/node": "^26.6.6"
   }
 }
