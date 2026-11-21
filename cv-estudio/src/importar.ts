@@ -3,7 +3,7 @@
 // Se carga aparte (import dinámico) para no pesar en la vista previa.
 import type { ResumeData } from "../vendor-import/schema/src/resume/data";
 import { type PeriodEndpoint, parsePeriod } from "../vendor-import/schema/src/resume/period";
-import { FORM_VACIO, type FormCv } from "./formulario";
+import { FORM_VACIO, type FormCv } from "./formulario-datos";
 
 export type TipoImportable = "pdf" | "docx" | "linkedin" | "json";
 

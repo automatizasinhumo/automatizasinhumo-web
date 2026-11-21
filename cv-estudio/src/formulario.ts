@@ -3,36 +3,10 @@
 import { parseResumeData, type ResumeData } from "../vendor/schema/resume/data";
 import { newResume } from "./adoptado/resume-model";
 
-export type Experiencia = { puesto: string; empresa: string; lugar: string; periodo: string; descripcion: string };
-export type Formacion = { titulo: string; centro: string; lugar: string; periodo: string };
-export type Habilidad = { nombre: string; nivel: number; detalle: string };
-export type Idioma = { idioma: string; nivel: string; puntos: number };
-
-export type FormCv = {
-	nombre: string;
-	titular: string;
-	email: string;
-	telefono: string;
-	ubicacion: string;
-	resumen: string;
-	experiencia: Experiencia[];
-	formacion: Formacion[];
-	habilidades: Habilidad[];
-	idiomas: Idioma[];
-};
-
-export const FORM_VACIO: FormCv = {
-	nombre: "",
-	titular: "",
-	email: "",
-	telefono: "",
-	ubicacion: "",
-	resumen: "",
-	experiencia: [],
-	formacion: [],
-	habilidades: [],
-	idiomas: [],
-};
+// Tipos y formulario vacío viven en formulario-datos.ts (sin dependencias: los usan el
+// importador y sus pruebas sin cargar el modelo ni DOMPurify).
+import { FORM_VACIO, type FormCv } from "./formulario-datos";
+export * from "./formulario-datos";
 
 export const FORM_EJEMPLO: FormCv = {
 	nombre: "Lucía Martín Ortega",
