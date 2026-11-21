@@ -65,6 +65,8 @@ interface Estado {
   espaciado: string;
   alcanzado: number;
   form: FormCv | null;
+  /** Ids de los extras elegidos (p. ej. `tarjeta`): sobreviven a recargar la página. */
+  extras: string[];
 }
 
 const CLAVE = 'servicios:cv';
@@ -132,6 +134,7 @@ export function iniciarEstudioCv() {
     espaciado: valido('espaciado', g.espaciado) ? g.espaciado! : FORMATO_INICIAL.espaciado,
     alcanzado: Math.min(PASOS.length - 1, Math.max(0, Number(g.alcanzado) || 0)),
     form: g.form && typeof g.form === 'object' ? g.form : null,
+    extras: Array.isArray(g.extras) ? cfg.extras.map((x) => x.id).filter((id) => g.extras!.includes(id)) : [],
   };
   if (!estado.diseno) estado.alcanzado = 0;
   let actual = 'plantilla';
@@ -290,6 +293,13 @@ export function iniciarEstudioCv() {
   }
   const extraPagado = (x: ExtraCv) => x.id === 'tarjeta' && !!pagado?.tarjeta;
   const extraMarcado = (x: ExtraCv) => !extraPagado(x) && !!$<HTMLInputElement>(`[data-extra="${x.producto}"]`)?.checked;
+  /** Las casillas de extras reflejan `estado.extras` (una sola fuente). */
+  function marcarExtras() {
+    for (const x of cfg.extras) {
+      const c = $<HTMLInputElement>(`[data-extra="${x.producto}"]`);
+      if (c) c.checked = estado.extras.includes(x.id);
+    }
+  }
   function resumir() {
     const m = modalidad();
     const p = cfg.paquetes[m];
@@ -404,6 +414,18 @@ export function iniciarEstudioCv() {
     const destino = estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
     history.replaceState(null, '', `${location.pathname}${location.search}${destino}`);
     void cargarPedido();
+    return true;
+  }
+  /** `#tarjeta` (o el id de cualquier extra) llega desde /servicios: deja ese extra elegido. */
+  function tomarExtra(): boolean {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!cfg.extras.some((x) => x.id === id)) return false;
+    if (!estado.extras.includes(id)) estado.extras.push(id);
+    guardar(estado);
+    marcarExtras();
+    const destino = estado.diseno && estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
+    history.replaceState(null, '', `${location.pathname}${location.search}${destino}`);
+    resumir();
     return true;
   }
 
@@ -592,7 +614,12 @@ export function iniciarEstudioCv() {
     const c = ev.target as HTMLInputElement;
     // La tarjeta y los extras no son estado del CV: ni se guardan ni repintan la vista previa.
     if (c.closest('[data-tarjeta-form]')) return;
-    if (c.dataset.extra !== undefined) return resumir();
+    if (c.dataset.extra !== undefined) {
+      const x = cfg.extras.find((e) => e.producto === c.dataset.extra);
+      if (x) estado.extras = c.checked ? [...new Set([...estado.extras, x.id])] : estado.extras.filter((id) => id !== x.id);
+      guardar(estado);
+      return resumir();
+    }
     if (c.name === 'importar') {
       const fichero = c.files?.[0];
       c.value = ''; // permite volver a elegir el mismo archivo
@@ -631,12 +658,15 @@ export function iniciarEstudioCv() {
   });
   window.addEventListener('hashchange', () => {
     tomarPedido();
+    tomarExtra();
     desdeHash(true);
   });
 
   // ---------- Arranque ----------
   volcar(estado.form ?? vacio());
   pintarControles();
+  marcarExtras();
+  tomarExtra();
   if (!tomarPedido()) {
     try {
       token = sessionStorage.getItem(CLAVE_PEDIDO) ?? '';
