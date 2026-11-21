@@ -7,6 +7,7 @@ import { reactiveTemplates } from "./adoptado/templates";
 import { ESPACIADOS, ESTILOS_LETRA, TAMANOS } from "./catalogo-formato";
 import { FORMAS, MARCA_POR_DEFECTO, fijarCapas, type Decoracion } from "./decoracion";
 import { crearDatos, FORM_EJEMPLO, FORM_VACIO } from "./formulario";
+import { VARIANTES } from "../vendor/pdf/templates/creativos/variantes";
 
 export const plantillas = reactiveTemplates.map((t) => ({ id: t.id, color: t.color }));
 export const formas = FORMAS;
@@ -49,7 +50,27 @@ export function datosEjemplo(plantilla = "onyx"): ResumeData {
 	s.certifications.items = [
 		{ id: id(), hidden: false, title: "Customer Experience Professional", issuer: "CXPA", date: "2023", website: web, description: "" },
 	] as never[];
+	s.interests.items = [
+		{ id: id(), hidden: false, icon: "", iconColor: "", name: "Fotografía", keywords: [] },
+		{ id: id(), hidden: false, icon: "", iconColor: "", name: "Senderismo", keywords: [] },
+		{ id: id(), hidden: false, icon: "", iconColor: "", name: "Voluntariado", keywords: [] },
+	] as never[];
+	nivelDePlantilla(d);
 	return parseResumeData(d);
+}
+
+/** Secciones de lista corta que, sin columna lateral, van en rejilla en vez de una debajo de otra. */
+const EN_REJILLA = ["skills", "languages", "interests"] as const;
+
+/**
+ * Las plantillas creativas traen su forma de nivel (barras, puntos, cuadros…). Las de una sola
+ * columna reparten habilidades, idiomas e intereses en tres columnas: apiladas a todo el ancho
+ * dejaban media hoja en blanco y empujaban dos líneas a una segunda página.
+ */
+function nivelDePlantilla(d: ResumeData) {
+	const v = VARIANTES[d.metadata.template];
+	if (v?.nivel) d.metadata.design.level.type = v.nivel;
+	if (v?.lateral === "ninguno") for (const id of EN_REJILLA) if (d.sections[id].columns === 1) d.sections[id].columns = 3;
 }
 
 let cola: Promise<unknown> = Promise.resolve();
@@ -100,6 +121,7 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra
 			const d = sanitizeResume(datos);
 			d.metadata.page.locale = "es-ES";
 			if (plantilla && plantillas.some((p) => p.id === plantilla)) d.metadata.template = plantilla as ResumeData["metadata"]["template"];
+			nivelDePlantilla(d);
 			if (color && /^#[0-9a-f]{6}$/i.test(color)) d.metadata.design.colors.primary = color;
 			aplicarFormato(d, { letra, tamano, espaciado });
 			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO);

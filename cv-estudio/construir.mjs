@@ -5,7 +5,7 @@
 // Salida: ../public/cv/estudio/motor/ (se sube al repo; el build de Astro no depende de esto).
 // Uso: npm ci && npm run construir
 import { build } from 'esbuild';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -66,6 +66,21 @@ const r = await build({
 if (process.env.META) writeFileSync(process.env.META, JSON.stringify(r.metafile));
 // pdf.js necesita su worker como fichero aparte, junto al motor.
 copyFileSync(require.resolve('pdfjs-dist/build/pdf.worker.min.mjs'), path.join(salida, 'pdf.worker.min.mjs'));
+
+// fuentes.css: las mismas fuentes que el PDF, para que la página enseñe cada «Letra» con su tipografía
+// real. Sale de los ficheros que acaba de emitir esbuild (con su hash), así que nunca se desfasa.
+{
+  const fuentes = readdirSync(path.join(salida, 'f'))
+    .map((f) => f.match(/^([a-z-]+)-latin-(400|700)-(normal|italic)-[A-Z0-9]+\.woff2?$/))
+    .filter((m) => m && m[3] === 'normal');
+  const familia = (slug) => slug.split('-').map((p) => p[0].toUpperCase() + p.slice(1)).join(' ');
+  writeFileSync(
+    path.join(salida, 'fuentes.css'),
+    fuentes
+      .map((m) => `@font-face{font-family:"CV ${familia(m[1])}";font-weight:${m[2]};font-style:normal;font-display:swap;src:url("/cv/estudio/motor/f/${m[0]}") format("woff")}`)
+      .join('\n') + '\n',
+  );
+}
 
 // Lee la licencia del directorio del paquete (los «exports» impiden resolver /LICENSE).
 const dirPaquete = (p) => path.join(aqui('./node_modules/'), p);
