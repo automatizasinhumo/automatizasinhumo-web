@@ -143,25 +143,45 @@ def reescribir(textos, p, cred):
     datos = (f"Negocio o evento: {nombre}. Actividad: {p['actividad']}. Ciudad: {p['ciudad']}. "
              f"Servicios: {', '.join(p.get('servicios', []))}. Lo que cuenta el cliente: {p.get('descripcion', '')}")
     salida = {}
-    for i in range(0, len(textos), LOTE):
-        pend = {str(k): textos[k] for k in range(i, min(i + LOTE, len(textos)))}
-        for intento in range(3):
+
+    def pedir(pend, extra):
+        """Una llamada a la IA: guarda lo adaptado y quita de «pend» lo que ya no es el texto original."""
+        r = ia(*cred, sistema, f'{datos}{extra}\n\nNodos de la página (orden de lectura):\n'
+               f'{json.dumps(pend, ensure_ascii=False)}')
+        nuevo = aplanar_respuesta(json.loads(r[r.index('{'): r.rindex('}') + 1]))
+        for k in [k for k in pend if k in nuevo]:
+            salida[k] = nuevo[k]
+            # Devuelto tal cual: se guarda, pero sigue pendiente para otro intento.
+            if ' '.join(nuevo[k].split()) != ' '.join(pend[k]['texto'].split()):
+                del pend[k]
+
+    def intentar(pend, etiqueta, veces, extra=''):
+        for intento in range(veces):
             if not pend:
-                break
+                return
             try:
-                r = ia(*cred, sistema, f'{datos}\n\nNodos de la página (orden de lectura):\n'
-                       f'{json.dumps(pend, ensure_ascii=False)}')
-                nuevo = aplanar_respuesta(json.loads(r[r.index('{'): r.rindex('}') + 1]))
-                for k in [k for k in pend if k in nuevo]:
-                    salida[k] = nuevo[k]
-                    # Devuelto tal cual: se guarda, pero sigue pendiente para otro intento.
-                    if ' '.join(nuevo[k].split()) != ' '.join(pend[k]['texto'].split()):
-                        del pend[k]
+                pedir(pend, extra)
             except CupoIAAgotado:
                 raise  # sin cupo, los demás lotes también fallarían: la solicitud espera entera
             except Exception as e:  # noqa: BLE001 — lo que no se adapte conserva el texto de la plantilla
-                print('  lote', i // LOTE, 'intento', intento + 1, type(e).__name__)
+                print(' ', etiqueta, 'intento', intento + 1, type(e).__name__)
+
+    restantes = {}
+    for i in range(0, len(textos), LOTE):
+        pend = {str(k): textos[k] for k in range(i, min(i + LOTE, len(textos)))}
+        intentar(pend, f'lote {i // LOTE}', 3)
+        restantes.update(pend)
         print(f'  textos {min(i + LOTE, len(textos))}/{len(textos)} (sin adaptar: {len(pend)})', flush=True)
+    # Repesca: en un lote grande el modelo suele saltarse o devolver igual uno o dos nodos (JSON roto,
+    # clave olvidada). De uno en uno y con la orden explícita de cambiarlos, casi siempre salen.
+    if restantes:
+        aviso = '\nEste texto sigue siendo el de la plantilla: reescríbelo para este negocio, no lo devuelvas igual.'
+        for k in list(restantes):
+            pend = {k: restantes[k]}
+            intentar(pend, f'repesca {k}', 2, aviso)
+            if not pend:
+                del restantes[k]
+        print(f'  repesca: sin adaptar {len(restantes)}', flush=True)
     return salida
 
 
