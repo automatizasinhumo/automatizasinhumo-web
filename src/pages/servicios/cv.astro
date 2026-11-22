@@ -284,6 +284,20 @@ const ejemploTarjeta: DatosTarjeta = {
                 <label class={campo}>Teléfono<input name="telefono" type="tel" autocomplete="tel" maxlength="60" /></label>
                 <label class={campo}>Ciudad<input name="ubicacion" autocomplete="address-level2" maxlength="120" /></label>
               </div>
+              <div class="foto-cv" data-guia="foto">
+                <input type="hidden" name="foto" />
+                <img data-foto-vista alt="Tu foto" width="72" height="72" hidden />
+                <div class="grid gap-1">
+                  <div class="flex flex-wrap gap-2">
+                    <label class="boton boton-secundario boton-compacto importar">
+                      <input type="file" name="fotoElegir" class="sr-only" accept="image/jpeg,image/png,image/webp,image/*" />
+                      Añadir foto
+                    </label>
+                    <button type="button" class="boton boton-secundario boton-compacto" data-foto-quitar hidden>Quitar foto</button>
+                  </div>
+                  <small class="ayuda" data-foto-estado aria-live="polite">Opcional. JPG o PNG; la reducimos sola.</small>
+                </div>
+              </div>
               <label class={campo}>Resumen <span class="ayuda">(2 o 3 frases)</span><textarea name="resumen" rows="4" maxlength={LIMITES_CV.resumen} data-cuenta placeholder="Dos o tres frases: qué haces y qué has conseguido."></textarea><small class="cuenta" aria-live="off"></small></label>
             </fieldset>
 

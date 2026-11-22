@@ -1,0 +1,2 @@
+/* Contiene software MIT/Apache-2.0 de terceros (Reactive Resume, Resumv, react-pdf, pdf.js, React, Phosphor) y fuentes OFL-1.1. Licencias: /cv/estudio/motor/LICENCIAS.txt */
+var r={nombre:"",titular:"",email:"",telefono:"",ubicacion:"",resumen:"",foto:"",experiencia:[],formacion:[],habilidades:[],idiomas:[]},t="/cv/estudio/ejemplo-foto.jpg",e=4e5;function n(i){return typeof i!="string"?"":i===t||i.length<=e&&/^data:image\/(jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(i)?i:""}export{r as a,t as b,n as c};

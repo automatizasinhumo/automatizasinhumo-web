@@ -6,7 +6,8 @@ import { newResume, sanitizeResume } from "./adoptado/resume-model";
 import { reactiveTemplates } from "./adoptado/templates";
 import { ESPACIADOS, ESTILOS_LETRA, TAMANOS } from "./catalogo-formato";
 import { FORMAS, MARCA_POR_DEFECTO, fijarCapas, type Decoracion } from "./decoracion";
-import { crearDatos, FORM_EJEMPLO, FORM_VACIO } from "./formulario";
+import { crearDatos, FORM_EJEMPLO, FORM_VACIO, ponerFoto } from "./formulario";
+import { FOTO_EJEMPLO } from "./formulario-datos";
 import { VARIANTES } from "../vendor/pdf/templates/creativos/variantes";
 
 export const plantillas = reactiveTemplates.map((t) => ({ id: t.id, color: t.color }));
@@ -31,8 +32,9 @@ export function datosEjemplo(plantilla = "onyx"): ResumeData {
 		"<p>Ocho años coordinando equipos de atención al cliente en comercio electrónico. He reducido los tiempos de respuesta a la mitad y mantengo una satisfacción superior al 95 %.</p>";
 	const s = d.sections;
 	s.experience.items = [
-		{ id: id(), hidden: false, company: "Tienda Levante S. L.", position: "Responsable de atención al cliente", location: "Valencia", period: "2021 – actualidad", website: web, roles: [], description: "<ul><li><p>Dirijo un equipo de 9 personas en chat, correo y teléfono.</p></li><li><p>Implanté respuestas guiadas: tiempo medio de respuesta de 6 h a 2,5 h.</p></li></ul>" },
+		{ id: id(), hidden: false, company: "Tienda Levante S. L.", position: "Responsable de atención al cliente", location: "Valencia", period: "2021 – actualidad", website: web, roles: [], description: "<ul><li><p>Dirijo un equipo de 9 personas en chat, correo y teléfono.</p></li><li><p>Implanté respuestas guiadas: tiempo medio de respuesta de 6 h a 2,5 h.</p></li><li><p>Satisfacción del cliente del 88 % al 96 % en dos años.</p></li></ul>" },
 		{ id: id(), hidden: false, company: "Moda Norte", position: "Agente de atención al cliente", location: "Bilbao", period: "2017 – 2021", website: web, roles: [], description: "<ul><li><p>Gestión de devoluciones e incidencias de envío.</p></li><li><p>Formación de nuevas incorporaciones.</p></li></ul>" },
+		{ id: id(), hidden: false, company: "Grupo Hostelero Mar", position: "Recepcionista", location: "Valencia", period: "2016 – 2017", website: web, roles: [], description: "<ul><li><p>Reservas, atención en tres idiomas y resolución de quejas.</p></li></ul>" },
 	] as never[];
 	s.education.items = [
 		{ id: id(), hidden: false, school: "Universitat de València", degree: "Grado", area: "Administración y Dirección de Empresas", grade: "", location: "Valencia", period: "2012 – 2016", website: web, description: "" },
@@ -55,6 +57,7 @@ export function datosEjemplo(plantilla = "onyx"): ResumeData {
 		{ id: id(), hidden: false, icon: "", iconColor: "", name: "Senderismo", keywords: [] },
 		{ id: id(), hidden: false, icon: "", iconColor: "", name: "Voluntariado", keywords: [] },
 	] as never[];
+	ponerFoto(d, FOTO_EJEMPLO);
 	nivelDePlantilla(d);
 	return parseResumeData(d);
 }
@@ -70,6 +73,7 @@ const EN_REJILLA = ["skills", "languages", "interests"] as const;
 function nivelDePlantilla(d: ResumeData) {
 	const v = VARIANTES[d.metadata.template];
 	if (v?.nivel) d.metadata.design.level.type = v.nivel;
+	if (v?.iconos) d.metadata.page.hideSectionIcons = false;
 	if (v?.lateral === "ninguno") for (const id of EN_REJILLA) if (d.sections[id].columns === 1) d.sections[id].columns = 3;
 }
 

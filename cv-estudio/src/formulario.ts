@@ -5,7 +5,7 @@ import { newResume } from "./adoptado/resume-model";
 
 // Tipos y formulario vacío viven en formulario-datos.ts (sin dependencias: los usan el
 // importador y sus pruebas sin cargar el modelo ni DOMPurify).
-import { FORM_VACIO, type Experiencia, type FormCv, type Formacion, type Habilidad, type Idioma } from "./formulario-datos";
+import { FORM_VACIO, FOTO_EJEMPLO, fotoValida, type Experiencia, type FormCv, type Formacion, type Habilidad, type Idioma } from "./formulario-datos";
 export * from "./formulario-datos";
 
 export const FORM_EJEMPLO: FormCv = {
@@ -16,6 +16,7 @@ export const FORM_EJEMPLO: FormCv = {
 	ubicacion: "Valencia",
 	resumen:
 		"Ocho años coordinando equipos de atención al cliente en comercio electrónico. He reducido los tiempos de respuesta a la mitad y mantengo una satisfacción superior al 95 %.",
+	foto: FOTO_EJEMPLO,
 	experiencia: [
 		{
 			puesto: "Responsable de atención al cliente",
@@ -59,6 +60,12 @@ const vinetas = (s: string) => {
 	return lineas.length ? `<ul>${lineas.map((l) => `<li><p>${escapar(l)}</p></li>`).join("")}</ul>` : "";
 };
 
+/** Foto del CV: el tamaño y la forma los decide cada plantilla; aquí solo la fuente. */
+export function ponerFoto(d: ResumeData, url: string) {
+	if (!url) return;
+	d.picture = { ...d.picture, url, hidden: false, size: Math.max(d.picture.size, 88) };
+}
+
 /** Convierte el formulario (datos del cliente, sin confiar en ellos) en un CV de Reactive Resume. */
 export function crearDatos(entrada: Partial<FormCv> | null | undefined, plantilla = "onyx"): ResumeData {
 	const f = { ...FORM_VACIO, ...(entrada ?? {}) };
@@ -73,6 +80,7 @@ export function crearDatos(entrada: Partial<FormCv> | null | undefined, plantill
 		location: txt(f.ubicacion, 120),
 	};
 	d.summary.content = parrafo(txt(f.resumen, 1500));
+	ponerFoto(d, fotoValida(f.foto));
 	const s = d.sections;
 	s.experience.items = lista<Experiencia>(f.experiencia, 12)
 		.filter((e) => txt(e?.puesto) || txt(e?.empresa))

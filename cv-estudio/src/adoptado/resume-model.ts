@@ -5,6 +5,7 @@ import {
   type ResumeData,
 } from "../../vendor/schema/resume/data";
 import { sampleResumeData } from "../../vendor/schema/resume/sample";
+import { FOTO_EJEMPLO } from "../formulario-datos";
 import samplePicture from "../../vendor/schema/resume/sample-picture.json";
 import { defaultResumeData } from "../../vendor/schema/resume/default";
 import { reactiveTemplates } from "./templates";
@@ -179,10 +180,12 @@ export function emptyItem(section: string): Record<string, any> {
 export function sanitizeResume(input: unknown): ResumeData {
   const d = parseResumeData(input);
   // No remote image loads or imported executable markup/CSS. Preserve only local raster photos.
+  // La foto ilustrada de ejemplo es un fichero del propio sitio (misma origen), no remota.
   d.picture.url =
-    /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(
+    d.picture.url === FOTO_EJEMPLO ||
+    (/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(
       d.picture.url,
-    ) && d.picture.url.length < 2_500_000
+    ) && d.picture.url.length < 2_500_000)
       ? d.picture.url
       : "";
   d.summary.content = cleanHtml(d.summary.content);

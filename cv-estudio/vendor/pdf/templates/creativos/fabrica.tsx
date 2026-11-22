@@ -10,7 +10,7 @@
 // Propias del estudio (no vienen de Reactive Resume), bajo la misma licencia del proyecto.
 import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
-import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
+import type { TemplateColorRoles, TemplateFeatureStyleSlots, TemplateFeatures, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Page, StyleSheet, Text as PdfText, View } from "#react-pdf-renderer";
@@ -80,7 +80,33 @@ export type Variante = {
 	nivel?: Nivel;
 	/** Grados de giro del segundo color respecto al principal. */
 	giro?: number;
+	/** Experiencia y formación sobre una línea de tiempo con puntos (cuerpo a una columna). */
+	linea?: boolean;
+	/** Icono delante de cada título de sección (entrada.ts quita hideSectionIcons). */
+	iconos?: boolean;
+	/** Forma de la foto: círculo (por defecto), arco (arriba redondo), redondeada o cuadrada. */
+	foto?: FormaFoto;
+	/** Lado de la foto (pt). En la cabecera por defecto 76; en la columna, su ancho útil. */
+	tamFoto?: number;
+	/** Foto grande arriba de la columna lateral; el nombre queda en la cabecera del cuerpo. */
+	fotoEnLateral?: boolean;
 };
+
+export type FormaFoto = "circulo" | "arco" | "redondeada" | "cuadrada";
+
+/** Tamaño y radios de la foto según su forma (react-pdf solo recorta con borderRadius). */
+export function marcoFoto(forma: FormaFoto | undefined, ancho: number): Style {
+	switch (forma) {
+		case "arco":
+			return { width: ancho, height: ancho * 1.22, borderTopLeftRadius: ancho / 2, borderTopRightRadius: ancho / 2, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 };
+		case "redondeada":
+			return { width: ancho, height: ancho * 1.1, borderRadius: Math.round(ancho * 0.16) };
+		case "cuadrada":
+			return { width: ancho, height: ancho, borderRadius: 2 };
+		default:
+			return { width: ancho, height: ancho, borderRadius: 999 };
+	}
+}
 
 const iniciales = (nombre: string) =>
 	nombre
@@ -202,9 +228,28 @@ function usarVariante(v: Variante, sinLateral = false) {
 			levelItemActive: (k: TemplateStyleContext) => ({ backgroundColor: sobreColor(k) ? "#ffffff" : primary, borderColor: sobreColor(k) ? "#ffffff" : primary }),
 			levelItemInactive: (k: TemplateStyleContext) => ({ backgroundColor: sobreColor(k) ? "rgba(255,255,255,0.22)" : v.nivel === "progress-bar" || v.nivel === "rectangle-full" ? c.tin : "transparent" }),
 			icon: createIconSlot({ metadata, accentFor: acentoEn }),
+			// Mismo color que el texto del título (blanco en etiqueta y sobre columnas de color).
+			sectionHeadingIcon: (k: TemplateStyleContext) => ({
+				size: fh * 0.9,
+				color: sobreColor(k) ? textoEn(k) : v.titulos === "etiqueta" ? "#ffffff" : v.titulos === "marcador" ? c.osc : acentoEn(k),
+			}),
 		} as unknown as Estilos;
 
-		return { colors, styles, c, primary, foreground, lateralFondo, lateralTexto, enColumna, fondoPagina };
+		const features: TemplateFeatures = v.linea ? { sectionTimeline: true } : {};
+		const featureStyles: TemplateFeatureStyleSlots = v.linea
+			? {
+					sectionTimeline: {
+						items: { position: "relative" },
+						line: (k: TemplateStyleContext) => ({ position: "absolute", top: 4, bottom: 4, left: 7, width: 1.4, backgroundColor: sobreColor(k) ? "rgba(255,255,255,0.5)" : c.med }),
+						item: { flexDirection: "row", columnGap: metrics.gapX(0.5), position: "relative" },
+						marker: { width: 15.4, alignItems: "center" },
+						dot: (k: TemplateStyleContext) => ({ width: 9, height: 9, marginTop: 3, borderRadius: 999, borderWidth: 2, borderColor: sobreColor(k) ? "#ffffff" : primary, backgroundColor: sobreColor(k) ? k.colors.sidebarBackground : "#ffffff" }),
+						content: { flex: 1 },
+					},
+				}
+			: {};
+
+		return { colors, styles, features, featureStyles, c, primary, foreground, lateralFondo, lateralTexto, enColumna, fondoPagina };
 	}, [metadata, r.row, r.headerIdentity, primary, foreground, background, base, metrics, v, sinLateral]);
 }
 
@@ -233,8 +278,10 @@ function Cabecera({ v, e, pageNodeKey }: { v: Variante; e: ReturnType<typeof usa
 	const texto = oscura ? "#ffffff" : e.foreground;
 	const acento = oscura ? mezclar(c.a, "#ffffff", 0.55) : c.p;
 
-	const foto = hasTemplatePicture(picture) ? (
-		<SemanticHeaderPicture src={picture.url} style={{ width: picture.size, height: picture.size, borderRadius: 999, objectFit: "cover", borderWidth: 3, borderColor: oscura ? "#ffffff" : c.tin }} />
+	// Con la foto en la columna, la cabecera no la repite.
+	const fotoAqui = hasTemplatePicture(picture) && !(v.fotoEnLateral && e.enColumna);
+	const foto = fotoAqui ? (
+		<SemanticHeaderPicture src={picture.url} style={{ ...marcoFoto(v.foto, v.tamFoto ?? 76), objectFit: "cover", borderWidth: 3, borderColor: oscura ? "#ffffff" : c.tin }} />
 	) : null;
 	const ini = iniciales(basics.name);
 	const fondoMono = v.arte === "orbita" ? "transparent" : oscura ? "rgba(255,255,255,0.18)" : c.p;
@@ -356,14 +403,25 @@ export function crearPagina(v: Variante) {
 		);
 
 		const secciones = (ids: string[], lugar: "main" | "sidebar") => ids.map((sec) => <Section key={sec} section={sec} placement={lugar} />);
+		const padLateral = metrics.gapX(1.1);
+		const fotoLateral =
+			showHeader && enColumna && v.fotoEnLateral && hasTemplatePicture(data.picture) ? (
+				<View style={{ alignItems: "center", paddingBottom: metrics.gapY(0.3) }}>
+					<SemanticHeaderPicture
+						src={data.picture.url}
+						style={{ ...marcoFoto(v.foto, v.tamFoto ?? anchoLateral - padLateral * 2), objectFit: "cover", borderWidth: 3, borderColor: e.lateralTexto === "#ffffff" ? "rgba(255,255,255,0.85)" : "#ffffff" }}
+					/>
+				</View>
+			) : null;
 
 		let contenido: ReactNode;
 		if (enColumna) {
 			const lateral = (
 				<SemanticRegionView
 					region="sidebar"
-					style={{ width: anchoLateral, paddingHorizontal: metrics.gapX(1.1), paddingTop: v.lateralArriba ?? 0, rowGap: metrics.sectionGap }}
+					style={{ width: anchoLateral, paddingHorizontal: padLateral, paddingTop: v.lateralArriba ?? 0, rowGap: metrics.sectionGap }}
 				>
+					{fotoLateral}
 					{showHeader && cabeceraEnLateral && <Cabecera v={vp} e={e} pageNodeKey={pageNodeKey} />}
 					{secciones(laterales, "sidebar")}
 				</SemanticRegionView>
@@ -411,7 +469,7 @@ export function crearPagina(v: Variante) {
 		return (
 			<Page {...semanticPageProps} size={semanticPageSize ?? pageSize} style={composeStyles(e.styles.page, pageMinHeightStyle, semanticPageStyle)}>
 				{arte}
-				<TemplateProvider pageNodeKey={pageNodeKey} styles={e.styles} colors={e.colors}>
+				<TemplateProvider pageNodeKey={pageNodeKey} styles={e.styles} colors={e.colors} features={e.features} featureStyles={e.featureStyles}>
 					{contenido}
 				</TemplateProvider>
 			</Page>
