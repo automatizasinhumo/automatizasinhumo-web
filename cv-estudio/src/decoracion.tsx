@@ -9,6 +9,7 @@ import { createElement as h } from "react";
 import { Circle, Defs, G, LinearGradient, Path, Polygon, Rect, Stop, Svg, Text, View } from "@react-pdf/renderer";
 
 import { DECORACION_VACIA, FONDOS, FORMAS, POSICIONES, SOMBREADOS, type Decoracion, type Fondo, type Forma, type Posicion, type Sombreado } from "./catalogo-decoracion";
+import { mezclar } from "./color";
 export { DECORACION_VACIA, FONDOS, FORMAS, POSICIONES, SOMBREADOS };
 export type { Decoracion, Fondo, Forma, Posicion, Sombreado };
 
@@ -158,20 +159,49 @@ function formas(d: Decoracion, o: (x: number) => number, k: number): Pieza[] {
 }
 
 const FONDO_PLANO: Partial<Record<Fondo, string>> = { papel: "#fbf6ec", gris: "#f1f3f5" };
+/** Opacidad del fondo «tinte» y del arranque del sombreado según la intensidad (las mismas al pintar y al medir). */
+const opacidadTinte = (i: number) => 0.06 + i * 0.06;
+const opacidadSombra = (i: number) => +(0.07 + i * 0.3).toFixed(3);
+
+/** Escala del tamaño de las formas y opacidad real de cada pieza según la intensidad. */
+const escalaForma = (i: number) => +(0.7 + i * 0.6).toFixed(3);
+const opacidadForma = (i: number) => (x: number) => +Math.min(0.85, x * (0.55 + i * 1.9)).toFixed(3);
+
+/**
+ * El fondo más oscuro que la decoración puede dejar bajo el texto: fondo de página, arranque del
+ * sombreado y, si hay formas abajo, sus rellenos (cada color con su pieza más opaca). Las de abajo sí
+ * cuentan porque los diseños de barra lateral llenan la página hasta el pie; las de arriba quedan en la
+ * esquina, por encima del texto, y la franja y el marco son trazos de borde.
+ */
+export function peorFondo(entrada: Partial<Record<keyof Decoracion, unknown>> | null | undefined): string {
+	const d = normalizar(entrada);
+	let fondo = FONDO_PLANO[d.fondo] ?? (d.fondo === "tinte" ? mezclar("#ffffff", d.color, opacidadTinte(d.intensidad)) : "#ffffff");
+	if (d.sombreado !== "ninguno") fondo = mezclar(fondo, d.color, opacidadSombra(d.intensidad));
+	if (d.posicion !== "arriba" && !["ninguna", "franja", "marco"].includes(d.forma)) {
+		const o = opacidadForma(d.intensidad);
+		const max = new Map<string, number>();
+		for (const p of esquinaSuperior(d.forma, d.color, d.color2, escalaForma(d.intensidad), (x) => o(x * 0.85))) {
+			const { fill, fillOpacity } = p.props as { fill?: string; fillOpacity?: number };
+			if (fill && fill !== "none" && fillOpacity) max.set(fill, Math.max(max.get(fill) ?? 0, fillOpacity));
+		}
+		for (const [color, alfa] of max) fondo = mezclar(fondo, color, alfa);
+	}
+	return fondo;
+}
 
 export function capaDecoracion() {
 	const d = actual;
 	if (d.forma === "ninguna" && d.sombreado === "ninguno" && d.fondo === "blanco") return null;
 	const i = d.intensidad;
-	const k = +(0.7 + i * 0.6).toFixed(3);
-	const o = (x: number) => +Math.min(0.85, x * (0.55 + i * 1.9)).toFixed(3);
-	const sombra = +(0.07 + i * 0.3).toFixed(3);
+	const k = escalaForma(i);
+	const o = opacidadForma(i);
+	const sombra = opacidadSombra(i);
 	const hijos: Pieza[] = [];
 	const defs: Pieza[] = [];
 
 	const plano = FONDO_PLANO[d.fondo];
 	if (plano) hijos.push(h(Rect, { key: "fondo", x: 0, y: 0, width: W, height: H, fill: plano }));
-	else if (d.fondo === "tinte") hijos.push(h(Rect, { key: "fondo", x: 0, y: 0, width: W, height: H, fill: d.color, fillOpacity: 0.06 + i * 0.06 }));
+	else if (d.fondo === "tinte") hijos.push(h(Rect, { key: "fondo", x: 0, y: 0, width: W, height: H, fill: d.color, fillOpacity: opacidadTinte(i) }));
 
 	const degradado = (id: string, x2: number, y2: number, y1 = 0, x1 = 0) =>
 		h(LinearGradient, { key: id, id, x1, y1, x2, y2 }, h(Stop, { offset: 0, stopColor: d.color, stopOpacity: sombra }), h(Stop, { offset: 1, stopColor: d.color, stopOpacity: 0 }));

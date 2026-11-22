@@ -218,7 +218,14 @@ const MAX_BYTES = 10 * 1024 * 1024;
 /** Lee el fichero y devuelve el formulario relleno. Nunca lanza: la página enseña el motivo. */
 export async function importarCv(fichero: Blob & { name?: string }, cargarPdfjs: CargarPdfjs): Promise<ResultadoImportar> {
 	if (fichero.size > MAX_BYTES) return { ok: false, motivo: "grande" };
-	const bytes = new Uint8Array(await fichero.arrayBuffer());
+	let bytes: Uint8Array;
+	try {
+		bytes = new Uint8Array(await fichero.arrayBuffer());
+	} catch (e) {
+		// El navegador puede negarse a leerlo (archivo movido o borrado tras elegirlo, permisos).
+		console.warn("importarCv", e);
+		return { ok: false, motivo: "lectura" };
+	}
 	const nombre = fichero.name ?? "cv";
 	const tipo = tipoDe(bytes, nombre);
 	if (!tipo) return { ok: false, motivo: "tipo" };
