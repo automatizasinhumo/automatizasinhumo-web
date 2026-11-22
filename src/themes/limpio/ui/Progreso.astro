@@ -40,18 +40,23 @@ const { pasos, etiqueta } = Astro.props;
   li {
     position: relative;
   }
-  /* Raíl bajo cada paso: se rellena con el color de marca al completarlo. */
+  /*
+   * Raíl bajo cada paso, como una sola barra de avance: lleno en los pasos anteriores al actual,
+   * a medias en el actual y vacío después (aunque ya se hayan visitado: manda dónde estás).
+   */
   li::before {
     content: '';
     display: block;
-    height: 4px;
+    height: 6px;
     border-radius: 999px;
-    background: var(--color-line);
-    transition: background-color var(--ds-mov-normal) var(--ds-curva);
+    background: linear-gradient(var(--color-brand), var(--color-brand)) left / var(--relleno, 0%) 100% no-repeat, var(--color-line);
+    transition: background-size var(--ds-mov-normal) var(--ds-curva);
   }
-  li:has([data-hecho])::before,
+  li:has(~ li [aria-current='step'])::before {
+    --relleno: 100%;
+  }
   li:has([aria-current='step'])::before {
-    background: var(--color-brand);
+    --relleno: 50%;
   }
   button {
     display: flex;

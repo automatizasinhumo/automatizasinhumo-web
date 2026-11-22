@@ -25,6 +25,7 @@ import {
   miniaturaCv,
 } from '../../features/servicios/cv';
 import { LIMITES_TARJETA, MODELOS_TARJETA } from '../../features/servicios/modelosTarjeta';
+import { ZOOM_MAX } from '../../features/servicios/fotoCv';
 import TarjetaDigital from '../../features/servicios/TarjetaDigital.astro';
 import type { DatosTarjeta } from '../../features/servicios/publicados';
 
@@ -78,14 +79,6 @@ const ejemploTarjeta: DatosTarjeta = {
       <Progreso pasos={PASOS_CV} etiqueta="Pasos para hacer tu currículum" />
       <button type="button" class="guia-boton" data-guia-abrir>Guía de este paso</button>
     </div>
-
-    <aside class="guia-aviso" data-guia-aviso hidden aria-label="Guía del estudio">
-      <p><strong>¿Primera vez aquí?</strong> Te lo enseñamos en medio minuto, paso a paso.</p>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" class="boton boton-principal boton-compacto" data-guia-abrir>Ver la guía</button>
-        <button type="button" class="boton boton-secundario boton-compacto" data-guia-no>Ahora no</button>
-      </div>
-    </aside>
 
     <form id="estudio-form" class="mt-8" novalidate autocomplete="on">
       <!-- 1 · Diseño y estilo: se elige viendo un ejemplo; los datos van después -->
@@ -297,6 +290,13 @@ const ejemploTarjeta: DatosTarjeta = {
                   </div>
                   <small class="ayuda" data-foto-estado aria-live="polite">Opcional. JPG o PNG; la reducimos sola.</small>
                 </div>
+                <div class="foto-ajuste" data-foto-ajuste hidden>
+                  <p class="ayuda">Arrastra la foto o usa los controles para encuadrarla.</p>
+                  <label>Acercar<input type="range" min="1" max={ZOOM_MAX} step="0.05" data-ajuste="zoom" /></label>
+                  <label>Izquierda · derecha<input type="range" min="0" max="100" step="1" data-ajuste="x" /></label>
+                  <label>Arriba · abajo<input type="range" min="0" max="100" step="1" data-ajuste="y" /></label>
+                  <button type="button" class="boton boton-secundario boton-compacto" data-foto-centrar>Centrar</button>
+                </div>
               </div>
               <label class={campo}>Resumen <span class="ayuda">(2 o 3 frases)</span><textarea name="resumen" rows="4" maxlength={LIMITES_CV.resumen} data-cuenta placeholder="Dos o tres frases: qué haces y qué has conseguido."></textarea><small class="cuenta" aria-live="off"></small></label>
             </fieldset>
@@ -448,10 +448,6 @@ const ejemploTarjeta: DatosTarjeta = {
       <div class="vista-lienzo" data-lienzo></div>
     </aside>
 
-    <p class="mt-12 text-xs text-faint">
-      Diseños basados en <a class="underline" href="https://github.com/amruthpillai/reactive-resume" rel="noopener">Reactive Resume</a> (licencia MIT).{' '}
-      <a class="underline" href="/cv/estudio/motor/LICENCIAS.txt">Licencias</a>.
-    </p>
   </div>
 
   <template id="t-experiencia">

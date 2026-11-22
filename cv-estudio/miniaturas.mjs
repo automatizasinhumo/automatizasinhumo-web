@@ -61,7 +61,7 @@ try {
     await p.evaluate(
       async ({ plantilla, color, decoracion, ancho }) => {
         const E = window.CvEstudio;
-        const blob = await E.crearPdf({ datos: E.datosEjemplo(plantilla), plantilla, color, decoracion, marcaAgua: null });
+        const blob = await E.crearPdf({ datos: null, muestra: true, plantilla, color, decoracion });
         await E.pintarPdf(blob, document.getElementById('v'), { ancho, maxPaginas: 1 });
       },
       { ...t, ancho: ANCHO },

@@ -244,12 +244,39 @@
     gap: var(--ds-hueco-3);
     margin-block: var(--ds-hueco-3);
   }
+  .foto-cv {
+    flex-wrap: wrap;
+  }
   .foto-cv img {
-    width: 72px;
-    height: 72px;
+    width: 96px;
+    height: 96px;
     border-radius: 999px;
     object-fit: cover;
     border: 1px solid var(--color-line);
+    touch-action: none;
+  }
+  .foto-cv:has([data-foto-ajuste]:not([hidden])) img {
+    cursor: grab;
+  }
+  .foto-ajuste {
+    display: grid;
+    gap: var(--ds-hueco-2);
+    flex: 1 1 16rem;
+  }
+  .foto-ajuste[hidden] {
+    display: none;
+  }
+  .foto-ajuste label {
+    display: grid;
+    gap: 0.15rem;
+    font-size: var(--ds-texto-small);
+  }
+  .foto-ajuste input[type='range'] {
+    width: 100%;
+    accent-color: var(--color-brand);
+  }
+  .foto-ajuste button {
+    justify-self: start;
   }
   .importar-nota {
     margin-top: var(--ds-hueco-2);
@@ -684,20 +711,7 @@
   }
 }
 
-/* Guía con ventanitas: aviso la primera vez y botón para repetirla en cada paso. */
-.guia-aviso {
-  display: grid;
-  gap: 0.6rem;
-  margin-block: 0 1rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--ds-borde);
-  border-radius: var(--ds-radio-tarjeta);
-  background: var(--ds-superficie-suave);
-  color: var(--ds-texto);
-}
-.guia-aviso[hidden] {
-  display: none;
-}
+/* Botón para repetir la guía del paso (la guía sale sola la primera vez). */
 .guia-boton {
   margin-inline-start: auto;
   background: none;

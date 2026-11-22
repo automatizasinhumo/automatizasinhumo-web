@@ -12,7 +12,8 @@ import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { textosDeSector } from './sectores';
-import { fotoValida, MARCA_WEB, MAX_FOTO_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
+import { guiar } from '../tour/guia';
+import { fotoValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces';
 type Fila = Record<string, string>;
@@ -577,6 +578,8 @@ export function iniciarEstudioWeb() {
     } else vista.hidden = true;
     if (paso === 'personaliza') pintarControles();
     if (paso === 'publica') resumir();
+    // Su guía sale sola la primera vez de la visita; el botón «Guía de este paso» la repite.
+    setTimeout(() => actual === paso && void guiar(GUIA_WEB[paso] ?? [], { raiz, clave: `web:${paso}`, auto: true }), 600);
     if (enfocar) {
       const h = $<HTMLElement>('h2', secciones.get(paso)!)!;
       h.tabIndex = -1;
@@ -599,6 +602,9 @@ export function iniciarEstudioWeb() {
   }
 
   // ---------- Eventos ----------
+  raiz.addEventListener('click', (ev) => {
+    if ((ev.target as Element).closest('button[data-guia-abrir]')) void guiar(GUIA_WEB[actual] ?? [], { raiz, clave: `web:${actual}` });
+  });
   raiz.addEventListener('click', (ev) => {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('button, [data-ir]');
     if (!b) return;

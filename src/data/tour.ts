@@ -10,8 +10,13 @@ export interface PasoTour {
   texto: string;
 }
 
-/** Clave de localStorage: «visto» (terminado o cerrado) o «no» (rechazado). */
-export const CLAVE_TOUR = 'tour:v1:estado';
+/**
+ * Claves de las guías de toda la web (src/features/tour/guia.ts). En localStorage, `CLAVE_GUIAS`
+ * vale «no» si alguien pulsó «No volver a mostrar»; en sessionStorage, `VISTA_GUIA + clave`
+ * marca la pantalla cuya guía ya salió sola en esta visita.
+ */
+export const CLAVE_GUIAS = 'ash:guias';
+export const VISTA_GUIA = 'ash:guia-vista:';
 /** Enlace que reabre la guía (pie de página): `/#guia`. */
 export const ANCLA_TOUR = 'guia';
 

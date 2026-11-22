@@ -10,7 +10,8 @@
  */
 import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
-import { guiarEstudio, guiaPendiente, recordarGuia } from './guiaCv';
+import { guiar } from '../tour/guia';
+import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
@@ -31,6 +32,8 @@ interface Motor {
     letra?: string;
     tamano?: string;
     espaciado?: string;
+    /** CV de ejemplo sin marca de agua (el motor ignora `datos`). */
+    muestra?: boolean;
   }): Promise<Blob>;
   pintarPdf(b: Blob, c: HTMLElement, o: { ancho: number; maxPaginas: number }): Promise<number>;
   importar(f: File): Promise<{ ok: true; tipo: string; form: FormCv } | { ok: false; motivo: 'tipo' | 'vacio' | 'lectura' }>;
@@ -96,24 +99,12 @@ const MAX_FOTO = 400_000;
 /** Foto del CV de ejemplo (cv-estudio/src/formulario-datos.ts FOTO_EJEMPLO). */
 const FOTO_EJEMPLO_CV = '/cv/estudio/ejemplo-foto.jpg';
 
-/** Reduce la foto en el navegador a JPEG (lado mayor 480 px): el motor del PDF solo lee JPG y PNG. */
-async function reducirFotoCv(f: File): Promise<string> {
-  const bmp = await createImageBitmap(f);
-  const k = Math.min(1, 480 / Math.max(bmp.width, bmp.height));
-  const lienzo = document.createElement('canvas');
-  lienzo.width = Math.max(1, Math.round(bmp.width * k));
-  lienzo.height = Math.max(1, Math.round(bmp.height * k));
-  const ctx = lienzo.getContext('2d')!;
-  ctx.fillStyle = '#fff'; // JPEG sin transparencia: fondo blanco en vez de negro
-  ctx.fillRect(0, 0, lienzo.width, lienzo.height);
-  ctx.drawImage(bmp, 0, 0, lienzo.width, lienzo.height);
-  bmp.close();
-  for (const q of [0.85, 0.72, 0.6, 0.45]) {
-    const url = lienzo.toDataURL('image/jpeg', q);
-    if (url.length <= MAX_FOTO) return url;
-  }
-  return '';
-}
+/** Foto original reducida y su encuadre, aparte del CV: solo sirven para reencuadrar aquí. */
+const CLAVE_FOTO = 'servicios:cv:foto';
+const MAX_BASE = 700_000;
+/** Huella del recorte guardado: si el campo «foto» ya no es ese recorte (ejemplo, importación), la base no vale. */
+const huella = (url: string) => `${url.length}:${url.slice(-48)}`;
+
 const PASOS = PASOS_CV.map((p) => p.id) as string[];
 const MARCA = 'VISTA PREVIA';
 const NUMERICOS = new Set(['nivel', 'puntos']);
@@ -255,7 +246,7 @@ export function iniciarEstudioCv() {
   }
   /** Miniatura y botón «Quitar» según el valor oculto de la foto; `aviso` sustituye a la miniatura. */
   function pintarFoto(aviso = '') {
-    // Solo una imagen incrustada (la que reduce reducirFotoCv); cualquier otro valor guardado se ignora.
+    // Solo una imagen incrustada (el recorte de fotoCv.ts); cualquier otro valor guardado se ignora.
     const url = urlFotoSegura(campo<HTMLInputElement | null>('foto')?.value ?? '');
     const img = $<HTMLImageElement>('[data-foto-vista]');
     if (img) {
@@ -265,16 +256,67 @@ export function iniciarEstudioCv() {
     }
     const quitar = $('[data-foto-quitar]');
     if (quitar) quitar.hidden = !url;
+    const panel = $('[data-foto-ajuste]');
+    if (panel) panel.hidden = !(url && foto.base);
+    for (const r of $$<HTMLInputElement>('[data-ajuste]')) r.value = String(foto.ajuste[r.dataset.ajuste as keyof AjusteFoto]);
     const estadoFoto = $('[data-foto-estado]');
     if (estadoFoto) estadoFoto.textContent = aviso || (url ? 'Foto añadida. Sale en los diseños con hueco para foto.' : 'Opcional. JPG o PNG; la reducimos sola.');
   }
   let genFoto = 0;
+  /** Base y encuadre de la foto subida; base vacía = no se puede reencuadrar (ejemplo, importada, ninguna). */
+  const foto: { base: string; ajuste: AjusteFoto } = { base: '', ajuste: { ...AJUSTE_INICIAL } };
+  function guardarFoto() {
+    try {
+      const recorte = campo<HTMLInputElement | null>('foto')?.value ?? '';
+      if (foto.base && recorte) localStorage.setItem(CLAVE_FOTO, JSON.stringify({ base: foto.base, ajuste: foto.ajuste, huella: huella(recorte) }));
+      else localStorage.removeItem(CLAVE_FOTO);
+    } catch {
+      /* sin sitio: la foto sigue en el CV, solo no se podrá reencuadrar tras recargar */
+    }
+  }
+  /** Recupera la base si el campo «foto» sigue siendo el recorte que se hizo con ella. */
+  function recuperarFoto() {
+    foto.base = '';
+    foto.ajuste = { ...AJUSTE_INICIAL };
+    try {
+      const v = JSON.parse(localStorage.getItem(CLAVE_FOTO) ?? 'null');
+      const recorte = campo<HTMLInputElement | null>('foto')?.value ?? '';
+      if (v && typeof v.base === 'string' && recorte && v.huella === huella(recorte)) {
+        foto.base = v.base;
+        foto.ajuste = normalizarAjuste(v.ajuste);
+      }
+    } catch {
+      /* guardado roto: se ignora */
+    }
+  }
+  let pidiendoRecorte = false;
+  /** Rehace el recorte con el encuadre actual (agrupa los movimientos seguidos del deslizador o del dedo). */
+  function reencuadrar() {
+    genFoto++; // el encuadre cambió: un recorte anterior aún en curso ya no vale
+    if (pidiendoRecorte || !foto.base) return;
+    pidiendoRecorte = true;
+    requestAnimationFrame(() => {
+      pidiendoRecorte = false;
+      const gen = ++genFoto;
+      recortar(foto.base, foto.ajuste, MAX_FOTO)
+        .then((url) => {
+          if (gen !== genFoto || !url) return;
+          campo('foto').value = url;
+          pintarFoto();
+          guardarFoto();
+          persistir();
+          programar();
+        })
+        .catch(() => undefined);
+    });
+  }
   function volcar(f: FormCv) {
     genFoto++; // una conversión de foto aún en curso no debe pisar el formulario nuevo
     for (const k of CAMPOS) {
       const c = campo<HTMLInputElement | null>(k);
       if (c) c.value = typeof f[k] === 'string' ? f[k] : '';
     }
+    recuperarFoto();
     pintarFoto();
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)?.replaceChildren();
@@ -329,7 +371,8 @@ export function iniciarEstudioCv() {
 
   // ---------- Vista previa ----------
   function crearPdf(E: Motor, marcaAgua: string, personal: boolean) {
-    // Al elegir el diseño aún no hay datos: se enseña el ejemplo, para ver cómo queda de verdad.
+    // Al elegir el diseño aún no hay datos: se enseña el ejemplo limpio, sin marca de agua,
+    // para ver cómo queda de verdad. La marca sale en cuanto hay datos del cliente.
     const f = recoger();
     const conEjemplo = actual === 'diseno' && !f.nombre;
     return E.crearPdf({
@@ -343,6 +386,7 @@ export function iniciarEstudioCv() {
       letra: estado.letra,
       tamano: estado.tamano,
       espaciado: estado.espaciado,
+      muestra: conEjemplo,
     });
   }
   let temporizador = 0;
@@ -692,6 +736,8 @@ export function iniciarEstudioCv() {
     if (paso === 'diseno') pintarControles();
     if (paso === 'revisa') repasar();
     if (paso === 'descarga') resumir();
+    // Tras pintar el paso (y su vista previa), su guía sale sola si aún no salió en esta visita.
+    setTimeout(() => actual === paso && void guiar(cfg.guia[paso] ?? [], { raiz, clave: `cv:${paso}`, auto: true }), 600);
     if (enfocar) {
       const h = $<HTMLElement>('h2', secciones.get(paso)!)!;
       h.tabIndex = -1;
@@ -754,9 +800,15 @@ export function iniciarEstudioCv() {
     if (b.hasAttribute('data-foto-quitar')) {
       genFoto++;
       campo('foto').value = '';
+      foto.base = '';
+      guardarFoto();
       pintarFoto();
       persistir();
       return programar();
+    }
+    if (b.hasAttribute('data-foto-centrar')) {
+      foto.ajuste = { ...AJUSTE_INICIAL };
+      return reencuadrar();
     }
     if (b.hasAttribute('data-anadir')) {
       const l = b.closest<HTMLElement>('[data-lista]')!.dataset.lista as Lista;
@@ -789,27 +841,40 @@ export function iniciarEstudioCv() {
   });
 
   // ---------- Guía ----------
-  const aviso = $('[data-guia-aviso]');
-  const abrirGuia = () => {
-    if (aviso) aviso.hidden = true;
-    recordarGuia('visto');
-    void guiarEstudio(cfg.guia[actual] ?? [], raiz);
-  };
+  // Cada paso enseña su guía sola la primera vez de la visita (ver mostrar()); el botón la repite.
   raiz.addEventListener('click', (ev) => {
-    const b = (ev.target as Element).closest<HTMLElement>('button');
-    if (b?.hasAttribute('data-guia-abrir')) abrirGuia();
-    else if (b?.hasAttribute('data-guia-no')) {
-      recordarGuia('no');
-      if (aviso) aviso.hidden = true;
-    }
+    if ((ev.target as Element).closest('button[data-guia-abrir]')) void guiar(cfg.guia[actual] ?? [], { raiz, clave: `cv:${actual}` });
   });
-  if (aviso && guiaPendiente()) aviso.hidden = false;
+
+  // Arrastrar la miniatura mueve la foto dentro del círculo (ratón, dedo o lápiz).
+  const miniFoto = $<HTMLImageElement>('[data-foto-vista]');
+  let arrastre: { id: number; x: number; y: number; ax: number; ay: number } | null = null;
+  miniFoto?.addEventListener('pointerdown', (ev) => {
+    if (!foto.base) return;
+    ev.preventDefault();
+    miniFoto.setPointerCapture(ev.pointerId);
+    arrastre = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, ax: foto.ajuste.x, ay: foto.ajuste.y };
+  });
+  miniFoto?.addEventListener('pointermove', (ev) => {
+    if (!arrastre || ev.pointerId !== arrastre.id) return;
+    const lado = miniFoto.getBoundingClientRect().width || 1;
+    // Llevar la foto a la derecha descubre su lado izquierdo: el centro del recorte va al revés.
+    foto.ajuste = normalizarAjuste({
+      ...foto.ajuste,
+      x: arrastre.ax - ((ev.clientX - arrastre.x) * 100) / lado,
+      y: arrastre.ay - ((ev.clientY - arrastre.y) * 100) / lado,
+    });
+    reencuadrar();
+  });
+  const soltar = () => (arrastre = null);
+  miniFoto?.addEventListener('pointerup', soltar);
+  miniFoto?.addEventListener('pointercancel', soltar);
 
   form.addEventListener('submit', (ev) => ev.preventDefault());
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
     // La tarjeta y los extras no son estado del CV: ni se guardan ni repintan la vista previa.
-    if (c.closest('[data-tarjeta-form]')) return;
+    if (c.closest('[data-tarjeta-form]') || c.dataset.ajuste) return;
     if (c.dataset.extra !== undefined) {
       const x = cfg.extras.find((e) => e.producto === c.dataset.extra);
       if (x) estado.extras = c.checked ? [...new Set([...estado.extras, x.id])] : estado.extras.filter((id) => id !== x.id);
@@ -822,11 +887,16 @@ export function iniciarEstudioCv() {
       const gen = ++genFoto;
       if (!f) return;
       if (!f.type.startsWith('image/')) return pintarFoto('Ese archivo no es una imagen.');
-      reducirFotoCv(f)
-        .then((url) => {
+      reducirBase(f, MAX_BASE)
+        .then(async (base) => {
+          if (gen !== genFoto) return;
+          const url = base && (await recortar(base, AJUSTE_INICIAL, MAX_FOTO));
           if (gen !== genFoto) return;
           if (!url) return pintarFoto('No hemos podido reducir esa foto. Prueba con otra.');
+          foto.base = base;
+          foto.ajuste = { ...AJUSTE_INICIAL };
           campo('foto').value = url;
+          guardarFoto();
           pintarFoto();
           persistir();
           programar();
@@ -860,6 +930,10 @@ export function iniciarEstudioCv() {
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.type === 'file' || c.closest('[data-tarjeta-form]') || c.dataset.extra !== undefined) return;
+    if (c.dataset.ajuste) {
+      foto.ajuste = normalizarAjuste({ ...foto.ajuste, [c.dataset.ajuste]: Number(c.value) });
+      return reencuadrar();
+    }
     if (c.tagName === 'TEXTAREA') acotar(c);
     if (c.name === 'colorLibre') estado.color = c.value;
     else if (c.name === 'colorLibre2') estado.color2 = c.value;

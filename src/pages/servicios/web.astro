@@ -55,6 +55,7 @@ const campo = 'campo';
 
     <div class="progreso-fijo">
       <Progreso pasos={PASOS_WEB} etiqueta="Pasos para hacer tu web" />
+      <button type="button" class="guia-boton" data-guia-abrir>Guía de este paso</button>
     </div>
 
     <form id="estudio-form" class="mt-8" novalidate autocomplete="on">
@@ -62,7 +63,7 @@ const campo = 'campo';
       <section data-paso="plantilla" aria-labelledby="paso-plantilla">
         <h2 id="paso-plantilla" class="paso-titulo">Elige el diseño de tu web</h2>
         <p class="paso-entradilla">Todos cuestan lo mismo, {euros(precio)}. Podrás cambiarlo después sin volver a escribir nada.</p>
-        <fieldset class="mt-6">
+        <fieldset class="mt-6" data-guia="galeria">
           <legend class="sr-only">Diseño de la web</legend>
           <div class="rejilla">
             {
@@ -84,7 +85,7 @@ const campo = 'campo';
         </fieldset>
         <p class="aviso" role="alert" data-error="plantilla" hidden>Elige un diseño para seguir.</p>
         <div class="paso-acciones">
-          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: tu negocio</button>
+          <button type="button" class="boton boton-principal" data-siguiente data-guia="siguiente">Siguiente: tu negocio</button>
         </div>
       </section>
 
@@ -94,14 +95,14 @@ const campo = 'campo';
         <p class="paso-entradilla">Lo que escribes se guarda solo en este navegador. A la derecha ves cómo queda.</p>
         <div class="con-vista">
           <div class="min-w-0">
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2" data-guia="atajos">
               <button type="button" class="boton boton-secundario boton-compacto" data-ejemplo>Rellenar con un ejemplo</button>
               <button type="button" class="boton boton-secundario boton-compacto" data-vaciar>Empezar en blanco</button>
               <button type="button" class="boton boton-secundario boton-compacto" data-textos>Escribir los textos por mí</button>
             </div>
             <p class="ayuda mt-2 text-sm" data-estado-textos role="status"></p>
 
-            <fieldset class="bloque">
+            <fieldset class="bloque" data-guia="negocio">
               <legend>Tu negocio</legend>
               <div class="filas">
                 <label class={campo}>Nombre del negocio *<input name="negocio" autocomplete="organization" required maxlength="80" /></label>
@@ -125,7 +126,7 @@ const campo = 'campo';
               <button type="button" class="anadir" data-anadir>+ Añadir servicio</button>
             </fieldset>
 
-            <fieldset class="bloque">
+            <fieldset class="bloque" data-guia="contacto">
               <legend>Contacto <span class="ayuda">(al menos uno)</span></legend>
               <div class="filas">
                 <label class={campo}>Teléfono<input name="telefono" type="tel" autocomplete="tel" maxlength="24" /></label>
@@ -157,7 +158,7 @@ const campo = 'campo';
         <p class="paso-entradilla">Elige el color de tu marca y la letra. La vista previa se actualiza sola.</p>
         <div class="con-vista">
           <div class="min-w-0">
-            <fieldset class="bloque">
+            <fieldset class="bloque" data-guia="color">
               <legend>Color</legend>
               <div class="muestras">
                 {
@@ -174,7 +175,7 @@ const campo = 'campo';
                 </label>
               </div>
             </fieldset>
-            <fieldset class="bloque">
+            <fieldset class="bloque" data-guia="letra">
               <legend>Letra</legend>
               <div class="letras">
                 {
@@ -228,11 +229,11 @@ const campo = 'campo';
             <p class="total"><span>Total</span><strong>{euros(precio)}</strong></p>
           </div>
           <p class="pagado" data-solo-pagado hidden>Pedido <strong data-res="ref"></strong> pagado. Tu web se publica sin marca de agua.</p>
-          <button type="button" class="boton boton-principal boton-destello w-full" data-comprar><span>Comprar y publicar · {euros(precio)}</span></button>
+          <button type="button" class="boton boton-principal boton-destello w-full" data-comprar data-guia="comprar"><span>Comprar y publicar · {euros(precio)}</span></button>
           <p class="mt-3 text-sm text-faint" role="status" data-estado-compra>Se publica en cuanto termines el pago.</p>
         </div>
         <!-- Dominio propio: solo con la web ya publicada (estudioWeb.ts + /api/web/dominio). -->
-        <div class="tarjeta dominio mt-4" data-dominio hidden>
+        <div class="tarjeta dominio mt-4" data-dominio data-guia="dominio" hidden>
           <h3 class="text-lg font-semibold">Tu dominio</h3>
           <p class="mt-1 text-sm text-faint">Si tienes un dominio (por ejemplo, peluquerialola.es), conéctalo y tu web saldrá en él con https. Si aún no lo tienes, cómpralo en cualquier registrador y vuelve aquí.</p>
           <div class="mt-3 flex flex-wrap items-end gap-2" data-dominio-pedir>
@@ -263,7 +264,7 @@ const campo = 'campo';
     </form>
 
     <!-- Vista previa: un único panel que el script mueve al paso activo. -->
-    <aside class="vista" aria-label="Vista previa de la web" data-vista data-tamano="movil" hidden>
+    <aside class="vista" aria-label="Vista previa de la web" data-vista data-guia="vista" data-tamano="movil" hidden>
       <div class="web-tamanos formas" role="radiogroup" aria-label="Ver como">
         <label class="forma"><input type="radio" name="tamano-vista" value="movil" class="sr-only" checked /><span>Móvil</span></label>
         <label class="forma"><input type="radio" name="tamano-vista" value="escritorio" class="sr-only" /><span>Ordenador</span></label>

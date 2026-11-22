@@ -4,6 +4,7 @@
 // Para aceptar un cambio visual a propósito: lanzar el workflow «QA visual» a mano con
 // actualizar=true y fusionar las capturas nuevas que sube como commit.
 import { expect, test, type Page } from '@playwright/test';
+import { CLAVE_GUIAS } from '../../src/data/tour';
 
 const ANCHOS = [360, 390, 768, 1280] as const;
 const PAGINAS = [
@@ -53,8 +54,8 @@ async function estabilizar(pg: Page) {
 for (const ancho of ANCHOS) {
   test.describe(`${ancho}px`, () => {
     test.use({ viewport: { width: ancho, height: 800 } });
-    // El aviso del tour (primera visita) tapa parte de la portada: se da por visto.
-    test.beforeEach(({ page }) => page.addInitScript(() => localStorage.setItem('tour:v1:estado', 'visto')));
+    // Las guías salen solas y tapan la portada: se entra como quien pulsó «No volver a mostrar».
+    test.beforeEach(({ page }) => page.addInitScript((k) => localStorage.setItem(k, 'no'), CLAVE_GUIAS));
     for (const [nombre, ruta] of PAGINAS) {
       test(`${nombre}`, async ({ page }) => {
         const r = await page.goto(ruta, { waitUntil: 'load' });

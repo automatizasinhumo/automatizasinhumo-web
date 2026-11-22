@@ -1,0 +1,41 @@
+/* Ventanitas de guía (Driver.js) comunes a toda la web. */
+.driver-popover.tour-ash {
+  background: var(--color-surface, #fff);
+  color: var(--color-ink, #111);
+  border-radius: 1rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+}
+.driver-popover.tour-ash .driver-popover-title {
+  font-size: 1.05rem;
+}
+.driver-popover.tour-ash .driver-popover-footer {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.driver-popover.tour-ash .driver-popover-footer button {
+  text-shadow: none;
+  border-radius: 9999px;
+  padding: 0.4rem 0.9rem;
+}
+.driver-popover.tour-ash .driver-popover-next-btn {
+  background: var(--color-brand, #1d4ed8);
+  color: var(--color-on-brand, #fff);
+  border-color: transparent;
+}
+.driver-popover.tour-ash .driver-popover-footer .guia-no-mostrar {
+  order: -1;
+  flex-basis: 100%;
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: start;
+  font-size: 0.8rem;
+  color: var(--color-muted, #555);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.driver-popover.tour-ash .driver-popover-close-btn {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.4rem;
+}

@@ -94,6 +94,11 @@ export type OpcionesPdf = {
 	letra?: string;
 	tamano?: string;
 	espaciado?: string;
+	/**
+	 * Muestra del diseño sin marca de agua: ignora `datos` y usa siempre el CV de ejemplo, así
+	 * nadie puede sacar su propio CV limpio por esta vía.
+	 */
+	muestra?: boolean;
 };
 
 /** Aplica letra, tamaño y espaciado del catálogo a los metadatos del CV. */
@@ -118,17 +123,17 @@ function aplicarFormato(d: ResumeData, { letra, tamano, espaciado }: Pick<Opcion
 }
 
 /** Genera el PDF. Los renders van en cola porque la decoración es estado del módulo. */
-export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra, tamano, espaciado }: OpcionesPdf): Promise<Blob> {
+export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra, tamano, espaciado, muestra }: OpcionesPdf): Promise<Blob> {
 	const trabajo = cola
 		.catch(() => {})
 		.then(async () => {
-			const d = sanitizeResume(datos);
+			const d = muestra ? datosEjemplo(plantilla) : sanitizeResume(datos);
 			d.metadata.page.locale = "es-ES";
 			if (plantilla && plantillas.some((p) => p.id === plantilla)) d.metadata.template = plantilla as ResumeData["metadata"]["template"];
 			nivelDePlantilla(d);
 			if (color && /^#[0-9a-f]{6}$/i.test(color)) d.metadata.design.colors.primary = color;
 			aplicarFormato(d, { letra, tamano, espaciado });
-			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO);
+			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO, muestra === true);
 			return createResumePdfBlob({ data: d });
 		});
 	cola = trabajo;
