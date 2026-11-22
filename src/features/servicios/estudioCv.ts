@@ -8,7 +8,7 @@
  * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, correoValido, euros, esCamino, faltanTrasImportar, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, correoValido, euros, esCamino, faltanTrasImportar, linkedinValido, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { gruposPortales, sobra } from './cvPortales';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { guiar } from '../tour/guia';
@@ -475,7 +475,7 @@ export function iniciarEstudioCv() {
     if (!correoValido(f.email)) puntos.push([false, '', 'El correo no parece válido: revisa que tenga @ y dominio']);
     if (!telefonoValido(f.telefono)) puntos.push([false, '', 'El teléfono no parece válido: revisa que tenga entre 9 y 15 cifras']);
     if (!webValida(f.web ?? '')) puntos.push([false, '', 'La web no parece válida: escribe la dirección (por ejemplo, tunombre.es)']);
-    if (!webValida(f.linkedin ?? '') && !/^@?[\p{L}\p{N}_-]{3,100}$/u.test((f.linkedin ?? '').trim())) puntos.push([false, '', 'El LinkedIn no parece válido: pega la dirección de tu perfil o tu usuario']);
+    if (!linkedinValido(f.linkedin ?? '')) puntos.push([false, '', 'El LinkedIn no parece válido: pega la dirección de tu perfil o tu usuario']);
     $('[data-repaso]')?.replaceChildren(
       ...puntos.map(([ok, bien, mal]) => {
         const li = document.createElement('li');

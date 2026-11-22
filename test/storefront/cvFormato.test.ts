@@ -1,6 +1,6 @@
 // Formato de los datos de contacto del CV: lo que «Revisa» avisa como mal escrito (sin bloquear).
 import { describe, expect, it } from 'vitest';
-import { correoValido, faltanTrasImportar, telefonoValido, webValida } from '../../src/features/servicios/cv';
+import { correoValido, faltanTrasImportar, linkedinValido, telefonoValido, webValida } from '../../src/features/servicios/cv';
 
 describe('formato de contacto', () => {
   it('correo', () => {
@@ -14,6 +14,10 @@ describe('formato de contacto', () => {
   it('web', () => {
     for (const v of ['', 'anaperez.es', 'https://anaperez.es/portfolio', 'http://www.ana.com']) expect(webValida(v), v).toBe(true);
     for (const v of ['javascript:alert(1)', 'data:text/html,hola', 'mi web', 'anaperez', 'ftp://ana.es']) expect(webValida(v), v).toBe(false);
+  });
+  it('LinkedIn: mismo criterio que el CV (una dirección sin perfil no vale)', () => {
+    for (const v of ['', 'https://www.linkedin.com/in/ana-perez', 'linkedin.com/in/ana', '@ana_perez', 'anaperez']) expect(linkedinValido(v), v).toBe(true);
+    for (const v of ['https://www.linkedin.com/', 'linkedin.com/company/x', 'ab']) expect(linkedinValido(v), v).toBe(false);
   });
 });
 

@@ -116,12 +116,13 @@ export const DISENOS_CV: readonly DisenoCv[] = [
  * Diseños que lee bien un ATS (los filtros automáticos de las empresas), medidos con `node cv-estudio/ats.mjs`:
  * el PDF se extrae con pdf.js y con pdftotext, el nombre sale arriba, los apartados no se mezclan y el
  * lector de CV recupera contacto, experiencia y formación. No depende de las columnas: se mide, no se supone.
- * Si cambia una plantilla, se vuelve a medir y se actualiza esta lista.
+ * Fuera: encabezados con letras espaciadas («e x p e r i e n c i a») o pegados al texto, que el lector no
+ * reconoce. Si cambia una plantilla, se vuelve a medir y se actualiza esta lista.
  */
 export const DISENOS_ATS: ReadonlySet<string> = new Set([
-  'onyx', 'azurill', 'bronzor', 'chikorita', 'ditto', 'kakuna', 'lapras', 'leafish', 'rhyhorn', 'scizor',
-  'aurora', 'coral', 'lienzo', 'nocturno', 'mosaico', 'prisma', 'brisa', 'oasis', 'tinta', 'pixel',
-  'cometa', 'trazo', 'arcada', 'foco', 'editorial',
+  'onyx', 'azurill', 'chikorita', 'ditto', 'kakuna', 'lapras', 'leafish', 'rhyhorn', 'scizor',
+  'aurora', 'coral', 'nocturno', 'mosaico', 'prisma', 'brisa', 'oasis', 'tinta', 'pixel',
+  'cometa', 'trazo', 'foco',
 ]);
 export const leeAts = (d: Pick<DisenoCv, 'id'>) => DISENOS_ATS.has(d.id);
 
@@ -166,6 +167,7 @@ export const filtrosDe = (d: DisenoCv) => FILTROS_DISENO.filter((f) => f.cumple(
 
 /** Letra, tamaño y espaciado: el mismo catálogo que usa el motor, para que página y PDF no se desfasen. */
 export { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, TAMANOS } from '../../../cv-estudio/src/catalogo-formato';
+import { perfilLinkedin } from '../../../cv-estudio/src/linkedin';
 export const MOTOR_CV = '/cv/estudio/motor/estudio.js';
 export const miniaturaCv = (id: string) => `/cv/estudio/miniaturas/${id}.jpg`;
 
@@ -254,6 +256,8 @@ export const telefonoValido = (v: string) => {
   const cifras = t.replace(/\D/g, '').length;
   return /^\(?\+?[\d\s().-]+$/.test(t) && cifras >= 9 && cifras <= 15;
 };
+/** LinkedIn: vacío, o un perfil que el CV va a poder mostrar (mismo criterio que la conversión). */
+export const linkedinValido = (v: string) => !v.trim() || !!perfilLinkedin(v);
 /** Web o perfil: dirección http(s) o un dominio («anaperez.es»); nunca otros esquemas (javascript:, data:). */
 export const webValida = (v: string) => {
   const t = v.trim();

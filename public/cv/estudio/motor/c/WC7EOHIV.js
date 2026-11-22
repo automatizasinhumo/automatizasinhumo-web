@@ -1,0 +1,2 @@
+/* Contiene software MIT/Apache-2.0 de terceros (Reactive Resume, Resumv, react-pdf, pdf.js, React, Phosphor) y fuentes OFL-1.1. Licencias: /cv/estudio/motor/LICENCIAS.txt */
+import{a,b,c,d,e,f}from"/cv/estudio/motor/c/BH2FTIJB.js";import"/cv/estudio/motor/c/CJS3AOBN.js";import"/cv/estudio/motor/c/SSVUU7Q3.js";import"/cv/estudio/motor/c/D657QFS3.js";import"/cv/estudio/motor/c/5PGWUB7I.js";import"/cv/estudio/motor/c/KKXX2T77.js";export{b as findPeriod,c as hasContactDetails,d as isContactLine,a as knownHeading,f as parseResumeText,e as standaloneDate};
