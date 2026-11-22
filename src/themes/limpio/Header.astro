@@ -240,23 +240,23 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
     place-items: center;
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 0.8rem;
+    border-radius: var(--ds-radio-marco);
     background: linear-gradient(135deg in oklch, var(--familia), var(--familia-2));
     color: #fff;
-    box-shadow: 0 6px 16px -8px var(--familia);
+    box-shadow: var(--ds-sombra-familia-1) var(--familia);
     transition: transform var(--ds-mov-rapido);
   }
   .mega a.fam:hover .fam-icono { transform: rotate(-6deg) scale(1.06); }
   .mega .fam-texto { display: grid; line-height: 1.25; }
-  .mega .fam-texto strong { font-size: 0.95rem; }
-  .mega .fam-texto small { font-size: 0.78rem; font-weight: 500; color: var(--familia); }
+  .mega .fam-texto strong { font-size: var(--ds-texto-menu); }
+  .mega .fam-texto small { font-size: var(--ds-texto-etiqueta); font-weight: 500; color: var(--familia); }
   .mega .servs { display: grid; margin-top: var(--ds-hueco-2); padding-left: calc(2.5rem + var(--ds-hueco-3)); }
   .mega .familias a.serv {
     display: flex;
     gap: var(--ds-hueco-2);
     align-items: center;
     min-height: 2rem;
-    font-size: 0.85rem;
+    font-size: var(--ds-texto-small);
     color: var(--color-muted);
     text-decoration: none;
   }
@@ -264,9 +264,9 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
   .mega a.serv.pronto { color: var(--color-faint); }
   .mega .marca-pronto {
     border-radius: var(--ds-radio-pildora);
-    padding: 0 0.45rem;
+    padding: 0 var(--ds-hueco-2);
     background: color-mix(in oklab, var(--familia) 10%, transparent);
-    font-size: 0.68rem;
+    font-size: var(--ds-texto-mini);
     font-weight: 600;
     color: var(--familia);
   }
