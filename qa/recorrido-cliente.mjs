@@ -2,11 +2,12 @@
 // a 390 px (móvil) y a 1280 px:
 //   portada → ficha del servicio → «Contratar ahora» abre el pago (sin pagar)
 //   → «Empieza gratis» → formulario por pasos → gracias con su número → página de estado
-//   → el mismo formulario enviado otra vez devuelve la misma solicitud (no crea otra).
+//   → el mismo formulario enviado otra vez devuelve la misma solicitud (no crea otra)
+//   → cada servicio de autoservicio (autoservicio.json) entra en el carrito.
 // Falla si falta un botón, si una página da error o si salta un error de JavaScript.
 // El correo es la dirección de pruebas de Resend (delivered@resend.dev): no escribe a nadie real.
 // uso: node qa/recorrido-cliente.mjs <base> [slug=web-una-pagina]
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const [base, slug = 'web-una-pagina'] = process.argv.slice(2);
@@ -130,6 +131,26 @@ async function recorrido(ctx, ancho) {
       if (r.status() !== 303) throw new Error(`el reenvío respondió HTTP ${r.status()} en vez de 303`);
       const otra = new URL(r.headers().location ?? '', base).searchParams.get('id');
       if (otra !== id) throw new Error(`el reenvío creó ${otra} en vez de devolver ${id}`);
+    });
+    // Los estudios llenan el carrito con ids públicos de autoservicio.json; si la D1 tiene
+    // otros ids, resolveCart descarta la línea en silencio y el carrito sale vacío.
+    await paso('cada servicio de autoservicio entra en el carrito', async () => {
+      const auto = JSON.parse(readFileSync(new URL('../src/features/servicios/autoservicio.json', import.meta.url), 'utf8'));
+      const claves = Object.entries(auto)
+        .filter(([k]) => !k.startsWith('$'))
+        .flatMap(([, p]) => (p.variantes ? Object.values(p.variantes).map((v) => `${p.producto}:${v.id}`) : [p.producto]));
+      for (const key of claves) {
+        const r = await pg.request.post(new URL('/api/cart', base).toString(), {
+          multipart: { _action: 'update', key, qty: '1' },
+          headers: { Origin: new URL(base).origin, 'x-partial': '1' },
+        });
+        if (r.status() >= 400) throw new Error(`/api/cart respondió HTTP ${r.status()} con ${key}`);
+      }
+      await ir('/cart');
+      const html = await pg.content();
+      const faltan = claves.filter((k) => !html.includes(`value="${k}"`));
+      if (faltan.length) throw new Error(`el carrito no muestra ${faltan.join(', ')}`);
+      await pg.screenshot({ path: `capturas/recorrido-${ancho}-carrito.png`, fullPage: true });
     });
   } catch {
     // El fallo ya está anotado en su paso; los siguientes dependen de él.
