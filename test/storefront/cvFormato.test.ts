@@ -1,6 +1,6 @@
 // Formato de los datos de contacto del CV: lo que «Revisa» avisa como mal escrito (sin bloquear).
 import { describe, expect, it } from 'vitest';
-import { correoValido, telefonoValido, webValida } from '../../src/features/servicios/cv';
+import { correoValido, faltanTrasImportar, telefonoValido, webValida } from '../../src/features/servicios/cv';
 
 describe('formato de contacto', () => {
   it('correo', () => {
@@ -14,5 +14,29 @@ describe('formato de contacto', () => {
   it('web', () => {
     for (const v of ['', 'anaperez.es', 'https://anaperez.es/portfolio', 'http://www.ana.com']) expect(webValida(v), v).toBe(true);
     for (const v of ['javascript:alert(1)', 'data:text/html,hola', 'mi web', 'anaperez', 'ftp://ana.es']) expect(webValida(v), v).toBe(false);
+  });
+});
+
+describe('qué falta tras importar', () => {
+  it('un CV vacío lo pide todo, en el orden del formulario', () => {
+    expect(faltanTrasImportar({})).toEqual(['tu nombre', 'el correo', 'el teléfono', 'la ciudad', 'un resumen sobre ti', 'la experiencia', 'la formación', 'las habilidades', 'los idiomas']);
+  });
+  it('un CV completo no pide nada', () => {
+    const f = {
+      nombre: 'Ana',
+      email: 'ana@x.es',
+      telefono: '600 000 000',
+      ubicacion: 'Sevilla',
+      resumen: 'Atención al cliente.',
+      experiencia: [{ puesto: 'Agente', empresa: 'Grupo Norte', periodo: '2020 – 2023' }],
+      formacion: [{ titulo: 'Grado', centro: 'US' }],
+      habilidades: [{ nombre: 'Zendesk' }],
+      idiomas: [{ idioma: 'Inglés' }],
+    };
+    expect(faltanTrasImportar(f)).toEqual([]);
+    expect(faltanTrasImportar({ ...f, experiencia: [{ puesto: 'Agente', periodo: '' }], telefono: '  ' })).toEqual(['el teléfono', 'las fechas de algún puesto']);
+  });
+  it('las filas vacías no cuentan', () => {
+    expect(faltanTrasImportar({ habilidades: [{ nombre: '' }], idiomas: [{}] })).toContain('las habilidades');
   });
 });

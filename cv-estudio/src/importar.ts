@@ -211,13 +211,13 @@ export function aFormulario(d: ResumeData): FormCv {
 	};
 }
 
-export type ResultadoImportar = { ok: true; tipo: TipoImportable; form: FormCv } | { ok: false; motivo: "tipo" | "vacio" | "lectura" };
+export type ResultadoImportar = { ok: true; tipo: TipoImportable; form: FormCv } | { ok: false; motivo: "tipo" | "grande" | "vacio" | "lectura" };
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
 /** Lee el fichero y devuelve el formulario relleno. Nunca lanza: la página enseña el motivo. */
 export async function importarCv(fichero: Blob & { name?: string }, cargarPdfjs: CargarPdfjs): Promise<ResultadoImportar> {
-	if (fichero.size > MAX_BYTES) return { ok: false, motivo: "tipo" };
+	if (fichero.size > MAX_BYTES) return { ok: false, motivo: "grande" };
 	const bytes = new Uint8Array(await fichero.arrayBuffer());
 	const nombre = fichero.name ?? "cv";
 	const tipo = tipoDe(bytes, nombre);

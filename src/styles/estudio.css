@@ -300,6 +300,23 @@
   .importar-nota[data-tono='error'] {
     color: var(--color-ink);
   }
+  .importar-ayuda {
+    margin-top: var(--ds-hueco-2);
+    font-size: var(--ds-texto-small);
+    color: var(--color-muted);
+  }
+  .importar-ayuda summary {
+    cursor: pointer;
+    color: var(--color-ink);
+  }
+  .importar-ayuda ul {
+    margin: var(--ds-hueco-2) 0;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .importar-ayuda li + li {
+    margin-top: var(--ds-hueco-1);
+  }
   .mas-apartados {
     margin-top: var(--ds-hueco-6);
     padding: var(--ds-hueco-3) var(--ds-hueco-4);

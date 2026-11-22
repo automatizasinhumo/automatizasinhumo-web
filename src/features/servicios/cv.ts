@@ -267,7 +267,41 @@ export const webValida = (v: string) => {
   }
 };
 
-export const euros = (centimos: number) =>
+/** Lo mínimo que se mira tras importar un CV (la forma del formulario, sin depender de cv-estudio). */
+interface CvImportado {
+  nombre?: string;
+  email?: string;
+  telefono?: string;
+  ubicacion?: string;
+  resumen?: string;
+  experiencia?: { puesto?: string; empresa?: string; periodo?: string }[];
+  formacion?: { titulo?: string; centro?: string }[];
+  habilidades?: { nombre?: string }[];
+  idiomas?: { idioma?: string }[];
+}
+
+/**
+ * Lo que un CV importado no trae y conviene pedir, en el orden del formulario. Un lector de CV nunca
+ * acierta al 100 %: en vez de un «repásalo» genérico, se dice qué falta.
+ */
+export function faltanTrasImportar(f: CvImportado): string[] {
+  const lleno = (v?: string) => !!v?.trim();
+  const faltan: string[] = [];
+  if (!lleno(f.nombre)) faltan.push('tu nombre');
+  if (!lleno(f.email)) faltan.push('el correo');
+  if (!lleno(f.telefono)) faltan.push('el teléfono');
+  if (!lleno(f.ubicacion)) faltan.push('la ciudad');
+  if (!lleno(f.resumen)) faltan.push('un resumen sobre ti');
+  const puestos = (f.experiencia ?? []).filter((e) => lleno(e.puesto) || lleno(e.empresa));
+  if (!puestos.length) faltan.push('la experiencia');
+  else if (puestos.some((e) => !lleno(e.periodo))) faltan.push('las fechas de algún puesto');
+  if (!(f.formacion ?? []).some((e) => lleno(e.titulo) || lleno(e.centro))) faltan.push('la formación');
+  if (!(f.habilidades ?? []).some((h) => lleno(h.nombre))) faltan.push('las habilidades');
+  if (!(f.idiomas ?? []).some((i) => lleno(i.idioma))) faltan.push('los idiomas');
+  return faltan;
+}
+
+export const euros =(centimos: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: centimos % 100 ? 2 : 0 }).format(
     centimos / 100,
   );
