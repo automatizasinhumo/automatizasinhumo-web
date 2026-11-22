@@ -1,7 +1,8 @@
 // Tour de bienvenida (src/data/tour.ts): cada paso apunta a un bloque visible y único de la
-// portada, en escritorio y en móvil; avanzar, retroceder, Escape, «Ahora no» y recarga.
+// portada, en escritorio y en móvil. Sale solo una vez por visita; avanzar, retroceder, Escape,
+// «No volver a mostrar» y el enlace del pie que la reabre.
 import { expect, test } from '@playwright/test';
-import { CLAVE_TOUR, PASOS_TOUR } from '../../src/data/tour';
+import { CLAVE_GUIAS, PASOS_TOUR } from '../../src/data/tour';
 
 for (const ancho of [390, 1280]) {
   test.describe(`tour ${ancho}px`, () => {
@@ -16,30 +17,31 @@ for (const ancho of [390, 1280]) {
       }
     });
 
-    test('empezar, avanzar, retroceder y Escape', async ({ page }) => {
+    test('sale sola, avanza, retrocede, Escape y no se repite en la visita', async ({ page }) => {
       await page.goto('/');
-      const aviso = page.locator('#tour-invitacion');
-      await expect(aviso).toBeVisible();
-      await aviso.getByRole('button', { name: 'Empezar guía' }).click();
       const globo = page.locator('.driver-popover');
       await expect(globo).toContainText(PASOS_TOUR[0].titulo);
       await expect(globo).toContainText(`1 de ${PASOS_TOUR.length}`);
+      await expect(globo.getByRole('button', { name: 'Cerrar la guía' })).toBeVisible();
       await globo.getByRole('button', { name: /Siguiente/ }).click();
       await expect(globo).toContainText(PASOS_TOUR[1].titulo);
       await globo.getByRole('button', { name: /Anterior/ }).click();
       await expect(globo).toContainText(PASOS_TOUR[0].titulo);
       await page.keyboard.press('Escape');
       await expect(globo).toHaveCount(0);
-      expect(await page.evaluate((k) => localStorage.getItem(k), CLAVE_TOUR)).toBe('visto');
       await page.reload();
-      await expect(aviso).toBeHidden();
+      await page.waitForLoadState('networkidle');
+      await expect(globo).toHaveCount(0);
     });
 
-    test('«Ahora no» no vuelve a ofrecerla; el enlace del pie la reabre', async ({ page }) => {
+    test('«No volver a mostrar» la apaga; el enlace del pie la reabre', async ({ page }) => {
       await page.goto('/');
-      await page.locator('#tour-invitacion').getByRole('button', { name: 'Ahora no' }).click();
+      await page.locator('.driver-popover').getByRole('button', { name: 'No volver a mostrar' }).click();
+      expect(await page.evaluate((k) => localStorage.getItem(k), CLAVE_GUIAS)).toBe('no');
+      await page.evaluate(() => sessionStorage.clear());
       await page.reload();
-      await expect(page.locator('#tour-invitacion')).toBeHidden();
+      await page.waitForLoadState('networkidle');
+      await expect(page.locator('.driver-popover')).toHaveCount(0);
       await page.getByRole('link', { name: 'Ver guía de la web' }).click();
       await expect(page.locator('.driver-popover')).toContainText(PASOS_TOUR[0].titulo);
     });

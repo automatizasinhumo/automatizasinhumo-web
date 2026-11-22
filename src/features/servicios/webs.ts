@@ -95,6 +95,28 @@ export const PASOS_WEB = [
   { id: 'publica', titulo: 'Publica' },
 ] as const;
 
+/** Guía con ventanitas por paso (src/features/tour/guia.ts): `guia` es el `data-guia` del bloque. */
+export const GUIA_WEB: Record<string, readonly { guia: string; titulo: string; texto: string }[]> = {
+  plantilla: [
+    { guia: 'galeria', titulo: 'Elige un diseño', texto: 'Todos cuestan lo mismo. Cada uno tiene su estructura; podrás cambiarlo luego sin volver a escribir nada.' },
+    { guia: 'siguiente', titulo: 'Y luego, tu negocio', texto: 'Cuando tengas uno, sigue: escribes tus datos y ves tu web al momento.' },
+  ],
+  datos: [
+    { guia: 'atajos', titulo: 'No empieces de cero', texto: 'Rellena con un ejemplo o deja que escribamos los textos por ti a partir de tu sector.' },
+    { guia: 'negocio', titulo: 'Tu negocio', texto: 'Nombre, a qué te dedicas y unas líneas. La foto es opcional: tu local, tu trabajo o tu logo.' },
+    { guia: 'contacto', titulo: 'Cómo te encuentran', texto: 'Pon al menos un teléfono, WhatsApp o correo: serán los botones grandes de tu web.' },
+    { guia: 'vista', titulo: 'Tu web, en vivo', texto: 'Se actualiza mientras escribes. Cambia entre móvil y ordenador para verla en los dos.' },
+  ],
+  personaliza: [
+    { guia: 'color', titulo: 'El color de tu marca', texto: 'Elige uno de la lista o el tuyo exacto. Los textos se ajustan solos para que se lean bien.' },
+    { guia: 'letra', titulo: 'La letra', texto: 'Cambia el carácter de la web: clásica, moderna, cercana…' },
+  ],
+  publica: [
+    { guia: 'comprar', titulo: 'Compra y publica', texto: 'Al pagar, tu web queda publicada sin marca de agua. Puedes cambiarla cuando quieras.' },
+    { guia: 'dominio', titulo: 'Tu dominio', texto: 'Conecta tu propio nombre (tunegocio.es) y te decimos el único paso que te toca a ti.' },
+  ],
+};
+
 export const MAX_SERVICIOS_WEB = 6;
 export const MAX_ENLACES_WEB = 4;
 

@@ -35,10 +35,13 @@ export function normalizar(entrada: Partial<Record<keyof Decoracion, unknown>> |
 	};
 }
 
-export function fijarCapas(decoracion: Partial<Record<keyof Decoracion, unknown>> | null | undefined, marcaAgua: string | null | undefined) {
+/**
+ * `muestra`: solo para el CV de ejemplo (entrada.ts lo impone), que no lleva datos de nadie y
+ * se enseña limpio al elegir diseño. Con datos del cliente nunca hay PDF sin marca en el navegador.
+ */
+export function fijarCapas(decoracion: Partial<Record<keyof Decoracion, unknown>> | null | undefined, marcaAgua: string | null | undefined, muestra = false) {
 	actual = normalizar(decoracion);
-	// Nunca sin marca: el PDF limpio no sale del navegador.
-	marca = String(marcaAgua ?? "").trim().slice(0, 60) || MARCA_POR_DEFECTO;
+	marca = muestra ? "" : String(marcaAgua ?? "").trim().slice(0, 60) || MARCA_POR_DEFECTO;
 }
 
 // Lienzo lógico A4 en puntos; el SVG se estira a la página real (A4 o carta).
