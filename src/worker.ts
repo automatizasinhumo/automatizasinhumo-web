@@ -148,7 +148,8 @@ export default {
       const w = await webPorSlug(env.DB, slug);
       if (!w) return null;
       const tienda = await origenTienda();
-      return documentoWeb(w.datos, url, tienda, `${tienda || new URL(url).origin}/w/${w.slug}/foto`);
+      const recursos = `${tienda || new URL(url).origin}/w/${w.slug}`;
+      return documentoWeb(w.datos, url, tienda, `${recursos}/foto`, `${recursos}/galeria/`);
     }).catch((err) => {
       console.error('Custom domain lookup failed:', err instanceof Error ? err.message : 'error');
       return null;

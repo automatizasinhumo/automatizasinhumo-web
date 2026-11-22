@@ -127,6 +127,7 @@ export const MAX_PREGUNTAS_WEB = 8;
 export const SECCIONES_WEB = [
   { id: 'sobre', nombre: 'Quiénes somos' },
   { id: 'servicios', nombre: 'Servicios' },
+  { id: 'galeria', nombre: 'Fotos' },
   { id: 'opiniones', nombre: 'Opiniones' },
   { id: 'preguntas', nombre: 'Preguntas frecuentes' },
   { id: 'contacto', nombre: 'Contacto' },
@@ -184,6 +185,8 @@ export interface DatosWeb {
   orden: IdSeccionWeb[];
   /** Foto del negocio ya reducida en el navegador (data URL WebP/JPEG), o ''. */
   foto: string;
+  /** Fotos del trabajo o del local (data URL más pequeñas que la portada), hasta MAX_GALERIA_WEB. */
+  galeria: string[];
 }
 
 /**
@@ -193,10 +196,13 @@ export interface DatosWeb {
  * descarta (la web se publica sin foto).
  */
 export const MAX_FOTO_WEB = 400_000;
+/** Galería: hasta 6 fotos de ~110 KB (lado mayor 1000 px); con la portada, la fila sigue lejos del máximo de D1. */
+export const MAX_GALERIA_WEB = 6;
+export const MAX_FOTO_GALERIA_WEB = 150_000;
 const FOTO = /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/;
 /** Foto guardada como bytes y tipo, para servirla en /w/<slug>/foto (og:image no admite data URL). */
-export function bytesFoto(foto: string): { tipo: string; bytes: Uint8Array<ArrayBuffer> } | null {
-  if (!fotoValida(foto)) return null;
+export function bytesFoto(foto: string, max = MAX_FOTO_WEB): { tipo: string; bytes: Uint8Array<ArrayBuffer> } | null {
+  if (!fotoValida(foto, max)) return null;
   const coma = foto.indexOf(',');
   let bin: string;
   try {
@@ -208,7 +214,10 @@ export function bytesFoto(foto: string): { tipo: string; bytes: Uint8Array<Array
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return { tipo: foto.slice(5, foto.indexOf(';')), bytes };
 }
-export const fotoValida = (v: unknown): v is string => typeof v === 'string' && v.length <= MAX_FOTO_WEB && FOTO.test(v);
+export const fotoValida = (v: unknown, max = MAX_FOTO_WEB): v is string => typeof v === 'string' && v.length <= max && FOTO.test(v);
+/** Fotos de galería válidas, sin repetidas y como mucho MAX_GALERIA_WEB. */
+export const galeriaValida = (v: unknown): string[] =>
+  [...new Set((Array.isArray(v) ? v : []).filter((x) => fotoValida(x, MAX_FOTO_GALERIA_WEB)))].slice(0, MAX_GALERIA_WEB) as string[];
 
 export const WEB_POR_DEFECTO: Pick<DatosWeb, 'plantilla' | 'color' | 'letra'> = {
   plantilla: 'clara',
@@ -286,6 +295,7 @@ export function validarWeb(x: unknown): ResultadoWeb {
       preguntas,
       orden: ordenWeb(o.orden),
       foto: fotoValida(o.foto) ? o.foto : '',
+      galeria: galeriaValida(o.galeria),
     },
   };
 }
@@ -323,6 +333,7 @@ export const EJEMPLO_WEB: DatosWeb = {
   opinionesUrl: '',
   orden: [...ORDEN_POR_DEFECTO],
   foto: '',
+  galeria: [],
 };
 
 // ---------- Pintado ----------
@@ -422,6 +433,11 @@ export const CSS_WEB = `
 .w-ico{width:1.15em;height:1.15em;flex:none}
 .w-cab{padding:56px 0 48px;text-align:center}
 .w-portada img{display:block;width:100%;max-height:440px;object-fit:cover;border-radius:16px}
+.w-galeria{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.w-galeria img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;background:var(--w-panel)}
+@container (min-width:640px){.w-galeria{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
+.w-revista .w-galeria img{border-radius:0}
+.w-brutal .w-galeria img{border:3px solid #111827;border-radius:0}
 .w-sector{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--w-ct)}
 .w-cab h1{font-size:clamp(2rem,9cqi,3.6rem);margin-top:10px}
 .w-lema{max-width:36rem;margin:14px auto 0;font-size:1.15rem;color:var(--w-suave)}
@@ -711,6 +727,11 @@ export interface OpcionesWeb {
   marca?: string;
   /** Pie de la publicada (enlace a quien la hizo). */
   pie?: string;
+  /**
+   * Prefijo de las fotos de galería en la publicada (…/w/<slug>/galeria/), para que el HTML no
+   * lleve los bytes y las fotos carguen al bajar. Sin él (vista previa), van las data URL.
+   */
+  galeria?: string;
 }
 
 /** HTML de la web (solo el contenido, con ámbito en `.w`). Todo texto del cliente va escapado. */
@@ -754,11 +775,18 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const preguntas = d.preguntas
     .map((x) => `<li><details class="w-dato w-pregunta" name="preguntas"><summary>${esc(x.pregunta)}</summary><div class="w-respuesta">${parrafosHtml(x.respuesta)}</div></details></li>`)
     .join('');
+  const fotos = d.galeria
+    .map(
+      (f, i) =>
+        `<li><img src="${esc(o.galeria ? `${o.galeria}${i}` : f)}" alt="${esc(`${d.negocio} · foto ${i + 1}`)}" loading="lazy" decoding="async"></li>`,
+    )
+    .join('');
   const seccion = (id: string, titulo: string, cuerpo: string) =>
     `<section class="w-sec w-${id}-sec" id="${id}"><div class="w-in"><h2>${titulo}</h2>${cuerpo}</div></section>`;
   const secciones: Record<IdSeccionWeb, string> = {
     sobre: d.sobre ? seccion('sobre', 'Quiénes somos', `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
     servicios: servicios ? seccion('servicios', 'Servicios', `<ul class="w-servicios">${servicios}</ul>`) : '',
+    galeria: fotos ? seccion('galeria', 'Fotos', `<ul class="w-galeria">${fotos}</ul>`) : '',
     opiniones: opiniones
       ? seccion('opiniones', 'Opiniones', `<ul class="w-opiniones">${opiniones}</ul>${d.opinionesUrl ? `<p class="w-mas"><a href="${esc(d.opinionesUrl)}" rel="noopener">Ver todas las opiniones</a></p>` : ''}`)
       : '',
@@ -819,7 +847,7 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
  * cuando la página se sirve desde otro dominio ('' = mismo origen). `imagen` es la URL absoluta
  * de la foto (/w/<slug>/foto) para la tarjeta que sale al compartir el enlace; '' si no hay foto.
  */
-export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = ''): string {
+export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = ''): string {
   const titulo = d.sector ? `${d.negocio} · ${d.sector}` : d.negocio;
   const descripcion = (d.lema || d.sobre.replace(/\s+/g, ' ') || titulo).slice(0, 160);
   const pie = `Web hecha con <a href="${esc(tienda)}/servicios/web">Automatiza sin humo</a>`;
@@ -841,7 +869,7 @@ ${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta
 <style>body{margin:0}${CSS_WEB}</style>
 </head>
 <body>
-${renderWeb(d, { pie })}
+${renderWeb(d, { pie, galeria })}
 </body>
 </html>
 `;

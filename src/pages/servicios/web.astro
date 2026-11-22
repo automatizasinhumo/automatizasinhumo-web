@@ -16,6 +16,7 @@ import {
   PASOS_WEB,
   PLANTILLAS_WEB,
   SECCIONES_WEB,
+  MAX_GALERIA_WEB,
   WEB_POR_DEFECTO,
 } from '../../features/servicios/webs';
 import { SECTORES_WEB } from '../../features/servicios/sectores';
@@ -120,6 +121,11 @@ const campo = 'campo';
                 <label class={campo}>Foto de portada <span class="ayuda">(opcional: tu local, tu trabajo o tu logo)</span><input type="file" accept="image/*" data-foto-elegir /></label>
                 <button type="button" class="quitar" data-foto-quitar hidden>Quitar foto</button>
                 <p class="ayuda" data-foto-aviso role="status" hidden></p>
+              </div>
+              <div class="galeria-fotos" data-galeria>
+                <ul class="galeria-mini" data-galeria-lista></ul>
+                <label class={campo} data-galeria-anadir>Fotos de tu trabajo <span class="ayuda">(opcional, hasta {MAX_GALERIA_WEB}: trabajos hechos, el local, el equipo)</span><input type="file" accept="image/*" multiple data-galeria-elegir /></label>
+                <p class="ayuda" data-galeria-aviso role="status" hidden></p>
               </div>
             </fieldset>
 
