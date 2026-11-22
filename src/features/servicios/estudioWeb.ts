@@ -13,9 +13,9 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
-import { fotoValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_WEB, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
 
-type Lista = 'servicios' | 'enlaces';
+type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
 type Contenido = Omit<DatosWeb, 'plantilla' | 'color' | 'letra'>;
 interface Config {
@@ -57,7 +57,7 @@ interface Pagado {
 const CLAVE = 'servicios:web';
 const CLAVE_PEDIDO = 'servicios:web:pedido';
 const PASOS = PASOS_WEB.map((p) => p.id) as string[];
-const CAMPOS = ['negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario'] as const;
+const CAMPOS = ['negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl'] as const;
 
 /**
  * Reduce la foto en el navegador (lado mayor 1200 px) y la devuelve como data URL que quepa en
@@ -79,7 +79,7 @@ async function reducirFoto(f: File): Promise<string> {
     }
   return '';
 }
-const LISTAS: Lista[] = ['servicios', 'enlaces'];
+const LISTAS: Lista[] = ['servicios', 'enlaces', 'opiniones', 'preguntas'];
 const COLOR = /^#[0-9a-f]{6}$/i;
 const ERROR_PUBLICAR: Record<string, string> = {
   negocio: 'Falta el nombre del negocio.',
@@ -172,8 +172,19 @@ export function iniciarEstudioWeb() {
       for (const fila of Array.isArray(c[l]) ? (c[l] as unknown as Fila[]) : []) anadir(l, fila);
     }
     limitar();
+    const lista = $('[data-orden]')!;
+    for (const id of ordenWeb(c.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);
+    pintarOrden();
     genFoto++;
     pintarFoto();
+  }
+  /** Primera no sube y última no baja. */
+  function pintarOrden() {
+    const filas = $$('[data-orden] > li');
+    filas.forEach((li, i) => {
+      $<HTMLButtonElement>('[data-subir]', li)!.disabled = i === 0;
+      $<HTMLButtonElement>('[data-bajar]', li)!.disabled = i === filas.length - 1;
+    });
   }
   /** Miniatura y botón «Quitar» según haya o no foto guardada. */
   function pintarFoto(aviso = '') {
@@ -201,9 +212,10 @@ export function iniciarEstudioWeb() {
       c[l] = $$('[data-items] > .item', $(`[data-lista="${l}"]`)!).map((item) =>
         Object.fromEntries($$<HTMLInputElement>('[data-k]', item).map((x) => [x.dataset.k!, x.value.trim()])),
       );
+    c.orden = $$('[data-orden] > li').map((li) => li.dataset.seccion);
     return c as unknown as Contenido;
   }
-  const vacio = (): Partial<Contenido> => ({ servicios: [{ nombre: '', precio: '', texto: '' }], enlaces: [] });
+  const vacio = (): Partial<Contenido> => ({ servicios: [{ nombre: '', precio: '', texto: '' }], enlaces: [], opiniones: [], preguntas: [], orden: ordenWeb(recoger().orden) });
   const ejemplo = (): Contenido => {
     const { plantilla: _p, color: _c, letra: _l, ...c } = cfg.ejemplo;
     return c;
@@ -631,6 +643,19 @@ export function iniciarEstudioWeb() {
       limitar();
       persistir();
       return programar();
+    }
+    if (b.hasAttribute('data-subir') || b.hasAttribute('data-bajar')) {
+      const li = b.closest('li')!;
+      const sube = b.hasAttribute('data-subir');
+      const otro = sube ? li.previousElementSibling : li.nextElementSibling;
+      if (!otro) return;
+      li.parentElement!.insertBefore(li, sube ? otro : otro.nextSibling);
+      pintarOrden();
+      // El foco sigue en la misma flecha; si ha quedado desactivada, en la otra.
+      const f = b as HTMLButtonElement;
+      (f.disabled ? $<HTMLButtonElement>(sube ? '[data-bajar]' : '[data-subir]', li) : f)?.focus();
+      persistir();
+      return programar(true);
     }
     if (b.hasAttribute('data-quitar')) {
       b.closest('.item')?.remove();

@@ -119,11 +119,37 @@ export const GUIA_WEB: Record<string, readonly { guia: string; titulo: string; t
 
 export const MAX_SERVICIOS_WEB = 6;
 export const MAX_ENLACES_WEB = 4;
+export const MAX_OPINIONES_WEB = 6;
+export const MAX_PREGUNTAS_WEB = 8;
+
+/** Secciones que el cliente puede reordenar (la portada va siempre arriba y el pie abajo). */
+export const SECCIONES_WEB = [
+  { id: 'sobre', nombre: 'Quiénes somos' },
+  { id: 'servicios', nombre: 'Servicios' },
+  { id: 'opiniones', nombre: 'Opiniones' },
+  { id: 'preguntas', nombre: 'Preguntas frecuentes' },
+  { id: 'contacto', nombre: 'Contacto' },
+] as const;
+export type IdSeccionWeb = (typeof SECCIONES_WEB)[number]['id'];
+const ORDEN_POR_DEFECTO = SECCIONES_WEB.map((x) => x.id) as IdSeccionWeb[];
+/** Orden válido: sin repetidos ni desconocidas; las que falten van al final en su sitio de siempre. */
+export function ordenWeb(v: unknown): IdSeccionWeb[] {
+  const dadas = (Array.isArray(v) ? v : []).filter((x): x is IdSeccionWeb => ORDEN_POR_DEFECTO.includes(x as IdSeccionWeb));
+  return [...new Set([...dadas, ...ORDEN_POR_DEFECTO])];
+}
 
 export interface ServicioWeb {
   nombre: string;
   precio: string;
   texto: string;
+}
+export interface OpinionWeb {
+  texto: string;
+  autor: string;
+}
+export interface PreguntaWeb {
+  pregunta: string;
+  respuesta: string;
 }
 export interface EnlaceWeb {
   etiqueta: string;
@@ -143,7 +169,18 @@ export interface DatosWeb {
   email: string;
   direccion: string;
   horario: string;
+  /** Pueblos o barrios donde trabaja (fontaneros, reformas…), en texto libre. */
+  zonas: string;
+  /** Página para reservar cita (Booksy, Google, la suya…): pasa a ser el botón principal. */
+  reservas: string;
   enlaces: EnlaceWeb[];
+  /** Opiniones de clientes que el negocio copia de donde las tenga (Google, Facebook…). */
+  opiniones: OpinionWeb[];
+  /** Dónde leer todas sus opiniones (su ficha de Google, por ejemplo). */
+  opinionesUrl: string;
+  preguntas: PreguntaWeb[];
+  /** Orden de las secciones (ordenWeb). */
+  orden: IdSeccionWeb[];
   /** Foto del negocio ya reducida en el navegador (data URL WebP/JPEG), o ''. */
   foto: string;
 }
@@ -215,6 +252,15 @@ export function validarWeb(x: unknown): ResultadoWeb {
     })
     .filter((e) => e.url)
     .slice(0, MAX_ENLACES_WEB);
+  const filas = (v: unknown) => (Array.isArray(v) ? v : []).map((f) => (f ?? {}) as Record<string, unknown>);
+  const opiniones = filas(o.opiniones)
+    .map((r) => ({ texto: parrafos(r.texto, 400), autor: texto(r.autor, 60) }))
+    .filter((x) => x.texto)
+    .slice(0, MAX_OPINIONES_WEB);
+  const preguntas = filas(o.preguntas)
+    .map((r) => ({ pregunta: texto(r.pregunta, 160), respuesta: parrafos(r.respuesta, 600) }))
+    .filter((x) => x.pregunta && x.respuesta)
+    .slice(0, MAX_PREGUNTAS_WEB);
   return {
     ok: true,
     datos: {
@@ -231,7 +277,13 @@ export function validarWeb(x: unknown): ResultadoWeb {
       email,
       direccion: texto(o.direccion, 160),
       horario: parrafos(o.horario, 300),
+      zonas: texto(o.zonas, 300),
+      reservas: urlSegura(o.reservas),
       enlaces,
+      opiniones,
+      opinionesUrl: urlSegura(o.opinionesUrl),
+      preguntas,
+      orden: ordenWeb(o.orden),
       foto: fotoValida(o.foto) ? o.foto : '',
     },
   };
@@ -256,7 +308,19 @@ export const EJEMPLO_WEB: DatosWeb = {
   email: 'hola@peluquerialola.es',
   direccion: 'Rúa da Raíña 1, Lugo',
   horario: 'Lunes a viernes: 9:30 – 20:00\nSábados: 9:30 – 14:00',
+  zonas: '',
+  reservas: '',
   enlaces: [{ etiqueta: 'Instagram', url: 'https://www.instagram.com/' }],
+  opiniones: [
+    { texto: 'Me cortan el pelo aquí desde hace años y siempre salgo contenta. Puntuales y muy cuidadosas.', autor: 'Marta G.' },
+    { texto: 'Me hicieron el recogido de la boda de mi hermana y aguantó toda la noche.', autor: 'Sara P.' },
+  ],
+  preguntas: [
+    { pregunta: '¿Hace falta pedir cita?', respuesta: 'Sí, trabajamos con cita para que no esperes. Escríbenos por WhatsApp y te damos hora.' },
+    { pregunta: '¿Puedo pagar con tarjeta?', respuesta: 'Sí, con tarjeta, Bizum o en efectivo.' },
+  ],
+  opinionesUrl: '',
+  orden: [...ORDEN_POR_DEFECTO],
   foto: '',
 };
 
@@ -330,6 +394,8 @@ const ICONO = {
   wa: '<path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/>',
   mail: '<path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7l9 6 9-6"/>',
   mapa: '<path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/><path d="M17.66 16.66 13.41 20.9a2 2 0 0 1-2.83 0l-4.24-4.24a8 8 0 1 1 11.32 0z"/>',
+  cita: '<path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/><path d="M16 3v4M8 3v4M4 11h16"/>',
+  zona: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
   reloj: '<path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/>',
   enlace: '<path d="M9 15l6-6"/><path d="M11 6l.46-.54a5 5 0 0 1 7.07 7.07L18 13"/><path d="M13 18l-.4.54a5.07 5.07 0 0 1-7.12 0 4.97 4.97 0 0 1 0-7.07L6 11"/>',
 } as const;
@@ -614,6 +680,25 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-retro .w-boton{border-radius:6px}
 .w-retro .w-portada img{border-radius:6px;border:8px solid #fffaf1;box-shadow:0 10px 30px rgb(43 33 24 / .25);transform:rotate(-1deg)}
 .w-retro .w-pie{border-top:2px dashed var(--w-borde)}
+.w-opiniones,.w-preguntas{display:grid;gap:12px;list-style:none;margin:0;padding:0}
+.w-opiniones{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.w-preguntas{max-width:46rem}
+.w-opinion,.w-pregunta{display:block}
+.w-opinion blockquote{margin:0;font-size:1.05rem}
+.w-opinion blockquote::before{content:"“";display:block;font-family:var(--w-ft-titulo);font-size:2.6rem;line-height:.8;color:var(--w-ct)}
+.w-opinion blockquote p+p,.w-respuesta p+p{margin-top:8px}
+.w-autor{margin-top:10px;font-weight:600;color:var(--w-suave)}
+.w-pregunta summary{cursor:pointer;font-weight:600;list-style-position:outside;margin-left:1.1em}
+.w-pregunta summary::marker{color:var(--w-ct)}
+.w-pregunta summary:focus-visible{outline:3px solid var(--w-c);outline-offset:3px}
+.w-respuesta{margin-top:8px;color:var(--w-suave)}
+.w-mas{margin-top:14px}
+.w-mas a{font-weight:600;color:var(--w-ct)}
+.w-barra{display:none}
+@container (max-width:640px){
+  .w-barra{position:sticky;bottom:0;z-index:4;display:flex;gap:8px;padding:10px 12px;background:var(--w-fondo);border-top:1px solid var(--w-borde);box-shadow:0 -6px 18px rgb(0 0 0 / .08)}
+  .w-barra .w-boton{flex:1 1 auto;justify-content:center;gap:6px;padding:10px 8px;font-size:.9rem;line-height:1.2;text-align:center;overflow-wrap:normal;word-break:normal}
+}
 .w-marca{position:absolute;inset:0;pointer-events:none;z-index:5;background-repeat:repeat}
 `.trim();
 
@@ -628,11 +713,18 @@ export interface OpcionesWeb {
 export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const letra = LETRAS_WEB.find((l) => l.id === d.letra) ?? LETRAS_WEB[0];
   const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, FONDO_TEXTO_CLARO)};--w-ct-oscuro:${acentoSobre(d.color, FONDO_TEXTO_OSCURO)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
-  const acciones = [
-    d.whatsapp && `<a class="w-boton w-boton-lleno" href="${esc(enlaceWhatsapp(d.whatsapp))}" rel="noopener">${icono('wa')}WhatsApp</a>`,
-    d.telefono && `<a class="w-boton${d.whatsapp ? '' : ' w-boton-lleno'}" href="tel:${esc(digitos(d.telefono))}">${icono('tel')}Llamar</a>`,
-    !d.telefono && !d.whatsapp && d.email && `<a class="w-boton w-boton-lleno" href="mailto:${esc(d.email)}">${icono('mail')}Escríbenos</a>`,
-  ].filter(Boolean);
+  // El primero es el botón principal (relleno): reservar, si hay enlace; si no, WhatsApp, llamar o correo.
+  const acciones = (
+    [
+      d.reservas && [d.reservas, 'cita', 'Reservar cita'],
+      d.whatsapp && [enlaceWhatsapp(d.whatsapp), 'wa', 'WhatsApp'],
+      d.telefono && [`tel:${digitos(d.telefono)}`, 'tel', 'Llamar'],
+      !d.telefono && !d.whatsapp && d.email && [`mailto:${d.email}`, 'mail', 'Escríbenos'],
+    ].filter(Boolean) as [string, keyof typeof ICONO, string][]
+  ).map(
+    ([href, ico, txt], i) =>
+      `<a class="w-boton${i ? '' : ' w-boton-lleno'}" href="${esc(href)}"${href.startsWith('http') ? ' rel="noopener"' : ''}>${icono(ico)}${txt}</a>`,
+  );
   const dato = (ico: keyof typeof ICONO, titulo: string, valor: string, href?: string) =>
     href
       ? `<li><a class="w-dato" href="${esc(href)}"${href.startsWith('http') ? ' rel="noopener"' : ''}>${icono(ico)}<span><small>${esc(titulo)}</small>${conSaltos(valor)}</span></a></li>`
@@ -643,6 +735,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     d.email && dato('mail', 'Correo', d.email, `mailto:${d.email}`),
     d.direccion && dato('mapa', 'Dirección', d.direccion, enlaceMapa(d.direccion)),
     d.horario && dato('reloj', 'Horario', d.horario),
+    d.zonas && dato('zona', 'Zonas que atendemos', d.zonas),
     ...d.enlaces.map((e) => dato('enlace', e.etiqueta, new URL(e.url).hostname.replace(/^www\./, ''), e.url)),
   ].filter(Boolean);
   const servicios = d.servicios
@@ -651,6 +744,23 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
         `<li class="w-servicio"><div class="w-servicio-cab"><h3>${esc(s.nombre)}</h3>${s.precio ? `<span class="w-precio">${esc(s.precio)}</span>` : ''}</div>${s.texto ? `<p>${esc(s.texto)}</p>` : ''}</li>`,
     )
     .join('');
+  const opiniones = d.opiniones
+    .map((x) => `<li class="w-dato w-opinion"><blockquote>${parrafosHtml(x.texto)}</blockquote>${x.autor ? `<p class="w-autor">${esc(x.autor)}</p>` : ''}</li>`)
+    .join('');
+  const preguntas = d.preguntas
+    .map((x) => `<li><details class="w-dato w-pregunta" name="preguntas"><summary>${esc(x.pregunta)}</summary><div class="w-respuesta">${parrafosHtml(x.respuesta)}</div></details></li>`)
+    .join('');
+  const seccion = (id: string, titulo: string, cuerpo: string) =>
+    `<section class="w-sec w-${id}-sec" id="${id}"><div class="w-in"><h2>${titulo}</h2>${cuerpo}</div></section>`;
+  const secciones: Record<IdSeccionWeb, string> = {
+    sobre: d.sobre ? seccion('sobre', 'Quiénes somos', `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
+    servicios: servicios ? seccion('servicios', 'Servicios', `<ul class="w-servicios">${servicios}</ul>`) : '',
+    opiniones: opiniones
+      ? seccion('opiniones', 'Opiniones', `<ul class="w-opiniones">${opiniones}</ul>${d.opinionesUrl ? `<p class="w-mas"><a href="${esc(d.opinionesUrl)}" rel="noopener">Ver todas las opiniones</a></p>` : ''}`)
+      : '',
+    preguntas: preguntas ? seccion('preguntas', 'Preguntas frecuentes', `<ul class="w-preguntas">${preguntas}</ul>`) : '',
+    contacto: seccion('contacto', 'Contacto', `<ul class="w-contacto">${contacto.join('')}</ul>`),
+  };
   return [
     `<div class="w w-${d.plantilla}" style="${esc(vars)}"><div class="w-cuerpo">`,
     `<header class="w-cab"><div class="w-in">`,
@@ -661,10 +771,10 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     `</div></header>`,
     `<main>`,
     d.foto ? `<div class="w-portada"><div class="w-in"><img src="${esc(d.foto)}" alt="${esc(d.negocio)}" decoding="async"></div></div>` : '',
-    d.sobre ? `<section class="w-sec w-sobre-sec"><div class="w-in"><h2>Quiénes somos</h2><div class="w-sobre">${parrafosHtml(d.sobre)}</div></div></section>` : '',
-    servicios ? `<section class="w-sec w-servicios-sec"><div class="w-in"><h2>Servicios</h2><ul class="w-servicios">${servicios}</ul></div></section>` : '',
-    `<section class="w-sec w-contacto-sec"><div class="w-in"><h2>Contacto</h2><ul class="w-contacto">${contacto.join('')}</ul></div></section>`,
+    ...ordenWeb(d.orden).map((id) => secciones[id]),
     `</main>`,
+    // En pantallas estrechas los botones de contacto se quedan a mano abajo mientras se lee (sin JavaScript).
+    acciones.length ? `<nav class="w-barra" aria-label="Contactar">${acciones.join('')}</nav>` : '',
     `<footer class="w-pie"><div class="w-in">© ${esc(d.negocio)}${o.pie ? ` · ${o.pie}` : ''}</div></footer></div>`,
     o.marca ? `<div class="w-marca" aria-hidden="true" style="background-image:${esc(fondoMarca(o.marca))}"></div>` : '',
     `</div>`,
@@ -683,6 +793,8 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
   if (d.telefono) ficha.telephone = d.telefono;
   if (d.email) ficha.email = d.email;
   if (d.direccion) ficha.address = { '@type': 'PostalAddress', streetAddress: d.direccion };
+  const zonas = d.zonas.split(/[,;\n]/).map((z) => z.trim()).filter(Boolean);
+  if (zonas.length) ficha.areaServed = zonas;
   const redes = d.enlaces.map((e) => e.url).filter(Boolean);
   if (redes.length) ficha.sameAs = redes;
   const servicios = d.servicios.filter((s) => s.nombre);

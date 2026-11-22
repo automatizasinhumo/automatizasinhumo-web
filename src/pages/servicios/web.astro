@@ -10,9 +10,12 @@ import {
   EJEMPLO_WEB,
   LETRAS_WEB,
   MAX_ENLACES_WEB,
+  MAX_OPINIONES_WEB,
+  MAX_PREGUNTAS_WEB,
   MAX_SERVICIOS_WEB,
   PASOS_WEB,
   PLANTILLAS_WEB,
+  SECCIONES_WEB,
   WEB_POR_DEFECTO,
 } from '../../features/servicios/webs';
 import { SECTORES_WEB } from '../../features/servicios/sectores';
@@ -135,12 +138,31 @@ const campo = 'campo';
                 <label class={campo}>Dirección<input name="direccion" autocomplete="street-address" maxlength="160" /></label>
               </div>
               <label class={campo}>Horario<textarea name="horario" rows="2" maxlength="300" placeholder="Lunes a viernes: 9:00 – 14:00"></textarea></label>
+              <div class="filas">
+                <label class={campo}>Zonas que atendéis <span class="ayuda">(opcional)</span><input name="zonas" maxlength="300" placeholder="Lugo, Outeiro de Rei, Rábade" /></label>
+                <label class={campo}>Enlace para reservar cita <span class="ayuda">(opcional)</span><input name="reservas" inputmode="url" maxlength="300" placeholder="booksy.com/tunegocio" /></label>
+              </div>
             </fieldset>
 
             <fieldset class="bloque" data-lista="enlaces" data-max={MAX_ENLACES_WEB}>
               <legend>Redes y enlaces <span class="ayuda">(hasta {MAX_ENLACES_WEB})</span></legend>
               <div data-items></div>
               <button type="button" class="anadir" data-anadir>+ Añadir enlace</button>
+            </fieldset>
+
+            <fieldset class="bloque" data-lista="opiniones" data-max={MAX_OPINIONES_WEB}>
+              <legend>Opiniones de clientes <span class="ayuda">(opcional, hasta {MAX_OPINIONES_WEB})</span></legend>
+              <p class="ayuda text-sm">Copia las que ya tengas en Google, Facebook o WhatsApp, con el nombre que te dejen poner.</p>
+              <div data-items></div>
+              <button type="button" class="anadir" data-anadir>+ Añadir opinión</button>
+              <label class={campo}>Enlace a todas tus opiniones <span class="ayuda">(tu ficha de Google, por ejemplo)</span><input name="opinionesUrl" inputmode="url" maxlength="300" /></label>
+            </fieldset>
+
+            <fieldset class="bloque" data-lista="preguntas" data-max={MAX_PREGUNTAS_WEB}>
+              <legend>Preguntas frecuentes <span class="ayuda">(opcional, hasta {MAX_PREGUNTAS_WEB})</span></legend>
+              <p class="ayuda text-sm">Lo que más te preguntan por teléfono: si hace falta cita, cómo se paga, si vais a domicilio…</p>
+              <div data-items></div>
+              <button type="button" class="anadir" data-anadir>+ Añadir pregunta</button>
             </fieldset>
           </div>
           <div data-hueco-vista></div>
@@ -188,6 +210,21 @@ const campo = 'campo';
                   ))
                 }
               </div>
+            </fieldset>
+            <fieldset class="bloque" data-guia="orden">
+              <legend>Orden de las secciones</legend>
+              <p class="ayuda text-sm">La portada va siempre arriba. Las secciones vacías no salen.</p>
+              <ol class="orden" data-orden>
+                {
+                  SECCIONES_WEB.map((x) => (
+                    <li data-seccion={x.id}>
+                      <span>{x.nombre}</span>
+                      <button type="button" class="mover" data-subir aria-label={`Subir ${x.nombre}`}>↑</button>
+                      <button type="button" class="mover" data-bajar aria-label={`Bajar ${x.nombre}`}>↓</button>
+                    </li>
+                  ))
+                }
+              </ol>
             </fieldset>
             <fieldset class="bloque">
               <legend>Diseño</legend>
@@ -286,6 +323,20 @@ const campo = 'campo';
         <label class={campo}>Precio<input data-k="precio" maxlength="20" placeholder="desde 20 €" /></label>
       </div>
       <label class={campo}>Descripción<input data-k="texto" maxlength="200" /></label>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-opiniones">
+    <div class="item">
+      <label class={campo}>Opinión<textarea data-k="texto" rows="2" maxlength="400"></textarea></label>
+      <label class={campo}>Quién la escribe<input data-k="autor" maxlength="60" placeholder="Marta G." /></label>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-preguntas">
+    <div class="item">
+      <label class={campo}>Pregunta<input data-k="pregunta" maxlength="160" placeholder="¿Hace falta cita?" /></label>
+      <label class={campo}>Respuesta<textarea data-k="respuesta" rows="2" maxlength="600"></textarea></label>
       <button type="button" class="quitar" data-quitar>Quitar</button>
     </div>
   </template>
