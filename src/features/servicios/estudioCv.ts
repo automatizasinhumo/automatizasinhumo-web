@@ -233,11 +233,30 @@ export function iniciarEstudioCv() {
     limitar(lista);
     return item;
   }
+  /**
+   * URL de la miniatura sin reinyectar el texto del campo: la foto de ejemplo es una constante y
+   * una data: URL se decodifica a bytes y se sirve como blob: propio (la anterior se libera).
+   */
+  let fotoBlob = '';
+  function urlFotoSegura(crudo: string): string {
+    if (fotoBlob) URL.revokeObjectURL(fotoBlob);
+    fotoBlob = '';
+    if (crudo === FOTO_EJEMPLO_CV) return FOTO_EJEMPLO_CV;
+    const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(crudo);
+    if (!m) return '';
+    try {
+      const bin = atob(m[2]);
+      const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+      fotoBlob = URL.createObjectURL(new Blob([bytes], { type: m[1] === 'image/png' ? 'image/png' : m[1] === 'image/webp' ? 'image/webp' : 'image/jpeg' }));
+    } catch {
+      return '';
+    }
+    return fotoBlob;
+  }
   /** Miniatura y botón «Quitar» según el valor oculto de la foto; `aviso` sustituye a la miniatura. */
   function pintarFoto(aviso = '') {
     // Solo una imagen incrustada (la que reduce reducirFotoCv); cualquier otro valor guardado se ignora.
-    const crudo = campo<HTMLInputElement | null>('foto')?.value ?? '';
-    const url = crudo === FOTO_EJEMPLO_CV || /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(crudo) ? crudo : '';
+    const url = urlFotoSegura(campo<HTMLInputElement | null>('foto')?.value ?? '');
     const img = $<HTMLImageElement>('[data-foto-vista]');
     if (img) {
       img.hidden = !url;
