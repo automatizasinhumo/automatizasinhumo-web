@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { euros } from '../../features/servicios/cv';
-import { FAMILIAS, PROXIMAS, disponible } from '../../features/servicios/catalogo';
+import { FAMILIAS, disponible } from '../../features/servicios/catalogo';
 
 // Catálogo nuevo: servicios agrupados por familia (catalogo.ts). El tema trae su propia
 // página (Servicios.astro, mismo lenguaje que su portada); sin ella, una lista sencilla.
@@ -11,15 +11,21 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
 const ThemeServicios = Object.values(import.meta.glob<{ default: unknown }>('#theme/Servicios.astro', { eager: true }))[0]
   ?.default as ((props: Record<string, unknown>) => unknown) | undefined;
 
+// «Desde» de la familia: el menor precio contratable, comparado en céntimos antes de formatearlo.
+const minimo = (precios: (number | undefined)[]) => {
+  const n = precios.filter((p): p is number => p !== undefined);
+  return n.length ? euros(Math.min(...n)) : undefined;
+};
 const familias = FAMILIAS.map((f) => ({
   ...f,
+  desde: minimo(f.servicios.filter(disponible).map((s) => s.desde)),
   servicios: f.servicios.map((s) => ({ ...s, desde: s.desde === undefined ? undefined : euros(s.desde) })),
 }));
 ---
 
-<Layout title="Servicios: elige y tenlo listo hoy" description="Currículum, tarjeta digital, dominio y webs: eliges, rellenas, lo ves al momento y lo tienes." sinAviso>
+<Layout title="Servicios: elige y tenlo listo hoy" description="Currículum, webs, tiendas, reservas, automatizaciones e invitaciones: eliges, rellenas, lo ves al momento y lo tienes." sinAviso>
   {ThemeServicios ? (
-    <ThemeServicios familias={familias} proximas={PROXIMAS} />
+    <ThemeServicios familias={familias} />
   ) : (
     <div class="mx-auto max-w-6xl px-4 pb-16 pt-8">
       <h1 class="font-serif text-4xl font-bold text-ink">Servicios</h1>
@@ -38,12 +44,6 @@ const familias = FAMILIAS.map((f) => ({
           </ul>
         </section>
       ))}
-      <section class="mt-10" data-proximas>
-        <h2 class="font-serif text-2xl font-bold text-ink">Y después</h2>
-        <ul class="mt-4 flex flex-wrap gap-2">
-          {PROXIMAS.map((p) => <li class="tarjeta px-4 py-2 text-muted">{p.nombre}</li>)}
-        </ul>
-      </section>
     </div>
   )}
 </Layout>

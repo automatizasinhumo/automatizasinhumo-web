@@ -129,15 +129,74 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
       },
     ],
   },
+  {
+    id: 'tiendas',
+    nombre: 'Tiendas online',
+    corto: 'Tiendas',
+    texto: 'Vende lo tuyo en internet sin pelearte con plataformas ni comisiones raras.',
+    icono: 'shopping-bag',
+    servicios: [
+      { id: 'tienda', nombre: 'Tienda online', texto: 'Tu catálogo con fotos, carrito y pedidos que te llegan al correo.', icono: 'shopping-cart', puntos: ['Fichas con fotos y variantes', 'Pedidos al correo y al móvil', 'Alojamiento incluido'] },
+      { id: 'pedido-whatsapp', nombre: 'Catálogo con pedido por WhatsApp', texto: 'El cliente elige y te llega el pedido escrito a tu WhatsApp.', icono: 'package', puntos: ['Sin cuentas ni contraseñas', 'Pedido ya ordenado', 'Ideal para tiendas de barrio'] },
+      { id: 'digitales', nombre: 'Venta de productos digitales', texto: 'Plantillas, cursos o PDF que se descargan al momento tras comprar.', icono: 'photo-down', puntos: ['Descarga automática', 'Enlace que caduca', 'Factura sola'] },
+    ],
+  },
+  {
+    id: 'reservas',
+    nombre: 'Reservas y citas',
+    corto: 'Reservas',
+    texto: 'Tu agenda abierta las 24 horas: el cliente elige hueco y tú solo atiendes.',
+    icono: 'calendar-check',
+    servicios: [
+      { id: 'citas', nombre: 'Citas para tu negocio', texto: 'Peluquerías, clínicas o talleres: el cliente elige día y hora.', icono: 'calendar-check', puntos: ['Recordatorio antes de la cita', 'Cambia o anula solo', 'Tu agenda en el móvil'] },
+      { id: 'mesas', nombre: 'Reservas de mesa', texto: 'Turnos de comida y cena con aforo, sin llamadas en plena hora punta.', icono: 'tools-kitchen-2', puntos: ['Aforo por turno', 'Confirmación al momento', 'Lista del día imprimible'] },
+      { id: 'clases', nombre: 'Clases y talleres con plazas', texto: 'Grupos con plazas limitadas y lista de espera automática.', icono: 'chalkboard', puntos: ['Plazas que se descuentan solas', 'Lista de espera', 'Aviso a los apuntados'] },
+    ],
+  },
+  {
+    id: 'automatizar',
+    nombre: 'Automatizaciones',
+    corto: 'Automatizar',
+    texto: 'Las tareas que repites cada día, hechas solas mientras tú trabajas.',
+    icono: 'route',
+    servicios: [
+      { id: 'respuestas', nombre: 'Respuestas automáticas a clientes', texto: 'Las preguntas de siempre contestadas al momento, a cualquier hora.', icono: 'message-chatbot', puntos: ['Correo y formulario web', 'Con tus propias respuestas', 'Te avisa si hace falta una persona'] },
+      { id: 'documentos', nombre: 'Facturas y documentos solos', texto: 'Presupuestos, facturas y contratos que se rellenan con tus datos.', icono: 'file-invoice', puntos: ['Plantillas con tu marca', 'PDF al correo del cliente', 'Archivo ordenado'] },
+      { id: 'formularios', nombre: 'Formularios que llegan a tu hoja', texto: 'Cada contacto o pedido entra ordenado en una hoja de cálculo.', icono: 'forms', puntos: ['Sin copiar a mano', 'Aviso al móvil', 'Resumen semanal'] },
+    ],
+  },
+  {
+    id: 'eventos',
+    nombre: 'Invitaciones y eventos',
+    corto: 'Eventos',
+    texto: 'Bodas, cumpleaños y celebraciones con su web, su invitación y sus confirmaciones.',
+    icono: 'heart',
+    servicios: [
+      { id: 'boda', nombre: 'Web de boda', texto: 'Vuestra historia, el lugar, los horarios y la confirmación de invitados.', icono: 'heart', puntos: ['Confirmación con menú', 'Cuenta atrás', 'Mapa y alojamientos'] },
+      { id: 'invitacion', nombre: 'Invitación digital', texto: 'Una invitación bonita para mandar por WhatsApp, con su enlace.', icono: 'confetti', puntos: ['Diseños para cada ocasión', 'Confirmación en un toque', 'Lista de asistentes'] },
+      { id: 'regalos', nombre: 'Lista de regalos', texto: 'Los invitados eligen y nadie repite regalo.', icono: 'sparkles', puntos: ['Regalos que se tachan solos', 'Mensaje para los novios', 'Enlace en la invitación'] },
+    ],
+  },
 ];
 
-/** Lo que llega después: solo nombre e icono, con su color de familia. */
-export const PROXIMAS: readonly { id: IdFamilia; nombre: string; icono: string }[] = [
-  { id: 'tiendas', nombre: 'Tiendas online', icono: 'shopping-bag' },
-  { id: 'reservas', nombre: 'Reservas y citas', icono: 'calendar-check' },
-  { id: 'automatizar', nombre: 'Automatizaciones', icono: 'route' },
-  { id: 'eventos', nombre: 'Invitaciones', icono: 'heart' },
-];
+/** Enlace a la sección de una familia dentro de /servicios. */
+export const hrefFamilia = (id: IdFamilia) => `/servicios#${id}`;
+
+/**
+ * Las familias para menús y pies: nombre, frase, icono y sus servicios con enlace (los
+ * que aún no están llevan a la sección de su familia y van marcados como «pronto»).
+ */
+export const familiasMenu = () =>
+  FAMILIAS.map((f) => ({
+    id: f.id,
+    nombre: f.nombre,
+    corto: f.corto,
+    texto: f.texto,
+    icono: f.icono,
+    href: hrefFamilia(f.id),
+    disponibles: f.servicios.filter(disponible).length,
+    servicios: f.servicios.map((s) => ({ text: s.nombre, href: s.href ?? hrefFamilia(f.id), pronto: !s.href })),
+  }));
 
 /** Página del catálogo nuevo: a ella llevan «Ver todos los servicios» del tema. */
 export const CATALOGO_HREF = '/servicios';

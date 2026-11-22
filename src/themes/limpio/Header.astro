@@ -4,6 +4,7 @@ import StoreNav from '../../features/storefront/controls/StoreNav.astro';
 import StoreSearchToggle from '../../features/storefront/controls/StoreSearchToggle.astro';
 import StoreCartControl from '../../features/storefront/controls/StoreCartControl.astro';
 import StoreAccountControl from '../../features/storefront/controls/StoreAccountControl.astro';
+import Icono from './IconoCat.astro';
 import Logo from './Logo.astro';
 import Boton from './ui/Boton.astro';
 import LuzTarjetas from './ui/LuzTarjetas.astro';
@@ -86,7 +87,40 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
         allText="Ver todos los servicios"
         links={pageLinks}
         class="hidden xl:flex"
-      />
+        panelClass="w-[min(55rem,calc(100vw-2rem))] p-0"
+      >
+        {/* Panel por familias (catalogo.ts): cada una con su color, su frase y sus servicios;
+            lo que aún no está lleva a la sección de su familia marcado como «pronto». */}
+        <div slot="panel" class="mega">
+          <ul class="familias">
+            {model.familias.map((f) => (
+              <li data-familia={f.id}>
+                <a href={f.href} class="fam">
+                  <span class="fam-icono"><Icono name={f.icono} class="h-5 w-5" /></span>
+                  <span class="fam-texto">
+                    <strong>{f.nombre}</strong>
+                    <small>{f.disponibles > 0 ? `${f.disponibles} ${f.disponibles === 1 ? 'listo' : 'listos'} para empezar` : 'Muy pronto'}</small>
+                  </span>
+                </a>
+                <ul class="servs">
+                  {f.servicios.map((sv) => (
+                    <li>
+                      <a href={sv.href} class:list={['serv', { pronto: sv.pronto }]}>
+                        {sv.text}
+                        {sv.pronto && <span class="marca-pronto">pronto</span>}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+          <div class="mega-pie">
+            <a href={model.serviciosHref} class="todos">Ver todos los servicios <Icono name="arrow-right" class="h-4 w-4" /></a>
+            <a href="/elige" class="test"><Icono name="sparkles" class="h-4 w-4" />¿No sabes cuál? Haz el test en un minuto</a>
+          </div>
+        </div>
+      </StoreMegaMenu>
       {/* Sin fila en línea: en xl la sustituye el mega menú; la hamburguesa
           (xl:hidden) sigue llevando todos los enlaces del menú de D1. */}
       <StoreNav links={model.headerLinks} inline={false} />
@@ -178,5 +212,80 @@ const pageLinks = model.headerLinks.filter((link) => link.href !== shopHref && !
       box-shadow: none;
       backdrop-filter: none;
     }
+  }
+  /* ── Panel «Servicios» por familias ── */
+  .mega { padding: var(--ds-hueco-3); }
+  .mega .familias {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-hueco-2);
+  }
+  .mega .familias > li {
+    border-radius: var(--ds-radio-tarjeta);
+    padding: var(--ds-hueco-3);
+    background: linear-gradient(160deg in oklch, color-mix(in oklab, var(--familia) 7%, var(--color-surface)), var(--color-surface) 70%);
+  }
+  .mega .familias a.fam {
+    display: flex;
+    gap: var(--ds-hueco-3);
+    align-items: center;
+    min-height: auto;
+    border-radius: var(--ds-radio-sutil);
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .mega .fam-icono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--ds-radio-marco);
+    background: linear-gradient(135deg in oklch, var(--familia), var(--familia-2));
+    color: #fff;
+    box-shadow: var(--ds-sombra-familia-1) var(--familia);
+    transition: transform var(--ds-mov-rapido);
+  }
+  .mega a.fam:hover .fam-icono { transform: rotate(-6deg) scale(1.06); }
+  .mega .fam-texto { display: grid; line-height: 1.25; }
+  .mega .fam-texto strong { font-size: var(--ds-texto-menu); }
+  .mega .fam-texto small { font-size: var(--ds-texto-etiqueta); font-weight: 500; color: var(--familia); }
+  .mega .servs { display: grid; margin-top: var(--ds-hueco-2); padding-left: calc(2.5rem + var(--ds-hueco-3)); }
+  .mega .familias a.serv {
+    display: flex;
+    gap: var(--ds-hueco-2);
+    align-items: center;
+    min-height: 2rem;
+    font-size: var(--ds-texto-small);
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  .mega a.serv:hover { color: var(--familia); }
+  .mega a.serv.pronto { color: var(--color-faint); }
+  .mega .marca-pronto {
+    border-radius: var(--ds-radio-pildora);
+    padding: 0 var(--ds-hueco-2);
+    background: color-mix(in oklab, var(--familia) 10%, transparent);
+    font-size: var(--ds-texto-mini);
+    font-weight: 600;
+    color: var(--familia);
+  }
+  .mega .mega-pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-hueco-4);
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--ds-hueco-2);
+    border-top: 1px solid var(--color-line);
+    padding: var(--ds-hueco-3) var(--ds-hueco-3) 0;
+  }
+  .mega .mega-pie a { display: inline-flex; gap: var(--ds-hueco-2); align-items: center; font-weight: 600; text-decoration: none; }
+  .mega .mega-pie .todos { color: var(--color-brand); }
+  .mega .mega-pie .test { color: var(--color-muted); font-weight: 500; }
+  .mega a:focus-visible { outline: 3px solid var(--familia, var(--color-brand)); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    .mega .fam-icono { transition: none; }
+    .mega a.fam:hover .fam-icono { transform: none; }
   }
 </style>

@@ -103,6 +103,9 @@
   --ds-texto-h3: clamp(1.15rem, 1.8vw, 1.4rem);
   --ds-texto-lead: clamp(1.05rem, 1.6vw, 1.25rem);
   --ds-texto-small: 0.875rem;
+  --ds-texto-menu: 0.95rem; /* títulos de los menús desplegables */
+  --ds-texto-destacado: 1.05rem; /* nombre de servicio en listas */
+  --ds-texto-mini: 0.7rem; /* contadores e insignias diminutas */
   --ds-texto-etiqueta: 0.78rem; /* versalitas: «PRECIO CERRADO», antetítulos */
   --ds-tracking-titular: -0.03em;
   --ds-tracking-etiqueta: 0.08em;
@@ -151,6 +154,11 @@
   --ds-sombra-1: 0 1px 2px rgb(23 45 45 / 0.06), 0 2px 8px -2px rgb(23 45 45 / 0.08);
   --ds-sombra-2: 0 12px 32px -12px rgb(23 45 45 / 0.22), 0 2px 6px -2px rgb(23 45 45 / 0.08);
   --ds-sombra-3: 0 30px 60px -20px rgb(23 45 45 / 0.35), 0 8px 20px -8px rgb(23 45 45 / 0.15);
+  /* Geometría de la sombra teñida por familia: se usa como «var(--ds-sombra-familia-n) var(--familia)». */
+  --ds-sombra-familia-1: 0 6px 16px -8px;
+  --ds-sombra-familia-2: 0 12px 24px -14px;
+  --ds-sombra-familia-3: 0 18px 40px -24px;
+  --ds-sombra-familia-4: 0 26px 50px -22px;
   --ds-sombra-marca: 0 10px 30px -10px color-mix(in oklab, var(--color-brand) 70%, transparent);
 
   /* Movimiento: solo transform y opacity en bucle (los compone la GPU). */
