@@ -270,6 +270,7 @@ export function iniciarEstudioCv() {
   }
   let genFoto = 0;
   function volcar(f: FormCv) {
+    genFoto++; // una conversión de foto aún en curso no debe pisar el formulario nuevo
     for (const k of CAMPOS) {
       const c = campo<HTMLInputElement | null>(k);
       if (c) c.value = typeof f[k] === 'string' ? f[k] : '';
