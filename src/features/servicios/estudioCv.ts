@@ -391,6 +391,7 @@ export function iniciarEstudioCv() {
     estado.camino = c;
     estado.inicio = inicio;
     if (c === 'personaliza' && inicio === 'cero') estado.diseno = cfg.desdeCero;
+    pintarProgreso();
   }
 
   // ---------- Vista previa ----------
@@ -740,17 +741,25 @@ export function iniciarEstudioCv() {
     }
   }
 
-  function mostrar(paso: string, enfocar: boolean) {
-    const i = PASOS.indexOf(paso);
-    actual = paso;
-    for (const [id, s] of secciones) s.hidden = id !== paso;
+  /** Último paso abierto. Con asesoría el cliente no pasa del diseño (lo hacemos nosotros); `alcanzado` se conserva por si vuelve al autoservicio. */
+  function tope() {
+    return estado.camino === 'asesoria' ? Math.min(estado.alcanzado, PASOS.indexOf('diseno')) : estado.alcanzado;
+  }
+  function pintarProgreso() {
+    const i = PASOS.indexOf(actual);
     for (const b of $$<HTMLButtonElement>('.progreso [data-ir]')) {
       const j = PASOS.indexOf(b.dataset.ir!);
-      b.disabled = j > estado.alcanzado;
+      b.disabled = j > tope();
       if (j === i) b.setAttribute('aria-current', 'step');
       else b.removeAttribute('aria-current');
-      b.toggleAttribute('data-hecho', j < i || (j <= estado.alcanzado && j !== i));
+      b.toggleAttribute('data-hecho', j < i || (j <= tope() && j !== i));
     }
+  }
+  function mostrar(pedido: string, enfocar: boolean) {
+    const paso = PASOS.indexOf(pedido) > tope() ? PASOS[tope()] : pedido;
+    actual = paso;
+    for (const [id, s] of secciones) s.hidden = id !== paso;
+    pintarProgreso();
     const hueco = $('[data-hueco-vista]', secciones.get(paso)!);
     if (hueco) {
       hueco.appendChild(vista);
@@ -776,7 +785,7 @@ export function iniciarEstudioCv() {
   function desdeHash(enfocar: boolean) {
     const pedido = location.hash.slice(1);
     const i = PASOS.indexOf(pedido);
-    mostrar(i >= 0 && i <= estado.alcanzado ? pedido : PASOS[0], enfocar);
+    mostrar(i >= 0 && i <= tope() ? pedido : PASOS[0], enfocar);
   }
   function persistir() {
     estado.form = recoger();
@@ -823,7 +832,8 @@ export function iniciarEstudioCv() {
     if (!b || !raiz.contains(b)) return;
     if (b.dataset.ir) return ir(b.dataset.ir);
     if (esCamino(b.dataset.aCamino)) {
-      elegirCamino(b.dataset.aCamino);
+      // «Diseñar el mío» desde una plantilla: se personaliza la elegida, no la de «desde cero».
+      elegirCamino(b.dataset.aCamino, 'plantilla');
       persistir();
       pintarControles();
       $('[data-guia="caminos"]')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
