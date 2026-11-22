@@ -506,6 +506,11 @@ export function iniciarEstudioCv() {
     res('modalidad').textContent = p.nombre;
     res('precio').textContent = euros(total);
     $('[data-solo-compra]')!.hidden = cvPagado;
+    const entradilla = $('[data-entradilla-anade]');
+    if (entradilla)
+      entradilla.textContent = cvPagado
+        ? 'Opcional. Tu pedido ya está pagado: lo que quieras añadir se compra aparte, con su propio enlace.'
+        : 'Opcional. Tu CV ya está guardado: lo que marques aquí se suma al mismo pedido y no pierdes nada.';
     $('[data-solo-pagado]')!.hidden = !cvPagado;
     if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
     // En la descarga solo se nombran los extras elegidos; se configuran en «Añade».
