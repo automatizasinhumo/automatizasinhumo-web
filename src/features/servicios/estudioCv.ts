@@ -480,7 +480,7 @@ export function iniciarEstudioCv() {
     );
   }
   const extraPagado = (x: ExtraCv) => x.id === 'tarjeta' && !!pedido.pagado?.tarjeta;
-  const extraMarcado = (x: ExtraCv) => !extraPagado(x) && !!$<HTMLInputElement>(`[data-extra="${x.producto}"]`)?.checked;
+  const extraMarcado = (x: ExtraCv) => !extraPagado(x) && !pedido.pagado?.cv && !!$<HTMLInputElement>(`[data-extra="${x.producto}"]`)?.checked;
   /** Las casillas de extras reflejan `estado.extras` (una sola fuente). */
   function marcarExtras() {
     for (const x of cfg.extras) {
@@ -493,8 +493,14 @@ export function iniciarEstudioCv() {
     const p = cfg.paquetes[m];
     const res = (k: string) => $(`[data-res="${k}"]`)!;
     const cvPagado = !!pedido.pagado?.cv;
-    // Un extra ya pagado no se vuelve a ofrecer.
-    for (const x of cfg.extras) $(`[data-extra="${x.producto}"]`)!.closest('label')!.hidden = extraPagado(x);
+    // Un extra ya pagado no se vuelve a ofrecer. Con el CV ya pagado, el pedido está cerrado: los demás
+    // extras no se pueden sumar a él y se ofrecen en su propia página.
+    for (const x of cfg.extras) {
+      const casilla = $<HTMLInputElement>(`[data-extra="${x.producto}"]`)!;
+      casilla.closest('label')!.hidden = extraPagado(x) || cvPagado;
+      const aparte = $<HTMLElement>(`[data-extra-aparte="${x.id}"]`);
+      if (aparte) aparte.hidden = extraPagado(x) || !cvPagado;
+    }
     const total = p.precio + cfg.extras.reduce((t, x) => t + (extraMarcado(x) ? x.precio : 0), 0);
     res('diseno').textContent = nombreDiseno(plantilla());
     res('modalidad').textContent = p.nombre;
@@ -884,6 +890,8 @@ export function iniciarEstudioCv() {
       volcar(r.form);
       persistir();
       programar(true);
+      // Si ya estás en «Añade», los trozos para LinkedIn/InfoJobs pasan a ser los del CV importado.
+      if (actual === 'anade') pintarPortales();
       avisar(recortado ? 'recortado' : 'ok');
     } catch {
       avisar('lectura');
@@ -897,7 +905,11 @@ export function iniciarEstudioCv() {
     if (b.dataset.ir) return ir(b.dataset.ir);
     if (b.dataset.copiar !== undefined) {
       const texto = b.dataset.copiar;
-      void navigator.clipboard?.writeText(texto).then(
+      if (!navigator.clipboard?.writeText) {
+        b.textContent = 'Selecciónalo y copia';
+        return;
+      }
+      void navigator.clipboard.writeText(texto).then(
         () => {
           b.textContent = 'Copiado';
           window.setTimeout(() => (b.textContent = 'Copiar'), 1500);

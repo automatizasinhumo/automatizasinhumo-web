@@ -467,6 +467,14 @@ const ejemploTarjeta: DatosTarjeta = {
                 </label>
               ))
             }
+            {
+              EXTRAS_CV.map((x) => (
+                <p class="extra-aparte" data-extra-aparte={x.id} hidden>
+                  Tu pedido ya está pagado. {x.nombre} se compra aparte:{' '}
+                  <a href={`/product/${x.slug}`}>{x.nombre.toLowerCase()} · {euros(x.precio)}</a>.
+                </p>
+              ))
+            }
         </div>
 
         <!-- Tarjeta digital: se configura aquí (modelo, color, datos) en cuanto se elige el extra; se publica al pagarla. -->
