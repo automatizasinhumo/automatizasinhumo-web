@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bytesFoto,
   CSS_WEB,
   EJEMPLO_WEB,
   LETRAS_WEB,
@@ -158,6 +159,19 @@ describe('foto de portada', () => {
     if (!r.ok) throw new Error(r.error);
     expect(r.datos.foto).toBe(foto);
     expect(renderWeb(r.datos)).toContain(`<img src="${foto}"`);
+  });
+
+  it('sale como imagen al compartir (og:image) solo si hay foto', () => {
+    const r = validarWeb({ ...base, foto });
+    if (!r.ok) throw new Error(r.error);
+    const img = 'https://x.test/w/lola/foto';
+    expect(documentoWeb(r.datos, 'https://x.test/w/lola', '', img)).toContain(`<meta property="og:image" content="${img}">`);
+    expect(documentoWeb({ ...r.datos, foto: '' }, 'https://x.test/w/lola', '', img)).not.toContain('og:image');
+    const b = bytesFoto(foto)!;
+    expect(b.tipo).toBe('image/webp');
+    expect(String.fromCharCode(...b.bytes.slice(0, 4))).toBe('RIFF');
+    expect(bytesFoto('javascript:alert(1)')).toBeNull();
+    expect(bytesFoto('data:image/png;base64,A')).toBeNull();
   });
 
   it('se descarta sin error si no es una foto válida o es demasiado grande', () => {

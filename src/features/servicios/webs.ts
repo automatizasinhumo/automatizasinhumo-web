@@ -120,6 +120,20 @@ export interface DatosWeb {
  */
 export const MAX_FOTO_WEB = 400_000;
 const FOTO = /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/;
+/** Foto guardada como bytes y tipo, para servirla en /w/<slug>/foto (og:image no admite data URL). */
+export function bytesFoto(foto: string): { tipo: string; bytes: Uint8Array<ArrayBuffer> } | null {
+  if (!fotoValida(foto)) return null;
+  const coma = foto.indexOf(',');
+  let bin: string;
+  try {
+    bin = atob(foto.slice(coma + 1));
+  } catch {
+    return null; // base64 de longitud imposible: se trata como sin foto (404), no como error
+  }
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return { tipo: foto.slice(5, foto.indexOf(';')), bytes };
+}
 export const fotoValida = (v: unknown): v is string => typeof v === 'string' && v.length <= MAX_FOTO_WEB && FOTO.test(v);
 
 export const WEB_POR_DEFECTO: Pick<DatosWeb, 'plantilla' | 'color' | 'letra'> = {
@@ -439,9 +453,10 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
 /**
  * Página publicada completa (/w/<slug> o el dominio del cliente): ligera, sin JavaScript ni
  * recursos externos. `tienda` es el origen de nuestra tienda para el enlace del pie y el icono
- * cuando la página se sirve desde otro dominio ('' = mismo origen).
+ * cuando la página se sirve desde otro dominio ('' = mismo origen). `imagen` es la URL absoluta
+ * de la foto (/w/<slug>/foto) para la tarjeta que sale al compartir el enlace; '' si no hay foto.
  */
-export function documentoWeb(d: DatosWeb, url: string, tienda = ''): string {
+export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = ''): string {
   const titulo = d.sector ? `${d.negocio} · ${d.sector}` : d.negocio;
   const descripcion = (d.lema || d.sobre.replace(/\s+/g, ' ') || titulo).slice(0, 160);
   const pie = `Web hecha con <a href="${esc(tienda)}/servicios/web">Automatiza sin humo</a>`;
@@ -457,7 +472,7 @@ export function documentoWeb(d: DatosWeb, url: string, tienda = ''): string {
 <meta property="og:title" content="${esc(titulo)}">
 <meta property="og:description" content="${esc(descripcion)}">
 <meta property="og:url" content="${esc(url)}">
-<meta name="theme-color" content="${esc(d.color)}">
+${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta name="twitter:card" content="summary_large_image">\n` : ''}<meta name="theme-color" content="${esc(d.color)}">
 <link rel="icon" href="${esc(tienda)}/favicon.svg">
 <script type="application/ld+json">${fichaNegocio(d, url)}</script>
 <style>body{margin:0}${CSS_WEB}</style>
