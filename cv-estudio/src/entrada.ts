@@ -136,7 +136,7 @@ const WORKER_PDF = new URL("./pdf.worker.min.mjs", import.meta.url).href;
 
 /** pdf.js con el worker ya apuntado. Único punto de carga para la vista previa y el importador. */
 async function cargarPdfjs() {
-	const pdfjs = await import("pdfjs-dist");
+	const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
 	pdfjs.GlobalWorkerOptions.workerSrc = WORKER_PDF;
 	return pdfjs;
 }
