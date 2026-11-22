@@ -93,6 +93,8 @@ const LISTAS: Lista[] = ['experiencia', 'formacion', 'habilidades', 'idiomas'];
 const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'resumen', 'foto'];
 /** Tope de la foto como data URL (igual que MAX_FOTO_CV del motor, que descarta lo que pase). */
 const MAX_FOTO = 400_000;
+/** Foto del CV de ejemplo (cv-estudio/src/formulario-datos.ts FOTO_EJEMPLO). */
+const FOTO_EJEMPLO_CV = '/cv/estudio/ejemplo-foto.jpg';
 
 /** Reduce la foto en el navegador a JPEG (lado mayor 480 px): el motor del PDF solo lee JPG y PNG. */
 async function reducirFotoCv(f: File): Promise<string> {
@@ -233,7 +235,9 @@ export function iniciarEstudioCv() {
   }
   /** Miniatura y botón «Quitar» según el valor oculto de la foto; `aviso` sustituye a la miniatura. */
   function pintarFoto(aviso = '') {
-    const url = campo<HTMLInputElement | null>('foto')?.value ?? '';
+    // Solo una imagen incrustada (la que reduce reducirFotoCv); cualquier otro valor guardado se ignora.
+    const crudo = campo<HTMLInputElement | null>('foto')?.value ?? '';
+    const url = crudo === FOTO_EJEMPLO_CV || /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(crudo) ? crudo : '';
     const img = $<HTMLImageElement>('[data-foto-vista]');
     if (img) {
       img.hidden = !url;
