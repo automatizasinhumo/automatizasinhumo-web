@@ -213,10 +213,13 @@ export const GUIA_CV: Record<string, readonly PasoGuiaCv[]> = {
     { guia: 'repaso', titulo: 'Un repaso rápido', texto: 'Te decimos qué falta (contacto, resumen, experiencia…). No es obligatorio, pero ayuda mucho.' },
     { guia: 'vista', titulo: 'Revisa página a página', texto: 'Mira que todo está donde quieres. Si no, vuelve atrás desde la barra de pasos: no pierdes nada.' },
   ],
-  descarga: [
-    { guia: 'comprar', titulo: 'Compra y descarga', texto: 'Pagas una vez y descargas el PDF sin marca de agua. Puedes volver a descargarlo con cambios.' },
+  anade: [
+    { guia: 'portales', titulo: 'Pásalo a LinkedIn o InfoJobs', texto: 'Tus datos en trozos listos para copiar y pegar en cada casilla del portal. Gratis.' },
     { guia: 'extras', titulo: 'Tarjeta digital con QR', texto: 'Márcala y aparece su configurador: eliges modelo, color y datos, y la ves al momento. Se publica al pagar.' },
     { guia: 'tarjeta', titulo: 'Diseña tu tarjeta', texto: 'Prueba los seis modelos con tu color y tus datos. Con el QR, quien lo escanee guarda tu contacto en un toque.' },
+  ],
+  descarga: [
+    { guia: 'comprar', titulo: 'Compra y descarga', texto: 'Pagas una vez y descargas el PDF sin marca de agua. Lo que añadiste en el paso anterior va en el mismo pedido.' },
   ],
 };
 
@@ -224,6 +227,7 @@ export const PASOS_CV = [
   { id: 'diseno', titulo: 'Diseño y estilo' },
   { id: 'datos', titulo: 'Tus datos' },
   { id: 'revisa', titulo: 'Revisa' },
+  { id: 'anade', titulo: 'Añade' },
   { id: 'descarga', titulo: 'Descarga' },
 ] as const;
 

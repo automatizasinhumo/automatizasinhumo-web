@@ -469,6 +469,77 @@
     justify-items: start;
     padding: var(--ds-hueco-6);
   }
+  /* Paso «Añade»: panel para copiar a LinkedIn/InfoJobs y extras del pedido. */
+  .portales,
+  .extras-lista {
+    margin-bottom: var(--ds-hueco-4);
+    padding: var(--ds-hueco-4);
+  }
+  .extras-lista > .extra:first-child {
+    margin-top: 0;
+  }
+  .portales summary {
+    display: grid;
+    gap: var(--ds-hueco-1);
+    cursor: pointer;
+  }
+  .portales summary small {
+    color: var(--color-muted);
+  }
+  .gratis {
+    justify-self: start;
+    padding: 0 var(--ds-hueco-2);
+    border-radius: 999px;
+    background: var(--color-brand);
+    color: var(--color-bg, #fff);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .portales-lista {
+    display: grid;
+    gap: var(--ds-hueco-4);
+    margin-top: var(--ds-hueco-4);
+  }
+  .portales-lista h4 {
+    margin-bottom: var(--ds-hueco-2);
+    font-weight: 700;
+  }
+  .portal-trozo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--ds-hueco-1) var(--ds-hueco-3);
+    align-items: start;
+    padding: var(--ds-hueco-2) 0;
+    border-top: 1px solid var(--color-line);
+  }
+  .portal-etiqueta {
+    grid-column: 1 / -1;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .portal-texto {
+    max-height: 8rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .portal-copiar {
+    padding-block: var(--ds-hueco-1);
+  }
+  .portal-aviso {
+    grid-column: 1 / -1;
+    color: var(--color-accent, #b4441e);
+  }
+  .aviso-tarjeta {
+    margin-top: var(--ds-hueco-4);
+    padding: var(--ds-hueco-4);
+  }
+  .enlace {
+    text-decoration: underline;
+    font-weight: 600;
+  }
   .muestras,
   .formas {
     display: flex;

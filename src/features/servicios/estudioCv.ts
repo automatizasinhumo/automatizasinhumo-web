@@ -9,6 +9,7 @@
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
 import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, esCamino, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { gruposPortales, sobra } from './cvPortales';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { guiar } from '../tour/guia';
 import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
@@ -418,7 +419,7 @@ export function iniciarEstudioCv() {
   let turno = 0;
   function programar(inmediato = false) {
     window.clearTimeout(temporizador);
-    if (actual === 'descarga') return;
+    if (actual === 'descarga' || actual === 'anade') return;
     temporizador = window.setTimeout(pintar, inmediato ? 0 : 400);
   }
   async function pintar() {
@@ -501,6 +502,18 @@ export function iniciarEstudioCv() {
     $('[data-solo-compra]')!.hidden = cvPagado;
     $('[data-solo-pagado]')!.hidden = !cvPagado;
     if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
+    // En la descarga solo se nombran los extras elegidos; se configuran en «Añade».
+    const elegidos = cfg.extras.filter(extraMarcado);
+    res('extras').hidden = !elegidos.length;
+    res('extras').replaceChildren(
+      ...elegidos.map((x) => {
+        const li = document.createElement('li');
+        li.textContent = `${x.nombre} · ${euros(x.precio)}`;
+        return li;
+      }),
+    );
+    const tj = pedido.pagado?.tarjeta;
+    $('[data-tarjeta-pendiente]')!.hidden = !(tj && !tj.slug);
     rellenarTarjeta();
     res('incluye').replaceChildren(
       ...p.incluye.map((x) => {
@@ -516,11 +529,58 @@ export function iniciarEstudioCv() {
       st.textContent = 'Tu pedido es del diseño listo: el PDF sale con el diseño base, sin tu color ni las formas.';
   }
 
+  // ---------- LinkedIn e InfoJobs: copiar campo a campo ----------
+  function pintarPortales() {
+    const caja = $('[data-portales]');
+    if (!caja) return;
+    const grupos = gruposPortales(recoger());
+    if (!grupos.length) {
+      const p = document.createElement('p');
+      p.className = 'text-sm text-muted';
+      p.textContent = 'Rellena tus datos y aquí aparecen listos para copiar.';
+      return caja.replaceChildren(p);
+    }
+    caja.replaceChildren(
+      ...grupos.map((g) => {
+        const sec = document.createElement('section');
+        const h = document.createElement('h4');
+        h.textContent = g.titulo;
+        sec.appendChild(h);
+        for (const t of g.trozos) {
+          const fila = document.createElement('div');
+          fila.className = 'portal-trozo';
+          const et = document.createElement('span');
+          et.className = 'portal-etiqueta';
+          et.textContent = t.etiqueta;
+          const texto = document.createElement('p');
+          texto.className = 'portal-texto';
+          texto.textContent = t.texto;
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'boton boton-secundario portal-copiar';
+          b.dataset.copiar = t.texto;
+          b.textContent = 'Copiar';
+          b.setAttribute('aria-label', `Copiar ${t.etiqueta.toLowerCase()} (${g.titulo})`);
+          fila.replaceChildren(et, texto, b);
+          const n = sobra(t);
+          if (n) {
+            const aviso = document.createElement('small');
+            aviso.className = 'portal-aviso';
+            aviso.textContent = `LinkedIn admite ${t.limite} caracteres: sobran ${n}.`;
+            fila.appendChild(aviso);
+          }
+          sec.appendChild(fila);
+        }
+        return sec;
+      }),
+    );
+  }
+
   // ---------- Compra y pedido pagado ----------
   /** El token sale de la barra de direcciones (y del historial) y, si ya hay CV, va directo a descargar. */
   const destinoPedido = () => (estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
   const pedido = pedidoEstudio<Pagado>(CLAVE_PEDIDO, '/api/cv/pedido', () => {
-    if (actual === 'descarga') resumir();
+    if (actual === 'descarga' || actual === 'anade') resumir();
   });
   /** Deja el carrito exactamente con lo elegido (cantidad 1, sin la otra modalidad) y va al pago. */
   async function comprar(b: HTMLButtonElement) {
@@ -571,7 +631,7 @@ export function iniciarEstudioCv() {
     if (!estado.extras.includes(id)) estado.extras.push(id);
     guardar(estado);
     marcarExtras();
-    const destino = estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '';
+    const destino = estado.alcanzado >= PASOS.indexOf('anade') ? '#anade' : '';
     history.replaceState(null, '', `${location.pathname}${location.search}${destino}`);
     resumir();
     return true;
@@ -768,6 +828,10 @@ export function iniciarEstudioCv() {
     } else vista.hidden = true;
     if (paso === 'diseno') pintarControles();
     if (paso === 'revisa') repasar();
+    if (paso === 'anade') {
+      resumir();
+      pintarPortales();
+    }
     if (paso === 'descarga') resumir();
     // Tras pintar el paso (y su vista previa), su guía sale sola si aún no salió en esta visita.
     setTimeout(() => actual === paso && void guiar(cfg.guia[paso] ?? [], { raiz, clave: `cv:${paso}`, auto: true }), 600);
@@ -831,6 +895,17 @@ export function iniciarEstudioCv() {
     const b = (ev.target as Element).closest<HTMLElement>('button');
     if (!b || !raiz.contains(b)) return;
     if (b.dataset.ir) return ir(b.dataset.ir);
+    if (b.dataset.copiar !== undefined) {
+      const texto = b.dataset.copiar;
+      void navigator.clipboard?.writeText(texto).then(
+        () => {
+          b.textContent = 'Copiado';
+          window.setTimeout(() => (b.textContent = 'Copiar'), 1500);
+        },
+        () => (b.textContent = 'Selecciónalo y copia'),
+      );
+      return;
+    }
     if (esCamino(b.dataset.aCamino)) {
       // «Diseñar el mío» desde una plantilla: se personaliza la elegida, no la de «desde cero».
       elegirCamino(b.dataset.aCamino, 'plantilla');
