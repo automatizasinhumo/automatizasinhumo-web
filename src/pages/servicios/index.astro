@@ -11,8 +11,14 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
 const ThemeServicios = Object.values(import.meta.glob<{ default: unknown }>('#theme/Servicios.astro', { eager: true }))[0]
   ?.default as ((props: Record<string, unknown>) => unknown) | undefined;
 
+// «Desde» de la familia: el menor precio contratable, comparado en céntimos antes de formatearlo.
+const minimo = (precios: (number | undefined)[]) => {
+  const n = precios.filter((p): p is number => p !== undefined);
+  return n.length ? euros(Math.min(...n)) : undefined;
+};
 const familias = FAMILIAS.map((f) => ({
   ...f,
+  desde: minimo(f.servicios.filter(disponible).map((s) => s.desde)),
   servicios: f.servicios.map((s) => ({ ...s, desde: s.desde === undefined ? undefined : euros(s.desde) })),
 }));
 ---

@@ -37,6 +37,8 @@ interface Familia {
   texto: string;
   icono: string;
   servicios: readonly Servicio[];
+  /** Menor precio contratable de la familia, ya formateado (lo calcula la página en céntimos). */
+  desde?: string;
 }
 interface Props {
   familias: readonly Familia[];
@@ -46,8 +48,7 @@ const { familias } = Astro.props;
 const conListos = familias.map((f) => {
   const listos = f.servicios.flatMap((s) => (s.href ? [{ ...s, href: s.href }] : []));
   const pronto = f.servicios.filter((s) => !s.href);
-  const desde = listos.map((s) => s.desde).find(Boolean);
-  return { ...f, listos, pronto, desde, muestra: listos.find((s) => s.muestra)?.muestra };
+  return { ...f, listos, pronto, muestra: listos.find((s) => s.muestra)?.muestra };
 });
 // Primero lo que se puede contratar ya; dentro de cada grupo, el orden de catalogo.ts.
 const puertas = [...conListos.filter((f) => f.listos.length > 0), ...conListos.filter((f) => f.listos.length === 0)];
