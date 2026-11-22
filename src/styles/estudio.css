@@ -323,6 +323,18 @@
   .anadir:hover {
     text-decoration: underline;
   }
+  .idea-dominio {
+    padding: 0.25rem 0.75rem;
+    font-weight: 600;
+    color: var(--color-brand);
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .idea-dominio:hover {
+    text-decoration: underline;
+  }
 
   .foto img {
     display: block;

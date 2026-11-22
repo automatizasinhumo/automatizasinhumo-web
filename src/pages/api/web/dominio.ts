@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { pedidoWeb } from '../../../features/servicios/pedidoAuto';
 import { webDePedido } from '../../../features/servicios/webs';
+import { ideasLibres } from '../../../features/servicios/ideasDominio';
 import { avanzarDominio, configDominios, dominioDePedido, pedirDominio, type FilaDominio } from '../../../features/servicios/dominios';
 
 export const prerender = false;
@@ -27,13 +28,19 @@ const ERRORES = {
   cloudflare: 'No hemos podido añadir el dominio. Vuelve a probar en un rato.',
 } as const;
 
-// POST /api/web/dominio {token, dominio?}
+// POST /api/web/dominio {token, dominio?, ideas?}
+//  - con `ideas: true`: nombres de dominio libres sacados del negocio (para quien aún no tiene);
 //  - con `dominio`: lo añade a Cloudflare y devuelve los servidores DNS que el cliente pone en su registrador;
 //  - sin él: estado actual, y da un paso de la conexión (no espera al cron de 5 minutos).
 export const POST: APIRoute = async ({ request }) => {
-  const body = (await request.json().catch(() => null)) as { token?: unknown; dominio?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { token?: unknown; dominio?: unknown; ideas?: unknown } | null;
   const p = await pedidoWeb(env.DB, body?.token);
   if (!p) return json({ ok: false, error: 'pedido' }, 403);
+  if (body?.ideas === true) {
+    const w = await webDePedido(env.DB, p.publicId);
+    const ideas = w ? await ideasLibres(w.datos.negocio, w.datos.direccion) : [];
+    return json({ ok: true, ideas });
+  }
   const cfg = configDominios(env);
   if (body?.dominio === undefined) {
     let fila = await dominioDePedido(env.DB, 'web', p.publicId);
