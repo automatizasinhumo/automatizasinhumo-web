@@ -27,6 +27,8 @@ const completo: FormCv = {
 describe('enlace', () => {
   it('completa dominios y solo acepta http(s)', () => {
     expect(enlace('anaperez.es')).toBe('https://anaperez.es/');
+    expect(enlace('anaperez.es?ref=cv')).toBe('https://anaperez.es/?ref=cv');
+    expect(enlace('anaperez.es#trabajos')).toBe('https://anaperez.es/#trabajos');
     expect(enlace('http://a.es/x')).toBe('http://a.es/x');
     expect(enlace('javascript:alert(1)')).toBe('');
     expect(enlace('data:text/html,hola')).toBe('');

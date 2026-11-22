@@ -76,7 +76,7 @@ await pagina.waitForFunction(() => !document.querySelector('[aria-busy="true"]')
 await pagina.waitForTimeout(1500);
 await pagina.waitForFunction(() => !document.querySelector('[aria-busy="true"]'), null, { timeout: 120000 }).catch(() => mal('la vista previa no termina con todo al límite'));
 const textoEstado = (await estado.count()) ? await estado.innerText() : '';
-if (!/p[aá]gina/.test(textoEstado)) mal(`vista previa con todo al límite: «${textoEstado}»`);
+if (!/^\d+ páginas? · /.test(textoEstado)) mal(`vista previa con todo al límite: «${textoEstado}»`);
 
 // «Revisa» avisa de un correo, un teléfono o una web mal escritos.
 await siguiente();

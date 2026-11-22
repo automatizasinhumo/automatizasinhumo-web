@@ -31,6 +31,13 @@ describe('periodoEs', () => {
 });
 
 describe('aFormulario', () => {
+  it('LinkedIn sin URL usa el usuario del perfil', () => {
+    const perfil = (website: object, username: string) =>
+      aFormulario(datos({}, { profiles: { items: [{ hidden: false, network: 'LinkedIn', username, website }] } })).linkedin;
+    expect(perfil({ url: '' }, 'ana-perez')).toBe('ana-perez');
+    expect(perfil({ url: 'https://www.linkedin.com/in/ana' }, 'otra')).toBe('https://www.linkedin.com/in/ana');
+  });
+
   it('saca el lugar de la línea de contacto', () => {
     const f = aFormulario(datos({ name: 'Ana', location: 'ana@x.es · 612 345 678 · Sevilla' }, {}));
     expect(f.ubicacion).toBe('Sevilla');

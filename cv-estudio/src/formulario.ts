@@ -70,7 +70,7 @@ const vinetas = (s: string) => {
 export function enlace(v: unknown): string {
 	const t = txt(v, 300).replace(/\s+/g, "");
 	if (!t) return "";
-	const url = /^https?:\/\//i.test(t) ? t : /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(t) ? `https://${t}` : "";
+	const url = /^https?:\/\//i.test(t) ? t : /^[a-z0-9-]+(\.[a-z0-9-]+)+([/?#].*)?$/i.test(t) ? `https://${t}` : "";
 	try {
 		const u = new URL(url);
 		return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";

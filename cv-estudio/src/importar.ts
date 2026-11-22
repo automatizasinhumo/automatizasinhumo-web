@@ -200,7 +200,10 @@ export function aFormulario(d: ResumeData): FormCv {
 			80,
 		),
 		web: corto(b.website?.url, 300),
-		linkedin: corto(visibles(s?.profiles?.items, 20).find((p) => /linkedin/i.test(`${p.network} ${p.website?.url}`))?.website?.url, 200),
+		linkedin: (() => {
+			const p = visibles(s?.profiles?.items, 20).find((p) => /linkedin/i.test(`${p.network} ${p.website?.url}`));
+			return corto(p?.website?.url || p?.username, 200);
+		})(),
 		cursos: visibles(s?.certifications?.items, 8).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.issuer, 120), fecha: corto(c.date, 40) })),
 		premios: visibles(s?.awards?.items, 6).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.awarder, 120), fecha: corto(c.date, 40) })),
 		publicaciones: visibles(s?.publications?.items, 6).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.publisher, 120), fecha: corto(c.date, 40) })),

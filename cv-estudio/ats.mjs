@@ -7,7 +7,7 @@
 // El resultado es la lista de `ats: true` de DISENOS_CV (src/features/servicios/cv.ts).
 // Uso: con el sitio arrancado (npx astro dev), `node cv-estudio/ats.mjs [http://localhost:4321]`.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright-core';
@@ -68,11 +68,15 @@ await navegador.close();
 
 /** Segundo lector, si está instalado: pdftotext (Poppler), el que usan muchos ATS. Cada lector ordena distinto. */
 const tmp = mkdtempSync(path.join(tmpdir(), 'ats-'));
-const conPoppler = spawnSync('pdftotext', ['-v']).status === 0;
+// Ruta absoluta fija (o PDFTOTEXT con ruta absoluta): no se busca en el PATH.
+const PDFTOTEXT = [process.env.PDFTOTEXT, '/usr/bin/pdftotext', '/usr/local/bin/pdftotext', '/opt/homebrew/bin/pdftotext'].find(
+  (p) => p && path.isAbsolute(p) && existsSync(p),
+);
+const conPoppler = !!PDFTOTEXT && spawnSync(PDFTOTEXT, ['-v']).status === 0;
 function lineasPoppler(bytes) {
   const f = path.join(tmp, 'cv.pdf');
   writeFileSync(f, bytes);
-  const r = spawnSync('pdftotext', ['-enc', 'UTF-8', f, '-'], { encoding: 'utf8' });
+  const r = spawnSync(PDFTOTEXT, ['-enc', 'UTF-8', f, '-'], { encoding: 'utf8' });
   return r.stdout.split(/\r?\n/).map((l) => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
 }
 
@@ -85,7 +89,7 @@ const lee = (ls, nombre) => {
 const filas = [];
 for (const c of crudos) {
   const bytes = new Uint8Array(c.bytes);
-  const a = lee(await lineas(bytes), c.nombre);
+  const a = lee(await lineas(bytes.slice()), c.nombre);
   const b = conPoppler ? lee(lineasPoppler(bytes), c.nombre) : a;
   const fila = { id: c.id, nombreArriba: a.nombreArriba && b.nombreArriba, encabezadosSueltos: a.encabezadosSueltos && b.encabezadosSueltos, importa: c.importa };
   fila.ats = fila.nombreArriba && fila.encabezadosSueltos && fila.importa;
