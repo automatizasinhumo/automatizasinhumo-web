@@ -86,6 +86,8 @@ export interface StorefrontShellModel {
   catalogHref: string;
   /** Catálogo nuevo por familias (/servicios): destino de «Ver todos los servicios» en los temas que lo usan. */
   serviciosHref: string;
+  /** Familias del catálogo nuevo (catalogo.ts) para el mega menú y el pie de los temas que lo usan. */
+  familias: ServiceFamilyLink[];
   footerLinks: StorefrontLink[];
   /** Páginas «Web para …» de cada oficio: enlazadas en todas las rutas para que no queden huérfanas. */
   sectorLinks: StorefrontLink[];
@@ -279,3 +281,16 @@ export interface ContentPageModel {
 
 /** Muestra del producto en la tarjeta del catálogo de servicios (control MuestraServicio). */
 export type { MuestraServicio } from '../servicios/catalogo';
+
+/** Una familia de servicios ya lista para pintar: enlace a su sección y sus servicios. */
+export interface ServiceFamilyLink {
+  id: string;
+  nombre: string;
+  corto: string;
+  texto: string;
+  icono: string;
+  href: string;
+  /** Cuántos servicios se pueden contratar ya (0 = familia en preparación). */
+  disponibles: number;
+  servicios: (StorefrontLink & { pronto: boolean })[];
+}

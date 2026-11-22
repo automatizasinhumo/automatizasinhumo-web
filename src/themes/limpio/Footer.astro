@@ -29,6 +29,12 @@ for (const link of model.footerLinks) {
   const i = GRUPOS.findIndex((g) => g.coincide.test(link.href));
   grupos[i === -1 ? GRUPOS.length : i].links.push(link);
 }
+// «Servicios» enseña las familias del catálogo nuevo (las mismas del menú), no las categorías
+// viejas de D1, que ya no casan con /servicios. Solo si el pie tiene grupo de servicios: un
+// pie sin enlaces sigue sin navegación.
+if (model.familias.length > 0 && grupos[0].links.length > 0) {
+  grupos[0].links = [...model.familias.map((f) => ({ text: f.nombre, href: f.href })), { text: 'Todos los servicios', href: model.serviciosHref }];
+}
 const gruposVisibles = grupos.filter((g) => g.links.length > 0);
 ---
 

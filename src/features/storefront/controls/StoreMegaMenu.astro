@@ -14,6 +14,8 @@ import {
  * enlaces sueltos. Envuelve el Navigation Menu de Starwind UI (MIT), que trae
  * teclado, Escape y foco. Sin JavaScript el panel no se abre: en xl las categorías
  * solo quedan en /products (pendiente en el backlog #87).
+ * Un tema puede pintar su propio panel con el slot «panel» (y su ancho con panelClass);
+ * sin slot sale la rejilla de áreas de siempre.
  */
 export interface MegaMenuArea {
   title: string;
@@ -28,16 +30,20 @@ interface Props {
   allText: string;
   links?: StorefrontLink[];
   class?: string;
+  panelClass?: string;
 }
 
-const { label, areas, allHref, allText, links = [], class: className } = Astro.props;
+const { label, areas, allHref, allText, links = [], class: className, panelClass = 'w-[min(46rem,calc(100vw-2rem))] p-5' } = Astro.props;
+const panelPropio = Astro.slots.has('panel');
 ---
 
 <NavigationMenu aria-label={label} class={className}>
   <NavigationMenuList>
     <NavigationMenuItem value="areas">
       <NavigationMenuTrigger>{label}</NavigationMenuTrigger>
-      <NavigationMenuContent class="w-[min(46rem,calc(100vw-2rem))] p-5">
+      <NavigationMenuContent class={panelClass}>
+        {panelPropio ? <slot name="panel" /> : (
+        <>
         <div class="grid grid-cols-3 gap-6">
           {
             areas.map((area) => (
@@ -61,6 +67,8 @@ const { label, areas, allHref, allText, links = [], class: className } = Astro.p
         <NavigationMenuLink href={allHref} class="mt-4 border-t border-line pt-3 font-medium text-brand">
           {allText} →
         </NavigationMenuLink>
+        </>
+        )}
       </NavigationMenuContent>
     </NavigationMenuItem>
     {
