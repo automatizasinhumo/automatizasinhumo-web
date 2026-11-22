@@ -160,6 +160,11 @@ export function aFormulario(d: ResumeData): FormCv {
 			const r = idioma(corto(l.language, 100), corto(l.fluency, 40), puntos(l.level));
 			return { idioma: r.idioma.slice(0, 60), nivel: r.nivel.slice(0, 40), puntos: r.puntos };
 		}),
+		// El carnet viaja en un campo propio con icono de coche (crearDatos le antepone «Carnet» si no lo trae).
+		carnet: corto(
+			(b.customFields ?? []).find((c) => c.icon === "car" || /^(carn[eé]t?|permiso)\b/i.test(c.text ?? ""))?.text?.replace(/^carn[eé]t?\s+(?=\S)/i, ""),
+			80,
+		),
 		web: corto(b.website?.url, 300),
 		linkedin: corto(visibles(s?.profiles?.items, 20).find((p) => /linkedin/i.test(`${p.network} ${p.website?.url}`))?.website?.url, 200),
 		cursos: visibles(s?.certifications?.items, 8).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.issuer, 120), fecha: corto(c.date, 40) })),

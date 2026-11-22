@@ -42,6 +42,7 @@ interface Motor {
 const AVISO_IMPORTAR = {
   leyendo: 'Leyendo tu CV…',
   ok: 'Listo: hemos rellenado tus datos con tu CV. Repásalos, por si falta algo.',
+  recortado: 'Listo: hemos rellenado tus datos con tu CV. Algún apartado traía más entradas de las que caben y nos hemos quedado con las primeras. Repásalos.',
   tipo: 'Ese archivo no se puede leer. Sube un PDF, un Word (.docx), la exportación de LinkedIn (.zip) o un JSON Resume.',
   vacio: 'No hemos encontrado texto en ese archivo (¿es una foto o un escaneo?). Prueba con otro o escribe tus datos.',
   lectura: 'No hemos podido leer ese archivo. Prueba con otro formato o escribe tus datos.',
@@ -780,10 +781,19 @@ export function iniciarEstudioCv() {
       const r = await (await motor()).importar(fichero);
       if (turno !== importacion) return;
       if (!r.ok) return avisar(r.motivo);
+      // Un CV importado entra con los máximos del formulario (los borradores guardados no se recortan).
+      let recortado = false;
+      for (const l of LISTAS) {
+        const filas = r.form[l];
+        if (Array.isArray(filas) && filas.length > LIMITES_CV.items[l]) {
+          (r.form as Record<string, unknown>)[l] = filas.slice(0, LIMITES_CV.items[l]);
+          recortado = true;
+        }
+      }
       volcar(r.form);
       persistir();
       programar(true);
-      avisar('ok');
+      avisar(recortado ? 'recortado' : 'ok');
     } catch {
       avisar('lectura');
     }

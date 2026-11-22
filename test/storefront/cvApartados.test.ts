@@ -31,6 +31,10 @@ describe('enlace', () => {
     expect(perfilLinkedin('linkedin.com/in/ana-perez')?.usuario).toBe('ana-perez');
     expect(perfilLinkedin('')).toBeNull();
   });
+  it('un escape roto en LinkedIn omite el perfil sin romper el CV', () => {
+    expect(perfilLinkedin('https://www.linkedin.com/in/ana%')).toBeNull();
+    expect(() => crearDatos({ ...FORM_VACIO, nombre: 'Ana', linkedin: 'https://www.linkedin.com/in/ana%' })).not.toThrow();
+  });
 });
 
 describe('apartados opcionales', () => {
@@ -48,6 +52,7 @@ describe('apartados opcionales', () => {
     const f = aFormulario(sinHtml);
     expect(f.web).toBe('https://anaperez.es/');
     expect(f.linkedin).toContain('ana-perez');
+    expect(f.carnet).toBe('B, vehículo propio');
     expect(f.cursos).toEqual(completo.cursos);
     expect(f.premios).toEqual(completo.premios);
     expect(f.publicaciones).toEqual(completo.publicaciones);

@@ -84,7 +84,14 @@ export function perfilLinkedin(v: unknown): { usuario: string; url: string } | n
 	const t = txt(v, 200).replace(/\s+/g, "");
 	if (!t) return null;
 	const m = /linkedin\.com\/in\/([^/?#]+)/i.exec(t);
-	const usuario = m ? decodeURIComponent(m[1]) : /^@?[\p{L}\p{N}_-]{3,100}$/u.test(t) ? t.replace(/^@/, "") : "";
+	let usuario = "";
+	if (m) {
+		try {
+			usuario = decodeURIComponent(m[1]);
+		} catch {
+			return null; // escape roto («%» suelto): se omite el perfil, no la vista previa
+		}
+	} else usuario = /^@?[\p{L}\p{N}_-]{3,100}$/u.test(t) ? t.replace(/^@/, "") : "";
 	return usuario ? { usuario, url: `https://www.linkedin.com/in/${encodeURIComponent(usuario)}` } : null;
 }
 
