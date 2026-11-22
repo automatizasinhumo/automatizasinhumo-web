@@ -697,7 +697,10 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-barra{display:none}
 @container (max-width:640px){
   .w-barra{position:sticky;bottom:0;z-index:4;display:flex;gap:8px;padding:10px 12px;background:var(--w-fondo);border-top:1px solid var(--w-borde);box-shadow:0 -6px 18px rgb(0 0 0 / .08)}
-  .w-barra .w-boton{flex:1 1 auto;justify-content:center;gap:6px;padding:10px 8px;font-size:.9rem;line-height:1.2;text-align:center;overflow-wrap:normal;word-break:normal}
+  .w-barra .w-boton{flex:1 1 0;min-width:0;justify-content:center;gap:6px;padding:10px 6px;font-size:.9rem;line-height:1.2;text-align:center;overflow-wrap:break-word;word-break:normal;hyphens:auto}
+}
+@container (max-width:380px){
+  .w-barra .w-boton{flex-direction:column;gap:2px;padding:8px 4px;font-size:.85rem}
 }
 .w-marca{position:absolute;inset:0;pointer-events:none;z-index:5;background-repeat:repeat}
 `.trim();
