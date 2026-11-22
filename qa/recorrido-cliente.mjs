@@ -42,9 +42,18 @@ async function recorrido(ctx, ancho) {
   };
 
   try {
-    await paso('la portada enlaza el servicio', async () => {
+    // La portada clásica enlaza la ficha directamente; la nueva (tema limpio) lleva por familias
+    // y categorías. Lo que importa al cliente es llegar: a la ficha como mucho a dos clics.
+    await paso('la portada lleva al servicio en dos clics como mucho', async () => {
       await ir('/');
-      if (!(await pg.locator(`a[href="/products/${slug}"]`).count())) throw new Error(`sin enlace a /products/${slug}`);
+      const destino = `/products/${slug}`;
+      if (await pg.locator(`a[href="${destino}"]`).count()) return;
+      const internos = await pg.locator('a[href^="/"]').evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute('href').split('#')[0]))]);
+      for (const href of internos.filter((h) => /^\/(categories|servicios|products)(\/|$)/.test(h))) {
+        const r = await pg.request.get(new URL(href, base).toString());
+        if (r.ok() && (await r.text()).includes(`href="${destino}"`)) return;
+      }
+      throw new Error(`sin camino de la portada a ${destino} en dos clics`);
     });
 
     // Un error a mitad del HTML (p. ej. D1 sin cupo) deja la página con 200 pero cortada:
