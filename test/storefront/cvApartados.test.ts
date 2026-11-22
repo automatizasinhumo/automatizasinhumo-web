@@ -1,6 +1,11 @@
 // Apartados opcionales del CV (web, LinkedIn, carnet, cursos, proyectos, voluntariado, premios,
 // publicaciones, referencias, aficiones): llegan al esquema de Reactive Resume y vuelven intactos.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// La raíz no instala las dependencias de cv-estudio (en CI no existe dompurify). Aquí solo se prueba la
+// estructura de los datos, no la limpieza del HTML: se deja pasar tal cual.
+vi.mock('dompurify', () => ({ default: { sanitize: (html: string) => html } }));
+
 import { FORM_VACIO, crearDatos, enlace, perfilLinkedin, type FormCv } from '../../cv-estudio/src/formulario';
 import { aFormulario } from '../../cv-estudio/src/importar';
 
