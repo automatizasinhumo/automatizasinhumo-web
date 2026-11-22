@@ -433,7 +433,6 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-bento .w-servicio{border:0;border-radius:24px;padding:24px;min-height:150px;background:#fff}
 .w-bento .w-servicio:first-child{background:var(--w-c);color:var(--w-s)}
 .w-bento .w-servicio:first-child :is(.w-precio,p){color:inherit}
-.w-bento .w-servicio:first-child p{opacity:.88}
 .w-bento .w-pie{border:0;padding-top:8px}
 @container (min-width:960px){
   .w-bento .w-servicios{grid-template-columns:repeat(6,1fr)}
@@ -495,7 +494,7 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-poster .w-cuerpo:has(.w-portada){display:grid}
 .w-poster .w-cuerpo:has(.w-portada) main{display:contents}
 .w-poster .w-cuerpo:has(.w-portada) :is(.w-cab,.w-portada){grid-area:1/1}
-.w-poster .w-cuerpo:has(.w-portada) .w-cab{z-index:1;color:#fff;background:linear-gradient(to top,rgb(0 0 0 / .78),rgb(0 0 0 / .15) 70%)}
+.w-poster .w-cuerpo:has(.w-portada) .w-cab{z-index:1;color:#fff;background:linear-gradient(to top,rgb(0 0 0 / .82),rgb(0 0 0 / .6));text-shadow:0 1px 3px rgb(0 0 0 / .5)}
 .w-poster .w-cuerpo:has(.w-portada) .w-cab::before{display:none}
 .w-poster .w-cuerpo:has(.w-portada) .w-cab .w-boton-lleno{background:var(--w-c);color:var(--w-s);border-color:var(--w-c)}
 .w-poster .w-portada .w-in{max-width:none;height:100%;padding:0}
@@ -506,7 +505,7 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-suave .w-cab::before,.w-suave .w-cab::after{content:"";position:absolute;border-radius:50%;background:color-mix(in srgb,var(--w-c) 20%,#fff)}
 .w-suave .w-cab::before{width:340px;height:340px;left:-130px;top:-140px}
 .w-suave .w-cab::after{width:220px;height:220px;right:-70px;bottom:-90px}
-.w-suave .w-cab .w-in{position:relative}
+.w-suave .w-cab .w-in{position:relative;z-index:1}
 .w-suave :is(.w-servicio,.w-dato){border:0;border-radius:28px;background:#fff;box-shadow:0 12px 30px -14px color-mix(in srgb,var(--w-c) 40%,transparent)}
 .w-suave .w-sec h2{text-align:center}
 .w-suave .w-sec h2::after{margin-inline:auto;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--w-c) 30%,#fff)}
@@ -584,7 +583,7 @@ a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offse
 .w-contraste .w-portada img{border-radius:0;filter:grayscale(1) contrast(1.1)}
 .w-contraste .w-pie{background:#000;color:#d4d4d4;border:0}
 /* Retro: papel crema, bordes discontinuos, sello girado */
-.w-retro{--w-fondo:#f6efe3;--w-tinta:#2b2118;--w-suave:#5c4a3a;--w-borde:#2b2118;--w-panel:#fffaf1}
+.w-retro{--w-ct:color-mix(in srgb,var(--w-ct-claro) 82%,#000);--w-fondo:#f6efe3;--w-tinta:#2b2118;--w-suave:#5c4a3a;--w-borde:#2b2118;--w-panel:#fffaf1}
 .w-retro .w-cab h1{text-transform:uppercase;letter-spacing:.04em}
 .w-retro .w-sector{display:inline-block;border:2px solid currentColor;border-radius:999px;padding:4px 14px;transform:rotate(-3deg)}
 .w-retro .w-sec h2{text-align:center}
