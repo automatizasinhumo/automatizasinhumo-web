@@ -64,8 +64,9 @@ const r = await build({
 });
 
 if (process.env.META) writeFileSync(process.env.META, JSON.stringify(r.metafile));
-// pdf.js necesita su worker como fichero aparte, junto al motor.
-copyFileSync(require.resolve('pdfjs-dist/build/pdf.worker.min.mjs'), path.join(salida, 'pdf.worker.min.mjs'));
+// pdf.js necesita su worker como fichero aparte, junto al motor. Versión legacy (motor y worker):
+// la moderna usa Map.getOrInsertComputed, que no existe en Chrome/Edge/Safari algo antiguos.
+copyFileSync(require.resolve('pdfjs-dist/legacy/build/pdf.worker.min.mjs'), path.join(salida, 'pdf.worker.min.mjs'));
 
 // fuentes.css: las mismas fuentes que el PDF, para que la página enseñe cada «Letra» con su tipografía
 // real. Sale de los ficheros que acaba de emitir esbuild (con su hash), así que nunca se desfasa.
