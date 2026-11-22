@@ -5,7 +5,7 @@ import { newResume } from "./adoptado/resume-model";
 
 // Tipos y formulario vacío viven en formulario-datos.ts (sin dependencias: los usan el
 // importador y sus pruebas sin cargar el modelo ni DOMPurify).
-import { FORM_VACIO, FOTO_EJEMPLO, fotoValida, type Experiencia, type FormCv, type Formacion, type Habilidad, type Idioma } from "./formulario-datos";
+import { FORM_VACIO, FOTO_EJEMPLO, fotoValida, type Experiencia, type FormCv, type Formacion, type Habilidad, type Idioma, type Interes, type Mencion, type Proyecto, type Referencia, type Voluntariado } from "./formulario-datos";
 export * from "./formulario-datos";
 
 export const FORM_EJEMPLO: FormCv = {
@@ -44,6 +44,9 @@ export const FORM_EJEMPLO: FormCv = {
 		{ idioma: "Inglés", nivel: "C1", puntos: 4 },
 		{ idioma: "Valenciano", nivel: "C1", puntos: 4 },
 	],
+	carnet: "B, vehículo propio",
+	cursos: [{ titulo: "Customer Experience Professional", entidad: "CXPA", fecha: "2023" }],
+	intereses: [{ nombre: "Fotografía" }, { nombre: "Senderismo" }, { nombre: "Voluntariado" }],
 };
 
 const NIVELES = ["", "Básico", "Elemental", "Intermedio", "Avanzado", "Experto"];
@@ -59,6 +62,31 @@ const vinetas = (s: string) => {
 	const lineas = s.split(/\r?\n/).map((l) => l.replace(/^[-•·*]\s*/, "").trim()).filter(Boolean);
 	return lineas.length ? `<ul>${lineas.map((l) => `<li><p>${escapar(l)}</p></li>`).join("")}</ul>` : "";
 };
+
+/**
+ * Enlace seguro para el PDF: solo http(s). «www.x.es» o «x.es/algo» se completan con https://.
+ * Cualquier otra cosa (javascript:, mailto:, texto suelto) se queda sin enlace.
+ */
+export function enlace(v: unknown): string {
+	const t = txt(v, 300).replace(/\s+/g, "");
+	if (!t) return "";
+	const url = /^https?:\/\//i.test(t) ? t : /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(t) ? `https://${t}` : "";
+	try {
+		const u = new URL(url);
+		return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
+	} catch {
+		return "";
+	}
+}
+const sitio = (url: string, label = "") => ({ url, label: label || url.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, ""), inlineLink: false });
+/** LinkedIn: admite la dirección entera o solo el usuario; devuelve usuario y enlace. */
+export function perfilLinkedin(v: unknown): { usuario: string; url: string } | null {
+	const t = txt(v, 200).replace(/\s+/g, "");
+	if (!t) return null;
+	const m = /linkedin\.com\/in\/([^/?#]+)/i.exec(t);
+	const usuario = m ? decodeURIComponent(m[1]) : /^@?[\p{L}\p{N}_-]{3,100}$/u.test(t) ? t.replace(/^@/, "") : "";
+	return usuario ? { usuario, url: `https://www.linkedin.com/in/${encodeURIComponent(usuario)}` } : null;
+}
 
 /** Foto del CV: el tamaño y la forma los decide cada plantilla; aquí solo la fuente. */
 export function ponerFoto(d: ResumeData, url: string) {
@@ -79,6 +107,10 @@ export function crearDatos(entrada: Partial<FormCv> | null | undefined, plantill
 		phone: txt(f.telefono, 60),
 		location: txt(f.ubicacion, 120),
 	};
+	const webPropia = enlace(f.web);
+	if (webPropia) d.basics.website = sitio(webPropia);
+	const carnet = txt(f.carnet, 80);
+	if (carnet) d.basics.customFields = [{ id: id(), icon: "car", text: /carn|permiso/i.test(carnet) ? carnet : `Carnet ${carnet}`, link: "" }];
 	d.summary.content = parrafo(txt(f.resumen, 1500));
 	ponerFoto(d, fotoValida(f.foto));
 	const s = d.sections;
@@ -124,5 +156,29 @@ export function crearDatos(entrada: Partial<FormCv> | null | undefined, plantill
 	s.languages.items = lista<Idioma>(f.idiomas, 8)
 		.filter((l) => txt(l?.idioma))
 		.map((l) => ({ id: id(), hidden: false, language: txt(l.idioma, 60), fluency: txt(l.nivel, 40), level: nivel(l.puntos) })) as never[];
+	const li = perfilLinkedin(f.linkedin);
+	s.profiles.items = (li ? [{ id: id(), hidden: false, icon: "linkedin-logo", iconColor: "", network: "LinkedIn", username: li.usuario, website: sitio(li.url, `linkedin.com/in/${li.usuario}`) }] : []) as never[];
+	const mencion = (v: unknown, max: number) =>
+		lista<Mencion>(v, max)
+			.filter((m) => txt(m?.titulo))
+			.map((m) => ({ titulo: txt(m.titulo, 160), entidad: txt(m.entidad, 120), fecha: txt(m.fecha, 40) }));
+	s.certifications.items = mencion(f.cursos, 8).map((m) => ({ id: id(), hidden: false, title: m.titulo, issuer: m.entidad, date: m.fecha, website: web, description: "" })) as never[];
+	s.awards.items = mencion(f.premios, 6).map((m) => ({ id: id(), hidden: false, title: m.titulo, awarder: m.entidad, date: m.fecha, website: web, description: "" })) as never[];
+	s.publications.items = mencion(f.publicaciones, 6).map((m) => ({ id: id(), hidden: false, title: m.titulo, publisher: m.entidad, date: m.fecha, website: web, description: "" })) as never[];
+	s.projects.items = lista<Proyecto>(f.proyectos, 6)
+		.filter((p) => txt(p?.nombre))
+		.map((p) => {
+			const url = enlace(p.enlace);
+			return { id: id(), hidden: false, name: txt(p.nombre, 160), period: txt(p.periodo, 60), website: url ? sitio(url) : web, description: vinetas(txt(p.descripcion, 700)) };
+		}) as never[];
+	s.volunteer.items = lista<Voluntariado>(f.voluntariado, 6)
+		.filter((v) => txt(v?.organizacion))
+		.map((v) => ({ id: id(), hidden: false, organization: txt(v.organizacion, 160), location: txt(v.lugar, 120), period: txt(v.periodo, 60), website: web, description: vinetas(txt(v.descripcion, 700)) })) as never[];
+	s.references.items = lista<Referencia>(f.referencias, 4)
+		.filter((r) => txt(r?.nombre))
+		.map((r) => ({ id: id(), hidden: false, name: txt(r.nombre, 120), position: txt(r.cargo, 160), website: web, phone: txt(r.contacto, 80), description: "" })) as never[];
+	s.interests.items = lista<Interes>(f.intereses, 8)
+		.filter((i) => txt(i?.nombre))
+		.map((i) => ({ id: id(), hidden: false, icon: "", iconColor: "", name: txt(i.nombre, 60), keywords: [] })) as never[];
 	return parseResumeData(d);
 }

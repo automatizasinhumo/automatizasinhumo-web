@@ -15,7 +15,7 @@ import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
-type Lista = 'experiencia' | 'formacion' | 'habilidades' | 'idiomas';
+type Lista = keyof typeof LIMITES_CV.items;
 type Fila = Record<string, string | number>;
 type FormCv = Record<string, string> & Record<Lista, Fila[]>;
 type Decoracion = { forma: string; color: string; color2: string; intensidad: number; posicion: string; sombreado: string; fondo: string };
@@ -92,8 +92,10 @@ const ERROR_TARJETA: Record<string, string> = {
   contacto: 'Añade al menos un correo, un teléfono, una web o tu LinkedIn.',
   pedido: 'Este pedido no incluye la tarjeta digital.',
 };
-const LISTAS: Lista[] = ['experiencia', 'formacion', 'habilidades', 'idiomas'];
-const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'resumen', 'foto'];
+const LISTAS = Object.keys(LIMITES_CV.items) as Lista[];
+/** Apartados opcionales que van plegados en «Más apartados». */
+const LISTAS_EXTRA: Lista[] = ['cursos', 'proyectos', 'voluntariado', 'premios', 'publicaciones', 'referencias', 'intereses'];
+const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'web', 'linkedin', 'carnet', 'resumen', 'foto'];
 /** Tope de la foto como data URL (igual que MAX_FOTO_CV del motor, que descarta lo que pase). */
 const MAX_FOTO = 400_000;
 /** Foto del CV de ejemplo (cv-estudio/src/formulario-datos.ts FOTO_EJEMPLO). */
@@ -323,6 +325,9 @@ export function iniciarEstudioCv() {
       for (const fila of Array.isArray(f[l]) ? f[l] : []) anadir(l, fila, true);
       limitar(l);
     }
+    // Si el CV trae apartados extra (importado o recuperado), se ven abiertos.
+    const mas = $<HTMLDetailsElement>('[data-mas-apartados]');
+    if (mas && LISTAS_EXTRA.some((l) => (f[l]?.length ?? 0) > 0)) mas.open = true;
     for (const c of $$<HTMLTextAreaElement>('textarea[data-cuenta]')) {
       c.value = c.value.slice(0, c.maxLength);
       acotar(c);
@@ -340,7 +345,7 @@ export function iniciarEstudioCv() {
     }
     return f;
   }
-  const vacio = (): FormCv => ({ ...Object.fromEntries(CAMPOS.map((k) => [k, ''])), experiencia: [], formacion: [], habilidades: [], idiomas: [] }) as unknown as FormCv;
+  const vacio = (): FormCv => ({ ...Object.fromEntries(CAMPOS.map((k) => [k, ''])), ...Object.fromEntries(LISTAS.map((l) => [l, []])) }) as unknown as FormCv;
 
   // ---------- Personalización ----------
   const MUESTRAS: [string, string, 'color' | 'color2'][] = [

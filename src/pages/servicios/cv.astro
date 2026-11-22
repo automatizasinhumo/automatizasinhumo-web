@@ -276,6 +276,9 @@ const ejemploTarjeta: DatosTarjeta = {
                 <label class={campo}>Correo<input name="email" type="email" autocomplete="email" maxlength="160" /></label>
                 <label class={campo}>Teléfono<input name="telefono" type="tel" autocomplete="tel" maxlength="60" /></label>
                 <label class={campo}>Ciudad<input name="ubicacion" autocomplete="address-level2" maxlength="120" /></label>
+                <label class={campo}>LinkedIn <span class="ayuda">(opcional)</span><input name="linkedin" maxlength="200" inputmode="url" placeholder="linkedin.com/in/tu-nombre" /></label>
+                <label class={campo}>Web o portfolio <span class="ayuda">(opcional)</span><input name="web" type="text" inputmode="url" autocomplete="url" maxlength="300" placeholder="tuweb.es" /></label>
+                <label class={campo}>Carnet de conducir <span class="ayuda">(opcional)</span><input name="carnet" maxlength="80" placeholder="B, vehículo propio" /></label>
               </div>
               <div class="foto-cv" data-guia="foto">
                 <input type="hidden" name="foto" />
@@ -328,6 +331,53 @@ const ejemploTarjeta: DatosTarjeta = {
               <button type="button" class="anadir" data-anadir>+ Añadir idioma</button>
               <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
             </fieldset>
+
+            <details class="mas-apartados" data-mas-apartados data-guia="mas-apartados">
+              <summary>Más apartados <span class="ayuda">(opcional: cursos, proyectos, voluntariado, premios…)</span></summary>
+              <p class="ayuda">Añade solo los que te sumen para el puesto. Los vacíos no salen en el CV.</p>
+              <fieldset class="bloque" data-lista="cursos" data-max={LIMITES_CV.items.cursos}>
+                <legend>Cursos y certificaciones</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir curso o certificado</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+              <fieldset class="bloque" data-lista="proyectos" data-max={LIMITES_CV.items.proyectos}>
+                <legend>Proyectos</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir proyecto</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+              <fieldset class="bloque" data-lista="voluntariado" data-max={LIMITES_CV.items.voluntariado}>
+                <legend>Voluntariado</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir voluntariado</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+              <fieldset class="bloque" data-lista="premios" data-max={LIMITES_CV.items.premios}>
+                <legend>Premios y reconocimientos</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir premio</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+              <fieldset class="bloque" data-lista="publicaciones" data-max={LIMITES_CV.items.publicaciones}>
+                <legend>Publicaciones</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir publicación</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+              <fieldset class="bloque" data-lista="referencias" data-max={LIMITES_CV.items.referencias}>
+                <legend>Referencias</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir referencia</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+              <fieldset class="bloque" data-lista="intereses" data-max={LIMITES_CV.items.intereses}>
+                <legend>Aficiones e intereses</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir afición</button>
+                <p class="limite" data-limite hidden>Es el máximo: con más, el CV se alarga y se lee peor.</p>
+              </fieldset>
+            </details>
           </div>
           <div data-hueco-vista></div>
         </div>
@@ -499,6 +549,76 @@ const ejemploTarjeta: DatosTarjeta = {
             <option value="4">4 de 5</option><option value="5">5 de 5</option>
           </select>
         </label>
+      </div>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-cursos">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Nombre<input data-k="titulo" maxlength="160" placeholder="Prevención de riesgos laborales (60 h)" /></label>
+        <label class={campo}>Centro o entidad<input data-k="entidad" maxlength="120" placeholder="SEPE" /></label>
+        <label class={campo}>Año<input data-k="fecha" maxlength="40" placeholder="2024" /></label>
+      </div>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-proyectos">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Proyecto<input data-k="nombre" maxlength="160" /></label>
+        <label class={campo}>Fechas<input data-k="periodo" maxlength="60" placeholder="2024" /></label>
+        <label class={campo}>Enlace (opcional)<input data-k="enlace" maxlength="300" placeholder="github.com/…" inputmode="url" /></label>
+      </div>
+      <label class={campo}>Qué hiciste y qué conseguiste <span class="ayuda">(uno por línea)</span><textarea data-k="descripcion" rows="2" maxlength="700" data-lineas="4" data-cuenta></textarea><small class="cuenta" aria-live="off"></small></label>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-voluntariado">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Organización<input data-k="organizacion" maxlength="160" placeholder="Cruz Roja" /></label>
+        <label class={campo}>Ciudad<input data-k="lugar" maxlength="120" /></label>
+        <label class={campo}>Fechas<input data-k="periodo" maxlength="60" placeholder="2022 – actualidad" /></label>
+      </div>
+      <label class={campo}>Qué hacías <span class="ayuda">(uno por línea)</span><textarea data-k="descripcion" rows="2" maxlength="700" data-lineas="4" data-cuenta></textarea><small class="cuenta" aria-live="off"></small></label>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-premios">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Nombre<input data-k="titulo" maxlength="160" /></label>
+        <label class={campo}>Quién lo concede<input data-k="entidad" maxlength="120" /></label>
+        <label class={campo}>Año<input data-k="fecha" maxlength="40" placeholder="2024" /></label>
+      </div>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-publicaciones">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Nombre<input data-k="titulo" maxlength="160" /></label>
+        <label class={campo}>Editorial o medio<input data-k="entidad" maxlength="120" /></label>
+        <label class={campo}>Año<input data-k="fecha" maxlength="40" placeholder="2024" /></label>
+      </div>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-referencias">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Nombre<input data-k="nombre" maxlength="120" placeholder="Ana López" /></label>
+        <label class={campo}>Cargo y empresa<input data-k="cargo" maxlength="160" placeholder="Directora, Tienda Levante" /></label>
+        <label class={campo}>Teléfono o correo<input data-k="contacto" maxlength="80" /></label>
+      </div>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-intereses">
+    <div class="item">
+      <div class="filas">
+        <label class={campo}>Afición<input data-k="nombre" maxlength="60" placeholder="Fotografía" /></label>
       </div>
       <button type="button" class="quitar" data-quitar>Quitar</button>
     </div>

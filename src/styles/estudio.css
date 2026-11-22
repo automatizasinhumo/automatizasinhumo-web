@@ -286,6 +286,20 @@
   .importar-nota[data-tono='error'] {
     color: var(--color-ink);
   }
+  .mas-apartados {
+    margin-top: var(--ds-hueco-6);
+    padding: var(--ds-hueco-3) var(--ds-hueco-4);
+    border: 1px dashed var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+  }
+  .mas-apartados > summary {
+    font-weight: 600;
+    color: var(--color-brand);
+    cursor: pointer;
+  }
+  .mas-apartados .bloque:first-of-type {
+    margin-top: var(--ds-hueco-4);
+  }
   .bloque legend {
     margin-bottom: var(--ds-hueco-2);
     font-size: var(--ds-texto-etiqueta);
