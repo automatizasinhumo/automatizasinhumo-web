@@ -292,6 +292,7 @@ export function iniciarEstudioCv() {
   let pidiendoRecorte = false;
   /** Rehace el recorte con el encuadre actual (agrupa los movimientos seguidos del deslizador o del dedo). */
   function reencuadrar() {
+    genFoto++; // el encuadre cambió: un recorte anterior aún en curso ya no vale
     if (pidiendoRecorte || !foto.base) return;
     pidiendoRecorte = true;
     requestAnimationFrame(() => {

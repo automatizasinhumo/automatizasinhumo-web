@@ -30,8 +30,16 @@ const escribir = (s: Storage | undefined, k: string, v: string | null) => {
     /* modo privado: la guía volverá a salir, que es lo seguro */
   }
 };
-const local = () => (typeof localStorage === 'undefined' ? undefined : localStorage);
-const sesion = () => (typeof sessionStorage === 'undefined' ? undefined : sessionStorage);
+// Con el almacenamiento bloqueado, solo leer localStorage ya lanza SecurityError.
+const almacen = (k: 'localStorage' | 'sessionStorage'): Storage | undefined => {
+  try {
+    return typeof globalThis[k] === 'undefined' ? undefined : globalThis[k];
+  } catch {
+    return undefined;
+  }
+};
+const local = () => almacen('localStorage');
+const sesion = () => almacen('sessionStorage');
 
 export const guiasApagadas = () => leer(local(), APAGADAS) === 'no';
 export const apagarGuias = () => escribir(local(), APAGADAS, 'no');
@@ -41,6 +49,8 @@ const visible = (el: Element | null): el is HTMLElement =>
   el instanceof HTMLElement && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
 
 let abierta: { destroy(): void } | null = null;
+/** Sube con cada apertura: si el usuario cambia de paso mientras carga Driver.js, la vieja se descarta. */
+let turno = 0;
 
 /**
  * Abre la guía. `clave` identifica la pantalla o paso: con `auto`, solo sale si las guías no
@@ -57,9 +67,11 @@ export async function guiar(
     return visible(el) ? [{ element: el, popover: { title: p.titulo, description: p.texto } }] : [];
   });
   if (!seleccion.length) return false;
-  escribir(sesion(), VISTA + clave, '1');
+  const mio = ++turno;
   const { driver } = await import('driver.js');
   await import('driver.js/dist/driver.css');
+  // Otra guía se pidió mientras cargaba, o el paso ya no está a la vista: esta llega tarde.
+  if (mio !== turno || !seleccion.every((s) => visible(s.element as Element))) return false;
   abierta?.destroy();
   const previo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -94,5 +106,6 @@ export async function guiar(
   });
   abierta = d;
   d.drive();
+  escribir(sesion(), VISTA + clave, '1'); // solo cuenta como vista si de verdad se abrió
   return true;
 }
