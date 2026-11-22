@@ -124,7 +124,12 @@ const FOTO = /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/;
 export function bytesFoto(foto: string): { tipo: string; bytes: Uint8Array<ArrayBuffer> } | null {
   if (!fotoValida(foto)) return null;
   const coma = foto.indexOf(',');
-  const bin = atob(foto.slice(coma + 1));
+  let bin: string;
+  try {
+    bin = atob(foto.slice(coma + 1));
+  } catch {
+    return null; // base64 de longitud imposible: se trata como sin foto (404), no como error
+  }
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return { tipo: foto.slice(5, foto.indexOf(';')), bytes };

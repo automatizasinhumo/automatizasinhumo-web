@@ -171,6 +171,7 @@ describe('foto de portada', () => {
     expect(b.tipo).toBe('image/webp');
     expect(String.fromCharCode(...b.bytes.slice(0, 4))).toBe('RIFF');
     expect(bytesFoto('javascript:alert(1)')).toBeNull();
+    expect(bytesFoto('data:image/png;base64,A')).toBeNull();
   });
 
   it('se descarta sin error si no es una foto válida o es demasiado grande', () => {
