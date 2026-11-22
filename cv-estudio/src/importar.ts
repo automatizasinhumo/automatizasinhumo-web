@@ -160,6 +160,20 @@ export function aFormulario(d: ResumeData): FormCv {
 			const r = idioma(corto(l.language, 100), corto(l.fluency, 40), puntos(l.level));
 			return { idioma: r.idioma.slice(0, 60), nivel: r.nivel.slice(0, 40), puntos: r.puntos };
 		}),
+		// El carnet viaja en un campo propio con icono de coche (crearDatos le antepone «Carnet» si no lo trae).
+		carnet: corto(
+			(b.customFields ?? []).find((c) => c.icon === "car" || /^(carn[eé]t?|permiso)\b/i.test(c.text ?? ""))?.text?.replace(/^carn[eé]t?\s+(?=\S)/i, ""),
+			80,
+		),
+		web: corto(b.website?.url, 300),
+		linkedin: corto(visibles(s?.profiles?.items, 20).find((p) => /linkedin/i.test(`${p.network} ${p.website?.url}`))?.website?.url, 200),
+		cursos: visibles(s?.certifications?.items, 8).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.issuer, 120), fecha: corto(c.date, 40) })),
+		premios: visibles(s?.awards?.items, 6).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.awarder, 120), fecha: corto(c.date, 40) })),
+		publicaciones: visibles(s?.publications?.items, 6).map((c) => ({ titulo: corto(c.title, 160), entidad: corto(c.publisher, 120), fecha: corto(c.date, 40) })),
+		proyectos: visibles(s?.projects?.items, 6).map((p) => ({ nombre: corto(p.name, 160), periodo: periodoEs(corto(p.period, 60)), enlace: corto(p.website?.url, 300), descripcion: texto(p.description).slice(0, 700) })),
+		voluntariado: visibles(s?.volunteer?.items, 6).map((v) => ({ organizacion: corto(v.organization, 160), lugar: corto(v.location, 120), periodo: periodoEs(corto(v.period, 60)), descripcion: texto(v.description).slice(0, 700) })),
+		referencias: visibles(s?.references?.items, 4).map((r) => ({ nombre: corto(r.name, 120), cargo: corto(r.position, 160), contacto: corto(r.phone, 80) })),
+		intereses: visibles(s?.interests?.items, 8).map((i) => ({ nombre: corto(i.name, 60) })),
 	};
 }
 

@@ -4,6 +4,12 @@ export type Experiencia = { puesto: string; empresa: string; lugar: string; peri
 export type Formacion = { titulo: string; centro: string; lugar: string; periodo: string };
 export type Habilidad = { nombre: string; nivel: number; detalle: string };
 export type Idioma = { idioma: string; nivel: string; puntos: number };
+/** Cursos y certificaciones, premios y publicaciones: qué, quién lo da y cuándo. */
+export type Mencion = { titulo: string; entidad: string; fecha: string };
+export type Proyecto = { nombre: string; periodo: string; enlace: string; descripcion: string };
+export type Voluntariado = { organizacion: string; lugar: string; periodo: string; descripcion: string };
+export type Referencia = { nombre: string; cargo: string; contacto: string };
+export type Interes = { nombre: string };
 
 export type FormCv = {
 	nombre: string;
@@ -12,12 +18,25 @@ export type FormCv = {
 	telefono: string;
 	ubicacion: string;
 	resumen: string;
+	/** Web personal o portfolio. */
+	web?: string;
+	/** LinkedIn: la dirección del perfil o solo el usuario. */
+	linkedin?: string;
+	/** Permiso de conducir y vehículo, p. ej. «B, vehículo propio». */
+	carnet?: string;
 	/** Foto: data URL JPEG/PNG reducida en el navegador, o la de ejemplo (FOTO_EJEMPLO). Vacía = sin foto. */
 	foto?: string;
 	experiencia: Experiencia[];
 	formacion: Formacion[];
 	habilidades: Habilidad[];
 	idiomas: Idioma[];
+	cursos?: Mencion[];
+	proyectos?: Proyecto[];
+	voluntariado?: Voluntariado[];
+	premios?: Mencion[];
+	publicaciones?: Mencion[];
+	referencias?: Referencia[];
+	intereses?: Interes[];
 };
 
 export const FORM_VACIO: FormCv = {
@@ -27,12 +46,25 @@ export const FORM_VACIO: FormCv = {
 	telefono: "",
 	ubicacion: "",
 	resumen: "",
+	web: "",
+	linkedin: "",
+	carnet: "",
 	foto: "",
 	experiencia: [],
 	formacion: [],
 	habilidades: [],
 	idiomas: [],
+	cursos: [],
+	proyectos: [],
+	voluntariado: [],
+	premios: [],
+	publicaciones: [],
+	referencias: [],
+	intereses: [],
 };
+
+/** Listas opcionales («Más apartados»): no hace falta rellenarlas. */
+export const LISTAS_EXTRA = ["cursos", "proyectos", "voluntariado", "premios", "publicaciones", "referencias", "intereses"] as const;
 
 /** Foto ilustrada del CV de ejemplo (public/cv/estudio/). */
 export const FOTO_EJEMPLO = "/cv/estudio/ejemplo-foto.jpg";

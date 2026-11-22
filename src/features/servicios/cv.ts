@@ -148,7 +148,7 @@ export const COLORES_CV: readonly { valor: string; nombre: string }[] = [
  * seleccionador lee de verdad. La página los pone en los campos y el estudio los aplica al pegar o importar.
  */
 export const LIMITES_CV = {
-  items: { experiencia: 6, formacion: 5, habilidades: 12, idiomas: 5 },
+  items: { experiencia: 6, formacion: 5, habilidades: 12, idiomas: 5, cursos: 6, proyectos: 4, voluntariado: 4, premios: 4, publicaciones: 4, referencias: 3, intereses: 6 },
   /** Caracteres. */
   resumen: 600,
   descripcion: 700,
