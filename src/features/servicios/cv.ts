@@ -243,6 +243,30 @@ export const PASOS_CV = [
   { id: 'descarga', titulo: 'Descarga' },
 ] as const;
 
+/**
+ * Formato de los datos de contacto: «Revisa» avisa si algo no parece válido (no bloquea: el PDF sale igual).
+ * Vacío cuenta como válido; que falte el contacto lo avisa otra línea del repaso.
+ */
+export const correoValido = (v: string) => !v.trim() || /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[^\s@.]{2,}$/.test(v.trim());
+export const telefonoValido = (v: string) => {
+  const t = v.trim();
+  if (!t) return true;
+  const cifras = t.replace(/\D/g, '').length;
+  return /^\(?\+?[\d\s().-]+$/.test(t) && cifras >= 9 && cifras <= 15;
+};
+/** Web o perfil: dirección http(s) o un dominio («anaperez.es»); nunca otros esquemas (javascript:, data:). */
+export const webValida = (v: string) => {
+  const t = v.trim();
+  if (!t) return true;
+  if (/^[a-z][a-z\d+.-]*:/i.test(t) && !/^https?:\/\//i.test(t)) return false;
+  try {
+    const u = new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`);
+    return /\.[a-z]{2,}$/i.test(u.hostname);
+  } catch {
+    return false;
+  }
+};
+
 export const euros = (centimos: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: centimos % 100 ? 2 : 0 }).format(
     centimos / 100,
