@@ -381,6 +381,46 @@
   .anadir:hover {
     text-decoration: underline;
   }
+  .orden {
+    display: grid;
+    gap: var(--ds-hueco-1);
+    margin: var(--ds-hueco-2) 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: orden;
+  }
+  .orden li {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-hueco-1);
+    padding: 0.4rem 0.4rem 0.4rem 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    background: var(--color-surface);
+    counter-increment: orden;
+  }
+  .orden li::before {
+    content: counter(orden) '.';
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .orden span {
+    flex: 1;
+  }
+  .mover {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-weight: 700;
+    color: var(--color-brand);
+    background: none;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .mover:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
   .idea-dominio {
     padding: 0.25rem 0.75rem;
     font-weight: 600;
