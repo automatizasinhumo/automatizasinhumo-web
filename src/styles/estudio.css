@@ -214,6 +214,16 @@
     padding: var(--ds-hueco-3);
     font-size: var(--ds-texto-small);
   }
+  .sello-ats {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-ink);
+  }
 
   /* Pasos 2 y 3: formulario y vista previa al lado. */
   .con-vista {

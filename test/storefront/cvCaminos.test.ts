@@ -1,6 +1,6 @@
 // Primer paso del estudio de CV: tres caminos (plantilla, diseño propio, asesoría) de menos a más.
 import { describe, expect, it } from 'vitest';
-import { ASESORIA_CV, CAMINOS_CV, CAMINOS_IDS, DISENOS_CV, DISENO_DESDE_CERO, GUIA_CV, esCamino } from '../../src/features/servicios/cv';
+import { ASESORIA_CV, CAMINOS_CV, CAMINOS_IDS, DISENOS_ATS, DISENOS_CV, DISENO_DESDE_CERO, DISENO_POR_DEFECTO, FILTROS_DISENO, GUIA_CV, esCamino } from '../../src/features/servicios/cv';
 import { mensajeDeTema, mensajeDesdeBusqueda } from '../../src/features/search/sinResultados';
 
 describe('caminos del CV', () => {
@@ -16,6 +16,15 @@ describe('caminos del CV', () => {
   });
   it('«desde cero» parte de un diseño de una columna que existe', () => {
     expect(DISENOS_CV.find((d) => d.id === DISENO_DESDE_CERO)?.columnas).toBe(1);
+  });
+  it('la lista ATS (medida con cv-estudio/ats.mjs) solo nombra diseños que existen', () => {
+    const ids = new Set(DISENOS_CV.map((d) => d.id));
+    for (const id of DISENOS_ATS) expect(ids.has(id)).toBe(true);
+    // El diseño por defecto y el de «desde cero» tienen que pasar un ATS.
+    expect(DISENOS_ATS.has(DISENO_POR_DEFECTO)).toBe(true);
+    expect(DISENOS_ATS.has(DISENO_DESDE_CERO)).toBe(true);
+    const filtro = FILTROS_DISENO.find((f) => f.id === 'ats');
+    expect(DISENOS_CV.filter((d) => filtro?.cumple(d)).length).toBe(DISENOS_ATS.size);
   });
   it('la guía del primer paso explica los caminos', () => {
     expect(GUIA_CV.diseno?.[0]?.guia).toBe('caminos');

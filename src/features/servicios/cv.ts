@@ -70,7 +70,6 @@ export interface DisenoCv {
   estilo: string;
   /** Sobrio (blanco y negro con un toque) o con bloques de color: lo primero que decide el cliente. */
   tono: 'sobrio' | 'color';
-  /** Una columna: la que mejor leen los filtros automáticos de las empresas. */
   columnas: 1 | 2;
   /** Plantilla creativa propia del estudio, con dibujo de fondo. */
   creativo?: boolean;
@@ -113,6 +112,19 @@ export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'scizor', nombre: 'Carmín', estilo: 'Filete de color, títulos marcados', tono: 'sobrio', columnas: 1 },
 ];
 
+/**
+ * Diseños que lee bien un ATS (los filtros automáticos de las empresas), medidos con `node cv-estudio/ats.mjs`:
+ * el PDF se extrae con pdf.js y con pdftotext, el nombre sale arriba, los apartados no se mezclan y el
+ * lector de CV recupera contacto, experiencia y formación. No depende de las columnas: se mide, no se supone.
+ * Si cambia una plantilla, se vuelve a medir y se actualiza esta lista.
+ */
+export const DISENOS_ATS: ReadonlySet<string> = new Set([
+  'onyx', 'azurill', 'bronzor', 'chikorita', 'ditto', 'kakuna', 'lapras', 'leafish', 'rhyhorn', 'scizor',
+  'aurora', 'coral', 'lienzo', 'nocturno', 'mosaico', 'prisma', 'brisa', 'oasis', 'tinta', 'pixel',
+  'cometa', 'trazo', 'arcada', 'foco', 'editorial',
+]);
+export const leeAts = (d: Pick<DisenoCv, 'id'>) => DISENOS_ATS.has(d.id);
+
 export const DISENO_POR_DEFECTO = 'aurora';
 /** «Desde cero» no es una página vacía: es el diseño más limpio (una columna, sin adornos) para vestirlo a tu gusto. */
 export const DISENO_DESDE_CERO = 'rhyhorn';
@@ -148,7 +160,7 @@ export const FILTROS_DISENO = [
   { id: 'creativo', nombre: 'Creativos', cumple: (d: DisenoCv) => d.creativo === true },
   { id: 'sobrio', nombre: 'Sobrios', cumple: (d: DisenoCv) => d.tono === 'sobrio' },
   { id: 'color', nombre: 'Con color', cumple: (d: DisenoCv) => d.tono === 'color' },
-  { id: 'una-columna', nombre: 'Una columna', cumple: (d: DisenoCv) => d.columnas === 1 },
+  { id: 'ats', nombre: 'Lee bien un ATS', cumple: (d: DisenoCv) => leeAts(d) },
 ] as const;
 export const filtrosDe = (d: DisenoCv) => FILTROS_DISENO.filter((f) => f.cumple(d)).map((f) => f.id).join(' ');
 

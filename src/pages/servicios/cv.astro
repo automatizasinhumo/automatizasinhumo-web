@@ -25,6 +25,7 @@ import {
   TAMANOS,
   euros,
   filtrosDe,
+  leeAts,
   miniaturaCv,
 } from '../../features/servicios/cv';
 import { LIMITES_TARJETA, MODELOS_TARJETA } from '../../features/servicios/modelosTarjeta';
@@ -136,7 +137,7 @@ const ejemploTarjeta: DatosTarjeta = {
                   </label>
                 ))}
               </div>
-              <p class="filtro-nota" data-nota-filtro="una-columna" hidden>Los filtros automáticos de las empresas leen mejor los diseños de una columna.</p>
+              <p class="filtro-nota" data-nota-filtro="ats" hidden>Probados con dos lectores de PDF y un lector de CV: el nombre sale arriba, los apartados no se mezclan y se recuperan tus datos. El PDF que descargas es texto seleccionable, sin marca de agua.</p>
               <div class="rejilla rejilla-caja" tabindex="0" role="group" aria-label="Diseños de currículum">
                 {DISENOS_CV.map((d) => (
                   <label class="tarjeta diseno" data-filtros={filtrosDe(d)}>
@@ -147,6 +148,7 @@ const ejemploTarjeta: DatosTarjeta = {
                         <strong class="block truncate text-ink">{d.nombre}</strong>
                         <span class="block truncate text-xs text-faint">{d.estilo}</span>
                       </span>
+                      {leeAts(d) && <span class="sello-ats" title="Lo lee bien un filtro automático (ATS)">ATS</span>}
                     </span>
                   </label>
                 ))}

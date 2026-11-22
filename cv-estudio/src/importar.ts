@@ -126,6 +126,33 @@ function idioma(nombre: string, nivel: string, puntos: number) {
 	return { idioma: i.trim(), nivel: n.trim(), puntos: puntos || deducido || 3 };
 }
 
+/**
+ * Un nivel suelto («Avanzado», «Nativo», «C1»): en los CV a dos columnas el nivel va en su propia línea y
+ * el lector lo toma por otro elemento. Puntos de 1 a 5 como en el formulario.
+ */
+const NIVELES: [RegExp, number][] = [
+	[/^(nativ[oa]|biling[üu]e|lengua materna|materna|c2|experto|experta)$/, 5],
+	[/^(c1|avanzad[oa]|alto|alta|fluido|fluida|profesional)$/, 4],
+	[/^(b1|b2|intermedi[oa]|medio|media)$/, 3],
+	[/^(a1|a2|b[áa]sico|b[áa]sica|bajo|baja|elemental)$/, 2],
+];
+export function nivelSuelto(texto: string): number {
+	const t = texto.trim().toLowerCase().replace(/[.:]$/, "");
+	return NIVELES.find(([re]) => re.test(t))?.[1] ?? 0;
+}
+
+/** Junta cada nivel suelto con el elemento anterior (si aún no tenía nivel) y lo quita de la lista. */
+function juntarNiveles<T>(items: T[], nombre: (x: T) => string, tieneNivel: (x: T) => boolean, ponerNivel: (x: T, texto: string, puntos: number) => T): T[] {
+	const out: T[] = [];
+	for (const x of items) {
+		const p = nivelSuelto(nombre(x));
+		const previo = out.at(-1);
+		if (p && previo !== undefined && !tieneNivel(previo)) out[out.length - 1] = ponerNivel(previo, nombre(x).trim(), p);
+		else out.push(x);
+	}
+	return out;
+}
+
 /** ResumeData (esquema upstream) → formulario sencillo del estudio. Mismos límites que crearDatos. */
 export function aFormulario(d: ResumeData): FormCv {
 	const b = d.basics ?? ({} as ResumeData["basics"]);
@@ -151,15 +178,22 @@ export function aFormulario(d: ResumeData): FormCv {
 			const [nombre, lugar] = separarLugar(centro, corto(e.location, 120));
 			return { titulo, centro: nombre, lugar, periodo: periodoEs(corto(e.period, 60)) };
 		}),
-		habilidades: visibles(s?.skills?.items, 15).map((h) => ({
-			nombre: corto(h.name, 80),
-			nivel: puntos(h.level) || 3,
-			detalle: corto((h.keywords ?? []).join(", "), 200),
-		})),
-		idiomas: visibles(s?.languages?.items, 8).map((l) => {
-			const r = idioma(corto(l.language, 100), corto(l.fluency, 40), puntos(l.level));
-			return { idioma: r.idioma.slice(0, 60), nivel: r.nivel.slice(0, 40), puntos: r.puntos };
-		}),
+		habilidades: juntarNiveles(
+			visibles(s?.skills?.items, 30).map((h) => ({ nombre: corto(h.name, 80), nivel: puntos(h.level), detalle: corto((h.keywords ?? []).join(", "), 200) })),
+			(h) => h.nombre,
+			(h) => h.nivel > 0,
+			(h, _t, p) => ({ ...h, nivel: p }),
+		)
+			.slice(0, 15)
+			.map((h) => ({ ...h, nivel: h.nivel || 3 })),
+		idiomas: juntarNiveles(
+			visibles(s?.languages?.items, 16).map((l) => idioma(corto(l.language, 100), corto(l.fluency, 40), puntos(l.level))),
+			(r) => r.idioma,
+			(r) => r.nivel !== "",
+			(r, t, p) => ({ ...r, nivel: t, puntos: p }),
+		)
+			.slice(0, 8)
+			.map((r) => ({ idioma: r.idioma.slice(0, 60), nivel: r.nivel.slice(0, 40), puntos: r.puntos })),
 		// El carnet viaja en un campo propio con icono de coche (crearDatos le antepone «Carnet» si no lo trae).
 		carnet: corto(
 			(b.customFields ?? []).find((c) => c.icon === "car" || /^(carn[eé]t?|permiso)\b/i.test(c.text ?? ""))?.text?.replace(/^carn[eé]t?\s+(?=\S)/i, ""),
