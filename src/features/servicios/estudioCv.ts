@@ -90,7 +90,30 @@ const ERROR_TARJETA: Record<string, string> = {
   pedido: 'Este pedido no incluye la tarjeta digital.',
 };
 const LISTAS: Lista[] = ['experiencia', 'formacion', 'habilidades', 'idiomas'];
-const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'resumen'];
+const CAMPOS = ['nombre', 'titular', 'email', 'telefono', 'ubicacion', 'resumen', 'foto'];
+/** Tope de la foto como data URL (igual que MAX_FOTO_CV del motor, que descarta lo que pase). */
+const MAX_FOTO = 400_000;
+/** Foto del CV de ejemplo (cv-estudio/src/formulario-datos.ts FOTO_EJEMPLO). */
+const FOTO_EJEMPLO_CV = '/cv/estudio/ejemplo-foto.jpg';
+
+/** Reduce la foto en el navegador a JPEG (lado mayor 480 px): el motor del PDF solo lee JPG y PNG. */
+async function reducirFotoCv(f: File): Promise<string> {
+  const bmp = await createImageBitmap(f);
+  const k = Math.min(1, 480 / Math.max(bmp.width, bmp.height));
+  const lienzo = document.createElement('canvas');
+  lienzo.width = Math.max(1, Math.round(bmp.width * k));
+  lienzo.height = Math.max(1, Math.round(bmp.height * k));
+  const ctx = lienzo.getContext('2d')!;
+  ctx.fillStyle = '#fff'; // JPEG sin transparencia: fondo blanco en vez de negro
+  ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+  ctx.drawImage(bmp, 0, 0, lienzo.width, lienzo.height);
+  bmp.close();
+  for (const q of [0.85, 0.72, 0.6, 0.45]) {
+    const url = lienzo.toDataURL('image/jpeg', q);
+    if (url.length <= MAX_FOTO) return url;
+  }
+  return '';
+}
 const PASOS = PASOS_CV.map((p) => p.id) as string[];
 const MARCA = 'VISTA PREVIA';
 const NUMERICOS = new Set(['nivel', 'puntos']);
@@ -210,11 +233,49 @@ export function iniciarEstudioCv() {
     limitar(lista);
     return item;
   }
+  /**
+   * URL de la miniatura sin reinyectar el texto del campo: la foto de ejemplo es una constante y
+   * una data: URL se decodifica a bytes y se sirve como blob: propio (la anterior se libera).
+   */
+  let fotoBlob = '';
+  function urlFotoSegura(crudo: string): string {
+    if (fotoBlob) URL.revokeObjectURL(fotoBlob);
+    fotoBlob = '';
+    if (crudo === FOTO_EJEMPLO_CV) return FOTO_EJEMPLO_CV;
+    const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(crudo);
+    if (!m) return '';
+    try {
+      const bin = atob(m[2]);
+      const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+      fotoBlob = URL.createObjectURL(new Blob([bytes], { type: m[1] === 'image/png' ? 'image/png' : m[1] === 'image/webp' ? 'image/webp' : 'image/jpeg' }));
+    } catch {
+      return '';
+    }
+    return fotoBlob;
+  }
+  /** Miniatura y botón «Quitar» según el valor oculto de la foto; `aviso` sustituye a la miniatura. */
+  function pintarFoto(aviso = '') {
+    // Solo una imagen incrustada (la que reduce reducirFotoCv); cualquier otro valor guardado se ignora.
+    const url = urlFotoSegura(campo<HTMLInputElement | null>('foto')?.value ?? '');
+    const img = $<HTMLImageElement>('[data-foto-vista]');
+    if (img) {
+      img.hidden = !url;
+      if (url) img.src = url;
+      else img.removeAttribute('src');
+    }
+    const quitar = $('[data-foto-quitar]');
+    if (quitar) quitar.hidden = !url;
+    const estadoFoto = $('[data-foto-estado]');
+    if (estadoFoto) estadoFoto.textContent = aviso || (url ? 'Foto añadida. Sale en los diseños con hueco para foto.' : 'Opcional. JPG o PNG; la reducimos sola.');
+  }
+  let genFoto = 0;
   function volcar(f: FormCv) {
+    genFoto++; // una conversión de foto aún en curso no debe pisar el formulario nuevo
     for (const k of CAMPOS) {
       const c = campo<HTMLInputElement | null>(k);
       if (c) c.value = typeof f[k] === 'string' ? f[k] : '';
     }
+    pintarFoto();
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)?.replaceChildren();
       for (const fila of Array.isArray(f[l]) ? f[l] : []) anadir(l, fila, true);
@@ -690,6 +751,13 @@ export function iniciarEstudioCv() {
       return ir(PASOS[i]);
     }
     if (b.hasAttribute('data-atras')) return ir(PASOS[Math.max(0, PASOS.indexOf(actual) - 1)]);
+    if (b.hasAttribute('data-foto-quitar')) {
+      genFoto++;
+      campo('foto').value = '';
+      pintarFoto();
+      persistir();
+      return programar();
+    }
     if (b.hasAttribute('data-anadir')) {
       const l = b.closest<HTMLElement>('[data-lista]')!.dataset.lista as Lista;
       anadir(l)?.querySelector<HTMLElement>('[data-k]')?.focus();
@@ -747,6 +815,26 @@ export function iniciarEstudioCv() {
       if (x) estado.extras = c.checked ? [...new Set([...estado.extras, x.id])] : estado.extras.filter((id) => id !== x.id);
       guardar(estado);
       return resumir();
+    }
+    if (c.name === 'fotoElegir') {
+      const f = c.files?.[0];
+      c.value = '';
+      const gen = ++genFoto;
+      if (!f) return;
+      if (!f.type.startsWith('image/')) return pintarFoto('Ese archivo no es una imagen.');
+      reducirFotoCv(f)
+        .then((url) => {
+          if (gen !== genFoto) return;
+          if (!url) return pintarFoto('No hemos podido reducir esa foto. Prueba con otra.');
+          campo('foto').value = url;
+          pintarFoto();
+          persistir();
+          programar();
+        })
+        .catch(() => {
+          if (gen === genFoto) pintarFoto('No hemos podido abrir esa foto. Prueba con otra (JPG o PNG).');
+        });
+      return;
     }
     if (c.name === 'importar') {
       const fichero = c.files?.[0];

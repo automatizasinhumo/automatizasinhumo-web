@@ -12,6 +12,8 @@ export type FormCv = {
 	telefono: string;
 	ubicacion: string;
 	resumen: string;
+	/** Foto: data URL JPEG/PNG reducida en el navegador, o la de ejemplo (FOTO_EJEMPLO). Vacía = sin foto. */
+	foto?: string;
 	experiencia: Experiencia[];
 	formacion: Formacion[];
 	habilidades: Habilidad[];
@@ -25,8 +27,21 @@ export const FORM_VACIO: FormCv = {
 	telefono: "",
 	ubicacion: "",
 	resumen: "",
+	foto: "",
 	experiencia: [],
 	formacion: [],
 	habilidades: [],
 	idiomas: [],
 };
+
+/** Foto ilustrada del CV de ejemplo (public/cv/estudio/). */
+export const FOTO_EJEMPLO = "/cv/estudio/ejemplo-foto.jpg";
+/** Tope de la foto ya reducida (data URL): la página la deja en ~480 px JPEG, muy por debajo. */
+export const MAX_FOTO_CV = 400_000;
+
+/** Solo JPEG o PNG en data URL (lo que sabe pintar react-pdf) o la foto de ejemplo; si no, "". */
+export function fotoValida(v: unknown): string {
+	if (typeof v !== "string") return "";
+	if (v === FOTO_EJEMPLO) return v;
+	return v.length <= MAX_FOTO_CV && /^data:image\/(jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(v) ? v : "";
+}

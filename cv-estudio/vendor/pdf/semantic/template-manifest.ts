@@ -162,6 +162,10 @@ const TEMPLATE_SEMANTIC_MANIFESTS = {
 	pixel: baseManifest("pixel", [itemHeaderRowPart]),
 	cometa: baseManifest("cometa", [itemHeaderRowPart]),
 	trazo: baseManifest("trazo", [itemHeaderRowPart]),
+	retrato: baseManifest("retrato", [itemHeaderRowPart]),
+	arcada: baseManifest("arcada", [itemHeaderRowPart]),
+	foco: baseManifest("foco", [itemHeaderRowPart]),
+	editorial: baseManifest("editorial", [itemHeaderRowPart]),
 } as const satisfies Readonly<Record<Template, TemplateSemanticManifest>>;
 
 export function getTemplateSemanticManifest(template: Template): TemplateSemanticManifest {
