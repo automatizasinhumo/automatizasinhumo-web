@@ -7,7 +7,7 @@ import { camposDeDescripcion, nombreCampo, LIMITES } from '../../features/solici
 import { formatPrice } from '../../config';
 import { resolverPedido } from '../../features/solicitudes/pedido';
 import { firmaFormulario } from '../../features/solicitudes/borrador';
-import { mensajeDesdeBusqueda } from '../../features/search/sinResultados';
+import { mensajeDeTema, mensajeDesdeBusqueda } from '../../features/search/sinResultados';
 import { disenoElegido } from '../../features/solicitudes/diseno';
 
 export const prerender = false;
@@ -38,7 +38,7 @@ const modalidadInicial = q.get('modalidad') === 'pro' ? 'Te lo montamos' : 'Plan
 // Campos que el servidor ha rellenado desde la URL: solo esos mandan sobre el borrador.
 // Un parámetro que no inicializa nada (?nombre=Ana) no debe vaciar lo guardado.
 // Desde una búsqueda sin resultados (?busqueda=) el mensaje llega ya empezado.
-const mensajeInicial = consulta ? mensajeDesdeBusqueda(q.get('busqueda')) : '';
+const mensajeInicial = consulta ? mensajeDesdeBusqueda(q.get('busqueda')) || mensajeDeTema(q.get('tema')) : '';
 const camposDesdeUrl = [q.get('modalidad') === 'pro' ? 'modalidad' : '', mensajeInicial ? 'mensaje' : '']
   .filter(Boolean)
   .join(' ');
