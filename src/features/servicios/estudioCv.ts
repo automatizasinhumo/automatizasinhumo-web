@@ -707,7 +707,8 @@ export function iniciarEstudioCv() {
   let tarjetaTocada = false;
   function rellenarTarjeta() {
     const pagada = !!pedido.pagado?.tarjeta;
-    caja.hidden = !(pagada || estado.extras.includes('tarjeta'));
+    // Con el CV ya pagado, una tarjeta sin pagar no se configura aquí: se compra aparte (enlace en «Añade»).
+    caja.hidden = !(pagada || (!pedido.pagado?.cv && estado.extras.includes('tarjeta')));
     const pub = $<HTMLButtonElement>('[data-publicar]')!;
     pub.disabled = !pagada;
     $('[data-tarjeta-nota]')!.hidden = pagada;
@@ -891,7 +892,10 @@ export function iniciarEstudioCv() {
       persistir();
       programar(true);
       // Si ya estás en «Añade», los trozos para LinkedIn/InfoJobs pasan a ser los del CV importado.
-      if (actual === 'anade') pintarPortales();
+      if (actual === 'anade') {
+        pintarPortales();
+        rellenarTarjeta();
+      }
       avisar(recortado ? 'recortado' : 'ok');
     } catch {
       avisar('lectura');
