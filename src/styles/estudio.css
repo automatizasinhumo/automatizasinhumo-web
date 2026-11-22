@@ -9,6 +9,10 @@
     margin-inline: auto;
     padding: var(--ds-hueco-8) 1rem var(--ds-hueco-12);
   }
+  /* Lo que el script oculta (caminos, pasos) se oculta aunque su bloque tenga display propio. */
+  [hidden] {
+    display: none !important;
+  }
   .progreso-fijo {
     position: sticky;
     /* Justo bajo la cabecera fija del sitio (la mide Header.astro); 5.5rem si no hay JS. */
@@ -403,6 +407,67 @@
   .mejora {
     padding: var(--ds-hueco-6);
     border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-line));
+  }
+  .mejora-aviso {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-hueco-3);
+    padding: var(--ds-hueco-4);
+  }
+
+  /* Primer paso: tres caminos iguales (plantilla, diseño propio, asesoría). */
+  .caminos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--ds-hueco-3);
+    margin: 0 0 var(--ds-hueco-6);
+    padding: 0;
+    border: 0;
+  }
+  .camino {
+    display: grid;
+    align-content: start;
+    gap: var(--ds-hueco-1);
+    padding: var(--ds-hueco-4);
+    border: 2px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    background: var(--color-surface, #fff);
+    cursor: pointer;
+  }
+  .camino:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-line));
+  }
+  .camino:has(input:checked) {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+  .camino:has(input:focus-visible) {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  .camino-etiqueta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-accent);
+  }
+  .camino-titulo {
+    font-size: 1.15rem;
+  }
+  .camino-precio {
+    font-weight: 700;
+  }
+  .camino-resumen {
+    font-size: 0.92rem;
+  }
+  .asesoria {
+    display: grid;
+    gap: var(--ds-hueco-3);
+    justify-items: start;
+    padding: var(--ds-hueco-6);
   }
   .muestras,
   .formas {

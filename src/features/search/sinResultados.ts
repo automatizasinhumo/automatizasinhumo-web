@@ -35,3 +35,9 @@ export function mensajeDesdeBusqueda(valor: string | null | undefined): string {
 export function eventoSinResultados(q: string): string {
   return JSON.stringify({ event: 'busqueda_sin_resultados', q: limpiarBusqueda(q) });
 }
+
+/** Temas con mensaje ya empezado en la consulta (`?tema=`), p. ej. la asesoría del estudio de CV. */
+const TEMAS: Record<string, string> = {
+  cv: 'Quiero ayuda con mi currículum: ',
+};
+export const mensajeDeTema = (tema: string | null | undefined): string => (tema && Object.hasOwn(TEMAS, tema) ? TEMAS[tema] : '');

@@ -8,7 +8,7 @@
  * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, esCamino, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { guiar } from '../tour/guia';
 import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
@@ -50,6 +50,8 @@ const AVISO_IMPORTAR = {
 interface Config {
   motor: string;
   porDefecto: string;
+  /** Diseño sobrio que sirve de «hoja en blanco» al personalizar desde cero. */
+  desdeCero: string;
   disenos: DisenoCv[];
   paquetes: Record<ModalidadCv, PaqueteCv>;
   extras: ExtraCv[];
@@ -63,8 +65,10 @@ interface Pagado {
 }
 interface Estado {
   diseno: string;
-  /** Con el diseño personalizado (color, formas, sombreado y fondo propios): modalidad de pago más alta. */
-  personalizar: boolean;
+  /** Camino del primer paso: plantilla tal cual, diseño propio (modalidad más alta) o asesoría. */
+  camino: CaminoCv;
+  /** Al personalizar: partir de una plantilla o de la estructura básica. */
+  inicio: 'plantilla' | 'cero';
   color: string;
   color2: string;
   forma: string;
@@ -152,12 +156,13 @@ export function iniciarEstudioCv() {
 
   // Lo guardado por versiones anteriores: «personalizable» era un diseño aparte, con su base en `base`,
   // y el sombreado era un sí/no.
-  const g = leer() as Partial<Omit<Estado, 'sombreado'>> & { base?: string; sombreado?: unknown };
+  const g = leer() as Partial<Omit<Estado, 'sombreado'>> & { base?: string; sombreado?: unknown; personalizar?: unknown };
   const antiguo = g.diseno === 'personalizable';
   const disenoGuardado = antiguo ? g.base : g.diseno;
   const estado: Estado = {
     diseno: idsDiseno.has(disenoGuardado ?? '') ? disenoGuardado! : cfg.porDefecto,
-    personalizar: antiguo || g.personalizar === true,
+    camino: esCamino(g.camino) ? g.camino : antiguo || g.personalizar === true ? 'personaliza' : 'plantilla',
+    inicio: g.inicio === 'cero' ? 'cero' : 'plantilla',
     color: HEX.test(g.color ?? '') ? g.color! : '#176b5a',
     color2: HEX.test(g.color2 ?? '') ? g.color2! : '#e0a526',
     forma: entre(FORMAS, g.forma, 'burbujas'),
@@ -185,7 +190,7 @@ export function iniciarEstudioCv() {
       throw e;
     }));
 
-  const modalidad = (): ModalidadCv => (estado.personalizar ? 'personalizable' : 'disenada');
+  const modalidad = (): ModalidadCv => (estado.camino === 'personaliza' ? 'personalizable' : 'disenada');
   const plantilla = () => estado.diseno;
   const nombreDiseno = (id: string) => cfg.disenos.find((d) => d.id === id)?.nombre ?? id;
 
@@ -367,12 +372,25 @@ export function iniciarEstudioCv() {
     }
     for (const k of ['forma', 'posicion', 'sombreado', 'fondo'] as const) for (const r of $$<HTMLInputElement>(`input[name="${k}"]`)) r.checked = r.value === estado[k];
     campo<HTMLInputElement>('intensidad').value = String(estado.intensidad);
-    campo<HTMLInputElement>('personalizar').checked = estado.personalizar;
     for (const k of CLAVES_FORMATO) for (const r of $$<HTMLInputElement>(`input[name="${k}"]`)) r.checked = r.value === estado[k];
-    const panel = $('[data-solo-personal]');
-    if (panel) panel.hidden = !estado.personalizar;
-    const dif = $('[data-diferencia]');
-    if (dif) dif.textContent = euros(cfg.paquetes.personalizable.precio - cfg.paquetes.disenada.precio);
+    pintarCamino();
+  }
+  /** Enseña solo lo del camino elegido (plantilla, diseño propio o asesoría). */
+  function pintarCamino() {
+    for (const r of $$<HTMLInputElement>('input[name="camino"]')) r.checked = r.value === estado.camino;
+    for (const r of $$<HTMLInputElement>('input[name="inicio"]')) r.checked = r.value === estado.inicio;
+    for (const el of $$('[data-solo-camino]')) el.hidden = el.dataset.soloCamino !== estado.camino;
+    for (const el of $$('[data-oculto-en]')) el.hidden = el.dataset.ocultoEn === estado.camino;
+    const personal = estado.camino === 'personaliza';
+    for (const el of $$('[data-solo-inicio]')) el.hidden = !(personal && el.dataset.soloInicio === estado.inicio);
+    const galeria = $('[data-galeria]');
+    if (galeria) galeria.hidden = personal && estado.inicio === 'cero';
+  }
+  /** Cambia de camino; «desde cero» arranca siempre con el diseño sobrio de una columna. */
+  function elegirCamino(c: CaminoCv, inicio = estado.inicio) {
+    estado.camino = c;
+    estado.inicio = inicio;
+    if (c === 'personaliza' && inicio === 'cero') estado.diseno = cfg.desdeCero;
   }
 
   // ---------- Vista previa ----------
@@ -804,6 +822,13 @@ export function iniciarEstudioCv() {
     const b = (ev.target as Element).closest<HTMLElement>('button');
     if (!b || !raiz.contains(b)) return;
     if (b.dataset.ir) return ir(b.dataset.ir);
+    if (esCamino(b.dataset.aCamino)) {
+      elegirCamino(b.dataset.aCamino);
+      persistir();
+      pintarControles();
+      $('[data-guia="caminos"]')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      return programar();
+    }
     if (b.hasAttribute('data-siguiente')) {
       if (!validar(actual)) return;
       const i = PASOS.indexOf(actual) + 1;
@@ -934,7 +959,8 @@ export function iniciarEstudioCv() {
       return;
     }
     if (c.name === 'diseno') estado.diseno = c.value;
-    else if (c.name === 'personalizar') estado.personalizar = c.checked;
+    else if (c.name === 'camino' && esCamino(c.value)) elegirCamino(c.value);
+    else if (c.name === 'inicio') elegirCamino('personaliza', c.value === 'cero' ? 'cero' : 'plantilla');
     else if (c.name === 'color' || c.name === 'color2') estado[c.name] = c.value;
     else if (c.name === 'forma' || c.name === 'posicion' || c.name === 'sombreado' || c.name === 'fondo') estado[c.name] = c.value;
     else if ((CLAVES_FORMATO as string[]).includes(c.name) && valido(c.name as ClaveFormato, c.value)) estado[c.name as ClaveFormato] = c.value;

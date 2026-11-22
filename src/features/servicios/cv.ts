@@ -114,6 +114,33 @@ export const DISENOS_CV: readonly DisenoCv[] = [
 ];
 
 export const DISENO_POR_DEFECTO = 'aurora';
+/** «Desde cero» no es una página vacía: es el diseño más limpio (una columna, sin adornos) para vestirlo a tu gusto. */
+export const DISENO_DESDE_CERO = 'rhyhorn';
+
+/**
+ * Los tres caminos del primer paso, de menos a más ayuda (y de menos a más precio): una plantilla tal
+ * cual, un diseño propio (desde una plantilla o desde cero) o que lo prepare una persona.
+ */
+export type CaminoCv = 'plantilla' | 'personaliza' | 'asesoria';
+export const CAMINOS_IDS: readonly CaminoCv[] = ['plantilla', 'personaliza', 'asesoria'];
+export const esCamino = (v: unknown): v is CaminoCv => CAMINOS_IDS.includes(v as CaminoCv);
+/** Asesoría: se pide por el formulario de consulta (respuesta por email) y se presupuesta según el caso. */
+export const ASESORIA_CV = { desde: 6900, enlace: '/empezar/consulta?tema=cv' } as const;
+export interface CaminoInfo {
+  id: CaminoCv;
+  etiqueta: string;
+  titulo: string;
+  precio: number;
+  /** «Desde»: el precio final depende del caso. */
+  desde: boolean;
+  resumen: string;
+}
+
+export const CAMINOS_CV: readonly CaminoInfo[] = [
+  { id: 'plantilla', etiqueta: 'Lo más rápido', titulo: 'Usa una plantilla', precio: PAQUETES_CV.disenada.precio, desde: false, resumen: 'Eliges un diseño, escribes tus datos y descargas el PDF.' },
+  { id: 'personaliza', etiqueta: 'A tu gusto', titulo: 'Diseña tu CV', precio: PAQUETES_CV.personalizable.precio, desde: false, resumen: 'Tus colores, formas, sombreado y fondo, partiendo de una plantilla o desde cero.' },
+  { id: 'asesoria', etiqueta: 'Con una persona', titulo: 'Te ayudamos', precio: ASESORIA_CV.desde, desde: true, resumen: 'Nos cuentas tu caso y te preparamos el CV. Te respondemos por email.' },
+];
 
 /** Filtros de la galería de diseños. `cumple` es la única fuente: la página y el script la usan tal cual. */
 export const FILTROS_DISENO = [
@@ -167,11 +194,13 @@ export interface PasoGuiaCv {
 }
 export const GUIA_CV: Record<string, readonly PasoGuiaCv[]> = {
   diseno: [
+    { guia: 'caminos', titulo: 'Primero, cómo lo quieres', texto: 'Una plantilla tal cual (lo más rápido), tu propio diseño con tus colores y formas, o que te lo preparemos nosotros. Puedes cambiar de idea cuando quieras.' },
     { guia: 'vista', titulo: 'Así queda tu CV', texto: 'Aquí ves el diseño con un ejemplo. Se actualiza solo cada vez que cambias algo. La marca de agua desaparece en el PDF que compras.' },
     { guia: 'filtros', titulo: 'Filtra los diseños', texto: 'Creativos, sobrios, con color o de una columna (la que mejor leen los filtros automáticos de las empresas).' },
-    { guia: 'galeria', titulo: 'Elige uno', texto: 'Toca el que te guste y míralo a la derecha. Desplázate: hay 25. Puedes cambiarlo cuando quieras sin perder lo que escribas.' },
+    { guia: 'galeria', titulo: 'Elige uno', texto: `Toca el que te guste y míralo a la derecha. Desplázate: hay ${DISENOS_CV.length}. Puedes cambiarlo cuando quieras sin perder lo que escribas.` },
     { guia: 'letra', titulo: 'Letra, tamaño y espaciado', texto: 'Pruébalos: la vista previa cambia al momento. Con mucho texto, un tamaño menor y espaciado compacto te ahorran una página.' },
-    { guia: 'personalizar', titulo: 'Ponle tu toque', texto: 'Activa esta casilla para cambiar los colores, añadir formas, sombreado y fondo. Si no lo activas, el diseño va tal cual.' },
+    { guia: 'inicio', titulo: '¿Desde dónde empiezas?', texto: 'Desde una plantilla que ya te guste o desde cero: un diseño limpio de una columna que vistes tú.' },
+    { guia: 'personalizar', titulo: 'Ponle tu toque', texto: 'Tus colores, formas, sombreado y fondo. Lo ves a la derecha mientras lo cambias.' },
     { guia: 'siguiente', titulo: 'Y ahora, tus datos', texto: 'Cuando te guste, sigue: escribirás tus datos una sola vez y el diseño se queda como lo has dejado.' },
   ],
   datos: [

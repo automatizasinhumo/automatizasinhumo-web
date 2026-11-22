@@ -3,7 +3,10 @@ import Layout from '../../layouts/Layout.astro';
 import '../../styles/estudio.css';
 import Progreso from '../../themes/limpio/ui/Progreso.astro';
 import {
+  ASESORIA_CV,
+  CAMINOS_CV,
   COLORES_CV,
+  DISENO_DESDE_CERO,
   DISENO_POR_DEFECTO,
   DISENOS_CV,
   ESPACIADOS,
@@ -34,10 +37,11 @@ import type { DatosTarjeta } from '../../features/servicios/publicados';
 // con marca de agua. El motor (cv-estudio/) se carga solo al elegir un diseño.
 Astro.response.headers.set('X-Robots-Tag', 'noindex');
 
-const { disenada } = PAQUETES_CV;
+const { personalizable, disenada } = PAQUETES_CV;
 const config = JSON.stringify({
   motor: MOTOR_CV,
   porDefecto: DISENO_POR_DEFECTO,
+  desdeCero: DISENO_DESDE_CERO,
   disenos: DISENOS_CV,
   guia: GUIA_CV,
   paquetes: PAQUETES_CV,
@@ -83,12 +87,47 @@ const ejemploTarjeta: DatosTarjeta = {
     <form id="estudio-form" class="mt-8" novalidate autocomplete="on">
       <!-- 1 · Diseño y estilo: se elige viendo un ejemplo; los datos van después -->
       <section data-paso="diseno" aria-labelledby="paso-diseno">
-        <h2 id="paso-diseno" class="paso-titulo">Elige tu diseño y ponle tu estilo</h2>
-        <p class="paso-entradilla">Lo ves al momento con un ejemplo. Cuando te guste, escribes tus datos y se quedan con este diseño. Desde <strong>{euros(disenada.precio)}</strong>.</p>
-        <div class="con-vista">
+        <h2 id="paso-diseno" class="paso-titulo">¿Cómo quieres tu CV?</h2>
+        <p class="paso-entradilla">Elige cómo hacerlo; puedes cambiar de idea cuando quieras sin perder nada. Lo ves al momento con un ejemplo.</p>
+        <fieldset class="caminos" data-guia="caminos">
+          <legend class="sr-only">Cómo quieres hacer tu CV</legend>
+          {CAMINOS_CV.map((c) => (
+            <label class="camino">
+              <input type="radio" name="camino" value={c.id} class="sr-only" />
+              <span class="camino-etiqueta">{c.etiqueta}</span>
+              <strong class="camino-titulo">{c.titulo}</strong>
+              <span class="camino-precio">{c.desde ? 'Desde ' : ''}{euros(c.precio)}</span>
+              <span class="camino-resumen">{c.resumen}</span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div class="tarjeta asesoria" data-solo-camino="asesoria" hidden>
+          <h3>Te preparamos el CV</h3>
+          <p>Una persona revisa tu trayectoria y el puesto que buscas, y te entrega el CV listo (y, si quieres, la carta). Cuéntanos tu caso en el formulario: te respondemos por email con el precio cerrado antes de empezar. Desde <strong>{euros(ASESORIA_CV.desde)}</strong>.</p>
+          <a class="boton boton-principal" href={ASESORIA_CV.enlace}>Contarnos tu caso</a>
+          <p class="ayuda-bloque">¿Prefieres hacerlo tú? Elige «Usa una plantilla» o «Diseña tu CV» arriba.</p>
+        </div>
+
+        <div class="con-vista" data-oculto-en="asesoria">
           <div class="min-w-0">
-            <fieldset class="bloque" data-guia="galeria">
-              <legend>1 · Diseño</legend>
+            <fieldset class="bloque" data-solo-camino="personaliza" data-guia="inicio" hidden>
+              <legend>¿Desde dónde empiezas?</legend>
+              <div class="formas" role="radiogroup" aria-label="Desde dónde empiezas">
+                <label class="forma">
+                  <input type="radio" name="inicio" value="plantilla" class="sr-only" />
+                  <span>Desde una plantilla</span>
+                </label>
+                <label class="forma">
+                  <input type="radio" name="inicio" value="cero" class="sr-only" />
+                  <span>Desde cero</span>
+                </label>
+              </div>
+              <p class="ayuda-bloque" data-solo-inicio="cero" hidden>Empiezas con un diseño limpio de una columna (el que mejor leen los filtros de las empresas) y lo vistes con tus colores y formas abajo.</p>
+            </fieldset>
+
+            <fieldset class="bloque" data-guia="galeria" data-galeria>
+              <legend>Diseño</legend>
               <div class="filtros" role="radiogroup" aria-label="Ver diseños" data-filtros-diseno data-guia="filtros">
                 {FILTROS_DISENO.map((f, i) => (
                   <label class="forma">
@@ -115,7 +154,7 @@ const ejemploTarjeta: DatosTarjeta = {
             </fieldset>
 
             <fieldset class="bloque" data-guia="letra">
-              <legend>2 · Letra</legend>
+              <legend>Letra</legend>
               {/* Las mismas fuentes que el PDF (las emite el motor), para ver cada letra antes de elegirla. */}
               <link rel="stylesheet" href="/cv/estudio/motor/fuentes.css" />
               <div class="letras">
@@ -153,14 +192,15 @@ const ejemploTarjeta: DatosTarjeta = {
               </div>
             </fieldset>
 
-            <fieldset class="bloque tarjeta mejora" data-guia="personalizar">
-              <legend>3 · A tu manera</legend>
-              <label class="casilla casilla-grande">
-                <input type="checkbox" name="personalizar" />
-                <span>Personalizar el diseño · <strong>+<span data-diferencia></span></strong></span>
-              </label>
+            <p class="tarjeta mejora mejora-aviso" data-solo-camino="plantilla">
+              <span>¿Quieres tus colores, formas y fondo? <strong>+{euros(personalizable.precio - disenada.precio)}</strong></span>
+              <button type="button" class="boton boton-compacto" data-a-camino="personaliza">Diseñar el mío</button>
+            </p>
+
+            <fieldset class="bloque tarjeta mejora" data-guia="personalizar" data-solo-camino="personaliza" hidden>
+              <legend>A tu manera</legend>
               <p class="ayuda-bloque">Tu color, formas, sombreado y fondo. Lo ves a la derecha mientras lo cambias.</p>
-              <div data-solo-personal hidden>
+              <div>
                 <div class="subbloque">
                   <span class="medida-titulo">Color principal</span>
                   <div class="muestras">
@@ -245,7 +285,7 @@ const ejemploTarjeta: DatosTarjeta = {
           </div>
           <div data-hueco-vista></div>
         </div>
-        <div class="paso-acciones">
+        <div class="paso-acciones" data-oculto-en="asesoria">
           <button type="button" class="boton boton-principal" data-siguiente data-guia="siguiente">Siguiente: tus datos</button>
         </div>
       </section>
