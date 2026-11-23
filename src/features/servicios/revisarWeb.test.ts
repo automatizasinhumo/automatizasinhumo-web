@@ -6,7 +6,7 @@ describe('revisión antes de publicar', () => {
   it('una web vacía avisa de lo importante y cada aviso lleva a un campo tocable', () => {
     const avisos = revisarWeb({ negocio: 'X', servicios: [], preguntas: [], opiniones: [] });
     const campos = avisos.map((a) => a[0]);
-    expect(campos).toEqual(expect.arrayContaining(['[name="lema"]', '[name="foto"]', '[name="telefono"]', '[data-lista="servicios"]', '[name="horario"]']));
+    expect(campos).toEqual(expect.arrayContaining(['[name="lema"]', '[data-foto-elegir]', '[name="telefono"]', '[data-lista="servicios"]', '[name="horario"]']));
     const validos = new Set(TOCABLES.map((t) => t[1]));
     for (const c of campos) expect(validos.has(c), c).toBe(true);
   });

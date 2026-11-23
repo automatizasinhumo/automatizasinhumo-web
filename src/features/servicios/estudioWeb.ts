@@ -141,7 +141,7 @@ export function revisarWeb(d: Partial<DatosWeb>): [campo: string, aviso: string]
   const t = (v?: string) => (v ?? '').trim();
   const out: [string, string][] = [];
   if (!t(d.lema)) out.push(['[name="lema"]', 'Falta la frase de portada: di en una línea qué ofreces.']);
-  if (!t(d.foto)) out.push(['[name="foto"]', 'Sin foto de portada: una foto real del negocio da confianza.']);
+  if (!t(d.foto)) out.push(['[data-foto-elegir]', 'Sin foto de portada: una foto real del negocio da confianza.']);
   if (!t(d.telefono) && !t(d.whatsapp) && !t(d.email)) out.push(['[name="telefono"]', 'No hay forma de contactar: pon teléfono, WhatsApp o correo.']);
   if (!(d.servicios ?? []).some((s) => t(s.nombre))) out.push(['[data-lista="servicios"]', 'Añade al menos un servicio o producto.']);
   else if (!(d.servicios ?? []).some((s) => t(s.precio))) out.push(['[data-lista="servicios"]', 'Ningún servicio tiene precio orientativo: ayuda a decidir.']);
