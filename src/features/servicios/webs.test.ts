@@ -11,6 +11,8 @@ import {
   renderWeb,
   SECCIONES_WEB,
   validarWeb,
+  resolverCapa,
+  CAPA_BASICA,
   type DatosWeb,
 } from './webs';
 
@@ -128,5 +130,34 @@ describe('galería', () => {
   it('la vista previa usa la data URL y sin fotos no hay sección', () => {
     expect(renderWeb(datos({ galeria: [foto(1)] }))).toContain(`src="${foto(1)}"`);
     expect(renderWeb(datos({ galeria: [] }))).not.toContain('id="galeria"');
+  });
+});
+
+describe('capa visual', () => {
+  it('valida acabado, forma de foto y movimiento y deja auto lo desconocido o ausente', () => {
+    expect(datos({}).acabado).toBe('auto');
+    const d = datos({ acabado: 'relieve', formaFoto: 'arco', movimiento: 'vivo' });
+    expect([d.acabado, d.formaFoto, d.movimiento]).toEqual(['relieve', 'arco', 'vivo']);
+    const raro = datos({ acabado: '"><script>', formaFoto: 'x', movimiento: 1 });
+    expect([raro.acabado, raro.formaFoto, raro.movimiento]).toEqual(['auto', 'auto', 'auto']);
+  });
+  it('resuelve: cliente, luego diseño, luego básica', () => {
+    expect(resolverCapa({})).toEqual(CAPA_BASICA);
+    expect(resolverCapa({}, { acabado: 'relieve' }).acabado).toBe('relieve');
+    expect(resolverCapa({ acabado: 'liso' }, { acabado: 'relieve' }).acabado).toBe('liso');
+  });
+  it('las básicas salen con grano y aparición; liso quita el grano; quieto se pinta como clase', () => {
+    const html = renderWeb(datos({}));
+    expect(html).toContain('w-ac-papel');
+    expect(html).toContain('w-mv-sutil');
+    expect(html).toContain('class="w-grano"');
+    const liso = renderWeb(datos({ acabado: 'liso', movimiento: 'quieto', formaFoto: 'organica' }));
+    expect(liso).not.toContain('w-grano"');
+    expect(liso).toContain('w-mv-quieto');
+    expect(liso).toContain('w-ff-organica');
+  });
+  it('un diseño de autor aporta su capa cuando el cliente deja auto', () => {
+    expect(renderWeb(datos({ plantilla: 'navaja' }))).toContain('w-ac-relieve');
+    expect(renderWeb(datos({ plantilla: 'escaparate' }))).toContain('w-mv-vivo');
   });
 });

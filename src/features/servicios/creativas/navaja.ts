@@ -19,6 +19,7 @@ export const navaja: Diseno = {
   color: '#dc4a37',
   fondoClaro: '#e5dac6',
   fondoOscuro: '#24221f',
+  capa: { acabado: 'relieve' },
   fuentes: ['ash-bebas', 'ash-archivo'],
   titulo: "'ash-bebas', Impact, 'Arial Narrow', sans-serif",
   texto: "'ash-archivo', system-ui, sans-serif",

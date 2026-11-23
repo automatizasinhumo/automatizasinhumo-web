@@ -16,6 +16,7 @@ export const pulso: Diseno = {
   color: '#d5f035',
   fondoClaro: '#e4e4e4',
   fondoOscuro: '#1a1a1a',
+  capa: { movimiento: 'vivo' },
   fuentes: ['ash-anton', 'ash-manrope'],
   titulo: "'ash-anton', Impact, 'Arial Narrow', sans-serif",
   texto: "'ash-manrope', system-ui, sans-serif",

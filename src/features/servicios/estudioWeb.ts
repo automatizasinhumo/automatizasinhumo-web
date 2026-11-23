@@ -74,7 +74,9 @@ interface Pagado {
 const CLAVE = 'servicios:web';
 const CLAVE_PEDIDO = 'servicios:web:pedido';
 const PASOS = PASOS_WEB.map((p) => p.id) as string[];
-const CAMPOS = ['negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl'] as const;
+/** Radios de la capa visual: se leen y escriben igual que un campo (RadioNodeList.value). */
+const CAPA = ['acabado', 'formaFoto', 'movimiento'] as const;
+const CAMPOS = [...CAPA, 'negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl'] as const;
 
 /**
  * Reduce la foto en el navegador (lado mayor 1200 px) y la devuelve como data URL que quepa en
@@ -184,6 +186,7 @@ export function iniciarEstudioWeb() {
   let genFoto = 0;
   function volcar(c: Partial<Contenido>) {
     for (const k of CAMPOS) campo(k).value = typeof c[k] === 'string' ? c[k] : '';
+    for (const k of CAPA) if (!campo(k).value) campo(k).value = 'auto';
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)!.replaceChildren();
       for (const fila of Array.isArray(c[l]) ? (c[l] as unknown as Fila[]) : []) anadir(l, fila);

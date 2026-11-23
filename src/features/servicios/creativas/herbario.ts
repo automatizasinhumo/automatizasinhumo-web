@@ -25,6 +25,7 @@ export const herbario: Diseno = {
   color: '#df654d',
   fondoClaro: '#efe3cc',
   fondoOscuro: '#2e5743',
+  capa: { acabado: 'papel' },
   fuentes: ['ash-fraunces', 'ash-dm-sans', 'ash-dm-mono'],
   titulo: "'ash-fraunces', Georgia, serif",
   texto: "'ash-dm-sans', system-ui, sans-serif",

@@ -15,6 +15,7 @@
  */
 
 import { CSS_DISENOS, CSS_DISENOS_COMUN, DISENOS, disenoWeb } from './creativas';
+import { CSS_CAPA } from './capaVisual';
 
 export type ExtraWeb = 'zonas' | 'horario' | 'franja';
 
@@ -430,7 +431,7 @@ const IDENTIDADES = `
 .w-t-cartel .w-sec:nth-of-type(even){background:color-mix(in srgb,var(--w-c) 8%,var(--w-fondo))}
 `;
 
-const CSS_BASICAS = (BASE + VARIANTES + IDENTIDADES).replace(/\n\s*/g, '\n').trim();
+const CSS_BASICAS = (BASE + VARIANTES + IDENTIDADES + CSS_CAPA).replace(/\n\s*/g, '\n').trim();
 
 /** CSS de todas las plantillas, con ámbito en `.w`: sirve igual en el estudio y en el Shadow DOM. */
 export const CSS_WEB = `${CSS_BASICAS}\n${CSS_DISENOS}`;

@@ -5,6 +5,7 @@
  * Sin DOM ni JavaScript en la página: solo HTML y CSS con ámbito en `.w-d-<id>`.
  */
 import type { DatosWeb } from '../webs';
+import type { CapaResuelta } from '../capaVisual';
 
 export type IconoWeb = 'tel' | 'wa' | 'mail' | 'mapa' | 'cita' | 'zona' | 'reloj' | 'enlace';
 
@@ -61,5 +62,7 @@ export interface Diseno {
   bloques?: (c: ContextoDiseno) => Readonly<Record<string, string>>;
   /** Algo entre la portada y la primera sección (cinta, franja de zonas…). */
   tras?: (c: ContextoDiseno) => string;
+  /** Acabado, forma de foto y movimiento con los que nace (el cliente los puede cambiar). */
+  capa?: Partial<CapaResuelta>;
   css: string;
 }

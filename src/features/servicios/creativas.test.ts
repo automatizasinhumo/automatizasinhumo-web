@@ -18,7 +18,7 @@ describe('diseños de autor', () => {
   it.each(DISENOS.map((x) => [x.id]))('%s pinta su portada, barra fija y títulos propios escapando el texto', (id) => {
     const x = DISENOS.find((d) => d.id === id)!;
     const html = renderWeb(datos({ plantilla: id, letra: 'diseno', ...x.muestra, negocio: 'Taller <Ana> & Co' }));
-    expect(html).toContain(`class="w w-d w-d-${id}"`);
+    expect(html).toMatch(new RegExp(`class="w w-d w-d-${id} w-ac-[a-z]+ w-ff-[a-z]+ w-mv-[a-z]+"`));
     expect(html).toContain('class="w-nav"');
     expect(html).toContain('Taller &lt;Ana&gt; &amp; Co');
     expect(html).not.toContain('<Ana>');

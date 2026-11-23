@@ -29,6 +29,8 @@ import { cssWebDe, disenoWeb, plantillaWeb, resolverPlantilla } from './plantill
 export { cssFuentes, DISENOS, FUENTES_WEB } from './creativas';
 export { CSS_WEB, cssWebDe, disenoWeb, PLANTILLAS_WEB, PLANTILLAS_ANTIGUAS, resolverPlantilla, type IdPlantillaWeb } from './plantillasWeb';
 import type { IdPlantillaWeb } from './plantillasWeb';
+import { ACABADOS_WEB, CAPA_POR_DEFECTO, FORMAS_FOTO_WEB, MOVIMIENTOS_WEB, clasesCapa, granoCapa, resolverCapa, type IdAcabadoWeb, type IdFormaFotoWeb, type IdMovimientoWeb } from './capaVisual';
+export { ACABADOS_WEB, CAPA_BASICA, FORMAS_FOTO_WEB, MOVIMIENTOS_WEB, resolverCapa } from './capaVisual';
 
 /** Letras del sistema: cargan al instante y no dependen de ningún servicio externo. */
 export const LETRAS_WEB = [
@@ -85,7 +87,7 @@ export const COLORES_WEB = [
 export const PASOS_WEB = [
   { id: 'plantilla', titulo: 'Diseño' },
   { id: 'datos', titulo: 'Tu negocio' },
-  { id: 'personaliza', titulo: 'Color y letra' },
+  { id: 'personaliza', titulo: 'Estilo' },
   { id: 'publica', titulo: 'Publica' },
 ] as const;
 
@@ -104,6 +106,7 @@ export const GUIA_WEB: Record<string, readonly { guia: string; titulo: string; t
   personaliza: [
     { guia: 'color', titulo: 'El color de tu marca', texto: 'Elige uno de la lista o el tuyo exacto. Los textos se ajustan solos para que se lean bien.' },
     { guia: 'letra', titulo: 'La letra', texto: 'Cambia el carácter de la web: clásica, moderna, cercana…' },
+    { guia: 'capa', titulo: 'Acabado, foto y movimiento', texto: 'Dale relieve: textura de papel, la forma de tu foto y cuánto se mueve. «El del diseño» deja lo que pensamos para tu plantilla.' },
   ],
   publica: [
     { guia: 'comprar', titulo: 'Compra y publica', texto: 'Al pagar, tu web queda publicada sin marca de agua. Puedes cambiarla cuando quieras.' },
@@ -154,6 +157,10 @@ export interface DatosWeb {
   plantilla: IdPlantillaWeb;
   color: string;
   letra: IdLetraWeb;
+  /** Capa visual (capaVisual.ts): «auto» deja lo del diseño. */
+  acabado: IdAcabadoWeb;
+  formaFoto: IdFormaFotoWeb;
+  movimiento: IdMovimientoWeb;
   negocio: string;
   sector: string;
   lema: string;
@@ -270,6 +277,9 @@ export function validarWeb(x: unknown): ResultadoWeb {
       plantilla: resolverPlantilla(o.plantilla) ?? WEB_POR_DEFECTO.plantilla,
       color: typeof o.color === 'string' && COLOR_VALIDO.test(o.color) ? o.color.toLowerCase() : WEB_POR_DEFECTO.color,
       letra: esDe(LETRAS_WEB, o.letra) ? o.letra : WEB_POR_DEFECTO.letra,
+      acabado: esDe(ACABADOS_WEB, o.acabado) ? o.acabado : 'auto',
+      formaFoto: esDe(FORMAS_FOTO_WEB, o.formaFoto) ? o.formaFoto : 'auto',
+      movimiento: esDe(MOVIMIENTOS_WEB, o.movimiento) ? o.movimiento : 'auto',
       negocio,
       sector: texto(o.sector, 60),
       lema: texto(o.lema, 140),
@@ -296,6 +306,7 @@ export function validarWeb(x: unknown): ResultadoWeb {
 /** Ejemplo para «Rellenar con un ejemplo» y para las miniaturas de las plantillas. */
 export const EJEMPLO_WEB: DatosWeb = {
   ...WEB_POR_DEFECTO,
+  ...CAPA_POR_DEFECTO,
   negocio: 'Peluquería Lola',
   sector: 'Peluquería y estética',
   lema: 'Cortes, color y peinados con cita, en el centro de Lugo.',
@@ -461,6 +472,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const claro = diseno?.fondoClaro ?? FONDO_TEXTO_CLARO;
   const oscuro = diseno?.fondoOscuro ?? FONDO_TEXTO_OSCURO;
   const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, claro)};--w-ct-oscuro:${acentoSobre(d.color, oscuro)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
+  const capa = resolverCapa(d, diseno?.capa);
   const rel = (href: string) => (href.startsWith('http') ? ' rel="noopener"' : '');
   const tel = d.telefono ? `tel:${digitos(d.telefono)}` : '';
   // El primero es el botón principal (relleno): reservar, si hay enlace; si no, WhatsApp, llamar o correo.
@@ -592,7 +604,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     const pri = listaAcciones[0];
     const nav = `<nav class="w-nav" aria-label="Secciones"><div class="w-in w-nav-in"><a class="w-nav-marca" href="#inicio">${esc(d.negocio)}</a>${enlaces ? `<ul>${enlaces}</ul>` : ''}${pri ? `<a class="w-boton w-boton-lleno" href="${esc(pri[0])}"${rel(pri[0])}>${icono(pri[1])}${pri[2]}</a>` : ''}</div></nav>`;
     return [
-      `<div class="w w-d w-d-${diseno.id}" style="${esc(vars)}" id="inicio"><div class="w-cuerpo">`,
+      `<div class="w w-d w-d-${diseno.id}${clasesCapa(capa)}" style="${esc(vars)}" id="inicio"><div class="w-cuerpo">`,
       nav,
       diseno.cabecera(ctx),
       diseno.tras?.(ctx) ?? '',
@@ -601,7 +613,8 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
       `</main>`,
       acciones ? `<nav class="w-barra" aria-label="Contactar">${acciones}</nav>` : '',
       `<footer class="w-pie"><div class="w-in">© ${esc(d.negocio)}${o.pie ? ` · ${o.pie}` : ''}</div></footer></div>`,
-      o.marca ? `<div class="w-marca" aria-hidden="true" style="background-image:${esc(fondoMarca(o.marca))}"></div>` : '',
+      granoCapa(capa),
+    o.marca ? `<div class="w-marca" aria-hidden="true" style="background-image:${esc(fondoMarca(o.marca))}"></div>` : '',
       `</div>`,
     ].join('');
   }
@@ -613,7 +626,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
         ? `${icono('reloj')}${esc(primera[0] ? `${primera[0]}: ${primera[1]}` : primera[1])}`
         : '';
   return [
-    `<div class="w w-t-${p.id}" style="${esc(vars)}"><div class="w-cuerpo">`,
+    `<div class="w w-t-${p.id}${clasesCapa(capa)}" style="${esc(vars)}"><div class="w-cuerpo">`,
     `<header class="w-cab w-h-${p.hero}${conFoto ? '' : ' w-sin-foto'}"><div class="w-in w-cab-in"><div class="w-cab-txt">`,
     d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : '',
     `<h1>${esc(d.negocio)}</h1>`,
@@ -629,6 +642,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     // En pantallas estrechas los botones de contacto se quedan a mano abajo mientras se lee (sin JavaScript).
     acciones ? `<nav class="w-barra" aria-label="Contactar">${acciones}</nav>` : '',
     `<footer class="w-pie"><div class="w-in">© ${esc(d.negocio)}${o.pie ? ` · ${o.pie}` : ''}</div></footer></div>`,
+    granoCapa(capa),
     o.marca ? `<div class="w-marca" aria-hidden="true" style="background-image:${esc(fondoMarca(o.marca))}"></div>` : '',
     `</div>`,
   ].join('');

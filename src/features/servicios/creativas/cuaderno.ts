@@ -18,6 +18,7 @@ export const cuaderno: Diseno = {
   color: '#3659b5',
   fondoClaro: '#fff0b9',
   fondoOscuro: '#22305e',
+  capa: { acabado: 'papel' },
   fuentes: ['ash-bricolage', 'ash-dm-sans'],
   titulo: "'ash-bricolage', 'Trebuchet MS', sans-serif",
   texto: "'ash-dm-sans', system-ui, sans-serif",
