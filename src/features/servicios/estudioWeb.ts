@@ -13,7 +13,7 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
-import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -127,7 +127,7 @@ export function iniciarEstudioWeb() {
 
   const g = leer();
   const estado: Estado = {
-    plantilla: cfg.plantillas.includes(g.plantilla ?? '') ? g.plantilla! : '',
+    plantilla: resolverPlantilla(g.plantilla) ?? '',
     color: COLOR.test(g.color ?? '') ? g.color! : cfg.porDefecto.color,
     letra: cfg.letras.includes(g.letra ?? '') ? g.letra! : cfg.porDefecto.letra,
     alcanzado: Math.min(PASOS.length - 1, Math.max(0, Number(g.alcanzado) || 0)),
@@ -812,6 +812,13 @@ export function iniciarEstudioWeb() {
     if (c.name === 'plantilla' || c.name === 'plantilla-rapida') {
       estado.plantilla = c.value;
       $('[data-error="plantilla"]')!.hidden = true;
+      // Cada plantilla trae su orden de secciones; el cliente lo puede cambiar después.
+      const elegida = PLANTILLAS_WEB.find((p) => p.id === c.value);
+      if (elegida) {
+        const lista = $('[data-orden]')!;
+        for (const id of ordenWeb(elegida.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);
+        pintarOrden();
+      }
     } else if (c.name === 'color') estado.color = c.value;
     else if (c.name === 'letra') estado.letra = c.value;
     persistir();

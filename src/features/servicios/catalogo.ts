@@ -9,7 +9,7 @@
  */
 import { AUTOSERVICIO, SLUG_WEB } from './autoservicio';
 import { DISENOS_CV, EXTRAS_CV, PAQUETES_CV, miniaturaCv } from './cv';
-import { EJEMPLO_WEB } from './webs';
+import { EJEMPLO_WEB, PLANTILLAS_WEB } from './webs';
 
 export type IdFamilia = 'cv' | 'webs' | 'tiendas' | 'reservas' | 'automatizar' | 'eventos';
 
@@ -108,10 +108,10 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         nombre: 'Web de una página',
         texto: 'Quién eres, qué ofreces y cómo contactarte, en una sola página clara.',
         icono: 'browser',
-        puntos: ['3 diseños, tu color y tu letra', 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
+        puntos: [`${PLANTILLAS_WEB.length} diseños, tu color y tu letra`, 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
         href: '/servicios/web',
         desde: AUTOSERVICIO[SLUG_WEB]!.precio,
-        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, plantilla: 'banda' } },
+        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, plantilla: 'salon' } },
       },
       {
         id: 'portafolio',
