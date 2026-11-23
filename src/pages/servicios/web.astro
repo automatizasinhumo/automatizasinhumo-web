@@ -7,6 +7,7 @@ import { euros } from '../../features/servicios/cv';
 import {
   COLORES_WEB,
   CSS_WEB,
+  cssFuentes,
   EJEMPLO_WEB,
   LETRAS_WEB,
   MAX_ENLACES_WEB,
@@ -40,6 +41,23 @@ const config = JSON.stringify({
   maxEnlaces: MAX_ENLACES_WEB,
 });
 const campo = 'campo';
+// Primero los diseños de autor (cada uno con su portada y tipografía), luego las básicas para configurar.
+const GRUPOS_WEB = [
+  {
+    id: 'autor',
+    titulo: 'Diseños de autor',
+    texto: 'Cada uno con su portada, su tipografía y su estilo, pensado para un tipo de negocio.',
+    plantillas: PLANTILLAS_WEB.filter((p) => p.familia === 'autor'),
+  },
+  {
+    id: 'basica',
+    titulo: 'Básicas, para configurar',
+    texto: 'Limpias y neutras: tú pones el color, la letra y el orden.',
+    plantillas: PLANTILLAS_WEB.filter((p) => p.familia === 'basica'),
+  },
+];
+// Las @font-face no funcionan dentro del shadow root de la vista previa: van en el documento.
+const FUENTES_CSS = cssFuentes('/fonts/web/');
 ---
 
 <Layout
@@ -47,6 +65,7 @@ const campo = 'campo';
   description="Elige un diseño, escribe los datos de tu negocio y mira tu web al momento. Con tu color y tu letra, publicada en cuanto la compras."
   sinAviso
 >
+  <Fragment set:html={`<style>${FUENTES_CSS}</style>`} />
   <div id="estudio-web" class="estudio" data-config={config}>
     <header class="fondo-tecnico cabecera-pagina">
       <span class="etiqueta">Servicios · Web</span>
@@ -69,23 +88,29 @@ const campo = 'campo';
         <p class="paso-entradilla">Todos cuestan lo mismo, {euros(precio)}. Podrás cambiarlo después sin volver a escribir nada.</p>
         <fieldset class="mt-6" data-guia="galeria">
           <legend class="sr-only">Diseño de la web</legend>
-          <div class="rejilla">
-            {
-              PLANTILLAS_WEB.map((p) => (
-                <label class="tarjeta diseno">
-                  <input type="radio" name="plantilla" value={p.id} class="sr-only" />
-                  <span class="mini-web" data-mini={p.id} aria-hidden="true" />
-                  <span class="diseno-pie">
-                    <span class="min-w-0">
-                      <strong class="block truncate text-ink">{p.nombre}</strong>
-                      <span class="block text-xs text-faint">{p.descripcion}</span>
-                    </span>
-                    <span class="precio">{euros(precio)}</span>
-                  </span>
-                </label>
-              ))
-            }
-          </div>
+          {
+            GRUPOS_WEB.map((g) => (
+              <div class="grupo-disenos" data-familia={g.id}>
+                <h3 class="grupo-titulo">{g.titulo}</h3>
+                <p class="grupo-texto">{g.texto}</p>
+                <div class="rejilla">
+                  {g.plantillas.map((p) => (
+                    <label class="tarjeta diseno">
+                      <input type="radio" name="plantilla" value={p.id} class="sr-only" />
+                      <span class="mini-web" data-mini={p.id} aria-hidden="true" />
+                      <span class="diseno-pie">
+                        <span class="min-w-0">
+                          <strong class="block truncate text-ink">{p.nombre}</strong>
+                          <span class="block text-xs text-faint">{p.descripcion}</span>
+                        </span>
+                        <span class="precio">{euros(precio)}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))
+          }
         </fieldset>
         <p class="aviso" role="alert" data-error="plantilla" hidden>Elige un diseño para seguir.</p>
         <div class="paso-acciones">

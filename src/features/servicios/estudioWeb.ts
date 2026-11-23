@@ -13,7 +13,7 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { esOrdenDeSector, esPreguntaDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
-import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -355,7 +355,11 @@ export function iniciarEstudioWeb() {
   function miniaturas() {
     for (const el of $$('[data-mini]')) {
       const s = el.attachShadow({ mode: 'closed' });
-      s.innerHTML = `<style>${cfg.css}${CSS_VISTA}</style><div class="mini">${renderWeb({ ...cfg.ejemplo, plantilla: el.dataset.mini as DatosWeb['plantilla'] })}</div>`;
+      const id = el.dataset.mini as DatosWeb['plantilla'];
+      // Los diseños de autor se enseñan con su propio negocio de muestra, su color y su letra.
+      const x = disenoWeb(id);
+      const datos: DatosWeb = x ? { ...cfg.ejemplo, ...x.muestra, plantilla: id, color: x.color, letra: 'diseno' } : { ...cfg.ejemplo, plantilla: id };
+      s.innerHTML = `<style>${cfg.css}${CSS_VISTA}</style><div class="mini">${renderWeb(datos)}</div>`;
     }
   }
 
@@ -829,6 +833,11 @@ export function iniciarEstudioWeb() {
       $('[data-error="plantilla"]')!.hidden = true;
       // Cada plantilla trae su orden de secciones; el cliente lo puede cambiar después.
       const elegida = PLANTILLAS_WEB.find((p) => p.id === c.value);
+      // Un diseño de autor llega con su color y su letra (el cliente los puede cambiar después);
+      // al volver a una básica, «la del diseño» pasa a la letra por defecto.
+      const x = disenoWeb(c.value);
+      if (x) Object.assign(estado, { color: x.color, letra: 'diseno' });
+      else if (estado.letra === 'diseno') estado.letra = cfg.porDefecto.letra;
       if (elegida) {
         const lista = $('[data-orden]')!;
         for (const id of ordenWeb(elegida.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);

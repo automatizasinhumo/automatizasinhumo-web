@@ -936,6 +936,19 @@
     max-width: 24rem;
     margin-inline: auto;
   }
+  .grupo-disenos + .grupo-disenos {
+    margin-top: var(--ds-hueco-4, 2.5rem);
+  }
+  .grupo-titulo {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--color-ink);
+  }
+  .grupo-texto {
+    margin: 0.25rem 0 1rem;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+  }
   .mini-web {
     display: block;
     aspect-ratio: 4 / 3;

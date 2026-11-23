@@ -7,6 +7,8 @@ import {
   MAX_ENLACES_WEB,
   MAX_SERVICIOS_WEB,
   PLANTILLAS_WEB,
+  cssWebDe,
+  DISENOS,
   PLANTILLAS_ANTIGUAS,
   resolverPlantilla,
   type DatosWeb,
@@ -25,6 +27,8 @@ import {
   sobreAcento,
   validarWeb,
 } from '../../src/features/servicios/webs';
+
+const BASICAS = PLANTILLAS_WEB.filter((p) => p.familia === 'basica');
 
 const base = { negocio: '  Bar Pepe ', telefono: '982 11 22 33' };
 
@@ -75,7 +79,7 @@ describe('renderWeb', () => {
     expect(html).toContain('&lt;script&gt;');
   });
   it('cada plantilla y letra cambia solo la clase y las variables', () => {
-    for (const p of PLANTILLAS_WEB) {
+    for (const p of BASICAS) {
       expect(renderWeb({ ...EJEMPLO_WEB, plantilla: p.id })).toContain(`class="w w-t-${p.id}"`);
       expect(CSS_WEB).toContain(`.w-t-${p.id}`);
     }
@@ -123,11 +127,18 @@ describe('ayudas', () => {
     expect(acentoSobre('#1d4ed8', FONDO_TEXTO_CLARO)).toBe('#1d4ed8');
   });
   it('el fondo de referencia es el más desfavorable de todos los paneles de las plantillas', () => {
-    const fondos = [...CSS_WEB.matchAll(/--w-(?:fondo|panel):(#[0-9a-f]{3,6})/g)].map((m) => m[1]!.length === 4 ? `#${[...m[1]!.slice(1)].map((x) => x + x).join('')}` : m[1]!);
-    for (const c of ['#777777', '#808080', '#2563eb', '#facc15', '#f472b6']) {
-      for (const f of fondos) {
-        const fondo = contraste(f, '#ffffff') < contraste(f, '#000000') ? FONDO_TEXTO_CLARO : FONDO_TEXTO_OSCURO;
-        expect(contraste(acentoSobre(c, fondo), f), `${c} sobre ${f}`).toBeGreaterThanOrEqual(CONTRASTE_AA);
+    const fondosDe = (css: string) => [...css.matchAll(/--w-(?:fondo|panel):(#[0-9a-f]{3,6})/g)].map((m) => m[1]!.length === 4 ? `#${[...m[1]!.slice(1)].map((x) => x + x).join('')}` : m[1]!);
+    // Las básicas usan los fondos de referencia comunes; cada diseño de autor, los suyos.
+    const casos: [string, string, string][] = [
+      [cssWebDe(BASICAS[0]!.id), FONDO_TEXTO_CLARO, FONDO_TEXTO_OSCURO],
+      ...DISENOS.map((x): [string, string, string] => [x.css, x.fondoClaro, x.fondoOscuro]),
+    ];
+    for (const [css, claro, oscuro] of casos) {
+      for (const c of ['#777777', '#808080', '#2563eb', '#facc15', '#f472b6']) {
+        for (const f of fondosDe(css)) {
+          const fondo = contraste(f, '#ffffff') < contraste(f, '#000000') ? claro : oscuro;
+          expect(contraste(acentoSobre(c, fondo), f), `${c} sobre ${f}`).toBeGreaterThanOrEqual(CONTRASTE_AA);
+        }
       }
     }
   });
@@ -218,7 +229,7 @@ describe('renderWeb: plantillas compuestas', () => {
   });
   it('cada plantilla pinta su portada, sus variantes y una identidad propia en el CSS', () => {
     const vistas = new Set<string>();
-    for (const p of PLANTILLAS_WEB) {
+    for (const p of BASICAS) {
       const html = renderWeb({ ...EJEMPLO_WEB, plantilla: p.id });
       expect(html).toContain(`w-cab w-h-${p.hero} w-sin-foto`);
       expect(html).toContain(`w-contacto-bloque w-c-${p.contacto}`);

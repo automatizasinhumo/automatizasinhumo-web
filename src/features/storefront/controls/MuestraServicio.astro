@@ -13,7 +13,7 @@
  */
 import { renderSVG } from 'uqr';
 import type { MuestraServicio } from '../../servicios/catalogo';
-import { CSS_WEB, renderWeb } from '../../servicios/webs';
+import { cssFuentes, cssWebDe, disenoWeb, renderWeb } from '../../servicios/webs';
 
 interface Props {
   muestra: MuestraServicio;
@@ -33,8 +33,10 @@ if (muestra.tipo === 'tarjeta') {
 }
 const sombraWeb =
   muestra.tipo === 'web'
-    ? `<style>:host{display:block}.escala{width:${ANCHO_WEB}px;transform:scale(var(--escala,.36));transform-origin:0 0;pointer-events:none}${CSS_WEB}</style><div class="escala">${renderWeb(muestra.datos)}</div>`
+    ? `<style>:host{display:block}.escala{width:${ANCHO_WEB}px;transform:scale(var(--escala,.36));transform-origin:0 0;pointer-events:none}${cssWebDe(muestra.datos.plantilla)}</style><div class="escala">${renderWeb(muestra.datos)}</div>`
     : '';
+// Las @font-face del diseño de autor van en el documento (no se aplican dentro del shadow root).
+const fuentesWeb = muestra.tipo === 'web' ? cssFuentes('/fonts/web/', disenoWeb(muestra.datos.plantilla)?.fuentes ?? []) : '';
 const iniciales = muestra.tipo === 'tarjeta' ? muestra.nombre.split(/\s+/).slice(0, 2).map((p) => p[0]).join('') : '';
 ---
 
@@ -60,12 +62,15 @@ const iniciales = muestra.tipo === 'tarjeta' ? muestra.nombre.split(/\s+/).slice
   )}
 
   {muestra.tipo === 'web' && (
+    <>
+    {fuentesWeb && <Fragment set:html={`<style>${fuentesWeb}</style>`} />}
     <div class="navegador">
       <div class="barra"><i></i><i></i><i></i><span>{muestra.url}</span></div>
       <div class="pantalla">
         <template shadowrootmode="open" set:html={sombraWeb} />
       </div>
     </div>
+    </>
   )}
 </div>
 

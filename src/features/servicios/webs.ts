@@ -24,9 +24,10 @@ import {
   type PaginaPublicada,
 } from './paginas';
 
-import { plantillaWeb, resolverPlantilla } from './plantillasWeb';
-import { CSS_WEB } from './plantillasWeb';
-export { CSS_WEB, PLANTILLAS_WEB, PLANTILLAS_ANTIGUAS, resolverPlantilla, type IdPlantillaWeb } from './plantillasWeb';
+import { cssFuentes, FUENTES_WEB, type ContextoDiseno, type IconoWeb } from './creativas';
+import { cssWebDe, disenoWeb, plantillaWeb, resolverPlantilla } from './plantillasWeb';
+export { cssFuentes, DISENOS, FUENTES_WEB } from './creativas';
+export { CSS_WEB, cssWebDe, disenoWeb, PLANTILLAS_WEB, PLANTILLAS_ANTIGUAS, resolverPlantilla, type IdPlantillaWeb } from './plantillasWeb';
 import type { IdPlantillaWeb } from './plantillasWeb';
 
 /** Letras del sistema: cargan al instante y no dependen de ningún servicio externo. */
@@ -58,6 +59,14 @@ export const LETRAS_WEB = [
     descripcion: 'Redondeada y amable',
     titulo: "'Trebuchet MS', 'Segoe UI', system-ui, sans-serif",
     texto: "'Trebuchet MS', 'Segoe UI', system-ui, sans-serif",
+  },
+  {
+    // La tipografía propia de cada diseño de autor; en una básica equivale a «Moderna».
+    id: 'diseno',
+    nombre: 'La del diseño',
+    descripcion: 'La tipografía pensada para tu diseño',
+    titulo: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    texto: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   },
 ] as const;
 export type IdLetraWeb = (typeof LETRAS_WEB)[number]['id'];
@@ -431,11 +440,27 @@ export const filasHorario = (horario: string): [string, string][] =>
       return m ? [m[1]!, m[2]!] : ['', l];
     });
 
+const TITULOS_GENERICOS: Readonly<Record<string, string>> = {
+  sobre: 'Quiénes somos',
+  servicios: 'Servicios',
+  galeria: 'Fotos',
+  opiniones: 'Opiniones',
+  preguntas: 'Preguntas frecuentes',
+  contacto: 'Contacto',
+  zonas: 'Dónde trabajamos',
+  horario: 'Horario',
+};
+
 /** HTML de la web (solo el contenido, con ámbito en `.w`). Todo texto del cliente va escapado. */
 export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const p = plantillaWeb(d.plantilla);
-  const letra = LETRAS_WEB.find((l) => l.id === d.letra) ?? LETRAS_WEB[0];
-  const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, FONDO_TEXTO_CLARO)};--w-ct-oscuro:${acentoSobre(d.color, FONDO_TEXTO_OSCURO)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
+  const diseno = disenoWeb(p.id);
+  const base = LETRAS_WEB.find((l) => l.id === d.letra) ?? LETRAS_WEB[0];
+  const letra = diseno && d.letra === 'diseno' ? { titulo: diseno.titulo, texto: diseno.texto } : base;
+  // En un diseño de autor el acento se ajusta a sus propios fondos (no a los genéricos).
+  const claro = diseno?.fondoClaro ?? FONDO_TEXTO_CLARO;
+  const oscuro = diseno?.fondoOscuro ?? FONDO_TEXTO_OSCURO;
+  const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, claro)};--w-ct-oscuro:${acentoSobre(d.color, oscuro)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
   const rel = (href: string) => (href.startsWith('http') ? ' rel="noopener"' : '');
   const tel = d.telefono ? `tel:${digitos(d.telefono)}` : '';
   // El primero es el botón principal (relleno): reservar, si hay enlace; si no, WhatsApp, llamar o correo.
@@ -510,25 +535,26 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
 
   const seccion = (id: string, titulo: string, cuerpo: string) =>
     `<section class="w-sec w-${id}-sec" id="${id}"><div class="w-in"><h2>${titulo}</h2>${cuerpo}</div></section>`;
+  const titulo = (id: string) => esc(diseno?.titulos?.[id] ?? TITULOS_GENERICOS[id] ?? id);
   const bloques: Record<string, string> = {
-    sobre: d.sobre ? seccion('sobre', 'Quiénes somos', `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
-    servicios: nS ? seccion('servicios', 'Servicios', `<ul class="w-servicios w-s-${vS}" data-n="${nS}">${servicios}</ul>`) : '',
-    galeria: fotos ? seccion('galeria', 'Fotos', `<ul class="w-galeria w-g-${p.galeria}" data-n="${d.galeria.length}">${fotos}</ul>`) : '',
+    sobre: d.sobre ? seccion('sobre', titulo('sobre'), `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
+    servicios: nS ? seccion('servicios', titulo('servicios'), `<ul class="w-servicios w-s-${vS}" data-n="${nS}">${servicios}</ul>`) : '',
+    galeria: fotos ? seccion('galeria', titulo('galeria'), `<ul class="w-galeria w-g-${p.galeria}" data-n="${d.galeria.length}">${fotos}</ul>`) : '',
     opiniones: opiniones
       ? seccion(
           'opiniones',
-          'Opiniones',
+          titulo('opiniones'),
           `<ul class="w-opiniones w-o-${vO}" data-n="${d.opiniones.length}">${opiniones}</ul>${d.opinionesUrl ? `<p class="w-mas"><a href="${esc(d.opinionesUrl)}" rel="noopener">Ver todas las opiniones</a></p>` : ''}`,
         )
       : '',
-    preguntas: preguntas ? seccion('preguntas', 'Preguntas frecuentes', `<ul class="w-preguntas">${preguntas}</ul>`) : '',
+    preguntas: preguntas ? seccion('preguntas', titulo('preguntas'), `<ul class="w-preguntas">${preguntas}</ul>`) : '',
     contacto: seccion(
       'contacto',
-      'Contacto',
+      titulo('contacto'),
       `<div class="w-contacto-bloque w-c-${p.contacto}"><div class="w-contacto-cta"><p class="w-contacto-grande">${grande}</p>${bloqueAcciones}</div><ul class="w-contacto">${filasContacto.join('')}</ul></div>`,
     ),
-    zonas: conExtra.zonas ? seccion('zonas', 'Dónde trabajamos', `<ul class="w-zonas">${zonas.map((z) => `<li>${esc(z)}</li>`).join('')}</ul>`) : '',
-    horario: conExtra.horario ? seccion('horario', 'Horario', `<table class="w-horario">${tabla}</table>`) : '',
+    zonas: conExtra.zonas ? seccion('zonas', titulo('zonas'), `<ul class="w-zonas">${zonas.map((z) => `<li>${esc(z)}</li>`).join('')}</ul>`) : '',
+    horario: conExtra.horario ? seccion('horario', titulo('horario'), `<table class="w-horario">${tabla}</table>`) : '',
     franja: conExtra.franja
       ? `<aside class="w-franja" aria-label="Contactar"><div class="w-in"><p>${textoFranja[listaAcciones[0]![1]]}</p>${bloqueAcciones}</div></aside>`
       : '',
@@ -542,6 +568,43 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const orden = p.orden.map((id) => (propio && (ORDEN_POR_DEFECTO as string[]).includes(id) ? cola.shift()! : id));
 
   const conFoto = Boolean(d.foto);
+  const imgFoto = conFoto ? `<img src="${esc(d.foto)}" alt="${esc(d.negocio)}" decoding="async" fetchpriority="high">` : '';
+  if (diseno) {
+    const ctx: ContextoDiseno = {
+      d,
+      esc,
+      icono: (k: IconoWeb) => icono(k),
+      acciones,
+      bloqueAcciones,
+      principal: listaAcciones[0],
+      tel,
+      grande,
+      zonas,
+      horario,
+      foto: imgFoto,
+      titulo: (id) => diseno.titulos?.[id] ?? TITULOS_GENERICOS[id] ?? id,
+      seccion: (id, t, cuerpo) => seccion(id, esc(t), cuerpo),
+    };
+    Object.assign(bloques, diseno.bloques?.(ctx) ?? {});
+    // Barra superior: marca, hasta cuatro anclas a las secciones que existen y la acción principal.
+    const presentes = orden.filter((id) => bloques[id] && id !== 'franja').slice(0, 4);
+    const enlaces = presentes.map((id) => `<li><a href="#${id}">${esc(ctx.titulo(id))}</a></li>`).join('');
+    const pri = listaAcciones[0];
+    const nav = `<nav class="w-nav" aria-label="Secciones"><div class="w-in w-nav-in"><a class="w-nav-marca" href="#inicio">${esc(d.negocio)}</a>${enlaces ? `<ul>${enlaces}</ul>` : ''}${pri ? `<a class="w-boton w-boton-lleno" href="${esc(pri[0])}"${rel(pri[0])}>${icono(pri[1])}${pri[2]}</a>` : ''}</div></nav>`;
+    return [
+      `<div class="w w-d w-d-${diseno.id}" style="${esc(vars)}" id="inicio"><div class="w-cuerpo">`,
+      nav,
+      diseno.cabecera(ctx),
+      diseno.tras?.(ctx) ?? '',
+      `<main>`,
+      ...orden.map((id) => bloques[id] ?? ''),
+      `</main>`,
+      acciones ? `<nav class="w-barra" aria-label="Contactar">${acciones}</nav>` : '',
+      `<footer class="w-pie"><div class="w-in">© ${esc(d.negocio)}${o.pie ? ` · ${o.pie}` : ''}</div></footer></div>`,
+      o.marca ? `<div class="w-marca" aria-hidden="true" style="background-image:${esc(fondoMarca(o.marca))}"></div>` : '',
+      `</div>`,
+    ].join('');
+  }
   const primera = horario[0];
   const datoCab =
     p.hero === 4 && zonas.length
@@ -624,13 +687,23 @@ export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '',
 ${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta name="twitter:card" content="summary_large_image">\n` : ''}<meta name="theme-color" content="${esc(d.color)}">
 <link rel="icon" href="${esc(tienda)}/favicon.svg">
 <script type="application/ld+json">${fichaNegocio(d, url)}</script>
-<style>body{margin:0}${CSS_WEB}</style>
+${fuentesDoc(d, tienda)}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
 </head>
 <body>
 ${renderWeb(d, { pie, galeria })}
 </body>
 </html>
 `;
+}
+
+/** `@font-face` (y precarga del titular) del diseño de autor elegido; '' en las básicas o con otra letra. */
+function fuentesDoc(d: DatosWeb, tienda: string): string {
+  const x = disenoWeb(plantillaWeb(d.plantilla).id);
+  if (!x || d.letra !== 'diseno') return '';
+  const pre = `${tienda}/fonts/web/`;
+  const primera = FUENTES_WEB[x.fuentes[0] ?? '']?.archivo;
+  const precarga = primera ? `<link rel="preload" href="${esc(pre + primera)}" as="font" type="font/woff2" crossorigin>\n` : '';
+  return `${precarga}<style>${cssFuentes(pre, x.fuentes)}</style>\n`;
 }
 
 /** Texto de la marca de agua de la vista previa del estudio. */
