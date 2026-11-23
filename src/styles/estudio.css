@@ -1132,3 +1132,4 @@
 .revision ul { margin: 0.5rem 0 0; padding-left: 1.1rem; list-style: disc; }
 .revision li + li { margin-top: 0.35rem; }
 .revision button { font-weight: 700; text-decoration: underline; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+.revision[data-completa='true'] { border-left-color: #15803d; background: color-mix(in srgb, #15803d 10%, transparent); }

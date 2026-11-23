@@ -683,7 +683,9 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
  * de la foto (/w/<slug>/foto) para la tarjeta que sale al compartir el enlace; '' si no hay foto.
  */
 export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = ''): string {
-  const titulo = d.sector ? `${d.negocio} · ${d.sector}` : d.negocio;
+  // «Nombre · Actividad en Zona»: la zona principal en el título ayuda a salir en búsquedas locales.
+  const zona = listaZonas(d.zonas)[0];
+  const titulo = (d.sector ? `${d.negocio} · ${d.sector}` : d.negocio) + (zona && d.sector ? ` en ${zona}` : '');
   const descripcion = (d.lema || d.sobre.replace(/\s+/g, ' ') || titulo).slice(0, 160);
   const pie = `Web hecha con <a href="${esc(tienda)}/servicios/web">Automatiza sin humo</a>`;
   return `<!doctype html>
@@ -695,6 +697,8 @@ export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '',
 <meta name="description" content="${esc(descripcion)}">
 <link rel="canonical" href="${esc(url)}">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:site_name" content="${esc(d.negocio)}">
 <meta property="og:title" content="${esc(titulo)}">
 <meta property="og:description" content="${esc(descripcion)}">
 <meta property="og:url" content="${esc(url)}">

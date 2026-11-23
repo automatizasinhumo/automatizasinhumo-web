@@ -134,21 +134,31 @@ export const TOCABLES: readonly [vista: string, campo: string, etiqueta: string]
 ];
 
 /**
- * Revisión antes de publicar: lo que falta o conviene completar, cada aviso con el campo del
- * editor al que lleva «Corregir» (mismo selector que TOCABLES). Pura, para poder probarla.
+ * Revisión antes de publicar e índice de preparación (0-100) para buscadores y clientes: cada
+ * comprobación vale unos puntos y, si falla, da un aviso con el campo del editor al que lleva
+ * «Corregir» (mismo selector que TOCABLES). Mide lo que el cliente ha rellenado, no el tráfico.
+ * Pura, para poder probarla.
  */
-export function revisarWeb(d: Partial<DatosWeb>): [campo: string, aviso: string][] {
+export function revisarWeb(d: Partial<DatosWeb>): { puntos: number; avisos: [campo: string, aviso: string, puntos: number][] } {
   const t = (v?: string) => (v ?? '').trim();
-  const out: [string, string][] = [];
-  if (!t(d.lema)) out.push(['[name="lema"]', 'Falta la frase de portada: di en una línea qué ofreces.']);
-  if (!t(d.foto)) out.push(['[data-foto-elegir]', 'Sin foto de portada: una foto real del negocio da confianza.']);
-  if (!t(d.telefono) && !t(d.whatsapp) && !t(d.email)) out.push(['[name="telefono"]', 'No hay forma de contactar: pon teléfono, WhatsApp o correo.']);
-  if (!(d.servicios ?? []).some((s) => t(s.nombre))) out.push(['[data-lista="servicios"]', 'Añade al menos un servicio o producto.']);
-  else if (!(d.servicios ?? []).some((s) => t(s.precio))) out.push(['[data-lista="servicios"]', 'Ningún servicio tiene precio orientativo: ayuda a decidir.']);
-  if (!t(d.horario)) out.push(['[name="horario"]', 'Falta el horario.']);
-  if ((d.preguntas ?? []).some((p) => t(p.pregunta) && !t(p.respuesta))) out.push(['[data-lista="preguntas"]', 'Hay preguntas sin respuesta.']);
-  if (!(d.opiniones ?? []).some((o) => t(o.texto))) out.push(['[data-lista="opiniones"]', 'Sin opiniones: copia dos o tres reseñas de clientes.']);
-  return out;
+  const servicios = (d.servicios ?? []).filter((s) => t(s.nombre));
+  const preguntas = (d.preguntas ?? []).filter((p) => t(p.pregunta));
+  const reglas: [ok: boolean, campo: string, aviso: string, puntos: number][] = [
+    [!!(t(d.telefono) || t(d.whatsapp) || t(d.email)), '[name="telefono"]', 'No hay forma de contactar: pon teléfono, WhatsApp o correo.', 15],
+    [servicios.length > 0, '[data-lista="servicios"]', 'Añade al menos un servicio o producto.', 10],
+    [!!t(d.lema), '[name="lema"]', 'Falta la frase de portada: di en una línea qué ofreces.', 10],
+    [!!t(d.foto), '[data-foto-elegir]', 'Sin foto de portada: una foto real del negocio da confianza.', 10],
+    [!!t(d.horario), '[name="horario"]', 'Falta el horario (también sale en Google).', 10],
+    [!!(t(d.zonas) || t(d.direccion)), '[name="zonas"]', 'Di dónde trabajas (barrio, ciudad o zonas): así te encuentran en tu zona.', 10],
+    [(d.opiniones ?? []).some((o) => t(o.texto)), '[data-lista="opiniones"]', 'Sin opiniones: copia dos o tres reseñas de clientes.', 8],
+    [!!t(d.sobre), '[name="sobre"]', 'Cuenta quiénes sois en dos frases.', 7],
+    [servicios.length === 0 || servicios.some((s) => t(s.precio)), '[data-lista="servicios"]', 'Ningún servicio tiene precio orientativo: ayuda a decidir.', 5],
+    [preguntas.length > 0 && preguntas.every((p) => t(p.respuesta)), '[data-lista="preguntas"]', preguntas.length ? 'Hay preguntas sin respuesta.' : 'Responde las dudas típicas en «Preguntas frecuentes».', 5],
+    [(d.galeria ?? []).length >= 3, '[data-galeria]', 'Sube al menos tres fotos a la galería.', 5],
+    [!!t(d.sector), '[name="sector"]', 'Escribe a qué se dedica el negocio.', 5],
+  ];
+  const fallos = reglas.filter((r) => !r[0]);
+  return { puntos: 100 - fallos.reduce((n, r) => n + r[3], 0), avisos: fallos.map(([, c, a, p]) => [c, a, p]) };
 }
 
 function leer(): Partial<Estado> {
@@ -520,21 +530,22 @@ export function iniciarEstudioWeb() {
     res('plantilla').textContent = nombrePlantilla(estado.plantilla);
     const lista = $('[data-revision]');
     if (lista) {
-      const avisos = revisarWeb(datos());
+      const { puntos, avisos } = revisarWeb(datos());
+      $('[data-revision-puntos]')!.textContent = String(puntos);
       lista.replaceChildren(
-        ...avisos.map(([sel, aviso]) => {
+        ...avisos.map(([sel, aviso, pts]) => {
           const li = document.createElement('li');
           const b = document.createElement('button');
           b.type = 'button';
           b.className = 'enlace';
           b.textContent = 'Corregir';
           b.addEventListener('click', () => tocar(sel));
-          li.textContent = `${aviso} `;
+          li.textContent = `${aviso} (+${pts}) `;
           li.appendChild(b);
           return li;
         }),
       );
-      lista.closest<HTMLElement>('[data-revision-caja]')!.hidden = !avisos.length;
+      lista.closest<HTMLElement>('[data-revision-caja]')!.dataset.completa = String(!avisos.length);
     }
     $('[data-solo-compra]')!.hidden = !!pedido.pagado;
     $('[data-solo-pagado]')!.hidden = !pedido.pagado;
