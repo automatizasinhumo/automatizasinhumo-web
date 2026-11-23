@@ -47,7 +47,8 @@
         "navaja",
         "salon"
       ],
-      "reserva": "Reservar cita"
+      "reserva": "Reservar cita",
+      "ejemplo": "Peluquería Lola"
     },
     {
       "id": "estetica",
@@ -99,7 +100,8 @@
         "serena",
         "herbario"
       ],
-      "reserva": "Reservar cita"
+      "reserva": "Reservar cita",
+      "ejemplo": "Estética Alba"
     },
     {
       "id": "bar",
@@ -156,7 +158,8 @@
         "bistro",
         "barra"
       ],
-      "reserva": "Reservar mesa"
+      "reserva": "Reservar mesa",
+      "ejemplo": "Casa Remedios"
     },
     {
       "id": "fontaneria",
@@ -206,7 +209,8 @@
         "guardia"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Pedir presupuesto"
+      "contacto": "Pedir presupuesto",
+      "ejemplo": "Fontanería Ríos"
     },
     {
       "id": "electricidad",
@@ -257,7 +261,8 @@
         "lamina"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Pedir presupuesto"
+      "contacto": "Pedir presupuesto",
+      "ejemplo": "Electricidad Norte"
     },
     {
       "id": "reformas",
@@ -312,7 +317,8 @@
         "urgente"
       ],
       "reserva": "Pedir visita",
-      "contacto": "Pedir presupuesto"
+      "contacto": "Pedir presupuesto",
+      "ejemplo": "Reformas Arco"
     },
     {
       "id": "taller",
@@ -365,7 +371,8 @@
         "pulso"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Pedir cita"
+      "contacto": "Pedir cita",
+      "ejemplo": "Talleres Hermanos Gil"
     },
     {
       "id": "salud",
@@ -423,7 +430,8 @@
         "agenda"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Pedir cita"
+      "contacto": "Pedir cita",
+      "ejemplo": "Fisio Centro Vida"
     },
     {
       "id": "deporte",
@@ -480,7 +488,8 @@
         "impulso"
       ],
       "reserva": "Reservar clase",
-      "contacto": "Probar una clase"
+      "contacto": "Probar una clase",
+      "ejemplo": "Estudio Fuerte"
     },
     {
       "id": "academia",
@@ -536,7 +545,8 @@
         "indice"
       ],
       "reserva": "Reservar clase",
-      "contacto": "Pedir información"
+      "contacto": "Pedir información",
+      "ejemplo": "Academia Pizarra"
     },
     {
       "id": "asesoria",
@@ -592,7 +602,8 @@
         "consulta"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Hacer una consulta"
+      "contacto": "Hacer una consulta",
+      "ejemplo": "Duero Asesores"
     },
     {
       "id": "tienda",
@@ -650,7 +661,8 @@
         "herbario",
         "vinetas"
       ],
-      "reserva": "Reservar"
+      "reserva": "Reservar",
+      "ejemplo": "Nido Concept"
     },
     {
       "id": "alimentacion",
@@ -706,7 +718,8 @@
         "atelier"
       ],
       "reserva": "Hacer un encargo",
-      "contacto": "Hacer un encargo"
+      "contacto": "Hacer un encargo",
+      "ejemplo": "Horno San Blas"
     },
     {
       "id": "limpieza",
@@ -758,7 +771,8 @@
         "guardia"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Pedir presupuesto"
+      "contacto": "Pedir presupuesto",
+      "ejemplo": "Limpiezas Brillo"
     },
     {
       "id": "mascotas",
@@ -811,7 +825,8 @@
         "escaparate"
       ],
       "reserva": "Pedir cita",
-      "contacto": "Pedir cita"
+      "contacto": "Pedir cita",
+      "ejemplo": "Clínica Huellas"
     },
     {
       "id": "alojamiento",
@@ -865,7 +880,8 @@
         "atelier"
       ],
       "reserva": "Reservar",
-      "contacto": "Consultar disponibilidad"
+      "contacto": "Consultar disponibilidad",
+      "ejemplo": "Casa Rural El Roble"
     },
     {
       "id": "fotografia",
@@ -919,7 +935,8 @@
         "postal"
       ],
       "reserva": "Reservar fecha",
-      "contacto": "Pedir presupuesto"
+      "contacto": "Pedir presupuesto",
+      "ejemplo": "Estudio Agosto"
     }
   ],
   "generico": {
@@ -959,6 +976,7 @@
       "cartel",
       "serena",
       "escaparate"
-    ]
+    ],
+    "ejemplo": "Tu negocio"
   }
 }

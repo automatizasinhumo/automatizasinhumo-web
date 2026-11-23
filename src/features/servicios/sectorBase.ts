@@ -12,6 +12,8 @@ export interface SectorBase {
   reserva?: string;
   /** Texto del botón principal cuando no hay reservas en línea («Pedir presupuesto»…). */
   contacto?: string;
+  /** Nombre de negocio inventado para las muestras de las páginas de sector. */
+  ejemplo?: string;
 }
 
 const sinTildes = (s: string) =>

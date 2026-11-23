@@ -1184,4 +1184,23 @@ export function iniciarEstudioWeb() {
   miniaturas();
   pedido.arrancar(destinoPedido());
   desdeHash(false);
+  desdeEnlace();
+
+  /** Las páginas de sector enlazan con ?sector=…&diseno=…: se aplican una vez y se limpian de la URL. */
+  function desdeEnlace() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('sector') && !q.has('diseno')) return;
+    const sectorQ = (q.get('sector') ?? '').slice(0, 60).trim();
+    if (sectorQ && rapido && !campo('sector').value) {
+      rapido.value = sectorQ;
+      sectorRapido(sectorQ, true);
+    }
+    const disenoQ = resolverPlantilla(q.get('diseno') ?? '');
+    const radio = disenoQ ? $<HTMLInputElement>(`input[name="plantilla"][value="${disenoQ}"]`, form ?? undefined) : null;
+    if (radio && !radio.checked) {
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
 }
