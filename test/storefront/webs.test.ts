@@ -122,6 +122,15 @@ describe('ayudas', () => {
     }
     expect(acentoSobre('#1d4ed8', FONDO_TEXTO_CLARO)).toBe('#1d4ed8');
   });
+  it('el fondo de referencia es el más desfavorable de todos los paneles de las plantillas', () => {
+    const fondos = [...CSS_WEB.matchAll(/--w-(?:fondo|panel):(#[0-9a-f]{3,6})/g)].map((m) => m[1]!.length === 4 ? `#${[...m[1]!.slice(1)].map((x) => x + x).join('')}` : m[1]!);
+    for (const c of ['#777777', '#808080', '#2563eb', '#facc15', '#f472b6']) {
+      for (const f of fondos) {
+        const fondo = contraste(f, '#ffffff') < contraste(f, '#000000') ? FONDO_TEXTO_CLARO : FONDO_TEXTO_OSCURO;
+        expect(contraste(acentoSobre(c, fondo), f), `${c} sobre ${f}`).toBeGreaterThanOrEqual(CONTRASTE_AA);
+      }
+    }
+  });
 });
 
 describe('fichaNegocio', () => {

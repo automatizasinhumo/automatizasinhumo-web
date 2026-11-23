@@ -91,11 +91,11 @@ export const PLANTILLAS_ANTIGUAS: Readonly<Record<string, IdPlantillaWeb>> = {
 /** Id de plantilla válido (incluidos los antiguos, ya traducidos) o undefined. */
 export function resolverPlantilla(v: unknown): IdPlantillaWeb | undefined {
   if (typeof v !== 'string') return undefined;
-  return PLANTILLAS_WEB.find((p) => p.id === v)?.id ?? PLANTILLAS_ANTIGUAS[v];
+  return PLANTILLAS_WEB.find((p) => p.id === v)?.id ?? (Object.hasOwn(PLANTILLAS_ANTIGUAS, v) ? PLANTILLAS_ANTIGUAS[v] : undefined);
 }
 
 export const plantillaWeb = (id: string): PlantillaWeb =>
-  PLANTILLAS_WEB.find((p) => p.id === id) ?? PLANTILLAS_WEB.find((p) => p.id === PLANTILLAS_ANTIGUAS[id]) ?? PLANTILLAS_WEB[2];
+  PLANTILLAS_WEB.find((p) => p.id === resolverPlantilla(id)) ?? PLANTILLAS_WEB[2];
 
 /** Base común: tokens, tipografía, botones, secciones, contacto, pie y barra fija del móvil. */
 const BASE = `

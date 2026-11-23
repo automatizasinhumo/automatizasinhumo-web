@@ -371,7 +371,8 @@ export function acentoSobre(hex: string, fondo: string): string {
   return hacia ? '#ffffff' : '#000000';
 }
 /** Fondos sobre los que el acento se usa como texto: el más desfavorable de cada familia. */
-export const FONDO_TEXTO_CLARO = '#f9fafb';
+// Claro: el panel claro más oscuro de las plantillas (atelier, #f3ede3); un test lo vigila.
+export const FONDO_TEXTO_CLARO = '#f3ede3';
 export const FONDO_TEXTO_OSCURO = '#111c33';
 
 const digitos = (t: string) => t.replace(/[^\d+]/g, '');
