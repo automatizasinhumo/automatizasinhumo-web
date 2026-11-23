@@ -14,9 +14,12 @@
  * Añadir una plantilla: su entrada aquí y su bloque `.w-t-<id>` en IDENTIDADES. Nada más cambia.
  */
 
+import { CSS_DISENOS, CSS_DISENOS_COMUN, DISENOS, disenoWeb } from './creativas';
+
 export type ExtraWeb = 'zonas' | 'horario' | 'franja';
 
-export const PLANTILLAS_WEB = [
+/** Básicas: el esqueleto común con variantes; se configuran a mano igual que los CV. */
+const BASICAS = [
   {
     id: 'guardia', nombre: 'Guardia', descripcion: 'Teléfono enorme y zonas a la vista. Para urgencias y oficios: fontanería, cerrajería, grúas.',
     hero: 4, servicios: 5, galeria: 4, opiniones: 1, contacto: 2,
@@ -78,8 +81,42 @@ export const PLANTILLAS_WEB = [
     orden: ['servicios', 'galeria', 'sobre', 'franja', 'opiniones', 'zonas', 'horario', 'preguntas', 'contacto'],
   },
 ] as const;
-export type PlantillaWeb = (typeof PLANTILLAS_WEB)[number];
-export type IdPlantillaWeb = PlantillaWeb['id'];
+
+/** Ids de los diseños de autor (creativas/): cada uno con portada, ilustración y tipografía propias. */
+export type IdDisenoWeb = 'agenda' | 'urgente' | 'bistro' | 'serena' | 'pulso' | 'indice';
+export type IdPlantillaWeb = (typeof BASICAS)[number]['id'] | IdDisenoWeb;
+export type FamiliaPlantilla = 'autor' | 'basica';
+
+export interface PlantillaWeb {
+  id: IdPlantillaWeb;
+  nombre: string;
+  descripcion: string;
+  familia: FamiliaPlantilla;
+  /** Portada de las básicas (w-h-N); 0 en los diseños de autor, que traen la suya. */
+  hero: number;
+  servicios: number;
+  galeria: number;
+  opiniones: number;
+  contacto: number;
+  orden: readonly string[];
+}
+
+/** Primero los diseños de autor, luego las básicas. */
+export const PLANTILLAS_WEB: readonly PlantillaWeb[] = [
+  ...DISENOS.map((x): PlantillaWeb => ({
+    id: x.id as IdDisenoWeb,
+    nombre: x.nombre,
+    descripcion: x.descripcion,
+    familia: 'autor',
+    hero: 0,
+    servicios: x.servicios,
+    galeria: x.galeria,
+    opiniones: x.opiniones,
+    contacto: x.contacto,
+    orden: x.orden,
+  })),
+  ...BASICAS.map((b): PlantillaWeb => ({ ...b, familia: 'basica' })),
+];
 
 /** Ids de la primera versión (solo CSS sobre un HTML único) → plantilla nueva más parecida. */
 export const PLANTILLAS_ANTIGUAS: Readonly<Record<string, IdPlantillaWeb>> = {
@@ -95,7 +132,9 @@ export function resolverPlantilla(v: unknown): IdPlantillaWeb | undefined {
 }
 
 export const plantillaWeb = (id: string): PlantillaWeb =>
-  PLANTILLAS_WEB.find((p) => p.id === resolverPlantilla(id)) ?? PLANTILLAS_WEB[2];
+  PLANTILLAS_WEB.find((p) => p.id === resolverPlantilla(id)) ?? PLANTILLAS_WEB.find((p) => p.id === 'salon')!;
+
+export { disenoWeb };
 
 /** Base común: tokens, tipografía, botones, secciones, contacto, pie y barra fija del móvil. */
 const BASE = `
@@ -391,5 +430,13 @@ const IDENTIDADES = `
 .w-t-cartel .w-sec:nth-of-type(even){background:color-mix(in srgb,var(--w-c) 8%,var(--w-fondo))}
 `;
 
-/** CSS de todas las plantillas, con ámbito en `.w`: sirve igual en la página publicada y en el Shadow DOM. */
-export const CSS_WEB = (BASE + VARIANTES + IDENTIDADES).replace(/\n\s*/g, '\n').trim();
+const CSS_BASICAS = (BASE + VARIANTES + IDENTIDADES).replace(/\n\s*/g, '\n').trim();
+
+/** CSS de todas las plantillas, con ámbito en `.w`: sirve igual en el estudio y en el Shadow DOM. */
+export const CSS_WEB = `${CSS_BASICAS}\n${CSS_DISENOS}`;
+
+/** CSS de la página publicada: lo común más solo el diseño de autor elegido (si lo es). */
+export function cssWebDe(id: string): string {
+  const x = disenoWeb(id);
+  return x ? `${CSS_BASICAS}\n${CSS_DISENOS_COMUN}${x.css.replace(/\n\s*/g, '')}` : CSS_BASICAS;
+}
