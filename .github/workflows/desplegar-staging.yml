@@ -194,6 +194,12 @@ jobs:
         # debe deshacer un despliegue bueno.
         run: node qa/recorrido-cliente.mjs "$BASE" || { sleep 30; node qa/recorrido-cliente.mjs "$BASE"; }
 
+      - name: Límites del formulario del CV
+        # Mínimos, máximos y formato de los campos. No cuenta para volver atrás (solo el recorrido):
+        # un fallo aquí se ve en rojo y se arregla en otra PR.
+        if: always() && steps.recorrido.outcome == 'success'
+        run: node qa/campos-cv.mjs "$BASE"
+
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:

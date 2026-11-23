@@ -5,6 +5,7 @@ import { newResume } from "./adoptado/resume-model";
 
 // Tipos y formulario vacío viven en formulario-datos.ts (sin dependencias: los usan el
 // importador y sus pruebas sin cargar el modelo ni DOMPurify).
+import { perfilLinkedin } from "./linkedin";
 import { FORM_VACIO, FOTO_EJEMPLO, fotoValida, type Experiencia, type FormCv, type Formacion, type Habilidad, type Idioma, type Interes, type Mencion, type Proyecto, type Referencia, type Voluntariado } from "./formulario-datos";
 export * from "./formulario-datos";
 
@@ -70,7 +71,7 @@ const vinetas = (s: string) => {
 export function enlace(v: unknown): string {
 	const t = txt(v, 300).replace(/\s+/g, "");
 	if (!t) return "";
-	const url = /^https?:\/\//i.test(t) ? t : /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(t) ? `https://${t}` : "";
+	const url = /^https?:\/\//i.test(t) ? t : /^[a-z0-9-]+(\.[a-z0-9-]+)+([/?#].*)?$/i.test(t) ? `https://${t}` : "";
 	try {
 		const u = new URL(url);
 		return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
@@ -79,21 +80,6 @@ export function enlace(v: unknown): string {
 	}
 }
 const sitio = (url: string, label = "") => ({ url, label: label || url.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, ""), inlineLink: false });
-/** LinkedIn: admite la dirección entera o solo el usuario; devuelve usuario y enlace. */
-export function perfilLinkedin(v: unknown): { usuario: string; url: string } | null {
-	const t = txt(v, 200).replace(/\s+/g, "");
-	if (!t) return null;
-	const m = /linkedin\.com\/in\/([^/?#]+)/i.exec(t);
-	let usuario = "";
-	if (m) {
-		try {
-			usuario = decodeURIComponent(m[1]);
-		} catch {
-			return null; // escape roto («%» suelto): se omite el perfil, no la vista previa
-		}
-	} else usuario = /^@?[\p{L}\p{N}_-]{3,100}$/u.test(t) ? t.replace(/^@/, "") : "";
-	return usuario ? { usuario, url: `https://www.linkedin.com/in/${encodeURIComponent(usuario)}` } : null;
-}
 
 /** Foto del CV: el tamaño y la forma los decide cada plantilla; aquí solo la fuente. */
 export function ponerFoto(d: ResumeData, url: string) {
@@ -189,3 +175,5 @@ export function crearDatos(entrada: Partial<FormCv> | null | undefined, plantill
 		.map((i) => ({ id: id(), hidden: false, icon: "", iconColor: "", name: txt(i.nombre, 60), keywords: [] })) as never[];
 	return parseResumeData(d);
 }
+
+export { perfilLinkedin };

@@ -5,7 +5,8 @@ import { parseResumeData, type ResumeData } from "../vendor/schema/resume/data";
 import { newResume, sanitizeResume } from "./adoptado/resume-model";
 import { reactiveTemplates } from "./adoptado/templates";
 import { ESPACIADOS, ESTILOS_LETRA, TAMANOS } from "./catalogo-formato";
-import { FORMAS, MARCA_POR_DEFECTO, fijarCapas, type Decoracion } from "./decoracion";
+import { colorLegible, mezclar, TINTE_DISENO } from "./color";
+import { FORMAS, MARCA_POR_DEFECTO, fijarCapas, peorFondo, type Decoracion } from "./decoracion";
 import { crearDatos, FORM_EJEMPLO, FORM_VACIO, ponerFoto } from "./formulario";
 import { FOTO_EJEMPLO } from "./formulario-datos";
 import { VARIANTES } from "../vendor/pdf/templates/creativos/variantes";
@@ -131,7 +132,11 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra
 			d.metadata.page.locale = "es-ES";
 			if (plantilla && plantillas.some((p) => p.id === plantilla)) d.metadata.template = plantilla as ResumeData["metadata"]["template"];
 			nivelDePlantilla(d);
-			if (color && /^#[0-9a-f]{6}$/i.test(color)) d.metadata.design.colors.primary = color;
+			if (color && /^#[0-9a-f]{6}$/i.test(color)) {
+				// El texto en color principal debe leerse sobre lo peor que tenga debajo: decoración y barra tintada del diseño.
+				const fondo = peorFondo(decoracion as Decoracion | undefined);
+				d.metadata.design.colors.primary = colorLegible(color, (c) => mezclar(fondo, c, TINTE_DISENO));
+			}
 			aplicarFormato(d, { letra, tamano, espaciado });
 			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO, muestra === true);
 			return createResumePdfBlob({ data: d });

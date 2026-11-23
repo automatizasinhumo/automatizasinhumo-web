@@ -6,7 +6,8 @@
   "scripts": {
     "construir": "node construir.mjs",
     "miniaturas": "node miniaturas.mjs",
-    "iconos": "node generar-iconos.mjs"
+    "iconos": "node generar-iconos.mjs",
+    "combinaciones": "node combinaciones.mjs"
   },
   "dependencies": {
     "@bramus/specificity": "2.4.3",

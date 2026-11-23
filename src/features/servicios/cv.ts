@@ -70,7 +70,6 @@ export interface DisenoCv {
   estilo: string;
   /** Sobrio (blanco y negro con un toque) o con bloques de color: lo primero que decide el cliente. */
   tono: 'sobrio' | 'color';
-  /** Una columna: la que mejor leen los filtros automáticos de las empresas. */
   columnas: 1 | 2;
   /** Plantilla creativa propia del estudio, con dibujo de fondo. */
   creativo?: boolean;
@@ -113,6 +112,20 @@ export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'scizor', nombre: 'Carmín', estilo: 'Filete de color, títulos marcados', tono: 'sobrio', columnas: 1 },
 ];
 
+/**
+ * Diseños que lee bien un ATS (los filtros automáticos de las empresas), medidos con `node cv-estudio/ats.mjs`:
+ * el PDF se extrae con pdf.js y con pdftotext, el nombre sale arriba, los apartados no se mezclan y el
+ * lector de CV recupera contacto, experiencia y formación. No depende de las columnas: se mide, no se supone.
+ * Fuera: encabezados con letras espaciadas («e x p e r i e n c i a») o pegados al texto, que el lector no
+ * reconoce. Si cambia una plantilla, se vuelve a medir y se actualiza esta lista.
+ */
+export const DISENOS_ATS: ReadonlySet<string> = new Set([
+  'onyx', 'azurill', 'chikorita', 'ditto', 'kakuna', 'lapras', 'leafish', 'rhyhorn', 'scizor',
+  'aurora', 'coral', 'nocturno', 'mosaico', 'prisma', 'brisa', 'oasis', 'tinta', 'pixel',
+  'cometa', 'trazo', 'foco',
+]);
+export const leeAts = (d: Pick<DisenoCv, 'id'>) => DISENOS_ATS.has(d.id);
+
 export const DISENO_POR_DEFECTO = 'aurora';
 /** «Desde cero» no es una página vacía: es el diseño más limpio (una columna, sin adornos) para vestirlo a tu gusto. */
 export const DISENO_DESDE_CERO = 'rhyhorn';
@@ -148,12 +161,13 @@ export const FILTROS_DISENO = [
   { id: 'creativo', nombre: 'Creativos', cumple: (d: DisenoCv) => d.creativo === true },
   { id: 'sobrio', nombre: 'Sobrios', cumple: (d: DisenoCv) => d.tono === 'sobrio' },
   { id: 'color', nombre: 'Con color', cumple: (d: DisenoCv) => d.tono === 'color' },
-  { id: 'una-columna', nombre: 'Una columna', cumple: (d: DisenoCv) => d.columnas === 1 },
+  { id: 'ats', nombre: 'Lee bien un ATS', cumple: (d: DisenoCv) => leeAts(d) },
 ] as const;
 export const filtrosDe = (d: DisenoCv) => FILTROS_DISENO.filter((f) => f.cumple(d)).map((f) => f.id).join(' ');
 
 /** Letra, tamaño y espaciado: el mismo catálogo que usa el motor, para que página y PDF no se desfasen. */
 export { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, TAMANOS } from '../../../cv-estudio/src/catalogo-formato';
+import { perfilLinkedin } from '../../../cv-estudio/src/linkedin';
 export const MOTOR_CV = '/cv/estudio/motor/estudio.js';
 export const miniaturaCv = (id: string) => `/cv/estudio/miniaturas/${id}.jpg`;
 
@@ -231,7 +245,67 @@ export const PASOS_CV = [
   { id: 'descarga', titulo: 'Descarga' },
 ] as const;
 
-export const euros = (centimos: number) =>
+/**
+ * Formato de los datos de contacto: «Revisa» avisa si algo no parece válido (no bloquea: el PDF sale igual).
+ * Vacío cuenta como válido; que falte el contacto lo avisa otra línea del repaso.
+ */
+export const correoValido = (v: string) => !v.trim() || /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[^\s@.]{2,}$/.test(v.trim());
+export const telefonoValido = (v: string) => {
+  const t = v.trim();
+  if (!t) return true;
+  const cifras = t.replace(/\D/g, '').length;
+  return /^\(?\+?[\d\s().-]+$/.test(t) && cifras >= 9 && cifras <= 15;
+};
+/** LinkedIn: vacío, o un perfil que el CV va a poder mostrar (mismo criterio que la conversión). */
+export const linkedinValido = (v: string) => !v.trim() || !!perfilLinkedin(v);
+/** Web o perfil: dirección http(s) o un dominio («anaperez.es»); nunca otros esquemas (javascript:, data:). */
+export const webValida = (v: string) => {
+  const t = v.trim();
+  if (!t) return true;
+  if (/^[a-z][a-z\d+.-]*:/i.test(t) && !/^https?:\/\//i.test(t)) return false;
+  try {
+    const u = new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`);
+    return /\.[a-z]{2,}$/i.test(u.hostname);
+  } catch {
+    return false;
+  }
+};
+
+/** Lo mínimo que se mira tras importar un CV (la forma del formulario, sin depender de cv-estudio). */
+interface CvImportado {
+  nombre?: string;
+  email?: string;
+  telefono?: string;
+  ubicacion?: string;
+  resumen?: string;
+  experiencia?: { puesto?: string; empresa?: string; periodo?: string }[];
+  formacion?: { titulo?: string; centro?: string }[];
+  habilidades?: { nombre?: string }[];
+  idiomas?: { idioma?: string }[];
+}
+
+/**
+ * Lo que un CV importado no trae y conviene pedir, en el orden del formulario. Un lector de CV nunca
+ * acierta al 100 %: en vez de un «repásalo» genérico, se dice qué falta.
+ */
+export function faltanTrasImportar(f: CvImportado): string[] {
+  const lleno = (v?: string) => !!v?.trim();
+  const faltan: string[] = [];
+  if (!lleno(f.nombre)) faltan.push('tu nombre');
+  if (!lleno(f.email)) faltan.push('el correo');
+  if (!lleno(f.telefono)) faltan.push('el teléfono');
+  if (!lleno(f.ubicacion)) faltan.push('la ciudad');
+  if (!lleno(f.resumen)) faltan.push('un resumen sobre ti');
+  const puestos = (f.experiencia ?? []).filter((e) => lleno(e.puesto) || lleno(e.empresa));
+  if (!puestos.length) faltan.push('la experiencia');
+  else if (puestos.some((e) => !lleno(e.periodo))) faltan.push('las fechas de algún puesto');
+  if (!(f.formacion ?? []).some((e) => lleno(e.titulo) || lleno(e.centro))) faltan.push('la formación');
+  if (!(f.habilidades ?? []).some((h) => lleno(h.nombre))) faltan.push('las habilidades');
+  if (!(f.idiomas ?? []).some((i) => lleno(i.idioma))) faltan.push('los idiomas');
+  return faltan;
+}
+
+export const euros =(centimos: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: centimos % 100 ? 2 : 0 }).format(
     centimos / 100,
   );

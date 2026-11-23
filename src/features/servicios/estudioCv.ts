@@ -8,7 +8,7 @@
  * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, euros, esCamino, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, correoValido, euros, esCamino, faltanTrasImportar, linkedinValido, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { gruposPortales, sobra } from './cvPortales';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { guiar } from '../tour/guia';
@@ -37,14 +37,15 @@ interface Motor {
     muestra?: boolean;
   }): Promise<Blob>;
   pintarPdf(b: Blob, c: HTMLElement, o: { ancho: number; maxPaginas: number }): Promise<number>;
-  importar(f: File): Promise<{ ok: true; tipo: string; form: FormCv } | { ok: false; motivo: 'tipo' | 'vacio' | 'lectura' }>;
+  importar(f: File): Promise<{ ok: true; tipo: string; form: FormCv } | { ok: false; motivo: 'tipo' | 'grande' | 'vacio' | 'lectura' }>;
 }
 
 const AVISO_IMPORTAR = {
   leyendo: 'Leyendo tu CV…',
-  ok: 'Listo: hemos rellenado tus datos con tu CV. Repásalos, por si falta algo.',
+  ok: 'Listo: hemos rellenado tus datos con tu CV. Repásalos por si algo ha quedado en otro sitio.',
   recortado: 'Listo: hemos rellenado tus datos con tu CV. Algún apartado traía más entradas de las que caben y nos hemos quedado con las primeras. Repásalos.',
   tipo: 'Ese archivo no se puede leer. Sube un PDF, un Word (.docx), la exportación de LinkedIn (.zip) o un JSON Resume.',
+  grande: 'Ese archivo pasa de 10 MB. Si es un PDF con fotos, expórtalo otra vez en «tamaño mínimo» o sube el Word.',
   vacio: 'No hemos encontrado texto en ese archivo (¿es una foto o un escaneo?). Prueba con otro o escribe tus datos.',
   lectura: 'No hemos podido leer ese archivo. Prueba con otro formato o escribe tus datos.',
 } as const;
@@ -470,6 +471,11 @@ export function iniciarEstudioCv() {
       [f.experiencia.some((e) => e.puesto || e.empresa), 'Experiencia', 'Sin experiencia añadida'],
       [f.formacion.some((e) => e.titulo || e.centro), 'Formación', 'Sin formación añadida'],
     ];
+    // Formato: solo se avisa de lo que está escrito y no parece válido.
+    if (!correoValido(f.email)) puntos.push([false, '', 'El correo no parece válido: revisa que tenga @ y dominio']);
+    if (!telefonoValido(f.telefono)) puntos.push([false, '', 'El teléfono no parece válido: revisa que tenga entre 9 y 15 cifras']);
+    if (!webValida(f.web ?? '')) puntos.push([false, '', 'La web no parece válida: escribe la dirección (por ejemplo, tunombre.es)']);
+    if (!linkedinValido(f.linkedin ?? '')) puntos.push([false, '', 'El LinkedIn no parece válido: pega la dirección de tu perfil o tu usuario']);
     $('[data-repaso]')?.replaceChildren(
       ...puntos.map(([ok, bien, mal]) => {
         const li = document.createElement('li');
@@ -902,6 +908,10 @@ export function iniciarEstudioCv() {
         rellenarTarjeta();
       }
       avisar(recortado ? 'recortado' : 'ok');
+      // Se pide justo lo que el lector no ha encontrado, no un «repásalo» genérico.
+      const faltan = faltanTrasImportar(r.form);
+      if (nota && faltan.length)
+        nota.textContent += ` No hemos encontrado ${new Intl.ListFormat('es', { type: 'conjunction' }).format(faltan)}: añádelo abajo si quieres que salga.`;
     } catch {
       avisar('lectura');
     }

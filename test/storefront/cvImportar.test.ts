@@ -31,6 +31,13 @@ describe('periodoEs', () => {
 });
 
 describe('aFormulario', () => {
+  it('LinkedIn sin URL usa el usuario del perfil', () => {
+    const perfil = (website: object, username: string) =>
+      aFormulario(datos({}, { profiles: { items: [{ hidden: false, network: 'LinkedIn', username, website }] } })).linkedin;
+    expect(perfil({ url: '' }, 'ana-perez')).toBe('ana-perez');
+    expect(perfil({ url: 'https://www.linkedin.com/in/ana' }, 'otra')).toBe('https://www.linkedin.com/in/ana');
+  });
+
   it('saca el lugar de la línea de contacto', () => {
     const f = aFormulario(datos({ name: 'Ana', location: 'ana@x.es · 612 345 678 · Sevilla' }, {}));
     expect(f.ubicacion).toBe('Sevilla');
@@ -63,6 +70,29 @@ describe('aFormulario', () => {
       { idioma: 'Inglés', nivel: 'C1', puntos: 4 },
       { idioma: 'Francés', nivel: 'básico', puntos: 2 },
     ]);
+  });
+
+  it('junta el nivel que el PDF a dos columnas deja en su propia línea', () => {
+    const lenguas = ['Español', 'Nativo', 'Inglés', 'C1', 'Valenciano', 'B2', 'Francés: básico'].map((language) => ({ language }));
+    const aptitudes = ['Atención multicanal', 'Avanzado', 'Zendesk', 'Análisis de datos', 'Intermedio'].map((name) => ({ name }));
+    const f = aFormulario(datos({}, { languages: { items: lenguas }, skills: { items: aptitudes } }));
+    expect(f.idiomas).toEqual([
+      { idioma: 'Español', nivel: 'Nativo', puntos: 5 },
+      { idioma: 'Inglés', nivel: 'C1', puntos: 4 },
+      { idioma: 'Valenciano', nivel: 'B2', puntos: 3 },
+      { idioma: 'Francés', nivel: 'básico', puntos: 2 },
+    ]);
+    expect(f.habilidades.map((h) => [h.nombre, h.nivel])).toEqual([
+      ['Atención multicanal', 4],
+      ['Zendesk', 3],
+      ['Análisis de datos', 3],
+    ]);
+  });
+
+  it('no junta un nivel a lo que ya trae el suyo ni deja un nivel huérfano fuera', () => {
+    const f = aFormulario(datos({}, { languages: { items: [{ language: 'Inglés (C1)' }, { language: 'C2' }] }, skills: { items: [{ name: 'Experto' }] } }));
+    expect(f.idiomas.map((i) => i.idioma)).toEqual(['Inglés', 'C2']);
+    expect(f.habilidades.map((h) => h.nombre)).toEqual(['Experto']);
   });
 
   it('omite lo oculto y respeta los límites del estudio', () => {
