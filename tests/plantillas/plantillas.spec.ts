@@ -37,7 +37,14 @@ async function abrir(pg: Page, plantilla: string, caso: Partial<DatosWeb>) {
   const html = documentoWeb(d, `${ORIGEN}/w/qa`, ORIGEN);
   await pg.goto(`${ORIGEN}/__qa__`).catch(() => {});
   await pg.setContent(html, { waitUntil: 'load' });
-  await pg.evaluate(() => document.fonts.ready);
+  // fonts.ready puede resolverse antes de que se pidan las fuentes: se cargan todas a la vez y se
+  // exige que ninguna falle (si una cae a la de sistema, la geometría medida no es la real).
+  const rotas = await pg.evaluate(async () => {
+    await Promise.all([...document.fonts].map((f) => f.load().catch(() => null)));
+    await document.fonts.ready;
+    return [...document.fonts].filter((f) => f.status !== 'loaded').map((f) => `${f.family} ${f.weight} ${f.style}`);
+  });
+  if (rotas.length) throw new Error(`fuentes sin cargar: ${rotas.join(', ')}`);
 }
 
 /** Palabras de titulares que ocupan más de una línea (Range.getClientRects por palabra). */
