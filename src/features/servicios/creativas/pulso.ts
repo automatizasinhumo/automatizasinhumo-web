@@ -14,7 +14,7 @@ export const pulso: Diseno = {
   descripcion: 'Energía de cartel: titular gigante, diagonales, cinta en movimiento y números enormes. Para gimnasios, entrenadores, deporte y baile.',
   color: '#d5f035',
   fondoClaro: '#e4e4e4',
-  fondoOscuro: '#111111',
+  fondoOscuro: '#1a1a1a',
   fuentes: ['ash-anton', 'ash-manrope'],
   titulo: "'ash-anton', Impact, 'Arial Narrow', sans-serif",
   texto: "'ash-manrope', system-ui, sans-serif",
