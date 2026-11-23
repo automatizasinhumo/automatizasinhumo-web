@@ -177,6 +177,15 @@ function guardar(e: Estado) {
   }
 }
 
+/**
+ * Casilla rápida del paso 1 → campo «sector» del paso 2. Al teclear (input) solo se copia; al
+ * confirmar (change) se emite siempre el change del campo, aunque el input ya lo hubiera copiado:
+ * si no, nunca se rellenarían los textos del sector.
+ */
+export function pasoSectorRapido(actual: string, valor: string, final: boolean): { asignar: boolean; confirmar: boolean } {
+  return { asignar: actual !== valor, confirmar: final };
+}
+
 export function iniciarEstudioWeb() {
   const raiz = document.getElementById('estudio-web');
   const form = document.getElementById('estudio-form') as HTMLFormElement | null;
@@ -442,10 +451,11 @@ export function iniciarEstudioWeb() {
   function sectorRapido(valor: string, final: boolean) {
     const campoSector = $<HTMLInputElement>('[name="sector"]', form ?? undefined);
     recomendar(valor);
-    if (!campoSector || campoSector.value === valor) return;
-    campoSector.value = valor;
-    if (final) campoSector.dispatchEvent(new Event('change', { bubbles: true }));
-    else persistir();
+    if (!campoSector) return;
+    const paso = pasoSectorRapido(campoSector.value, valor, final);
+    if (paso.asignar) campoSector.value = valor;
+    if (paso.confirmar) campoSector.dispatchEvent(new Event('change', { bubbles: true }));
+    else if (paso.asignar) persistir();
   }
   /** Abre el paso que contiene el campo, lo resalta un momento y lo enfoca. */
   function tocar(sel: string) {
