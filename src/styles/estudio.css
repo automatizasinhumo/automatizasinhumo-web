@@ -1120,3 +1120,15 @@
   }
 }
 
+
+/* Revisión antes de publicar (#15): avisos con «Corregir», que lleva al campo. */
+.revision {
+  margin-block: 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #d97706;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, #d97706 10%, transparent);
+}
+.revision ul { margin: 0.5rem 0 0; padding-left: 1.1rem; list-style: disc; }
+.revision li + li { margin-top: 0.35rem; }
+.revision button { font-weight: 700; text-decoration: underline; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }

@@ -133,6 +133,24 @@ export const TOCABLES: readonly [vista: string, campo: string, etiqueta: string]
   ['#contacto, .w-barra', '[name="telefono"]', 'el contacto'],
 ];
 
+/**
+ * Revisión antes de publicar: lo que falta o conviene completar, cada aviso con el campo del
+ * editor al que lleva «Corregir» (mismo selector que TOCABLES). Pura, para poder probarla.
+ */
+export function revisarWeb(d: Partial<DatosWeb>): [campo: string, aviso: string][] {
+  const t = (v?: string) => (v ?? '').trim();
+  const out: [string, string][] = [];
+  if (!t(d.lema)) out.push(['[name="lema"]', 'Falta la frase de portada: di en una línea qué ofreces.']);
+  if (!t(d.foto)) out.push(['[name="foto"]', 'Sin foto de portada: una foto real del negocio da confianza.']);
+  if (!t(d.telefono) && !t(d.whatsapp) && !t(d.email)) out.push(['[name="telefono"]', 'No hay forma de contactar: pon teléfono, WhatsApp o correo.']);
+  if (!(d.servicios ?? []).some((s) => t(s.nombre))) out.push(['[data-lista="servicios"]', 'Añade al menos un servicio o producto.']);
+  else if (!(d.servicios ?? []).some((s) => t(s.precio))) out.push(['[data-lista="servicios"]', 'Ningún servicio tiene precio orientativo: ayuda a decidir.']);
+  if (!t(d.horario)) out.push(['[name="horario"]', 'Falta el horario.']);
+  if ((d.preguntas ?? []).some((p) => t(p.pregunta) && !t(p.respuesta))) out.push(['[data-lista="preguntas"]', 'Hay preguntas sin respuesta.']);
+  if (!(d.opiniones ?? []).some((o) => t(o.texto))) out.push(['[data-lista="opiniones"]', 'Sin opiniones: copia dos o tres reseñas de clientes.']);
+  return out;
+}
+
 function leer(): Partial<Estado> {
   try {
     const v = JSON.parse(localStorage.getItem(CLAVE) ?? 'null');
@@ -500,6 +518,24 @@ export function iniciarEstudioWeb() {
     const res = (k: string) => $(`[data-res="${k}"]`)!;
     res('negocio').textContent = campo('negocio').value.trim();
     res('plantilla').textContent = nombrePlantilla(estado.plantilla);
+    const lista = $('[data-revision]');
+    if (lista) {
+      const avisos = revisarWeb(datos());
+      lista.replaceChildren(
+        ...avisos.map(([sel, aviso]) => {
+          const li = document.createElement('li');
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'enlace';
+          b.textContent = 'Corregir';
+          b.addEventListener('click', () => tocar(sel));
+          li.textContent = `${aviso} `;
+          li.appendChild(b);
+          return li;
+        }),
+      );
+      lista.closest<HTMLElement>('[data-revision-caja]')!.hidden = !avisos.length;
+    }
     $('[data-solo-compra]')!.hidden = !!pedido.pagado;
     $('[data-solo-pagado]')!.hidden = !pedido.pagado;
     if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
