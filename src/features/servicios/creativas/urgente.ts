@@ -108,7 +108,7 @@ ${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}${zona
 .w-d-urgente .w-opinion{background:#fff;border:1px solid var(--w-borde)}
 .w-d-urgente .w-opinion blockquote::before{content:"★★★★★";font:400 1rem var(--w-ft-texto);letter-spacing:.2em;color:#b7791f;margin-bottom:10px}
 .w-d-urgente .w-c-2 .w-contacto-cta{background:var(--w-navy);color:#fff;border-radius:8px;border-bottom:10px solid var(--w-c)}
-.w-d-urgente .w-c-2 .w-contacto-grande a{color:var(--w-c);text-decoration:none;font-weight:400}
+.w-d-urgente .w-c-2 .w-contacto-grande a{color:var(--w-ct-oscuro);text-decoration:none;font-weight:400}
 .w-d-urgente .w-c-2 .w-contacto-cta .w-boton{color:#fff;border-color:#fff}
 .w-d-urgente .w-c-2 .w-contacto-cta .w-boton-lleno{background:var(--w-c);color:var(--w-s);border-color:var(--w-c)}
 @container (min-width:760px){

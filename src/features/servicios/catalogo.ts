@@ -9,10 +9,14 @@
  */
 import { AUTOSERVICIO, SLUG_WEB } from './autoservicio';
 import { DISENOS_CV, EXTRAS_CV, PAQUETES_CV, miniaturaCv } from './cv';
+import type { IdDisenoWeb } from './plantillasWeb';
 import { disenoWeb, EJEMPLO_WEB, PLANTILLAS_WEB } from './webs';
 
 /** La muestra del catálogo enseña un diseño de autor, no una básica. */
-const DISENO_MUESTRA = disenoWeb('agenda')!;
+const ID_MUESTRA: IdDisenoWeb = 'agenda';
+const DISENO_MUESTRA = disenoWeb(ID_MUESTRA) ?? (() => {
+  throw new Error(`Falta el diseño de muestra «${ID_MUESTRA}»`);
+})();
 
 export type IdFamilia = 'cv' | 'webs' | 'tiendas' | 'reservas' | 'automatizar' | 'eventos';
 
@@ -114,7 +118,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         puntos: [`${PLANTILLAS_WEB.filter((p) => p.familia === 'autor').length} diseños de autor y ${PLANTILLAS_WEB.filter((p) => p.familia === 'basica').length} básicas`, 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
         href: '/servicios/web',
         desde: AUTOSERVICIO[SLUG_WEB]!.precio,
-        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, ...DISENO_MUESTRA.muestra, plantilla: DISENO_MUESTRA.id, color: DISENO_MUESTRA.color, letra: 'diseno' } },
+        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, ...DISENO_MUESTRA.muestra, plantilla: ID_MUESTRA, color: DISENO_MUESTRA.color, letra: 'diseno' } },
       },
       {
         id: 'portafolio',

@@ -62,6 +62,7 @@ const iniciales = muestra.tipo === 'tarjeta' ? muestra.nombre.split(/\s+/).slice
   )}
 
   {muestra.tipo === 'web' && (
+    <>
     {fuentesWeb && <Fragment set:html={`<style>${fuentesWeb}</style>`} />}
     <div class="navegador">
       <div class="barra"><i></i><i></i><i></i><span>{muestra.url}</span></div>
@@ -69,6 +70,7 @@ const iniciales = muestra.tipo === 'tarjeta' ? muestra.nombre.split(/\s+/).slice
         <template shadowrootmode="open" set:html={sombraWeb} />
       </div>
     </div>
+    </>
   )}
 </div>
 
