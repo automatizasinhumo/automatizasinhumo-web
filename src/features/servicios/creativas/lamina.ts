@@ -64,7 +64,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-lamina .w-rotulo span{padding:6px 12px;font:500 .72rem/1 var(--w-mono);letter-spacing:.12em;text-transform:uppercase}
 .w-d-lamina .w-rotulo span+span{border-left:1px solid var(--w-tinta)}
 .w-d-lamina .w-sector{font-family:var(--w-mono);color:var(--w-ct);letter-spacing:.14em}
-.w-d-lamina .w-cab h1{font-weight:300;font-size:clamp(3rem,11cqw,8rem);line-height:.9;letter-spacing:-.05em}
+.w-d-lamina .w-cab h1{font-weight:300;font-size:min(clamp(3rem,11cqw,8rem),var(--w-h1-tope,99em));line-height:.9;letter-spacing:-.05em}
 .w-d-lamina .w-cab .w-lema{max-width:36ch;color:var(--w-suave);padding-left:18px;border-left:2px solid var(--w-c)}
 .w-d-lamina .w-boton{border-radius:0;font-weight:700;letter-spacing:.02em}
 .w-d-lamina .w-cab-vis{position:relative;padding:18px;border:1px solid var(--w-borde);background:rgb(255 255 255 / .55)}

@@ -64,7 +64,7 @@ ${lema(c, 'w-bocadillo')}${c.bloqueAcciones}
 .w-d-vinetas .w-cab-txt{padding:clamp(22px,4cqw,44px)}
 .w-d-vinetas .w-cab-txt>*+*{margin-top:clamp(12px,2cqw,20px)}
 .w-d-vinetas .w-sector{display:inline-block;padding:6px 14px;border:2px solid var(--w-tinta);border-radius:999px;background:var(--w-melocoton);color:var(--w-tinta);letter-spacing:.08em;transform:rotate(-2deg)}
-.w-d-vinetas .w-cab h1{font-weight:800;font-size:clamp(2.8rem,9cqw,6.4rem);line-height:.95;letter-spacing:-.03em;color:var(--w-tinta);-webkit-text-stroke:0}
+.w-d-vinetas .w-cab h1{font-weight:800;font-size:min(clamp(2.8rem,9cqw,6.4rem),var(--w-h1-tope,99em));line-height:.95;letter-spacing:-.03em;color:var(--w-tinta);-webkit-text-stroke:0}
 .w-d-vinetas .w-bocadillo{position:relative;max-width:40ch;padding:16px 20px;border:3px solid var(--w-tinta);border-radius:22px;background:var(--w-fondo);color:var(--w-tinta)}
 .w-d-vinetas .w-bocadillo::after{content:"";position:absolute;left:34px;bottom:-16px;width:24px;height:24px;background:var(--w-fondo);border-right:3px solid var(--w-tinta);border-bottom:3px solid var(--w-tinta);transform:skewX(-30deg) rotate(45deg)}
 .w-d-vinetas .w-cab .w-acciones{margin-top:30px}

@@ -51,7 +51,7 @@ ${primera ? `<p class="w-cab-dato">${c.icono('reloj')}<span>${esc(primera[0] ? `
 .w-d-agenda .w-cab{padding-block:clamp(36px,7cqw,96px);background:radial-gradient(60cqw 40cqw at 95% 10%,color-mix(in srgb,var(--w-c) 18%,transparent),transparent 70%),var(--w-fondo)}
 .w-d-agenda .w-cab-in{display:grid;gap:clamp(28px,5cqw,64px);align-items:center}
 .w-d-agenda .w-cab-txt>*+*{margin-top:clamp(14px,2.2cqw,26px)}
-.w-d-agenda .w-cab h1{font-size:clamp(3rem,10.5cqw,7.6rem);font-weight:380;line-height:.92;letter-spacing:-.045em;text-wrap:balance;font-variation-settings:"opsz" 144}
+.w-d-agenda .w-cab h1{font-size:min(clamp(3rem,10.5cqw,7.6rem),var(--w-h1-tope,99em));font-weight:380;line-height:.92;letter-spacing:-.045em;text-wrap:balance;font-variation-settings:"opsz" 144}
 .w-d-agenda .w-sector{font-family:var(--w-ft-titulo);font-style:italic;font-weight:400;font-size:1.15rem;letter-spacing:0;text-transform:none;color:var(--w-ct)}
 .w-d-agenda .w-sector::before{content:"— "}
 .w-d-agenda .w-cab .w-lema{font-size:clamp(1.05rem,2cqw,1.3rem);max-width:34ch;color:var(--w-suave)}

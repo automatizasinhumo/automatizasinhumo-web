@@ -68,7 +68,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-indice .w-sello-mono{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;border:1.5px solid var(--w-c);outline:1px solid color-mix(in srgb,var(--w-c) 50%,transparent);outline-offset:5px}
 .w-d-indice .w-sello-mono span{font:400 2rem/1 var(--w-ft-titulo);color:var(--w-ct);letter-spacing:.04em}
 .w-d-indice .w-sector{font-size:.8rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--w-ct)}
-.w-d-indice .w-cab h1{font-weight:400;font-size:clamp(2.6rem,8cqw,5.6rem);line-height:1;letter-spacing:-.015em;text-wrap:balance}
+.w-d-indice .w-cab h1{font-weight:400;font-size:min(clamp(2.6rem,8cqw,5.6rem),var(--w-h1-tope,99em));line-height:1;letter-spacing:-.015em;text-wrap:balance}
 .w-d-indice .w-cab .w-lema{font-size:clamp(1.05rem,2cqw,1.3rem);max-width:38ch;color:#d4d9df}
 .w-d-indice .w-cab .w-boton{color:#f5f1e8;border-radius:2px}
 .w-d-indice .w-cab .w-boton-lleno{color:var(--w-s)}

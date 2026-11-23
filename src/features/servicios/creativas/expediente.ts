@@ -61,7 +61,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-expediente .w-cab-txt>*+*{margin-top:clamp(12px,2cqw,22px)}
 .w-d-expediente .w-ref{font:600 .78rem/1 var(--w-ft-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--w-suave)}
 .w-d-expediente .w-ref::before{content:"";display:inline-block;width:28px;height:2px;margin-right:10px;vertical-align:middle;background:var(--w-c)}
-.w-d-expediente .w-cab h1{font-weight:800;font-size:clamp(3.4rem,13cqw,9.5rem);line-height:.86;letter-spacing:-.01em;text-transform:uppercase}
+.w-d-expediente .w-cab h1{--w-em-letra:.9;font-weight:800;font-size:min(clamp(3.4rem,13cqw,9.5rem),var(--w-h1-tope,99em));line-height:.86;letter-spacing:-.01em;text-transform:uppercase}
 .w-d-expediente .w-cab .w-lema{max-width:42ch;color:var(--w-suave)}
 .w-d-expediente .w-boton{border-radius:2px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:.88rem}
 .w-d-expediente .w-cab-vis{display:grid;gap:0;border:2px solid var(--w-tinta);background:var(--w-panel)}
@@ -93,7 +93,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-expediente .w-contacto-grande{font-weight:800;text-transform:uppercase}
 @container (min-width:760px){
   .w-d-expediente .w-cab-in{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
-  .w-d-expediente .w-cab h1{font-size:clamp(3.4rem,7.6cqw,6.6rem)}
+  .w-d-expediente .w-cab h1{font-size:min(clamp(3.4rem,7.6cqw,6.6rem),var(--w-h1-tope,99em))}
   .w-d-expediente .w-s-4{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;display:grid}
   .w-d-expediente .w-s-4>li{margin:0}
   .w-d-expediente .w-s-4[data-n="1"],.w-d-expediente .w-s-4[data-n="3"]>li:first-child{grid-column:1/-1}

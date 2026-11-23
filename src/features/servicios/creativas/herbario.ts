@@ -63,7 +63,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-herbario .w-cab-txt>*+*{margin-top:clamp(12px,2cqw,22px)}
 .w-d-herbario .w-ficha{display:inline-block;padding:6px 12px;border:1px solid var(--w-verde);font:500 .74rem/1.2 var(--w-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--w-verde)}
 .w-d-herbario .w-sector{color:var(--w-ct);font-family:var(--w-mono);letter-spacing:.12em}
-.w-d-herbario .w-cab h1{font-weight:500;font-style:italic;font-size:clamp(3rem,11cqw,7.6rem);line-height:.9;letter-spacing:-.03em;color:var(--w-verde)}
+.w-d-herbario .w-cab h1{font-weight:500;font-style:italic;font-size:min(clamp(3rem,11cqw,7.6rem),var(--w-h1-tope,99em));line-height:.9;letter-spacing:-.03em;color:var(--w-verde)}
 .w-d-herbario .w-cab .w-lema{max-width:38ch;font-size:clamp(1.05rem,2cqw,1.25rem);color:var(--w-suave)}
 .w-d-herbario .w-boton{border-radius:999px;font-weight:600}
 .w-d-herbario .w-cab-vis{max-width:440px;width:100%;justify-self:center;transform:rotate(2deg)}

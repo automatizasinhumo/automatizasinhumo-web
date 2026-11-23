@@ -55,7 +55,7 @@ ${lema(c)}${panel}
 .w-d-serena .w-cab-in{display:grid;gap:clamp(26px,5cqw,56px);align-items:center}
 .w-d-serena .w-cab-txt>*+*{margin-top:clamp(14px,2cqw,22px)}
 .w-d-serena .w-sector{display:inline-block;padding:6px 14px;border-radius:999px;background:#fff;color:var(--w-ct);font-weight:600;font-size:.85rem;letter-spacing:.04em;text-transform:none}
-.w-d-serena .w-cab h1{font-size:clamp(2.6rem,8.5cqw,5.6rem);font-weight:600;line-height:1;letter-spacing:-.035em;text-wrap:balance}
+.w-d-serena .w-cab h1{font-size:min(clamp(2.6rem,8.5cqw,5.6rem),var(--w-h1-tope,99em));font-weight:600;line-height:1;letter-spacing:-.035em;text-wrap:balance}
 .w-d-serena .w-cab .w-lema{font-size:clamp(1.08rem,2.1cqw,1.32rem);color:var(--w-suave);max-width:34ch}
 .w-d-serena .w-cita{background:#fff;border-radius:24px;padding:clamp(18px,3cqw,26px);box-shadow:0 24px 50px -30px #264a5666;display:grid;gap:14px;max-width:480px}
 .w-d-serena .w-cita-tit{display:flex;gap:10px;align-items:center;font-family:var(--w-ft-titulo);font-weight:600;font-size:1.1rem}

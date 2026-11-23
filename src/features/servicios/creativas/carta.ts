@@ -59,7 +59,7 @@ ${lema(c)}${c.bloqueAcciones}</div>
 .w-d-carta-impresa .w-sector{color:var(--w-ct);letter-spacing:.24em}
 .w-d-carta-impresa .w-orla{width:min(220px,60%);stroke:var(--w-tinta);stroke-width:1.5;fill:none}
 .w-d-carta-impresa .w-orla .rombo{fill:var(--w-c);stroke:none}
-.w-d-carta-impresa .w-cab h1{font-weight:600;font-size:clamp(3rem,10cqw,7rem);line-height:.9;letter-spacing:-.01em;text-wrap:balance}
+.w-d-carta-impresa .w-cab h1{font-weight:600;font-size:min(clamp(3rem,10cqw,7rem),var(--w-h1-tope,99em));line-height:.9;letter-spacing:-.01em;text-wrap:balance}
 .w-d-carta-impresa .w-cab .w-lema{font-family:var(--w-ft-titulo);font-style:italic;font-size:clamp(1.15rem,2.4cqw,1.5rem);max-width:38ch;color:var(--w-suave)}
 .w-d-carta-impresa .w-cab .w-acciones{justify-content:center}
 .w-d-carta-impresa .w-cubierta-vis{max-width:420px;width:100%;justify-self:center}

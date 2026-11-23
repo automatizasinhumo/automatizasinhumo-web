@@ -59,7 +59,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-fotograma .w-rollo span{padding:4px 10px;border:1px solid var(--w-borde);font:500 .72rem/1 var(--w-mono);letter-spacing:.14em;color:var(--w-suave)}
 .w-d-fotograma .w-rollo span:first-child{border-color:var(--w-c);color:var(--w-ct)}
 .w-d-fotograma .w-sector{font-family:var(--w-mono);color:var(--w-suave);letter-spacing:.16em}
-.w-d-fotograma .w-cab h1{font-weight:700;font-size:clamp(3.2rem,12cqw,9rem);line-height:.86;letter-spacing:-.05em}
+.w-d-fotograma .w-cab h1{font-weight:700;font-size:min(clamp(3.2rem,12cqw,9rem),var(--w-h1-tope,99em));line-height:.86;letter-spacing:-.05em}
 .w-d-fotograma .w-cab .w-lema{max-width:40ch;color:var(--w-suave)}
 .w-d-fotograma .w-boton{border-radius:0;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:.88rem}
 .w-d-fotograma .w-cab-foto{border:10px solid #000;box-shadow:0 0 0 1px var(--w-borde)}
