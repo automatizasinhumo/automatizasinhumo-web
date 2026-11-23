@@ -555,7 +555,7 @@ export function iniciarEstudioWeb() {
         n.textContent = o.dominio;
         const e = document.createElement('span');
         e.textContent = 'Incluido · Elegir';
-        b.append(n, e);
+        b.replaceChildren(n, e);
         return b;
       }),
     );
