@@ -7,6 +7,9 @@ import {
   MAX_ENLACES_WEB,
   MAX_SERVICIOS_WEB,
   PLANTILLAS_WEB,
+  PLANTILLAS_ANTIGUAS,
+  resolverPlantilla,
+  type DatosWeb,
   WEB_POR_DEFECTO,
   CONTRASTE_AA,
   FONDO_TEXTO_CLARO,
@@ -73,8 +76,8 @@ describe('renderWeb', () => {
   });
   it('cada plantilla y letra cambia solo la clase y las variables', () => {
     for (const p of PLANTILLAS_WEB) {
-      expect(renderWeb({ ...EJEMPLO_WEB, plantilla: p.id })).toContain(`class="w w-${p.id}"`);
-      expect(CSS_WEB).toContain(`.w-${p.id}`);
+      expect(renderWeb({ ...EJEMPLO_WEB, plantilla: p.id })).toContain(`class="w w-t-${p.id}"`);
+      expect(CSS_WEB).toContain(`.w-t-${p.id}`);
     }
     for (const l of LETRAS_WEB) expect(renderWeb({ ...EJEMPLO_WEB, letra: l.id })).toContain(`--w-ft-titulo:${esc(l.titulo)}`);
   });
@@ -185,7 +188,77 @@ describe('foto de portada', () => {
       const r = validarWeb({ ...base, foto: mala });
       if (!r.ok) throw new Error(r.error);
       expect(r.datos.foto).toBe('');
-      expect(renderWeb(r.datos)).not.toContain('w-portada');
+      expect(renderWeb(r.datos)).not.toContain('w-cab-foto');
     }
+  });
+});
+
+describe('renderWeb: plantillas compuestas', () => {
+  const con = (x: Record<string, unknown>) => {
+    const r = validarWeb({ ...base, ...x });
+    if (!r.ok) throw new Error(r.error);
+    return r.datos;
+  };
+  it('los ids antiguos se traducen a la plantilla nueva más parecida', () => {
+    for (const [viejo, nuevo] of Object.entries(PLANTILLAS_ANTIGUAS)) {
+      expect(PLANTILLAS_WEB.some((p) => p.id === nuevo)).toBe(true);
+      expect(con({ plantilla: viejo }).plantilla).toBe(nuevo);
+      expect(resolverPlantilla(viejo)).toBe(nuevo);
+    }
+    expect(resolverPlantilla('inventada')).toBeUndefined();
+  });
+  it('cada plantilla pinta su portada, sus variantes y una identidad propia en el CSS', () => {
+    const vistas = new Set<string>();
+    for (const p of PLANTILLAS_WEB) {
+      const html = renderWeb({ ...EJEMPLO_WEB, plantilla: p.id });
+      expect(html).toContain(`w-cab w-h-${p.hero} w-sin-foto`);
+      expect(html).toContain(`w-contacto-bloque w-c-${p.contacto}`);
+      vistas.add(`${p.hero}${p.servicios}${p.galeria}${p.opiniones}${p.contacto}`);
+      expect(p.orden.at(-1)).toBe('contacto');
+    }
+    expect(vistas.size).toBeGreaterThanOrEqual(10);
+    for (const v of ['w-h-1', 'w-h-6', 'w-s-5', 'w-g-4', 'w-o-3', 'w-c-4', 'w-zonas', 'w-horario', 'w-franja']) expect(CSS_WEB).toContain(`.${v}`);
+    expect(CSS_WEB).not.toMatch(/@media[^{]*width/);
+  });
+  it('con foto, va en la portada; sin foto, la portada lo sabe', () => {
+    const foto = 'data:image/webp;base64,AAAA';
+    const html = renderWeb(con({ plantilla: 'barra', foto }));
+    expect(html).toContain('<header class="w-cab w-h-2">');
+    expect(html).toContain(`<figure class="w-cab-foto"><img src="${foto}"`);
+  });
+  it('las variantes se degradan con pocos datos', () => {
+    const uno = renderWeb(con({ plantilla: 'salon', servicios: [{ nombre: 'Corte', precio: '15 €' }] }));
+    expect(uno).toContain('w-servicios w-s-3" data-n="1"');
+    const sinPrecio = renderWeb(con({ plantilla: 'salon', servicios: [{ nombre: 'Corte' }, { nombre: 'Tinte' }] }));
+    expect(sinPrecio).toContain('w-servicios w-s-5"');
+    const conPrecio = renderWeb(con({ plantilla: 'salon', servicios: [{ nombre: 'Corte', precio: '15 €' }, { nombre: 'Tinte' }] }));
+    expect(conPrecio).toContain('w-servicios w-s-2"');
+    const opinion = renderWeb(con({ plantilla: 'barra', opiniones: [{ texto: 'Genial', autor: 'Ana' }] }));
+    expect(opinion).toContain('w-opiniones w-o-1"');
+  });
+  it('zonas y horario tienen sección propia si la plantilla la trae, y si no van en contacto', () => {
+    const d = { horario: 'Lunes a viernes: 9:30–20:00\nSábados cerrado', zonas: 'Vigo, Redondela; Cangas' };
+    const guardia = renderWeb(con({ ...d, plantilla: 'guardia' }));
+    expect(guardia).toContain('<ul class="w-zonas"><li>Vigo</li><li>Redondela</li><li>Cangas</li></ul>');
+    expect(guardia).toContain('<tr><th scope="row">Lunes a viernes</th><td>9:30–20:00</td></tr><tr><td colspan="2">Sábados cerrado</td></tr>');
+    expect(guardia).not.toContain('<small>Horario</small>');
+    expect(guardia).toContain('<p class="w-cab-dato">');
+    const encuadre = renderWeb(con({ ...d, plantilla: 'encuadre' }));
+    expect(encuadre).not.toContain('id="horario"');
+    expect(encuadre).toContain('<small>Horario</small>');
+    expect(encuadre).toContain('<small>Zonas que atendemos</small>');
+  });
+  it('la franja invita con la acción principal', () => {
+    expect(renderWeb(con({ plantilla: 'salon', reservas: 'https://booksy.com/x' }))).toContain('<p>¿Te reservamos cita?</p>');
+    expect(renderWeb(con({ plantilla: 'salon' }))).toContain('<p>Llámanos y te atendemos</p>');
+    expect(renderWeb(con({ plantilla: 'consulta' }))).not.toContain('w-franja');
+  });
+  it('sin orden propio manda el de la plantilla; con orden propio, el del cliente', () => {
+    const datosRicos = { ...EJEMPLO_WEB, galeria: ['data:image/webp;base64,AAAA'] };
+    const pos = (html: string, id: string) => html.indexOf(`id="${id}"`);
+    const obra = renderWeb({ ...datosRicos, plantilla: 'obra' });
+    expect(pos(obra, 'galeria')).toBeLessThan(pos(obra, 'servicios'));
+    const propio = renderWeb({ ...datosRicos, plantilla: 'obra', orden: ['servicios', 'galeria', 'sobre', 'opiniones', 'preguntas', 'contacto'].reverse() as DatosWeb['orden'] });
+    expect(pos(propio, 'contacto')).toBeLessThan(pos(propio, 'servicios'));
   });
 });

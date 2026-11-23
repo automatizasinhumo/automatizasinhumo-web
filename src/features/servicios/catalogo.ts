@@ -111,7 +111,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         puntos: ['3 diseños, tu color y tu letra', 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
         href: '/servicios/web',
         desde: AUTOSERVICIO[SLUG_WEB]!.precio,
-        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, plantilla: 'banda' } },
+        muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, plantilla: 'salon' } },
       },
       {
         id: 'portafolio',
