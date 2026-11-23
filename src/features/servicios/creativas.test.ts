@@ -25,6 +25,12 @@ describe('diseños de autor', () => {
     expect(html).toContain(`--w-ft-titulo:${x.titulo.replaceAll("'", '&#39;')}`);
   });
 
+  it.each(DISENOS.map((x) => [x.id]))('%s declara en «fuentes» toda familia ash-* que usa (si no, sale con la del sistema)', (id) => {
+    const x = DISENOS.find((d) => d.id === id)!;
+    const usadas = new Set([x.titulo, x.texto, x.css].join(' ').match(/ash-[a-z0-9-]+(?=')/g) ?? []);
+    for (const f of usadas) expect(x.fuentes, `${id} usa ${f}`).toContain(f);
+  });
+
   it('con otra letra el diseño usa esa letra y no la suya', () => {
     const html = renderWeb(datos({ plantilla: 'pulso', letra: 'clasica' }));
     expect(html).not.toContain('ash-anton');
