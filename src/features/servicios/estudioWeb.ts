@@ -184,6 +184,7 @@ export function iniciarEstudioWeb() {
   /** Fotos de la galería (data URL ya reducidas); se guardan con el borrador como el resto. */
   let galeria: string[] = [];
   let genGaleria = 0;
+  let colaGaleria: Promise<void> = Promise.resolve();
   function pintarGaleria(aviso = '') {
     $('[data-galeria-lista]')!.replaceChildren(
       ...galeria.map((url, i) => {
@@ -657,7 +658,6 @@ export function iniciarEstudioWeb() {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('button, [data-ir]');
     if (!b) return;
     if (b.dataset.galeriaQuitar) {
-      genGaleria++;
       const fuera = Number(b.dataset.galeriaQuitar);
       return cambiarGaleria(galeria.filter((_, i) => i !== fuera));
     }
@@ -756,13 +756,17 @@ export function iniciarEstudioWeb() {
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.hasAttribute('data-galeria-elegir')) {
-      const hueco = MAX_GALERIA_WEB - galeria.length;
       const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
       c.value = '';
-      const gen = ++genGaleria;
+      // Las selecciones se encolan: elegir otra foto mientras se reduce la anterior no la pierde.
+      // Solo un vaciado o una recarga (que suben genGaleria) descartan lo que está en curso.
+      const gen = genGaleria;
       if (!todos.length) return pintarGaleria('Elige una o varias imágenes (JPG o PNG).');
-      const elegidos = todos.slice(0, hueco);
-      void Promise.all(elegidos.map((f) => reducirFoto(f, 1000, MAX_FOTO_GALERIA_WEB).catch(() => ''))).then((urls) => {
+      colaGaleria = colaGaleria.then(async () => {
+        if (gen !== genGaleria) return;
+        const hueco = MAX_GALERIA_WEB - galeria.length;
+        const elegidos = todos.slice(0, hueco);
+        const urls = await Promise.all(elegidos.map((f) => reducirFoto(f, 1000, MAX_FOTO_GALERIA_WEB).catch(() => '')));
         if (gen !== genGaleria) return;
         const buenas = urls.filter(Boolean);
         const avisos = [
