@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema, fotoO } from './piezas';
 
 /** Sin foto: formas orgánicas superpuestas con una silueta en calma (sin texto). */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 400 400" aria-hidden="true" focusable="false">
@@ -44,9 +45,9 @@ export const serena: Diseno = {
         ? `<div class="w-cita">${c.principal ? `<p class="w-cita-tit">${c.icono('cita')}<span>Reserva tu primera visita</span></p>` : ''}${lista ? `<ul class="w-cita-lista">${lista}</ul>` : ''}${c.bloqueAcciones}</div>`
         : '';
     return `<header class="w-cab w-cab-serena"><div class="w-in w-cab-in"><div class="w-cab-txt">
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}<h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${panel}
-</div><div class="w-cab-vis">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ILUSTRACION}</div></div></header>`;
+${sector(c)}<h1>${esc(d.negocio)}</h1>
+${lema(c)}${panel}
+</div><div class="w-cab-vis">${fotoO(c, ILUSTRACION)}</div></div></header>`;
   },
   css: `
 .w-d-serena{--w-fondo:#fbfdfc;--w-tinta:#264a56;--w-suave:#4f6b74;--w-borde:#d3e6df;--w-panel:#eef7f3;--w-menta:#d9eee7;--w-r:22px;--w-esp:24px}

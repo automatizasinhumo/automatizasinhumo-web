@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { lema, fotoO } from './piezas';
 
 /** Sin foto: plano de tuberías y cableado con una llave inglesa, en trazo técnico. */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 480 420" aria-hidden="true" focusable="false">
@@ -48,8 +49,8 @@ export const urgente: Diseno = {
       : '';
     return `<header class="w-cab w-cab-urgente${c.foto ? '' : ' w-sin-foto'}"><div class="w-in w-cab-in"><div class="w-cab-txt">
 ${d.sector ? `<p class="w-sector"><span class="w-luz" aria-hidden="true"></span>${esc(d.sector)}</p>` : ''}<h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}${zonas}
-</div><div class="w-cab-vis">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ILUSTRACION}</div></div></header>`;
+${lema(c)}${c.bloqueAcciones}${zonas}
+</div><div class="w-cab-vis">${fotoO(c, ILUSTRACION)}</div></div></header>`;
   },
   // Cinta superior con el teléfono, antes incluso de la portada (va dentro del header en el DOM: ver tras).
   tras: (c) =>
@@ -69,7 +70,7 @@ ${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}${zona
 .w-d-urgente .w-luz{width:10px;height:10px;border-radius:50%;background:var(--w-c);box-shadow:0 0 0 4px color-mix(in srgb,var(--w-c) 30%,transparent)}
 @media (prefers-reduced-motion:no-preference){.w-d-urgente .w-luz{animation:w-late 1.6s ease-in-out infinite}}
 @keyframes w-late{50%{box-shadow:0 0 0 9px transparent}}
-.w-d-urgente .w-cab h1{font-size:clamp(2.4rem,7.6cqw,5.2rem);overflow-wrap:normal;hyphens:auto;line-height:.95;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance}
+.w-d-urgente .w-cab h1{font-size:clamp(2.4rem,7.6cqw,5.2rem);overflow-wrap:anywhere;hyphens:auto;line-height:.95;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance}
 .w-d-urgente .w-cab .w-lema{font-size:clamp(1.1rem,2.3cqw,1.45rem);color:#d6dee8;max-width:36ch}
 .w-d-urgente .w-cab .w-boton{color:#fff;border-radius:6px}
 .w-d-urgente .w-cab .w-boton-lleno{color:var(--w-s)}
@@ -91,8 +92,9 @@ ${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}${zona
 .w-d-urgente .w-cinta{overflow:hidden;background:var(--w-c);color:var(--w-s);font:400 1.05rem var(--w-ft-titulo);text-transform:uppercase;white-space:nowrap}
 .w-d-urgente .w-cinta-in{display:inline-flex;gap:38px;padding:12px 0}
 .w-d-urgente .w-cinta span::after{content:"●";margin-left:38px;font-size:.6em;vertical-align:middle}
-@media (prefers-reduced-motion:no-preference){.w-d-urgente .w-cinta-in{animation:w-cinta 26s linear infinite}}
-@keyframes w-cinta{to{transform:translateX(-50%)}}
+/* La cinta avanza con el scroll del visitante (no se mueve sola: WCAG 2.2.2); sin soporte, queda quieta. */
+@supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){.w-d-urgente .w-cinta-in{animation:w-cinta linear both;animation-timeline:view();animation-range:entry 0% exit 100%}}}
+@keyframes w-cinta{from{transform:translateX(0)}to{transform:translateX(-35%)}}
 .w-d-urgente .w-sec h2{display:flex;align-items:center;gap:14px;text-transform:uppercase;font-size:clamp(1.7rem,5cqw,3rem);letter-spacing:-.01em}
 .w-d-urgente .w-sec h2::before{content:"";flex:none;width:18px;height:18px;background:var(--w-c);transform:rotate(45deg)}
 .w-d-urgente .w-sec h2::after{display:none}

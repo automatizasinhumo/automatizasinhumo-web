@@ -15,6 +15,14 @@ export const FUENTES_WEB: Readonly<Record<string, { archivo: string; peso: strin
   'ash-manrope': { archivo: 'manrope.woff2', peso: '200 800' },
   'ash-dm-serif': { archivo: 'dm-serif-display.woff2', peso: '400' },
   'ash-instrument-sans': { archivo: 'instrument-sans.woff2', peso: '400 700' },
+  'ash-bebas': { archivo: 'bebas-neue.woff2', peso: '400' },
+  'ash-big-shoulders': { archivo: 'big-shoulders-display.woff2', peso: '100 900' },
+  'ash-bricolage': { archivo: 'bricolage-grotesque.woff2', peso: '200 800' },
+  'ash-playfair': { archivo: 'playfair-display.woff2', peso: '400 900' },
+  'ash-space-grotesk': { archivo: 'space-grotesk.woff2', peso: '300 700' },
+  'ash-syne': { archivo: 'syne.woff2', peso: '400 800' },
+  'ash-plex-mono': { archivo: 'ibm-plex-mono.woff2', peso: '500' },
+  'ash-dm-mono': { archivo: 'dm-mono.woff2', peso: '500' },
 };
 
 /**

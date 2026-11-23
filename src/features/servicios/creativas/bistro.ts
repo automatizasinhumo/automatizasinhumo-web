@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema, fotoO } from './piezas';
 
 /** Adorno de carta clásica (filete con rombo central), para separar títulos y la portada. */
 const ADORNO = `<svg class="w-adorno" viewBox="0 0 240 24" aria-hidden="true" focusable="false"><path d="M0 12h96M144 12h96" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M120 2l10 10-10 10-10-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="120" cy="12" r="2.6" fill="currentColor"/><circle cx="102" cy="12" r="1.8" fill="currentColor"/><circle cx="138" cy="12" r="1.8" fill="currentColor"/></svg>`;
@@ -47,10 +48,10 @@ export const bistro: Diseno = {
     const { d, esc } = c;
     const primera = c.horario[0];
     return `<header class="w-cab w-cab-bistro"><div class="w-in w-cab-in"><div class="w-carta"><div class="w-carta-in">
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}${ADORNO}<h1>${esc(d.negocio)}</h1>${ADORNO}
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
+${sector(c)}${ADORNO}<h1>${esc(d.negocio)}</h1>${ADORNO}
+${lema(c)}${c.bloqueAcciones}
 ${primera ? `<p class="w-cab-dato">${esc(primera[0] ? `${primera[0]} · ${primera[1]}` : primera[1])}</p>` : ''}
-</div></div><div class="w-cab-vis">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ILUSTRACION}</div></div></header>`;
+</div></div><div class="w-cab-vis">${fotoO(c, ILUSTRACION)}</div></div></header>`;
   },
   css: `
 .w-d-bistro{--w-fondo:#fff7e8;--w-tinta:#3b2522;--w-suave:#6b4f48;--w-borde:#e3cfb1;--w-panel:#f6ecd8;--w-oliva:#788264;--w-r:2px;--w-esp:24px}
