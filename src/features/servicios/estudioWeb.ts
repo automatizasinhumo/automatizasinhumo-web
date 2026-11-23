@@ -122,7 +122,7 @@ export const TOCABLES: readonly [vista: string, campo: string, etiqueta: string]
   ['.w-cab h1, .w-nav-marca', '[name="negocio"]', 'el nombre'],
   ['.w-sector', '[name="sector"]', 'la actividad'],
   ['.w-lema', '[name="lema"]', 'la frase de portada'],
-  ['.w-cab-foto, .w-arco', '[name="foto"]', 'la foto'],
+  ['.w-cab-foto, .w-arco', '[data-foto-elegir]', 'la foto'],
   ['#servicios', '[data-lista="servicios"]', 'los servicios'],
   ['#galeria', '[data-galeria]', 'las fotos'],
   ['#sobre', '[name="sobre"]', 'quiénes sois'],
