@@ -17,6 +17,8 @@ export interface SectorWeb {
   orden: IdSeccionWeb[];
   /** Preguntas frecuentes típicas, sin respuesta: las responde el negocio y solo se publican respondidas. */
   preguntas: string[];
+  /** Tres diseños de estilos distintos que le van a ese negocio: los que el estudio enseña primero. */
+  disenos: string[];
 }
 
 // Los datos viven en src/data/sectores-web.json; aquí solo el tipo y la lógica.
@@ -47,6 +49,13 @@ export function sectorDe(texto: string): SectorWeb | null {
       }
     }
   return mejor;
+}
+
+/** Los tres diseños recomendados para lo que escribió el cliente (o los de cualquier negocio). */
+export function disenosRecomendados(texto: string): { sector: SectorWeb | null; ids: string[] } {
+  const sector = sectorDe(texto);
+  const validos = new Set(PLANTILLAS_WEB.map((p) => p.id as string));
+  return { sector, ids: (sector ?? SECTOR_GENERICO).disenos.filter((id) => validos.has(id)) };
 }
 
 /** Último trozo de la dirección que parece un lugar («Rúa da Raíña 1, Lugo» → «Lugo»). */

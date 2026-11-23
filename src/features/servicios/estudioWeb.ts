@@ -11,7 +11,7 @@
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
-import { esOrdenDeSector, esPreguntaDeSector, textosDeSector } from './sectores';
+import { disenosRecomendados, esOrdenDeSector, esPreguntaDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
@@ -387,6 +387,38 @@ export function iniciarEstudioWeb() {
     const destino = el && TOCABLES.find(([sel]) => sel === el.dataset.editar);
     if (destino) tocar(destino[1]);
   });
+  // ---------- Tres diseños recomendados ----------
+  // En el paso 1 el cliente dice a qué se dedica y suben arriba tres diseños de estilos distintos que
+  // le van. Se mueven las tarjetas (no se copian): conservan su miniatura y su radio.
+  const rapido = $<HTMLInputElement>('[data-sector-rapido]');
+  const cajaRec = $<HTMLElement>('[data-recomendados]');
+  const movidas: [HTMLElement, HTMLElement, Node | null][] = [];
+  function recomendar(texto: string) {
+    if (!cajaRec) return;
+    for (const [el, padre, sig] of movidas.reverse()) padre.insertBefore(el, sig);
+    movidas.length = 0;
+    const { sector, ids } = disenosRecomendados(texto);
+    if (texto.trim())
+      for (const id of ids) {
+        const el = $<HTMLInputElement>(`input[name="plantilla"][value="${id}"]`, form ?? undefined)?.closest<HTMLElement>('label');
+        if (!el?.parentElement) continue;
+        movidas.push([el, el.parentElement, el.nextSibling]);
+        $('[data-recomendados-rejilla]', cajaRec)!.appendChild(el);
+      }
+    $('[data-recomendados-titulo]', cajaRec)!.textContent = sector
+      ? `Para ${sector.nombre.toLowerCase()}: tres estilos distintos`
+      : 'Tres estilos que valen para cualquier negocio';
+    cajaRec.hidden = movidas.length === 0;
+  }
+  /** La casilla del paso 1 y la del paso 2 son el mismo dato. */
+  function sectorRapido(valor: string, final: boolean) {
+    const campoSector = $<HTMLInputElement>('[name="sector"]', form ?? undefined);
+    recomendar(valor);
+    if (!campoSector || campoSector.value === valor) return;
+    campoSector.value = valor;
+    if (final) campoSector.dispatchEvent(new Event('change', { bubbles: true }));
+    else persistir();
+  }
   /** Abre el paso que contiene el campo, lo resalta un momento y lo enfoca. */
   function tocar(sel: string) {
     const objetivo = $<HTMLElement>(sel, form ?? undefined);
@@ -787,6 +819,10 @@ export function iniciarEstudioWeb() {
     } else vista.hidden = true;
     if (paso === 'personaliza') pintarControles();
     if (paso === 'publica') resumir();
+    if (paso === 'plantilla' && rapido) {
+      rapido.value = $<HTMLInputElement>('[name="sector"]', form ?? undefined)?.value ?? '';
+      recomendar(rapido.value);
+    }
     // Su guía sale sola la primera vez de la visita; el botón «Guía de este paso» la repite.
     setTimeout(() => actual === paso && void guiar(GUIA_WEB[paso] ?? [], { raiz, clave: `web:${paso}`, auto: true }), 600);
     if (enfocar) {
@@ -925,6 +961,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, true);
     if (c.name?.startsWith('titular-') || c.name === 'dominio') return;
     if (c.hasAttribute('data-galeria-elegir')) {
       const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
@@ -1003,6 +1040,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, false);
     if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio' || c.name?.startsWith('titular-')) return;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;

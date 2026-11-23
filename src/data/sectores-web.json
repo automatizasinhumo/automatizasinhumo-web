@@ -41,6 +41,11 @@
         "¿Cuánto cuesta el corte?",
         "¿Atendéis sin cita?",
         "¿Cuánto dura una coloración?"
+      ],
+      "disenos": [
+        "agenda",
+        "navaja",
+        "salon"
       ]
     },
     {
@@ -87,6 +92,11 @@
         "¿Qué incluye cada tratamiento?",
         "¿Hay alguna contraindicación?",
         "¿Puedo cambiar mi cita?"
+      ],
+      "disenos": [
+        "agenda",
+        "serena",
+        "herbario"
       ]
     },
     {
@@ -138,6 +148,11 @@
         "¿Tenéis menú del día?",
         "¿Aceptáis reservas?",
         "¿Hay opciones sin gluten?"
+      ],
+      "disenos": [
+        "carta-impresa",
+        "bistro",
+        "barra"
       ]
     },
     {
@@ -181,6 +196,11 @@
         "¿Atendéis urgencias?",
         "¿Qué zonas cubrís?",
         "¿Cobráis el desplazamiento?"
+      ],
+      "disenos": [
+        "urgente",
+        "expediente",
+        "guardia"
       ]
     },
     {
@@ -225,6 +245,11 @@
         "¿Tenéis servicio urgente?",
         "¿Qué zonas atendéis?",
         "¿Hacéis instalaciones nuevas y reparaciones?"
+      ],
+      "disenos": [
+        "urgente",
+        "expediente",
+        "lamina"
       ]
     },
     {
@@ -273,6 +298,11 @@
         "¿El presupuesto es sin compromiso?",
         "¿Cuánto dura una reforma?",
         "¿Os encargáis de los materiales?"
+      ],
+      "disenos": [
+        "expediente",
+        "lamina",
+        "urgente"
       ]
     },
     {
@@ -319,6 +349,11 @@
         "¿Trabajáis con mi marca y modelo?",
         "¿Cuánto tarda un diagnóstico?",
         "¿Hace falta cita previa?"
+      ],
+      "disenos": [
+        "urgente",
+        "expediente",
+        "pulso"
       ]
     },
     {
@@ -370,6 +405,11 @@
         "¿Necesito cita previa?",
         "¿Cuánto dura la primera consulta?",
         "¿Trabajáis con mutuas o seguros?"
+      ],
+      "disenos": [
+        "serena",
+        "indice",
+        "agenda"
       ]
     },
     {
@@ -420,6 +460,11 @@
         "¿Puedo probar una clase?",
         "¿Hay grupos para principiantes?",
         "¿Qué horarios tenéis?"
+      ],
+      "disenos": [
+        "pulso",
+        "serena",
+        "impulso"
       ]
     },
     {
@@ -469,6 +514,11 @@
         "¿Qué niveles impartís?",
         "¿Dais clases en línea?",
         "¿Cómo funciona la matrícula?"
+      ],
+      "disenos": [
+        "cuaderno",
+        "vinetas",
+        "indice"
       ]
     },
     {
@@ -518,6 +568,11 @@
         "¿Trabajáis con autónomos?",
         "¿Qué incluye la cuota?",
         "¿La primera consulta tiene coste?"
+      ],
+      "disenos": [
+        "indice",
+        "lamina",
+        "consulta"
       ]
     },
     {
@@ -570,6 +625,11 @@
         "¿Puedo preguntar si tenéis algo antes de ir?",
         "¿Hacéis encargos?",
         "¿Enviáis a domicilio?"
+      ],
+      "disenos": [
+        "escaparate",
+        "herbario",
+        "vinetas"
       ]
     },
     {
@@ -619,6 +679,11 @@
         "¿Aceptáis encargos?",
         "¿Tenéis productos para alergias o intolerancias?",
         "¿Puedo pedir y pasar a recoger?"
+      ],
+      "disenos": [
+        "escaparate",
+        "bistro",
+        "atelier"
       ]
     },
     {
@@ -664,6 +729,11 @@
         "¿Qué productos usáis?",
         "¿Cómo calculáis el presupuesto?",
         "¿En qué localidades trabajáis?"
+      ],
+      "disenos": [
+        "urgente",
+        "serena",
+        "guardia"
       ]
     },
     {
@@ -710,6 +780,11 @@
         "¿Qué animales atendéis?",
         "¿Hace falta cita?",
         "¿Qué tengo que llevar?"
+      ],
+      "disenos": [
+        "vinetas",
+        "serena",
+        "escaparate"
       ]
     },
     {
@@ -757,6 +832,11 @@
         "¿A qué hora es la entrada y la salida?",
         "¿Admitís mascotas?",
         "¿Hay aparcamiento?"
+      ],
+      "disenos": [
+        "postal",
+        "fotograma",
+        "atelier"
       ]
     },
     {
@@ -804,6 +884,11 @@
         "¿Cuánto cuesta una sesión?",
         "¿Cuándo entregáis las fotos?",
         "¿Os desplazáis?"
+      ],
+      "disenos": [
+        "fotograma",
+        "lamina",
+        "postal"
       ]
     }
   ],
@@ -839,6 +924,11 @@
       "¿Cómo puedo contactar con vosotros?",
       "¿Qué zonas atendéis?",
       "¿Cuánto cuesta?"
+    ],
+    "disenos": [
+      "cartel",
+      "serena",
+      "escaparate"
     ]
   }
 }

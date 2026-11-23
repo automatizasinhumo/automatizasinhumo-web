@@ -1089,3 +1089,34 @@
 /* «Editar tocando»: el campo al que lleva un toque en la vista previa se ilumina un momento. */
 .tocado { outline: 3px solid #2563eb; outline-offset: 4px; border-radius: 10px; transition: outline-color 1.2s ease; }
 @media (prefers-reduced-motion: reduce) { .tocado { transition: none; } }
+
+/* Paso 1: los tres diseños recomendados por sector, destacados encima del catálogo. */
+.recomendados {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 2px solid #2563eb;
+  border-radius: 1rem;
+  background: color-mix(in srgb, #2563eb 6%, transparent);
+}
+/* Cámara directa: solo donde hay cámara a mano (pantallas táctiles). */
+.camara {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.camara:focus-within {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .camara {
+    display: none;
+  }
+}
+
