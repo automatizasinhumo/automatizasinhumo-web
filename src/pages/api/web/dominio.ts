@@ -97,7 +97,13 @@ export const POST: APIRoute = async ({ request }) => {
   }
   if (body?.dominio === undefined) {
     let fila = await dominioDePedido(env.DB, 'web', p.publicId);
-    if (fila && cfg && fila.estado !== 'activo') fila = await avanzarDominio(env.DB, cfg, fila);
+    if (fila && cfg && fila.estado !== 'activo') {
+      fila = await avanzarDominio(env.DB, cfg, fila);
+      // Reserva liberada (Registrar no la conocía): el cliente vuelve a ver las ofertas, con el aviso.
+      if (!(await dominioDePedido(env.DB, 'web', p.publicId))) {
+        return json({ ok: true, disponible: !!cfg, compra: !!reg, dominio: null, aviso: fila.detalle });
+      }
+    }
     return json({ ok: true, disponible: !!cfg, compra: !!reg, dominio: vista(fila) });
   }
   if (!(await webDePedido(env.DB, p.publicId))) return json({ ok: false, error: 'Publica la web antes de conectar tu dominio.' }, 409);

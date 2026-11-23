@@ -47,6 +47,8 @@ interface RespuestaDominio {
   compra?: boolean;
   error?: string;
   campo?: string;
+  /** Aviso cuando la reserva se liberó (dominio: null). */
+  aviso?: string | null;
   dominio?: {
     dominio: string;
     estado: 'registrando' | 'esperando_dns' | 'conectando' | 'activo' | 'error';
@@ -486,8 +488,9 @@ export function iniciarEstudioWeb() {
       $('[data-dominio-titular]')!.hidden = true;
     }
     if (!v) {
+      ideasDe = null; // tras liberar una reserva, volver a pedir las ofertas en esta misma sesión
       void cargarIdeas();
-      return void st.replaceChildren();
+      return void (d.aviso ? (st.textContent = d.aviso) : st.replaceChildren());
     }
     if (!cambiando) $('[data-dominio-ideas]')!.hidden = true;
     $('[data-dominio-nombre]')!.textContent = v.dominio;

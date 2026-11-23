@@ -352,7 +352,11 @@ describe('comprarDominio', () => {
     const caida = api({ [ESTADO]: () => new Response(JSON.stringify({ success: false, errors: [{ code: 10000, message: 'interno' }] }), { status: 502 }) });
     expect((await avanzarDominios(db, CFG, 20, caida.f))[0]).toMatchObject({ estado: 'registrando' });
     const desconocido = api({ [ESTADO]: () => new Response(JSON.stringify({ success: false, errors: [{ code: 404, message: 'not found' }] }), { status: 404 }) });
-    await avanzarDominios(db, CFG, 20, desconocido.f);
+    // Reciente: la compra puede seguir en vuelo, no se libera.
+    expect((await avanzarDominios(db, CFG, 20, desconocido.f))[0]).toMatchObject({ estado: 'registrando' });
+    expect(db.sql.prepare('SELECT count(*) AS n FROM dominios_paginas').get()).toEqual({ n: 1 });
+    db.sql.prepare("UPDATE dominios_paginas SET created_at = datetime('now', '-31 minutes')").run();
+    expect((await avanzarDominios(db, CFG, 20, desconocido.f))[0]).toMatchObject({ estado: 'error' });
     expect(db.sql.prepare('SELECT count(*) AS n FROM dominios_paginas').get()).toEqual({ n: 0 });
   });
 

@@ -338,6 +338,10 @@ async function responde(dominio: string, f: typeof fetch): Promise<boolean> {
   }
 }
 
+/** Minutos que ha de tener una reserva para liberarla cuando Registrar dice que no la conoce (404). */
+export const MARGEN_404_MIN = 30;
+export const REGISTRO_NO_EMPEZO = 'El registro no llegó a empezar. Puedes volver a contratarlo.';
+
 /** Un paso de la conexión de un dominio. Devuelve la fila tal como queda. */
 export async function avanzarDominio(db: D1Database, cfg: ConfigDominios, fila: FilaDominio, f: typeof fetch = fetch): Promise<FilaDominio> {
   const d = fila.dominio;
@@ -347,10 +351,17 @@ export async function avanzarDominio(db: D1Database, cfg: ConfigDominios, fila: 
       try {
         r = await estadoRegistro(cfg, d, f);
       } catch (e) {
-        // Registrar no conoce ese registro (la petición de compra nunca llegó): se libera la reserva.
+        // Registrar no conoce ese registro. Solo se libera la reserva pasado un margen: la petición de
+        // compra puede seguir en vuelo (la fila se crea antes de llamar a Registrar) y borrarla dejaría
+        // un dominio comprado sin fila y abriría la puerta a una segunda compra.
         if (e instanceof ErrorCloudflare && e.http === 404) {
-          await db.prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado = 'registrando'").bind(d).run();
-          return { ...fila, estado: 'error', detalle: 'El registro no llegó a empezar. Puedes volver a contratarlo.' };
+          const borrada = await db
+            .prepare(`DELETE FROM dominios_paginas WHERE dominio = ? AND estado = 'registrando' AND created_at <= datetime('now', '-${MARGEN_404_MIN} minutes')`)
+            .bind(d)
+            .run();
+          if (borrada.meta.changes) return { ...fila, estado: 'error', detalle: REGISTRO_NO_EMPEZO };
+          await guardar(db, d, { detalle: AVISOS_REGISTRO.comprobando });
+          return { ...fila, detalle: AVISOS_REGISTRO.comprobando };
         }
         throw e;
       }
