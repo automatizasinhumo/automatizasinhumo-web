@@ -185,8 +185,8 @@ export function iniciarEstudioWeb() {
   /** Sube con cada foto elegida, quitada o formulario cargado: una reducción tardía no pisa a la vigente. */
   let genFoto = 0;
   function volcar(c: Partial<Contenido>) {
-    for (const k of CAMPOS) campo(k).value = typeof c[k] === 'string' ? c[k] : '';
-    for (const k of CAPA) if (!campo(k).value) campo(k).value = 'auto';
+    // Los radios no se desmarcan con '': la capa vuelve a 'auto' cuando el contenido no la trae.
+    for (const k of CAMPOS) campo(k).value = typeof c[k] === 'string' && c[k] ? c[k] : (CAPA as readonly string[]).includes(k) ? 'auto' : '';
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)!.replaceChildren();
       for (const fila of Array.isArray(c[l]) ? (c[l] as unknown as Fila[]) : []) anadir(l, fila);

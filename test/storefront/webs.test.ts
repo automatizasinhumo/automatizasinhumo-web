@@ -80,7 +80,7 @@ describe('renderWeb', () => {
   });
   it('cada plantilla y letra cambia solo la clase y las variables', () => {
     for (const p of BASICAS) {
-      expect(renderWeb({ ...EJEMPLO_WEB, plantilla: p.id })).toContain(`class="w w-t-${p.id}"`);
+      expect(renderWeb({ ...EJEMPLO_WEB, plantilla: p.id })).toContain(`class="w w-t-${p.id} w-ac-papel w-ff-auto w-mv-sutil"`);
       expect(CSS_WEB).toContain(`.w-t-${p.id}`);
     }
     for (const l of LETRAS_WEB) expect(renderWeb({ ...EJEMPLO_WEB, letra: l.id })).toContain(`--w-ft-titulo:${esc(l.titulo)}`);
