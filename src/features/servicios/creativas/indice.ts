@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema, fotoO } from './piezas';
 
 /** Iniciales para el monograma (máx. 2 letras de las palabras con significado). */
 const iniciales = (n: string) =>
@@ -55,9 +56,9 @@ export const indice: Diseno = {
     const indice = `<ol class="w-sumario">${titulos.map(([id, t], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(t)}</a></li>`).join('')}</ol>`;
     return `<header class="w-cab w-cab-indice"><div class="w-in w-cab-in"><div class="w-cab-txt">
 <p class="w-sello-mono" aria-hidden="true"><span>${esc(iniciales(d.negocio))}</span></p>
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}<h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
-</div><div class="w-cab-vis">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ''}<nav class="w-cab-indice-nav" aria-label="Índice">${indice}</nav></div></div></header>`;
+${sector(c)}<h1>${esc(d.negocio)}</h1>
+${lema(c)}${c.bloqueAcciones}
+</div><div class="w-cab-vis">${fotoO(c)}<nav class="w-cab-indice-nav" aria-label="Índice">${indice}</nav></div></div></header>`;
   },
   css: `
 .w-d-indice{--w-fondo:#f5f1e8;--w-tinta:#182d42;--w-suave:#4c5a68;--w-borde:#dcd3c2;--w-panel:#ece5d6;--w-navy:#182d42;--w-r:4px;--w-esp:22px;counter-reset:w-srv}

@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema } from './piezas';
 
 /** Ilustración sin foto: tijeras, peine y ondas de pelo dentro del arco. */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 400 520" aria-hidden="true" focusable="false">
@@ -40,8 +41,8 @@ export const agenda: Diseno = {
     const visual = c.foto ? `<div class="w-arco">${c.foto}</div>` : `<div class="w-arco">${ILUSTRACION}</div>`;
     const primera = c.horario[0];
     return `<header class="w-cab w-cab-agenda"><div class="w-in w-cab-in"><div class="w-cab-txt">
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}<h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
+${sector(c)}<h1>${esc(d.negocio)}</h1>
+${lema(c)}${c.bloqueAcciones}
 ${primera ? `<p class="w-cab-dato">${c.icono('reloj')}<span>${esc(primera[0] ? `${primera[0]}: ${primera[1]}` : primera[1])}</span></p>` : ''}
 </div><div class="w-cab-vis">${visual}${c.principal ? SELLO : ''}</div></div></header>`;
   },

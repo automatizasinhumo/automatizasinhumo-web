@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema, fotoO } from './piezas';
 
 /** Sin foto: paisaje de costa con sol, montes y casa blanca, como la cara de una postal. */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 480 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
@@ -44,10 +45,10 @@ export const postal: Diseno = {
   cabecera: (c) => {
     const { d, esc } = c;
     return `<header class="w-cab w-cab-postal"><div class="w-in"><div class="w-tarjeta">
-<div class="w-cara">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ILUSTRACION}<p class="w-saludo" aria-hidden="true">Recuerdos de ${esc(d.negocio)}</p></div>
+<div class="w-cara">${fotoO(c, ILUSTRACION)}<p class="w-saludo" aria-hidden="true">Recuerdos de ${esc(d.negocio)}</p></div>
 <div class="w-dorso"><div class="w-cab-txt">${sello(esc(d.sector || d.negocio))}
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}<h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
+${sector(c)}<h1>${esc(d.negocio)}</h1>
+${lema(c)}${c.bloqueAcciones}
 </div></div></div></div></header>`;
   },
   css: `

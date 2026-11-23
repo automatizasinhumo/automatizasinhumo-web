@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema, fotoO } from './piezas';
 
 /** Sin foto: kettlebell y pesa en bloque con líneas de velocidad. */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 420 380" aria-hidden="true" focusable="false">
@@ -37,9 +38,9 @@ export const pulso: Diseno = {
   cabecera: (c) => {
     const { d, esc } = c;
     return `<header class="w-cab w-cab-pulso"><div class="w-in w-cab-in"><div class="w-cab-txt">
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}<h1><span>${esc(d.negocio)}</span><span class="w-eco" aria-hidden="true">${esc(d.negocio)}</span></h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
-</div><div class="w-cab-vis">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ILUSTRACION}</div></div></header>`;
+${sector(c)}<h1><span>${esc(d.negocio)}</span><span class="w-eco" aria-hidden="true">${esc(d.negocio)}</span></h1>
+${lema(c)}${c.bloqueAcciones}
+</div><div class="w-cab-vis">${fotoO(c, ILUSTRACION)}</div></div></header>`;
   },
   tras: (c) => {
     const nombres = c.d.servicios.map((s) => s.nombre).filter(Boolean);

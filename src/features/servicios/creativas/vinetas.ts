@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { sector, lema, fotoO } from './piezas';
 
 /** Sin foto: perro y gato asomados a una viñeta, con huellas y bocadillo. */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 420 360" aria-hidden="true" focusable="false">
@@ -47,9 +48,9 @@ export const vinetas: Diseno = {
   cabecera: (c) => {
     const { d, esc } = c;
     return `<header class="w-cab w-cab-vinetas"><div class="w-in w-cab-in"><div class="w-cab-txt w-panel-comic">
-${d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : ''}<h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema w-bocadillo">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
-</div><div class="w-cab-vis w-panel-comic">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : ILUSTRACION}${c.principal ? `<span class="w-pegatina" aria-hidden="true">¡Hola!</span>` : ''}</div></div></header>`;
+${sector(c)}<h1>${esc(d.negocio)}</h1>
+${lema(c, 'w-bocadillo')}${c.bloqueAcciones}
+</div><div class="w-cab-vis w-panel-comic">${fotoO(c, ILUSTRACION)}${c.principal ? `<span class="w-pegatina" aria-hidden="true">¡Hola!</span>` : ''}</div></div></header>`;
   },
   css: `
 .w-d-vinetas{--w-fondo:#fff9e9;--w-tinta:#1d1d2b;--w-suave:#45455a;--w-borde:#1d1d2b;--w-panel:#ffffff;--w-melocoton:#ffd6ba;--w-r:18px;--w-esp:22px;--w-sombra:5px 5px 0 #1d1d2b}

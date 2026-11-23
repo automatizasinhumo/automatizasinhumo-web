@@ -1,4 +1,5 @@
 import type { Diseno } from './tipos';
+import { lema, fotoO } from './piezas';
 
 /** Sin foto: alzado de una casa con cotas, como en un plano de proyecto. */
 const ILUSTRACION = `<svg class="w-ilus" viewBox="0 0 440 340" aria-hidden="true" focusable="false">
@@ -47,8 +48,8 @@ export const expediente: Diseno = {
     const cajetin = `<dl class="w-cajetin">${fila('Proyecto', d.sector)}${fila('Zona', c.zonas[0] ?? '')}${fila('Contacto', d.telefono || d.whatsapp || d.email)}${fila('Escala', '1:50')}</dl>`;
     return `<header class="w-cab w-cab-expediente"><div class="w-in w-cab-in"><div class="w-cab-txt">
 <p class="w-ref" aria-hidden="true">Ref. 01 · Alzado</p><h1>${esc(d.negocio)}</h1>
-${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
-</div><div class="w-cab-vis">${c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : `<div class="w-lamina">${ILUSTRACION}</div>`}${cajetin}</div></div></header>`;
+${lema(c)}${c.bloqueAcciones}
+</div><div class="w-cab-vis">${fotoO(c, `<div class="w-lamina">${ILUSTRACION}</div>`)}${cajetin}</div></div></header>`;
   },
   css: `
 .w-d-expediente{--w-fondo:#e9e2d5;--w-tinta:#282d2d;--w-suave:#4b5050;--w-borde:#c7bfae;--w-panel:#f3eee4;--w-grafito:#282d2d;--w-r:2px;--w-esp:22px;--w-reja:color-mix(in srgb,var(--w-tinta) 9%,transparent)}
