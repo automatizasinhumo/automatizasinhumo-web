@@ -89,6 +89,11 @@ declare namespace Cloudflare {
     CF_DOMINIOS_TOKEN?: string;
     CF_ACCOUNT_ID?: string;
     CF_WORKER_NOMBRE?: string;
+    // Compra del dominio incluida (src/features/servicios/registrador.ts, Cloudflare Registrar):
+    // '1' la activa (el token necesita además Registrar write; la cuenta, perfil de facturación y
+    // contacto por defecto de Registrar). CF_DOMINIO_PRECIO_MAX: USD/año que se compra incluido (15).
+    CF_REGISTRAR_ACTIVO?: string;
+    CF_DOMINIO_PRECIO_MAX?: string;
     // Clave de IndexNow (src/features/seo/indexnow.ts): secreto; sin ella /<clave>.txt da 404.
     INDEXNOW_KEY?: string;
     // Admin auth (src/middleware.ts): the password is set in the first-run setup
