@@ -118,3 +118,15 @@ describe('orden y preguntas de partida', () => {
     expect(otro.ids).toHaveLength(3);
   });
 });
+
+describe('servicios puestos por nosotros', () => {
+  it('reconoce los de un sector sin tocar y respeta los del cliente', async () => {
+    const { esServicioDeSector, textosDeSector } = await import('./sectores');
+    const [fonta] = textosDeSector('Fontanería', 'X').servicios;
+    expect(esServicioDeSector(fonta)).toBe(true);
+    expect(esServicioDeSector({ nombre: '', precio: '', texto: '' })).toBe(true);
+    expect(esServicioDeSector({ ...fonta, precio: '40 €' })).toBe(false);
+    expect(esServicioDeSector({ ...fonta, texto: 'Lo mío' })).toBe(false);
+    expect(esServicioDeSector({ nombre: 'Corte', precio: '', texto: 'A mi manera' })).toBe(false);
+  });
+});

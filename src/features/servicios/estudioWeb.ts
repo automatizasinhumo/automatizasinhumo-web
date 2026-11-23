@@ -11,7 +11,7 @@
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
-import { disenosRecomendados, esOrdenDeSector, esPreguntaDeSector, textosDeSector } from './sectores';
+import { disenosRecomendados, esOrdenDeSector, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
@@ -344,9 +344,13 @@ export function iniciarEstudioWeb() {
     const c = recoger();
     const t = textosDeSector(c.sector, c.negocio, c.direccion);
     let algo = false;
-    if (!c.lema) (campo('lema').value = escritos.lema = t.lema), (algo = true);
-    if (!c.sobre) (campo<HTMLTextAreaElement>('sobre').value = escritos.sobre = t.sobre), (algo = true);
-    if (c.servicios.every((s) => !s.nombre && !s.precio && !s.texto)) {
+    // Vacío o el que pusimos nosotros (otro sector): se cambia; lo escrito por el cliente se respeta.
+    if (!c.lema || (c.lema === escritos.lema.trim() && c.lema !== t.lema))
+      (campo('lema').value = escritos.lema = t.lema), (algo = true);
+    if (!c.sobre || (c.sobre === escritos.sobre.trim() && c.sobre !== t.sobre))
+      (campo<HTMLTextAreaElement>('sobre').value = escritos.sobre = t.sobre), (algo = true);
+    const mismos = c.servicios.map((s) => s.nombre).join() === t.servicios.slice(0, cfg.maxServicios).map((s) => s.nombre).join();
+    if (!mismos && c.servicios.every(esServicioDeSector)) {
       $('[data-lista="servicios"] [data-items]')!.replaceChildren();
       for (const s of t.servicios.slice(0, cfg.maxServicios)) anadir('servicios', { ...s });
       limitar();
