@@ -3,7 +3,7 @@
 // cambiar. Sin servicios externos ni coste por uso: es una tabla. Añadir un sector es añadir una
 // entrada en src/data/sectores-web.json; `claves` son raíces sin tildes que se buscan en lo que escribe el cliente.
 import datos from '../../data/sectores-web.json';
-import { ordenWeb, type IdSeccionWeb, type PreguntaWeb, type ServicioWeb } from './webs';
+import { ordenWeb, PLANTILLAS_WEB, type IdSeccionWeb, type PreguntaWeb, type ServicioWeb } from './webs';
 
 export interface SectorWeb {
   id: string;
@@ -82,8 +82,11 @@ export function textosDeSector(sector: string, negocio: string, direccion = ''):
 
 const TODOS = [...SECTORES_WEB, SECTOR_GENERICO];
 const PREGUNTAS_DE_SECTOR = new Set(TODOS.flatMap((s) => s.preguntas));
-const ORDENES_DE_SECTOR = new Set([ordenWeb([]), ...TODOS.map((s) => ordenWeb(s.orden))].map((o) => o.join()));
+// También el de cada plantilla: al elegir una, el estudio coloca su orden, y eso no es «tocarlo».
+const ORDENES_DE_SECTOR = new Set(
+  [ordenWeb([]), ...TODOS.map((s) => ordenWeb(s.orden)), ...PLANTILLAS_WEB.map((p) => ordenWeb(p.orden as readonly IdSeccionWeb[]))].map((o) => o.join()),
+);
 /** Pregunta que pusimos nosotros (de algún sector): si sigue sin respuesta, se puede cambiar por la del sector nuevo. */
 export const esPreguntaDeSector = (p: string) => PREGUNTAS_DE_SECTOR.has(p.trim());
-/** Orden que no ha movido el cliente: el de partida o el de algún sector. */
+/** Orden que no ha movido el cliente: el de partida, el de algún sector o el de alguna plantilla. */
 export const esOrdenDeSector = (orden: readonly string[]) => ORDENES_DE_SECTOR.has(ordenWeb(orden as IdSeccionWeb[]).join());

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_PREGUNTAS_WEB, MAX_SERVICIOS_WEB, ordenWeb, validarWeb } from './webs';
+import { MAX_PREGUNTAS_WEB, MAX_SERVICIOS_WEB, ordenWeb, PLANTILLAS_WEB, validarWeb } from './webs';
 import { esOrdenDeSector, esPreguntaDeSector, lugarDe, SECTOR_GENERICO, SECTORES_WEB, sectorDe, textosDeSector } from './sectores';
 
 describe('sectorDe', () => {
@@ -98,6 +98,7 @@ describe('orden y preguntas de partida', () => {
     expect(esPreguntaDeSector('¿Abrís los domingos?')).toBe(false);
     expect(esOrdenDeSector(ordenWeb([]))).toBe(true);
     expect(esOrdenDeSector(textosDeSector('Reformas', 'x').orden)).toBe(true);
+    for (const p of PLANTILLAS_WEB) expect(esOrdenDeSector(ordenWeb(p.orden as never)), p.id).toBe(true);
     expect(esOrdenDeSector(['contacto', 'sobre', 'servicios', 'galeria', 'opiniones', 'preguntas'])).toBe(false);
   });
 });
