@@ -164,6 +164,7 @@ const BASE = `
 .w-dato{display:flex;gap:12px;align-items:flex-start;min-height:44px;padding:14px 16px;border-radius:var(--w-r);background:var(--w-panel);text-decoration:none}
 .w-dato .w-ico{color:var(--w-ct);margin-top:3px}
 .w-dato small{display:block;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--w-suave)}
+.w-dato>span{min-width:0;overflow-wrap:anywhere}
 a.w-dato:hover,a.w-dato:focus-visible{outline:2px solid var(--w-c);outline-offset:0}
 .w-preguntas{display:grid;gap:12px;max-width:46rem}
 .w-pregunta{display:block}

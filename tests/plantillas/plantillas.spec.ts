@@ -12,6 +12,7 @@ const CASOS: Record<string, Partial<DatosWeb>> = {
   largo: {
     negocio: 'Talleres y Reparaciones Hermanos Gil Fernández',
     sector: 'Electrodomésticos y climatización',
+    email: 'atencionalclienteyreparacionesurgentes@hermanosgilfernandez.es',
     lema: 'Reparamos lavadoras, frigoríficos, hornos y aires acondicionados de todas las marcas en el día, con garantía por escrito de seis meses.',
     servicios: Array.from({ length: 8 }, (_, i) => ({
       nombre: `Reparación de electrodomésticos ${i + 1}`,
