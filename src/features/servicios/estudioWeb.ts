@@ -11,7 +11,7 @@
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
-import { esOrdenDeSector, esPreguntaDeSector, textosDeSector } from './sectores';
+import { disenosRecomendados, esOrdenDeSector, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
@@ -133,6 +133,34 @@ export const TOCABLES: readonly [vista: string, campo: string, etiqueta: string]
   ['#contacto, .w-barra', '[name="telefono"]', 'el contacto'],
 ];
 
+/**
+ * Revisión antes de publicar e índice de preparación (0-100) para buscadores y clientes: cada
+ * comprobación vale unos puntos y, si falla, da un aviso con el campo del editor al que lleva
+ * «Corregir» (mismo selector que TOCABLES). Mide lo que el cliente ha rellenado, no el tráfico.
+ * Pura, para poder probarla.
+ */
+export function revisarWeb(d: Partial<DatosWeb>): { puntos: number; avisos: [campo: string, aviso: string, puntos: number][] } {
+  const t = (v?: string) => (v ?? '').trim();
+  const servicios = (d.servicios ?? []).filter((s) => t(s.nombre));
+  const preguntas = (d.preguntas ?? []).filter((p) => t(p.pregunta));
+  const reglas: [ok: boolean, campo: string, aviso: string, puntos: number][] = [
+    [!!(t(d.telefono) || t(d.whatsapp) || t(d.email)), '[name="telefono"]', 'No hay forma de contactar: pon teléfono, WhatsApp o correo.', 15],
+    [servicios.length > 0, '[data-lista="servicios"]', 'Añade al menos un servicio o producto.', 10],
+    [!!t(d.lema), '[name="lema"]', 'Falta la frase de portada: di en una línea qué ofreces.', 10],
+    [!!t(d.foto), '[data-foto-elegir]', 'Sin foto de portada: una foto real del negocio da confianza.', 10],
+    [!!t(d.horario), '[name="horario"]', 'Falta el horario (también sale en Google).', 10],
+    [!!(t(d.zonas) || t(d.direccion)), '[name="zonas"]', 'Di dónde trabajas (barrio, ciudad o zonas): así te encuentran en tu zona.', 10],
+    [(d.opiniones ?? []).some((o) => t(o.texto)), '[data-lista="opiniones"]', 'Sin opiniones: copia dos o tres reseñas de clientes.', 8],
+    [!!t(d.sobre), '[name="sobre"]', 'Cuenta quiénes sois en dos frases.', 7],
+    [servicios.length === 0 || servicios.some((s) => t(s.precio)), '[data-lista="servicios"]', 'Ningún servicio tiene precio orientativo: ayuda a decidir.', 5],
+    [preguntas.length > 0 && preguntas.every((p) => t(p.respuesta)), '[data-lista="preguntas"]', preguntas.length ? 'Hay preguntas sin respuesta.' : 'Responde las dudas típicas en «Preguntas frecuentes».', 5],
+    [(d.galeria ?? []).length >= 3, '[data-galeria]', 'Sube al menos tres fotos a la galería.', 5],
+    [!!t(d.sector), '[name="sector"]', 'Escribe a qué se dedica el negocio.', 5],
+  ];
+  const fallos = reglas.filter((r) => !r[0]);
+  return { puntos: 100 - fallos.reduce((n, r) => n + r[3], 0), avisos: fallos.map(([, c, a, p]) => [c, a, p]) };
+}
+
 function leer(): Partial<Estado> {
   try {
     const v = JSON.parse(localStorage.getItem(CLAVE) ?? 'null');
@@ -147,6 +175,15 @@ function guardar(e: Estado) {
   } catch {
     /* sin almacenamiento: el estudio sigue funcionando en esta visita */
   }
+}
+
+/**
+ * Casilla rápida del paso 1 → campo «sector» del paso 2. Al teclear (input) solo se copia; al
+ * confirmar (change) se emite siempre el change del campo, aunque el input ya lo hubiera copiado:
+ * si no, nunca se rellenarían los textos del sector.
+ */
+export function pasoSectorRapido(actual: string, valor: string, final: boolean): { asignar: boolean; confirmar: boolean } {
+  return { asignar: actual !== valor, confirmar: final };
 }
 
 export function iniciarEstudioWeb() {
@@ -307,9 +344,13 @@ export function iniciarEstudioWeb() {
     const c = recoger();
     const t = textosDeSector(c.sector, c.negocio, c.direccion);
     let algo = false;
-    if (!c.lema) (campo('lema').value = escritos.lema = t.lema), (algo = true);
-    if (!c.sobre) (campo<HTMLTextAreaElement>('sobre').value = escritos.sobre = t.sobre), (algo = true);
-    if (c.servicios.every((s) => !s.nombre && !s.precio && !s.texto)) {
+    // Vacío o el que pusimos nosotros (otro sector): se cambia; lo escrito por el cliente se respeta.
+    if (!c.lema || (c.lema === escritos.lema.trim() && c.lema !== t.lema))
+      (campo('lema').value = escritos.lema = t.lema), (algo = true);
+    if (!c.sobre || (c.sobre === escritos.sobre.trim() && c.sobre !== t.sobre))
+      (campo<HTMLTextAreaElement>('sobre').value = escritos.sobre = t.sobre), (algo = true);
+    const mismos = c.servicios.map((s) => s.nombre).join() === t.servicios.slice(0, cfg.maxServicios).map((s) => s.nombre).join();
+    if (!mismos && c.servicios.every(esServicioDeSector)) {
       $('[data-lista="servicios"] [data-items]')!.replaceChildren();
       for (const s of t.servicios.slice(0, cfg.maxServicios)) anadir('servicios', { ...s });
       limitar();
@@ -387,6 +428,39 @@ export function iniciarEstudioWeb() {
     const destino = el && TOCABLES.find(([sel]) => sel === el.dataset.editar);
     if (destino) tocar(destino[1]);
   });
+  // ---------- Tres diseños recomendados ----------
+  // En el paso 1 el cliente dice a qué se dedica y suben arriba tres diseños de estilos distintos que
+  // le van. Se mueven las tarjetas (no se copian): conservan su miniatura y su radio.
+  const rapido = $<HTMLInputElement>('[data-sector-rapido]');
+  const cajaRec = $<HTMLElement>('[data-recomendados]');
+  const movidas: [HTMLElement, HTMLElement, Node | null][] = [];
+  function recomendar(texto: string) {
+    if (!cajaRec) return;
+    for (const [el, padre, sig] of movidas.reverse()) padre.insertBefore(el, sig);
+    movidas.length = 0;
+    const { sector, ids } = disenosRecomendados(texto);
+    if (texto.trim())
+      for (const id of ids) {
+        const el = $<HTMLInputElement>(`input[name="plantilla"][value="${id}"]`, form ?? undefined)?.closest<HTMLElement>('label');
+        if (!el?.parentElement) continue;
+        movidas.push([el, el.parentElement, el.nextSibling]);
+        $('[data-recomendados-rejilla]', cajaRec)!.appendChild(el);
+      }
+    $('[data-recomendados-titulo]', cajaRec)!.textContent = sector
+      ? `Para ${sector.nombre.toLowerCase()}: tres estilos distintos`
+      : 'Tres estilos que valen para cualquier negocio';
+    cajaRec.hidden = movidas.length === 0;
+  }
+  /** La casilla del paso 1 y la del paso 2 son el mismo dato. */
+  function sectorRapido(valor: string, final: boolean) {
+    const campoSector = $<HTMLInputElement>('[name="sector"]', form ?? undefined);
+    recomendar(valor);
+    if (!campoSector) return;
+    const paso = pasoSectorRapido(campoSector.value, valor, final);
+    if (paso.asignar) campoSector.value = valor;
+    if (paso.confirmar) campoSector.dispatchEvent(new Event('change', { bubbles: true }));
+    else if (paso.asignar) persistir();
+  }
   /** Abre el paso que contiene el campo, lo resalta un momento y lo enfoca. */
   function tocar(sel: string) {
     const objetivo = $<HTMLElement>(sel, form ?? undefined);
@@ -468,6 +542,25 @@ export function iniciarEstudioWeb() {
     const res = (k: string) => $(`[data-res="${k}"]`)!;
     res('negocio').textContent = campo('negocio').value.trim();
     res('plantilla').textContent = nombrePlantilla(estado.plantilla);
+    const lista = $('[data-revision]');
+    if (lista) {
+      const { puntos, avisos } = revisarWeb(datos());
+      $('[data-revision-puntos]')!.textContent = String(puntos);
+      lista.replaceChildren(
+        ...avisos.map(([sel, aviso, pts]) => {
+          const li = document.createElement('li');
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'enlace';
+          b.textContent = 'Corregir';
+          b.addEventListener('click', () => tocar(sel));
+          li.textContent = `${aviso} (+${pts}) `;
+          li.appendChild(b);
+          return li;
+        }),
+      );
+      lista.closest<HTMLElement>('[data-revision-caja]')!.dataset.completa = String(!avisos.length);
+    }
     $('[data-solo-compra]')!.hidden = !!pedido.pagado;
     $('[data-solo-pagado]')!.hidden = !pedido.pagado;
     if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
@@ -787,6 +880,10 @@ export function iniciarEstudioWeb() {
     } else vista.hidden = true;
     if (paso === 'personaliza') pintarControles();
     if (paso === 'publica') resumir();
+    if (paso === 'plantilla' && rapido) {
+      rapido.value = $<HTMLInputElement>('[name="sector"]', form ?? undefined)?.value ?? '';
+      recomendar(rapido.value);
+    }
     // Su guía sale sola la primera vez de la visita; el botón «Guía de este paso» la repite.
     setTimeout(() => actual === paso && void guiar(GUIA_WEB[paso] ?? [], { raiz, clave: `web:${paso}`, auto: true }), 600);
     if (enfocar) {
@@ -925,6 +1022,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, true);
     if (c.name?.startsWith('titular-') || c.name === 'dominio') return;
     if (c.hasAttribute('data-galeria-elegir')) {
       const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
@@ -1003,6 +1101,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, false);
     if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio' || c.name?.startsWith('titular-')) return;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;

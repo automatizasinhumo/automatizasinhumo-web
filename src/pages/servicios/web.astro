@@ -89,6 +89,21 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
       <section data-paso="plantilla" aria-labelledby="paso-plantilla">
         <h2 id="paso-plantilla" class="paso-titulo">Elige el diseño de tu web</h2>
         <p class="paso-entradilla">Todos cuestan lo mismo, {euros(precio)}. Podrás cambiarlo después sin volver a escribir nada.</p>
+        <div class="recomienda mt-6">
+          <label class={campo}
+            >¿A qué se dedica tu negocio? <span class="ayuda">(te enseñamos primero los diseños que mejor le van)</span><input
+              data-sector-rapido
+              maxlength="60"
+              list="sectores-web"
+              placeholder="Ej.: Peluquería"
+              autocomplete="off"
+            /></label
+          >
+          <div class="grupo-disenos recomendados" data-recomendados hidden>
+            <h3 class="grupo-titulo" data-recomendados-titulo>Para tu negocio</h3>
+            <div class="rejilla" data-recomendados-rejilla></div>
+          </div>
+        </div>
         <fieldset class="mt-6" data-guia="galeria">
           <legend class="sr-only">Diseño de la web</legend>
           {
@@ -147,12 +162,14 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
                 <input type="hidden" name="foto" />
                 <img data-foto-vista alt="Foto de portada elegida" hidden />
                 <label class={campo}>Foto de portada <span class="ayuda">(opcional: tu local, tu trabajo o tu logo)</span><input type="file" accept="image/*" data-foto-elegir /></label>
+                <label class="camara">Hacer la foto ahora<input type="file" accept="image/*" capture="environment" data-foto-elegir class="sr-only" /></label>
                 <button type="button" class="quitar" data-foto-quitar hidden>Quitar foto</button>
                 <p class="ayuda" data-foto-aviso role="status" hidden></p>
               </div>
               <div class="galeria-fotos" data-galeria>
                 <ul class="galeria-mini" data-galeria-lista></ul>
                 <label class={campo} data-galeria-anadir>Fotos de tu trabajo <span class="ayuda">(opcional, hasta {MAX_GALERIA_WEB}: trabajos hechos, el local, el equipo)</span><input type="file" accept="image/*" multiple data-galeria-elegir /></label>
+                <label class="camara">Hacer una foto ahora<input type="file" accept="image/*" capture="environment" data-galeria-elegir class="sr-only" /></label>
                 <p class="ayuda" data-galeria-aviso role="status" hidden></p>
               </div>
             </fieldset>
@@ -310,6 +327,10 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
             <div><dt>Negocio</dt><dd data-res="negocio"></dd></div>
             <div><dt>Diseño</dt><dd data-res="plantilla"></dd></div>
           </dl>
+          <div class="revision" data-revision-caja>
+            <p><strong>Tu web está preparada al <span data-revision-puntos>0</span>/100</strong> <span class="ayuda">para clientes y buscadores</span></p>
+            <ul data-revision></ul>
+          </div>
           <ul class="incluye">
             <li>Publicada al momento, sin marca de agua</li>
             <li>Alojamiento incluido y certificado de seguridad (https)</li>

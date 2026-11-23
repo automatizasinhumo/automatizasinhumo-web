@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_PREGUNTAS_WEB, MAX_SERVICIOS_WEB, ordenWeb, PLANTILLAS_WEB, validarWeb } from './webs';
-import { esOrdenDeSector, esPreguntaDeSector, lugarDe, SECTOR_GENERICO, SECTORES_WEB, sectorDe, textosDeSector } from './sectores';
+import { disenosRecomendados, esOrdenDeSector, esPreguntaDeSector, lugarDe, SECTOR_GENERICO, SECTORES_WEB, sectorDe, textosDeSector } from './sectores';
 
 describe('sectorDe', () => {
   it.each([
@@ -100,5 +100,33 @@ describe('orden y preguntas de partida', () => {
     expect(esOrdenDeSector(textosDeSector('Reformas', 'x').orden)).toBe(true);
     for (const p of PLANTILLAS_WEB) expect(esOrdenDeSector(ordenWeb(p.orden as never)), p.id).toBe(true);
     expect(esOrdenDeSector(['contacto', 'sobre', 'servicios', 'galeria', 'opiniones', 'preguntas'])).toBe(false);
+  });
+  it('cada sector recomienda tres diseños que existen y son distintos', () => {
+    const ids = new Set(PLANTILLAS_WEB.map((p) => p.id as string));
+    for (const s of [...SECTORES_WEB, SECTOR_GENERICO]) {
+      expect(s.disenos, s.id).toHaveLength(3);
+      expect(new Set(s.disenos).size, s.id).toBe(3);
+      for (const id of s.disenos) expect(ids.has(id), `${s.id} → ${id}`).toBe(true);
+    }
+  });
+  it('recomienda por lo que escribe el cliente y, si no encaja, los de cualquier negocio', () => {
+    expect(disenosRecomendados('Barbería Roble').ids).toContain('navaja');
+    expect(disenosRecomendados('fontanero urgente').ids[0]).toBe('urgente');
+    const otro = disenosRecomendados('fabricamos velas');
+    expect(otro.sector).toBeNull();
+    expect(otro.ids).toEqual(SECTOR_GENERICO.disenos);
+    expect(otro.ids).toHaveLength(3);
+  });
+});
+
+describe('servicios puestos por nosotros', () => {
+  it('reconoce los de un sector sin tocar y respeta los del cliente', async () => {
+    const { esServicioDeSector, textosDeSector } = await import('./sectores');
+    const [fonta] = textosDeSector('Fontanería', 'X').servicios;
+    expect(esServicioDeSector(fonta)).toBe(true);
+    expect(esServicioDeSector({ nombre: '', precio: '', texto: '' })).toBe(true);
+    expect(esServicioDeSector({ ...fonta, precio: '40 €' })).toBe(false);
+    expect(esServicioDeSector({ ...fonta, texto: 'Lo mío' })).toBe(false);
+    expect(esServicioDeSector({ nombre: 'Corte', precio: '', texto: 'A mi manera' })).toBe(false);
   });
 });
