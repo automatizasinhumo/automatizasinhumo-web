@@ -83,7 +83,7 @@ const BASICAS = [
 ] as const;
 
 /** Ids de los diseños de autor (creativas/): cada uno con portada, ilustración y tipografía propias. */
-export type IdDisenoWeb = 'agenda' | 'urgente' | 'bistro' | 'serena' | 'pulso' | 'indice';
+export type IdDisenoWeb = 'agenda' | 'urgente' | 'bistro' | 'serena' | 'pulso' | 'indice' | 'navaja' | 'expediente' | 'vinetas' | 'postal';
 export type IdPlantillaWeb = (typeof BASICAS)[number]['id'] | IdDisenoWeb;
 export type FamiliaPlantilla = 'autor' | 'basica';
 

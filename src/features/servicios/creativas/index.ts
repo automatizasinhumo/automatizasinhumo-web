@@ -5,15 +5,19 @@
 import { agenda } from './agenda';
 import { bistro } from './bistro';
 import { indice } from './indice';
+import { expediente } from './expediente';
+import { navaja } from './navaja';
+import { postal } from './postal';
 import { pulso } from './pulso';
 import { serena } from './serena';
 import type { Diseno } from './tipos';
 import { urgente } from './urgente';
+import { vinetas } from './vinetas';
 
 export type { ContextoDiseno, Diseno, IconoWeb } from './tipos';
 export { cssFuentes, FUENTES_WEB } from './fuentes';
 
-export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice];
+export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal];
 
 export const disenoWeb = (id: string): Diseno | undefined => DISENOS.find((x) => x.id === id);
 
