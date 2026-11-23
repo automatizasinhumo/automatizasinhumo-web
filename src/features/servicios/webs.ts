@@ -10,6 +10,7 @@
  * Plantillas = solo CSS sobre el mismo HTML. Añadir una es añadir su entrada en PLANTILLAS_WEB
  * y su bloque `.w-<id>` en CSS_WEB; el formulario, la validación y la publicación no cambian.
  */
+import { horarioSchema, tipoNegocio } from './negocioSchema';
 import {
   COLOR_VALIDO,
   EMAIL,
@@ -790,7 +791,9 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
  * no ejecutable, y se escapa `<` para que ningún texto pueda cerrar la etiqueta.
  */
 export function fichaNegocio(d: DatosWeb, url: string): string {
-  const ficha: Record<string, unknown> = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: d.negocio, url };
+  const ficha: Record<string, unknown> = { '@context': 'https://schema.org', '@type': tipoNegocio(d.sector), name: d.negocio, url };
+  const horas = horarioSchema(d.horario);
+  if (horas) ficha.openingHoursSpecification = horas;
   const descripcion = (d.sobre || d.lema).replace(/\s+/g, ' ').trim();
   if (descripcion) ficha.description = descripcion.slice(0, 300);
   if (d.telefono) ficha.telephone = d.telefono;

@@ -124,7 +124,7 @@ describe('ayudas', () => {
 describe('fichaNegocio', () => {
   it('describe el negocio para buscadores con lo que el cliente rellenó', () => {
     const f = JSON.parse(fichaNegocio(EJEMPLO_WEB, 'https://lola.es/'));
-    expect(f['@type']).toBe('LocalBusiness');
+    expect(f['@type']).toBe('HairSalon');
     expect(f.name).toBe(EJEMPLO_WEB.negocio);
     expect(f.url).toBe('https://lola.es/');
     expect(f.telephone).toBe(EJEMPLO_WEB.telefono);
