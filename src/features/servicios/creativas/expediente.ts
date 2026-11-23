@@ -38,7 +38,7 @@ export const expediente: Diseno = {
     servicios: [
       { nombre: 'Reforma de baño', precio: 'desde 5.900 €', texto: 'Plato de ducha, alicatado, sanitarios y fontanería nueva en 10 días.' },
       { nombre: 'Reforma de cocina', precio: 'desde 8.500 €', texto: 'Muebles, encimera, electricidad y gas certificados.' },
-      { nombre: 'Reforma integral', texto: 'Proyecto, licencias y dirección de obra para pisos y casas.' },
+      { nombre: 'Reforma integral', precio: '', texto: 'Proyecto, licencias y dirección de obra para pisos y casas.' },
     ],
   },
   cabecera: (c) => {

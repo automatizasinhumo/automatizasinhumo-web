@@ -35,7 +35,7 @@ export const navaja: Diseno = {
       { nombre: 'Corte clásico', precio: '14 €', texto: 'Tijera y máquina, lavado incluido.' },
       { nombre: 'Arreglo de barba', precio: '10 €', texto: 'Perfilado a navaja con toalla caliente.' },
       { nombre: 'Afeitado tradicional', precio: '16 €', texto: 'Brocha, jabón y aceite de cierre.' },
-      { nombre: 'Corte + barba', precio: '22 €' },
+      { nombre: 'Corte + barba', precio: '22 €', texto: '' },
     ],
   },
   cabecera: (c) => {
