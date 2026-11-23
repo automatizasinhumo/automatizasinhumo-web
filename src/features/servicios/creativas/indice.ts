@@ -76,8 +76,8 @@ ${d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : ''}${c.bloqueAcciones}
 .w-d-indice .w-cab-foto img{width:100%;aspect-ratio:3/2;object-fit:cover;filter:saturate(.8)}
 .w-d-indice .w-sumario{list-style:none;margin:0;padding:0;border-top:1px solid #ffffff30}
 .w-d-indice .w-sumario a{display:flex;gap:18px;align-items:baseline;padding:16px 4px;border-bottom:1px solid #ffffff30;text-decoration:none;font:400 clamp(1.2rem,2.4cqw,1.6rem) var(--w-ft-titulo);transition:padding .2s}
-.w-d-indice .w-sumario a:hover{padding-left:14px;color:var(--w-c)}
-.w-d-indice .w-sumario span{font:600 .8rem var(--w-ft-texto);letter-spacing:.14em;color:var(--w-c)}
+.w-d-indice .w-sumario a:hover{padding-left:14px;color:var(--w-ct)}
+.w-d-indice .w-sumario span{font:600 .8rem var(--w-ft-texto);letter-spacing:.14em;color:var(--w-ct)}
 .w-d-indice .w-sec h2{font-weight:400;font-size:clamp(2rem,5.4cqw,3.4rem);letter-spacing:-.01em;padding-bottom:16px;border-bottom:1px solid var(--w-borde)}
 .w-d-indice .w-sec h2::after{display:none}
 .w-d-indice .w-sec:nth-of-type(even){background:var(--w-panel)}
