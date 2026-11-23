@@ -93,6 +93,8 @@ export class ErrorCloudflare extends Error {
   constructor(
     readonly codigos: number[],
     mensaje: string,
+    /** Estado HTTP de la respuesta (0 si no se conoce). */
+    readonly http = 0,
   ) {
     super(mensaje);
   }
@@ -106,7 +108,7 @@ async function cf<T>(cfg: ConfigDominios, ruta: string, init: RequestInit = {}, 
   const j = (await r.json().catch(() => null)) as RespuestaCf<T> | null;
   if (!j?.success) {
     const errores = j?.errors ?? [];
-    throw new ErrorCloudflare(errores.map((e) => e.code), errores.map((e) => e.message).join('; ') || `HTTP ${r.status}`);
+    throw new ErrorCloudflare(errores.map((e) => e.code), errores.map((e) => e.message).join('; ') || `HTTP ${r.status}`, r.status);
   }
   return j.result;
 }
@@ -284,14 +286,46 @@ export async function comprarDominio(
     const r = await registrarDominio(cfg, dominio, t.titular, f);
     if (r.state === 'failed') {
       await guardar(db, dominio, { estado: 'error', detalle: r.error?.message?.slice(0, 300) ?? 'Registro rechazado' });
+    } else {
+      await guardar(db, dominio, { detalle: detalleRegistro(r) });
     }
   } catch (e) {
-    // Sin registro en Cloudflare: se libera para que el cliente pueda volver a intentarlo.
-    await db.prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado = 'registrando'").bind(dominio).run();
-    return { ok: false, error: 'cloudflare', detalle: e instanceof Error ? e.message.slice(0, 200) : undefined };
+    // Solo un rechazo explícito de Registrar libera la reserva. Si la respuesta se cortó, puede que
+    // el registro sí empezara: la fila se queda en «registrando» y el cron consulta su estado (si
+    // Registrar no lo conoce, lo libera allí), así el pedido no puede pagar un segundo dominio.
+    if (rechazoDefinitivo(e)) {
+      await db.prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado = 'registrando'").bind(dominio).run();
+      return { ok: false, error: 'cloudflare', detalle: e instanceof Error ? e.message.slice(0, 200) : undefined };
+    }
+    await guardar(db, dominio, { detalle: AVISOS_REGISTRO.comprobando });
   }
   const fila = await filaDeDominio(db, dominio);
   return fila ? { ok: true, fila } : { ok: false, error: 'cloudflare' };
+}
+
+/** Cloudflare contestó con un error 4xx explícito: la petición no se aceptó. */
+function rechazoDefinitivo(e: unknown): boolean {
+  return e instanceof ErrorCloudflare && e.codigos.length > 0 && e.http >= 400 && e.http < 500;
+}
+
+const AVISOS_REGISTRO = {
+  correo: 'Confirma el correo que el registrador ha enviado al email del titular; en cuanto lo hagas seguimos solos.',
+  accion: 'El registrador pide una comprobación al titular. Revisa el email del titular; seguimos solos en cuanto esté.',
+  revision: 'El registrador está revisando el registro. Puede tardar unas horas; seguimos comprobándolo.',
+  comprobando: 'Comprobando el registro con el registrador.',
+} as const;
+
+/** El detalle es un aviso para el cliente (no un error interno de la API): se puede enseñar tal cual. */
+export const esAvisoRegistro = (detalle: string | null): detalle is string =>
+  !!detalle && (Object.values(AVISOS_REGISTRO) as string[]).includes(detalle);
+
+/** Texto para el cliente mientras el registro no termina (bloqueos y acciones pendientes incluidos). */
+function detalleRegistro(r: { state: string; context?: { action?: unknown } }): string | null {
+  if (r.state === 'action_required') {
+    return r.context?.action === 'registrant_email_confirmation_pending' ? AVISOS_REGISTRO.correo : AVISOS_REGISTRO.accion;
+  }
+  if (r.state === 'blocked') return AVISOS_REGISTRO.revision;
+  return null;
 }
 
 /** ¿Responde ya el dominio con la página? (HTTPS válido: si el certificado aún no está, fetch falla). */
@@ -309,15 +343,27 @@ export async function avanzarDominio(db: D1Database, cfg: ConfigDominios, fila: 
   const d = fila.dominio;
   try {
     if (fila.estado === 'registrando') {
-      const r = await estadoRegistro(cfg, d, f);
-      if (r.state === 'failed' || r.state === 'blocked' || r.state === 'action_required') {
-        const detalle = (r.error?.message ?? `Registro ${r.state}`).slice(0, 300);
+      let r;
+      try {
+        r = await estadoRegistro(cfg, d, f);
+      } catch (e) {
+        // Registrar no conoce ese registro (la petición de compra nunca llegó): se libera la reserva.
+        if (e instanceof ErrorCloudflare && e.http === 404) {
+          await db.prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado = 'registrando'").bind(d).run();
+          return { ...fila, estado: 'error', detalle: 'El registro no llegó a empezar. Puedes volver a contratarlo.' };
+        }
+        throw e;
+      }
+      // «blocked» y «action_required» no son finales: se sigue consultando y se explica qué pasa.
+      if (r.state === 'failed') {
+        const detalle = (r.error?.message ?? 'Registro rechazado').slice(0, 300);
         await guardar(db, d, { estado: 'error', detalle });
         return { ...fila, estado: 'error', detalle };
       }
       if (r.state !== 'succeeded') {
-        await guardar(db, d, { detalle: null });
-        return { ...fila, detalle: null };
+        const detalle = detalleRegistro(r);
+        await guardar(db, d, { detalle });
+        return { ...fila, detalle };
       }
       // Comprado: sus DNS ya son los de Cloudflare, la zona se activa sola.
       const zona = await crearZona(cfg, d, f, true);

@@ -6,6 +6,7 @@ import {
   avanzarDominios,
   avisarDominiosActivos,
   comprarDominio,
+  esAvisoRegistro,
   configDominios,
   normalizarDominio,
   pedirDominio,
@@ -334,5 +335,47 @@ describe('comprarDominio', () => {
     await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, lenta.f);
     const rechazo = api({ [ESTADO]: () => ok({ state: 'failed', completed: true, error: { message: 'Contacto no válido' } }) });
     expect((await avanzarDominios(db, CFG, 20, rechazo.f))[0]).toMatchObject({ estado: 'error', detalle: 'Contacto no válido' });
+  });
+
+  it('respuesta cortada: conserva la reserva (sin segunda compra) y el cron la libera solo si Registrar no la conoce', async () => {
+    const db = d1();
+    publicada(db);
+    const cortada = api({
+      'POST /accounts/acc/registrar/domain-check': libre(),
+      'POST /accounts/acc/registrar/registrations': () => {
+        throw new TypeError('network connection lost');
+      },
+    });
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, cortada.f)).toMatchObject({ ok: true, fila: { estado: 'registrando' } });
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'otra.com', TITULAR, api({}).f)).toMatchObject({ ok: false, error: 'ocupado' });
+    // Un 5xx tampoco es un rechazo seguro.
+    const caida = api({ [ESTADO]: () => new Response(JSON.stringify({ success: false, errors: [{ code: 10000, message: 'interno' }] }), { status: 502 }) });
+    expect((await avanzarDominios(db, CFG, 20, caida.f))[0]).toMatchObject({ estado: 'registrando' });
+    const desconocido = api({ [ESTADO]: () => new Response(JSON.stringify({ success: false, errors: [{ code: 404, message: 'not found' }] }), { status: 404 }) });
+    await avanzarDominios(db, CFG, 20, desconocido.f);
+    expect(db.sql.prepare('SELECT count(*) AS n FROM dominios_paginas').get()).toEqual({ n: 0 });
+  });
+
+  it('«blocked» y «action_required» siguen en curso con un aviso para el cliente y terminan conectándose', async () => {
+    const db = d1();
+    publicada(db);
+    const compra = api({
+      'POST /accounts/acc/registrar/domain-check': libre(),
+      'POST /accounts/acc/registrar/registrations': () => ok({ state: 'action_required', completed: false, context: { action: 'registrant_email_confirmation_pending' } }),
+    });
+    const r = await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, compra.f);
+    expect(r.ok && r.fila.detalle).toContain('Confirma el correo');
+    expect(esAvisoRegistro(r.ok ? r.fila.detalle : null)).toBe(true);
+    const bloqueado = api({ [ESTADO]: () => ok({ state: 'blocked', completed: false }) });
+    const b = (await avanzarDominios(db, CFG, 20, bloqueado.f))[0]!;
+    expect(b).toMatchObject({ estado: 'registrando' });
+    expect(b.detalle).toContain('revisando');
+    // Un error interno de la API no es un aviso para el cliente.
+    expect(esAvisoRegistro('error 10000')).toBe(false);
+    const hecho = api({ [ESTADO]: () => ok({ state: 'succeeded', completed: true }), 'POST /zones': () => ok({ id: 'z7', status: 'pending', name_servers: [] }),
+      'GET /zones/z7': () => ok({ id: 'z7', status: 'pending' }),
+      'PUT /zones/z7/activation_check': () => ok({}),
+    });
+    expect((await avanzarDominios(db, CFG, 20, hecho.f))[0]).toMatchObject({ estado: 'esperando_dns', detalle: null });
   });
 });

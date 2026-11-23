@@ -39,7 +39,7 @@ async function reg<T>(cfg: ConfigDominios, ruta: string, init: RequestInit = {},
   const j = (await r.json().catch(() => null)) as { success?: boolean; result?: T; errors?: { code: number; message: string }[] } | null;
   if (!j?.success) {
     const errores = j?.errors ?? [];
-    throw new ErrorCloudflare(errores.map((x) => x.code), errores.map((x) => x.message).join('; ') || `HTTP ${r.status}`);
+    throw new ErrorCloudflare(errores.map((x) => x.code), errores.map((x) => x.message).join('; ') || `HTTP ${r.status}`, r.status);
   }
   return { status: r.status, result: j.result as T };
 }

@@ -52,6 +52,8 @@ interface RespuestaDominio {
     estado: 'registrando' | 'esperando_dns' | 'conectando' | 'activo' | 'error';
     servidores: string[];
     detalle: string | null;
+    /** Aviso del registro en curso para el cliente (confirmar el email, revisión del registrador...). */
+    aviso?: string | null;
     comprado?: boolean;
   } | null;
 }
@@ -414,6 +416,7 @@ export function iniciarEstudioWeb() {
     if (b) b.textContent = pedido.pagado ? (pedido.pagado.slug ? 'Guardar los cambios en mi web' : 'Publicar mi web') : `Comprar y publicar · ${euros(cfg.precio)}`;
     if (pedido.pagado?.slug && !$('[data-estado-compra] a')) avisar(`/w/${pedido.pagado.slug}`, 'Tu web está publicada en');
     if (pedido.pagado?.slug && dominioDe !== pedido.token) {
+      if (dominioDe) soltarContratar();
       dominioDe = pedido.token;
       void dominio();
     } else if (!pedido.pagado?.slug && dominioDe) {
@@ -421,6 +424,7 @@ export function iniciarEstudioWeb() {
       clearTimeout(sondeo);
       dominioDe = null;
       cambiando = false;
+      soltarContratar();
       $('[data-dominio]')!.hidden = true;
       $('[data-estado-dominio]')!.replaceChildren();
     }
@@ -432,10 +436,17 @@ export function iniciarEstudioWeb() {
   let dominioDe: string | null = null;
   let cambiando = false;
   let sondeo: ReturnType<typeof setTimeout> | undefined;
+  /** Compra en curso: solo su respuesta (y no la de otro pedido) vuelve a habilitar «Contratar». */
+  let compras = 0;
+  function soltarContratar() {
+    compras++;
+    $<HTMLButtonElement>('[data-contratar]')!.disabled = false;
+  }
   async function dominio(cuerpo: { dominio?: string; comprar?: { dominio: string; titular: Record<string, string> } } = {}) {
     const token = pedido.token;
     if (!token || !pedido.pagado?.slug) return;
     clearTimeout(sondeo);
+    const mia = cuerpo.comprar ? ++compras : 0;
     let d: RespuestaDominio;
     try {
       const r = await fetch('/api/web/dominio', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, ...cuerpo }) });
@@ -443,13 +454,12 @@ export function iniciarEstudioWeb() {
     } catch {
       d = { ok: false, error: 'No hemos podido comprobar tu dominio. Revisa tu conexión.' };
     }
+    if (mia && mia === compras) $<HTMLButtonElement>('[data-contratar]')!.disabled = false;
     if (!pedido.vigente(token)) return;
     // Si falla la consulta del estado, se vuelve a preguntar al pasar otra vez por «Publicar».
     if (!d.ok && !cuerpo.dominio && !cuerpo.comprar) dominioDe = null;
     if (d.ok) cambiando = false;
     if (cuerpo.comprar) {
-      const b = $<HTMLButtonElement>('[data-contratar]')!;
-      b.disabled = false;
       if (d.ok) $('[data-dominio-titular]')!.hidden = true;
       else if (d.campo) campo(`titular-${d.campo}`)?.focus();
     }
@@ -514,7 +524,9 @@ export function iniciarEstudioWeb() {
     }
     st.textContent = v.comprado
       ? v.estado === 'registrando'
-        ? `Registrando ${v.dominio} a tu nombre. Puedes cerrar esta página: lo conectamos solos y te escribimos cuando esté.`
+        ? v.aviso
+          ? `Registrando ${v.dominio} a tu nombre. ${v.aviso}`
+          : `Registrando ${v.dominio} a tu nombre. Puedes cerrar esta página: lo conectamos solos y te escribimos cuando esté.`
         : `${v.dominio} ya es tuyo. Lo estamos conectando a tu web con https; te escribimos cuando esté (suele tardar menos de una hora).`
       : v.estado === 'conectando'
         ? 'Servidores DNS cambiados. Estamos preparando el certificado https; tarda unos minutos.'

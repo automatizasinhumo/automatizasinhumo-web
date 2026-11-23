@@ -4,7 +4,7 @@ import { pedidoWeb } from '../../../features/servicios/pedidoAuto';
 import { webDePedido } from '../../../features/servicios/webs';
 import { ideasDominio, ideasLibres } from '../../../features/servicios/ideasDominio';
 import { configRegistrador, cotizarDominios } from '../../../features/servicios/registrador';
-import { avanzarDominio, comprarDominio, configDominios, dominioDePedido, pedirDominio, type FilaDominio } from '../../../features/servicios/dominios';
+import { avanzarDominio, comprarDominio, configDominios, dominioDePedido, esAvisoRegistro, pedirDominio, type FilaDominio } from '../../../features/servicios/dominios';
 
 export const prerender = false;
 
@@ -20,6 +20,7 @@ const vista = (f: FilaDominio | null) =>
     estado: f.estado,
     servidores: JSON.parse(f.servidores || '[]') as string[],
     detalle: f.detalle,
+    aviso: f.estado === 'registrando' && esAvisoRegistro(f.detalle) ? f.detalle : null,
     comprado: !!f.registrador,
   };
 
