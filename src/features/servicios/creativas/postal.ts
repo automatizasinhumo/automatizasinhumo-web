@@ -22,6 +22,7 @@ export const postal: Diseno = {
   color: '#ce7657',
   fondoClaro: '#f5e5cc',
   fondoOscuro: '#316f86',
+  capa: { acabado: 'papel' },
   fuentes: ['ash-playfair', 'ash-dm-sans'],
   titulo: "'ash-playfair', Georgia, serif",
   texto: "'ash-dm-sans', system-ui, sans-serif",

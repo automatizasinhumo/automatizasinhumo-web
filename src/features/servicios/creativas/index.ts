@@ -46,12 +46,6 @@ const COMUN = `
 .w-d .w-cab-foto img{display:block}
 @container (min-width:760px){.w-d .w-nav ul{display:flex}}
 @container (max-width:640px){.w-d .w-nav .w-boton{display:none}}
-@supports (animation-timeline:view()){
-  @media (prefers-reduced-motion:no-preference){
-    .w-d .w-sec .w-in>*{animation:w-sube linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
-  }
-}
-@keyframes w-sube{from{transform:translateY(26px)}}
 `;
 
 export const CSS_DISENOS_COMUN = COMUN.replace(/\n\s*/g, '');

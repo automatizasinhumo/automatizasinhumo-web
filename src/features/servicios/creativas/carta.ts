@@ -20,6 +20,7 @@ export const carta: Diseno = {
   color: '#793c37',
   fondoClaro: '#f3e4c8',
   fondoOscuro: '#3b2523',
+  capa: { acabado: 'papel' },
   fuentes: ['ash-cormorant', 'ash-dm-sans'],
   titulo: "'ash-cormorant', Georgia, serif",
   texto: "'ash-dm-sans', system-ui, sans-serif",

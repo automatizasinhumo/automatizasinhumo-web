@@ -24,6 +24,7 @@ export const bistro: Diseno = {
   color: '#793c37',
   fondoClaro: '#f6ecd8',
   fondoOscuro: '#3b2522',
+  capa: { acabado: 'papel' },
   fuentes: ['ash-cormorant', 'ash-dm-sans'],
   titulo: "'ash-cormorant', 'Cormorant Garamond', Georgia, serif",
   texto: "'ash-dm-sans', system-ui, sans-serif",

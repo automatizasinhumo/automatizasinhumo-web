@@ -26,6 +26,7 @@ export const vinetas: Diseno = {
   color: '#3257b8',
   fondoClaro: '#ffd6ba',
   fondoOscuro: '#1d1d2b',
+  capa: { acabado: 'relieve' },
   fuentes: ['ash-bricolage', 'ash-outfit'],
   titulo: "'ash-bricolage', 'Trebuchet MS', sans-serif",
   texto: "'ash-outfit', system-ui, sans-serif",

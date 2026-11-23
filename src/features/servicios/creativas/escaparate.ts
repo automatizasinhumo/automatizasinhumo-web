@@ -16,6 +16,7 @@ export const escaparate: Diseno = {
   color: '#f08a50',
   fondoClaro: '#e7defa',
   fondoOscuro: '#232026',
+  capa: { movimiento: 'vivo' },
   fuentes: ['ash-syne', 'ash-manrope'],
   titulo: "'ash-syne', 'Trebuchet MS', sans-serif",
   texto: "'ash-manrope', system-ui, sans-serif",

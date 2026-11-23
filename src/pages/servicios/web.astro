@@ -10,6 +10,9 @@ import {
   cssFuentes,
   EJEMPLO_WEB,
   LETRAS_WEB,
+  ACABADOS_WEB,
+  FORMAS_FOTO_WEB,
+  MOVIMIENTOS_WEB,
   MAX_ENLACES_WEB,
   MAX_OPINIONES_WEB,
   MAX_PREGUNTAS_WEB,
@@ -201,14 +204,14 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
         <p class="aviso" role="alert" data-error="datos" hidden>Escribe el nombre del negocio y al menos un teléfono, un WhatsApp o un correo.</p>
         <div class="paso-acciones">
           <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
-          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: color y letra</button>
+          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: estilo</button>
         </div>
       </section>
 
       <!-- 3 · Personaliza -->
       <section data-paso="personaliza" aria-labelledby="paso-personaliza" hidden>
         <h2 id="paso-personaliza" class="paso-titulo">Dale tu toque</h2>
-        <p class="paso-entradilla">Elige el color de tu marca y la letra. La vista previa se actualiza sola.</p>
+        <p class="paso-entradilla">Color, letra, acabado, forma de la foto y movimiento. La vista previa se actualiza sola.</p>
         <div class="con-vista">
           <div class="min-w-0">
             <fieldset class="bloque" data-guia="color">
@@ -242,6 +245,26 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
                 }
               </div>
             </fieldset>
+            {
+              [
+                { k: 'acabado', t: 'Acabado', l: ACABADOS_WEB },
+                { k: 'formaFoto', t: 'Forma de la foto', l: FORMAS_FOTO_WEB },
+                { k: 'movimiento', t: 'Movimiento', l: MOVIMIENTOS_WEB },
+              ].map((g, i) => (
+                <fieldset class="bloque" data-guia={i === 0 ? 'capa' : undefined}>
+                  <legend>{g.t}</legend>
+                  <div class="letras">
+                    {g.l.map((x) => (
+                      <label class="letra">
+                        <input type="radio" name={g.k} value={x.id} class="sr-only" checked={x.id === 'auto'} />
+                        <strong>{x.nombre}</strong>
+                        <span>{x.descripcion}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))
+            }
             <fieldset class="bloque" data-guia="orden">
               <legend>Orden de las secciones</legend>
               <p class="ayuda text-sm">La portada va siempre arriba. Las secciones vacías no salen.</p>

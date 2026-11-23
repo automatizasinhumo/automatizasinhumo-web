@@ -23,6 +23,7 @@ export const lamina: Diseno = {
   color: '#8a6d45',
   fondoClaro: '#e8e4d8',
   fondoOscuro: '#303637',
+  capa: { acabado: 'papel' },
   fuentes: ['ash-manrope', 'ash-plex-mono'],
   titulo: "'ash-manrope', 'Helvetica Neue', sans-serif",
   texto: "'ash-manrope', system-ui, sans-serif",
