@@ -9,7 +9,7 @@ const sinTildes = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLo
 /** Palabras del sector → subtipo de schema.org. El orden importa: gana la primera que aparezca. */
 const TIPOS: readonly [RegExp, string][] = [
   [/peluquer|barber/, 'HairSalon'],
-  [/unas|manicur/, 'NailSalon'],
+  [/\bunas\b|manicur/, 'NailSalon'],
   [/estetica|belleza|spa\b/, 'BeautySalon'],
   [/dentist|dental|odontolog/, 'Dentist'],
   [/fisioterap|fisio\b/, 'Physiotherapy'],
@@ -81,7 +81,7 @@ function leerDias(txt: string): string[] | null {
 const hora = (h: string, m?: string) => {
   const n = Number(h);
   const mm = Number(m ?? 0);
-  return n <= 24 && mm < 60 ? `${String(n).padStart(2, '0')}:${String(mm).padStart(2, '0')}` : null;
+  return (n < 24 || (n === 24 && mm === 0)) && mm < 60 ? `${String(n).padStart(2, '0')}:${String(mm).padStart(2, '0')}` : null;
 };
 
 /** «9:30 – 14:00 y 17:00 – 20:00» → tramos; null si sobra algo. */
@@ -101,21 +101,31 @@ function leerHoras(txt: string): [string, string][] | null {
 
 /**
  * Horario escrito a mano → `openingHoursSpecification`. Una línea por grupo de días
- * («Lunes a viernes: 9:30 – 20:00»). Las líneas de cerrado o festivos se ignoran; si alguna
- * otra línea no se entiende, no se emite nada (un horario a medias confundiría a los buscadores).
+ * («Lunes a viernes: 9:30 – 20:00»). Las líneas de cerrado quitan esos días de los tramos
+ * («Lunes a viernes: 9-14» + «Miércoles: cerrado» → sin miércoles); las de festivos o cita previa
+ * se ignoran. Si alguna otra línea no se entiende, no se emite nada (un horario a medias
+ * confundiría a los buscadores).
  */
 export function horarioSchema(horario: string): Record<string, unknown>[] | undefined {
   const lineas = sinTildes(horario).replace(/[–—]/g, '-').split('\n').map((l) => l.trim()).filter(Boolean);
-  const salida: Record<string, unknown>[] = [];
+  const tramos: { dias: string[]; opens: string; closes: string }[] = [];
+  const cerrados = new Set<string>();
   for (const l of lineas) {
-    if (/cerrado|festivo|vacaciones|cita previa/.test(l)) continue;
+    if (/cerrado/.test(l)) {
+      for (const d of leerDias(l.replace(/cerrados?.*$/, '')) ?? []) cerrados.add(d);
+      continue;
+    }
+    if (/festivo|vacaciones|cita previa/.test(l)) continue;
     const corte = l.search(/\d/);
     if (corte <= 0) return undefined;
     const dias = leerDias(l.slice(0, corte));
-    const tramos = leerHoras(l.slice(corte));
-    if (!dias || !tramos) return undefined;
-    for (const [opens, closes] of tramos)
-      salida.push({ '@type': 'OpeningHoursSpecification', dayOfWeek: dias, opens, closes });
+    const horas = leerHoras(l.slice(corte));
+    if (!dias || !horas) return undefined;
+    for (const [opens, closes] of horas) tramos.push({ dias, opens, closes });
   }
+  const salida = tramos
+    .map(({ dias, opens, closes }) => ({ dias: dias.filter((d) => !cerrados.has(d)), opens, closes }))
+    .filter((t) => t.dias.length)
+    .map(({ dias, opens, closes }) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: dias, opens, closes }));
   return salida.length ? salida : undefined;
 }

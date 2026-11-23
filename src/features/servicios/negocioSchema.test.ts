@@ -9,6 +9,8 @@ describe('tipoNegocio', () => {
     expect(tipoNegocio('Taller mecánico')).toBe('AutoRepair');
     expect(tipoNegocio('Bar de tapas')).toBe('Restaurant');
     expect(tipoNegocio('Barbería')).toBe('HairSalon');
+    expect(tipoNegocio('Salón de uñas')).toBe('NailSalon');
+    expect(tipoNegocio('Tienda de aceitunas')).toBe('Store');
   });
   it('si no lo reconoce, LocalBusiness', () => {
     expect(tipoNegocio('')).toBe('LocalBusiness');
@@ -31,10 +33,16 @@ describe('horarioSchema', () => {
   it('ignora las líneas de cerrado', () => {
     expect(horarioSchema('Lunes a sábado: 9:00 - 21:00\nDomingos: cerrado')).toHaveLength(1);
   });
+  it('un día cerrado sale de los rangos que lo incluyen', () => {
+    expect(horarioSchema('Lunes a viernes: 9-14\nMiércoles: cerrado')?.[0]?.dayOfWeek).toEqual(['Monday', 'Tuesday', 'Thursday', 'Friday']);
+    expect(horarioSchema('Domingo: 10-14\nDomingo: cerrado')).toBeUndefined();
+  });
   it('si una línea no se entiende, no emite nada', () => {
     expect(horarioSchema('Lunes a viernes: 9:30 – 20:00\nVerano: 8 – 15')).toBeUndefined();
     expect(horarioSchema('Mañanas de 9 a 14')).toBeUndefined();
     expect(horarioSchema('Lunes: 25:00 - 26:00')).toBeUndefined();
+    expect(horarioSchema('Lunes: 09:00 - 24:30')).toBeUndefined();
+    expect(horarioSchema('Viernes: 20:00 - 24:00')?.[0]?.closes).toBe('24:00');
     expect(horarioSchema('Viernes a lunes: 9 - 14')).toBeUndefined();
     expect(horarioSchema('')).toBeUndefined();
   });
