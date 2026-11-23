@@ -28,6 +28,19 @@
           "Tratamientos",
           "Hidratación y reparación del cabello."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "galeria",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Cuánto cuesta el corte?",
+        "¿Atendéis sin cita?",
+        "¿Cuánto dura una coloración?"
       ]
     },
     {
@@ -61,6 +74,19 @@
           "Masajes",
           "Relajantes y descontracturantes."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "galeria",
+        "preguntas",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Qué incluye cada tratamiento?",
+        "¿Hay alguna contraindicación?",
+        "¿Puedo cambiar mi cita?"
       ]
     },
     {
@@ -99,6 +125,19 @@
           "Grupos y celebraciones",
           "Menús cerrados para comidas y cenas."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "galeria",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Tenéis menú del día?",
+        "¿Aceptáis reservas?",
+        "¿Hay opciones sin gluten?"
       ]
     },
     {
@@ -129,6 +168,19 @@
           "Instalaciones",
           "Agua fría y caliente, desagües."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "preguntas",
+        "galeria",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Atendéis urgencias?",
+        "¿Qué zonas cubrís?",
+        "¿Cobráis el desplazamiento?"
       ]
     },
     {
@@ -160,6 +212,19 @@
           "Iluminación",
           "Cambio a LED y puntos de luz."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "preguntas",
+        "galeria",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Tenéis servicio urgente?",
+        "¿Qué zonas atendéis?",
+        "¿Hacéis instalaciones nuevas y reparaciones?"
       ]
     },
     {
@@ -195,6 +260,19 @@
           "Pintura",
           "Interiores y fachadas."
         ]
+      ],
+      "orden": [
+        "galeria",
+        "servicios",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿El presupuesto es sin compromiso?",
+        "¿Cuánto dura una reforma?",
+        "¿Os encargáis de los materiales?"
       ]
     },
     {
@@ -228,6 +306,19 @@
           "Diagnosis",
           "Lectura de averías electrónica."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "preguntas",
+        "galeria",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Trabajáis con mi marca y modelo?",
+        "¿Cuánto tarda un diagnóstico?",
+        "¿Hace falta cita previa?"
       ]
     },
     {
@@ -266,6 +357,19 @@
           "Consejos para casa",
           "Pautas para continuar entre sesiones."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "galeria",
+        "preguntas",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Necesito cita previa?",
+        "¿Cuánto dura la primera consulta?",
+        "¿Trabajáis con mutuas o seguros?"
       ]
     },
     {
@@ -303,6 +407,19 @@
           "Bonos",
           "Mensual o por sesiones."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "galeria",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Puedo probar una clase?",
+        "¿Hay grupos para principiantes?",
+        "¿Qué horarios tenéis?"
       ]
     },
     {
@@ -339,6 +456,19 @@
           "Prueba de nivel",
           "Para empezar en el grupo adecuado."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "galeria",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Qué niveles impartís?",
+        "¿Dais clases en línea?",
+        "¿Cómo funciona la matrícula?"
       ]
     },
     {
@@ -375,6 +505,19 @@
           "Consultas",
           "Resolvemos tus dudas concretas."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "galeria",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Trabajáis con autónomos?",
+        "¿Qué incluye la cuota?",
+        "¿La primera consulta tiene coste?"
       ]
     },
     {
@@ -414,6 +557,19 @@
           "Envíos",
           "Consulta si llegamos a tu zona."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "galeria",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Puedo preguntar si tenéis algo antes de ir?",
+        "¿Hacéis encargos?",
+        "¿Enviáis a domicilio?"
       ]
     },
     {
@@ -450,6 +606,19 @@
           "Reparto",
           "Consulta si llegamos a tu zona."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "galeria",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Aceptáis encargos?",
+        "¿Tenéis productos para alergias o intolerancias?",
+        "¿Puedo pedir y pasar a recoger?"
       ]
     },
     {
@@ -482,6 +651,19 @@
           "Fin de obra",
           "Dejamos todo listo para entrar."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "preguntas",
+        "galeria",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Qué productos usáis?",
+        "¿Cómo calculáis el presupuesto?",
+        "¿En qué localidades trabajáis?"
       ]
     },
     {
@@ -515,6 +697,19 @@
           "Alimentación",
           "Te aconsejamos la dieta adecuada."
         ]
+      ],
+      "orden": [
+        "servicios",
+        "galeria",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Qué animales atendéis?",
+        "¿Hace falta cita?",
+        "¿Qué tengo que llevar?"
       ]
     },
     {
@@ -549,6 +744,19 @@
           "Estancias largas",
           "Precio especial por semanas."
         ]
+      ],
+      "orden": [
+        "galeria",
+        "servicios",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿A qué hora es la entrada y la salida?",
+        "¿Admitís mascotas?",
+        "¿Hay aparcamiento?"
       ]
     },
     {
@@ -583,6 +791,19 @@
           "Sesiones",
           "Retratos y familia."
         ]
+      ],
+      "orden": [
+        "galeria",
+        "servicios",
+        "opiniones",
+        "sobre",
+        "preguntas",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿Cuánto cuesta una sesión?",
+        "¿Cuándo entregáis las fotos?",
+        "¿Os desplazáis?"
       ]
     }
   ],
@@ -605,6 +826,19 @@
         "Trabajo garantizado",
         "Si algo no está bien, lo arreglamos."
       ]
+    ],
+    "orden": [
+      "servicios",
+      "opiniones",
+      "galeria",
+      "preguntas",
+      "sobre",
+      "contacto"
+    ],
+    "preguntas": [
+      "¿Cómo puedo contactar con vosotros?",
+      "¿Qué zonas atendéis?",
+      "¿Cuánto cuesta?"
     ]
   }
 }

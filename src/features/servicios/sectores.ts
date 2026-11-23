@@ -3,7 +3,7 @@
 // cambiar. Sin servicios externos ni coste por uso: es una tabla. Añadir un sector es añadir una
 // entrada en src/data/sectores-web.json; `claves` son raíces sin tildes que se buscan en lo que escribe el cliente.
 import datos from '../../data/sectores-web.json';
-import type { ServicioWeb } from './webs';
+import { ordenWeb, type IdSeccionWeb, type PreguntaWeb, type ServicioWeb } from './webs';
 
 export interface SectorWeb {
   id: string;
@@ -13,6 +13,10 @@ export interface SectorWeb {
   lema: string;
   sobre: string;
   servicios: [string, string][];
+  /** Orden de secciones de partida: lo que el cliente de ese negocio busca primero (fotos, opiniones…). */
+  orden: IdSeccionWeb[];
+  /** Preguntas frecuentes típicas, sin respuesta: las responde el negocio y solo se publican respondidas. */
+  preguntas: string[];
 }
 
 // Los datos viven en src/data/sectores-web.json; aquí solo el tipo y la lógica.
@@ -59,6 +63,8 @@ export interface TextosWeb {
   lema: string;
   sobre: string;
   servicios: ServicioWeb[];
+  orden: IdSeccionWeb[];
+  preguntas: PreguntaWeb[];
 }
 
 /** Textos de partida para un negocio: los del sector que encaje o los genéricos. */
@@ -69,5 +75,15 @@ export function textosDeSector(sector: string, negocio: string, direccion = ''):
     lema: lugar ? `${s.lema} en ${lugar}.` : `${s.lema}.`,
     sobre: s.sobre.replaceAll('{negocio}', () => negocio.trim() || 'nuestro negocio'),
     servicios: s.servicios.map(([nombre, texto]) => ({ nombre, precio: '', texto })),
+    orden: ordenWeb(s.orden),
+    preguntas: s.preguntas.map((pregunta) => ({ pregunta, respuesta: '' })),
   };
 }
+
+const TODOS = [...SECTORES_WEB, SECTOR_GENERICO];
+const PREGUNTAS_DE_SECTOR = new Set(TODOS.flatMap((s) => s.preguntas));
+const ORDENES_DE_SECTOR = new Set([ordenWeb([]), ...TODOS.map((s) => ordenWeb(s.orden))].map((o) => o.join()));
+/** Pregunta que pusimos nosotros (de algún sector): si sigue sin respuesta, se puede cambiar por la del sector nuevo. */
+export const esPreguntaDeSector = (p: string) => PREGUNTAS_DE_SECTOR.has(p.trim());
+/** Orden que no ha movido el cliente: el de partida o el de algún sector. */
+export const esOrdenDeSector = (orden: readonly string[]) => ORDENES_DE_SECTOR.has(ordenWeb(orden as IdSeccionWeb[]).join());
