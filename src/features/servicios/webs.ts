@@ -11,6 +11,7 @@
  * formulario, la validación y la publicación no cambian al añadir una.
  */
 import { horarioSchema, tipoNegocio } from './negocioSchema';
+import { accionesDeSector } from './sectorBase';
 import {
   COLOR_VALIDO,
   EMAIL,
@@ -476,12 +477,15 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const rel = (href: string) => (href.startsWith('http') ? ' rel="noopener"' : '');
   const tel = d.telefono ? `tel:${digitos(d.telefono)}` : '';
   // El primero es el botón principal (relleno): reservar, si hay enlace; si no, WhatsApp, llamar o correo.
+  // Los textos dependen del sector: un bar reserva mesa; un fontanero pide presupuesto.
+  const textos = accionesDeSector(d.sector);
   const listaAcciones = [
-    d.reservas && [d.reservas, 'cita', 'Reservar cita'],
+    d.reservas && [d.reservas, 'cita', textos.reserva],
     d.whatsapp && [enlaceWhatsapp(d.whatsapp), 'wa', 'WhatsApp'],
     tel && [tel, 'tel', 'Llamar'],
     !d.telefono && !d.whatsapp && d.email && [`mailto:${d.email}`, 'mail', 'Escríbenos'],
   ].filter(Boolean) as [string, 'cita' | 'wa' | 'tel' | 'mail', string][];
+  if (!d.reservas && textos.contacto && listaAcciones[0]) listaAcciones[0] = [listaAcciones[0][0], listaAcciones[0][1], textos.contacto];
   const acciones = listaAcciones
     .map(([href, ico, txt], i) => `<a class="w-boton${i ? '' : ' w-boton-lleno'}" href="${esc(href)}"${rel(href)}>${icono(ico)}${txt}</a>`)
     .join('');

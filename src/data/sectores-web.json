@@ -46,7 +46,8 @@
         "agenda",
         "navaja",
         "salon"
-      ]
+      ],
+      "reserva": "Reservar cita"
     },
     {
       "id": "estetica",
@@ -97,7 +98,8 @@
         "agenda",
         "serena",
         "herbario"
-      ]
+      ],
+      "reserva": "Reservar cita"
     },
     {
       "id": "bar",
@@ -153,7 +155,8 @@
         "carta-impresa",
         "bistro",
         "barra"
-      ]
+      ],
+      "reserva": "Reservar mesa"
     },
     {
       "id": "fontaneria",
@@ -201,7 +204,9 @@
         "urgente",
         "expediente",
         "guardia"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir presupuesto"
     },
     {
       "id": "electricidad",
@@ -250,7 +255,9 @@
         "urgente",
         "expediente",
         "lamina"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir presupuesto"
     },
     {
       "id": "reformas",
@@ -303,7 +310,9 @@
         "expediente",
         "lamina",
         "urgente"
-      ]
+      ],
+      "reserva": "Pedir visita",
+      "contacto": "Pedir presupuesto"
     },
     {
       "id": "taller",
@@ -354,7 +363,9 @@
         "urgente",
         "expediente",
         "pulso"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir cita"
     },
     {
       "id": "salud",
@@ -410,7 +421,9 @@
         "serena",
         "indice",
         "agenda"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir cita"
     },
     {
       "id": "deporte",
@@ -465,7 +478,9 @@
         "pulso",
         "serena",
         "impulso"
-      ]
+      ],
+      "reserva": "Reservar clase",
+      "contacto": "Probar una clase"
     },
     {
       "id": "academia",
@@ -519,7 +534,9 @@
         "cuaderno",
         "vinetas",
         "indice"
-      ]
+      ],
+      "reserva": "Reservar clase",
+      "contacto": "Pedir información"
     },
     {
       "id": "asesoria",
@@ -573,7 +590,9 @@
         "indice",
         "lamina",
         "consulta"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Hacer una consulta"
     },
     {
       "id": "tienda",
@@ -630,7 +649,8 @@
         "escaparate",
         "herbario",
         "vinetas"
-      ]
+      ],
+      "reserva": "Reservar"
     },
     {
       "id": "alimentacion",
@@ -684,7 +704,9 @@
         "escaparate",
         "bistro",
         "atelier"
-      ]
+      ],
+      "reserva": "Hacer un encargo",
+      "contacto": "Hacer un encargo"
     },
     {
       "id": "limpieza",
@@ -734,7 +756,9 @@
         "urgente",
         "serena",
         "guardia"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir presupuesto"
     },
     {
       "id": "mascotas",
@@ -785,7 +809,9 @@
         "vinetas",
         "serena",
         "escaparate"
-      ]
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir cita"
     },
     {
       "id": "alojamiento",
@@ -837,7 +863,9 @@
         "postal",
         "fotograma",
         "atelier"
-      ]
+      ],
+      "reserva": "Reservar",
+      "contacto": "Consultar disponibilidad"
     },
     {
       "id": "fotografia",
@@ -889,7 +917,9 @@
         "fotograma",
         "lamina",
         "postal"
-      ]
+      ],
+      "reserva": "Reservar fecha",
+      "contacto": "Pedir presupuesto"
     }
   ],
   "generico": {

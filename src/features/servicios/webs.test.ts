@@ -85,6 +85,13 @@ describe('renderWeb: bloques nuevos', () => {
     expect(html).toContain('<nav class="w-barra" aria-label="Contactar">');
     expect(html).toContain('Ver todas las opiniones');
   });
+  it('el texto del botón principal depende del sector', () => {
+    expect(renderWeb(datos({ sector: 'Bar de tapas', reservas: 'https://x.es/r' }))).toMatch(/w-boton-lleno"[^>]*>.*?Reservar mesa<\/a>/);
+    expect(renderWeb(datos({ sector: 'Fontanero' }))).toMatch(/<a class="w-boton w-boton-lleno" href="tel:600123456">.*?Pedir presupuesto<\/a>/);
+    const pelu = renderWeb(datos({ sector: 'Peluquería' }));
+    expect(pelu).toMatch(/w-boton-lleno" href="tel:600123456">.*?Llamar<\/a>/);
+    expect(renderWeb(datos({ sector: 'Fontanero', reservas: 'https://x.es/r' }))).toMatch(/w-boton-lleno"[^>]*>.*?Pedir cita<\/a><a class="w-boton" href="tel:600123456">.*?Llamar</);
+  });
   it('sin reservas, el principal sigue siendo llamar', () => {
     const html = renderWeb(datos({}));
     expect(html).toMatch(/<a class="w-boton w-boton-lleno" href="tel:600123456">/);
