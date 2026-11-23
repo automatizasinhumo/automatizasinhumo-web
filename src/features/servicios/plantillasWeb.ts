@@ -189,7 +189,9 @@ const VARIANTES = `
 .w .w-cab{position:relative;isolation:isolate;overflow:hidden;padding-block:clamp(calc(var(--w-esp)*2),6cqw,calc(var(--w-esp)*4));background:var(--w-fondo);color:var(--w-tinta)}
 .w .w-cab-in{display:grid;gap:clamp(var(--w-esp),4cqw,calc(var(--w-esp)*3));align-items:center}
 .w .w-cab-txt{min-width:0;position:relative;z-index:2;container-type:inline-size}
-.w h1{--w-h1-tope:calc(100cqi / (var(--w-pl,8) * var(--w-em-letra,.68)))}
+.w h1{--w-h1-tope:calc(100cqi / (var(--w-pl,8) * var(--w-em-letra,.74)))}
+.w :is(h2,h3){hyphens:auto}
+.w :is(.w-s-1,.w-s-2,.w-s-3,.w-s-4,.w-s-5)>li{min-width:0}
 .w .w-cab-txt>*+*{margin-block-start:clamp(12px,2cqw,22px)}
 .w .w-cab h1{font-size:min(var(--w-h1),var(--w-h1-tope,99em));line-height:1.04;letter-spacing:-.035em;text-wrap:balance}
 .w .w-cab .w-lema{font-size:clamp(1.05rem,2.1cqw,1.35rem);line-height:1.5;max-width:55ch;color:var(--w-suave)}

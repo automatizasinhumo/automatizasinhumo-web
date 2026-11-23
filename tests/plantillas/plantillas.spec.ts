@@ -62,6 +62,9 @@ function partidas(pg: Page) {
       for (let n = tw.nextNode(); n; n = tw.nextNode()) {
         for (const w of seg.segment(n.textContent ?? '')) {
           if (!w.isWordLike) continue;
+          // En h2/h3 de tarjetas estrechas una palabra de 15+ letras («electrodomésticos») puede no caber
+          // ni encogida: se admite que baje partida (con guion donde el navegador separa) antes que desbordar.
+          if (h.tagName !== 'H1' && [...w.segment].length >= 15) continue;
           const r = document.createRange();
           r.setStart(n, w.index);
           r.setEnd(n, w.index + w.segment.length);

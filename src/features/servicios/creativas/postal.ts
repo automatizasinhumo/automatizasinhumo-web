@@ -76,7 +76,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-postal .w-sello-postal svg{width:40px;fill:#fffdf8}
 .w-d-postal .w-matasellos{display:grid;place-items:center;width:92px;aspect-ratio:1;margin-top:-34px;margin-left:-60px;border:2px solid var(--w-mar);border-radius:50%;color:var(--w-mar);font:700 .58rem/1.2 var(--w-ft-texto);letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:12px;transform:rotate(-14deg);opacity:.85}
 .w-d-postal .w-sector{color:var(--w-ct)}
-.w-d-postal .w-cab h1{--w-em-letra:.8;font-weight:700;font-size:min(clamp(2.6rem,8cqw,5.6rem),var(--w-h1-tope,99em));line-height:.98;letter-spacing:-.02em}
+.w-d-postal .w-cab h1{--w-em-letra:.9;font-weight:700;font-size:min(clamp(2.6rem,8cqw,5.6rem),var(--w-h1-tope,99em));line-height:.98;letter-spacing:-.02em}
 .w-d-postal .w-cab .w-lema{font-family:var(--w-ft-titulo);font-style:italic;font-size:clamp(1.1rem,2.2cqw,1.4rem);line-height:1.6;max-width:34ch}
 .w-d-postal .w-boton{border-radius:4px;font-weight:600}
 .w-d-postal .w-sec h2{font-weight:600;font-size:clamp(2rem,5.5cqw,3.6rem);letter-spacing:-.02em}
