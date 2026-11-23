@@ -148,7 +148,10 @@ export default {
       const w = await webPorSlug(env.DB, slug);
       if (!w) return null;
       const tienda = await origenTienda();
-      return documentoWeb(w.datos, url, tienda, `${tienda || new URL(url).origin}/w/${w.slug}/foto`);
+      // Sin origen de tienda, las fotos van dentro del HTML: el dominio del cliente solo sirve «/».
+      if (!tienda) return documentoWeb(w.datos, url);
+      const recursos = `${tienda}/w/${w.slug}`;
+      return documentoWeb(w.datos, url, tienda, `${recursos}/foto`, `${recursos}/galeria/`);
     }).catch((err) => {
       console.error('Custom domain lookup failed:', err instanceof Error ? err.message : 'error');
       return null;

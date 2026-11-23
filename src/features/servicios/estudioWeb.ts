@@ -13,7 +13,7 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
-import { fotoValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -63,9 +63,9 @@ const CAMPOS = ['negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whats
  * Reduce la foto en el navegador (lado mayor 1200 px) y la devuelve como data URL que quepa en
  * MAX_FOTO_WEB: WebP si el navegador lo sabe escribir, si no JPEG, bajando calidad hasta que entre.
  */
-async function reducirFoto(f: File): Promise<string> {
+async function reducirFoto(f: File, lado = 1200, max = MAX_FOTO_WEB): Promise<string> {
   const bmp = await createImageBitmap(f);
-  const k = Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
+  const k = Math.min(1, lado / Math.max(bmp.width, bmp.height));
   const lienzo = document.createElement('canvas');
   lienzo.width = Math.max(1, Math.round(bmp.width * k));
   lienzo.height = Math.max(1, Math.round(bmp.height * k));
@@ -75,7 +75,7 @@ async function reducirFoto(f: File): Promise<string> {
     for (const q of [0.82, 0.7, 0.55, 0.4]) {
       const url = lienzo.toDataURL(tipo, q);
       if (!url.startsWith(`data:${tipo}`)) break;
-      if (url.length <= MAX_FOTO_WEB) return url;
+      if (url.length <= max) return url;
     }
   return '';
 }
@@ -177,6 +177,42 @@ export function iniciarEstudioWeb() {
     pintarOrden();
     genFoto++;
     pintarFoto();
+    galeria = galeriaValida(c.galeria);
+    genGaleria++;
+    pintarGaleria();
+  }
+  /** Fotos de la galería (data URL ya reducidas); se guardan con el borrador como el resto. */
+  let galeria: string[] = [];
+  let genGaleria = 0;
+  let colaGaleria: Promise<void> = Promise.resolve();
+  function pintarGaleria(aviso = '') {
+    $('[data-galeria-lista]')!.replaceChildren(
+      ...galeria.map((url, i) => {
+        const li = document.createElement('li');
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Foto ${i + 1} de la galería`;
+        const quitar = document.createElement('button');
+        quitar.type = 'button';
+        quitar.className = 'quitar';
+        quitar.dataset.galeriaQuitar = String(i);
+        quitar.textContent = 'Quitar';
+        quitar.setAttribute('aria-label', `Quitar la foto ${i + 1}`);
+        li.appendChild(img);
+        li.appendChild(quitar);
+        return li;
+      }),
+    );
+    $('[data-galeria-anadir]')!.hidden = galeria.length >= MAX_GALERIA_WEB;
+    const a = $('[data-galeria-aviso]')!;
+    a.textContent = aviso;
+    a.hidden = !aviso;
+  }
+  function cambiarGaleria(nueva: string[], aviso = '') {
+    galeria = galeriaValida(nueva);
+    pintarGaleria(aviso);
+    persistir();
+    programar(true);
   }
   /** Primera no sube y última no baja. */
   function pintarOrden() {
@@ -213,6 +249,7 @@ export function iniciarEstudioWeb() {
         Object.fromEntries($$<HTMLInputElement>('[data-k]', item).map((x) => [x.dataset.k!, x.value.trim()])),
       );
     c.orden = $$('[data-orden] > li').map((li) => li.dataset.seccion);
+    c.galeria = galeria;
     return c as unknown as Contenido;
   }
   const vacio = (): Partial<Contenido> => ({ servicios: [{ nombre: '', precio: '', texto: '' }], enlaces: [], opiniones: [], preguntas: [], orden: ordenWeb(recoger().orden) });
@@ -620,6 +657,10 @@ export function iniciarEstudioWeb() {
   raiz.addEventListener('click', (ev) => {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('button, [data-ir]');
     if (!b) return;
+    if (b.dataset.galeriaQuitar) {
+      const fuera = Number(b.dataset.galeriaQuitar);
+      return cambiarGaleria(galeria.filter((_, i) => i !== fuera));
+    }
     if (b.hasAttribute('data-foto-quitar')) {
       genFoto++;
       return ponerFoto('');
@@ -714,6 +755,28 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.hasAttribute('data-galeria-elegir')) {
+      const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
+      c.value = '';
+      // Las selecciones se encolan: elegir otra foto mientras se reduce la anterior no la pierde.
+      // Solo un vaciado o una recarga (que suben genGaleria) descartan lo que está en curso.
+      const gen = genGaleria;
+      if (!todos.length) return pintarGaleria('Elige una o varias imágenes (JPG o PNG).');
+      colaGaleria = colaGaleria.then(async () => {
+        if (gen !== genGaleria) return;
+        const hueco = MAX_GALERIA_WEB - galeria.length;
+        const elegidos = todos.slice(0, hueco);
+        const urls = await Promise.all(elegidos.map((f) => reducirFoto(f, 1000, MAX_FOTO_GALERIA_WEB).catch(() => '')));
+        if (gen !== genGaleria) return;
+        const buenas = urls.filter(Boolean);
+        const avisos = [
+          buenas.length < elegidos.length && 'Alguna foto no se ha podido abrir; prueba con otra.',
+          todos.length > hueco && `Caben ${MAX_GALERIA_WEB} fotos; hemos añadido las primeras.`,
+        ].filter(Boolean);
+        cambiarGaleria([...galeria, ...buenas], avisos.join(' '));
+      });
+      return;
+    }
     if (c.hasAttribute('data-foto-elegir')) {
       const f = c.files?.[0];
       c.value = '';

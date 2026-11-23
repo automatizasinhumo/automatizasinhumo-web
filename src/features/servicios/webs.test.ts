@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { EJEMPLO_WEB, fichaNegocio, MAX_OPINIONES_WEB, MAX_PREGUNTAS_WEB, ordenWeb, renderWeb, SECCIONES_WEB, validarWeb, type DatosWeb } from './webs';
+import {
+  EJEMPLO_WEB,
+  fichaNegocio,
+  galeriaValida,
+  MAX_FOTO_GALERIA_WEB,
+  MAX_GALERIA_WEB,
+  MAX_OPINIONES_WEB,
+  MAX_PREGUNTAS_WEB,
+  ordenWeb,
+  renderWeb,
+  SECCIONES_WEB,
+  validarWeb,
+  type DatosWeb,
+} from './webs';
 
 const base = { negocio: 'Peluquería Marta', telefono: '600 123 456' };
 const datos = (x: Record<string, unknown>): DatosWeb => {
@@ -82,5 +95,38 @@ describe('fichaNegocio: zonas', () => {
     const f = JSON.parse(fichaNegocio(datos({ zonas: 'Lugo, Outeiro de Rei;  Rábade ' }), 'https://x.es'));
     expect(f.areaServed).toEqual(['Lugo', 'Outeiro de Rei', 'Rábade']);
     expect(JSON.parse(fichaNegocio(datos({}), 'https://x.es')).areaServed).toBeUndefined();
+  });
+});
+
+describe('galería', () => {
+  const foto = (n: number) => `data:image/png;base64,${'A'.repeat(4 * n)}`;
+
+  it('filtra fotos no válidas, quita repetidas y limita a MAX_GALERIA_WEB', () => {
+    const grande = `data:image/png;base64,${'A'.repeat(MAX_FOTO_GALERIA_WEB)}`;
+    const lista = [foto(1), foto(1), 'https://x.es/a.png', 'data:image/gif;base64,AAAA', grande, 7, ...[2, 3, 4, 5, 6, 7, 8].map(foto)];
+    const g = galeriaValida(lista);
+    expect(g).toHaveLength(MAX_GALERIA_WEB);
+    expect(new Set(g).size).toBe(g.length);
+    expect(g).not.toContain(grande);
+    expect(g[0]).toBe(foto(1));
+    expect(galeriaValida('no')).toEqual([]);
+  });
+
+  it('validarWeb conserva la galería válida', () => {
+    expect(datos({ galeria: [foto(1), 'mala', foto(2)] }).galeria).toEqual([foto(1), foto(2)]);
+  });
+
+  it('la publicada sirve las fotos por ruta, con carga diferida', () => {
+    const html = renderWeb(datos({ galeria: [foto(1), foto(2)] }), { galeria: '/w/x/galeria/' });
+    expect(html).toContain('id="galeria"');
+    expect(html).toContain('src="/w/x/galeria/0"');
+    expect(html).toContain('src="/w/x/galeria/1"');
+    expect(html).toContain('loading="lazy"');
+    expect(html).not.toContain('data:image');
+  });
+
+  it('la vista previa usa la data URL y sin fotos no hay sección', () => {
+    expect(renderWeb(datos({ galeria: [foto(1)] }))).toContain(`src="${foto(1)}"`);
+    expect(renderWeb(datos({ galeria: [] }))).not.toContain('id="galeria"');
   });
 });
