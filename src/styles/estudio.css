@@ -1085,3 +1085,7 @@
   display: grid;
   justify-items: center;
 }
+
+/* «Editar tocando»: el campo al que lleva un toque en la vista previa se ilumina un momento. */
+.tocado { outline: 3px solid #2563eb; outline-offset: 4px; border-radius: 10px; transition: outline-color 1.2s ease; }
+@media (prefers-reduced-motion: reduce) { .tocado { transition: none; } }

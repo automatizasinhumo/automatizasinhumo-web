@@ -111,7 +111,27 @@ const ERROR_PUBLICAR: Record<string, string> = {
 /** Estilos solo de la vista previa: sin seleccionar texto y la miniatura a escala. */
 /** Ancho al que se pinta la vista «Ordenador» antes de escalarla al panel: pasa los cortes de 640 y 960 px. */
 const ANCHO_ESCRITORIO = 1100;
-const CSS_VISTA = `:host{display:block;user-select:none;-webkit-user-select:none}.mini{width:250%;transform:scale(.4);transform-origin:0 0}:host([data-escritorio]) .w{width:${ANCHO_ESCRITORIO}px;zoom:var(--escala,1)}`;
+const CSS_VISTA = `:host{display:block;user-select:none;-webkit-user-select:none}[data-editar]{cursor:pointer}@media (hover:hover){[data-editar]:hover{outline:2px dashed #2563eb;outline-offset:4px}}.mini{width:250%;transform:scale(.4);transform-origin:0 0}:host([data-escritorio]) .w{width:${ANCHO_ESCRITORIO}px;zoom:var(--escala,1)}`;
+
+/**
+ * «Editar tocando»: lo que se ve en la vista previa lleva al campo que lo cambia.
+ * En orden de prioridad (lo concreto de la portada antes que la sección entera).
+ * Solo en la vista previa: la web publicada no lleva estas marcas.
+ */
+export const TOCABLES: readonly [vista: string, campo: string, etiqueta: string][] = [
+  ['.w-cab h1, .w-nav-marca', '[name="negocio"]', 'el nombre'],
+  ['.w-sector', '[name="sector"]', 'la actividad'],
+  ['.w-lema', '[name="lema"]', 'la frase de portada'],
+  ['.w-cab-foto, .w-arco', '[name="foto"]', 'la foto'],
+  ['#servicios', '[data-lista="servicios"]', 'los servicios'],
+  ['#galeria', '[data-galeria]', 'las fotos'],
+  ['#sobre', '[name="sobre"]', 'quiénes sois'],
+  ['#horario', '[name="horario"]', 'el horario'],
+  ['#zonas', '[name="zonas"]', 'las zonas'],
+  ['#opiniones', '[data-lista="opiniones"]', 'las opiniones'],
+  ['#preguntas', '[data-lista="preguntas"]', 'las preguntas'],
+  ['#contacto, .w-barra', '[name="telefono"]', 'el contacto'],
+];
 
 function leer(): Partial<Estado> {
   try {
@@ -333,6 +353,12 @@ export function iniciarEstudioWeb() {
     const muestra = !d.negocio;
     const v = muestra ? { ...cfg.ejemplo, plantilla: d.plantilla, color: d.color, letra: d.letra } : paraVista(d);
     sombra.innerHTML = `<style>${cfg.css}${CSS_VISTA}</style>${renderWeb(v, { marca: MARCA_WEB })}`;
+    for (const [sel, , etiqueta] of TOCABLES)
+      for (const el of sombra.querySelectorAll<HTMLElement>(sel))
+        if (!el.closest('[data-editar]')) {
+          el.dataset.editar = sel;
+          el.title = `Toca para cambiar ${etiqueta}`;
+        }
     barra.textContent = `${location.host}/w/${slugDe(v.negocio)}`;
     escalar();
     $('[data-estado]')!.textContent = muestra ? 'Ejemplo: escribe tus datos y aparecerán aquí' : `Vista previa · diseño ${nombrePlantilla(v.plantilla)}`;
@@ -355,6 +381,30 @@ export function iniciarEstudioWeb() {
     if (escritorio && host.clientWidth) host.style.setProperty('--escala', String(Math.min(1, host.clientWidth / ANCHO_ESCRITORIO)));
   }
   new ResizeObserver(escalar).observe(host);
+  sombra.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    const el = (ev.target as HTMLElement).closest<HTMLElement>('[data-editar]');
+    const destino = el && TOCABLES.find(([sel]) => sel === el.dataset.editar);
+    if (destino) tocar(destino[1]);
+  });
+  /** Abre el paso que contiene el campo, lo resalta un momento y lo enfoca. */
+  function tocar(sel: string) {
+    const objetivo = $<HTMLElement>(sel, form ?? undefined);
+    const paso = objetivo?.closest<HTMLElement>('[data-paso]')?.dataset.paso;
+    if (!objetivo || !paso) return;
+    if (paso !== actual) {
+      history.pushState(null, '', `#${paso}`);
+      mostrar(paso, false);
+    }
+    requestAnimationFrame(() => {
+      const caja = objetivo.closest<HTMLElement>('label, fieldset, [data-lista], [data-galeria]') ?? objetivo;
+      caja.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      caja.classList.add('tocado');
+      setTimeout(() => caja.classList.remove('tocado'), 1600);
+      const foco = objetivo.matches('input, textarea, select') ? objetivo : $<HTMLElement>('input, textarea, button', objetivo);
+      foco?.focus({ preventScroll: true });
+    });
+  }
   let temporizador = 0;
   function programar(inmediato = false) {
     window.clearTimeout(temporizador);
