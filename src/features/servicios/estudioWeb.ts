@@ -11,9 +11,9 @@
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
-import { textosDeSector } from './sectores';
+import { esOrdenDeSector, esPreguntaDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
-import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -273,6 +273,21 @@ export function iniciarEstudioWeb() {
       $('[data-lista="servicios"] [data-items]')!.replaceChildren();
       for (const s of t.servicios.slice(0, cfg.maxServicios)) anadir('servicios', { ...s });
       limitar();
+      algo = true;
+    }
+    // Preguntas típicas del sector, sin respuesta (no se publican hasta responderlas).
+    // Sin respuestas y con preguntas vacías o de un sector (p. ej. cambió de sector): se ponen las del suyo.
+    if (c.preguntas.every((p) => !p.respuesta && (!p.pregunta || esPreguntaDeSector(p.pregunta)))) {
+      $('[data-lista="preguntas"] [data-items]')!.replaceChildren();
+      for (const p of t.preguntas.slice(0, MAX_PREGUNTAS_WEB)) anadir('preguntas', { ...p });
+      limitar();
+      algo = true;
+    }
+    // Orden del sector solo si el cliente no lo ha movido (sigue el de partida o el de algún sector).
+    if (esOrdenDeSector(ordenWeb(c.orden)) && ordenWeb(c.orden).join() !== t.orden.join()) {
+      const lista = $('[data-orden]')!;
+      for (const id of t.orden) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);
+      pintarOrden();
       algo = true;
     }
     return algo;

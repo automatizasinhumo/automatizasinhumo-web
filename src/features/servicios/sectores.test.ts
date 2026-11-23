@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_SERVICIOS_WEB, validarWeb } from './webs';
-import { lugarDe, SECTOR_GENERICO, SECTORES_WEB, sectorDe, textosDeSector } from './sectores';
+import { MAX_PREGUNTAS_WEB, MAX_SERVICIOS_WEB, ordenWeb, PLANTILLAS_WEB, validarWeb } from './webs';
+import { esOrdenDeSector, esPreguntaDeSector, lugarDe, SECTOR_GENERICO, SECTORES_WEB, sectorDe, textosDeSector } from './sectores';
 
 describe('sectorDe', () => {
   it.each([
@@ -69,5 +69,36 @@ describe('textosDeSector', () => {
   it('ids únicos', () => {
     const ids = SECTORES_WEB.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('orden y preguntas de partida', () => {
+  it.each([...SECTORES_WEB, SECTOR_GENERICO].map((s) => [s.id ?? 'generico', s] as const))('%s: orden completo y preguntas válidas', (_id, s) => {
+    expect(ordenWeb(s.orden)).toEqual(s.orden);
+    expect(s.preguntas.length).toBeGreaterThan(0);
+    expect(s.preguntas.length).toBeLessThanOrEqual(MAX_PREGUNTAS_WEB);
+    expect(new Set(s.preguntas).size).toBe(s.preguntas.length);
+    for (const p of s.preguntas) expect(p).toMatch(/^¿.+\?$/);
+  });
+
+  it('las preguntas salen sin respuesta y no se publican hasta responderlas', () => {
+    const t = textosDeSector('Fontanería', 'Fontanería Pérez');
+    expect(t.preguntas[0]).toEqual({ pregunta: '¿Atendéis urgencias?', respuesta: '' });
+    const r = validarWeb({ negocio: 'Fontanería Pérez', telefono: '600123123', preguntas: t.preguntas });
+    expect(r.ok && r.datos.preguntas).toEqual([]);
+  });
+
+  it('negocios visuales empiezan por la galería; oficios, por servicios', () => {
+    expect(textosDeSector('Reformas', 'x').orden[0]).toBe('galeria');
+    expect(textosDeSector('Fontanería', 'x').orden[0]).toBe('servicios');
+  });
+
+  it('distingue lo que puso el sistema de lo que escribió el cliente', () => {
+    expect(esPreguntaDeSector('¿Atendéis urgencias?')).toBe(true);
+    expect(esPreguntaDeSector('¿Abrís los domingos?')).toBe(false);
+    expect(esOrdenDeSector(ordenWeb([]))).toBe(true);
+    expect(esOrdenDeSector(textosDeSector('Reformas', 'x').orden)).toBe(true);
+    for (const p of PLANTILLAS_WEB) expect(esOrdenDeSector(ordenWeb(p.orden as never)), p.id).toBe(true);
+    expect(esOrdenDeSector(['contacto', 'sobre', 'servicios', 'galeria', 'opiniones', 'preguntas'])).toBe(false);
   });
 });
