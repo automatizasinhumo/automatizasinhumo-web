@@ -44,8 +44,21 @@ interface Estado {
 interface RespuestaDominio {
   ok?: boolean;
   disponible?: boolean;
+  compra?: boolean;
   error?: string;
-  dominio?: { dominio: string; estado: 'esperando_dns' | 'conectando' | 'activo' | 'error'; servidores: string[]; detalle: string | null } | null;
+  campo?: string;
+  dominio?: {
+    dominio: string;
+    estado: 'registrando' | 'esperando_dns' | 'conectando' | 'activo' | 'error';
+    servidores: string[];
+    detalle: string | null;
+    comprado?: boolean;
+  } | null;
+}
+interface Oferta {
+  dominio: string;
+  precio: number | null;
+  moneda: string | null;
 }
 
 interface Pagado {
@@ -419,7 +432,7 @@ export function iniciarEstudioWeb() {
   let dominioDe: string | null = null;
   let cambiando = false;
   let sondeo: ReturnType<typeof setTimeout> | undefined;
-  async function dominio(cuerpo: { dominio?: string } = {}) {
+  async function dominio(cuerpo: { dominio?: string; comprar?: { dominio: string; titular: Record<string, string> } } = {}) {
     const token = pedido.token;
     if (!token || !pedido.pagado?.slug) return;
     clearTimeout(sondeo);
@@ -432,8 +445,14 @@ export function iniciarEstudioWeb() {
     }
     if (!pedido.vigente(token)) return;
     // Si falla la consulta del estado, se vuelve a preguntar al pasar otra vez por «Publicar».
-    if (!d.ok && !cuerpo.dominio) dominioDe = null;
+    if (!d.ok && !cuerpo.dominio && !cuerpo.comprar) dominioDe = null;
     if (d.ok) cambiando = false;
+    if (cuerpo.comprar) {
+      const b = $<HTMLButtonElement>('[data-contratar]')!;
+      b.disabled = false;
+      if (d.ok) $('[data-dominio-titular]')!.hidden = true;
+      else if (d.campo) campo(`titular-${d.campo}`)?.focus();
+    }
     pintarDominio(d);
   }
   function pintarDominio(d: RespuestaDominio) {
@@ -449,7 +468,13 @@ export function iniciarEstudioWeb() {
     if (caja.hidden) return;
     st.dataset.tono = '';
     $('[data-dominio-pedir]')!.hidden = !!v && !cambiando;
-    $('[data-dominio-pasos]')!.hidden = !v || v.estado === 'activo' || cambiando;
+    $('[data-dominio-propio-titulo]')!.hidden = !!v && !cambiando;
+    // Un dominio comprado por nosotros ya usa nuestros DNS: no hay pasos para el cliente.
+    $('[data-dominio-pasos]')!.hidden = !v || v.estado === 'activo' || cambiando || !!v.comprado;
+    if (v) {
+      $('[data-dominio-ofertas]')!.hidden = true;
+      $('[data-dominio-titular]')!.hidden = true;
+    }
     if (!v) {
       void cargarIdeas();
       return void st.replaceChildren();
@@ -482,8 +507,16 @@ export function iniciarEstudioWeb() {
       st.replaceChildren('Tu web ya está en ', a, '. Los cambios que publiques aquí salen también allí.');
       return;
     }
-    st.textContent =
-      v.estado === 'conectando'
+    if (v.estado === 'error') {
+      st.dataset.tono = 'error';
+      st.textContent = `No se ha podido completar ${v.dominio}${v.detalle ? `: ${v.detalle}` : ''}. Escríbenos y lo resolvemos.`;
+      return;
+    }
+    st.textContent = v.comprado
+      ? v.estado === 'registrando'
+        ? `Registrando ${v.dominio} a tu nombre. Puedes cerrar esta página: lo conectamos solos y te escribimos cuando esté.`
+        : `${v.dominio} ya es tuyo. Lo estamos conectando a tu web con https; te escribimos cuando esté (suele tardar menos de una hora).`
+      : v.estado === 'conectando'
         ? 'Servidores DNS cambiados. Estamos preparando el certificado https; tarda unos minutos.'
         : 'Esperando a que cambies los servidores DNS. Puedes cerrar esta página: te escribimos cuando esté.';
     sondeo = setTimeout(() => {
@@ -498,17 +531,36 @@ export function iniciarEstudioWeb() {
     if (!token || ideasDe === token) return;
     ideasDe = token;
     let ideas: string[] = [];
+    let ofertas: Oferta[] = [];
     try {
       const r = await fetch('/api/web/dominio', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, ideas: true }) });
-      const j = (await r.json().catch(() => ({}))) as { ideas?: unknown };
-      if (Array.isArray(j.ideas)) ideas = j.ideas.filter((x): x is string => typeof x === 'string').slice(0, 5);
+      const j = (await r.json().catch(() => ({}))) as { ideas?: unknown; ofertas?: unknown };
+      if (Array.isArray(j.ofertas)) ofertas = (j.ofertas as Oferta[]).filter((o) => o && typeof o.dominio === 'string').slice(0, 5);
+      const incluidos = new Set(ofertas.map((o) => o.dominio));
+      if (Array.isArray(j.ideas)) ideas = j.ideas.filter((x): x is string => typeof x === 'string' && !incluidos.has(x)).slice(0, 5);
     } catch {
       ideasDe = null;
     }
     if (!pedido.vigente(token)) return;
-    const caja = $('[data-dominio-ideas]')!;
     // Si mientras tanto se ha conectado un dominio, la caja de pedirlo ya no está a la vista.
-    caja.hidden = !ideas.length || $('[data-dominio-pedir]')!.hidden;
+    const libre = !$('[data-dominio-pedir]')!.hidden;
+    $('[data-dominio-ofertas]')!.hidden = !ofertas.length || !libre;
+    $('[data-dominio-ofertas-lista]')!.replaceChildren(
+      ...ofertas.map((o) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'oferta-dominio';
+        b.dataset.oferta = o.dominio;
+        const n = document.createElement('strong');
+        n.textContent = o.dominio;
+        const e = document.createElement('span');
+        e.textContent = 'Incluido · Elegir';
+        b.append(n, e);
+        return b;
+      }),
+    );
+    const caja = $('[data-dominio-ideas]')!;
+    caja.hidden = !ideas.length || !libre;
     $('[data-dominio-ideas-lista]')!.replaceChildren(
       ...ideas.map((d) => {
         const b = document.createElement('button');
@@ -519,6 +571,27 @@ export function iniciarEstudioWeb() {
         return b;
       }),
     );
+  }
+  let ofertaElegida = '';
+  function elegirOferta(d: string) {
+    ofertaElegida = d;
+    $('[data-titular-dominio]')!.textContent = d;
+    const f = $('[data-dominio-titular]')!;
+    f.hidden = false;
+    $('[data-estado-dominio]')!.replaceChildren();
+    campo('titular-nombre').focus();
+  }
+  function contratarDominio(b: HTMLButtonElement) {
+    if (!ofertaElegida || b.disabled) return;
+    const titular: Record<string, string> = {};
+    for (const k of ['nombre', 'empresa', 'email', 'telefono', 'calle', 'ciudad', 'provincia', 'cp', 'pais']) {
+      titular[k] = (campo<HTMLInputElement | HTMLSelectElement>(`titular-${k}`)?.value ?? '').trim();
+    }
+    b.disabled = true;
+    const st = $('[data-estado-dominio]')!;
+    st.dataset.tono = '';
+    st.textContent = `Contratando ${ofertaElegida}…`;
+    void dominio({ comprar: { dominio: ofertaElegida, titular } });
   }
   function conectarDominio() {
     const c = campo('dominio');
@@ -739,6 +812,12 @@ export function iniciarEstudioWeb() {
       return programar(true);
     }
     if (b.hasAttribute('data-conectar')) return conectarDominio();
+    if (b.dataset.oferta) return elegirOferta(b.dataset.oferta);
+    if (b.hasAttribute('data-contratar')) return contratarDominio(b as HTMLButtonElement);
+    if (b.hasAttribute('data-titular-cancelar')) {
+      $('[data-dominio-titular]')!.hidden = true;
+      return $<HTMLElement>('[data-oferta]')?.focus();
+    }
     if (b.dataset.idea) {
       campo('dominio').value = b.dataset.idea;
       return campo('dominio').focus();
@@ -767,9 +846,14 @@ export function iniciarEstudioWeb() {
       ev.preventDefault();
       conectarDominio();
     }
+    if (ev.key === 'Enter' && (ev.target as HTMLInputElement).name?.startsWith('titular-')) {
+      ev.preventDefault();
+      contratarDominio($<HTMLButtonElement>('[data-contratar]')!);
+    }
   });
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.name?.startsWith('titular-') || c.name === 'dominio') return;
     if (c.hasAttribute('data-galeria-elegir')) {
       const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
       c.value = '';
@@ -842,7 +926,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
-    if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio') return;
+    if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio' || c.name?.startsWith('titular-')) return;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;
       pintarControles();

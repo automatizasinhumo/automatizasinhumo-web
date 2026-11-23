@@ -5,6 +5,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 import {
   avanzarDominios,
   avisarDominiosActivos,
+  comprarDominio,
   configDominios,
   normalizarDominio,
   pedirDominio,
@@ -16,7 +17,7 @@ import {
 function d1(): D1Database & { sql: DatabaseSync } {
   const sql = new DatabaseSync(':memory:');
   sql.exec('CREATE TABLE orders (public_id TEXT PRIMARY KEY, email TEXT)');
-  for (const m of ['0048_paginas_publicadas.sql', '0049_dominios_paginas.sql']) {
+  for (const m of ['0048_paginas_publicadas.sql', '0049_dominios_paginas.sql', '0050_dominios_registro.sql']) {
     sql.exec(readFileSync(new URL(`../../../migrations/${m}`, import.meta.url), 'utf8'));
   }
   const prep = (q: string, args: unknown[] = []) => {
@@ -250,5 +251,88 @@ describe('servirDominio', () => {
     expect(await servirDominio(new Request('https://lola.es/'), db, doc)).toBeNull();
     expect(await servirDominio(new Request('https://otro.es/'), db, doc)).toBeNull();
     expect(await servirDominio(new Request('https://x.workers.dev/'), db, doc)).toBeNull();
+  });
+});
+
+describe('comprarDominio', () => {
+  const REG = { ...CFG, precioMax: 15 };
+  const TITULAR = {
+    nombre: 'Lola Pérez',
+    email: 'lola@example.es',
+    telefono: '612 345 678',
+    calle: 'Calle Mayor 3',
+    ciudad: 'Madrid',
+    provincia: 'Madrid',
+    cp: '28013',
+    pais: 'ES',
+  };
+  const ESTADO = 'GET /accounts/acc/registrar/registrations/lola.com/registration-status';
+  const libre =
+    (precio = '10.46') =>
+    () =>
+      ok({ domains: [{ name: 'lola.com', registrable: true, tier: 'standard', pricing: { currency: 'USD', registration_cost: precio, renewal_cost: precio } }] });
+
+  it('registra a nombre del titular, una sola vez, y el cron lo conecta sin pasos del cliente', async () => {
+    const db = d1();
+    publicada(db);
+    let cuerpo: Record<string, unknown> = {};
+    const compra = api({
+      'POST /accounts/acc/registrar/domain-check': libre(),
+      'POST /accounts/acc/registrar/registrations': (init) => ((cuerpo = JSON.parse(String(init!.body))), ok({ state: 'in_progress', completed: false })),
+    });
+    const r = await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, compra.f);
+    expect(r.ok && r.fila).toMatchObject({ dominio: 'lola.com', estado: 'registrando', registrador: 'cloudflare' });
+    expect(cuerpo).toMatchObject({ domain_name: 'lola.com', auto_renew: true, contacts: { registrant: { phone: '+34.612345678' } } });
+    // Doble clic: no se paga otro registro.
+    const otra = api({});
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, otra.f)).toMatchObject({ ok: true });
+    expect(otra.llamadas).toEqual([]);
+    // Ni otro dominio para el mismo pedido, ni sustituirlo conectando uno propio.
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'otra.com', TITULAR, otra.f)).toMatchObject({ ok: false, error: 'ocupado' });
+    expect(await pedirDominio(db, CFG, 'web', 'p1', 'mio.es', otra.f)).toMatchObject({ ok: false, error: 'ocupado' });
+
+    const pendiente = api({ [ESTADO]: () => ok({ state: 'in_progress', completed: false }) });
+    expect((await avanzarDominios(db, CFG, 20, pendiente.f))[0]!.estado).toBe('registrando');
+    const hecho = api({
+      [ESTADO]: () => ok({ state: 'succeeded', completed: true }),
+      'POST /zones': () => fallo(1061),
+      // Registrar ya creó la zona activa: al ser nuestra compra, se acepta.
+      'GET /zones?name=lola.com': () => ok([{ id: 'z7', name: 'lola.com', status: 'active', name_servers: ['a.ns'] }]),
+      'GET /zones/z7': () => ok({ id: 'z7', status: 'active' }),
+      'PUT /accounts/acc/workers/domains': () => ok({}),
+      'GET https://lola.com/': () => new Response('<html>', { headers: { 'x-pagina-dominio': 'lola.com' } }),
+    });
+    expect((await avanzarDominios(db, CFG, 20, hecho.f))[0]).toMatchObject({ estado: 'activo', zona_id: 'z7' });
+  });
+
+  it('rechaza titular incompleto, dominio no incluido o sin registro activo, sin dejar fila', async () => {
+    const db = d1();
+    publicada(db);
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'lola.com', { ...TITULAR, telefono: '123' })).toEqual({ ok: false, error: 'titular', detalle: 'telefono' });
+    expect(await comprarDominio(db, null, 'web', 'p1', 'lola.com', TITULAR)).toEqual({ ok: false, error: 'no_disponible' });
+    const caro = api({ 'POST /accounts/acc/registrar/domain-check': libre('60.00') });
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, caro.f)).toMatchObject({ ok: false, error: 'no_incluido' });
+    const es = api({ 'POST /accounts/acc/registrar/domain-check': () => fallo(1008) });
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'lola.es', TITULAR, es.f)).toMatchObject({
+      ok: false,
+      error: 'no_incluido',
+      detalle: expect.stringContaining('terminación'),
+    });
+    expect(db.sql.prepare('SELECT count(*) AS n FROM dominios_paginas').get()).toEqual({ n: 0 });
+  });
+
+  it('si Registrar falla al pedirlo, libera la reserva; si el registro falla después, queda en error', async () => {
+    const db = d1();
+    publicada(db);
+    const caida = api({ 'POST /accounts/acc/registrar/domain-check': libre(), 'POST /accounts/acc/registrar/registrations': () => fallo(10000) });
+    expect(await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, caida.f)).toMatchObject({ ok: false, error: 'cloudflare' });
+    expect(db.sql.prepare('SELECT count(*) AS n FROM dominios_paginas').get()).toEqual({ n: 0 });
+    const lenta = api({
+      'POST /accounts/acc/registrar/domain-check': libre(),
+      'POST /accounts/acc/registrar/registrations': () => ok({ state: 'pending', completed: false }),
+    });
+    await comprarDominio(db, REG, 'web', 'p1', 'lola.com', TITULAR, lenta.f);
+    const rechazo = api({ [ESTADO]: () => ok({ state: 'failed', completed: true, error: { message: 'Contacto no válido' } }) });
+    expect((await avanzarDominios(db, CFG, 20, rechazo.f))[0]).toMatchObject({ estado: 'error', detalle: 'Contacto no válido' });
   });
 });

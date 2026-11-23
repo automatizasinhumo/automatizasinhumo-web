@@ -17,8 +17,9 @@
  * CF_ACCOUNT_ID y CF_WORKER_NOMBRE; sin ellos el estudio dice que aún no está disponible.
  */
 import type { TipoPagina } from './paginas';
+import { cotizarDominios, estadoRegistro, registrarDominio, validarTitular, type ConfigRegistrador } from './registrador';
 
-export type EstadoDominio = 'esperando_dns' | 'conectando' | 'activo' | 'error';
+export type EstadoDominio = 'registrando' | 'esperando_dns' | 'conectando' | 'activo' | 'error';
 
 export interface FilaDominio {
   dominio: string;
@@ -29,6 +30,8 @@ export interface FilaDominio {
   servidores: string | null;
   detalle: string | null;
   avisado: number;
+  /** 'cloudflare' si lo compramos nosotros (Cloudflare Registrar); null si el dominio era del cliente. */
+  registrador: string | null;
   updated_at: string;
 }
 
@@ -116,8 +119,11 @@ interface Zona {
   account?: { id: string };
 }
 
-/** Crea la zona (o recupera la que ya está en nuestra cuenta). */
-export async function crearZona(cfg: ConfigDominios, dominio: string, f: typeof fetch = fetch): Promise<Zona> {
+/**
+ * Crea la zona (o recupera la que ya está en nuestra cuenta). `comprado`: el dominio lo acabamos de
+ * registrar nosotros, así que su zona (que Registrar puede haber creado ya activa) es de este pedido.
+ */
+export async function crearZona(cfg: ConfigDominios, dominio: string, f: typeof fetch = fetch, comprado = false): Promise<Zona> {
   try {
     return await cf<Zona>(cfg, '/zones', { method: 'POST', body: JSON.stringify({ name: dominio, account: { id: cfg.cuenta }, type: 'full' }) }, f);
   } catch (e) {
@@ -125,7 +131,7 @@ export async function crearZona(cfg: ConfigDominios, dominio: string, f: typeof 
     // Una zona ya activa sin fila en D1 sería de otro pedido: no se entrega a quien la pida.
     if (!(e instanceof ErrorCloudflare) || !e.codigos.includes(1061)) throw e;
     const zonas = await cf<Zona[]>(cfg, `/zones?name=${encodeURIComponent(dominio)}&account.id=${cfg.cuenta}`, {}, f);
-    if (!zonas[0] || zonas[0].status === 'active') throw e;
+    if (!zonas[0] || (zonas[0].status === 'active' && !comprado)) throw e;
     return zonas[0];
   }
 }
@@ -147,7 +153,7 @@ export const conectarHost = (cfg: ConfigDominios, host: string, zona: string, f:
 
 // ---------- Estado en D1 ----------
 
-const COLUMNAS = 'dominio, tipo, pedido_public_id, estado, zona_id, servidores, detalle, avisado, updated_at';
+const COLUMNAS = 'dominio, tipo, pedido_public_id, estado, zona_id, servidores, detalle, avisado, registrador, updated_at';
 
 export const dominioDePedido = (db: D1Database, tipo: TipoPagina, pedido: string) =>
   db.prepare(`SELECT ${COLUMNAS} FROM dominios_paginas WHERE tipo = ? AND pedido_public_id = ?`).bind(tipo, pedido).first<FilaDominio>();
@@ -197,7 +203,7 @@ export async function pedirDominio(
   if (otro && (otro.tipo !== tipo || otro.pedido_public_id !== pedido)) return { ok: false, error: 'ocupado' };
   const previo = await dominioDePedido(db, tipo, pedido);
   if (previo?.dominio === dominio) return { ok: true, fila: previo };
-  if (previo?.estado === 'activo') return { ok: false, error: 'ocupado', detalle: previo.dominio };
+  if (previo?.estado === 'activo' || previo?.registrador) return { ok: false, error: 'ocupado', detalle: previo.dominio };
   let zona: Zona;
   try {
     zona = await crearZona(cfg, dominio, f);
@@ -207,7 +213,7 @@ export async function pedirDominio(
   if (previo) {
     // El cron pudo activarlo mientras se creaba la zona: un dominio activo no se sustituye.
     const borrado = await db
-      .prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado != 'activo'")
+      .prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado != 'activo' AND registrador IS NULL")
       .bind(previo.dominio)
       .run();
     if (!borrado.meta.changes) return { ok: false, error: 'ocupado', detalle: previo.dominio };
@@ -219,6 +225,71 @@ export async function pedirDominio(
     )
     .bind(dominio, tipo, pedido, zona.id, JSON.stringify(zona.name_servers ?? []))
     .run();
+  const fila = await filaDeDominio(db, dominio);
+  return fila ? { ok: true, fila } : { ok: false, error: 'cloudflare' };
+}
+
+export type ResultadoComprarDominio =
+  | { ok: true; fila: FilaDominio }
+  | { ok: false; error: 'dominio' | 'ocupado' | 'no_disponible' | 'no_incluido' | 'titular' | 'cloudflare'; detalle?: string };
+
+const NO_INCLUIDO: Record<string, string> = {
+  extension: 'Esa terminación no se puede contratar desde aquí. Prueba la versión .com o conecta uno que ya tengas.',
+  ocupado: 'Ese dominio ya tiene dueño. Prueba otra de las ideas.',
+  premium: 'Ese dominio es «premium» (mucho más caro). Prueba otra de las ideas.',
+  caro: 'Ese dominio sale más caro de lo incluido. Prueba otra terminación.',
+};
+
+/**
+ * Compra el dominio para la página del pedido (incluido con la web, uno por pedido) y lo deja en
+ * camino de conectarse solo: la fila se crea antes de llamar a Registrar, así que una segunda
+ * petición (doble clic, reintento) nunca paga otro dominio.
+ */
+export async function comprarDominio(
+  db: D1Database,
+  cfg: ConfigRegistrador | null,
+  tipo: TipoPagina,
+  pedido: string,
+  entrada: unknown,
+  titularBruto: unknown,
+  f: typeof fetch = fetch,
+): Promise<ResultadoComprarDominio> {
+  const dominio = normalizarDominio(entrada);
+  if (!dominio) return { ok: false, error: 'dominio' };
+  if (!cfg) return { ok: false, error: 'no_disponible' };
+  const t = validarTitular(titularBruto);
+  if (!t.ok) return { ok: false, error: 'titular', detalle: t.campo };
+  const previo = await dominioDePedido(db, tipo, pedido);
+  if (previo?.dominio === dominio && previo.registrador) return { ok: true, fila: previo };
+  if (previo?.registrador || previo?.estado === 'activo') return { ok: false, error: 'ocupado', detalle: previo.dominio };
+  if (await filaDeDominio(db, dominio)) return { ok: false, error: 'ocupado' };
+  let cot;
+  try {
+    [cot] = await cotizarDominios(cfg, [dominio], f);
+  } catch (e) {
+    return { ok: false, error: 'cloudflare', detalle: e instanceof Error ? e.message.slice(0, 200) : undefined };
+  }
+  if (!cot?.incluido) return { ok: false, error: 'no_incluido', detalle: NO_INCLUIDO[cot?.motivo ?? 'ocupado'] };
+  // Reserva: sustituye un dominio propio sin activar del mismo pedido y bloquea compras dobles.
+  if (previo) await db.prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado != 'activo' AND registrador IS NULL").bind(previo.dominio).run();
+  const alta = await db
+    .prepare(
+      `INSERT OR IGNORE INTO dominios_paginas (dominio, tipo, pedido_public_id, estado, registrador)
+       VALUES (?, ?, ?, 'registrando', 'cloudflare')`,
+    )
+    .bind(dominio, tipo, pedido)
+    .run();
+  if (!alta.meta.changes) return { ok: false, error: 'ocupado' };
+  try {
+    const r = await registrarDominio(cfg, dominio, t.titular, f);
+    if (r.state === 'failed') {
+      await guardar(db, dominio, { estado: 'error', detalle: r.error?.message?.slice(0, 300) ?? 'Registro rechazado' });
+    }
+  } catch (e) {
+    // Sin registro en Cloudflare: se libera para que el cliente pueda volver a intentarlo.
+    await db.prepare("DELETE FROM dominios_paginas WHERE dominio = ? AND estado = 'registrando'").bind(dominio).run();
+    return { ok: false, error: 'cloudflare', detalle: e instanceof Error ? e.message.slice(0, 200) : undefined };
+  }
   const fila = await filaDeDominio(db, dominio);
   return fila ? { ok: true, fila } : { ok: false, error: 'cloudflare' };
 }
@@ -237,6 +308,23 @@ async function responde(dominio: string, f: typeof fetch): Promise<boolean> {
 export async function avanzarDominio(db: D1Database, cfg: ConfigDominios, fila: FilaDominio, f: typeof fetch = fetch): Promise<FilaDominio> {
   const d = fila.dominio;
   try {
+    if (fila.estado === 'registrando') {
+      const r = await estadoRegistro(cfg, d, f);
+      if (r.state === 'failed' || r.state === 'blocked' || r.state === 'action_required') {
+        const detalle = (r.error?.message ?? `Registro ${r.state}`).slice(0, 300);
+        await guardar(db, d, { estado: 'error', detalle });
+        return { ...fila, estado: 'error', detalle };
+      }
+      if (r.state !== 'succeeded') {
+        await guardar(db, d, { detalle: null });
+        return { ...fila, detalle: null };
+      }
+      // Comprado: sus DNS ya son los de Cloudflare, la zona se activa sola.
+      const zona = await crearZona(cfg, d, f, true);
+      const servidores = JSON.stringify(zona.name_servers ?? []);
+      await guardar(db, d, { estado: 'esperando_dns', zona_id: zona.id, servidores, detalle: null });
+      fila = { ...fila, estado: 'esperando_dns', zona_id: zona.id, servidores, detalle: null };
+    }
     if (fila.estado === 'esperando_dns' && fila.zona_id) {
       const zona = await leerZona(cfg, fila.zona_id, f);
       if (zona.status !== 'active') {
@@ -272,7 +360,7 @@ export async function avanzarDominios(db: D1Database, cfg: ConfigDominios | null
   if (!cfg) return [];
   const { results } = await db
     .prepare(
-      `SELECT ${COLUMNAS} FROM dominios_paginas WHERE estado IN ('esperando_dns', 'conectando')
+      `SELECT ${COLUMNAS} FROM dominios_paginas WHERE estado IN ('registrando', 'esperando_dns', 'conectando')
        AND created_at > datetime('now', '-30 days') ORDER BY updated_at LIMIT ?`,
     )
     .bind(limite)
