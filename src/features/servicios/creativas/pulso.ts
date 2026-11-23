@@ -82,7 +82,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-pulso .w-sec h2{font-weight:400;text-transform:uppercase;font-size:clamp(2.8rem,10cqw,6rem);line-height:.9}
 .w-d-pulso .w-sec h2::after{display:none}
 .w-d-pulso .w-sec:nth-of-type(even){background:var(--w-negro);color:#fff;--w-suave:#cfcfcf;--w-borde:#333;--w-panel:#1a1a1a;--w-ct:var(--w-ct-oscuro)}
-.w-d-pulso .w-servicios>li{counter-increment:w-srv;position:relative;border-radius:0;border:0;border-top:3px solid currentColor;padding-top:clamp(56px,8cqw,90px);background:transparent}
+.w-d-pulso .w-servicios>li{counter-increment:w-srv;position:relative;display:block;border-radius:0;border:0;border-top:3px solid currentColor;padding-top:clamp(56px,8cqw,90px);background:transparent}
 .w-d-pulso .w-servicios>li::before{content:counter(w-srv,decimal-leading-zero);position:absolute;top:6px;left:0;font:400 clamp(3.4rem,8cqw,5.4rem)/1 var(--w-ft-titulo);color:transparent;-webkit-text-stroke:2px currentColor}
 .w-d-pulso .w-servicio h3{font-family:var(--w-ft-titulo);font-weight:400;text-transform:uppercase;font-size:clamp(1.5rem,3cqw,2rem)}
 .w-d-pulso .w-precio{background:var(--w-c);color:var(--w-s);border-radius:0;font-weight:800}
