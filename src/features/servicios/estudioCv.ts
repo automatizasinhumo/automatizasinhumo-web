@@ -188,6 +188,7 @@ export function iniciarEstudioCv() {
   if (disenoPedido) {
     estado.diseno = disenoPedido;
     if (estado.camino === 'asesoria') estado.camino = 'plantilla';
+    guardar(estado);
     const q = new URLSearchParams(location.search);
     q.delete('diseno');
     history.replaceState(null, '', `${location.pathname}${q.size ? `?${q}` : ''}${location.hash}`);
