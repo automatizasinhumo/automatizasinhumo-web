@@ -36,10 +36,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
       - name: Lighthouse de toda la web (muestreo por plantilla de URL)
@@ -59,7 +59,7 @@ jobs:
             rows.sort((a,b)=>(a[1]??1)-(b[1]??1));
             const md=["## Unlighthouse: "+rows.length+" páginas (peores primero)","","| Ruta | Total | Rend. | Acces. | Buenas pr. | SEO |","|---|---|---|---|---|---|",...rows.slice(0,40).map(r=>"| "+r.map(v=>typeof v==="number"?Math.round(v*100):v).join(" | ")+" |")].join("\n");
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,md+"\n"); console.log(md)'
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: unlighthouse
@@ -71,10 +71,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
       - name: Cabeceras de seguridad (Mozilla HTTP Observatory)
@@ -98,16 +98,16 @@ jobs:
         ports:
           - 8010:8010
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
       - name: Esperar a LanguageTool
         run: for _ in $(seq 1 60); do curl -sf "http://localhost:8010/v2/languages" > /dev/null && break; sleep 2; done
       - run: node qa/ortografia.mjs http://localhost:8010
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: ortografia
@@ -128,7 +128,7 @@ jobs:
     env:
       HOME: /root
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Instalar Playwright (fuera del package.json de la tienda)
@@ -138,7 +138,7 @@ jobs:
           ln -s qa/navegador/node_modules node_modules
       - run: node qa/navegadores.mjs "$BASE" qa/urls-navegadores.txt
       - run: node qa/buscador-movil.mjs "$BASE"
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: capturas
@@ -157,7 +157,7 @@ jobs:
     env:
       HOME: /root
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Instalar fast-check (qa/navegador, con lockfile; Playwright ya viene en la imagen)
@@ -165,7 +165,7 @@ jobs:
           npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
           ln -s qa/navegador/node_modules node_modules
       - run: node qa/exploratorio.mjs "$BASE" 25
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: capturas-exploratorio
@@ -185,7 +185,7 @@ jobs:
     env:
       HOME: /root
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Instalar gremlins.js (qa/navegador, con lockfile; Playwright ya viene en la imagen)
@@ -193,7 +193,7 @@ jobs:
           npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
           ln -s qa/navegador/node_modules node_modules
       - run: node qa/gremlins.mjs "$BASE" 1000
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: capturas-gremlins
@@ -205,10 +205,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
       - name: HTML de todas las URL del sitemap
@@ -229,10 +229,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
       - name: axe-core en todas las URL del sitemap
@@ -250,10 +250,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: npm
@@ -277,7 +277,7 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - run: node scripts/demos/idioma.mjs --json idioma-demos.json
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: idioma-demos
@@ -316,7 +316,7 @@ jobs:
             urls-abs.txt --budget.configPath qa/perf-budget.json -b chrome -n 3 --chrome.collectLongTasks --outputFolder sitespeed-result > sitespeed.log 2>&1
           code=$?; set -e
           { echo "## sitespeed.io: presupuesto (salida $code)"; echo; echo '```'; grep -iE 'budget|fail|pass|error' sitespeed.log | tail -60; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: sitespeed
@@ -329,7 +329,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: projectdiscovery/nuclei-action@32a91c0da7be14c07b0ade6c14fa0f6e78d97c9c # v3.1.0
+      - uses: projectdiscovery/nuclei-action@cc153d0541e1adf8a42bbe31c0a4fb2376147538 # v3.1.1
         id: nuclei
         continue-on-error: true
         with:
@@ -352,10 +352,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
       - run: 'pip install --disable-pip-version-check --only-binary=:all: schemathesis==4.33.4'
@@ -364,7 +364,7 @@ jobs:
         env:
           BASE_URL: ${{ env.BASE }}
           REPORT_DIR: ${{ runner.temp }}/schemathesis
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: contrato-api
