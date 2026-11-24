@@ -21,6 +21,14 @@ describe('sitemapLocs', () => {
     '/webs/abogados',
     '/webs/fisioterapeutas',
     '/webs/talleres',
+    '/curriculum/camarero',
+    '/curriculum/dependienta',
+    '/curriculum/administrativo',
+    '/curriculum/sin-experiencia',
+    '/curriculum/ats',
+    '/curriculum/auxiliar-enfermeria',
+    '/curriculum/repartidor',
+    '/curriculum/recepcionista',
   ];
 
   it('con portada propia del tema lista / y el catálogo en /products', () => {

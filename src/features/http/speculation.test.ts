@@ -17,7 +17,7 @@ const precarga = (ruta: string) => {
 
 describe('speculation rules', () => {
   it('precarga las páginas públicas de lectura', () => {
-    for (const r of ['/', '/products', '/products/web-taller', '/categories/webs', '/pages/preguntas-frecuentes', '/blog', '/blog/x', '/webs/peluquerias']) {
+    for (const r of ['/', '/products', '/products/web-taller', '/categories/webs', '/pages/preguntas-frecuentes', '/blog', '/blog/x', '/webs/peluquerias', '/curriculum/camarero']) {
       expect(precarga(r), r).toBe(true);
     }
   });

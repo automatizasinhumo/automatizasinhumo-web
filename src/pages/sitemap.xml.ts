@@ -9,6 +9,7 @@ import { PORTADA_DEL_TEMA } from '../features/settings/themeHome';
 import { publicOrigin } from '../features/http/origin';
 import { getCollection } from 'astro:content';
 import { SECTORS } from '../features/blog/sectors';
+import { PUESTOS_CV } from '../features/servicios/puestosCv';
 
 export const prerender = false;
 
@@ -99,6 +100,7 @@ export function marketingStaticPaths(blogEntries: { id: string }[]): string[] {
     '/elige',
     ...blogEntries.map((entry) => `/blog/${entry.id}`),
     ...SECTORS.map((sector) => `/webs/${sector.slug}`),
+    ...PUESTOS_CV.map((puesto) => `/curriculum/${puesto.slug}`),
   ];
 }
 

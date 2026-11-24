@@ -1,0 +1,118 @@
+---
+import { env } from 'cloudflare:workers';
+import Layout from '../../layouts/Layout.astro';
+import { publicOrigin } from '../../features/http/origin';
+import { buildPageMetadata } from '../../features/seo/metadata';
+import { breadcrumbJsonLd } from '../../features/storefront/breadcrumbs';
+import { faqJsonLd } from '../../features/servicios/faqSector';
+import { euros, miniaturaCv, PAQUETES_CV } from '../../features/servicios/cv';
+import { disenosDePuesto, enlaceEstudioCv, PUESTOS_CV, puestoCv } from '../../features/servicios/puestosCv';
+
+const puesto = puestoCv(Astro.params.puesto);
+if (!puesto) {
+  return new Response('Puesto no encontrado', {
+    status: 404,
+    headers: { 'cache-control': 'no-store' },
+  });
+}
+
+const origin = publicOrigin(Astro.url.origin, env.CANONICAL_ORIGIN);
+const canonicalPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const metadata = buildPageMetadata({
+  title: puesto.title,
+  description: puesto.description,
+  canonical: new URL(canonicalPath, origin).href,
+});
+const breadcrumb = breadcrumbJsonLd(
+  [{ text: 'Inicio', href: '/' }, { text: 'Currículum', href: '/servicios/cv' }, { text: puesto.nombre, href: null }],
+  origin,
+  metadata.canonical,
+);
+const disenos = disenosDePuesto(puesto);
+const estudio = enlaceEstudioCv(puesto.disenos[0]);
+const precio = euros(PAQUETES_CV.disenada.precio);
+const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb, faqJsonLd(puesto.preguntas)].flat()).replace(/</g, '\\u003c');
+---
+
+<Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
+  <script is:inline type="application/ld+json" set:html={jsonLd}></script>
+  <section class="fondo-tecnico cabecera-pagina">
+    <span class="etiqueta">Currículum por puesto</span>
+    <h1 class="mt-4 max-w-3xl font-serif text-4xl font-bold leading-tight text-ink sm:text-5xl">{puesto.h1}</h1>
+    <p class="mt-5 max-w-2xl text-lg leading-7 text-muted">{puesto.intro}</p>
+    <div class="mt-7 flex flex-wrap gap-3">
+      <a href={estudio} class="boton boton-principal" data-cta-puesto>Hacer mi currículum →</a>
+      <a href="#ejemplo" class="boton boton-secundario">Ver el ejemplo</a>
+    </div>
+    <p class="mt-3 text-sm text-muted">Lo rellenas y lo ves al momento. Descarga en PDF desde {precio}.</p>
+  </section>
+
+  <section class="py-10 sm:py-12" aria-labelledby="disenos">
+    <h2 id="disenos" class="font-serif text-2xl font-bold text-ink">Tres diseños que leen bien los filtros automáticos</h2>
+    <p class="mt-2 max-w-2xl text-muted">Medidos extrayendo el texto del PDF, como hace un ATS. Elige uno y el estudio se abre con él.</p>
+    <ul class="mt-6 grid gap-6 sm:grid-cols-3" data-disenos-puesto>
+      {disenos.map((d, i) => (
+        <li class="overflow-hidden rounded-2xl border border-line bg-surface">
+          <a href={enlaceEstudioCv(d!.id)} class="block border-b border-line" aria-label={`Hacer mi currículum con el diseño ${d!.nombre}`}>
+            <img
+              src={miniaturaCv(d!.id)}
+              alt=""
+              width="480"
+              height="679"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              class="block h-auto w-full"
+            />
+          </a>
+          <div class="flex items-center justify-between gap-3 p-4">
+            <span class="font-semibold text-ink">{d!.nombre}</span>
+            <a href={enlaceEstudioCv(d!.id)} class="boton boton-secundario">Elegir</a>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="mb-12 rounded-2xl border border-line bg-surface p-6" aria-labelledby="consejos">
+    <h2 id="consejos" class="font-serif text-2xl font-bold text-ink">Qué poner en tu currículum</h2>
+    <ul class="mt-4 list-disc space-y-2 pl-5 text-muted">
+      {puesto.consejos.map((c) => <li>{c}</li>)}
+    </ul>
+  </section>
+
+  <section id="ejemplo" class="mb-12 grid gap-6 md:grid-cols-2" aria-labelledby="ejemplo-titulo">
+    <div class="tarjeta p-6">
+      <h2 id="ejemplo-titulo" class="font-serif text-2xl font-bold text-ink">Ejemplo de perfil profesional</h2>
+      <p class="mt-4 leading-7 text-muted">{puesto.perfil}</p>
+      <p class="mt-4 text-sm text-muted">Cópialo y cámbialo por tus datos: años, lugares y lo que sabes hacer.</p>
+    </div>
+    <div class="tarjeta p-6">
+      <h2 class="font-serif text-2xl font-bold text-ink">Habilidades que se buscan</h2>
+      <ul class="mt-4 flex flex-wrap gap-2">
+        {puesto.habilidades.map((h) => <li class="pildora">{h}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="mb-12" aria-labelledby="preguntas">
+    <h2 id="preguntas" class="font-serif text-2xl font-bold text-ink">Preguntas frecuentes</h2>
+    <div class="mt-4 divide-y divide-line rounded-2xl border border-line bg-surface">
+      {puesto.preguntas.map((p) => (
+        <details class="group p-5">
+          <summary class="cursor-pointer list-none font-semibold text-ink marker:hidden">{p.pregunta}</summary>
+          <p class="mt-3 text-muted">{p.respuesta}</p>
+        </details>
+      ))}
+    </div>
+    <a href={estudio} class="boton boton-principal mt-6 inline-flex">Hacer mi currículum →</a>
+  </section>
+
+  <nav aria-labelledby="otros-puestos" class="mb-12">
+    <h2 id="otros-puestos" class="font-serif text-xl font-bold text-ink">Currículum para otros puestos</h2>
+    <ul class="mt-3 flex flex-wrap gap-3">
+      {PUESTOS_CV.filter((otro) => otro.slug !== puesto.slug).map((otro) => (
+        <li><a href={`/curriculum/${otro.slug}`} class="pildora">{otro.nombre}</a></li>
+      ))}
+    </ul>
+  </nav>
+</Layout>

@@ -8,7 +8,7 @@
  * el estudio lo comprueba en /api/cv/pedido, descarga el PDF sin marca de agua y, si incluye la
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
-import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, correoValido, euros, esCamino, faltanTrasImportar, linkedinValido, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
+import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, conDisenoDeEnlace, correoValido, disenoDesdeEnlace, euros, esCamino, faltanTrasImportar, linkedinValido, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { NOMBRE_PORTAL, PORTALES, gruposPortales, muestraTrozo, sobra, textoPortal, type Portal } from './cvPortales';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { DESTINOS_QR, contenidoQr, type DatosTarjeta as DatosImprimir, type DestinoQr } from '../../../cv-estudio/src/tarjeta-datos';
@@ -182,6 +182,16 @@ export function iniciarEstudioCv() {
     form: g.form && typeof g.form === 'object' ? g.form : null,
     extras: Array.isArray(g.extras) ? cfg.extras.map((x) => x.id).filter((id) => g.extras!.includes(id)) : [],
   };
+  // Diseño pedido por enlace (páginas /curriculum/<puesto>): manda sobre lo guardado y se quita de la
+  // URL para que recargar no pise lo que el cliente elija después.
+  const disenoPedido = disenoDesdeEnlace(location.search, idsDiseno);
+  if (disenoPedido) {
+    Object.assign(estado, conDisenoDeEnlace(estado, disenoPedido));
+    guardar(estado);
+    const q = new URLSearchParams(location.search);
+    q.delete('diseno');
+    history.replaceState(null, '', `${location.pathname}${q.size ? `?${q}` : ''}${location.hash}`);
+  }
   let actual = 'diseno';
 
   // Motor: se pide una vez y se reutiliza.

@@ -17,6 +17,7 @@ export const RUTAS_PRECARGABLES = [
   '/blog',
   '/blog/*',
   '/webs/*',
+  '/curriculum/*',
 ] as const;
 
 /** Cualquier ruta con query no vacía. */

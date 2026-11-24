@@ -48,6 +48,18 @@ const { model } = Astro.props;
       </section>
     )
   }
+  {
+    model.puestoLinks.length > 0 && (
+      <section aria-labelledby="pie-puestos" class="mx-auto max-w-6xl px-6 pb-10 text-sm">
+        <h2 id="pie-puestos" class="font-semibold text-white">Currículum por puesto</h2>
+        <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          {model.puestoLinks.map((link) => (
+            <li><a href={link.href} class="text-white/80 hover:text-white hover:underline">{link.text}</a></li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
   <div class="border-t border-white/10">
     <p class="mx-auto max-w-6xl px-6 py-5 text-xs text-white/60">&copy; {new Date().getFullYear()} {model.storeName} · Sin complicaciones y con una persona detrás. · <a href="/#guia" class="underline-offset-2 hover:text-white hover:underline">Ver guía de la web</a></p>
   </div>

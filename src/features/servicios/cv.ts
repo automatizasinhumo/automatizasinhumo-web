@@ -175,6 +175,26 @@ export const filtrosDe = (d: DisenoCv) => FILTROS_DISENO.filter((f) => f.cumple(
 export { ESPACIADOS, ESTILOS_LETRA, FORMATO_INICIAL, TAMANOS } from '../../../cv-estudio/src/catalogo-formato';
 import { perfilLinkedin } from '../../../cv-estudio/src/linkedin';
 export const MOTOR_CV = '/cv/estudio/motor/estudio.js';
+/**
+ * Diseño pedido por enlace (`/servicios/cv?diseno=onyx`, desde las páginas por puesto): manda sobre lo
+ * guardado si existe; si no existe o no viene, null y se queda lo de siempre.
+ */
+export const disenoDesdeEnlace = (search: string, ids: ReadonlySet<string>): string | null => {
+  const d = new URLSearchParams(search).get('diseno');
+  return d && ids.has(d) ? d : null;
+};
+
+/**
+ * Aplica el diseño del enlace a lo guardado: además del diseño, el camino y el inicio tienen que
+ * enseñarlo (la asesoría no tiene galería y «desde cero» pinta su propia base, no el diseño pedido).
+ */
+export const conDisenoDeEnlace = <T extends { diseno: string; camino: CaminoCv; inicio: 'plantilla' | 'cero' }>(estado: T, diseno: string): T => ({
+  ...estado,
+  diseno,
+  camino: estado.camino === 'asesoria' ? 'plantilla' : estado.camino,
+  inicio: 'plantilla',
+});
+
 export const miniaturaCv = (id: string) => `/cv/estudio/miniaturas/${id}.jpg`;
 
 /** Formas, posición, sombreado y fondo de la personalizable: el mismo catálogo que dibuja el motor. */
