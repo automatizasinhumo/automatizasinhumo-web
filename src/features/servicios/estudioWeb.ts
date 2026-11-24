@@ -184,11 +184,13 @@ function leer(): Partial<Estado> {
     return {};
   }
 }
-function guardar(e: Estado) {
+function guardar(e: Estado): boolean {
   try {
     localStorage.setItem(CLAVE, JSON.stringify(e));
+    return true;
   } catch {
-    /* sin almacenamiento: el estudio sigue funcionando en esta visita */
+    /* sin almacenamiento (o lleno de fotos): el estudio sigue funcionando en esta visita */
+    return false;
   }
 }
 
@@ -1038,8 +1040,16 @@ export function iniciarEstudioWeb() {
   }
   function persistir() {
     estado.contenido = recoger();
-    guardar(estado);
+    marcarGuardado(guardar(estado));
     if (historial.registrar(instantanea())) pintarHistorial();
+  }
+
+  /** «Guardado» visible: quien escribe en el móvil sabe que puede cerrar y volver sin perder nada. */
+  function marcarGuardado(ok: boolean) {
+    const m = $<HTMLElement>('[data-guardado]');
+    if (!m) return;
+    m.dataset.ok = String(ok);
+    m.textContent = ok ? '✓ Guardado en este dispositivo' : 'Sin guardar: libera espacio o quita alguna foto';
   }
 
   // ---------- Deshacer / rehacer ----------
