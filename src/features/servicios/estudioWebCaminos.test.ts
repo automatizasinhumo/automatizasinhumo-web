@@ -84,5 +84,7 @@ describe('pasos por camino', () => {
     expect(aspectoAlElegir(basica.id, conLetra, def, autor.id)).toEqual({ color: def.color, letra: 'serif' });
     // Si cambió también el color, se respeta.
     expect(aspectoAlElegir(basica.id, propio, def, autor.id)).toEqual(propio);
+    // Color propio con la letra del diseño: se queda su color, la letra vuelve a la de por defecto.
+    expect(aspectoAlElegir(basica.id, { color: '#abcdef', letra: 'diseno' }, def, autor.id)).toEqual({ color: '#abcdef', letra: def.letra });
   });
 });
