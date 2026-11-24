@@ -7,7 +7,7 @@
 // y nadie la regenera, la huella no casa y esa miniatura vuelve a pintarse en vivo (nunca se
 // enseña una imagen caducada). Regenerar: `node scripts/miniaturas-web.mjs` (ver su cabecera).
 import manifiesto from './miniaturas-web.json';
-import { CSS_WEB, disenoWeb, EJEMPLO_WEB, renderWeb, type DatosWeb } from './webs';
+import { CSS_WEB, disenoWeb, EJEMPLO_WEB, huellaFnv as fnv, renderWeb, type DatosWeb } from './webs';
 
 /** Carpeta pública de las imágenes. */
 export const CARPETA_MINIATURAS = '/images/webs/mini/';
@@ -22,16 +22,6 @@ export const CSS_MINI = '.mini{width:250%;transform:scale(.4);transform-origin:0
 export function datosMiniatura(id: DatosWeb['plantilla'], ejemplo: DatosWeb = EJEMPLO_WEB): DatosWeb {
   const x = disenoWeb(id);
   return x ? { ...ejemplo, ...x.muestra, plantilla: id, color: x.color, letra: 'diseno' } : { ...ejemplo, plantilla: id };
-}
-
-/** FNV-1a de 32 bits en hexadecimal: estable entre servidor, navegador y script. */
-function fnv(s: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0).toString(16).padStart(8, '0');
 }
 
 const huellas = new Map<string, string>();
