@@ -1015,6 +1015,25 @@
   cursor: pointer;
 }
 
+.guia-boton:disabled {
+  color: var(--color-muted, currentColor);
+  text-decoration: none;
+  cursor: default;
+}
+/* Deshacer / rehacer y guía, en una línea bajo los pasos. */
+.historial {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-hueco-4, 1rem);
+}
+.historial .guia-boton {
+  margin-inline-start: 0;
+}
+.historial [data-guia-abrir] {
+  margin-inline-start: auto;
+}
+
 /* Configurador de la tarjeta digital: modelos en miniatura (la misma maqueta que la página pública) y vista en vivo. */
 [data-tarjeta-form] {
   --acento: #176b5a;

@@ -8,6 +8,7 @@
  * «#pedido=<token>»: el estudio lo comprueba en /api/web/pedido y la publica en /w/<nombre>
  * con /api/web/publicar. Volver a publicar actualiza la misma dirección.
  */
+import { Historial } from './historial';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
@@ -217,6 +218,13 @@ export function iniciarEstudioWeb() {
   };
   if (!estado.plantilla) estado.alcanzado = 0;
   let actual = 'plantilla';
+
+  // Deshacer / rehacer. Instantánea de lo que el cliente edita (contenido y aspecto); la galería se comparte por referencia.
+  type Instantanea = Pick<Estado, 'plantilla' | 'color' | 'letra'> & { contenido: Partial<Contenido> };
+  const instantanea = (): Instantanea => ({ plantilla: estado.plantilla, color: estado.color, letra: estado.letra, contenido: estado.contenido ?? {} });
+  const historial = new Historial<Instantanea>(({ contenido: { galeria, ...resto }, ...aspecto }) =>
+    JSON.stringify([aspecto, resto, (galeria ?? []).map((g) => g.length + g.slice(-24))]),
+  );
 
   // ---------- Formulario ----------
   function anadir(lista: Lista, valores: Fila = {}) {
@@ -905,6 +913,26 @@ export function iniciarEstudioWeb() {
   function persistir() {
     estado.contenido = recoger();
     guardar(estado);
+    if (historial.registrar(instantanea())) pintarHistorial();
+  }
+
+  // ---------- Deshacer / rehacer ----------
+  function pintarHistorial() {
+    for (const [sel, ok] of [['[data-deshacer]', historial.puedeDeshacer], ['[data-rehacer]', historial.puedeRehacer]] as const) {
+      const b = $<HTMLButtonElement>(sel);
+      if (b) b.disabled = !ok;
+    }
+  }
+  function saltar(v: Instantanea | undefined, que: string) {
+    if (!v) return;
+    Object.assign(estado, { plantilla: v.plantilla, color: v.color, letra: v.letra, contenido: v.contenido });
+    volcar(v.contenido);
+    pintarControles();
+    guardar(estado);
+    pintarHistorial();
+    const aviso = $('[data-historial-aviso]');
+    if (aviso) aviso.textContent = que;
+    programar(true);
   }
 
   // ---------- Eventos ----------
@@ -914,6 +942,8 @@ export function iniciarEstudioWeb() {
   raiz.addEventListener('click', (ev) => {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('button, [data-ir]');
     if (!b) return;
+    if (b.hasAttribute('data-deshacer')) return saltar(historial.deshacer(), 'Cambio deshecho');
+    if (b.hasAttribute('data-rehacer')) return saltar(historial.rehacer(), 'Cambio rehecho');
     if (b.dataset.galeriaQuitar) {
       const fuera = Number(b.dataset.galeriaQuitar);
       return cambiarGaleria(galeria.filter((_, i) => i !== fuera));
@@ -1115,8 +1145,24 @@ export function iniciarEstudioWeb() {
     desdeHash(true);
   });
 
+  // Ctrl+Z / Ctrl+Y fuera de los campos de texto (dentro, el navegador ya deshace lo escrito).
+  document.addEventListener('keydown', (ev) => {
+    if (!(ev.ctrlKey || ev.metaKey) || ev.altKey) return;
+    const t = ev.target as HTMLElement;
+    if (t.closest('input:not([type=radio]):not([type=checkbox]):not([type=color]), textarea, [contenteditable]')) return;
+    const k = ev.key.toLowerCase();
+    const atras = k === 'z' && !ev.shiftKey;
+    if (!atras && k !== 'y' && !(k === 'z' && ev.shiftKey)) return;
+    ev.preventDefault();
+    if (atras) saltar(historial.deshacer(), 'Cambio deshecho');
+    else saltar(historial.rehacer(), 'Cambio rehecho');
+  });
+
   // ---------- Arranque ----------
   volcar(estado.contenido ?? vacio());
+  estado.contenido = recoger();
+  historial.registrar(instantanea());
+  pintarHistorial();
   pintarControles();
   miniaturas();
   pedido.arrancar(destinoPedido());
