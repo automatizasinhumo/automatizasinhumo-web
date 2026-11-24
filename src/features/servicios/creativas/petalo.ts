@@ -88,7 +88,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
       ['Hablamos antes', 'Unos minutos para conocer tu piel y lo que buscas.'],
       ['Te vas con pautas', 'Te contamos cómo cuidarte en casa hasta la próxima.'],
     ];
-    return `<section class="w-ritual" aria-label="Tu primera visita"><div class="w-in"><p class="w-ritual-ante">Tu primera visita</p><ol>${pasos
+    return `<section class="w-ritual" aria-labelledby="w-ritual-t"><div class="w-in"><h2 class="w-ritual-ante" id="w-ritual-t">Tu primera visita</h2><ol>${pasos
       .map(([t, x]) => `<li><h3>${t}</h3><p>${x}</p></li>`)
       .join('')}</ol></div></section>`;
   },
@@ -145,6 +145,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
 .w-d-petalo .w-c-2 .w-contacto-cta{background:var(--w-c);color:var(--w-s);border-radius:calc(var(--w-r) + 10px)}
 .w-d-petalo .w-c-2 .w-contacto-grande a{color:inherit}
 .w-d-petalo .w-c-2 .w-contacto-cta .w-boton{color:var(--w-s);border-color:currentColor}
+.w-d-petalo .w-c-2 .w-contacto-cta .w-boton:not(.w-boton-lleno):hover{background:var(--w-s);color:var(--w-c);border-color:var(--w-s)}
 .w-d-petalo .w-c-2 .w-contacto-cta .w-boton-lleno{background:var(--w-fondo);color:var(--w-tinta);border-color:var(--w-fondo)}
 @container (min-width:760px){
   .w-d-petalo .w-cab-in{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
