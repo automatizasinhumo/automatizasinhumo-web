@@ -7,6 +7,8 @@ import { buildPageMetadata } from '../../features/seo/metadata';
 import { getSector, SECTORS, servicesForSector } from '../../features/blog/sectors';
 import { getConfig } from '../../config';
 import { breadcrumbJsonLd } from '../../features/storefront/breadcrumbs';
+import { fuentesMuestras, miniaturaMuestra, muestrasDeSector } from '../../features/servicios/muestrasSector';
+import { faqJsonLd, preguntasSector } from '../../features/servicios/faqSector';
 
 const sector = getSector(Astro.params.sector);
 if (!sector) {
@@ -35,7 +37,10 @@ const breadcrumb = breadcrumbJsonLd(
   origin,
   metadata.canonical,
 );
-const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g, '\\u003c');
+const muestras = muestrasDeSector(sector.label);
+const estudio = muestras[0]?.enlace ?? '/servicios/web';
+const preguntas = preguntasSector(sector.label);
+const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb, faqJsonLd(preguntas)].flat()).replace(/</g, '\\u003c');
 ---
 
 <Layout title={metadata.title} description={metadata.description} canonical={metadata.canonical}>
@@ -47,19 +52,18 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g
     </h1>
     <p class="mt-5 max-w-2xl text-lg leading-7 text-muted">{sector.introduction}</p>
     <div class="mt-7 flex flex-wrap gap-3">
+      <a href={estudio} class="boton boton-principal">Diseña tu web ahora →</a>
       {principal && (
         <a
           href={`/empezar/${principal.slug}`}
-          class="boton boton-principal"
+          class="boton boton-secundario"
         >
           Empieza gratis: {principal.name} →
         </a>
       )}
       <a
         href="/empezar/consulta"
-        class={principal
-          ? 'boton boton-secundario'
-          : 'boton boton-principal'}
+        class="boton boton-secundario"
       >
         Cuéntanos qué necesitas
       </a>
@@ -68,6 +72,25 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g
       <p class="mt-3 text-sm text-muted">Sin tarjeta: primero ves la muestra y después decides. Desde {principal.formattedPrice}.</p>
     )}
   </section>
+
+  {muestras.length > 0 && (
+    <section class="py-10 sm:py-12" aria-labelledby="muestras">
+      <style is:inline set:html={fuentesMuestras(muestras)}></style>
+      <h2 id="muestras" class="font-serif text-2xl font-bold text-ink">Así puede quedar tu web</h2>
+      <p class="mt-2 max-w-2xl text-muted">Tres diseños pensados para {sector.label.toLowerCase()}, ya con textos de ejemplo. Elige uno y cámbialo todo en el estudio: nombre, fotos, colores y servicios.</p>
+      <ul class="mt-6 grid gap-6 sm:grid-cols-3" data-muestras>
+        {muestras.map((m) => (
+          <li class="overflow-hidden rounded-2xl border border-line bg-surface">
+            <div class="border-b border-line" aria-hidden="true" inert set:html={`<div>${miniaturaMuestra(m)}</div>`} />
+            <div class="flex items-center justify-between gap-3 p-4">
+              <span class="font-semibold text-ink">{m.nombre}</span>
+              <a href={m.enlace} class="boton boton-secundario" aria-label={`Elegir el diseño ${m.nombre}`}>Elegir este diseño</a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <section class="py-10 sm:py-12" aria-labelledby="servicios">
     <h2 id="servicios" class="font-serif text-2xl font-bold text-ink sm:text-3xl">
@@ -134,6 +157,18 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb].flat()).replace(/</g
     <p class="mt-5 text-sm text-muted">
       Para que la página represente bien tu negocio, prepara horarios, zona de atención, servicios y una forma de contacto que puedas mantener actualizada.
     </p>
+  </section>
+
+  <section class="mb-12" aria-labelledby="preguntas">
+    <h2 id="preguntas" class="font-serif text-2xl font-bold text-ink">Preguntas frecuentes</h2>
+    <div class="mt-4 divide-y divide-line rounded-2xl border border-line bg-surface">
+      {preguntas.map((p) => (
+        <details class="group p-5">
+          <summary class="cursor-pointer list-none font-semibold text-ink marker:hidden">{p.pregunta}</summary>
+          <p class="mt-3 text-muted">{p.respuesta}</p>
+        </details>
+      ))}
+    </div>
   </section>
 
   <nav aria-labelledby="otros-sectores" class="mb-12">

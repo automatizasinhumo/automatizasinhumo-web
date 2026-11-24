@@ -611,7 +611,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     const pri = listaAcciones[0];
     const nav = `<nav class="w-nav" aria-label="Secciones"><div class="w-in w-nav-in"><a class="w-nav-marca" href="#inicio">${esc(d.negocio)}</a>${enlaces ? `<ul>${enlaces}</ul>` : ''}${pri ? `<a class="w-boton w-boton-lleno" href="${esc(pri[0])}"${rel(pri[0])}>${icono(pri[1])}${pri[2]}</a>` : ''}</div></nav>`;
     return [
-      `<div class="w w-d w-d-${diseno.id}${clasesCapa(capa)}" style="${esc(vars)}" id="inicio"><div class="w-cuerpo">`,
+      `<div lang="es" class="w w-d w-d-${diseno.id}${clasesCapa(capa)}" style="${esc(vars)}" id="inicio"><div class="w-cuerpo">`,
       nav,
       diseno.cabecera(ctx),
       diseno.tras?.(ctx) ?? '',
@@ -633,7 +633,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
         ? `${icono('reloj')}${esc(primera[0] ? `${primera[0]}: ${primera[1]}` : primera[1])}`
         : '';
   return [
-    `<div class="w w-t-${p.id}${clasesCapa(capa)}" style="${esc(vars)}"><div class="w-cuerpo">`,
+    `<div lang="es" class="w w-t-${p.id}${clasesCapa(capa)}" style="${esc(vars)}"><div class="w-cuerpo">`,
     `<header class="w-cab w-h-${p.hero}${conFoto ? '' : ' w-sin-foto'}"><div class="w-in w-cab-in"><div class="w-cab-txt">`,
     d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : '',
     `<h1>${esc(d.negocio)}</h1>`,
