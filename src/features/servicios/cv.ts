@@ -98,7 +98,7 @@ export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'trama', nombre: 'Trama', estilo: 'Trama de puntos', tono: 'color', columnas: 2, creativo: true },
   { id: 'cumbre', nombre: 'Cumbre', estilo: 'Cordillera en la cabecera', tono: 'color', columnas: 2, creativo: true },
   { id: 'relieve', nombre: 'Relieve', estilo: 'Curvas de nivel', tono: 'color', columnas: 1, creativo: true },
-  { id: 'confeti', nombre: 'Confeti', estilo: 'Confeti y tarjetas', tono: 'color', columnas: 1, creativo: true },
+  { id: 'confeti', nombre: 'Confeti', estilo: 'Confeti y tarjetas', tono: 'color', columnas: 2, creativo: true },
   { id: 'pliegue', nombre: 'Pliegue', estilo: 'Esquina doblada', tono: 'color', columnas: 1, creativo: true },
   { id: 'plano', nombre: 'Plano', estilo: 'Plano técnico', tono: 'color', columnas: 2, creativo: true },
   { id: 'onyx', nombre: 'Ónix', estilo: 'Clásico con columna lateral', tono: 'sobrio', columnas: 2 },
