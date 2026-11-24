@@ -831,12 +831,14 @@ export function iniciarEstudioWeb() {
     st.dataset.tono = '';
     st.replaceChildren(`${texto} `, a);
   }
+  // Restauración de versión en curso: ni otra restauración ni publicar hasta que acabe.
+  let restaurando = false;
   async function publicar(b: HTMLButtonElement) {
     const st = $('[data-estado-compra]')!;
     // Solo con el pedido del token vigente ya cargado: nunca el token de B con lo escrito para A.
     const token = pedido.token;
     const pagado = pedido.pagado;
-    if (!pagado || !pedido.vigente(token)) return;
+    if (restaurando || !pagado || !pedido.vigente(token)) return;
     b.disabled = true;
     st.textContent = 'Publicando…';
     try {
@@ -887,7 +889,6 @@ export function iniciarEstudioWeb() {
       }),
     );
   }
-  let restaurando = false;
   async function restaurar(v: Version, b: HTMLButtonElement) {
     const token = pedido.token;
     const pagado = pedido.pagado;
