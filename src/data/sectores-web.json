@@ -96,9 +96,9 @@
         "¿Puedo cambiar mi cita?"
       ],
       "disenos": [
+        "petalo",
         "agenda",
-        "serena",
-        "herbario"
+        "serena"
       ],
       "reserva": "Reservar cita",
       "ejemplo": "Estética Alba"

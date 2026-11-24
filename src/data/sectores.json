@@ -180,5 +180,25 @@
     "demoHints": [
       "cleaning-company"
     ]
+  },
+  {
+    "slug": "estetica",
+    "label": "Centros de estética",
+    "title": "Web para centros de estética: tratamientos, precios y cita",
+    "description": "Una web para centros de estética, uñas y masaje con tratamientos y precios orientativos, horario, opiniones y cita por WhatsApp o en la agenda.",
+    "heading": "Una web tan cuidada como tus tratamientos",
+    "introduction": "Quien busca un centro de estética compara cómo se ve el sitio, qué tratamientos hay, cuánto cuestan más o menos y si puede pedir cita sin llamar. La web tiene que transmitir calma y dejar reservar en un toque.",
+    "considerations": [
+      "Agrupa los tratamientos (facial, manos y pies, depilación, masaje) con duración y precio desde.",
+      "Explica cómo es la primera visita y qué hay que saber antes (alergias, preparación, cambios de cita).",
+      "Enseña el espacio y opiniones reales; son lo que más pesa al elegir."
+    ],
+    "serviceSlugs": [
+      "web-una-pagina",
+      "web-corporativa-5-secciones"
+    ],
+    "demoHints": [
+      "spa-salon"
+    ]
   }
 ]

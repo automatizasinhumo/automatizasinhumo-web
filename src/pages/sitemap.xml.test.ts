@@ -24,6 +24,7 @@ describe('sitemapLocs', () => {
     '/webs/dentistas',
     '/webs/panaderias',
     '/webs/limpieza',
+    '/webs/estetica',
     '/curriculum/camarero',
     '/curriculum/dependienta',
     '/curriculum/administrativo',
