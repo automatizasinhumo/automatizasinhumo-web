@@ -96,6 +96,10 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
         <h2 id="paso-plantilla" class="paso-titulo">Elige el diseño de tu web</h2>
         <p class="paso-entradilla">Todos cuestan lo mismo, {euros(precio)}. Podrás cambiarlo después sin volver a escribir nada.</p>
         <div class="recomienda mt-6">
+          <div class="filas">
+            <label class={campo}>Nombre de tu negocio<input data-espejo="negocio" maxlength="80" autocomplete="organization" placeholder="Ej.: Peluquería Lola" /></label>
+            <label class={campo}>Dónde está <span class="ayuda">(pueblo o barrio)</span><input data-espejo="direccion" maxlength="160" autocomplete="address-level2" placeholder="Ej.: Getafe" /></label>
+          </div>
           <label class={campo}
             >¿A qué se dedica tu negocio? <span class="ayuda">(te enseñamos primero los diseños que mejor le van)</span><input
               data-sector-rapido

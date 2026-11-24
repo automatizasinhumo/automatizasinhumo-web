@@ -40,4 +40,9 @@ describe('editar tocando', () => {
       expect(hay(h, TOCABLES[2][0]), p.id).toBe(true);
     }
   });
+  it('los datos del primer paso reflejan campos que existen en el formulario', () => {
+    const espejos = [...pagina.matchAll(/data-espejo="([a-z]+)"/g)].map((m) => m[1]!);
+    expect(espejos).toEqual(['negocio', 'direccion']);
+    for (const e of espejos) expect(pagina).toContain(`name="${e}"`);
+  });
 });
