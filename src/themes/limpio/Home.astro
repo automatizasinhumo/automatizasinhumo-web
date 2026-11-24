@@ -55,10 +55,20 @@ const servicios = SERVICIOS.flatMap(([id, icono, nombre]) => {
 });
 
 const PASOS = [
-  { icono: 'hand-click', titulo: 'Elige', texto: 'Una plantilla del catálogo o la que te recomiende el test en un minuto.' },
-  { icono: 'pencil', titulo: 'Rellena tus datos', texto: 'Textos, fotos y colores. Ves la vista previa mientras lo personalizas.' },
-  { icono: 'rocket', titulo: 'Listo al momento', texto: 'Pagas el precio cerrado y lo descargas o publicas al instante.' },
-];
+  { icono: 'hand-click', titulo: 'Elige un diseño', texto: 'Úsalo tal cual o cambia colores y letra. Si dudas, el test te recomienda uno en un minuto.', muestra: 'plantillas' },
+  { icono: 'pencil', titulo: 'Añade tus datos', texto: 'Textos y fotos en campos guiados. La vista previa cambia mientras escribes.', muestra: 'editor' },
+  { icono: 'eye', titulo: 'Míralo antes de pagar', texto: 'Ves el resultado terminado. Pagas el precio cerrado y lo descargas o publicas al momento.', muestra: 'vista' },
+] as const;
+// Tras los pasos, un botón a lo más pedido: el CV y la web (si el test los tiene).
+const atajos = (
+  [
+    ['trabajo', 'Crear mi CV'],
+    ['llamadas', 'Crear mi web'],
+  ] as const
+).flatMap(([id, texto]) => {
+  const o = objetivos.find((x) => x.id === id);
+  return o ? [{ href: o.href, texto }] : [];
+});
 ---
 
 <Fondo />
@@ -147,11 +157,25 @@ const PASOS = [
   </div>
 </section>
 
-<Seccion id="como" antetitulo="Así de fácil" titulo="De tu idea al resultado, en tres pasos" entradilla="Sin llamadas ni presupuestos: eliges, rellenas y listo." separada>
+<Seccion id="como" antetitulo="Así de fácil" titulo="De tu idea al resultado, en tres pasos" entradilla="Sin llamadas ni presupuestos: eliges un diseño, añades tus datos y ves el resultado antes de pagar." separada>
   <div data-tour="como-funciona"><Pasos pasos={PASOS} etiqueta="Pasos para tenerlo listo" /></div>
+  {atajos.length > 0 && (
+    <div class="pasos-accion" data-pasos-accion>
+      {atajos.map((a, i) => (
+        <Boton href={a.href} variante={i ? 'secundario' : 'principal'}>{a.texto}</Boton>
+      ))}
+    </div>
+  )}
 </Seccion>
 
 <style>
+  .pasos-accion {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ds-hueco-3);
+    margin-top: var(--ds-hueco-6);
+  }
   /* ── Disposición: en el móvil todo en columna y centrado (título, acción, escena,
      resto): el subtítulo y los botones caben en la primera pantalla, antes de la
      maqueta. Desde 60rem, texto a la izquierda y escena a la derecha. ── */
