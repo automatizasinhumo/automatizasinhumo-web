@@ -184,6 +184,17 @@ export const disenoDesdeEnlace = (search: string, ids: ReadonlySet<string>): str
   return d && ids.has(d) ? d : null;
 };
 
+/**
+ * Aplica el diseño del enlace a lo guardado: además del diseño, el camino y el inicio tienen que
+ * enseñarlo (la asesoría no tiene galería y «desde cero» pinta su propia base, no el diseño pedido).
+ */
+export const conDisenoDeEnlace = <T extends { diseno: string; camino: CaminoCv; inicio: 'plantilla' | 'cero' }>(estado: T, diseno: string): T => ({
+  ...estado,
+  diseno,
+  camino: estado.camino === 'asesoria' ? 'plantilla' : estado.camino,
+  inicio: 'plantilla',
+});
+
 export const miniaturaCv = (id: string) => `/cv/estudio/miniaturas/${id}.jpg`;
 
 /** Formas, posición, sombreado y fondo de la personalizable: el mismo catálogo que dibuja el motor. */

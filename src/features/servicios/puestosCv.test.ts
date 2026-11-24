@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { DISENOS_ATS, DISENOS_CV, disenoDesdeEnlace, miniaturaCv } from './cv';
+import { DISENOS_ATS, DISENOS_CV, conDisenoDeEnlace, disenoDesdeEnlace, miniaturaCv } from './cv';
 import { disenosDePuesto, enlaceEstudioCv, PUESTOS_CV, puestoCv } from './puestosCv';
 
 describe('páginas de currículum por puesto', () => {
@@ -37,6 +37,13 @@ describe('páginas de currículum por puesto', () => {
     expect(disenoDesdeEnlace(url.search, ids)).toBe('onyx');
     expect(disenoDesdeEnlace('?diseno=no-existe', ids)).toBeNull();
     expect(disenoDesdeEnlace('', ids)).toBeNull();
+  });
+
+  it('el diseño del enlace se ve siempre: saca de la asesoría y de «desde cero»', () => {
+    const base = { diseno: 'onyx', camino: 'personaliza' as const, inicio: 'cero' as const, otro: 1 };
+    expect(conDisenoDeEnlace(base, 'aurora')).toEqual({ diseno: 'aurora', camino: 'personaliza', inicio: 'plantilla', otro: 1 });
+    expect(conDisenoDeEnlace({ ...base, camino: 'asesoria' as const }, 'aurora').camino).toBe('plantilla');
+    expect(conDisenoDeEnlace({ ...base, camino: 'plantilla' as const }, 'aurora').camino).toBe('plantilla');
   });
 
   it('puestoCv busca por slug', () => {
