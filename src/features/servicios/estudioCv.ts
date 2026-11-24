@@ -682,6 +682,8 @@ export function iniciarEstudioCv() {
 
   // ---------- Tarjeta digital ----------
   const campoT = (k: string) => $<HTMLInputElement>(`[data-t="${k}"]`)!;
+  /** El borrador de la tarjeta va con el pedido que la pagó (o el del CV mientras no se compra). */
+  const refTarjeta = () => pedido.pagado?.refTarjeta ?? pedido.pagado?.ref ?? 'borrador';
   const caja = $('[data-tarjeta-form]')!;
   const vistaT = $('[data-tarjeta-vista]')!;
   const CAMPOS_T = ['nombre', 'cargo', 'email', 'telefono', 'web', 'ubicacion', 'resumen', 'linkedin'] as const;
@@ -696,7 +698,7 @@ export function iniciarEstudioCv() {
   };
   const guardarBorrador = () => {
     // `ref`: de qué pedido es el borrador ('borrador' antes de pagar), para no mezclar ediciones de otro.
-    const d: Record<string, unknown> = { ref: pedido.pagado?.ref ?? 'borrador', modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
+    const d: Record<string, unknown> = { ref: refTarjeta(), modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
     for (const k of CAMPOS_T) d[k] = campoT(k).value;
     try {
       localStorage.setItem(CLAVE_TARJETA, JSON.stringify(d));
@@ -750,7 +752,7 @@ export function iniciarEstudioCv() {
     pub.disabled = !pagada;
     $('[data-tarjeta-nota]')!.hidden = pagada;
     if (caja.hidden) return;
-    const ref = pedido.pagado?.ref ?? 'borrador';
+    const ref = refTarjeta();
     // Mientras no toques la tarjeta, sigue a los datos del CV (puedes volver atrás y cambiarlos).
     if (tarjetaDe === ref && tarjetaTocada) return pintarTarjeta();
     tarjetaDe = ref;

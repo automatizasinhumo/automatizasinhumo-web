@@ -10,6 +10,8 @@ export interface PagadoCv<T = unknown> {
   ref: string;
   cv: ModalidadCv | null;
   tarjeta: { slug: string | null; datos: T | null } | null;
+  /** Referencia del pedido que pagó la tarjeta: identifica su borrador (no la del CV). */
+  refTarjeta?: string;
   linkedin?: boolean;
   infojobs?: boolean;
 }
@@ -18,7 +20,8 @@ export interface PagadoCv<T = unknown> {
  * Une los pedidos (en orden de llegada). El CV es el de mayor alcance (personalizable sobre
  * diseñada) y su referencia es la que se muestra; los portales se suman; la tarjeta es la del
  * último pedido que la incluye y su token es el elegido, porque publicar la tarjeta exige el token
- * del pedido que la pagó. Sin tarjeta, manda el token del pedido del CV.
+ * del pedido que la pagó. Sin tarjeta, manda el token del pedido del CV. El borrador de la tarjeta
+ * se guarda con `refTarjeta`: con el CV A y la tarjeta B, llegar la tarjeta C no recupera el de B.
  */
 export function combinarPedidosCv<T>(pedidos: readonly PedidoCargado<PagadoCv<T>>[]): PedidoCargado<PagadoCv<T>> | null {
   if (!pedidos.length) return null;
@@ -31,6 +34,7 @@ export function combinarPedidosCv<T>(pedidos: readonly PedidoCargado<PagadoCv<T>
       ref: (conCv ?? base).d.ref,
       cv: conCv?.d.cv ?? null,
       tarjeta: conTarjeta?.d.tarjeta ?? null,
+      ...(conTarjeta ? { refTarjeta: conTarjeta.d.ref } : {}),
       linkedin: pedidos.some((p) => p.d.linkedin),
       infojobs: pedidos.some((p) => p.d.infojobs),
     },

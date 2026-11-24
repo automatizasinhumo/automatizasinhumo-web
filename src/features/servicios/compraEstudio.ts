@@ -89,7 +89,7 @@ export interface PedidoEstudio<D extends { ref: string }> {
   readonly token: string;
   /** Pedido del token vigente; null mientras no está comprobado. */
   readonly pagado: D | null;
-  /** true mientras se comprueba un token: ni comprar ni publicar. */
+  /** true mientras se comprueba un token o alguna consulta falló: ni comprar ni publicar. */
   readonly cargando: boolean;
   /** Si el hash trae `#pedido=`, lo toma y lo carga. true si venía. */
   tomar(destino: string): boolean;
@@ -97,6 +97,37 @@ export interface PedidoEstudio<D extends { ref: string }> {
   arrancar(destino: string): void;
   /** ¿Sigue cargado el pedido de este token? Se comprueba tras cada await antes de tocar estado. */
   vigente(token: string): boolean;
+}
+
+/** Reintentos de las consultas caídas (red, 5xx) antes de rendirse hasta recargar la página. */
+export const REINTENTOS = 3;
+
+/**
+ * Consulta cada token por separado: un 404 es un pedido caducado; un fallo de red o un 5xx de uno
+ * no tumba los demás, queda en `fallidos` (no es lo mismo que no existir).
+ */
+export async function consultarPedidos<D>(
+  lista: readonly string[],
+  url: string,
+  sigue: () => boolean = () => true,
+  pedir: typeof fetch = fetch,
+): Promise<{ cargados: PedidoCargado<D>[]; caducados: string[]; fallidos: string[] }> {
+  const cargados: PedidoCargado<D>[] = [];
+  const caducados: string[] = [];
+  const fallidos: string[] = [];
+  for (const t of lista) {
+    if (!sigue()) break;
+    try {
+      const r = await pedir(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: t }) });
+      if (r.status === 404) caducados.push(t);
+      else if (r.ok) cargados.push({ token: t, d: (await r.json()) as D });
+      else fallidos.push(t);
+    } catch (e) {
+      console.error(e);
+      fallidos.push(t);
+    }
+  }
+  return { cargados, caducados, fallidos };
 }
 
 export function pedidoEstudio<D extends { ref: string }>(
@@ -111,41 +142,29 @@ export function pedidoEstudio<D extends { ref: string }>(
   let cargando = false;
   const guardados = () => (combinar ? leerTokens(tokenGuardado(clave)) : [tokenGuardado(clave)].filter(Boolean));
   const guardar = (lista: string[]) => guardarToken(clave, combinar ? (lista.length ? JSON.stringify(lista) : '') : (lista.at(-1) ?? ''));
-  async function cargar(lista: string[]) {
+  async function cargar(lista: string[], intento = 0) {
     const g = ++gen;
     token = lista.at(-1) ?? '';
-    pagado = null;
+    if (!intento) pagado = null;
     cargando = lista.length > 0;
-    alCambiar(null);
+    if (!intento) alCambiar(null);
     if (!lista.length) return;
-    try {
-      const cargados: PedidoCargado<D>[] = [];
-      const caducados: string[] = [];
-      for (const t of lista) {
-        const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: t }) });
-        if (g !== gen) return;
-        if (r.status === 404) caducados.push(t);
-        else if (r.ok) cargados.push({ token: t, d: (await r.json()) as D });
-        if (g !== gen) return;
-      }
-      if (caducados.length) guardar(lista.filter((t) => !caducados.includes(t)));
-      const elegido = combinar ? combinar(cargados) : (cargados.at(-1) ?? null);
-      if (!elegido) {
-        if (caducados.length === lista.length) token = '';
-        return;
-      }
+    const { cargados, caducados, fallidos } = await consultarPedidos<D>(lista, url, () => g === gen);
+    if (g !== gen) return;
+    const vivos = lista.filter((t) => !caducados.includes(t));
+    if (caducados.length) guardar(vivos);
+    const elegido = combinar ? combinar(cargados) : (cargados.at(-1) ?? null);
+    // Una consulta caída no es un pedido inexistente: se enseña lo que hay, pero sin dejar comprar
+    // ni publicar (cargando sigue en true) hasta que respondan todos; si no, se ofrecería volver a
+    // pagar un CV ya pagado.
+    const incompleto = fallidos.length > 0;
+    if (elegido) {
       token = elegido.token;
       pagado = elegido.d;
-      cargando = false;
-      alCambiar(elegido.d);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      if (g === gen && cargando) {
-        cargando = false;
-        alCambiar(null);
-      }
-    }
+    } else if (!incompleto && !vivos.length) token = '';
+    cargando = incompleto;
+    alCambiar(pagado);
+    if (incompleto && intento < REINTENTOS) setTimeout(() => g === gen && void cargar(vivos, intento + 1), 1500 * (intento + 1));
   }
   return {
     get token() {

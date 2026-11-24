@@ -1,6 +1,6 @@
 // Volver de pagar un extra suelto no esconde el CV ya pagado (CodeRabbit en #192, 24/11).
 import { describe, expect, it } from 'vitest';
-import { MAX_TOKENS, leerTokens, sumarToken } from '../../src/features/servicios/compraEstudio';
+import { MAX_TOKENS, consultarPedidos, leerTokens, sumarToken } from '../../src/features/servicios/compraEstudio';
 import { combinarPedidosCv, type PagadoCv } from '../../src/features/servicios/cvPedidos';
 
 const p = (token: string, d: Partial<PagadoCv>) => ({ token, d: { ref: `R-${token}`, cv: null, tarjeta: null, ...d } as PagadoCv });
@@ -43,5 +43,39 @@ describe('combinarPedidosCv', () => {
     const r = combinarPedidosCv([p('li', { linkedin: true })])!;
     expect(r.d.cv).toBeNull();
     expect(r.token).toBe('li');
+  });
+});
+
+describe('borrador de la tarjeta', () => {
+  it('va con la referencia del pedido que pagó la tarjeta, no con la del CV', () => {
+    const tj = (s: string) => ({ slug: s, datos: null });
+    const b = combinarPedidosCv([p('cv', { cv: 'disenada' }), p('B', { tarjeta: tj('b') })])!;
+    expect(b.d).toMatchObject({ ref: 'R-cv', refTarjeta: 'R-B' });
+    const c = combinarPedidosCv([p('cv', { cv: 'disenada' }), p('B', { tarjeta: tj('b') }), p('C', { tarjeta: tj('c') })])!;
+    expect(c).toMatchObject({ token: 'C', d: { ref: 'R-cv', refTarjeta: 'R-C' } });
+    // Añadir un portal no cambia la tarjeta ni su borrador.
+    expect(combinarPedidosCv([p('cv', { cv: 'disenada' }), p('B', { tarjeta: tj('b') }), p('li', { linkedin: true })])!.d.refTarjeta).toBe('R-B');
+    expect(combinarPedidosCv([p('cv', { cv: 'disenada' })])!.d.refTarjeta).toBeUndefined();
+  });
+});
+
+describe('consultarPedidos', () => {
+  const resp = (status: number, d?: unknown) => ({ status, ok: status < 300, json: async () => d }) as Response;
+  it('un 503 o un fallo de red no es un pedido caducado ni tumba los demás', async () => {
+    const pedir = (async (_u: string, i: RequestInit) => {
+      const t = JSON.parse(String(i.body)).token as string;
+      if (t === 'red') throw new Error('sin red');
+      return t === 'cv' ? resp(503) : t === 'viejo' ? resp(404) : resp(200, { ref: t });
+    }) as typeof fetch;
+    const r = await consultarPedidos(['cv', 'red', 'viejo', 'li'], '/x', () => true, pedir);
+    expect(r.fallidos).toEqual(['cv', 'red']);
+    expect(r.caducados).toEqual(['viejo']);
+    expect(r.cargados).toEqual([{ token: 'li', d: { ref: 'li' } }]);
+  });
+  it('deja de consultar si cambia el pedido a mitad', async () => {
+    let n = 0;
+    const pedir = (async () => (n++, resp(200, {}))) as unknown as typeof fetch;
+    await consultarPedidos(['a', 'b', 'c'], '/x', () => n < 1, pedir);
+    expect(n).toBe(1);
   });
 });
