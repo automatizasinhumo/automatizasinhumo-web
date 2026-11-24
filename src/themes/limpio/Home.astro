@@ -129,7 +129,7 @@ const PASOS = [
 
   <div class="accion">
     <p class="subtitulo">Crea tu web, automatiza tu negocio y lanza tu evento en pocos pasos. Todo automático, a precio cerrado y con vista previa antes de pagar.</p>
-    <div class="botones">
+    <div class="botones" data-tour="empieza">
       <Boton href={testHref}>Haz el test y te recomendamos</Boton>
       <Boton href={catalogHref} variante="secundario">Ver todos los servicios</Boton>
     </div>
@@ -137,7 +137,7 @@ const PASOS = [
 
   <div class="resto">
     {servicios.length > 0 && (
-      <ul class="servicios" aria-label="Servicios">
+      <ul class="servicios" aria-label="Servicios" data-tour="atajos">
         {servicios.map((s) => (
           <li><Pildora href={s.href} icono={s.icono}>{s.nombre}</Pildora></li>
         ))}
@@ -148,7 +148,7 @@ const PASOS = [
 </section>
 
 <Seccion id="como" antetitulo="Así de fácil" titulo="De tu idea al resultado, en tres pasos" entradilla="Sin llamadas ni presupuestos: eliges, rellenas y listo." separada>
-  <Pasos pasos={PASOS} etiqueta="Pasos para tenerlo listo" />
+  <div data-tour="como-funciona"><Pasos pasos={PASOS} etiqueta="Pasos para tenerlo listo" /></div>
 </Seccion>
 
 <style>

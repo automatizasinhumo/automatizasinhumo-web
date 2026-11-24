@@ -1,9 +1,8 @@
 ---
 /**
- * Pasos numerados unidos por una línea: «cómo funciona» y cualquier proceso corto.
- * En horizontal cuando cabe; en vertical en el móvil. Entran al aparecer en
- * pantalla con una animación ligada al scroll (animation-timeline: view(), solo
- * transform y opacity); sin soporte, se ven directamente.
+ * Pasos numerados en tarjetas sobre un panel con textura: «cómo funciona» y cualquier
+ * proceso corto. En horizontal cuando cabe; en vertical en el móvil. Siempre visibles
+ * y con contraste AA: ninguna animación de entrada los oculta.
  */
 import Icono from '../IconoCat.astro';
 
@@ -19,7 +18,7 @@ interface Props {
 }
 const { pasos, etiqueta } = Astro.props;
 ---
-<ol class="pasos" aria-label={etiqueta}>
+<ol class="pasos" aria-label={etiqueta} style={`--n:${pasos.length}`}>
   {pasos.map((p, i) => (
     <li style={`--i:${i}`}>
       <span class="num"><Icono name={p.icono} class="h-5 w-5" /></span>
@@ -32,45 +31,60 @@ const { pasos, etiqueta } = Astro.props;
 </ol>
 
 <style>
+  /* Panel con textura (malla de color + grano SVG) que separa los pasos del fondo de
+     rejilla; cada paso es una tarjeta opaca, así el texto se lee siempre con contraste AA.
+     Siempre visibles: nada depende del scroll para leerse. */
   .pasos {
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--ds-hueco-6);
-    counter-reset: paso;
+    gap: var(--ds-hueco-4);
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--color-brand) 18%, var(--color-line));
+    border-radius: calc(var(--ds-radio-tarjeta) * 1.5);
+    padding: clamp(1rem, 3vw, 2rem);
+    background:
+      radial-gradient(ellipse at 0% 0%, color-mix(in oklab, var(--color-brand) 26%, transparent), transparent 60%),
+      radial-gradient(ellipse at 100% 100%, color-mix(in oklab, var(--color-accent) 20%, transparent), transparent 55%),
+      linear-gradient(135deg, color-mix(in oklab, var(--color-brand) 10%, var(--color-surface)), color-mix(in oklab, var(--color-accent) 8%, var(--color-surface)));
+    box-shadow: var(--ds-sombra-2);
+  }
+  .pasos::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .2 0 0 0 0 .2 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    pointer-events: none;
   }
   li {
     position: relative;
     display: flex;
     gap: var(--ds-hueco-4);
     align-items: flex-start;
+    border: 1px solid color-mix(in oklab, var(--color-brand) 14%, var(--color-line));
+    border-radius: var(--ds-radio-tarjeta);
+    padding: var(--ds-hueco-5, 1.25rem);
+    background: var(--color-surface);
+    box-shadow: var(--ds-sombra-1);
   }
   /* El texto puede encoger: si no, una palabra larga empuja el paso fuera. */
   li > div {
     min-width: 0;
   }
   .num {
-    position: relative;
-    z-index: 1;
     display: grid;
     flex: none;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 1px solid color-mix(in oklab, var(--color-brand) 25%, var(--color-line));
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
-    color: var(--color-brand);
-    background: var(--color-surface);
-    box-shadow: var(--ds-sombra-1);
-  }
-  /* Línea que une los pasos: vertical en el móvil. */
-  li:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 2.75rem;
-    bottom: calc(-1 * var(--ds-hueco-6));
-    left: 1.375rem;
-    width: 1px;
-    background: linear-gradient(var(--color-line), transparent);
+    color: #fff;
+    background: linear-gradient(135deg in oklch, var(--color-brand), color-mix(in oklch, var(--color-brand) 60%, var(--color-accent)));
+    box-shadow: var(--ds-sombra-marca);
   }
   .titulo {
     font-family: var(--font-serif);
@@ -80,42 +94,46 @@ const { pasos, etiqueta } = Astro.props;
     color: var(--color-ink);
   }
   .orden {
-    margin-right: 0.15rem;
+    margin-right: 0.25rem;
     font-size: var(--ds-texto-etiqueta);
+    font-weight: 700;
     letter-spacing: var(--ds-tracking-etiqueta);
     color: var(--color-accent);
     vertical-align: 0.2em;
   }
   .texto {
-    margin-top: 0.2rem;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: var(--color-muted);
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-ink);
+    opacity: 0.82;
+  }
+  /* Flecha entre pasos: hacia abajo en el móvil, hacia la derecha en escritorio. */
+  li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--ds-hueco-5, 1.25rem) + 1.5rem - 0.4rem);
+    bottom: calc(-0.4rem - var(--ds-hueco-4) / 2);
+    z-index: 1;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-right: 2px solid var(--color-brand);
+    border-bottom: 2px solid var(--color-brand);
+    transform: rotate(45deg);
   }
   @media (min-width: 48rem) {
-    .pasos { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); grid-auto-flow: column; gap: var(--ds-hueco-8); }
+    .pasos { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); grid-auto-flow: column; gap: var(--ds-hueco-6); }
     li { flex-direction: column; }
     li:not(:last-child)::after {
-      top: 1.375rem;
+      left: auto;
+      right: calc(-0.4rem - var(--ds-hueco-6) / 2);
+      top: 50%;
       bottom: auto;
-      left: 3.5rem;
-      right: calc(-1 * var(--ds-hueco-8) + 0.75rem);
-      width: auto;
-      height: 1px;
-      background: linear-gradient(90deg, var(--color-line), transparent);
+      transform: translateY(-50%) rotate(-45deg);
     }
   }
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      li {
-        animation: paso-entra linear both;
-        animation-timeline: view();
-        animation-range: entry 10% entry 70%;
-      }
-    }
-  }
-  @keyframes paso-entra {
-    from { opacity: 0; transform: translateY(1.25rem); }
-    to { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    li { transition: transform var(--ds-mov-normal) var(--ds-curva), box-shadow var(--ds-mov-normal); }
+    li:hover { transform: translateY(-3px); box-shadow: var(--ds-sombra-2); }
   }
 </style>

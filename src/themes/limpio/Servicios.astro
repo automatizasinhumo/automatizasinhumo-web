@@ -52,19 +52,17 @@ const conListos = familias.map((f) => {
 });
 // Primero lo que se puede contratar ya; dentro de cada grupo, el orden de catalogo.ts.
 const puertas = [...conListos.filter((f) => f.listos.length > 0), ...conListos.filter((f) => f.listos.length === 0)];
-const totalListos = conListos.reduce((n, f) => n + f.listos.length, 0);
 const dos = (n: number) => String(n).padStart(2, '0');
 ---
 
 <Fondo />
 
 <section class="cabeza" aria-labelledby="servicios-titulo">
-  <p class="antetitulo"><span class="punto" aria-hidden="true"></span>{totalListos} servicios listos hoy · {familias.length} familias</p>
   <h1 id="servicios-titulo">Todo lo que necesitas, <span class="marca">hecho a tu medida y al momento</span></h1>
   <p class="subtitulo">Elige una familia, rellena tus datos y míralo terminado antes de pagar.</p>
 </section>
 
-<nav class="puertas" aria-label="Familias de servicios">
+<nav class="puertas" aria-label="Familias de servicios" data-tour="familias">
   {puertas.map((f, i) => (
     <a href={`#${f.id}`} class:list={['puerta', { grande: f.listos.length > 0 }]} data-familia={f.id} style={`--i:${i}`}>
       <span class="puerta-fondo" aria-hidden="true"></span>
@@ -92,7 +90,7 @@ const dos = (n: number) => String(n).padStart(2, '0');
   ))}
 </nav>
 
-<div class="indice" data-indice>
+<div class="indice" data-indice data-tour="indice">
   <nav class="indice-barra" aria-label="Ir a una familia">
     {familias.map((f) => (
       <a href={`#${f.id}`} data-familia={f.id} data-ir={f.id}>
@@ -104,7 +102,7 @@ const dos = (n: number) => String(n).padStart(2, '0');
 
 <div class="familias">
   {conListos.map((f, n) => (
-    <section id={f.id} class="familia" data-familia={f.id} aria-labelledby={`${f.id}-titulo`}>
+    <section id={f.id} class="familia" data-familia={f.id} data-tour={n === 0 ? 'primera-familia' : undefined} aria-labelledby={`${f.id}-titulo`}>
       <header class="familia-cabeza">
         <span class="numero" aria-hidden="true">{dos(n + 1)}</span>
         <span class="familia-icono" aria-hidden="true"><Icono name={f.icono} class="h-7 w-7" /></span>
@@ -184,30 +182,6 @@ const dos = (n: number) => String(n).padStart(2, '0');
     align-items: center;
     padding-block: clamp(1rem, 4vh, 2.5rem) var(--ds-hueco-8);
     text-align: center;
-  }
-  .antetitulo {
-    display: inline-flex;
-    gap: var(--ds-hueco-2);
-    align-items: center;
-    border: 1px solid var(--color-line);
-    border-radius: var(--ds-radio-pildora);
-    padding: var(--ds-hueco-2) var(--ds-hueco-4);
-    background: color-mix(in oklab, var(--color-surface) 80%, transparent);
-    font-size: var(--ds-texto-small);
-    font-weight: 600;
-    color: var(--color-muted);
-  }
-  .punto {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--color-brand);
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-brand) 60%, transparent);
-    animation: latido 2s infinite;
-  }
-  @keyframes latido {
-    70% { box-shadow: 0 0 0 var(--ds-hueco-2) transparent; }
-    100% { box-shadow: 0 0 0 0 transparent; }
   }
   h1 {
     max-width: 20ch;
@@ -402,9 +376,32 @@ const dos = (n: number) => String(n).padStart(2, '0');
   .indice-barra a:focus-visible { outline: 3px solid var(--familia); outline-offset: 2px; }
 
   /* ── Una sección por familia. ── */
+  /* Banda con el color de la familia y una trama de puntos: cada familia se distingue
+     de un vistazo sin tarjetas planas sobre blanco. */
   .familia {
+    position: relative;
+    isolation: isolate;
     scroll-margin-top: calc(var(--alto-cabecera, 4.5rem) + 5rem);
-    padding-top: var(--ds-hueco-12, 4rem);
+    margin-top: var(--ds-hueco-8, 2rem);
+    border: 1px solid color-mix(in oklab, var(--familia) 22%, var(--color-line));
+    border-radius: calc(var(--ds-radio-tarjeta) * 1.5);
+    padding: clamp(1rem, 3vw, 2rem);
+    background:
+      radial-gradient(ellipse at 100% 0%, color-mix(in oklab, var(--familia-2, var(--familia)) 22%, transparent), transparent 55%),
+      linear-gradient(160deg, color-mix(in oklab, var(--familia) 12%, var(--color-surface)), color-mix(in oklab, var(--familia) 4%, var(--color-surface)) 70%);
+    box-shadow: var(--ds-sombra-1);
+  }
+  .familia::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-image: radial-gradient(color-mix(in oklab, var(--familia) 30%, transparent) 1px, transparent 1.5px);
+    background-size: 18px 18px;
+    -webkit-mask-image: linear-gradient(200deg, #000, transparent 65%);
+    mask-image: linear-gradient(200deg, #000, transparent 65%);
+    pointer-events: none;
   }
   .familia-cabeza {
     display: grid;
@@ -587,8 +584,7 @@ const dos = (n: number) => String(n).padStart(2, '0');
     .puerta,
     .servicio,
     .flecha,
-    .puerta-muestra,
-    .punto { animation: none; transition: none; }
+    .puerta-muestra { animation: none; transition: none; }
     .puerta:hover,
     .puerta:focus-visible,
     .servicio:hover,
