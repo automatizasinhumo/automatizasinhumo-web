@@ -89,10 +89,12 @@ declare namespace Cloudflare {
     CF_DOMINIOS_TOKEN?: string;
     CF_ACCOUNT_ID?: string;
     CF_WORKER_NOMBRE?: string;
-    // Compra del dominio incluida (src/features/servicios/registrador.ts, Cloudflare Registrar):
+    // Compra del dominio propio, aparte de la web (src/features/servicios/registrador.ts, Cloudflare Registrar):
     // '1' la activa (el token necesita además Registrar write; la cuenta, perfil de facturación y
-    // contacto por defecto de Registrar). CF_DOMINIO_PRECIO_MAX: USD/año que se compra incluido (15).
+    // contacto por defecto de Registrar). CF_DOMINIO_PRECIO_MAX: USD/año máximo de los dominios que se ofrecen, aparte de la web (15).
     CF_REGISTRAR_ACTIVO?: string;
+    // CF_DOMINIO_COBRO=1 solo cuando el carrito cobra el dominio: sin ella no se ofrece ni se registra ninguno.
+    CF_DOMINIO_COBRO?: string;
     CF_DOMINIO_PRECIO_MAX?: string;
     // Clave de IndexNow (src/features/seo/indexnow.ts): secreto; sin ella /<clave>.txt da 404.
     INDEXNOW_KEY?: string;
