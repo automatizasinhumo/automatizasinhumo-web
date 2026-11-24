@@ -125,12 +125,29 @@ export async function publicarPagina(
   datos: unknown,
 ): Promise<string> {
   const json = JSON.stringify(datos);
-  const ya = await db
-    .prepare(
-      "UPDATE paginas_publicadas SET datos = ?, updated_at = datetime('now') WHERE tipo = ? AND pedido_public_id = ? RETURNING slug",
-    )
-    .bind(json, tipo, pedido)
-    .first<{ slug: string }>();
+  // Volver a publicar: lo que había pasa al historial (si cambia algo) y se recortan las antiguas,
+  // todo en un lote para que nunca quede una versión perdida a medias.
+  const [, actualizada] = await db.batch<{ slug: string }>([
+    db
+      .prepare(
+        `INSERT INTO paginas_versiones (tipo, pedido_public_id, datos, created_at)
+         SELECT tipo, pedido_public_id, datos, updated_at FROM paginas_publicadas
+         WHERE tipo = ? AND pedido_public_id = ? AND datos <> ?`,
+      )
+      .bind(tipo, pedido, json),
+    db
+      .prepare(
+        "UPDATE paginas_publicadas SET datos = ?, updated_at = datetime('now') WHERE tipo = ? AND pedido_public_id = ? RETURNING slug",
+      )
+      .bind(json, tipo, pedido),
+    db
+      .prepare(
+        `DELETE FROM paginas_versiones WHERE tipo = ? AND pedido_public_id = ? AND id NOT IN
+         (SELECT id FROM paginas_versiones WHERE tipo = ? AND pedido_public_id = ? ORDER BY id DESC LIMIT ?)`,
+      )
+      .bind(tipo, pedido, tipo, pedido, MAX_VERSIONES),
+  ]);
+  const ya = actualizada?.results?.[0];
   if (ya) return ya.slug;
   const base = slugBase(nombre, tipo);
   const candidatos = [base, ...Array.from({ length: 8 }, (_, i) => `${base}-${i + 2}`)];
@@ -153,4 +170,45 @@ export async function publicarPagina(
     if (otra) return otra.slug;
   }
   throw new Error(`No se encontró una dirección libre para la página (${tipo})`);
+}
+
+// ---------- Versiones anteriores ----------
+
+/** Versiones que se guardan por página: de sobra para deshacer una mala tarde, sin crecer sin fin. */
+export const MAX_VERSIONES = 20;
+
+export interface VersionPagina {
+  id: number;
+  created_at: string;
+}
+
+/** Versiones anteriores de la página de un pedido, de la más reciente a la más antigua. */
+export async function versionesDePedido(db: D1Database, tipo: TipoPagina, pedido: string): Promise<VersionPagina[]> {
+  const r = await db
+    .prepare('SELECT id, created_at FROM paginas_versiones WHERE tipo = ? AND pedido_public_id = ? ORDER BY id DESC LIMIT ?')
+    .bind(tipo, pedido, MAX_VERSIONES)
+    .all<VersionPagina>();
+  return r.results ?? [];
+}
+
+/** Datos de una versión anterior, solo si es de ese pedido y sigue pasando el validador actual. */
+export async function versionDePedido<T>(
+  db: D1Database,
+  tipo: TipoPagina,
+  pedido: string,
+  id: number,
+  validar: Validador<T>,
+): Promise<T | null> {
+  if (!Number.isSafeInteger(id) || id <= 0) return null;
+  const r = await db
+    .prepare('SELECT datos FROM paginas_versiones WHERE id = ? AND tipo = ? AND pedido_public_id = ?')
+    .bind(id, tipo, pedido)
+    .first<{ datos: string }>();
+  if (!r) return null;
+  try {
+    const v = validar(JSON.parse(r.datos));
+    return v.ok ? v.datos : null;
+  } catch {
+    return null;
+  }
 }

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
+import { versionesDePedido } from '../../../features/servicios/paginas';
 import { pedidoWeb } from '../../../features/servicios/pedidoAuto';
 import { publicarWeb, validarWeb } from '../../../features/servicios/webs';
 
@@ -19,5 +20,6 @@ export const POST: APIRoute = async ({ request }) => {
   const v = validarWeb(body?.datos);
   if (!v.ok) return json({ ok: false, error: v.error }, 422);
   const slug = await publicarWeb(env.DB, p.publicId, v.datos);
-  return json({ ok: true, slug, url: `/w/${slug}` });
+  const versiones = await versionesDePedido(env.DB, 'web', p.publicId);
+  return json({ ok: true, slug, url: `/w/${slug}`, versiones });
 };

@@ -1152,3 +1152,10 @@
 .revision li + li { margin-top: 0.35rem; }
 .revision button { font-weight: 700; text-decoration: underline; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 .revision[data-completa='true'] { border-left-color: #15803d; background: color-mix(in srgb, #15803d 10%, transparent); }
+
+/* Versiones anteriores de la web publicada (estudioWeb.ts · pintarVersiones). */
+.versiones { margin-top: 1rem; border-top: 1px solid var(--color-line); padding-top: 0.75rem; font-size: 0.9rem; }
+.versiones summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.versiones ol { margin: 0.5rem 0 0; padding-left: 1.1rem; list-style: decimal; }
+.versiones li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; min-height: 44px; }
+.versiones button { font-weight: 700; text-decoration: underline; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; min-height: 44px; }
