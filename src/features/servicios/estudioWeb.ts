@@ -275,6 +275,8 @@ export function iniciarEstudioWeb() {
   function volcar(c: Partial<Contenido>) {
     // Los radios no se desmarcan con '': la capa vuelve a 'auto' cuando el contenido no la trae.
     for (const k of CAMPOS) campo(k).value = typeof c[k] === 'string' && c[k] ? c[k] : (CAPA as readonly string[]).includes(k) ? 'auto' : '';
+    // Los datos del primer paso (nombre, localidad) son espejos de los campos del formulario.
+    for (const e of $$<HTMLInputElement>('[data-espejo]')) e.value = campo(e.dataset.espejo as (typeof CAMPOS)[number]).value;
     for (const l of LISTAS) {
       $(`[data-lista="${l}"] [data-items]`)!.replaceChildren();
       for (const fila of Array.isArray(c[l]) ? (c[l] as unknown as Fila[]) : []) anadir(l, fila);
@@ -1224,6 +1226,7 @@ export function iniciarEstudioWeb() {
   form.addEventListener('change', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, true);
+    if (c.dataset.espejo) return void campo(c.dataset.espejo as (typeof CAMPOS)[number]).dispatchEvent(new Event('change', { bubbles: true }));
     if (c.name?.startsWith('titular-') || c.name === 'dominio') return;
     if (c.hasAttribute('data-galeria-elegir')) {
       const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
@@ -1303,7 +1306,16 @@ export function iniciarEstudioWeb() {
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
     if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, false);
+    if (c.dataset.espejo) {
+      const f = campo(c.dataset.espejo as (typeof CAMPOS)[number]);
+      f.value = c.value;
+      if (c.dataset.espejo === 'negocio' && c.value.trim()) f.removeAttribute('aria-invalid');
+      persistir();
+      return programar();
+    }
     if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio' || c.name?.startsWith('titular-')) return;
+    // Y al revés: si cambia el campo, su espejo del primer paso no se queda con el valor viejo.
+    for (const e of $$<HTMLInputElement>(`[data-espejo="${c.name}"]`)) e.value = c.value;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;
       pintarControles();
