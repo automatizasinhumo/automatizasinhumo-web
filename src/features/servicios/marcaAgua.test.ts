@@ -25,4 +25,8 @@ describe('marca de agua de la vista previa del CV', () => {
     expect(motor).toContain('rotate(-90deg)');
     expect(motor).not.toContain('rotate(-32deg)');
   });
+  it('con marca, el margen de página nunca queda por debajo de la cinta (datos importados con 0)', () => {
+    const entrada = readFileSync(new URL('../../../cv-estudio/src/entrada.ts', import.meta.url), 'utf8');
+    expect(entrada).toMatch(/if \(!muestra\) \{[\s\S]{0,400}CINTA \+ 3[\s\S]{0,200}marginX = Math\.max[\s\S]{0,120}marginY = Math\.max/);
+  });
 });

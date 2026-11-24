@@ -6,7 +6,7 @@ import { newResume, sanitizeResume } from "./adoptado/resume-model";
 import { reactiveTemplates } from "./adoptado/templates";
 import { ESPACIADOS, ESTILOS_LETRA, TAMANOS } from "./catalogo-formato";
 import { colorLegible, mezclar, TINTE_DISENO } from "./color";
-import { FORMAS, MARCA_POR_DEFECTO, fijarCapas, peorFondo, type Decoracion } from "./decoracion";
+import { CINTA, FORMAS, MARCA_POR_DEFECTO, fijarCapas, peorFondo, type Decoracion } from "./decoracion";
 import { crearDatos, FORM_EJEMPLO, FORM_VACIO, ponerFoto } from "./formulario";
 import { FOTO_EJEMPLO } from "./formulario-datos";
 import { VARIANTES } from "../vendor/pdf/templates/creativos/variantes";
@@ -138,6 +138,13 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra
 				d.metadata.design.colors.primary = colorLegible(color, (c) => mezclar(fondo, c, TINTE_DISENO));
 			}
 			aplicarFormato(d, { letra, tamano, espaciado });
+			if (!muestra) {
+				// Con marca, las cintas ocupan CINTA pt en cada canto: un margen menor (datos importados con 0)
+				// dejaría el texto debajo. El catálogo nunca baja de 14 pt, así que esto solo toca esos casos.
+				const minimo = CINTA + 3;
+				d.metadata.page.marginX = Math.max(d.metadata.page.marginX ?? 0, minimo);
+				d.metadata.page.marginY = Math.max(d.metadata.page.marginY ?? 0, minimo);
+			}
 			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO, muestra === true);
 			return createResumePdfBlob({ data: d });
 		});
