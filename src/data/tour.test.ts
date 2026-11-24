@@ -72,4 +72,13 @@ describe('guías por pantalla del tema limpio', () => {
   it('los pasos de «Así de fácil» no dependen de una animación de scroll para verse', () => {
     expect(leer('src/themes/limpio/ui/Pasos.astro')).not.toMatch(/animation-timeline/);
   });
+  it('«Así de fácil» dice que se ve el resultado antes de pagar y acaba con botones a CV y web', () => {
+    const home = leer('src/themes/limpio/Home.astro');
+    expect(home).toMatch(/Míralo antes de pagar/);
+    expect(home).toMatch(/data-pasos-accion/);
+    expect(home).toMatch(/'trabajo', 'Crear mi CV'/);
+    expect(home).toMatch(/'llamadas', 'Crear mi web'/);
+    // Las miniaturas son decorativas: no las lee el lector de pantalla.
+    expect(leer('src/themes/limpio/ui/Pasos.astro')).toMatch(/class=\{`muestra muestra-\$\{p\.muestra\}`\} aria-hidden="true"/);
+  });
 });

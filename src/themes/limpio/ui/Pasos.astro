@@ -10,6 +10,8 @@ interface Paso {
   titulo: string;
   texto: string;
   icono: string;
+  /** Miniatura decorativa del paso (solo desde 48rem): plantillas, editor o vista previa. */
+  muestra?: 'plantillas' | 'editor' | 'vista';
 }
 interface Props {
   pasos: readonly Paso[];
@@ -21,6 +23,13 @@ const { pasos, etiqueta } = Astro.props;
 <ol class="pasos" aria-label={etiqueta} style={`--n:${pasos.length}`}>
   {pasos.map((p, i) => (
     <li style={`--i:${i}`}>
+      {p.muestra && (
+        <span class={`muestra muestra-${p.muestra}`} aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
+      )}
       <span class="num"><Icono name={p.icono} class="h-5 w-5" /></span>
       <div>
         <p class="titulo"><span class="orden">{String(i + 1).padStart(2, '0')}</span> {p.titulo}</p>
@@ -120,6 +129,38 @@ const { pasos, etiqueta } = Astro.props;
     border-right: 2px solid var(--color-brand);
     border-bottom: 2px solid var(--color-brand);
     transform: rotate(45deg);
+  }
+  /* Miniaturas: dibujadas con CSS (sin imágenes que cargar), en los colores del tema. */
+  .muestra {
+    display: none;
+  }
+  @media (min-width: 48rem) {
+    .muestra {
+      display: grid;
+      align-self: stretch;
+      height: 6.5rem;
+      gap: var(--ds-hueco-2);
+      border-radius: calc(var(--ds-radio-tarjeta) * 0.75);
+      padding: var(--ds-hueco-2);
+      background: color-mix(in oklab, var(--color-brand) 8%, var(--color-bg, #fff));
+    }
+    .muestra i {
+      display: block;
+      border-radius: var(--ds-radio-sutil);
+      background: color-mix(in oklab, var(--color-ink) 12%, transparent);
+    }
+    /* Tres plantillas en fila; la del medio, elegida. */
+    .muestra-plantillas { grid-template-columns: repeat(3, 1fr); }
+    .muestra-plantillas i { background: var(--color-surface); border: 1px solid var(--color-line); }
+    .muestra-plantillas i:nth-child(2) { border: 2px solid var(--color-brand); box-shadow: var(--ds-sombra-1); }
+    /* Campos de un formulario: el segundo, activo. */
+    .muestra-editor { grid-template-rows: repeat(3, 1fr); }
+    .muestra-editor i { background: var(--color-surface); border: 1px solid var(--color-line); }
+    .muestra-editor i:nth-child(2) { border-color: var(--color-brand); width: 80%; }
+    /* Página terminada con la marca de agua en el borde. */
+    .muestra-vista { grid-template-rows: 1.2rem 1fr auto; outline: 2px dashed color-mix(in oklab, var(--color-brand) 45%, transparent); outline-offset: -0.35rem; }
+    .muestra-vista i:nth-child(1) { background: var(--color-brand); width: 55%; }
+    .muestra-vista i:nth-child(3) { height: 0.5rem; width: 35%; }
   }
   @media (min-width: 48rem) {
     .pasos { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); grid-auto-flow: column; gap: var(--ds-hueco-6); }
