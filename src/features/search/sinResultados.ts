@@ -39,5 +39,6 @@ export function eventoSinResultados(q: string): string {
 /** Temas con mensaje ya empezado en la consulta (`?tema=`), p. ej. la asesoría del estudio de CV. */
 const TEMAS: Record<string, string> = {
   cv: 'Quiero ayuda con mi currículum: ',
+  web: 'Quiero que me hagáis la web de mi negocio: ',
 };
 export const mensajeDeTema = (tema: string | null | undefined): string => (tema && Object.hasOwn(TEMAS, tema) ? TEMAS[tema] : '');

@@ -92,9 +92,47 @@ export const PASOS_WEB = [
   { id: 'publica', titulo: 'Publica' },
 ] as const;
 
+export type IdPasoWeb = (typeof PASOS_WEB)[number]['id'];
+
+/**
+ * Los mismos tres caminos que el estudio de CV (CAMINOS_CV), para que las dos páginas empiecen
+ * igual: «tal cual» se salta el paso de estilo; «a tu gusto» lo enseña; «te la hacemos» lleva a
+ * la consulta. Plantilla y diseño propio cuestan lo mismo: el precio lo pone la página.
+ */
+export type CaminoWeb = 'plantilla' | 'personaliza' | 'asesoria';
+export const ASESORIA_WEB = { desde: 14900, enlace: '/empezar/consulta?tema=web' } as const;
+export const CAMINOS_WEB: readonly { id: CaminoWeb; etiqueta: string; titulo: string; resumen: string }[] = [
+  { id: 'plantilla', etiqueta: 'Lo más rápido', titulo: 'Usa una plantilla', resumen: 'Eliges un diseño, escribes los datos de tu negocio y la publicas tal cual.' },
+  { id: 'personaliza', etiqueta: 'A tu gusto', titulo: 'Diseña tu web', resumen: 'Partes de un diseño y cambias color, letra, acabado, fotos y movimiento.' },
+  { id: 'asesoria', etiqueta: 'Con una persona', titulo: 'Te la hacemos', resumen: 'Nos cuentas tu negocio y te preparamos la web. Te respondemos por email.' },
+];
+export const esCaminoWeb = (v: unknown): v is CaminoWeb => CAMINOS_WEB.some((c) => c.id === v);
+
+/** Pasos que recorre cada camino, en orden. La asesoría se queda en el primero. */
+export function pasosDelCamino(camino: CaminoWeb): IdPasoWeb[] {
+  const todos = PASOS_WEB.map((p) => p.id);
+  if (camino === 'asesoria') return [todos[0]!];
+  return camino === 'plantilla' ? todos.filter((p) => p !== 'personaliza') : todos;
+}
+
+/** Paso al que lleva «Siguiente» o «Atrás» dentro del camino ('' si no hay). */
+export function pasoVecino(camino: CaminoWeb, actual: string, salto: 1 | -1): IdPasoWeb | '' {
+  const pasos = pasosDelCamino(camino);
+  const i = pasos.indexOf(actual as IdPasoWeb);
+  if (i < 0) {
+    // Venía de un paso que este camino no recorre (p. ej. «Estilo» tras pasar a «tal cual»).
+    const todos = PASOS_WEB.map((p) => p.id) as string[];
+    const j = todos.indexOf(actual);
+    const cand = salto > 0 ? pasos.find((p) => todos.indexOf(p) > j) : [...pasos].reverse().find((p) => todos.indexOf(p) < j);
+    return cand ?? '';
+  }
+  return pasos[i + salto] ?? '';
+}
+
 /** Guía con ventanitas por paso (src/features/tour/guia.ts): `guia` es el `data-guia` del bloque. */
 export const GUIA_WEB: Record<string, readonly { guia: string; titulo: string; texto: string }[]> = {
   plantilla: [
+    { guia: 'caminos', titulo: 'Primero, cómo la quieres', texto: 'Una plantilla tal cual (lo más rápido), tu propio diseño con tus colores y tu letra, o que te la hagamos nosotros. Puedes cambiar de idea cuando quieras.' },
     { guia: 'galeria', titulo: 'Elige un diseño', texto: 'Todos cuestan lo mismo. Cada uno tiene su estructura; podrás cambiarlo luego sin volver a escribir nada.' },
     { guia: 'siguiente', titulo: 'Y luego, tu negocio', texto: 'Cuando tengas uno, sigue: escribes tus datos y ves tu web al momento.' },
   ],
