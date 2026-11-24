@@ -719,6 +719,7 @@
       "nombre": "Alimentación",
       "claves": [
         "panader",
+        "horno",
         "pasteler",
         "carnicer",
         "pescader",
@@ -763,9 +764,9 @@
         "¿Puedo pedir y pasar a recoger?"
       ],
       "disenos": [
+        "hornada",
         "escaparate",
-        "bistro",
-        "atelier"
+        "bistro"
       ],
       "reserva": "Hacer un encargo",
       "contacto": "Hacer un encargo",

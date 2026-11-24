@@ -140,5 +140,25 @@
     "demoHints": [
       "dental-clinic"
     ]
+  },
+  {
+    "slug": "panaderias",
+    "label": "Panaderías",
+    "title": "Web para panaderías y pastelerías: encargos, horario y tartas",
+    "description": "Una web para panaderías, pastelerías y obradores con el pan del día, encargos de tartas, horario y cómo llegar, lista para pedir por WhatsApp.",
+    "heading": "Una web que huela a pan recién hecho",
+    "introduction": "Quien busca una panadería quiere saber a qué hora abres, qué tienes hoy y si puede encargar una tarta o el pan del domingo. La web debe responder eso de un vistazo y dejar hacer el encargo sin colas.",
+    "considerations": [
+      "Enseña el pan y los dulces de siempre y avisa de los de temporada; actualízalos cuando cambien.",
+      "Explica cómo se encarga: con cuánta antelación, hasta qué hora y si se paga al recoger.",
+      "Indica los alérgenos y si hay opciones sin gluten o sin lactosa, y el horario de festivos."
+    ],
+    "serviceSlugs": [
+      "web-una-pagina",
+      "carta-qr"
+    ],
+    "demoHints": [
+      "restaurant/cafe"
+    ]
   }
 ]
