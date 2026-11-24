@@ -1,6 +1,8 @@
 /**
  * Guías con ventanitas para toda la web (Driver.js, MIT). Salen solas: cada pantalla o paso
- * enseña su guía una vez por visita (sessionStorage), sin que nadie tenga que activarlas.
+ * enseña su guía la primera vez (localStorage), corta (≤ MAX_AUTO pasos) y nunca encima de
+ * alguien que ya está escribiendo. Una guía cerrada no se repite sola (24/11, datos de tours
+ * 2025-2026: 1-2 pasos acaban el 73 %, 6-8 el 25 %); la completa sigue en el botón «Guía».
  * Cada ventanita trae la X y «No volver a mostrar», que las apaga en todas las páginas
  * (localStorage). El botón «Guía» de cada página la abre siempre y vuelve a encenderlas.
  */
@@ -41,6 +43,24 @@ const almacen = (k: 'localStorage' | 'sessionStorage'): Storage | undefined => {
 const local = () => almacen('localStorage');
 const sesion = () => almacen('sessionStorage');
 
+/** Pasos que salen solos; el resto, con el botón «Guía». */
+export const MAX_AUTO = 3;
+
+/**
+ * Qué pasos enseñar. Sola (`auto`): ninguno si las guías están apagadas, si esa pantalla ya la
+ * enseñó o si el usuario está escribiendo; si no, los MAX_AUTO primeros. Pedida: todos.
+ */
+export function pasosAMostrar<T>(pasos: readonly T[], { auto, apagadas, vista, escribiendo }: { auto: boolean; apagadas: boolean; vista: boolean; escribiendo: boolean }): readonly T[] {
+  if (!auto) return pasos;
+  if (apagadas || vista || escribiendo) return [];
+  return pasos.slice(0, MAX_AUTO);
+}
+
+const escribiendo = () => {
+  const el = typeof document === 'undefined' ? null : document.activeElement;
+  return !!el && (el.matches('input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]), textarea, select') || (el as HTMLElement).isContentEditable);
+};
+
 export const guiasApagadas = () => leer(local(), APAGADAS) === 'no';
 export const apagarGuias = () => escribir(local(), APAGADAS, 'no');
 export const encenderGuias = () => escribir(local(), APAGADAS, null);
@@ -60,9 +80,12 @@ export async function guiar(
   pasos: readonly PasoGuia[],
   { raiz, atributo = 'data-guia', clave, auto = false }: { raiz?: Document | HTMLElement | null; atributo?: string; clave: string; auto?: boolean },
 ): Promise<boolean> {
-  if (auto && (guiasApagadas() || leer(sesion(), VISTA + clave))) return false;
+  // Las ya vistas de antes (sessionStorage) también cuentan: nadie la ve dos veces por el cambio.
+  const vista = !!(leer(local(), VISTA + clave) || leer(sesion(), VISTA + clave));
+  const elegidos = pasosAMostrar(pasos, { auto, apagadas: guiasApagadas(), vista, escribiendo: escribiendo() });
+  if (!elegidos.length) return false;
   if (!auto) encenderGuias();
-  const seleccion: DriveStep[] = pasos.flatMap((p) => {
+  const seleccion: DriveStep[] = elegidos.flatMap((p) => {
     const el = (raiz ?? document).querySelector(`[${atributo}="${p.guia}"]`);
     return visible(el) ? [{ element: el, popover: { title: p.titulo, description: p.texto } }] : [];
   });
@@ -106,6 +129,6 @@ export async function guiar(
   });
   abierta = d;
   d.drive();
-  escribir(sesion(), VISTA + clave, '1'); // solo cuenta como vista si de verdad se abrió
+  escribir(local(), VISTA + clave, '1'); // solo cuenta como vista si de verdad se abrió
   return true;
 }
