@@ -38,7 +38,8 @@ export function normalizar(entrada: Partial<Record<keyof Decoracion, unknown>> |
 
 /**
  * `muestra`: solo para el CV de ejemplo (entrada.ts lo impone), que no lleva datos de nadie y
- * se enseña limpio al elegir diseño. Con datos del cliente nunca hay PDF sin marca en el navegador.
+ * se enseña limpio al elegir diseño, y el PDF del pedido pagado (entrada.ts, `sinMarca`). Un texto de
+ * marca vacío nunca quita la marca: hace falta pedirlo de forma explícita.
  */
 export function fijarCapas(decoracion: Partial<Record<keyof Decoracion, unknown>> | null | undefined, marcaAgua: string | null | undefined, muestra = false) {
 	actual = normalizar(decoracion);
@@ -89,9 +90,9 @@ function esquinaSuperior(f: Forma, c: string, c2: string, k: number, o: (x: numb
 			];
 		case "hexagonos":
 			return [
-				poli(1, regular(W - R(50), R(60), R(80)), { fill: c, fillOpacity: o(0.14) }),
-				poli(2, regular(W - R(140), R(115), R(40)), { fill: "none", stroke: c2, strokeWidth: 1.8, strokeOpacity: o(0.4) }),
-				poli(3, regular(W - R(150), R(30), R(24)), { fill: c2, fillOpacity: o(0.16) }),
+				poli(1, regular(W - R(50), R(60), R(80), 6), { fill: c, fillOpacity: o(0.14) }),
+				poli(2, regular(W - R(140), R(115), R(40), 6), { fill: "none", stroke: c2, strokeWidth: 1.8, strokeOpacity: o(0.4) }),
+				poli(3, regular(W - R(150), R(30), R(24), 6), { fill: c2, fillOpacity: o(0.16) }),
 			];
 		case "destellos": {
 			const estrella = (cx: number, cy: number, r: number, key: number, a: number, col: string) =>

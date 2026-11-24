@@ -1,5 +1,5 @@
 // API del motor del estudio de CV para la página (/servicios/cv).
-// window.CvEstudio = { plantillas, formas, estilosLetra, tamanos, espaciados, datosEjemplo, crearDatos, formEjemplo, formVacio, crearPdf, pintarPdf, importar }.
+// window.CvEstudio = { crearTarjeta, destinosQr, contenidoQr, plantillas, formas, estilosLetra, tamanos, espaciados, datosEjemplo, crearDatos, formEjemplo, formVacio, crearPdf, pintarPdf, importar }.
 import { createResumePdfBlob } from "../vendor/pdf/browser";
 import { parseResumeData, type ResumeData } from "../vendor/schema/resume/data";
 import { newResume, sanitizeResume } from "./adoptado/resume-model";
@@ -10,6 +10,8 @@ import { CINTA, FORMAS, MARCA_POR_DEFECTO, fijarCapas, peorFondo, type Decoracio
 import { crearDatos, FORM_EJEMPLO, FORM_VACIO, ponerFoto } from "./formulario";
 import { FOTO_EJEMPLO } from "./formulario-datos";
 import { VARIANTES } from "../vendor/pdf/templates/creativos/variantes";
+import { DESTINOS_QR, contenidoQr } from "./tarjeta-datos";
+import type { OpcionesTarjeta } from "./tarjeta";
 
 export const plantillas = reactiveTemplates.map((t) => ({ id: t.id, color: t.color }));
 export const formas = FORMAS;
@@ -86,11 +88,13 @@ export type OpcionesPdf = {
 	/** Color principal de la plantilla (#rrggbb). */
 	color?: string;
 	decoracion?: Partial<Decoracion> | null;
-	/**
-	 * Texto de la marca de agua. El motor del navegador SIEMPRE la pone (vacío o null usan
-	 * MARCA_POR_DEFECTO): el PDF final sin marca no se genera en el cliente.
-	 */
+	/** Texto de la marca de agua; vacío o null usan MARCA_POR_DEFECTO. */
 	marcaAgua?: string | null;
+	/**
+	 * PDF final, sin marca de agua: solo para la descarga del pedido pagado. Sin esta opción
+	 * explícita el CV con datos del cliente siempre lleva marca (un texto vacío no la quita).
+	 */
+	sinMarca?: boolean;
 	/** Ids de catalogo-formato.ts. Si faltan o no existen, se queda lo que traigan los datos. */
 	letra?: string;
 	tamano?: string;
@@ -124,7 +128,7 @@ function aplicarFormato(d: ResumeData, { letra, tamano, espaciado }: Pick<Opcion
 }
 
 /** Genera el PDF. Los renders van en cola porque la decoración es estado del módulo. */
-export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra, tamano, espaciado, muestra }: OpcionesPdf): Promise<Blob> {
+export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, sinMarca, letra, tamano, espaciado, muestra }: OpcionesPdf): Promise<Blob> {
 	const trabajo = cola
 		.catch(() => {})
 		.then(async () => {
@@ -138,14 +142,15 @@ export function crearPdf({ datos, plantilla, color, decoracion, marcaAgua, letra
 				d.metadata.design.colors.primary = colorLegible(color, (c) => mezclar(fondo, c, TINTE_DISENO));
 			}
 			aplicarFormato(d, { letra, tamano, espaciado });
-			if (!muestra) {
+			const limpio = muestra === true || sinMarca === true;
+			if (!limpio) {
 				// Con marca, las cintas ocupan CINTA pt en cada canto: un margen menor (datos importados con 0)
 				// dejaría el texto debajo. El catálogo nunca baja de 14 pt, así que esto solo toca esos casos.
 				const minimo = CINTA + 3;
 				d.metadata.page.marginX = Math.max(d.metadata.page.marginX ?? 0, minimo);
 				d.metadata.page.marginY = Math.max(d.metadata.page.marginY ?? 0, minimo);
 			}
-			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO, muestra === true);
+			fijarCapas(decoracion as Decoracion | undefined, marcaAgua?.trim() || MARCA_POR_DEFECTO, limpio);
 			return createResumePdfBlob({ data: d });
 		});
 	cola = trabajo;
@@ -197,5 +202,8 @@ declare global {
 /** Lee un CV que el cliente ya tiene (PDF, Word, LinkedIn .zip, JSON Resume). Carga los lectores solo al usarlo. */
 const importar = async (fichero: Blob & { name?: string }) => (await import("./importar")).importarCv(fichero, cargarPdfjs);
 
-const api = { plantillas, formas, estilosLetra: ESTILOS_LETRA, tamanos: TAMANOS, espaciados: ESPACIADOS, datosEjemplo, crearDatos, formEjemplo: FORM_EJEMPLO, formVacio: FORM_VACIO, crearPdf, pintarPdf, importar };
+/** Tarjeta imprimible de 85 × 55 mm a juego con el CV. Se carga al usarla (la mayoría no la pide). */
+const crearTarjeta = async (o: OpcionesTarjeta) => (await import("./tarjeta")).crearTarjeta(o);
+
+const api = { crearTarjeta, destinosQr: DESTINOS_QR, contenidoQr, plantillas, formas, estilosLetra: ESTILOS_LETRA, tamanos: TAMANOS, espaciados: ESPACIADOS, datosEjemplo, crearDatos, formEjemplo: FORM_EJEMPLO, formVacio: FORM_VACIO, crearPdf, pintarPdf, importar };
 window.CvEstudio = api;
