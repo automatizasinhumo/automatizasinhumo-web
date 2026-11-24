@@ -162,6 +162,10 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
                 <datalist id="sectores-web">{SECTORES_WEB.map((s) => <option value={s.nombre} />)}</datalist>
               </div>
               <label class={campo}>Frase de presentación<input name="lema" maxlength="140" placeholder="Qué ofreces y dónde, en una frase." /></label>
+              <div class="ideas-lema">
+                <button type="button" class="min-h-11 text-sm font-semibold underline" data-ideas>Dame ideas para la frase</button>
+                <div class="flex flex-col gap-2" data-ideas-lista role="group" aria-label="Ideas para la frase" hidden></div>
+              </div>
               <label class={campo}>Quiénes sois<textarea name="sobre" rows="4" maxlength="900" placeholder="Unas líneas sobre ti o tu equipo."></textarea></label>
               <div class="foto">
                 <input type="hidden" name="foto" />

@@ -12,7 +12,7 @@ import { Historial } from './historial';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
-import { disenosRecomendados, esOrdenDeSector, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
+import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
 
@@ -1077,6 +1077,30 @@ export function iniciarEstudioWeb() {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('button, [data-ir]');
     if (!b) return;
     if (b.hasAttribute('data-deshacer')) return saltar(historial.deshacer(), 'Cambio deshecho');
+    if (b.hasAttribute('data-ideas')) {
+      const lista = $<HTMLElement>('[data-ideas-lista]')!;
+      lista.replaceChildren(
+        ...ideasDeLema(campo('sector').value, campo('negocio').value, campo('direccion').value).map((t) => {
+          const x = document.createElement('button');
+          x.type = 'button';
+          x.className = 'idea-lema';
+          x.dataset.ideaLema = t;
+          x.textContent = t;
+          return x;
+        }),
+      );
+      lista.hidden = false;
+      return;
+    }
+    if (b.dataset.ideaLema !== undefined) {
+      const l = campo('lema');
+      // Elegida por el cliente: aunque coincida con la automática, otro sector ya no la sustituye.
+      escritos.lema = '';
+      l.value = b.dataset.ideaLema;
+      l.dispatchEvent(new Event('input', { bubbles: true }));
+      $<HTMLElement>('[data-ideas-lista]')!.hidden = true;
+      return l.focus();
+    }
     if (b.hasAttribute('data-rehacer')) return saltar(historial.rehacer(), 'Cambio rehecho');
     if (b.dataset.galeriaQuitar) {
       const fuera = Number(b.dataset.galeriaQuitar);
@@ -1126,6 +1150,8 @@ export function iniciarEstudioWeb() {
       return programar();
     }
     if (b.hasAttribute('data-vaciar')) {
+      $<HTMLElement>('[data-ideas-lista]')!.replaceChildren();
+      $<HTMLElement>('[data-ideas-lista]')!.hidden = true;
       volcar(vacio());
       persistir();
       return programar(true);
