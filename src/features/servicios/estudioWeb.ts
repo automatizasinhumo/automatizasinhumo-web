@@ -1073,7 +1073,7 @@ export function iniciarEstudioWeb() {
           const x = document.createElement('button');
           x.type = 'button';
           x.className = 'idea-lema';
-          x.dataset.idea = t;
+          x.dataset.ideaLema = t;
           x.textContent = t;
           return x;
         }),
@@ -1081,9 +1081,11 @@ export function iniciarEstudioWeb() {
       lista.hidden = false;
       return;
     }
-    if (b.dataset.idea !== undefined) {
+    if (b.dataset.ideaLema !== undefined) {
       const l = campo('lema');
-      l.value = b.dataset.idea;
+      // Elegida por el cliente: aunque coincida con la automática, otro sector ya no la sustituye.
+      escritos.lema = '';
+      l.value = b.dataset.ideaLema;
       l.dispatchEvent(new Event('input', { bubbles: true }));
       $<HTMLElement>('[data-ideas-lista]')!.hidden = true;
       return l.focus();
@@ -1137,6 +1139,8 @@ export function iniciarEstudioWeb() {
       return programar();
     }
     if (b.hasAttribute('data-vaciar')) {
+      $<HTMLElement>('[data-ideas-lista]')!.replaceChildren();
+      $<HTMLElement>('[data-ideas-lista]')!.hidden = true;
       volcar(vacio());
       persistir();
       return programar(true);
