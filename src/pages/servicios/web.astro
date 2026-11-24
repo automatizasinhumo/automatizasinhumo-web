@@ -81,7 +81,12 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
 
     <div class="progreso-fijo">
       <Progreso pasos={PASOS_WEB} etiqueta="Pasos para hacer tu web" />
-      <button type="button" class="guia-boton" data-guia-abrir>Guía de este paso</button>
+      <div class="historial" role="group" aria-label="Acciones del estudio">
+        <button type="button" class="guia-boton" data-deshacer disabled aria-keyshortcuts="Control+Z" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
+        <button type="button" class="guia-boton" data-rehacer disabled aria-keyshortcuts="Control+Y" title="Rehacer (Ctrl+Y)">↷ Rehacer</button>
+        <span class="sr-only" role="status" data-historial-aviso></span>
+        <button type="button" class="guia-boton" data-guia-abrir>Guía de este paso</button>
+      </div>
     </div>
 
     <form id="estudio-form" class="mt-8" novalidate autocomplete="on">
