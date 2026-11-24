@@ -9,7 +9,7 @@
 // había UPDATE y las altas (p. ej. cv-linkedin, 24/11) no llegaban a ningún entorno ya sembrado.
 import { productos } from './catalogo.mjs';
 import { descripcion } from './descripcion.mjs';
-import { pid } from './ids.mjs';
+import { modalidades, pid } from './ids.mjs';
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
 const slugs = process.argv.slice(2);
@@ -36,7 +36,13 @@ for (const p of lista) {
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(v.etiqueta)}, ${v.precio}, 999, ${q(v.sku)}, ${i}, 1, ${q(v.id)} FROM products WHERE slug=${q(p.slug)} AND NOT EXISTS (SELECT 1 FROM product_variants WHERE sku=${q(v.sku)});`);
       out.push(`UPDATE product_variants SET label=${q(v.etiqueta)}, price_cents=${v.precio}, position=${i}, active=1, public_id=${q(v.id)} WHERE sku=${q(v.sku)};`);
     });
-  } else if (p.p.length === 2)
-    p.p.forEach((eur, i) => out.push(`UPDATE product_variants SET price_cents=${eur * 100} WHERE sku=${q(`${p.slug}-${i ? 'pro' : 'diy'}`)};`));
+  } else if (modalidades(p).length) {
+    // Con dos precios: modalidades diy/pro, que se crean si faltan (un servicio nuevo nace sin ellas).
+    out.push(`UPDATE products SET variant_label=${q('Modalidad')} WHERE slug=${q(p.slug)} AND variant_label IS NULL;`);
+    for (const m of modalidades(p)) {
+      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(m.label)}, ${m.cents}, 999, ${q(m.sku)}, ${m.posicion}, 1, ${q(m.id)} FROM products WHERE slug=${q(p.slug)} AND NOT EXISTS (SELECT 1 FROM product_variants WHERE sku=${q(m.sku)});`);
+      out.push(`UPDATE product_variants SET price_cents=${m.cents} WHERE sku=${q(m.sku)};`);
+    }
+  }
 }
 process.stdout.write(out.join('\n') + '\n');

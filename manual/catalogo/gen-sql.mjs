@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { categorias, productos, paginas } from './catalogo.mjs';
 import { descripcion } from './descripcion.mjs';
-import { pid } from './ids.mjs';
+import { modalidades, pid } from './ids.mjs';
 import { DEMOS, DEMOS_URL, INTERACTIVAS, demosDe } from '../demos/demos.mjs';
 
 const q = (s) => (s == null ? 'NULL' : `'${String(s).replace(/'/g, "''")}'`);
@@ -49,10 +49,9 @@ for (const p of productos) {
       if (pid('var', v.sku) !== v.id) throw new Error(`autoservicio.json: id de ${v.sku} debe ser ${pid('var', v.sku)}`);
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(v.etiqueta)}, ${v.precio}, 999, ${q(v.sku)}, ${i}, 1, ${q(v.id)} FROM products WHERE slug=${q(p.slug)};`);
     });
-  } else if (varios) {
-    [['Plantilla + guía (la publicas tú)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
-      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(label)}, ${eur * 100}, 999, ${q(`${p.slug}-${i ? 'pro' : 'diy'}`)}, ${i}, 1, ${q(pid('var', `${p.slug}-${i ? 'pro' : 'diy'}`))} FROM products WHERE slug=${q(p.slug)};`));
-  }
+  } else
+    for (const m of modalidades(p))
+      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(m.label)}, ${m.cents}, 999, ${q(m.sku)}, ${m.posicion}, 1, ${q(m.id)} FROM products WHERE slug=${q(p.slug)};`);
 }
 
 // Páginas
