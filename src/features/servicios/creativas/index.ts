@@ -5,6 +5,7 @@
 import { agenda } from './agenda';
 import { bistro } from './bistro';
 import { brillo } from './brillo';
+import { petalo } from './petalo';
 import { carta } from './carta';
 import { cuaderno } from './cuaderno';
 import { escaparate } from './escaparate';
@@ -27,7 +28,7 @@ import { vinetas } from './vinetas';
 export type { ContextoDiseno, Diseno, IconoWeb } from './tipos';
 export { cssFuentes, FUENTES_WEB } from './fuentes';
 
-export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal, carta, cuaderno, fotograma, escaparate, herbario, lamina, matricula, sonrisa, hornada, brillo];
+export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal, carta, cuaderno, fotograma, escaparate, herbario, lamina, matricula, sonrisa, hornada, brillo, petalo];
 
 export const disenoWeb = (id: string): Diseno | undefined => DISENOS.find((x) => x.id === id);
 
