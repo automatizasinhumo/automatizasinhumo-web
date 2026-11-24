@@ -104,8 +104,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
 .w-d-brillo .w-cab-txt>*+*{margin-top:clamp(14px,2cqw,22px)}
 .w-d-brillo .w-sector{font:800 .82rem/1.2 var(--w-ft-texto);letter-spacing:.14em;text-transform:uppercase;color:var(--w-suave)}
 .w-d-brillo .w-cab h1{margin-bottom:.2em;font-size:min(clamp(2.6rem,7.4cqw,5.4rem),var(--w-h1-tope,99em));font-weight:800;line-height:1.02;letter-spacing:-.03em;overflow-wrap:break-word;text-wrap:balance}
-.w-d-brillo .w-rotulador{position:relative;white-space:nowrap;z-index:0}
-.w-d-brillo .w-rotulador::after{content:"";position:absolute;z-index:-1;left:-.06em;right:-.06em;bottom:.04em;height:.34em;border-radius:.2em .5em .3em .6em;background:var(--w-c);transform:rotate(-1.2deg)}
+.w-d-brillo .w-rotulador{padding:0 .06em;margin:0 -.06em;border-radius:.2em .5em .3em .6em;background:linear-gradient(transparent 60%,color-mix(in srgb,var(--w-c) 42%,transparent) 0 92%,transparent 0);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .w-d-brillo .w-cab .w-lema-bloque{font-size:clamp(1.08rem,2.2cqw,1.3rem);line-height:1.55;color:var(--w-suave);max-width:38ch}
 .w-d-brillo .w-cab .w-boton{min-height:54px;padding-inline:24px}
 .w-d-brillo .w-cab-vis{position:relative;min-width:0;max-width:30rem;width:100%;justify-self:center}
