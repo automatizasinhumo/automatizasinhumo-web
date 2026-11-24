@@ -239,11 +239,11 @@ const NO_INCLUIDO: Record<string, string> = {
   extension: 'Esa terminación no se puede contratar desde aquí. Prueba la versión .com o conecta uno que ya tengas.',
   ocupado: 'Ese dominio ya tiene dueño. Prueba otra de las ideas.',
   premium: 'Ese dominio es «premium» (mucho más caro). Prueba otra de las ideas.',
-  caro: 'Ese dominio sale más caro de lo incluido. Prueba otra terminación.',
+  caro: 'Ese dominio sale demasiado caro al año. Prueba otra terminación.',
 };
 
 /**
- * Compra el dominio para la página del pedido (incluido con la web, uno por pedido) y lo deja en
+ * Compra el dominio propio para la página del pedido (aparte de la web, uno por pedido) y lo deja en
  * camino de conectarse solo: la fila se crea antes de llamar a Registrar, así que una segunda
  * petición (doble clic, reintento) nunca paga otro dominio.
  */

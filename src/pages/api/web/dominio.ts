@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers';
 import { pedidoWeb } from '../../../features/servicios/pedidoAuto';
 import { webDePedido } from '../../../features/servicios/webs';
 import { ideasDominio, ideasLibres } from '../../../features/servicios/ideasDominio';
-import { configRegistrador, cotizarDominios } from '../../../features/servicios/registrador';
+import { configRegistrador, cotizarDominios, precioDominioEur } from '../../../features/servicios/registrador';
 import { nsActuales, proveedorDeNs } from '../../../features/servicios/proveedorDns';
 import { avanzarDominio, comprarDominio, configDominios, dominioDePedido, esAvisoRegistro, pedirDominio, type FilaDominio } from '../../../features/servicios/dominios';
 
@@ -37,7 +37,7 @@ const ERRORES = {
   ocupado: 'Ese dominio ya está conectado a otra web.',
   no_disponible: 'La conexión automática de dominios aún no está activa. Tu web sigue publicada en su dirección.',
   cloudflare: 'No hemos podido añadir el dominio. Vuelve a probar en un rato.',
-  no_incluido: 'Ese dominio no se puede contratar incluido. Prueba otra de las ideas.',
+  no_incluido: 'Ese dominio no se puede contratar desde aquí. Prueba otra de las ideas.',
   titular: 'Revisa los datos del titular.',
 } as const;
 
@@ -77,14 +77,14 @@ export const POST: APIRoute = async ({ request }) => {
   if (body?.ideas === true) {
     const w = await webDePedido(env.DB, p.publicId);
     if (!w) return json({ ok: true, ideas: [], ofertas: [] });
-    // Con el registro activo: dominios que contratamos incluidos con la web, con su precio real.
-    let ofertas: { dominio: string; precio: number | null; moneda: string | null }[] = [];
+    // Con el registro activo: dominios propios que contratamos por ti, aparte de la web, con su precio al año.
+    let ofertas: { dominio: string; precio: number | null; moneda: string | null; euros: number | null }[] = [];
     if (reg) {
       try {
         ofertas = (await cotizarDominios(reg, candidatos(w.datos.negocio, w.datos.direccion)))
           .filter((c) => c.incluido)
           .slice(0, 5)
-          .map(({ dominio, precio, moneda }) => ({ dominio, precio, moneda }));
+          .map(({ dominio, precio, renovacion, moneda }) => ({ dominio, precio, moneda, euros: precioDominioEur(precio, renovacion) }));
       } catch {
         ofertas = [];
       }

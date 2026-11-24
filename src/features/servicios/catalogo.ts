@@ -115,7 +115,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         nombre: 'Web de una página',
         texto: 'Quién eres, qué ofreces y cómo contactarte, en una sola página clara.',
         icono: 'browser',
-        puntos: [`${PLANTILLAS_WEB.filter((p) => p.familia === 'autor').length} diseños de autor y ${PLANTILLAS_WEB.filter((p) => p.familia === 'basica').length} básicas`, 'Llamada y WhatsApp a un toque', 'Publicada al momento, alojamiento incluido'],
+        puntos: [`${PLANTILLAS_WEB.filter((p) => p.familia === 'autor').length} diseños de autor y ${PLANTILLAS_WEB.filter((p) => p.familia === 'basica').length} básicas`, 'Llamada y WhatsApp a un toque', 'Publicada al momento en tu dirección /w/negocio'],
         href: '/servicios/web',
         desde: AUTOSERVICIO[SLUG_WEB]!.precio,
         muestra: { tipo: 'web', url: 'peluquerialola.es', datos: { ...EJEMPLO_WEB, ...DISENO_MUESTRA.muestra, plantilla: ID_MUESTRA, color: DISENO_MUESTRA.color, letra: 'diseno' } },
@@ -125,7 +125,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         nombre: 'Portafolio',
         texto: 'Tus trabajos con fotos grandes y un formulario para que te escriban.',
         icono: 'photo',
-        puntos: ['Galería por proyectos', 'Formulario de contacto', 'Tu dominio o dirección incluida'],
+        puntos: ['Galería por proyectos', 'Formulario de contacto', 'Tu dirección /w/nombre incluida'],
       },
       {
         id: 'carta',
@@ -143,7 +143,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
     texto: 'Vende lo tuyo en internet sin pelearte con plataformas ni comisiones raras.',
     icono: 'shopping-bag',
     servicios: [
-      { id: 'tienda', nombre: 'Tienda online', texto: 'Tu catálogo con fotos, carrito y pedidos que te llegan al correo.', icono: 'shopping-cart', puntos: ['Fichas con fotos y variantes', 'Pedidos al correo y al móvil', 'Alojamiento incluido'] },
+      { id: 'tienda', nombre: 'Tienda online', texto: 'Tu catálogo con fotos, carrito y pedidos que te llegan al correo.', icono: 'shopping-cart', puntos: ['Fichas con fotos y variantes', 'Pedidos al correo y al móvil', 'Dominio propio opcional'] },
       { id: 'pedido-whatsapp', nombre: 'Catálogo con pedido por WhatsApp', texto: 'El cliente elige y te llega el pedido escrito a tu WhatsApp.', icono: 'package', puntos: ['Sin cuentas ni contraseñas', 'Pedido ya ordenado', 'Ideal para tiendas de barrio'] },
       { id: 'digitales', nombre: 'Venta de productos digitales', texto: 'Plantillas, cursos o PDF que se descargan al momento tras comprar.', icono: 'photo-down', puntos: ['Descarga automática', 'Enlace que caduca', 'Factura sola'] },
     ],

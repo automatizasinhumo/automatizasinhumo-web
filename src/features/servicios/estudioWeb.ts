@@ -66,7 +66,12 @@ interface Oferta {
   dominio: string;
   precio: number | null;
   moneda: string | null;
+  /** Precio al cliente, euros/año (coste del registro + margen). */
+  euros?: number | null;
 }
+
+/** Etiqueta del botón de una oferta de dominio propio: va aparte de la web, con su precio al año. */
+export const etiquetaOferta = (o: Pick<Oferta, 'euros'>) => (o.euros ? `${o.euros} €/año · Elegir` : 'Elegir');
 
 interface Version {
   id: number;
@@ -764,7 +769,7 @@ export function iniciarEstudioWeb() {
         const n = document.createElement('strong');
         n.textContent = o.dominio;
         const e = document.createElement('span');
-        e.textContent = 'Incluido · Elegir';
+        e.textContent = etiquetaOferta(o);
         b.replaceChildren(n, e);
         return b;
       }),

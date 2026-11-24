@@ -11,12 +11,13 @@
  * esos los marca `registrable: false` y el estudio deja la vía de conectar uno propio.
  *
  * Se activa con CF_REGISTRAR_ACTIVO=1 (la cuenta necesita su perfil de facturación y el contacto por
- * defecto de Registrar). CF_DOMINIO_PRECIO_MAX (USD, por defecto 15) limita lo que se compra incluido.
+ * defecto de Registrar). CF_DOMINIO_PRECIO_MAX (USD, por defecto 15) limita lo que se ofrece: el dominio
+ * propio va aparte de la web, a su coste más un margen (precioDominioEur). La dirección /w/negocio sí va incluida.
  */
 import { ErrorCloudflare, type ConfigDominios } from './dominios';
 
 export interface ConfigRegistrador extends ConfigDominios {
-  /** Precio máximo del primer año (USD) que se registra incluido con la web. */
+  /** Precio máximo por año (USD) de los dominios que se ofrecen (aparte de la web). */
   precioMax: number;
 }
 
@@ -27,6 +28,21 @@ export function configRegistrador(
   if (!cfg || e.CF_REGISTRAR_ACTIVO !== '1') return null;
   const max = Number(e.CF_DOMINIO_PRECIO_MAX);
   return { ...cfg, precioMax: Number.isFinite(max) && max > 0 ? max : 15 };
+}
+
+/** Cambio de referencia y margen con los que se muestra el dominio propio en euros. */
+export const EUR_POR_USD = 0.92;
+export const MARGEN_DOMINIO_EUR = 5;
+
+/**
+ * Precio al cliente del dominio propio (euros/año, entero): coste real del registro convertido
+ * a euros más nuestro margen, redondeado al alza. Se toma el mayor entre alta y renovación,
+ * para que el precio anunciado no suba al renovar. null si no hay precio.
+ */
+export function precioDominioEur(registro: number | null, renovacion: number | null = null): number | null {
+  const base = Math.max(registro ?? NaN, renovacion ?? -Infinity);
+  if (!Number.isFinite(base) || base <= 0) return null;
+  return Math.ceil(base * EUR_POR_USD + MARGEN_DOMINIO_EUR);
 }
 
 const API = 'https://api.cloudflare.com/client/v4';
@@ -48,7 +64,7 @@ async function reg<T>(cfg: ConfigDominios, ruta: string, init: RequestInit = {},
 
 export interface Cotizacion {
   dominio: string;
-  /** Se puede registrar ya, por API, a precio estándar y dentro del máximo incluido. */
+  /** Se puede registrar ya, por API, a precio estándar y dentro del máximo que ofrecemos. */
   incluido: boolean;
   precio: number | null;
   renovacion: number | null;
