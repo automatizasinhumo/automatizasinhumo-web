@@ -10,6 +10,7 @@ import { guestOrderUrl } from '../../features/orders/guestAccess.ts';
 import { paginate, queryHref } from '../../pagination';
 import Pagination from '../../components/Pagination.astro';
 import { catalogPath } from '../../features/settings/home';
+import { NOMBRE_TIPO, paginasDeCliente } from '../../features/servicios/panelCliente';
 
 if (!(await accountsEnabled())) return Astro.redirect('/', 303);
 const email = await getCustomerEmail(Astro.cookies);
@@ -33,17 +34,64 @@ const orderLinks = new Map(
 const hrefFor = (p: number) => queryHref('/account', { page: p > 1 ? p : undefined });
 const orderCfg = getConfig().orderNumber;
 const timeZone = Astro.locals.settings?.timeZone ?? getConfig().timeZone;
+// Sus páginas publicadas (web, tarjeta): un fallo aquí no deja sin la lista de pedidos.
+const paginas = await paginasDeCliente(env.DB, email).catch((e) => {
+  console.error('Panel: no se pudieron leer las páginas', e);
+  return [];
+});
+const ESTADO: Record<string, string> = { paid: 'Pagado', pending: 'Pendiente', refunded: 'Reembolsado' };
+const miles = new Intl.NumberFormat('es-ES');
 // The catalog is at / until the home page is pointed elsewhere.
 const shopHref = catalogPath(Astro.locals.settings?.homePage);
 ---
 
 <Layout title="Tu cuenta">
   <div class="mx-auto max-w-2xl">
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="font-serif text-3xl tracking-tight sm:text-4xl">Tus pedidos</h1>
-      <a href="/account/logout" class="text-sm font-medium text-accent">Cerrar sesión</a>
+    <div class="mb-2 flex items-center justify-between">
+      <h1 class="font-serif text-3xl tracking-tight sm:text-4xl">Tu cuenta</h1>
+      <a href="/account/logout" class="inline-flex min-h-11 items-center text-sm font-medium text-accent">Cerrar sesión</a>
     </div>
-    <p class="mb-6 text-sm text-muted">Signed in as {email}</p>
+    <p class="mb-8 text-sm text-muted">Has entrado como {email}</p>
+
+    {
+      paginas.length > 0 && (
+        <section class="mb-10" aria-labelledby="tus-paginas">
+          <h2 id="tus-paginas" class="mb-3 font-serif text-2xl tracking-tight">Tus páginas</h2>
+          <ul class="grid gap-3">
+            {paginas.map((p) => {
+              const publica = p.dominio ? `https://${p.dominio}/` : p.ruta;
+              return (
+                <li class="rounded-lg border border-line bg-surface p-4 text-sm" data-pagina={p.tipo}>
+                  <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <strong class="text-base text-ink">{NOMBRE_TIPO[p.tipo]}</strong>
+                    <span class="text-xs text-faint">Actualizada el {formatDate(p.actualizada, undefined, timeZone)}</span>
+                  </div>
+                  <a href={publica} class="mt-1 block break-all text-accent" target="_blank" rel="noopener">
+                    {p.dominio ?? new URL(p.ruta, Astro.url).host + p.ruta}
+                  </a>
+                  <p class="mt-2 text-muted" data-visitas>
+                    <span class="tabular-nums font-medium text-ink">{miles.format(p.visitas7)}</span> visitas en 7 días ·{' '}
+                    <span class="tabular-nums">{miles.format(p.visitas30)}</span> en 30 días
+                  </p>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    {p.editar && (
+                      <a href={p.editar} class="inline-flex min-h-11 items-center rounded-md bg-accent px-4 font-medium text-white">
+                        Editar
+                      </a>
+                    )}
+                    <a href={publica} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center rounded-md border border-line px-4 font-medium text-ink">
+                      Ver publicada
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )
+    }
+
+    <h2 class="mb-3 font-serif text-2xl tracking-tight">Tus pedidos</h2>
 
     {
       orders.length === 0 ? (
@@ -57,11 +105,11 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
               <div>
                 {orderLinks.get(o.id) ? (
                   <a href={orderLinks.get(o.id)} class="font-medium text-ink hover:text-accent">
-                    Order #{orderReference(o.public_id, o.id, orderCfg)}
+                    Pedido n.º {orderReference(o.public_id, o.id, orderCfg)}
                   </a>
                 ) : (
                   <span class="font-medium text-ink">
-                    Order #{orderReference(o.public_id, o.id, orderCfg)}
+                    Pedido n.º {orderReference(o.public_id, o.id, orderCfg)}
                   </span>
                 )}
                 <div class="text-xs text-faint">{formatDate(o.created_at, undefined, timeZone)}</div>
@@ -70,8 +118,8 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                 <div class="tabular-nums">{formatPrice(o.amount_total_cents, o.currency)}</div>
                 <div class="text-xs capitalize text-faint">
                   {o.refunded_cents > 0 && o.refunded_cents < o.amount_total_cents
-                    ? 'Partially refunded'
-                    : o.status}
+                    ? 'Reembolso parcial'
+                    : (ESTADO[o.status] ?? o.status)}
                 </div>
               </div>
             </li>

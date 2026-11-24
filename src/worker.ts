@@ -1,3 +1,4 @@
+import { contarVisita } from './features/servicios/panelCliente';
 import { handle } from '@astrojs/cloudflare/handler';
 import { env } from 'cloudflare:workers';
 import { sweepStaleNotifications } from './features/email/outbox';
@@ -147,6 +148,7 @@ export default {
       if (tipo !== 'web') return null;
       const w = await webPorSlug(env.DB, slug);
       if (!w) return null;
+      if (request.method === 'GET') ctx.waitUntil(contarVisita(env.DB, 'web', w.slug, request.headers.get('user-agent')));
       const tienda = await origenTienda();
       // Sin origen de tienda, las fotos van dentro del HTML: el dominio del cliente solo sirve «/».
       if (!tienda) return documentoWeb(w.datos, url);
