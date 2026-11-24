@@ -78,7 +78,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
 .w-d-matricula .w-placa>span:last-child{padding:9px 14px}
 .w-d-matricula .w-placa-e{display:grid;place-items:end center;width:26px;padding-bottom:6px;background:#1f4fb8;color:#fff;font-size:.75rem;letter-spacing:0}
 .w-d-matricula .w-cab h1{--w-em-letra:.82;margin-bottom:.3em;font-size:min(clamp(2.6rem,8cqw,6rem),var(--w-h1-tope,99em));font-weight:800;line-height:.9;text-transform:uppercase;letter-spacing:-.005em;overflow-wrap:break-word;text-wrap:balance}
-.w-d-matricula .w-cab .w-lema-bloque{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;background:var(--w-negro);color:var(--w-c);padding:.18em .45em;font:700 clamp(1.15rem,2.6cqw,1.7rem)/1.6 var(--w-ft-titulo);text-transform:uppercase;letter-spacing:.02em}
+.w-d-matricula .w-cab .w-lema-bloque{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;background:var(--w-negro);color:var(--w-ct-oscuro);padding:.18em .45em;font:700 clamp(1.15rem,2.6cqw,1.7rem)/1.6 var(--w-ft-titulo);text-transform:uppercase;letter-spacing:.02em}
 .w-d-matricula .w-cab .w-lema-bloque+*{margin-top:clamp(22px,3cqw,30px)}
 .w-d-matricula .w-cab .w-boton{color:#fff;border-color:#b9bcc2;min-height:54px;padding-inline:24px}
 .w-d-matricula .w-cab .w-boton-lleno{color:var(--w-s);border-color:var(--w-c)}
@@ -99,7 +99,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
 .w-d-matricula .w-estado dt{display:flex;align-items:center;gap:8px;color:#b9bcc2;font:500 .78rem 'ash-dm-mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.14em}
 .w-d-matricula .w-estado dt .w-ico{color:var(--w-c)}
 .w-d-matricula .w-estado dd{margin:4px 0 0;font:700 clamp(1.15rem,2.4cqw,1.5rem) var(--w-ft-titulo);text-transform:uppercase}
-.w-d-matricula .w-estado dd a{color:var(--w-c);text-decoration:none}
+.w-d-matricula .w-estado dd a{color:var(--w-ct-oscuro);text-decoration:none}
 .w-d-matricula .w-cuadros{height:12px;background:conic-gradient(#121316 25%,var(--w-c) 0 50%,#121316 0 75%,var(--w-c) 0) 0 0/12px 12px}
 .w-d-matricula .w-sec h2{text-transform:uppercase;font-weight:800;font-size:clamp(1.9rem,5.4cqw,3.4rem);line-height:.95;letter-spacing:-.005em}
 .w-d-matricula .w-sec h2::after{content:"";display:block;width:64px;height:8px;margin-top:12px;background:var(--w-c)}
