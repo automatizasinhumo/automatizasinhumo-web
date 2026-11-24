@@ -58,6 +58,8 @@ interface RespuestaDominio {
     /** Aviso del registro en curso para el cliente (confirmar el email, revisión del registrador...). */
     aviso?: string | null;
     comprado?: boolean;
+    /** Dónde está el dominio, deducido de sus DNS actuales (null si no se reconoce). */
+    proveedor?: { nombre: string; ruta: string } | null;
   } | null;
 }
 interface Oferta {
@@ -672,6 +674,15 @@ export function iniciarEstudioWeb() {
     }
     if (!cambiando) $('[data-dominio-ideas]')!.hidden = true;
     $('[data-dominio-nombre]')!.textContent = v.dominio;
+    const paso = $('[data-dominio-paso1]')!;
+    if (v.proveedor) {
+      const b = document.createElement('strong');
+      b.textContent = v.proveedor.nombre;
+      const r = document.createElement('span');
+      r.className = 'block mt-1';
+      r.textContent = v.proveedor.ruta;
+      paso.replaceChildren('Tu dominio está en ', b, '. Entra en su panel y ve a:', r);
+    } else paso.textContent = 'Entra en la web donde compraste el dominio y busca «Servidores DNS» (o «Nameservers»).';
     $('[data-dominio-ns]')!.replaceChildren(
       ...v.servidores.map((ns) => {
         const li = document.createElement('li');

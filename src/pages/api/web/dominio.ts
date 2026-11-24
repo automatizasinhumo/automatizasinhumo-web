@@ -4,6 +4,7 @@ import { pedidoWeb } from '../../../features/servicios/pedidoAuto';
 import { webDePedido } from '../../../features/servicios/webs';
 import { ideasDominio, ideasLibres } from '../../../features/servicios/ideasDominio';
 import { configRegistrador, cotizarDominios } from '../../../features/servicios/registrador';
+import { nsActuales, proveedorDeNs } from '../../../features/servicios/proveedorDns';
 import { avanzarDominio, comprarDominio, configDominios, dominioDePedido, esAvisoRegistro, pedirDominio, type FilaDominio } from '../../../features/servicios/dominios';
 
 export const prerender = false;
@@ -23,6 +24,13 @@ const vista = (f: FilaDominio | null) =>
     aviso: f.estado === 'registrando' && esAvisoRegistro(f.detalle) ? f.detalle : null,
     comprado: !!f.registrador,
   };
+
+/** Mientras el cliente tiene que cambiar los DNS, dónde está su dominio (para darle el camino exacto). */
+async function vistaCompleta(f: FilaDominio | null) {
+  const v = vista(f);
+  if (!v || v.estado !== 'esperando_dns' || v.comprado) return v;
+  return { ...v, proveedor: proveedorDeNs(await nsActuales(v.dominio)) };
+}
 
 const ERRORES = {
   dominio: 'Escribe solo tu dominio, por ejemplo peluquerialola.es (sin www ni subdominios).',
@@ -104,7 +112,7 @@ export const POST: APIRoute = async ({ request }) => {
         return json({ ok: true, disponible: !!cfg, compra: !!reg, dominio: null, aviso: fila.detalle });
       }
     }
-    return json({ ok: true, disponible: !!cfg, compra: !!reg, dominio: vista(fila) });
+    return json({ ok: true, disponible: !!cfg, compra: !!reg, dominio: await vistaCompleta(fila) });
   }
   if (!(await webDePedido(env.DB, p.publicId))) return json({ ok: false, error: 'Publica la web antes de conectar tu dominio.' }, 409);
   const r = await pedirDominio(env.DB, cfg, 'web', p.publicId, body.dominio);
@@ -112,5 +120,5 @@ export const POST: APIRoute = async ({ request }) => {
     const status = r.error === 'dominio' ? 422 : r.error === 'no_disponible' ? 503 : 409;
     return json({ ok: false, error: r.detalle && r.error === 'cloudflare' ? r.detalle : ERRORES[r.error] }, status);
   }
-  return json({ ok: true, disponible: true, dominio: vista(r.fila) });
+  return json({ ok: true, disponible: true, dominio: await vistaCompleta(r.fila) });
 };
