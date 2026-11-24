@@ -1193,3 +1193,8 @@
 .mezclar { margin-top: 0.75rem; min-height: 44px; padding: 0.5rem 1rem; border: 1px solid currentColor; border-radius: 999px; font-weight: 600; background: transparent; cursor: pointer; }
 .mezclar:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
 .mezclar:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+/* Cambia una sección: botones que rotan la variante de cada parte */
+.variantes{display:flex;flex-wrap:wrap;gap:8px}
+.variante{padding:8px 14px;border:1px solid var(--borde,#d6d3cc);border-radius:999px;background:var(--panel,#fff);font:inherit;font-size:.92rem;cursor:pointer}
+.variante:hover,.variante:focus-visible{border-color:currentColor}
+.variante-reset{background:transparent;text-decoration:underline;border-color:transparent}

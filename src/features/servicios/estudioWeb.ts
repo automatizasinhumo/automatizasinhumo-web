@@ -14,7 +14,7 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
-import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, validarWeb, type DatosWeb } from './webs';
+import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type DatosWeb, type IdVarianteWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -93,7 +93,7 @@ const PASOS = PASOS_WEB.map((p) => p.id) as string[];
 const CAPA = ['acabado', 'formaFoto', 'movimiento'] as const;
 /** Lo que cambia «Prueba otra combinación»: lo visual, nunca el texto ni las fotos. */
 export const MEZCLA = ['color', 'letra', 'acabado', 'formaFoto'] as const;
-const CAMPOS = [...CAPA, 'negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl'] as const;
+const CAMPOS = [...CAPA, 'negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl', 'variantes'] as const;
 
 /**
  * Reduce la foto en el navegador (lado mayor 1200 px) y la devuelve como data URL que quepa en
@@ -1114,6 +1114,18 @@ export function iniciarEstudioWeb() {
       l.dispatchEvent(new Event('input', { bubbles: true }));
       $<HTMLElement>('[data-ideas-lista]')!.hidden = true;
       return l.focus();
+    }
+    if (b.dataset.variante || b.hasAttribute('data-variante-reset')) {
+      const p = PLANTILLAS_WEB.find((x) => x.id === (estado.plantilla || cfg.porDefecto.plantilla)) ?? PLANTILLAS_WEB[0]!;
+      const v = campo('variantes');
+      const id = b.dataset.variante as IdVarianteWeb | undefined;
+      if (id === 'hero' && !p.hero) return void ($('[data-estado-variante]')!.textContent = 'Este diseño trae su propia portada: prueba con otra sección.');
+      v.value = id ? siguienteVariante(v.value, id, p[id] || 1) : '0.0.0.0.0';
+      $('[data-estado-variante]')!.textContent = id
+        ? `${VARIANTES_WEB.find((x) => x.id === id)!.boton}: mira la vista previa.`
+        : 'Todas las secciones vuelven a ser las de la plantilla.';
+      v.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
     }
     if (b.hasAttribute('data-rehacer')) return saltar(historial.rehacer(), 'Cambio rehecho');
     if (b.dataset.galeriaQuitar) {
