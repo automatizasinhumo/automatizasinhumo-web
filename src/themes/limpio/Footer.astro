@@ -74,7 +74,7 @@ const gruposVisibles = grupos.filter((g) => g.links.length > 0);
     </div>
     {
       model.sectorLinks.length > 0 && (
-        <section aria-labelledby="pie-sectores" class="sectores">
+        <section aria-labelledby="pie-sectores" data-visual-crece class="sectores">
           <h2 id="pie-sectores">Webs por sector</h2>
           <ul>
             {model.sectorLinks.map((link) => (

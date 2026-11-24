@@ -1,0 +1,2 @@
+/* QA visual: lo que crece con el catálogo no cuenta en la captura (ver visual.spec.ts). */
+[data-visual-crece] { display: none !important; }
