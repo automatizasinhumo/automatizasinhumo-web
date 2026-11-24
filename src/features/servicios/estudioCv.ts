@@ -1030,8 +1030,8 @@ export function iniciarEstudioCv() {
     }
     if (b.hasAttribute('data-comprar')) {
       const accion = accionBotonCv(pedido.cargando, !!pedido.pagado?.cv);
-      if (accion === 'descargar') descargar(b as HTMLButtonElement);
-      else if (accion === 'comprar') comprar(b as HTMLButtonElement);
+      if (accion === 'descargar') void descargar(b as HTMLButtonElement);
+      else if (accion === 'comprar') void comprar(b as HTMLButtonElement);
       return;
     }
     if (b.hasAttribute('data-publicar')) return void (pedido.cargando ? undefined : publicar(b as HTMLButtonElement));
