@@ -69,6 +69,12 @@ describe('tarjeta: contenido del QR', () => {
 		expect(v.at(-1)).toBe('END:VCARD');
 	});
 
+	it('un teléfono sin cifras no cuenta: ni línea TEL vacía ni QR de contacto solo con eso', () => {
+		expect(vcard({ ...lucia, telefono: '---' })).not.toContain('TEL');
+		expect(contenidoQr('contacto', { nombre: 'Ana Gil', telefono: '- -' })).toBe('');
+		expect(contenidoQr('contacto', { nombre: 'Ana Gil', telefono: '+34 600-000-000' })).toContain('TEL;TYPE=CELL:+34600000000');
+	});
+
 	it('sin web, la vCard usa LinkedIn', () => {
 		expect(vcard({ ...lucia, web: '' })).toContain('URL:https://www.linkedin.com/in/lucia-martin');
 	});

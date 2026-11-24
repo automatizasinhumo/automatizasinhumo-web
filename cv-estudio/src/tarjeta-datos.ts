@@ -61,6 +61,12 @@ export function urlLinkedin(s: string | undefined): string {
 	return /^[\w-]{3,100}$/.test(t) ? `https://www.linkedin.com/in/${t}` : "";
 }
 
+/** Teléfono en cifras (y «+»); vacío si no queda ningún dígito, p. ej. «---». */
+export const telefonoQr = (t: string | undefined): string => {
+	const c = limpio(t).replace(/[^\d+]/g, "");
+	return /\d/.test(c) ? c : "";
+};
+
 /** vCard 3.0 mínima: cabe holgada en un QR de 24 mm y la entienden iPhone y Android sin app. */
 export function vcard(d: DatosTarjeta): string {
 	const e = (s: string) => s.replace(/([\\;,])/g, "\\$1");
@@ -68,7 +74,7 @@ export function vcard(d: DatosTarjeta): string {
 	const partes = nombre.split(" ");
 	const lineas = ["BEGIN:VCARD", "VERSION:3.0", `N:${e(partes.slice(1).join(" "))};${e(partes[0] ?? "")};;;`, `FN:${e(nombre)}`];
 	if (limpio(d.cargo)) lineas.push(`TITLE:${e(limpio(d.cargo))}`);
-	if (limpio(d.telefono)) lineas.push(`TEL;TYPE=CELL:${limpio(d.telefono).replace(/[^\d+]/g, "")}`);
+	if (telefonoQr(d.telefono)) lineas.push(`TEL;TYPE=CELL:${telefonoQr(d.telefono)}`);
 	if (limpio(d.email)) lineas.push(`EMAIL:${limpio(d.email)}`);
 	const web = aUrl(d.web) || urlLinkedin(d.linkedin);
 	if (web) lineas.push(`URL:${web}`);
@@ -86,7 +92,7 @@ export function contenidoQr(destino: DestinoQr, d: DatosTarjeta): string {
 		case "tarjeta":
 			return aUrl(d.enlaceTarjeta);
 		case "contacto":
-			return limpio(d.nombre) && (limpio(d.telefono) || limpio(d.email)) ? vcard(d) : "";
+			return limpio(d.nombre) && (telefonoQr(d.telefono) || limpio(d.email)) ? vcard(d) : "";
 	}
 }
 
