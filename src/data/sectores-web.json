@@ -375,12 +375,62 @@
       "ejemplo": "Talleres Hermanos Gil"
     },
     {
+      "id": "dental",
+      "nombre": "Clínica dental",
+      "claves": [
+        "dent",
+        "odontolog",
+        "ortodonc",
+        "sonrisa"
+      ],
+      "lema": "Tu sonrisa en buenas manos, sin miedo y sin prisas",
+      "sobre": "En {negocio} te explicamos cada tratamiento antes de empezar y vamos a tu ritmo. Atendemos a toda la familia, de los peques a los mayores.\n\nPide tu primera visita y te contamos cómo podemos ayudarte.",
+      "servicios": [
+        [
+          "Revisión y limpieza",
+          "Exploración completa y limpieza profesional."
+        ],
+        [
+          "Ortodoncia",
+          "Brackets o alineadores invisibles."
+        ],
+        [
+          "Implantes",
+          "Recupera dientes perdidos con seguridad."
+        ],
+        [
+          "Urgencias dentales",
+          "Te atendemos el mismo día si es posible."
+        ]
+      ],
+      "orden": [
+        "servicios",
+        "opiniones",
+        "preguntas",
+        "galeria",
+        "sobre",
+        "contacto"
+      ],
+      "preguntas": [
+        "¿La primera visita es gratuita?",
+        "¿Atendéis urgencias?",
+        "¿Trabajáis con mutuas o financiación?"
+      ],
+      "disenos": [
+        "sonrisa",
+        "serena",
+        "agenda"
+      ],
+      "reserva": "Pedir cita",
+      "contacto": "Pedir cita",
+      "ejemplo": "Clínica Dental Alba"
+    },
+    {
       "id": "salud",
       "nombre": "Clínica y salud",
       "claves": [
         "fisio",
         "clinic",
-        "dent",
         "medic",
         "psicolog",
         "podolog",
