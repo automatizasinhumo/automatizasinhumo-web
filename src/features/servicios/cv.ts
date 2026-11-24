@@ -75,7 +75,7 @@ export interface DisenoCv {
   creativo?: boolean;
 }
 
-/** Los 29 diseños del motor: primero las creativas propias, con nombre propio y una pista de estilo. */
+/** Los 39 diseños del motor: primero las creativas propias, con nombre propio y una pista de estilo. */
 export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'aurora', nombre: 'Aurora', estilo: 'Ola de color degradada', tono: 'color', columnas: 2, creativo: true },
   { id: 'coral', nombre: 'Coral', estilo: 'Columna con burbujas', tono: 'color', columnas: 2, creativo: true },
@@ -95,6 +95,12 @@ export const DISENOS_CV: readonly DisenoCv[] = [
   { id: 'arcada', nombre: 'Arcada', estilo: 'Foto en arco y papel crema', tono: 'color', columnas: 2, creativo: true },
   { id: 'foco', nombre: 'Foco', estilo: 'Banda oscura con foto', tono: 'color', columnas: 2, creativo: true },
   { id: 'editorial', nombre: 'Editorial', estilo: 'Portada de revista con foto', tono: 'color', columnas: 1, creativo: true },
+  { id: 'trama', nombre: 'Trama', estilo: 'Trama de puntos', tono: 'color', columnas: 2, creativo: true },
+  { id: 'cumbre', nombre: 'Cumbre', estilo: 'Cordillera en la cabecera', tono: 'color', columnas: 2, creativo: true },
+  { id: 'relieve', nombre: 'Relieve', estilo: 'Curvas de nivel', tono: 'color', columnas: 1, creativo: true },
+  { id: 'confeti', nombre: 'Confeti', estilo: 'Confeti y tarjetas', tono: 'color', columnas: 1, creativo: true },
+  { id: 'pliegue', nombre: 'Pliegue', estilo: 'Esquina doblada', tono: 'color', columnas: 1, creativo: true },
+  { id: 'plano', nombre: 'Plano', estilo: 'Plano técnico', tono: 'color', columnas: 2, creativo: true },
   { id: 'onyx', nombre: 'Ónix', estilo: 'Clásico con columna lateral', tono: 'sobrio', columnas: 2 },
   { id: 'azurill', nombre: 'Celeste', estilo: 'Cabecera centrada', tono: 'sobrio', columnas: 2 },
   { id: 'bronzor', nombre: 'Bronce', estilo: 'Apartados al margen', tono: 'sobrio', columnas: 1 },

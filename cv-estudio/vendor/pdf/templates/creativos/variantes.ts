@@ -1,6 +1,6 @@
 import type { Variante } from "./fabrica";
 
-// Dieciocho plantillas creativas del estudio, cada una con su dibujo SVG (arte.tsx), su forma
+// Veinticuatro plantillas creativas del estudio, cada una con su dibujo SVG (arte.tsx), su forma
 // de cabecera, títulos y niveles. El id es el que ve el motor; nombre y descripción están en
 // src/adoptado/templates.ts.
 export const VARIANTES: Record<string, Variante> = {
@@ -22,5 +22,11 @@ export const VARIANTES: Record<string, Variante> = {
 	arcada: { cabecera: "izquierda", columna: true, lateral: "derecha", fondoLateral: "tinte", fondoPagina: "crema", titulos: "mayusculas", fotoEnLateral: true, foto: "arco", lateralArriba: 26, nombre: 2.3, marcador: true, linea: true, iconos: true, nivel: "circle", giro: 40 },
 	foco: { cabecera: "banda", bandaOscura: true, altoCabecera: 150, lateral: "derecha", fondoLateral: "tinte", titulos: "etiqueta", foto: "circulo", tamFoto: 104, nombre: 2, nombrePartido: true, linea: true, iconos: true, nivel: "rectangle-full", giro: 160 },
 	editorial: { cabecera: "centrada", arte: "manchas", altoCabecera: 190, lateral: "ninguno", fondoLateral: "tinte", fondoPagina: "crema", titulos: "doble", foto: "redondeada", tamFoto: 92, nombre: 2.4, linea: true, iconos: true, nivel: "square", giro: 100 },
+	trama: { cabecera: "izquierda", arte: "puntos", altoCabecera: 140, lateral: "derecha", fondoLateral: "tinte", titulos: "subrayado", nombre: 2, nombrePartido: true, nivel: "circle", giro: 210, linea: true, iconos: true, foto: "circulo", tamFoto: 84 },
+	cumbre: { cabecera: "banda", bandaArte: "claro", arte: "montes", altoCabecera: 160, lateral: "izquierda", fondoLateral: "tinte", titulos: "barra", monograma: true, nivel: "progress-bar", giro: 140, linea: true, iconos: true, foto: "circulo", tamFoto: 86 },
+	relieve: { cabecera: "centrada", arte: "curvas", altoCabecera: 165, lateral: "ninguno", fondoLateral: "tinte", fondoPagina: "crema", titulos: "punteado", nombre: 1.9, nivel: "rectangle", giro: 80, linea: true, iconos: true, foto: "redondeada", tamFoto: 82 },
+	confeti: { cabecera: "izquierda", arte: "confeti", altoCabecera: 140, lateral: "derecha", fondoLateral: "tinte", titulos: "pastilla", tarjetas: true, monograma: true, marcador: true, nivel: "square", giro: 170, iconos: true, foto: "circulo", tamFoto: 80 },
+	pliegue: { cabecera: "izquierda", arte: "pliegue", altoCabecera: 150, lateral: "ninguno", fondoLateral: "tinte", titulos: "mayusculas", nombre: 2.2, nombrePartido: true, nivel: "rectangle-full", giro: 30, linea: true, foto: "cuadrada", tamFoto: 90 },
+	plano: { cabecera: "lateral", columna: true, lateral: "izquierda", fondoLateral: "oscuro", arte: "rejilla", titulos: "etiqueta", nombrePartido: true, lateralArriba: 8, nivel: "progress-bar", giro: 190, linea: true, iconos: true, foto: "circulo", tamFoto: 110 },
 };
 export const IDS_CREATIVOS = Object.keys(VARIANTES);

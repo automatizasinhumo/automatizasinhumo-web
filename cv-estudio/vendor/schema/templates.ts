@@ -34,6 +34,12 @@ export const templateSchema = z.enum([
 	"arcada",
 	"foco",
 	"editorial",
+	"trama",
+	"cumbre",
+	"relieve",
+	"confeti",
+	"pliegue",
+	"plano",
 ]);
 
 export type Template = z.infer<typeof templateSchema>;

@@ -1,2 +1,0 @@
-/* Contiene software MIT/Apache-2.0 de terceros (Reactive Resume, Resumv, react-pdf, pdf.js, React, Phosphor) y fuentes OFL-1.1. Licencias: /cv/estudio/motor/LICENCIAS.txt */
-import{a,b,c,d,e,f,g,h,i,j,k}from"/cv/estudio/motor/c/DT6SIIXB.js";import"/cv/estudio/motor/c/QVJYE5MX.js";import"/cv/estudio/motor/c/KKXX2T77.js";export{i as HARVEST_DEFAULTS,d as PDF_ATS_RULE_CODES,h as PDF_OPS,k as analyzePdfResume,b as buildExtractedDocument,c as buildResumeSemantics,a as columnSegments,j as harvestPdfDocument,f as matchJobDescription,g as pdfVerdict,e as surfaceFormsOf};
