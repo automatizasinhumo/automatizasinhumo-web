@@ -1,6 +1,6 @@
 // Arte vectorial de las plantillas creativas: cada una tiene su propio fondo (olas, burbujas,
 // arcos, hexágonos, mosaico, diagonales, manchas, franjas, arco, rayas, pinceladas, píxeles,
-// órbita y trazos) dibujado en SVG detrás del contenido. Se divide en dos capas:
+// órbita, trazos, trama de puntos, montes, curvas de nivel, confeti, pliegue y rejilla) dibujado en SVG detrás del contenido. Se divide en dos capas:
 // - fija: se repite en todas las páginas (columna lateral a toda altura, fondo de página);
 // - cabecera: solo en la página con la cabecera (olas, diagonales…).
 // Todo depende del color principal elegido, así que cualquier color queda coherente.
@@ -21,7 +21,13 @@ export type Arte =
 	| "pinceladas"
 	| "pixeles"
 	| "orbita"
-	| "trazos";
+	| "trazos"
+	| "puntos"
+	| "montes"
+	| "curvas"
+	| "confeti"
+	| "pliegue"
+	| "rejilla";
 
 export type Paleta = {
 	/** Principal. */
@@ -98,6 +104,29 @@ const hexagono = (cx: number, cy: number, r: number) =>
 		const t = (Math.PI / 3) * i + Math.PI / 6;
 		return `${(cx + r * Math.cos(t)).toFixed(1)},${(cy + r * Math.sin(t)).toFixed(1)}`;
 	}).join(" ");
+
+/** Trama de puntos que encoge al alejarse de la esquina (ox, oy); dx/dy: hacia dónde crece. */
+const trama = (clave: string, ox: number, oy: number, dx: 1 | -1, dy: 1 | -1, n: number, paso: number, rMax: number, color: string, op: number) => {
+	const puntos: ReactElement[] = [];
+	for (let i = 0; i < n; i++)
+		for (let j = 0; j < n; j++) {
+			const r = rMax * (1 - (i + j) / (1.6 * n));
+			if (r < 0.5) continue;
+			puntos.push(<Circle key={`${clave}${i}-${j}`} cx={ox + dx * j * paso} cy={oy + dy * i * paso} r={r} fill={color} opacity={op} />);
+		}
+	return puntos;
+};
+
+/** Curva de nivel cerrada: un círculo deformado con ondas suaves (estable para cada anillo). */
+const nivel = (cx: number, cy: number, r: number, k: number) => {
+	const n = 48;
+	const pts = Array.from({ length: n }, (_, i) => {
+		const t = (2 * Math.PI * i) / n;
+		const rr = r * (1 + 0.11 * Math.sin(3 * t + k * 0.45) + 0.05 * Math.sin(5 * t + 1.3 + k * 0.2));
+		return `${(cx + rr * Math.cos(t)).toFixed(1)},${(cy + rr * Math.sin(t)).toFixed(1)}`;
+	});
+	return `M${pts.join(" L")} Z`;
+};
 
 type Capas = { fija: ReactElement[]; cabecera: ReactElement[] };
 
@@ -364,6 +393,111 @@ const ARTES: Record<Arte, (L: Lienzo) => Capas> = {
 			<Path key="t3" d={`M-10,90 C${W * 0.26},42 ${W * 0.48},136 ${W * 0.72},74 S${W * 0.96},44 ${W + 10},86`} stroke={c.med} strokeWidth={0.9} fill="none" />,
 		],
 	}),
+
+	// Trama de puntos (semitono) en la esquina de la cabecera y otra más suave al pie.
+	puntos: ({ W, H, c }) => ({
+		fija: trama("f", 14, H - 14, 1, -1, 9, 13, 3.4, c.a, 0.45),
+		cabecera: [...trama("c", W - 14, 14, -1, 1, 12, 14, 4.6, c.p, 0.85), <Rect key="b" x={W - 22} y={0} width={22} height={4} fill={c.a} />],
+	}),
+
+	// Banda con cordillera: dos capas de picos y un sol pálido.
+	montes: ({ W, hc, c }) => {
+		const picos = (base: number, alt: number[], fase: number) => {
+			const paso = W / (alt.length - 1);
+			return `M0,${base + 2} ${alt.map((a, i) => `L${(i * paso + (i % 2 ? fase : 0)).toFixed(1)},${(base - a).toFixed(1)}`).join(" ")} L${W},${base + 2} Z`;
+		};
+		return {
+			fija: [],
+			cabecera: [
+				<Defs key="d">
+					<LinearGradient id="montG" x1="0" y1="0" x2="0" y2="1">
+						<Stop offset="0" stopColor={c.osc} />
+						<Stop offset="1" stopColor={c.p} />
+					</LinearGradient>
+				</Defs>,
+				<Rect key="f" x={0} y={0} width={W} height={hc} fill="url(#montG)" />,
+				<Circle key="s" cx={W - 92} cy={hc * 0.34} r={24} fill="#ffffff" opacity={0.14} />,
+				<Path key="m1" d={picos(hc, [18, 46, 22, 58, 30, 50, 16, 42, 24], 14)} fill={c.a} opacity={0.42} />,
+				<Path key="m2" d={picos(hc, [6, 22, 10, 28, 8, 24, 12, 20, 4], -10)} fill={c.osc} opacity={0.5} />,
+				<Rect key="l" x={0} y={hc} width={W} height={3} fill={c.a} />,
+			],
+		};
+	},
+
+	// Curvas de nivel, como en un mapa topográfico, en dos esquinas.
+	curvas: ({ W, H, c }) => ({
+		fija: Array.from({ length: 8 }, (_, k) => <Path key={`f${k}`} d={nivel(26, H - 18, 22 + k * 13, k + 9)} fill="none" stroke={c.med} strokeWidth={0.9} opacity={0.9 - k * 0.08} />),
+		cabecera: [
+			<Circle key="c" cx={W - 46} cy={34} r={10} fill={c.a} opacity={0.5} />,
+			...Array.from({ length: 10 }, (_, k) => <Path key={`c${k}`} d={nivel(W - 46, 34, 20 + k * 12, k)} fill="none" stroke={k % 3 === 2 ? c.a : c.p} strokeWidth={k % 3 === 2 ? 1.4 : 0.8} opacity={0.75 - k * 0.055} />),
+		],
+	}),
+
+	// Confeti: piezas en el cuarto derecho de la cabecera (lejos del nombre) y una franja fina al pie, bajo el margen.
+	confeti: ({ W, H, hc, c }) => {
+		const tonos = [c.p, c.a, c.med, c.osc];
+		const pieza = (i: number, x: number, y: number) => {
+			const t = tonos[Math.floor(azar(i + 7) * tonos.length)]!;
+			const s = 3 + azar(i + 3) * 4;
+			const g = azar(i + 11) * Math.PI;
+			const op = 0.55 + azar(i + 5) * 0.4;
+			const forma = Math.floor(azar(i + 1) * 4);
+			if (forma === 0) return <Circle key={`p${i}`} cx={x} cy={y} r={s * 0.7} fill={t} opacity={op} />;
+			const vert = (lados: number) =>
+				Array.from({ length: lados }, (_, k) => {
+					const a = g + (2 * Math.PI * k) / lados;
+					return `${(x + s * Math.cos(a)).toFixed(1)},${(y + s * Math.sin(a)).toFixed(1)}`;
+				}).join(" ");
+			if (forma === 1) return <Polygon key={`p${i}`} points={vert(4)} fill={t} opacity={op} />;
+			if (forma === 2) return <Polygon key={`p${i}`} points={vert(3)} fill={t} opacity={op} />;
+			return <Line key={`p${i}`} x1={x - s * Math.cos(g)} y1={y - s * Math.sin(g)} x2={x + s * Math.cos(g)} y2={y + s * Math.sin(g)} stroke={t} strokeWidth={2.2} strokeLinecap="round" opacity={op} />;
+		};
+		const cab = Array.from({ length: 30 }, (_, i) => pieza(i, W * 0.72 + azar(i * 3 + 1) * (W * 0.26), 8 + azar(i * 5 + 2) * Math.max(40, hc - 40)));
+		const pie = Array.from({ length: 14 }, (_, i) => pieza(i + 100, W * 0.04 + azar(i * 7 + 4) * (W * 0.92), H - 6 - azar(i * 9 + 6) * 10));
+		return { fija: pie, cabecera: cab };
+	},
+
+	// Esquina doblada: triángulos superpuestos arriba a la derecha y un pliegue al pie.
+	pliegue: ({ W, H, c }) => ({
+		fija: [
+			<Polygon key="f1" points={`0,${H} 0,${H - 70} 70,${H}`} fill={c.tin} />,
+			<Polygon key="f2" points={`0,${H} 0,${H - 40} 40,${H}`} fill={c.a} opacity={0.55} />,
+		],
+		cabecera: [
+			<Polygon key="c1" points={`${W - 150},0 ${W},0 ${W},150`} fill={c.tin} />,
+			<Polygon key="c2" points={`${W - 104},0 ${W},0 ${W},104`} fill={c.p} />,
+			<Polygon key="c3" points={`${W - 104},0 ${W - 52},52 ${W},104 ${W - 30},30`} fill={c.osc} opacity={0.35} />,
+			<Polygon key="c4" points={`${W - 46},0 ${W},0 ${W},46`} fill={c.a} />,
+		],
+	}),
+
+	// Columna oscura de plano técnico: rejilla fina, cotas y un compás arriba.
+	rejilla: (L) => {
+		if (!L.lat) return { fija: [], cabecera: [] };
+		const { H, c } = L;
+		const { x, w } = L.lat;
+		const paso = 14;
+		const lineas: ReactElement[] = [];
+		for (let i = 1; i * paso < w; i++) lineas.push(<Line key={`v${i}`} x1={x + i * paso} y1={0} x2={x + i * paso} y2={H} stroke="#ffffff" strokeWidth={i % 5 ? 0.3 : 0.7} opacity={i % 5 ? 0.08 : 0.16} />);
+		for (let j = 1; j * paso < H; j++) lineas.push(<Line key={`h${j}`} x1={x} y1={j * paso} x2={x + w} y2={j * paso} stroke="#ffffff" strokeWidth={j % 5 ? 0.3 : 0.7} opacity={j % 5 ? 0.08 : 0.16} />);
+		const cx = x + w - 26;
+		return {
+			fija: [
+				<Rect key="l" x={x} y={0} width={w} height={H} fill={L.lat.fondo} />,
+				...lineas,
+				<Line key="cota" x1={x + 12} y1={H - 30} x2={x + w - 12} y2={H - 30} stroke={c.a} strokeWidth={0.8} opacity={0.8} />,
+				<Line key="c1" x1={x + 12} y1={H - 35} x2={x + 12} y2={H - 25} stroke={c.a} strokeWidth={0.8} opacity={0.8} />,
+				<Line key="c2" x1={x + w - 12} y1={H - 35} x2={x + w - 12} y2={H - 25} stroke={c.a} strokeWidth={0.8} opacity={0.8} />,
+			],
+			cabecera: [
+				<Circle key="r1" cx={cx} cy={24} r={34} fill="none" stroke={c.a} strokeWidth={0.9} opacity={0.75} />,
+				<Circle key="r2" cx={cx} cy={24} r={20} fill="none" stroke="#ffffff" strokeWidth={0.6} strokeDasharray="2,3" opacity={0.5} />,
+				<Line key="x" x1={cx - 44} y1={24} x2={cx + 44} y2={24} stroke="#ffffff" strokeWidth={0.5} opacity={0.4} />,
+				<Line key="y" x1={cx} y1={-20} x2={cx} y2={68} stroke="#ffffff" strokeWidth={0.5} opacity={0.4} />,
+				<Circle key="p" cx={cx} cy={24} r={3} fill={c.a} />,
+			],
+		};
+	},
 };
 
 /**
