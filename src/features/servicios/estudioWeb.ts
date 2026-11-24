@@ -1314,6 +1314,8 @@ export function iniciarEstudioWeb() {
       return programar();
     }
     if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio' || c.name?.startsWith('titular-')) return;
+    // Y al revés: si cambia el campo, su espejo del primer paso no se queda con el valor viejo.
+    for (const e of $$<HTMLInputElement>(`[data-espejo="${c.name}"]`)) e.value = c.value;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {
       estado.color = c.value;
       pintarControles();
