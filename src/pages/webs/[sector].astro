@@ -9,6 +9,7 @@ import { getConfig } from '../../config';
 import { breadcrumbJsonLd } from '../../features/storefront/breadcrumbs';
 import { fuentesMuestras, miniaturaMuestra, muestrasDeSector } from '../../features/servicios/muestrasSector';
 import { faqJsonLd, preguntasSector } from '../../features/servicios/faqSector';
+import ComparativaPrecio from '../../features/storefront/ComparativaPrecio.astro';
 
 const sector = getSector(Astro.params.sector);
 if (!sector) {
@@ -91,6 +92,8 @@ const jsonLd = JSON.stringify([metadata.jsonLd, breadcrumb, faqJsonLd(preguntas)
       </ul>
     </section>
   )}
+
+  <ComparativaPrecio enlace={muestras[0]?.enlace ?? '/servicios/web'} />
 
   <section class="py-10 sm:py-12" aria-labelledby="servicios">
     <h2 id="servicios" class="font-serif text-2xl font-bold text-ink sm:text-3xl">
