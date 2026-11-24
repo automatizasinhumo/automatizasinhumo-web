@@ -14,10 +14,10 @@ export interface ProveedorDns {
 const LISTA: (ProveedorDns & { ns: RegExp })[] = [
   { id: 'ionos', nombre: 'IONOS', ns: /\.ui-dns\.(com|de|org|biz)$/, ruta: 'Dominios y SSL → tu dominio → Servidores de nombres → Usar servidores de nombres personalizados' },
   { id: 'godaddy', nombre: 'GoDaddy', ns: /\.domaincontrol\.com$/, ruta: 'Mis productos → Dominios → tu dominio → DNS → Servidores de nombres → Cambiar → Usaré mis propios servidores' },
-  { id: 'hostinger', nombre: 'Hostinger', ns: /\.(dns-parking\.com|hostinger\.[a-z.]+)$/, ruta: 'Dominios → Administrar → DNS / Nameservers → Cambiar nameservers' },
+  { id: 'hostinger', nombre: 'Hostinger', ns: /\.(dns-parking\.com|hostinger\.(com|es|net))$/, ruta: 'Dominios → Administrar → DNS / Nameservers → Cambiar nameservers' },
   { id: 'ovh', nombre: 'OVHcloud', ns: /\.ovh\.(net|com|ca)$|\.anycast\.me$/, ruta: 'Web Cloud → Nombres de dominio → tu dominio → Servidores DNS → Modificar servidores DNS' },
   { id: 'dondominio', nombre: 'DonDominio', ns: /\.dondominio\.(com|net|org)$/, ruta: 'Dominios → tu dominio → Servidores DNS → Personalizados' },
-  { id: 'arsys', nombre: 'Arsys', ns: /\.arsys\.(es|net)$|\.dns\.arsys\./, ruta: 'Panel de control → Dominios → tu dominio → Servidores DNS → Modificar' },
+  { id: 'arsys', nombre: 'Arsys', ns: /\.arsys\.(es|net|com)$/, ruta: 'Panel de control → Dominios → tu dominio → Servidores DNS → Modificar' },
   { id: 'cdmon', nombre: 'cdmon', ns: /\.cdmon\.(net|com)$/, ruta: 'Dominios → tu dominio → Gestión DNS → Cambiar servidores DNS' },
   { id: 'namecheap', nombre: 'Namecheap', ns: /\.registrar-servers\.com$/, ruta: 'Domain List → Manage → Nameservers → Custom DNS' },
   { id: 'strato', nombre: 'Strato', ns: /\.(rzone|stratoserver)\.de$|\.strato\.(de|es)$/, ruta: 'Dominios → Gestionar dominio → Servidores de nombres → Usar otros' },

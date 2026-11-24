@@ -14,6 +14,7 @@ describe('proveedor del dominio por sus NS', () => {
   it('no se deja engañar por nombres parecidos ni inventa', () => {
     expect(proveedorDeNs(['ns1.fakedomaincontrol.com.evil.net'])).toBeNull();
     expect(proveedorDeNs(['ns1.miempresa.es'])).toBeNull();
+    expect(proveedorDeNs(['ns1.hostinger.evil.com', 'dns.arsys.otro.net'])).toBeNull();
     expect(proveedorDeNs([])).toBeNull();
   });
   it('lee los NS por DNS sobre HTTPS y no rompe si falla', async () => {

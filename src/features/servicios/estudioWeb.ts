@@ -681,7 +681,7 @@ export function iniciarEstudioWeb() {
       const r = document.createElement('span');
       r.className = 'block mt-1';
       r.textContent = v.proveedor.ruta;
-      paso.replaceChildren('Tu dominio está en ', b, '. Entra en su panel y ve a:', r);
+      paso.replaceChildren('Tus DNS los gestiona ', b, ' (normalmente, donde compraste el dominio). Entra en su panel y ve a:', r);
     } else paso.textContent = 'Entra en la web donde compraste el dominio y busca «Servidores DNS» (o «Nameservers»).';
     $('[data-dominio-ns]')!.replaceChildren(
       ...v.servidores.map((ns) => {
