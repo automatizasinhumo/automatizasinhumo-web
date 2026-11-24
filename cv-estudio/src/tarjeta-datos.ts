@@ -36,16 +36,28 @@ const limpio = (s: string | undefined) => (s ?? "").replace(/\s+/g, " ").trim();
 export function aUrl(s: string | undefined): string {
 	const t = limpio(s);
 	if (!t) return "";
-	if (/^https?:\/\//i.test(t)) return t;
-	if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(t)) return `https://${t}`;
-	return "";
+	const u = /^https?:\/\//i.test(t) ? t : /^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(t) ? `https://${t}` : "";
+	return u && hostValido(u) ? u : "";
+}
+
+/** Host con punto y sin espacios: «https://» o «http://localhost» no son una web. */
+function hostValido(u: string): boolean {
+	try {
+		return /^[\w-]+(\.[\w-]+)+$/.test(new URL(u).hostname);
+	} catch {
+		return false;
+	}
 }
 
 /** LinkedIn admite el perfil entero o solo el usuario («lucia-martin»). */
 export function urlLinkedin(s: string | undefined): string {
 	const t = limpio(s).replace(/^@/, "");
 	if (!t) return "";
-	if (/linkedin\.com/i.test(t)) return aUrl(t);
+	if (/linkedin\.com/i.test(t)) {
+		const u = aUrl(t);
+		// Por el dominio, no por el texto: «ejemplo.es/linkedin.com» no es LinkedIn.
+		return u && /(^|\.)linkedin\.com$/i.test(new URL(u).hostname) ? u : "";
+	}
 	return /^[\w-]{3,100}$/.test(t) ? `https://www.linkedin.com/in/${t}` : "";
 }
 

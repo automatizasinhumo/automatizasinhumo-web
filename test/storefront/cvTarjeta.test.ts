@@ -43,6 +43,8 @@ describe('tarjeta: direcciones', () => {
 		expect(aUrl(' http://a.b/c ')).toBe('http://a.b/c');
 		expect(aUrl('mi web')).toBe('');
 		expect(aUrl(undefined)).toBe('');
+		expect(aUrl('https://')).toBe('');
+		expect(aUrl('http://localhost')).toBe('');
 	});
 
 	it('urlLinkedin admite el usuario suelto, con @ o el perfil entero', () => {
@@ -50,6 +52,8 @@ describe('tarjeta: direcciones', () => {
 		expect(urlLinkedin('@lucia-martin')).toBe('https://www.linkedin.com/in/lucia-martin');
 		expect(urlLinkedin('linkedin.com/in/x-y')).toBe('https://linkedin.com/in/x-y');
 		expect(urlLinkedin('no vale')).toBe('');
+		expect(urlLinkedin('https://ejemplo.es/linkedin.com')).toBe('');
+		expect(urlLinkedin('https://es.linkedin.com/in/x')).toBe('https://es.linkedin.com/in/x');
 	});
 });
 

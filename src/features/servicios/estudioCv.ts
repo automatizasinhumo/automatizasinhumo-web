@@ -785,7 +785,8 @@ export function iniciarEstudioCv() {
     // El QR de la página es opcional y sale sin marcar: solo si lo pidió o ya lo publicó con él.
     campoT('qr').checked = g?.qr === true;
     const destino = $<HTMLSelectElement>('[data-qr-destino]');
-    if (destino && typeof g?.qrDestino === 'string' && DESTINOS_QR.some((d) => d.id === g.qrDestino)) destino.value = g.qrDestino;
+    // Siempre se asigna: si no, el destino del pedido anterior se quedaba en el selector.
+    if (destino) destino.value = typeof g?.qrDestino === 'string' && DESTINOS_QR.some((d) => d.id === g.qrDestino) ? g.qrDestino : 'contacto';
     pintarAyudaQr();
     const m = g?.modelo;
     const modelo = esModeloTarjeta(m) ? m : MODELO_TARJETA_POR_DEFECTO;
