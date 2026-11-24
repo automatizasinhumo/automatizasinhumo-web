@@ -292,6 +292,9 @@
   .foto-ajuste button {
     justify-self: start;
   }
+  .importar-nota:empty {
+    display: none;
+  }
   .importar-nota {
     margin-top: var(--ds-hueco-2);
     font-size: var(--ds-texto-small);
@@ -300,22 +303,37 @@
   .importar-nota[data-tono='error'] {
     color: var(--color-ink);
   }
-  .importar-ayuda {
-    margin-top: var(--ds-hueco-2);
-    font-size: var(--ds-texto-small);
-    color: var(--color-muted);
-  }
-  .importar-ayuda summary {
-    cursor: pointer;
+  .importar-dialogo {
+    max-width: min(34rem, calc(100vw - 2rem));
+    padding: var(--ds-hueco-5);
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    background: var(--color-surface, #fff);
     color: var(--color-ink);
+    font-size: var(--ds-texto-small);
   }
-  .importar-ayuda ul {
-    margin: var(--ds-hueco-2) 0;
+  .importar-dialogo::backdrop {
+    background: rgb(15 23 42 / 0.45);
+  }
+  .importar-dialogo h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: var(--ds-hueco-2);
+  }
+  .importar-dialogo ul {
+    margin: var(--ds-hueco-3) 0;
     padding-left: 1.2em;
     list-style: disc;
+    color: var(--color-muted);
   }
-  .importar-ayuda li + li {
+  .importar-dialogo li + li {
     margin-top: var(--ds-hueco-1);
+  }
+  .importar-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-hueco-2);
+    margin-top: var(--ds-hueco-4);
   }
   .mas-apartados {
     margin-top: var(--ds-hueco-6);
