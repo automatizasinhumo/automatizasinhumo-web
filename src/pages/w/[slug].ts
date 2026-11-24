@@ -1,14 +1,16 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
+import { contarVisita } from '../../features/servicios/panelCliente';
 import { documentoWeb, webPorSlug } from '../../features/servicios/webs';
 
 export const prerender = false;
 
 // Web de una página publicada por el cliente desde /servicios/web. HTML completo y propio
 // (sin la cabecera de la tienda), sin JavaScript ni recursos externos.
-export const GET: APIRoute = async ({ params, url }) => {
+export const GET: APIRoute = async ({ params, url, request, locals }) => {
   const w = await webPorSlug(env.DB, params.slug ?? '');
   if (!w) return new Response('Web no encontrada', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+  locals.cfContext?.waitUntil(contarVisita(env.DB, 'web', w.slug, request.headers.get('user-agent')));
   const imagen = new URL(`/w/${w.slug}/foto`, url).href;
   const galeria = new URL(`/w/${w.slug}/galeria/`, url).href;
   return new Response(documentoWeb(w.datos, new URL(`/w/${w.slug}`, url).href, '', imagen, galeria), {

@@ -4,6 +4,7 @@
 // Sin JavaScript: QR en SVG desde el servidor y «Guardar contacto» como .vcf.
 import { env } from 'cloudflare:workers';
 import { coloresTarjeta } from '../../../features/servicios/modelosTarjeta';
+import { contarVisita } from '../../../features/servicios/panelCliente';
 import { tarjetaPorSlug } from '../../../features/servicios/publicados';
 import TarjetaDigital from '../../../features/servicios/TarjetaDigital.astro';
 
@@ -11,6 +12,7 @@ export const prerender = false;
 
 const t = await tarjetaPorSlug(env.DB, Astro.params.slug ?? '');
 if (!t) return new Response('Tarjeta no encontrada', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+Astro.locals.cfContext?.waitUntil(contarVisita(env.DB, 'tarjeta', t.slug, Astro.request.headers.get('user-agent')));
 const d = t.datos;
 const url = new URL(`/c/${t.slug}`, Astro.url).href;
 const { sobre, acento2 } = coloresTarjeta(d.color);

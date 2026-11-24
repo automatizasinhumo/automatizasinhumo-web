@@ -1,39 +1,9 @@
-import { readFileSync } from 'node:fs';
-import { DatabaseSync } from 'node:sqlite';
-import type { D1Database } from '@cloudflare/workers-types';
+import { d1 as d1Prueba } from './d1Prueba';
 import { describe, expect, it } from 'vitest';
 import { fechaVersion } from './estudioWeb';
 import { MAX_VERSIONES, paginaDePedido, publicarPagina, versionDePedido, versionesDePedido, type Validador } from './paginas';
 
-/** D1 mínimo sobre SQLite de Node con las migraciones reales, con lote transaccional como D1. */
-function d1(): D1Database & { sql: DatabaseSync } {
-  const sql = new DatabaseSync(':memory:');
-  for (const m of ['0048_paginas_publicadas.sql', '0051_paginas_versiones.sql'])
-    sql.exec(readFileSync(new URL(`../../../migrations/${m}`, import.meta.url), 'utf8'));
-  const prep = (q: string, args: unknown[] = []) => {
-    const a = args as (string | number | null)[];
-    const st = () => sql.prepare(q);
-    return {
-      bind: (...nuevos: unknown[]) => prep(q, nuevos),
-      first: async () => (st().get(...a) as unknown) ?? null,
-      all: async () => ({ results: st().all(...a) }),
-      run: async () => ({ meta: { changes: Number(st().run(...a).changes) } }),
-      todo: () => ({ results: st().all(...a) }),
-    };
-  };
-  const batch = async (ps: ReturnType<typeof prep>[]) => {
-    sql.exec('BEGIN');
-    try {
-      const r = ps.map((p) => p.todo());
-      sql.exec('COMMIT');
-      return r;
-    } catch (e) {
-      sql.exec('ROLLBACK');
-      throw e;
-    }
-  };
-  return { sql, prepare: (q: string) => prep(q), batch } as unknown as D1Database & { sql: DatabaseSync };
-}
+const d1 = () => d1Prueba(['0048_paginas_publicadas.sql', '0051_paginas_versiones.sql']);
 
 type D = { n: number };
 const validar: Validador<D> = (x) =>
