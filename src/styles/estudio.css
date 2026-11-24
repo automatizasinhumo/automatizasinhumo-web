@@ -1176,4 +1176,14 @@
 .idea-lema:focus-visible {
   outline: 3px solid #2563eb;
   outline-offset: 2px;
+/* Indicador de guardado automático del estudio (estudioWeb.ts → marcarGuardado). */
+.guardado {
+  align-self: center;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+.guardado[data-ok='false'] {
+  color: #b91c1c;
+  opacity: 1;
+  font-weight: 600;
 }
