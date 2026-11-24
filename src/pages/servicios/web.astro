@@ -5,6 +5,8 @@ import Progreso from '../../themes/limpio/ui/Progreso.astro';
 import { AUTOSERVICIO, SLUG_WEB } from '../../features/servicios/autoservicio';
 import { euros } from '../../features/servicios/cv';
 import {
+  ASESORIA_WEB,
+  CAMINOS_WEB,
   COLORES_WEB,
   CSS_WEB,
   cssFuentes,
@@ -98,8 +100,31 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
     <form id="estudio-form" class="mt-8" novalidate autocomplete="on">
       <!-- 1 · Diseño -->
       <section data-paso="plantilla" aria-labelledby="paso-plantilla">
-        <h2 id="paso-plantilla" class="paso-titulo">Elige el diseño de tu web</h2>
-        <p class="paso-entradilla">Todos cuestan lo mismo, {euros(precio)}. Podrás cambiarlo después sin volver a escribir nada.</p>
+        <h2 id="paso-plantilla" class="paso-titulo">¿Cómo quieres tu web?</h2>
+        <p class="paso-entradilla">Elige cómo hacerla; puedes cambiar de idea cuando quieras sin perder nada. Todos los diseños cuestan lo mismo, {euros(precio)}.</p>
+        <fieldset class="caminos" data-guia="caminos">
+          <legend class="sr-only">Cómo quieres hacer tu web</legend>
+          {
+            CAMINOS_WEB.map((c) => (
+              <label class="camino">
+                <input type="radio" name="camino" value={c.id} class="sr-only" />
+                <span class="camino-etiqueta">{c.etiqueta}</span>
+                <strong class="camino-titulo">{c.titulo}</strong>
+                <span class="camino-precio">{c.id === 'asesoria' ? `Desde ${euros(ASESORIA_WEB.desde)}` : euros(precio)}</span>
+                <span class="camino-resumen">{c.resumen}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+
+        <div class="tarjeta asesoria" data-solo-camino="asesoria" hidden>
+          <h3>Te hacemos la web</h3>
+          <p>Una persona mira tu negocio, escribe los textos, elige las fotos y te deja la web publicada. Cuéntanos tu caso en el formulario: te respondemos por email con el precio cerrado antes de empezar. Desde <strong>{euros(ASESORIA_WEB.desde)}</strong>.</p>
+          <a class="boton boton-principal" href={ASESORIA_WEB.enlace}>Contarnos tu negocio</a>
+          <p class="ayuda-bloque">¿Prefieres hacerla tú? Elige «Usa una plantilla» o «Diseña tu web» arriba.</p>
+        </div>
+
+        <div data-oculto-en="asesoria">
         <div class="recomienda mt-6">
           <div class="filas">
             <label class={campo}>Nombre de tu negocio<input data-espejo="negocio" maxlength="80" autocomplete="organization" placeholder="Ej.: Peluquería Lola" /></label>
@@ -154,6 +179,7 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
         <p class="aviso" role="alert" data-error="plantilla" hidden>Elige un diseño para seguir.</p>
         <div class="paso-acciones">
           <button type="button" class="boton boton-principal" data-siguiente data-guia="siguiente">Siguiente: tu negocio</button>
+        </div>
         </div>
       </section>
 
@@ -244,9 +270,15 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
           <div data-hueco-vista></div>
         </div>
         <p class="aviso" role="alert" data-error="datos" hidden>Escribe el nombre del negocio y al menos un teléfono, un WhatsApp o un correo.</p>
+        <p class="tarjeta mejora mejora-aviso" data-solo-camino="plantilla">
+          <span>Tu web sale tal cual con el diseño elegido. ¿Quieres otro color, otra letra o más movimiento?</span>
+          <button type="button" class="boton boton-compacto" data-a-camino="personaliza">Diseñar la mía</button>
+        </p>
         <div class="paso-acciones">
           <button type="button" class="boton boton-secundario" data-atras>Atrás</button>
-          <button type="button" class="boton boton-principal" data-siguiente>Siguiente: estilo</button>
+          <button type="button" class="boton boton-principal" data-siguiente
+            ><span data-solo-camino="personaliza">Siguiente: estilo</span><span data-solo-camino="plantilla" hidden>Siguiente: publica</span></button
+          >
         </div>
       </section>
 

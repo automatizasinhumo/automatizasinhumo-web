@@ -15,7 +15,7 @@ import { protegerVista } from './protegerVista';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { CSS_MINI, datosMiniatura } from './miniaturasWeb';
-import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type DatosWeb, type IdVarianteWeb } from './webs';
+import { aspectoAlElegir, CAPA_TAL_CUAL, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -32,6 +32,8 @@ interface Config {
   maxEnlaces: number;
 }
 interface Estado {
+  /** Cómo la hace: tal cual, a su gusto (con el paso de estilo) o pidiendo que se la hagamos. */
+  camino: CaminoWeb;
   plantilla: string;
   color: string;
   letra: string;
@@ -228,6 +230,8 @@ export function iniciarEstudioWeb() {
 
   const g = leer();
   const estado: Estado = {
+    // Quien ya había pasado por «Estilo» antes de haber caminos sigue en «a tu gusto».
+    camino: esCaminoWeb(g.camino) ? g.camino : (Number(g.alcanzado) || 0) >= PASOS.indexOf('personaliza') ? 'personaliza' : 'plantilla',
     plantilla: resolverPlantilla(g.plantilla) ?? '',
     color: COLOR.test(g.color ?? '') ? g.color! : cfg.porDefecto.color,
     letra: cfg.letras.includes(g.letra ?? '') ? g.letra! : cfg.porDefecto.letra,
@@ -1002,7 +1006,8 @@ export function iniciarEstudioWeb() {
     const ajeno = !!estado.pedido && estado.pedido !== d.ref;
     if (d.datos && (ajeno || !campo('negocio').value.trim())) {
       const { plantilla, color, letra, ...c } = d.datos;
-      Object.assign(estado, { plantilla, color, letra, alcanzado: PASOS.length - 1, pedido: d.ref });
+      Object.assign(estado, { plantilla, color, letra, camino: 'personaliza', alcanzado: PASOS.length - 1, pedido: d.ref });
+      aplicarCamino();
       volcar(c);
       persistir();
       if (ajeno) nuevoHistorial();
@@ -1026,8 +1031,14 @@ export function iniciarEstudioWeb() {
     const i = PASOS.indexOf(paso);
     actual = paso;
     for (const [id, s] of secciones) s.hidden = id !== paso;
+    const recorre = pasosDelCamino(estado.camino) as string[];
     for (const b of $$<HTMLButtonElement>('.progreso [data-ir]')) {
       const j = PASOS.indexOf(b.dataset.ir!);
+      // Los pasos que el camino no recorre no se ven, y los números siguen seguidos (1, 2, 3).
+      const k = recorre.indexOf(b.dataset.ir!);
+      b.parentElement!.hidden = k < 0;
+      const num = $('.num', b);
+      if (num) num.textContent = String(k + 1);
       b.disabled = j > estado.alcanzado;
       if (j === i) b.setAttribute('aria-current', 'step');
       else b.removeAttribute('aria-current');
@@ -1061,7 +1072,31 @@ export function iniciarEstudioWeb() {
   function desdeHash(enfocar: boolean) {
     const pedido = location.hash.slice(1);
     const i = PASOS.indexOf(pedido);
-    mostrar(i >= 0 && i <= estado.alcanzado ? pedido : PASOS[0]!, enfocar);
+    const vale = i >= 0 && i <= estado.alcanzado && (pasosDelCamino(estado.camino) as string[]).includes(pedido);
+    mostrar(vale ? pedido : PASOS[0]!, enfocar);
+  }
+
+  /** Enseña solo lo del camino elegido, como en el estudio de CV. */
+  function aplicarCamino() {
+    for (const r of $$<HTMLInputElement>('input[name="camino"]')) r.checked = r.value === estado.camino;
+    for (const el of $$('[data-solo-camino]')) el.hidden = el.dataset.soloCamino !== estado.camino;
+    for (const el of $$('[data-oculto-en]')) el.hidden = el.dataset.ocultoEn === estado.camino;
+  }
+  /** Cambia de camino. «Tal cual» vuelve al color y la letra del diseño: lo que se ve es lo que se publica. */
+  function elegirCamino(c: CaminoWeb) {
+    estado.camino = c;
+    if (c === 'plantilla' && estado.plantilla) {
+      const x = disenoWeb(estado.plantilla);
+      Object.assign(estado, x ? { color: x.color, letra: 'diseno' } : { color: cfg.porDefecto.color, letra: cfg.porDefecto.letra });
+      // Acabado, forma de foto, movimiento y variantes de sección tampoco se ven en este camino.
+      for (const [k, v] of Object.entries(CAPA_TAL_CUAL)) campo(k as keyof typeof CAPA_TAL_CUAL).value = v;
+    }
+    aplicarCamino();
+    persistir();
+    pintarControles();
+    programar();
+    if (!(pasosDelCamino(c) as string[]).includes(actual)) ir(PASOS[0]!);
+    else mostrar(actual, false);
   }
   function persistir() {
     estado.contenido = recoger();
@@ -1159,17 +1194,19 @@ export function iniciarEstudioWeb() {
     }
     if (b.dataset.ir) {
       ev.preventDefault();
-      if (PASOS.indexOf(b.dataset.ir) <= estado.alcanzado) ir(b.dataset.ir);
+      if (PASOS.indexOf(b.dataset.ir) <= estado.alcanzado && (pasosDelCamino(estado.camino) as string[]).includes(b.dataset.ir)) ir(b.dataset.ir);
       return;
     }
+    if (b.dataset.aCamino && esCaminoWeb(b.dataset.aCamino)) return elegirCamino(b.dataset.aCamino);
     if (b.hasAttribute('data-siguiente')) {
       if (!validar(actual)) return;
-      const i = PASOS.indexOf(actual) + 1;
-      estado.alcanzado = Math.max(estado.alcanzado, i);
+      const sig = pasoVecino(estado.camino, actual, 1);
+      if (!sig) return;
+      estado.alcanzado = Math.max(estado.alcanzado, PASOS.indexOf(sig));
       persistir();
-      return ir(PASOS[i]!);
+      return ir(sig);
     }
-    if (b.hasAttribute('data-atras')) return ir(PASOS[Math.max(0, PASOS.indexOf(actual) - 1)]!);
+    if (b.hasAttribute('data-atras')) return ir(pasoVecino(estado.camino, actual, -1) || PASOS[0]!);
     if (b.hasAttribute('data-anadir')) {
       const l = b.closest<HTMLElement>('[data-lista]')!.dataset.lista as Lista;
       anadir(l)?.querySelector<HTMLInputElement>('[data-k]')?.focus();
@@ -1275,6 +1312,7 @@ export function iniciarEstudioWeb() {
     if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, true);
     if (c.dataset.espejo) return void campo(c.dataset.espejo as (typeof CAMPOS)[number]).dispatchEvent(new Event('change', { bubbles: true }));
     if (c.name?.startsWith('titular-') || c.name === 'dominio') return;
+    if (c.name === 'camino') return void (esCaminoWeb(c.value) && elegirCamino(c.value));
     if (c.hasAttribute('data-galeria-elegir')) {
       const todos = [...(c.files ?? [])].filter((f) => f.type.startsWith('image/'));
       c.value = '';
@@ -1330,15 +1368,14 @@ export function iniciarEstudioWeb() {
       return guardar(estado);
     }
     if (c.name === 'plantilla' || c.name === 'plantilla-rapida') {
+      const anterior = estado.plantilla;
       estado.plantilla = c.value;
       $('[data-error="plantilla"]')!.hidden = true;
       // Cada plantilla trae su orden de secciones; el cliente lo puede cambiar después.
       const elegida = PLANTILLAS_WEB.find((p) => p.id === c.value);
       // Un diseño de autor llega con su color y su letra (el cliente los puede cambiar después);
       // al volver a una básica, «la del diseño» pasa a la letra por defecto.
-      const x = disenoWeb(c.value);
-      if (x) Object.assign(estado, { color: x.color, letra: 'diseno' });
-      else if (estado.letra === 'diseno') estado.letra = cfg.porDefecto.letra;
+      Object.assign(estado, aspectoAlElegir(c.value, estado, cfg.porDefecto, anterior));
       if (elegida) {
         const lista = $('[data-orden]')!;
         for (const id of ordenWeb(elegida.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);
@@ -1394,6 +1431,7 @@ export function iniciarEstudioWeb() {
   historial.registrar(instantanea());
   pintarHistorial();
   pintarControles();
+  aplicarCamino();
   miniaturas();
   pedido.arrancar(destinoPedido());
   desdeHash(false);
