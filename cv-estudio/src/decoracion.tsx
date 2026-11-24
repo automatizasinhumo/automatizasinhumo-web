@@ -38,7 +38,8 @@ export function normalizar(entrada: Partial<Record<keyof Decoracion, unknown>> |
 
 /**
  * `muestra`: solo para el CV de ejemplo (entrada.ts lo impone), que no lleva datos de nadie y
- * se enseña limpio al elegir diseño. Con datos del cliente nunca hay PDF sin marca en el navegador.
+ * se enseña limpio al elegir diseño, y el PDF del pedido pagado (entrada.ts, `sinMarca`). Un texto de
+ * marca vacío nunca quita la marca: hace falta pedirlo de forma explícita.
  */
 export function fijarCapas(decoracion: Partial<Record<keyof Decoracion, unknown>> | null | undefined, marcaAgua: string | null | undefined, muestra = false) {
 	actual = normalizar(decoracion);

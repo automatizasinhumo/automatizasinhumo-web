@@ -11,6 +11,7 @@
 import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, correoValido, euros, esCamino, faltanTrasImportar, linkedinValido, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
 import { NOMBRE_PORTAL, PORTALES, gruposPortales, muestraTrozo, sobra, textoPortal, type Portal } from './cvPortales';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
+import { DESTINOS_QR, contenidoQr, type DatosTarjeta as DatosImprimir, type DestinoQr } from '../../../cv-estudio/src/tarjeta-datos';
 import { guiar } from '../tour/guia';
 import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
@@ -31,6 +32,8 @@ interface Motor {
     color?: string;
     decoracion?: Decoracion | null;
     marcaAgua: string;
+    /** PDF final sin marca: solo la descarga del pedido pagado. */
+    sinMarca?: boolean;
     letra?: string;
     tamano?: string;
     espaciado?: string;
@@ -38,6 +41,9 @@ interface Motor {
     muestra?: boolean;
   }): Promise<Blob>;
   pintarPdf(b: Blob, c: HTMLElement, o: { ancho: number; maxPaginas: number }): Promise<number>;
+  plantillas: { id: string; color?: string }[];
+  /** Tarjeta de 85 × 55 mm a juego con el CV (cv-estudio/src/tarjeta.tsx). */
+  crearTarjeta(o: { datos: DatosImprimir; plantilla: string; color: string; letra?: string; destino: DestinoQr; vistaPrevia: boolean }): Promise<Blob>;
   importar(f: File): Promise<{ ok: true; tipo: string; form: FormCv } | { ok: false; motivo: 'tipo' | 'grande' | 'vacio' | 'lectura' }>;
 }
 
@@ -394,7 +400,8 @@ export function iniciarEstudioCv() {
   }
 
   // ---------- Vista previa ----------
-  function crearPdf(E: Motor, marcaAgua: string, personal: boolean) {
+  /** `marcaAgua: null` = PDF final sin marca (solo para la descarga pagada). */
+  function crearPdf(E: Motor, marcaAgua: string | null, personal: boolean) {
     // Al elegir el diseño aún no hay datos: se enseña el ejemplo limpio, sin marca de agua,
     // para ver cómo queda de verdad. La marca sale en cuanto hay datos del cliente.
     const f = recoger();
@@ -406,7 +413,8 @@ export function iniciarEstudioCv() {
       decoracion: personal
         ? { forma: estado.forma, color: estado.color, color2: estado.color2, intensidad: estado.intensidad, posicion: estado.posicion, sombreado: estado.sombreado, fondo: estado.fondo }
         : null,
-      marcaAgua,
+      marcaAgua: marcaAgua ?? '',
+      sinMarca: marcaAgua === null,
       // «Usa una plantilla» es la plantilla tal cual: su letra, tamaño y espaciado de serie.
       letra: personal ? estado.letra : undefined,
       tamano: personal ? estado.tamano : undefined,
@@ -650,7 +658,7 @@ export function iniciarEstudioCv() {
     try {
       // Solo sale personalizado si eso es lo que se pagó.
       const personal = modalidad() === 'personalizable' && pedido.pagado?.cv === 'personalizable';
-      const blob = await crearPdf(await motor(), '', personal);
+      const blob = await crearPdf(await motor(), null, personal);
       const nombre = recoger().nombre.replace(/[\\/:*?"<>|]+/g, '').trim();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -698,7 +706,7 @@ export function iniciarEstudioCv() {
   };
   const guardarBorrador = () => {
     // `ref`: de qué pedido es el borrador ('borrador' antes de pagar), para no mezclar ediciones de otro.
-    const d: Record<string, unknown> = { ref: refTarjeta(), modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
+    const d: Record<string, unknown> = { ref: refTarjeta(), modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked, qrDestino: destinoQr() };
     for (const k of CAMPOS_T) d[k] = campoT(k).value;
     try {
       localStorage.setItem(CLAVE_TARJETA, JSON.stringify(d));
@@ -774,7 +782,11 @@ export function iniciarEstudioCv() {
     campoT('resumen').value = v('resumen', f.resumen.slice(0, 280));
     campoT('color').value = v('color', estado.color);
     campoT('linkedin').value = (pagada && pedido.pagado!.tarjeta!.datos ? (g as DatosTarjeta).enlaces?.find((e) => /linkedin\./i.test(e.url))?.url : undefined) ?? v('linkedin', '');
-    campoT('qr').checked = g?.qr !== false;
+    // El QR de la página es opcional y sale sin marcar: solo si lo pidió o ya lo publicó con él.
+    campoT('qr').checked = g?.qr === true;
+    const destino = $<HTMLSelectElement>('[data-qr-destino]');
+    if (destino && typeof g?.qrDestino === 'string' && DESTINOS_QR.some((d) => d.id === g.qrDestino)) destino.value = g.qrDestino;
+    pintarAyudaQr();
     const m = g?.modelo;
     const modelo = esModeloTarjeta(m) ? m : MODELO_TARJETA_POR_DEFECTO;
     for (const r of $$<HTMLInputElement>('input[name="tj-modelo"]')) r.checked = r.value === modelo;
@@ -805,6 +817,70 @@ export function iniciarEstudioCv() {
     st.dataset.tono = '';
     st.replaceChildren(`${texto} `, enlace(url, `${location.host}${url}`), ' · ', enlace(`${url}/qr.svg`, 'QR para imprimir'));
   }
+  // ---------- Tarjeta para imprimir (85 × 55 mm, a juego con el CV) ----------
+  function destinoQr(): DestinoQr {
+    return ($<HTMLSelectElement>('[data-qr-destino]')?.value as DestinoQr) || 'contacto';
+  }
+  const AVISO_QR: Record<DestinoQr, string> = {
+    contacto: 'Para el QR de contacto hacen falta tu nombre y un teléfono o un correo.',
+    linkedin: 'Escribe tu LinkedIn (vale solo el usuario) para que el QR lo abra.',
+    web: 'Escribe la dirección de tu web para que el QR la abra.',
+    tarjeta: 'Publica antes tu tarjeta online: el QR abrirá su dirección.',
+  };
+  function pintarAyudaQr() {
+    const ayuda = $('[data-qr-ayuda]');
+    if (ayuda) ayuda.textContent = DESTINOS_QR.find((d) => d.id === destinoQr())?.ayuda ?? '';
+  }
+  function datosImprimir(): DatosImprimir {
+    const val = (k: string) => campoT(k).value.trim();
+    const slug = pedido.pagado?.tarjeta?.slug;
+    return {
+      nombre: val('nombre'),
+      cargo: val('cargo'),
+      email: val('email'),
+      telefono: val('telefono'),
+      web: val('web'),
+      ubicacion: val('ubicacion'),
+      linkedin: val('linkedin'),
+      enlaceTarjeta: slug ? `${location.origin}/c/${slug}` : '',
+    };
+  }
+  async function descargarTarjeta(b: HTMLButtonElement) {
+    const st = $('[data-estado-imprimir]')!;
+    b.disabled = true;
+    st.dataset.tono = '';
+    st.textContent = 'Preparando tu tarjeta…';
+    try {
+      const E = await motor();
+      const datos = datosImprimir();
+      const destino = destinoQr();
+      // Mismo diseño que el CV: su plantilla y, si es personalizado, su color y su letra.
+      const personal = modalidad() === 'personalizable';
+      const color = personal ? estado.color : (E.plantillas.find((p) => p.id === plantilla())?.color ?? estado.color);
+      const blob = await E.crearTarjeta({ datos, plantilla: plantilla(), color, letra: personal ? estado.letra : undefined, destino, vistaPrevia: !pedido.pagado?.tarjeta });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `Tarjeta ${datos.nombre.replace(/[^\p{L}\p{N} .-]+/gu, '').trim() || 'profesional'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
+      const sinQr = !contenidoQr(destino, datos);
+      st.dataset.tono = sinQr ? 'error' : '';
+      st.textContent = sinQr ? `Descargada sin QR. ${AVISO_QR[destino]}` : 'Lista en tus descargas. Pídela a la imprenta en 85 × 55 mm (el PDF ya lleva el sangrado).';
+    } catch (e) {
+      console.error(e);
+      st.dataset.tono = 'error';
+      st.textContent = 'No se ha podido generar la tarjeta. Recarga la página e inténtalo otra vez.';
+    } finally {
+      b.disabled = false;
+    }
+  }
+  $('[data-qr-destino]')?.addEventListener('change', () => {
+    pintarAyudaQr();
+    guardarBorrador();
+  });
+
   async function publicar(b: HTMLButtonElement) {
     const st = $('[data-estado-tarjeta]')!;
     const val = (k: string) => campoT(k).value.trim();
@@ -1035,6 +1111,7 @@ export function iniciarEstudioCv() {
       return;
     }
     if (b.hasAttribute('data-publicar')) return void (pedido.cargando ? undefined : publicar(b as HTMLButtonElement));
+    if (b.hasAttribute('data-tarjeta-pdf')) return void descargarTarjeta(b as HTMLButtonElement);
   });
 
   // ---------- Guía ----------

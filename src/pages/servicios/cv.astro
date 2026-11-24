@@ -32,6 +32,7 @@ import {
 import { LIMITES_TARJETA, MODELOS_TARJETA } from '../../features/servicios/modelosTarjeta';
 import { ZOOM_MAX } from '../../features/servicios/fotoCv';
 import TarjetaDigital from '../../features/servicios/TarjetaDigital.astro';
+import { DESTINOS_QR } from '../../../cv-estudio/src/tarjeta-datos';
 import type { DatosTarjeta } from '../../features/servicios/publicados';
 
 // Estudio de CV: sección nueva de servicios, todavía sin publicar (noindex y sin enlaces).
@@ -509,8 +510,8 @@ const ejemploTarjeta: DatosTarjeta = {
         <div class="tarjeta publicar" data-tarjeta-form data-guia="tarjeta" hidden>
           <h3 class="font-serif text-xl font-bold text-ink">Diseña tu tarjeta digital</h3>
           <p class="mt-1 text-sm text-muted">
-            Una página tuya con tu contacto y un QR para compartirla. Elige el modelo, ajusta los datos (los hemos sacado de tu CV) y
-            mírala al momento.
+            Una página tuya con tu contacto (en /c/tu-nombre) y, a juego con tu CV, una tarjeta de 85 × 55 mm para imprimir. Elige
+            el modelo, ajusta los datos (los hemos sacado de tu CV) y mírala al momento.
           </p>
 
           <fieldset class="bloque mt-4" data-tj-modelos>
@@ -548,7 +549,7 @@ const ejemploTarjeta: DatosTarjeta = {
                 <textarea data-t="resumen" rows="3" maxlength={LIMITES_TARJETA.resumen}></textarea>
                 <small class="cuenta" data-tj-cuenta aria-live="off"></small>
               </label>
-              <label class="extra mt-3"><input type="checkbox" data-t="qr" checked /><span><strong>Mostrar el código QR</strong><small>Quien lo escanee abre tu tarjeta y guarda tu contacto.</small></span></label>
+              <label class="extra mt-3"><input type="checkbox" data-t="qr" /><span><strong>Mostrar un código QR en la página</strong><small>Para enseñarla desde el móvil: quien lo escanee abre tu tarjeta y guarda tu contacto.</small></span></label>
             </div>
             <div class="tj-vista" data-tarjeta-vista aria-label="Vista previa de tu tarjeta">
               <TarjetaDigital datos={ejemploTarjeta} muestra />
@@ -558,8 +559,29 @@ const ejemploTarjeta: DatosTarjeta = {
           <p class="mt-4 text-sm text-muted" data-tarjeta-nota>
             La tarjeta se publica en cuanto completes el pago (se compra junto al CV). Hasta entonces puedes probar modelos y colores sin límite.
           </p>
-          <button type="button" class="boton boton-principal mt-4" data-publicar disabled>Publicar mi tarjeta</button>
+          <p class="mt-4 text-sm text-muted" data-publicar-ayuda>
+            <strong>Publicar</strong> crea tu página pública en <code>/c/tu-nombre</code>: un enlace que puedes poner en tu firma, en
+            LinkedIn o en el QR de la tarjeta impresa. Puedes cambiarla y volver a publicarla cuando quieras.
+          </p>
+          <button type="button" class="boton boton-principal mt-3" data-publicar disabled>Publicar mi tarjeta</button>
           <p class="mt-3 text-sm" role="status" data-estado-tarjeta></p>
+
+          <div class="mt-6" data-imprimir>
+            <h4 class="font-serif text-lg font-bold text-ink">Tarjeta para imprimir (85 × 55 mm)</h4>
+            <p class="mt-1 text-sm text-muted">
+              PDF de dos caras con el diseño y los colores de tu CV, listo para cualquier imprenta (lleva 3 mm de sangrado). Por
+              delante, tu nombre y tu cargo; por detrás, tu contacto y un QR.
+            </p>
+            <label class="campo mt-3">
+              <span>El QR de la tarjeta lleva a</span>
+              <select data-qr-destino>
+                {DESTINOS_QR.map((d) => <option value={d.id}>{d.nombre}</option>)}
+              </select>
+            </label>
+            <small class="mt-1 block text-sm text-muted" data-qr-ayuda>{DESTINOS_QR[0]!.ayuda}</small>
+            <button type="button" class="boton mt-3" data-tarjeta-pdf>Descargar tarjeta para imprimir</button>
+            <p class="mt-2 text-sm" role="status" data-estado-imprimir></p>
+          </div>
         </div>
         <div class="paso-acciones">
           <button type="button" class="boton boton-secundario" data-atras>Atrás</button>

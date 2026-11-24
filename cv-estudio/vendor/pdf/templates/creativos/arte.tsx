@@ -517,6 +517,12 @@ const capaSvg = (L: Lienzo, hijos: ReactElement[], fija: boolean, clave: string)
 	);
 };
 
+/** Las mismas formas sin envolver en capas: la tarjeta imprimible las mete en su propio SVG escalado. */
+export function formasArte(arte: Arte | undefined, L: Lienzo, soloCabecera = false): ReactElement[] {
+	const capas = arte ? ARTES[arte](L) : { fija: lateral(L), cabecera: [] };
+	return soloCabecera ? capas.cabecera : [...capas.fija, ...capas.cabecera];
+}
+
 /** Capas de arte de una plantilla. `conCabecera`: esta página lleva la cabecera. */
 export function capasArte(arte: Arte | undefined, L: Lienzo, conCabecera: boolean) {
 	const fondo = L.fondo ? [<Rect key="fondo" x={0} y={0} width={L.W} height={L.H} fill={L.fondo} />] : [];
