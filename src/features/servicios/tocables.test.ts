@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { load } from 'cheerio';
 import { describe, expect, it } from 'vitest';
-import { TOCABLES } from './estudioWeb';
+import { MEZCLA, TOCABLES } from './estudioWeb';
 import { EJEMPLO_WEB, PLANTILLAS_WEB, renderWeb } from './webs';
 
 const foto = 'data:image/jpeg;base64,/9j/AAAA';
@@ -44,5 +44,9 @@ describe('editar tocando', () => {
     const espejos = [...pagina.matchAll(/data-espejo="([a-z]+)"/g)].map((m) => m[1]!);
     expect(espejos).toEqual(['negocio', 'direccion']);
     for (const e of espejos) expect(pagina).toContain(`name="${e}"`);
+  });
+  it('«Prueba otra combinación» solo toca grupos visuales que existen en el editor', () => {
+    expect(pagina).toContain('data-mezclar');
+    for (const g of MEZCLA) expect(pagina.includes(`name="${g}"`) || pagina.includes(`k: '${g}'`), g).toBe(true);
   });
 });

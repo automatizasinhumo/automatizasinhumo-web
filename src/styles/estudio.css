@@ -1188,3 +1188,8 @@
   opacity: 1;
   font-weight: 600;
 }
+
+/* «Prueba otra combinación» (estudioWeb.ts · data-mezclar). */
+.mezclar { margin-top: 0.75rem; min-height: 44px; padding: 0.5rem 1rem; border: 1px solid currentColor; border-radius: 999px; font-weight: 600; background: transparent; cursor: pointer; }
+.mezclar:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
+.mezclar:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }

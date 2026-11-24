@@ -91,6 +91,8 @@ const CLAVE_PEDIDO = 'servicios:web:pedido';
 const PASOS = PASOS_WEB.map((p) => p.id) as string[];
 /** Radios de la capa visual: se leen y escriben igual que un campo (RadioNodeList.value). */
 const CAPA = ['acabado', 'formaFoto', 'movimiento'] as const;
+/** Lo que cambia «Prueba otra combinación»: lo visual, nunca el texto ni las fotos. */
+export const MEZCLA = ['color', 'letra', 'acabado', 'formaFoto'] as const;
 const CAMPOS = [...CAPA, 'negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl'] as const;
 
 /**
@@ -1208,6 +1210,18 @@ export function iniciarEstudioWeb() {
       return;
     }
     if (b.hasAttribute('data-compartir')) return void compartir(b as HTMLButtonElement);
+    if (b.hasAttribute('data-mezclar')) {
+      // Otra combinación de lo que ya hay (color, letra, acabado, forma de foto): el contenido no cambia
+      // y se deshace de un paso (los cambios seguidos se funden en el historial).
+      for (const g of MEZCLA) {
+        const otras = $$<HTMLInputElement>(`input[type="radio"][name="${g}"]`, form).filter((r) => !r.checked && r.value !== 'auto');
+        const r = otras[Math.floor(Math.random() * otras.length)];
+        if (!r) continue;
+        r.checked = true;
+        r.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      return;
+    }
     if (b.hasAttribute('data-comprar')) return void (pedido.cargando ? undefined : pedido.pagado ? publicar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
   });
 
