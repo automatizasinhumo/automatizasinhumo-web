@@ -15,7 +15,7 @@ import { protegerVista } from './protegerVista';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { CSS_MINI, datosMiniatura } from './miniaturasWeb';
-import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
+import { aspectoAlElegir, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -1372,9 +1372,7 @@ export function iniciarEstudioWeb() {
       const elegida = PLANTILLAS_WEB.find((p) => p.id === c.value);
       // Un diseño de autor llega con su color y su letra (el cliente los puede cambiar después);
       // al volver a una básica, «la del diseño» pasa a la letra por defecto.
-      const x = disenoWeb(c.value);
-      if (x) Object.assign(estado, { color: x.color, letra: 'diseno' });
-      else if (estado.letra === 'diseno') estado.letra = cfg.porDefecto.letra;
+      Object.assign(estado, aspectoAlElegir(c.value, estado, cfg.porDefecto));
       if (elegida) {
         const lista = $('[data-orden]')!;
         for (const id of ordenWeb(elegida.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);

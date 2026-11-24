@@ -116,6 +116,22 @@ export function pasosDelCamino(camino: CaminoWeb): IdPasoWeb[] {
 }
 
 /** Paso al que lleva «Siguiente» o «Atrás» dentro del camino ('' si no hay). */
+/**
+ * Color y letra al elegir otra plantilla. Un diseño de autor trae los suyos; al volver de él a una
+ * básica se vuelve a los de por defecto (si no, en «Usa una plantilla», que no tiene paso de estilo,
+ * se publicaría el color del diseño anterior). Si el cliente ya había elegido letra, no se toca nada.
+ */
+export function aspectoAlElegir(
+  plantilla: string,
+  actual: { color: string; letra: string },
+  porDefecto: { color: string; letra: string },
+): { color: string; letra: string } {
+  const x = disenoWeb(plantilla);
+  if (x) return { color: x.color, letra: 'diseno' };
+  if (actual.letra === 'diseno') return { color: porDefecto.color, letra: porDefecto.letra };
+  return { color: actual.color, letra: actual.letra };
+}
+
 export function pasoVecino(camino: CaminoWeb, actual: string, salto: 1 | -1): IdPasoWeb | '' {
   const pasos = pasosDelCamino(camino);
   const i = pasos.indexOf(actual as IdPasoWeb);

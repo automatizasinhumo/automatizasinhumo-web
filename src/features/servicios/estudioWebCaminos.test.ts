@@ -3,7 +3,7 @@ import { load } from 'cheerio';
 import { describe, expect, it } from 'vitest';
 import { mensajeDeTema } from '../search/sinResultados';
 import { CAMINOS_CV } from './cv';
-import { ASESORIA_WEB, CAMINOS_WEB, PASOS_WEB, pasosDelCamino, pasoVecino } from './webs';
+import { aspectoAlElegir, ASESORIA_WEB, disenoWeb, PLANTILLAS_WEB, CAMINOS_WEB, PASOS_WEB, pasosDelCamino, pasoVecino } from './webs';
 
 const web = load(readFileSync(new URL('../../pages/servicios/web.astro', import.meta.url), 'utf8'));
 const cv = load(readFileSync(new URL('../../pages/servicios/cv.astro', import.meta.url), 'utf8'));
@@ -67,5 +67,17 @@ describe('pasos por camino', () => {
   it('desde un paso que el camino no recorre, se sigue por el más cercano', () => {
     expect(pasoVecino('plantilla', 'personaliza', 1)).toBe('publica');
     expect(pasoVecino('plantilla', 'personaliza', -1)).toBe('datos');
+  });
+
+  it('de un diseño de autor a una básica vuelven el color y la letra por defecto', () => {
+    const autor = PLANTILLAS_WEB.find((p) => disenoWeb(p.id))!;
+    const basica = PLANTILLAS_WEB.find((p) => !disenoWeb(p.id))!;
+    const def = { color: '#123456', letra: 'sistema' };
+    const tras = aspectoAlElegir(autor.id, def, def);
+    expect(tras).toEqual({ color: disenoWeb(autor.id)!.color, letra: 'diseno' });
+    expect(aspectoAlElegir(basica.id, tras, def)).toEqual(def);
+    // Si el cliente ya eligió su letra y color, cambiar entre básicas no los toca.
+    const propio = { color: '#abcdef', letra: 'serif' };
+    expect(aspectoAlElegir(basica.id, propio, def)).toEqual(propio);
   });
 });
