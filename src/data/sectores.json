@@ -160,5 +160,25 @@
     "demoHints": [
       "restaurant/cafe"
     ]
+  },
+  {
+    "slug": "limpieza",
+    "label": "Empresas de limpieza",
+    "title": "Web para empresas de limpieza: servicios, zonas y presupuesto",
+    "description": "Una web para empresas de limpieza de hogares, oficinas y comunidades con servicios, zonas que cubres, cómo trabajáis y presupuesto por WhatsApp.",
+    "heading": "Una web que dé confianza antes de abrir la puerta",
+    "introduction": "Quien busca una empresa de limpieza va a dejarte entrar en su casa o en su oficina. Antes de escribirte quiere saber qué limpiáis, si llegáis a su zona, cómo se calcula el precio y quién va a ir. La web debe responder eso y dejar pedir presupuesto en un toque.",
+    "considerations": [
+      "Separa los servicios (hogares, oficinas, comunidades, fin de obra) y di si trabajáis por horas o por servicio.",
+      "Indica las localidades que cubrís y explica cómo se pide y se calcula el presupuesto.",
+      "Cuenta quién forma el equipo, si lleváis vuestros productos y qué pasa si algo no queda bien."
+    ],
+    "serviceSlugs": [
+      "web-una-pagina",
+      "web-corporativa-5-secciones"
+    ],
+    "demoHints": [
+      "cleaning-company"
+    ]
   }
 ]
