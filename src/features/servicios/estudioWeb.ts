@@ -880,7 +880,9 @@ export function iniciarEstudioWeb() {
         b.className = 'enlace';
         b.textContent = 'Volver a esta';
         b.addEventListener('click', () => void restaurar(v, b));
-        li.append(t, ' ', b);
+        li.appendChild(t);
+        li.appendChild(document.createTextNode(' '));
+        li.appendChild(b);
         return li;
       }),
     );
