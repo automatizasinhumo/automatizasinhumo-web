@@ -39,7 +39,7 @@ export const brillo: Diseno = {
   nombre: 'Brillo',
   descripcion: 'Azul marino y amarillo, el nombre subrayado a rotulador y los pasos para pedir presupuesto. Para empresas de limpieza, mantenimiento y servicios a domicilio.',
   color: '#ffc21a',
-  fondoClaro: '#f7f5f0',
+  fondoClaro: '#eceae2',
   fondoOscuro: '#0f2a44',
   fuentes: ['ash-archivo', 'ash-manrope'],
   titulo: "'ash-archivo', 'Arial Narrow', system-ui, sans-serif",
