@@ -734,6 +734,30 @@ function fuentesDoc(d: DatosWeb, tienda: string): string {
 /** Texto de la marca de agua de la vista previa del estudio. */
 export const MARCA_WEB = 'VISTA PREVIA';
 
+/**
+ * Borrador compartido (/vista/<id>): misma web con marca de agua, sin indexar y con una barra que
+ * invita a hacer la propia. Sin JavaScript.
+ */
+export function documentoVista(d: DatosWeb): string {
+  const barra = `<a href="/servicios/web" style="position:fixed;inset:auto 12px 12px auto;z-index:99;background:#111;color:#fff;font:600 15px/1 system-ui,sans-serif;padding:14px 18px;border-radius:999px;text-decoration:none;box-shadow:0 6px 20px #0004">Hacer la mía</a>`;
+  return `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>${esc(d.negocio)} · borrador</title>
+<link rel="icon" href="/favicon.svg">
+${fuentesDoc(d, '')}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
+</head>
+<body>
+${renderWeb(d, { marca: MARCA_WEB })}
+${barra}
+</body>
+</html>
+`;
+}
+
 // ---------- Publicación (común a todas las páginas: paginas.ts) ----------
 
 export type WebPublicada = PaginaPublicada<DatosWeb>;

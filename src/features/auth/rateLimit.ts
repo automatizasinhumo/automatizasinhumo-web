@@ -21,7 +21,8 @@ export function rateLimitBucket(
     pathname === '/api/checkout' ||
     pathname === '/checkout' ||
     pathname.startsWith('/pay/') ||
-    pathname === '/api/solicitudes'
+    pathname === '/api/solicitudes' ||
+    pathname === '/api/web/vista'
   ) {
     return 'checkout';
   }
