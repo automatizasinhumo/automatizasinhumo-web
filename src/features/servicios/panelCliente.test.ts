@@ -15,7 +15,7 @@ async function montar() {
   const db = d1(MIGRACIONES, PEDIDOS);
   db.sql.exec(`INSERT INTO orders (id, public_id, email) VALUES (1, 'ord_a', 'ana@x.es'), (2, 'ord_b', 'otro@x.es');
     INSERT INTO order_guest_access (order_public_id, access_token) VALUES ('ord_a', 'tok-a'), ('ord_b', 'tok-b');`);
-  const web = await publicarPagina(db, 'web', 'ord_a', 'Peluquería Ana', { n: 1 });
+  const web = await publicarPagina(db, 'web', 'ord_a', 'Peluquería Ana', { negocio: 'Peluquería Ana' });
   await publicarPagina(db, 'web', 'ord_b', 'Bar Otro', { n: 1 });
   return { db, web };
 }
@@ -26,7 +26,7 @@ describe('panel del cliente', () => {
     db.sql.exec(`INSERT INTO dominios_paginas (dominio, tipo, pedido_public_id, estado) VALUES ('ana.es', 'web', 'ord_a', 'activo')`);
     const ps = await paginasDeCliente(db, 'ana@x.es', HOY);
     expect(ps).toHaveLength(1);
-    expect(ps[0]).toMatchObject({ tipo: 'web', slug: web, ruta: `/w/${web}`, dominio: 'ana.es', visitas7: 0, visitas30: 0 });
+    expect(ps[0]).toMatchObject({ tipo: 'web', nombre: 'Peluquería Ana', slug: web, ruta: `/w/${web}`, dominio: 'ana.es', visitas7: 0, visitas30: 0 });
     expect(ps[0]!.editar).toContain('#pedido=tok-a');
     expect(await paginasDeCliente(db, 'nadie@x.es', HOY)).toEqual([]);
   });

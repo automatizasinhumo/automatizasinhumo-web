@@ -63,7 +63,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
               return (
                 <li class="rounded-lg border border-line bg-surface p-4 text-sm" data-pagina={p.tipo}>
                   <div class="flex flex-wrap items-baseline justify-between gap-2">
-                    <strong class="text-base text-ink">{NOMBRE_TIPO[p.tipo]}</strong>
+                    <span><strong class="text-base text-ink">{p.nombre ?? NOMBRE_TIPO[p.tipo]}</strong>{p.nombre && <span class="ml-2 text-xs text-faint">{NOMBRE_TIPO[p.tipo]}</span>}</span>
                     <span class="text-xs text-faint">Actualizada el {formatDate(p.actualizada, undefined, timeZone)}</span>
                   </div>
                   <a href={publica} class="mt-1 block break-all text-accent" target="_blank" rel="noopener">

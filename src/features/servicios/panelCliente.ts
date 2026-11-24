@@ -13,6 +13,8 @@ export const NOMBRE_TIPO: Record<TipoPagina, string> = { web: 'Tu web', tarjeta:
 
 export interface PaginaCliente {
   tipo: TipoPagina;
+  /** Nombre del negocio o de la persona, para distinguir varias páginas; null si los datos no lo traen. */
+  nombre: string | null;
   slug: string;
   ruta: string;
   editar: string | null;
@@ -29,6 +31,7 @@ export async function paginasDeCliente(db: D1Database, email: string, hoy = new 
   const { results } = await db
     .prepare(
       `SELECT p.tipo, p.slug, p.pedido_public_id, p.updated_at,
+              COALESCE(json_extract(p.datos, '$.negocio'), json_extract(p.datos, '$.nombre')) AS nombre,
               (SELECT d.dominio FROM dominios_paginas d
                 WHERE d.tipo = p.tipo AND d.pedido_public_id = p.pedido_public_id AND d.estado = 'activo'
                 ORDER BY d.updated_at DESC LIMIT 1) AS dominio,
@@ -39,7 +42,7 @@ export async function paginasDeCliente(db: D1Database, email: string, hoy = new 
         ORDER BY p.updated_at DESC LIMIT 20`,
     )
     .bind(diaHace(6, hoy), diaHace(29, hoy), email)
-    .all<{ tipo: string; slug: string; pedido_public_id: string; updated_at: string; dominio: string | null; visitas7: number; visitas30: number }>();
+    .all<{ tipo: string; nombre: unknown; slug: string; pedido_public_id: string; updated_at: string; dominio: string | null; visitas7: number; visitas30: number }>();
   const filas = (results ?? []).filter((r): r is typeof r & { tipo: TipoPagina } => Object.hasOwn(SLUG_DE_TIPO, r.tipo));
   return Promise.all(
     filas.map(async (r) => {
@@ -47,6 +50,7 @@ export async function paginasDeCliente(db: D1Database, email: string, hoy = new 
       const acceso = r.pedido_public_id.startsWith('ord_') ? (await getGuestAccess(db, r.pedido_public_id))?.access_token : r.pedido_public_id;
       return {
         tipo: r.tipo,
+        nombre: typeof r.nombre === 'string' && r.nombre.trim() ? r.nombre.trim() : null,
         slug: r.slug,
         ruta: rutaPagina(r.tipo, r.slug),
         editar: acceso ? enlaceAutoservicio(SLUG_DE_TIPO[r.tipo], acceso) : null,
