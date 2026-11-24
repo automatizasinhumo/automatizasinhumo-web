@@ -23,6 +23,15 @@ export interface PagadoCv<T = unknown> {
  * del pedido que la pagó. Sin tarjeta, manda el token del pedido del CV. El borrador de la tarjeta
  * se guarda con `refTarjeta`: con el CV A y la tarjeta B, llegar la tarjeta C no recupera el de B.
  */
+/**
+ * Qué hace el botón principal del estudio. Un CV ya comprobado se descarga siempre, aunque otra
+ * consulta (un extra) siga fallando; comprar solo cuando se sabe que no hay CV pagado.
+ */
+export function accionBotonCv(cargando: boolean, cvPagado: boolean): 'descargar' | 'comprar' | null {
+  if (cvPagado) return 'descargar';
+  return cargando ? null : 'comprar';
+}
+
 export function combinarPedidosCv<T>(pedidos: readonly PedidoCargado<PagadoCv<T>>[]): PedidoCargado<PagadoCv<T>> | null {
   if (!pedidos.length) return null;
   const conCv = pedidos.find((p) => p.d.cv === 'personalizable') ?? pedidos.find((p) => p.d.cv);

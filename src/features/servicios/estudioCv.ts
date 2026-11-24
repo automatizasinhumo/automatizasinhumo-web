@@ -14,7 +14,7 @@ import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './m
 import { guiar } from '../tour/guia';
 import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
-import { combinarPedidosCv, type PagadoCv } from './cvPedidos';
+import { accionBotonCv, combinarPedidosCv, type PagadoCv } from './cvPedidos';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = keyof typeof LIMITES_CV.items;
@@ -1028,9 +1028,13 @@ export function iniciarEstudioCv() {
       });
       return;
     }
-    if (pedido.cargando && (b.hasAttribute('data-comprar') || b.hasAttribute('data-publicar'))) return;
-    if (b.hasAttribute('data-comprar')) return void (pedido.pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
-    if (b.hasAttribute('data-publicar')) return void publicar(b as HTMLButtonElement);
+    if (b.hasAttribute('data-comprar')) {
+      const accion = accionBotonCv(pedido.cargando, !!pedido.pagado?.cv);
+      if (accion === 'descargar') descargar(b as HTMLButtonElement);
+      else if (accion === 'comprar') comprar(b as HTMLButtonElement);
+      return;
+    }
+    if (b.hasAttribute('data-publicar')) return void (pedido.cargando ? undefined : publicar(b as HTMLButtonElement));
   });
 
   // ---------- Guía ----------

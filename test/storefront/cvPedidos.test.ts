@@ -1,7 +1,7 @@
 // Volver de pagar un extra suelto no esconde el CV ya pagado (CodeRabbit en #192, 24/11).
 import { describe, expect, it } from 'vitest';
 import { MAX_TOKENS, consultarPedidos, leerTokens, sumarToken } from '../../src/features/servicios/compraEstudio';
-import { combinarPedidosCv, type PagadoCv } from '../../src/features/servicios/cvPedidos';
+import { accionBotonCv, combinarPedidosCv, type PagadoCv } from '../../src/features/servicios/cvPedidos';
 
 const p = (token: string, d: Partial<PagadoCv>) => ({ token, d: { ref: `R-${token}`, cv: null, tarjeta: null, ...d } as PagadoCv });
 
@@ -77,5 +77,16 @@ describe('consultarPedidos', () => {
     const pedir = (async () => (n++, resp(200, {}))) as unknown as typeof fetch;
     await consultarPedidos(['a', 'b', 'c'], '/x', () => n < 1, pedir);
     expect(n).toBe(1);
+  });
+});
+
+describe('accionBotonCv', () => {
+  it('un CV comprobado se descarga aunque otra consulta siga fallando', () => {
+    expect(accionBotonCv(true, true)).toBe('descargar');
+    expect(accionBotonCv(false, true)).toBe('descargar');
+  });
+  it('sin CV pagado, no deja comprar hasta saberlo seguro', () => {
+    expect(accionBotonCv(true, false)).toBeNull();
+    expect(accionBotonCv(false, false)).toBe('comprar');
   });
 });

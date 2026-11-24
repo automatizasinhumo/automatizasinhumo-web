@@ -161,7 +161,11 @@ export function pedidoEstudio<D extends { ref: string }>(
     if (elegido) {
       token = elegido.token;
       pagado = elegido.d;
-    } else if (!incompleto && !vivos.length) token = '';
+    } else if (!incompleto) {
+      // Respondieron todos y no queda ningún pedido válido (p. ej., caducaron durante un reintento).
+      token = '';
+      pagado = null;
+    }
     cargando = incompleto;
     alCambiar(pagado);
     if (incompleto && intento < REINTENTOS) setTimeout(() => g === gen && void cargar(vivos, intento + 1), 1500 * (intento + 1));
