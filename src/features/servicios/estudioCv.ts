@@ -410,9 +410,10 @@ export function iniciarEstudioCv() {
         ? { forma: estado.forma, color: estado.color, color2: estado.color2, intensidad: estado.intensidad, posicion: estado.posicion, sombreado: estado.sombreado, fondo: estado.fondo }
         : null,
       marcaAgua,
-      letra: estado.letra,
-      tamano: estado.tamano,
-      espaciado: estado.espaciado,
+      // «Usa una plantilla» es la plantilla tal cual: su letra, tamaño y espaciado de serie.
+      letra: personal ? estado.letra : undefined,
+      tamano: personal ? estado.tamano : undefined,
+      espaciado: personal ? estado.espaciado : undefined,
       muestra: conEjemplo,
     });
   }
@@ -978,6 +979,14 @@ export function iniciarEstudioCv() {
       persistir();
       return programar();
     }
+    if (b.hasAttribute('data-abrir-importar')) {
+      $<HTMLDialogElement>('[data-importar-dialogo]')?.showModal();
+      return;
+    }
+    if (b.hasAttribute('data-cerrar-importar')) {
+      $<HTMLDialogElement>('[data-importar-dialogo]')?.close();
+      return;
+    }
     if (b.hasAttribute('data-vaciar')) {
       volcar(vacio());
       persistir();
@@ -1065,6 +1074,7 @@ export function iniciarEstudioCv() {
     if (c.name === 'importar') {
       const fichero = c.files?.[0];
       c.value = ''; // permite volver a elegir el mismo archivo
+      $<HTMLDialogElement>('[data-importar-dialogo]')?.close();
       if (fichero) void importar(fichero);
       return;
     }

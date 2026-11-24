@@ -155,7 +155,7 @@ const ejemploTarjeta: DatosTarjeta = {
               </div>
             </fieldset>
 
-            <fieldset class="bloque" data-guia="letra">
+            <fieldset class="bloque" data-guia="letra" data-solo-camino="personaliza" hidden>
               <legend>Letra</legend>
               {/* Las mismas fuentes que el PDF (las emite el motor), para ver cada letra antes de elegirla. */}
               <link rel="stylesheet" href="/cv/estudio/motor/fuentes.css" />
@@ -204,7 +204,8 @@ const ejemploTarjeta: DatosTarjeta = {
               <p class="ayuda-bloque">Tu color, formas, sombreado y fondo. Lo ves a la derecha mientras lo cambias.</p>
               <div>
                 <div class="subbloque">
-                  <span class="medida-titulo">Color principal</span>
+                  <span class="medida-titulo">Elige tu tonalidad</span>
+                  <span class="ayuda-bloque">El tono principal de tu CV: títulos, filetes y adornos.</span>
                   <div class="muestras">
                     {COLORES_CV.map((c) => (
                       <label class="muestra" title={c.nombre}>
@@ -219,7 +220,7 @@ const ejemploTarjeta: DatosTarjeta = {
                   </div>
                 </div>
                 <div class="subbloque">
-                  <span class="medida-titulo">Color de acento</span>
+                  <span class="medida-titulo">Tono que lo acompaña</span>
                   <div class="muestras">
                     {COLORES_CV.map((c) => (
                       <label class="muestra" title={c.nombre}>
@@ -299,18 +300,14 @@ const ejemploTarjeta: DatosTarjeta = {
         <div class="con-vista">
           <div class="min-w-0">
             <div class="flex flex-wrap gap-2" data-guia="importar">
-              <label class="boton boton-principal boton-compacto importar">
-                <input type="file" name="importar" class="sr-only" accept=".pdf,.docx,.zip,.json,application/pdf" data-importar />
-                Usar mi CV actual
-              </label>
+              <button type="button" class="boton boton-principal boton-compacto importar" data-abrir-importar aria-haspopup="dialog">Usar mi CV actual</button>
               <button type="button" class="boton boton-secundario boton-compacto" data-ejemplo>Rellenar con un ejemplo</button>
               <button type="button" class="boton boton-secundario boton-compacto" data-vaciar>Empezar en blanco</button>
             </div>
-            <p class="importar-nota" data-estado-importar role="status" aria-live="polite">
-              ¿Ya tienes un CV? Súbelo en PDF o Word, o la exportación de LinkedIn (.zip), y rellenamos los campos por ti. Se lee en tu navegador.
-            </p>
-            <details class="importar-ayuda" data-importar-ayuda>
-              <summary>¿Qué archivos sirven?</summary>
+            <p class="importar-nota" data-estado-importar role="status" aria-live="polite"></p>
+            <dialog class="importar-dialogo" data-importar-dialogo aria-labelledby="importar-titulo">
+              <h3 id="importar-titulo">Usa tu CV actual</h3>
+              <p>Súbelo y rellenamos los campos por ti. Se lee en tu navegador.</p>
               <ul>
                 <li><strong>PDF</strong> hecho con Word, Canva, Google Docs, InfoJobs o Europass. Una foto o un escaneo no tiene texto que leer: en ese caso, mejor el Word.</li>
                 <li><strong>Word (.docx)</strong>. Si es un .doc antiguo, ábrelo y guárdalo como .docx.</li>
@@ -318,7 +315,14 @@ const ejemploTarjeta: DatosTarjeta = {
                 <li><strong>JSON Resume (.json)</strong>, si vienes de Reactive Resume u otro editor que lo exporte.</li>
               </ul>
               <p>Hasta 10 MB. Después te decimos qué no hemos encontrado para que lo añadas.</p>
-            </details>
+              <div class="importar-acciones">
+                <label class="boton boton-principal boton-compacto">
+                  <input type="file" name="importar" class="sr-only" accept=".pdf,.docx,.zip,.json,application/pdf" data-importar />
+                  Elegir archivo
+                </label>
+                <button type="button" class="boton boton-secundario boton-compacto" data-cerrar-importar>Cancelar</button>
+              </div>
+            </dialog>
 
             <fieldset class="bloque" data-guia="sobre-ti">
               <legend>Sobre ti</legend>
