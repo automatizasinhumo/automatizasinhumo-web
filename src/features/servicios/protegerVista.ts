@@ -2,7 +2,7 @@
  * Protección disuasoria de las vistas previas de pago (CV y, después, webs).
  * No es infalible —nada en el navegador lo es—: el PDF o la web sin marca de agua solo se
  * entregan tras la compra. Esto encarece el pantallazo para que no compense:
- *  - la vista es un canvas (sin texto que copiar) con marca de agua en mosaico, a resolución de pantalla;
+ *  - la vista es un canvas (sin texto que copiar) con marca de agua en cintas por los bordes (no tapa el texto), a resolución de pantalla;
  *  - sin menú contextual ni arrastrar para «guardar imagen»;
  *  - se desenfoca cuando la pestaña o la ventana pierden el foco (Win+Mayús+S, recortes, cambio de app)
  *    y al pulsar Impr Pant; al imprimir no sale (CSS `@media print` del tema).

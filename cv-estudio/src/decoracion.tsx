@@ -222,17 +222,43 @@ export function capaDecoracion() {
 	return h(Svg, { fixed: true, style: capa, viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none" }, ...(defs.length ? [h(Defs, { key: "defs" }, ...defs)] : []), ...hijos);
 }
 
+/**
+ * Marca de agua en los bordes, nunca sobre el texto: una cinta arriba, otra abajo y una en
+ * cada canto, dentro del margen de la página (el mínimo es 14 pt, «Compacto»). La cinta es
+ * blanca translúcida para leerse igual sobre una cabecera o barra lateral de color. Recortar
+ * las cuatro cintas deja un CV sin márgenes y a resolución de pantalla: el pantallazo no compensa.
+ */
+export const CINTA = 11;
 export function capaMarcaAgua() {
 	if (!marca) return null;
-	const filas = [];
-	// Mosaico mayor que la página (rotado) para que no quede ninguna esquina limpia.
-	for (let i = 0; i < 14; i++)
-		filas.push(
-			h(Text, { key: i, style: { fontSize: 22, fontFamily: "Helvetica-Bold", color: "#000000", opacity: 0.08, marginBottom: 52, textAlign: "center" } }, `${marca}   ·   ${marca}   ·   ${marca}`),
+	// Repeticiones que caben en cada borde: un texto más largo que su caja react-pdf no lo pinta.
+	const tira = (largo: number) => Array.from({ length: Math.max(2, Math.floor(largo / 110)) }, () => marca).join("   ·   ");
+	const letra = { fontSize: 6.5, fontFamily: "Helvetica-Bold", color: "#475569", lineHeight: 1, textAlign: "center" } as const;
+	// Fondo translúcido aparte: si la opacidad fuera de la cinta, también apagaría el texto.
+	const fondo = h(View, { style: { ...capa, backgroundColor: "#ffffff", opacity: 0.85 } });
+	const banda = (largo: number) => h(View, { style: { width: largo, height: CINTA, paddingTop: (CINTA - 6.5) / 2 } }, h(Text, { style: letra }, tira(largo)));
+	const horizontal = (k: string, pos: object) =>
+		h(View, { key: k, style: { position: "absolute", left: 0, right: 0, height: CINTA, overflow: "hidden", ...pos } }, fondo, banda(W));
+	// Los cantos: la misma cinta girada sobre su centro; largo = alto de la página.
+	const vertical = (k: string, lado: "left" | "right") =>
+		h(
+			View,
+			{ key: k, style: { position: "absolute", top: 0, bottom: 0, width: CINTA, overflow: "hidden", [lado]: 0 } },
+			fondo,
+			h(
+				View,
+				{
+					style: {
+						position: "absolute",
+						width: H,
+						height: CINTA,
+						left: (CINTA - H) / 2,
+						top: (H - CINTA) / 2,
+						transform: lado === "left" ? "rotate(-90deg)" : "rotate(90deg)",
+					},
+				},
+				banda(H),
+			),
 		);
-	return h(
-		View,
-		{ fixed: true, style: { ...capa, justifyContent: "center", alignItems: "center", overflow: "hidden" } },
-		h(View, { style: { transform: "rotate(-32deg)", width: 1300, alignItems: "center" } }, ...filas),
-	);
+	return h(View, { fixed: true, style: capa }, horizontal("arriba", { top: 0 }), horizontal("abajo", { bottom: 0 }), vertical("izq", "left"), vertical("der", "right"));
 }
