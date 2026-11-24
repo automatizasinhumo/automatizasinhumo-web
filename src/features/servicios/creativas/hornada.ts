@@ -82,7 +82,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
 .w-d-hornada .w-cinta a{color:inherit}
 .w-d-hornada .w-cab-in{display:grid;gap:clamp(24px,5cqw,56px);align-items:center;padding-top:clamp(30px,6cqw,80px)}
 .w-d-hornada .w-cab-txt>*+*{margin-top:clamp(14px,2cqw,22px)}
-.w-d-hornada .w-mano{display:inline-block;transform:rotate(-2deg);font:italic 500 clamp(1.25rem,2.6cqw,1.6rem)/1.1 var(--w-ft-titulo);color:var(--w-c);letter-spacing:0;text-transform:none}
+.w-d-hornada .w-mano{display:inline-block;transform:rotate(-2deg);font:italic 500 clamp(1.25rem,2.6cqw,1.6rem)/1.1 var(--w-ft-titulo);color:var(--w-ct);letter-spacing:0;text-transform:none}
 .w-d-hornada .w-cab h1{--w-em-letra:.9;margin-bottom:.2em;font-size:min(clamp(2.6rem,7.6cqw,5.6rem),var(--w-h1-tope,99em));font-weight:500;line-height:1.04;letter-spacing:-.02em;overflow-wrap:break-word;text-wrap:balance;padding-bottom:.18em;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8c14-6 22 4 36-1s24-5 38 0 26 3 42-3' fill='none' stroke='%23e9a9a0' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E") 0 100%/min(9ch,70%) .22em no-repeat}
 .w-d-hornada .w-cab .w-lema-bloque{font-size:clamp(1.1rem,2.3cqw,1.35rem);line-height:1.55;color:var(--w-suave);max-width:36ch}
 .w-d-hornada .w-cab .w-boton{min-height:54px;padding-inline:26px}
@@ -111,11 +111,11 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
 .w-d-hornada .w-ilus .etiqueta path{fill:var(--w-papel);stroke-width:2}
 .w-d-hornada .w-ilus .etiqueta .hilo{fill:none;stroke-width:1.4}
 .w-d-hornada .w-ilus text{stroke:none;fill:#3a2620}
-.w-d-hornada .w-ilus .etiqueta text{font:italic 600 19px var(--w-ft-titulo);fill:var(--w-c)}
+.w-d-hornada .w-ilus .etiqueta text{font:italic 600 19px var(--w-ft-titulo);fill:var(--w-ct)}
 .w-d-hornada .w-ilus .sello circle{fill:var(--w-mantequilla);stroke-width:2.6}
 .w-d-hornada .w-ilus .sello .pespunte{fill:none;stroke-width:1.4;stroke-dasharray:4 5}
 .w-d-hornada .w-ilus .sello-a{font:800 13px var(--w-ft-texto);letter-spacing:3px}
-.w-d-hornada .w-ilus .sello-b{font:italic 600 17px var(--w-ft-titulo);fill:var(--w-c)}
+.w-d-hornada .w-ilus .sello-b{font:italic 600 17px var(--w-ft-titulo);fill:var(--w-ct)}
 .w-d-hornada .w-cab-foto{margin:0;border-radius:999px 999px var(--w-r) var(--w-r);overflow:hidden;border:3px solid var(--w-tinta);box-shadow:0 0 0 10px var(--w-mora-claro),0 24px 50px -20px #3a26208c}
 .w-d-hornada .w-cab-foto img{width:100%;aspect-ratio:4/5;object-fit:cover}
 .w-d-hornada .w-costura{height:2px;background:linear-gradient(90deg,var(--w-borde) 55%,transparent 0) 0 0/12px 2px repeat-x}
