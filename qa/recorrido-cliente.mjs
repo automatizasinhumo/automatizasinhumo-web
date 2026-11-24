@@ -42,6 +42,18 @@ async function recorrido(ctx, ancho) {
   };
 
   try {
+    // Las guías Driver.js salen solas la primera vez y tapan la página mientras están abiertas:
+    // se comprueba que un visitante nuevo las puede cerrar, y el resto del recorrido va sin ellas.
+    await paso('la guía de bienvenida se cierra con la X', async () => {
+      await ir('/');
+      const guia = pg.locator('.driver-popover');
+      if (await guia.first().waitFor({ state: 'visible', timeout: 8000 }).then(() => true, () => false)) {
+        await pg.locator('.driver-popover-close-btn').first().click();
+        await guia.first().waitFor({ state: 'hidden', timeout: 5000 });
+      }
+      await pg.evaluate((k) => localStorage.setItem(k, 'no'), 'ash:guias');
+    });
+
     // La portada clásica enlaza la ficha directamente; la nueva (tema limpio) lleva por familias
     // y categorías. Lo que importa al cliente es llegar: a la ficha como mucho a dos clics.
     await paso('la portada lleva al servicio en dos clics como mucho', async () => {
