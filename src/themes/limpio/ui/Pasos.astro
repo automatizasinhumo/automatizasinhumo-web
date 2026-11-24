@@ -139,14 +139,14 @@ const { pasos, etiqueta } = Astro.props;
       display: grid;
       align-self: stretch;
       height: 6.5rem;
-      gap: 0.4rem;
+      gap: var(--ds-hueco-2);
       border-radius: calc(var(--ds-radio-tarjeta) * 0.75);
-      padding: 0.6rem;
+      padding: var(--ds-hueco-2);
       background: color-mix(in oklab, var(--color-brand) 8%, var(--color-bg, #fff));
     }
     .muestra i {
       display: block;
-      border-radius: 0.3rem;
+      border-radius: var(--ds-radio-sutil);
       background: color-mix(in oklab, var(--color-ink) 12%, transparent);
     }
     /* Tres plantillas en fila; la del medio, elegida. */
