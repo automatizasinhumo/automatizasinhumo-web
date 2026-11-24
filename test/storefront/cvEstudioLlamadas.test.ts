@@ -12,8 +12,8 @@ const ficheros = readdirSync(dir)
 	.filter((f) => /\.tsx?$/.test(f) && !f.endsWith('.d.ts'))
 	.map((f) => dir + f);
 
-// 2554/2555: número de argumentos; 2304: nombre sin declarar.
-const VIGILADOS = new Set([2554, 2555, 2304]);
+// 2554/2555: número de argumentos; 2304/2552: nombre sin declarar (2552 cuando hay uno parecido).
+const VIGILADOS = new Set([2554, 2555, 2304, 2552]);
 
 describe('motor del estudio de CV', () => {
 	it('ninguna llamada tiene argumentos de menos o de más ni usa nombres sin declarar', () => {
