@@ -25,6 +25,8 @@ const br = await chromium.launch();
 try {
   for (const ancho of ANCHOS) {
     const pg = await br.newPage({ viewport: { width: ancho, height: 900 }, locale: 'es-ES', reducedMotion: 'reduce' });
+    // La guía Driver.js es un popover fijo que no mide el diseño; se apaga como haría el visitante.
+    await pg.addInitScript(() => localStorage.setItem('ash:guias', 'no'));
     for (const ruta of RUTAS) {
       const res = await pg.goto(base + ruta, { waitUntil: 'load', timeout: 45000 }).catch(() => null);
       if (!res || res.status() >= 400) {

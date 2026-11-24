@@ -408,7 +408,8 @@ const dos = (n: number) => String(n).padStart(2, '0');
   }
   .familia-cabeza {
     display: grid;
-    grid-template-columns: auto auto 1fr;
+    /* minmax(0, …): una palabra larga («Automatizaciones») no ensancha la página a 320 px. */
+    grid-template-columns: auto auto minmax(0, 1fr);
     gap: var(--ds-hueco-4);
     align-items: center;
     margin-bottom: var(--ds-hueco-6);
@@ -439,10 +440,12 @@ const dos = (n: number) => String(n).padStart(2, '0');
     font-size: var(--ds-texto-h2, 2rem);
     line-height: 1.1;
     color: var(--color-ink);
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   .familia-cabeza p { margin-top: var(--ds-hueco-1); max-width: 52ch; color: var(--color-muted); text-wrap: pretty; }
   @media (max-width: 30rem) {
-    .familia-cabeza { grid-template-columns: auto 1fr; }
+    .familia-cabeza { grid-template-columns: auto minmax(0, 1fr); }
     .numero { display: none; }
   }
 
