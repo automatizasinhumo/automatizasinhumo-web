@@ -9,11 +9,12 @@
  * tarjeta, la publica en /c/<nombre> con los datos del CV.
  */
 import { ESPACIADOS, ESTILOS_LETRA, FONDOS, FORMAS, FORMATO_INICIAL, LIMITES_CV, PASOS_CV, POSICIONES, SOMBREADOS, TAMANOS, correoValido, euros, esCamino, faltanTrasImportar, linkedinValido, telefonoValido, webValida, type CaminoCv, type DisenoCv, type ExtraCv, type ModalidadCv, type PaqueteCv } from './cv';
-import { gruposPortales, sobra } from './cvPortales';
+import { NOMBRE_PORTAL, PORTALES, gruposPortales, muestraTrozo, sobra, textoPortal, type Portal } from './cvPortales';
 import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './modelosTarjeta';
 import { guiar } from '../tour/guia';
 import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
+import { accionBotonCv, combinarPedidosCv, type PagadoCv } from './cvPedidos';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = keyof typeof LIMITES_CV.items;
@@ -60,11 +61,7 @@ interface Config {
   guia: Record<string, { guia: string; titulo: string; texto: string }[]>;
 }
 type DatosTarjeta = Record<string, unknown> & { enlaces?: { etiqueta: string; url: string }[] };
-interface Pagado {
-  ref: string;
-  cv: ModalidadCv | null;
-  tarjeta: { slug: string | null; datos: DatosTarjeta | null } | null;
-}
+type Pagado = PagadoCv<DatosTarjeta>;
 interface Estado {
   diseno: string;
   /** Camino del primer paso: plantilla tal cual, diseño propio (modalidad más alta) o asesoría. */
@@ -486,7 +483,7 @@ export function iniciarEstudioCv() {
       }),
     );
   }
-  const extraPagado = (x: ExtraCv) => x.id === 'tarjeta' && !!pedido.pagado?.tarjeta;
+  const extraPagado = (x: ExtraCv) => (x.id === 'tarjeta' ? !!pedido.pagado?.tarjeta : !!pedido.pagado?.[x.id]);
   const extraMarcado = (x: ExtraCv) => !extraPagado(x) && !pedido.pagado?.cv && !!$<HTMLInputElement>(`[data-extra="${x.producto}"]`)?.checked;
   /** Las casillas de extras reflejan `estado.extras` (una sola fuente). */
   function marcarExtras() {
@@ -532,6 +529,9 @@ export function iniciarEstudioCv() {
     );
     const tj = pedido.pagado?.tarjeta;
     $('[data-tarjeta-pendiente]')!.hidden = !(tj && !tj.slug);
+    const portales = PORTALES.filter((pt) => pedido.pagado?.[pt]).map((pt) => NOMBRE_PORTAL[pt]);
+    $('[data-portales-pagados]')!.hidden = !portales.length;
+    $('[data-portales-nombres]')!.textContent = portales.join(' e ');
     rellenarTarjeta();
     res('incluye').replaceChildren(
       ...p.incluye.map((x) => {
@@ -547,18 +547,32 @@ export function iniciarEstudioCv() {
       st.textContent = 'Tu pedido es del diseño listo: el PDF sale con el diseño base, sin tu color ni las formas.';
   }
 
-  // ---------- LinkedIn e InfoJobs: copiar campo a campo ----------
+  // ---------- LinkedIn e InfoJobs: extras de pago ----------
+  // Marcado y sin pagar: se ve qué casillas salen (texto recortado) y su precio. Pagado: todo para copiar y descargar.
   function pintarPortales() {
-    const caja = $('[data-portales]');
-    if (!caja) return;
-    const grupos = gruposPortales(recoger());
+    for (const portal of PORTALES) {
+      const caja = $(`[data-portal="${portal}"]`);
+      const x = cfg.extras.find((e) => e.id === portal);
+      if (!caja || !x) continue;
+      const pagado = extraPagado(x);
+      caja.hidden = !(pagado || extraMarcado(x));
+      if (caja.hidden) continue;
+      $(`[data-descargar-portal="${portal}"]`, caja)!.hidden = !pagado;
+      $('[data-portal-nota]', caja)!.textContent = pagado
+        ? 'Ya es tuyo: copia cada trozo en su casilla o descárgalo todo.'
+        : `Así te lo dejamos: cada casilla de ${NOMBRE_PORTAL[portal]} lista para pegar. Se desbloquea al pagar (${euros(x.precio)}).`;
+      pintarTrozos($('[data-portal-lista]', caja)!, portal, pagado);
+    }
+  }
+  function pintarTrozos(lista: HTMLElement, portal: Portal, completo: boolean) {
+    const grupos = gruposPortales(recoger(), portal);
     if (!grupos.length) {
       const p = document.createElement('p');
       p.className = 'text-sm text-muted';
       p.textContent = 'Rellena tus datos y aquí aparecen listos para copiar.';
-      return caja.replaceChildren(p);
+      return lista.replaceChildren(p);
     }
-    caja.replaceChildren(
+    lista.replaceChildren(
       ...grupos.map((g) => {
         const sec = document.createElement('section');
         const h = document.createElement('h4');
@@ -572,19 +586,22 @@ export function iniciarEstudioCv() {
           et.textContent = t.etiqueta;
           const texto = document.createElement('p');
           texto.className = 'portal-texto';
-          texto.textContent = t.texto;
-          const b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'boton boton-secundario portal-copiar';
-          b.dataset.copiar = t.texto;
-          b.textContent = 'Copiar';
-          b.setAttribute('aria-label', `Copiar ${t.etiqueta.toLowerCase()} (${g.titulo})`);
-          fila.replaceChildren(et, texto, b);
+          texto.textContent = completo ? t.texto : muestraTrozo(t.texto);
+          fila.replaceChildren(et, texto);
+          if (completo) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'boton boton-secundario portal-copiar';
+            b.dataset.copiar = t.texto;
+            b.textContent = 'Copiar';
+            b.setAttribute('aria-label', `Copiar ${t.etiqueta.toLowerCase()} (${g.titulo})`);
+            fila.appendChild(b);
+          }
           const n = sobra(t);
           if (n) {
             const aviso = document.createElement('small');
             aviso.className = 'portal-aviso';
-            aviso.textContent = `LinkedIn admite ${t.limite} caracteres: sobran ${n}.`;
+            aviso.textContent = `${NOMBRE_PORTAL[portal]} admite ${t.limite} caracteres: sobran ${n}.`;
             fila.appendChild(aviso);
           }
           sec.appendChild(fila);
@@ -593,13 +610,21 @@ export function iniciarEstudioCv() {
       }),
     );
   }
+  function descargarPortal(portal: Portal) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([textoPortal(recoger(), portal)], { type: 'text/plain;charset=utf-8' }));
+    a.download = `cv-${portal}.txt`;
+    a.click();
+    window.setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
+  }
 
   // ---------- Compra y pedido pagado ----------
   /** El token sale de la barra de direcciones (y del historial) y, si ya hay CV, va directo a descargar. */
   const destinoPedido = () => (estado.alcanzado >= PASOS.length - 1 ? '#descarga' : '');
   const pedido = pedidoEstudio<Pagado>(CLAVE_PEDIDO, '/api/cv/pedido', () => {
     if (actual === 'descarga' || actual === 'anade') resumir();
-  });
+    if (actual === 'anade') pintarPortales();
+  }, combinarPedidosCv);
   /** Deja el carrito exactamente con lo elegido (cantidad 1, sin la otra modalidad) y va al pago. */
   async function comprar(b: HTMLButtonElement) {
     const st = $('[data-estado-compra]')!;
@@ -657,6 +682,8 @@ export function iniciarEstudioCv() {
 
   // ---------- Tarjeta digital ----------
   const campoT = (k: string) => $<HTMLInputElement>(`[data-t="${k}"]`)!;
+  /** El borrador de la tarjeta va con el pedido que la pagó (o el del CV mientras no se compra). */
+  const refTarjeta = () => pedido.pagado?.refTarjeta ?? pedido.pagado?.ref ?? 'borrador';
   const caja = $('[data-tarjeta-form]')!;
   const vistaT = $('[data-tarjeta-vista]')!;
   const CAMPOS_T = ['nombre', 'cargo', 'email', 'telefono', 'web', 'ubicacion', 'resumen', 'linkedin'] as const;
@@ -671,7 +698,7 @@ export function iniciarEstudioCv() {
   };
   const guardarBorrador = () => {
     // `ref`: de qué pedido es el borrador ('borrador' antes de pagar), para no mezclar ediciones de otro.
-    const d: Record<string, unknown> = { ref: pedido.pagado?.ref ?? 'borrador', modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
+    const d: Record<string, unknown> = { ref: refTarjeta(), modelo: modeloT(), color: campoT('color').value, qr: campoT('qr').checked };
     for (const k of CAMPOS_T) d[k] = campoT(k).value;
     try {
       localStorage.setItem(CLAVE_TARJETA, JSON.stringify(d));
@@ -725,7 +752,7 @@ export function iniciarEstudioCv() {
     pub.disabled = !pagada;
     $('[data-tarjeta-nota]')!.hidden = pagada;
     if (caja.hidden) return;
-    const ref = pedido.pagado?.ref ?? 'borrador';
+    const ref = refTarjeta();
     // Mientras no toques la tarjeta, sigue a los datos del CV (puedes volver atrás y cambiarlos).
     if (tarjetaDe === ref && tarjetaTocada) return pintarTarjeta();
     tarjetaDe = ref;
@@ -923,6 +950,7 @@ export function iniciarEstudioCv() {
     const b = (ev.target as Element).closest<HTMLElement>('button');
     if (!b || !raiz.contains(b)) return;
     if (b.dataset.ir) return ir(b.dataset.ir);
+    if (b.dataset.descargarPortal) return descargarPortal(b.dataset.descargarPortal as Portal);
     if (b.dataset.copiar !== undefined) {
       const texto = b.dataset.copiar;
       if (!navigator.clipboard?.writeText) {
@@ -1000,9 +1028,13 @@ export function iniciarEstudioCv() {
       });
       return;
     }
-    if (pedido.cargando && (b.hasAttribute('data-comprar') || b.hasAttribute('data-publicar'))) return;
-    if (b.hasAttribute('data-comprar')) return void (pedido.pagado?.cv ? descargar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
-    if (b.hasAttribute('data-publicar')) return void publicar(b as HTMLButtonElement);
+    if (b.hasAttribute('data-comprar')) {
+      const accion = accionBotonCv(pedido.cargando, !!pedido.pagado?.cv);
+      if (accion === 'descargar') void descargar(b as HTMLButtonElement);
+      else if (accion === 'comprar') void comprar(b as HTMLButtonElement);
+      return;
+    }
+    if (b.hasAttribute('data-publicar')) return void (pedido.cargando ? undefined : publicar(b as HTMLButtonElement));
   });
 
   // ---------- Guía ----------
@@ -1044,7 +1076,8 @@ export function iniciarEstudioCv() {
       const x = cfg.extras.find((e) => e.producto === c.dataset.extra);
       if (x) estado.extras = c.checked ? [...new Set([...estado.extras, x.id])] : estado.extras.filter((id) => id !== x.id);
       guardar(estado);
-      return resumir();
+      resumir();
+      return pintarPortales();
     }
     if (c.name === 'fotoElegir') {
       const f = c.files?.[0];

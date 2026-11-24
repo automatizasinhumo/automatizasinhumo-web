@@ -5,7 +5,7 @@
  * en la galería es exactamente lo que el cliente descarga.
  */
 
-import { AUTOSERVICIO, SLUG_CV, SLUG_TARJETA } from './autoservicio';
+import { AUTOSERVICIO, SLUG_CV, SLUG_INFOJOBS, SLUG_LINKEDIN, SLUG_TARJETA } from './autoservicio';
 
 export type ModalidadCv = 'disenada' | 'personalizable';
 
@@ -43,24 +43,24 @@ export const PAQUETES_CV: Record<ModalidadCv, PaqueteCv> = {
 };
 
 /** Extras que se compran junto al CV y se publican solos con los mismos datos. */
+export type IdExtraCv = 'tarjeta' | 'linkedin' | 'infojobs';
 export interface ExtraCv {
-  id: 'tarjeta';
+  id: IdExtraCv;
   slug: string;
   nombre: string;
   precio: number;
   producto: string;
   resumen: string;
 }
-const TARJETA = AUTOSERVICIO[SLUG_TARJETA]!;
+const extra = (id: IdExtraCv, slug: string, resumen: string): ExtraCv => {
+  const s = AUTOSERVICIO[slug];
+  if (!s?.precio) throw new Error(`autoservicio.json: falta ${slug} con precio`);
+  return { id, slug, nombre: s.nombre, precio: s.precio, producto: s.producto, resumen };
+};
 export const EXTRAS_CV: readonly ExtraCv[] = [
-  {
-    id: 'tarjeta',
-    slug: SLUG_TARJETA,
-    nombre: TARJETA.nombre,
-    precio: TARJETA.precio ?? 0,
-    producto: TARJETA.producto,
-    resumen: 'Tu página de contacto con QR y botón «Guardar contacto», publicada al momento con los datos de tu CV.',
-  },
+  extra('linkedin', SLUG_LINKEDIN, 'Tus datos en trozos con el nombre de cada casilla de LinkedIn, avisos si algo no cabe, guía paso a paso y archivo para descargar.'),
+  extra('infojobs', SLUG_INFOJOBS, 'Lo mismo para «Mi CV» de InfoJobs: cada trozo con su casilla, guía paso a paso y archivo para descargar.'),
+  extra('tarjeta', SLUG_TARJETA, 'Tu página de contacto con QR y botón «Guardar contacto», publicada al momento con los datos de tu CV.'),
 ];
 
 export interface DisenoCv {
@@ -234,8 +234,7 @@ export const GUIA_CV: Record<string, readonly PasoGuiaCv[]> = {
     { guia: 'vista', titulo: 'Revisa página a página', texto: 'Mira que todo está donde quieres. Si no, vuelve atrás desde la barra de pasos: no pierdes nada.' },
   ],
   anade: [
-    { guia: 'portales', titulo: 'Pásalo a LinkedIn o InfoJobs', texto: 'Tus datos en trozos listos para copiar y pegar en cada casilla del portal. Gratis.' },
-    { guia: 'extras', titulo: 'Tarjeta digital con QR', texto: 'Márcala y aparece su configurador: eliges modelo, color y datos, y la ves al momento. Se publica al pagar.' },
+    { guia: 'extras', titulo: 'Añade lo que te sirva', texto: 'LinkedIn o InfoJobs: márcalo y verás qué casillas te dejamos listas para pegar. Tarjeta con QR: márcala y aparece su configurador. Todo se desbloquea al pagar.' },
     { guia: 'tarjeta', titulo: 'Diseña tu tarjeta', texto: 'Prueba los seis modelos con tu color y tus datos. Con el QR, quien lo escanee guarda tu contacto en un toque.' },
   ],
   descarga: [

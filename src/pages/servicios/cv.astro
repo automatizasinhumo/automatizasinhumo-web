@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import '../../styles/estudio.css';
 import Progreso from '../../themes/limpio/ui/Progreso.astro';
+import { NOMBRE_PORTAL, PASOS_PORTAL, PORTALES } from '../../features/servicios/cvPortales';
 import {
   ASESORIA_CV,
   CAMINOS_CV,
@@ -461,14 +462,6 @@ const ejemploTarjeta: DatosTarjeta = {
         <h2 id="paso-anade" class="paso-titulo">Cosas que puedes añadir</h2>
         <p class="paso-entradilla" data-entradilla-anade>Opcional. Tu CV ya está guardado: lo que marques aquí se suma al mismo pedido y no pierdes nada.</p>
 
-        <details class="tarjeta portales" data-guia="portales">
-          <summary>
-            <strong>Pásalo a LinkedIn o InfoJobs</strong> <span class="gratis">Gratis</span>
-            <small>Tus datos en trozos listos para pegar en cada casilla del portal, con aviso si alguno no cabe.</small>
-          </summary>
-          <div class="portales-lista" data-portales></div>
-        </details>
-
         <div class="tarjeta extras-lista" data-guia="extras">
             {
               EXTRAS_CV.map((x) => (
@@ -492,6 +485,25 @@ const ejemploTarjeta: DatosTarjeta = {
               ))
             }
         </div>
+
+        <!-- LinkedIn / InfoJobs: al marcar la casilla se despliega lo que recibes; al pagar, todo para copiar y descargar. -->
+        {
+          PORTALES.map((p) => (
+            <div class="tarjeta portales" data-portal={p} hidden>
+              <h3 class="font-serif text-xl font-bold text-ink">Tu CV en {NOMBRE_PORTAL[p]}</h3>
+              <p class="mt-1 text-sm text-muted" data-portal-nota />
+              <ol class="portal-pasos">
+                {PASOS_PORTAL[p].map((x) => (
+                  <li>{x}</li>
+                ))}
+              </ol>
+              <button type="button" class="boton boton-principal boton-compacto" data-descargar-portal={p} hidden>
+                Descargar todo en un archivo
+              </button>
+              <div class="portales-lista" data-portal-lista />
+            </div>
+          ))
+        }
 
         <!-- Tarjeta digital: se configura aquí (modelo, color, datos) en cuanto se elige el extra; se publica al pagarla. -->
         <div class="tarjeta publicar" data-tarjeta-form data-guia="tarjeta" hidden>
@@ -575,6 +587,9 @@ const ejemploTarjeta: DatosTarjeta = {
 
         <p class="tarjeta aviso-tarjeta" data-tarjeta-pendiente hidden>
           Tu tarjeta digital está pagada. <button type="button" class="enlace" data-ir="anade">Publícala desde «Añade»</button>.
+        </p>
+        <p class="tarjeta aviso-tarjeta" data-portales-pagados hidden>
+          Tu CV para <span data-portales-nombres></span> está listo. <button type="button" class="enlace" data-ir="anade">Cópialo o descárgalo desde «Añade»</button>.
         </p>
         <div class="paso-acciones">
           <button type="button" class="boton boton-secundario" data-atras>Atrás</button>

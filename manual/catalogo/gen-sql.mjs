@@ -1,18 +1,11 @@
 // node manual/catalogo/gen-sql.mjs > manual/catalogo/seed.sql
 // Sustituye el catálogo demo de Minshop por el catálogo de servicios.
 import { existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { categorias, productos, paginas } from './catalogo.mjs';
 import { descripcion } from './descripcion.mjs';
+import { modalidades, pid } from './ids.mjs';
 import { DEMOS, DEMOS_URL, INTERACTIVAS, demosDe } from '../demos/demos.mjs';
 
-const ALPHA = '0123456789abcdefghjkmnpqrstvwxyz';
-// Id público estable: sale del tipo y de una clave única (slug…), no del azar. Así
-// regenerar el seed solo cambia lo que cambia en catalogo.mjs y los ids no bailan.
-const pid = (p, clave) => {
-  const h = createHash('sha256').update(`${p}:${clave}`).digest();
-  return `${p}_${Array.from({ length: 10 }, (_, i) => ALPHA[h[i] % 32]).join('')}`;
-};
 const q = (s) => (s == null ? 'NULL' : `'${String(s).replace(/'/g, "''")}'`);
 
 const out = [];
@@ -56,10 +49,9 @@ for (const p of productos) {
       if (pid('var', v.sku) !== v.id) throw new Error(`autoservicio.json: id de ${v.sku} debe ser ${pid('var', v.sku)}`);
       out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(v.etiqueta)}, ${v.precio}, 999, ${q(v.sku)}, ${i}, 1, ${q(v.id)} FROM products WHERE slug=${q(p.slug)};`);
     });
-  } else if (varios) {
-    [['Plantilla + guía (la publicas tú)', p.p[0]], ['Te lo montamos', p.p[1]]].forEach(([label, eur], i) =>
-      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(label)}, ${eur * 100}, 999, ${q(`${p.slug}-${i ? 'pro' : 'diy'}`)}, ${i}, 1, ${q(pid('var', `${p.slug}-${i ? 'pro' : 'diy'}`))} FROM products WHERE slug=${q(p.slug)};`));
-  }
+  } else
+    for (const m of modalidades(p))
+      out.push(`INSERT INTO product_variants (product_id, label, price_cents, stock, sku, position, active, public_id) SELECT id, ${q(m.label)}, ${m.cents}, 999, ${q(m.sku)}, ${m.posicion}, 1, ${q(m.id)} FROM products WHERE slug=${q(p.slug)};`);
 }
 
 // Páginas
