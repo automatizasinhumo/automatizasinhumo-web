@@ -66,10 +66,22 @@ interface Oferta {
   moneda: string | null;
 }
 
+interface Version {
+  id: number;
+  created_at: string;
+}
 interface Pagado {
   ref: string;
   slug: string | null;
   datos: DatosWeb | null;
+  versiones?: Version[];
+}
+
+/** «2026-11-24 09:05:00» (UTC, como lo guarda D1) → «24 nov 2026, 10:05» en la hora del cliente. */
+export function fechaVersion(utc: string, locale = 'es-ES', timeZone?: string): string {
+  const d = new Date(`${utc.replace(' ', 'T')}Z`);
+  if (Number.isNaN(d.getTime())) return utc;
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone }).format(d);
 }
 
 const CLAVE = 'servicios:web';
@@ -579,6 +591,7 @@ export function iniciarEstudioWeb() {
     $('[data-solo-compra]')!.hidden = !!pedido.pagado;
     $('[data-solo-pagado]')!.hidden = !pedido.pagado;
     if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
+    pintarVersiones();
     const b = $('[data-comprar] span');
     if (b) b.textContent = pedido.pagado ? (pedido.pagado.slug ? 'Guardar los cambios en mi web' : 'Publicar mi web') : `Comprar y publicar · ${euros(cfg.precio)}`;
     if (pedido.pagado?.slug && !$('[data-estado-compra] a')) avisar(`/w/${pedido.pagado.slug}`, 'Tu web está publicada en');
@@ -828,7 +841,7 @@ export function iniciarEstudioWeb() {
     st.textContent = 'Publicando…';
     try {
       const r = await fetch('/api/web/publicar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, datos: datos() }) });
-      const d = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; slug?: string; error?: string };
+      const d = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; slug?: string; error?: string; versiones?: Version[] };
       if (!pedido.vigente(token)) return;
       if (!d.ok || !d.url) {
         st.dataset.tono = 'error';
@@ -836,6 +849,7 @@ export function iniciarEstudioWeb() {
         return;
       }
       pagado.slug = d.slug ?? null;
+      if (d.versiones) pagado.versiones = d.versiones;
       estado.pedido = pagado.ref;
       persistir();
       avisar(d.url, 'Publicada en');
@@ -844,6 +858,65 @@ export function iniciarEstudioWeb() {
       console.error(e);
       st.dataset.tono = 'error';
       st.textContent = 'No se ha podido publicar. Revisa tu conexión e inténtalo de nuevo.';
+    } finally {
+      b.disabled = false;
+    }
+  }
+  /** Versiones anteriores de la web publicada: cada una se puede volver a poner con un clic. */
+  function pintarVersiones() {
+    const caja = $<HTMLDetailsElement>('[data-versiones]');
+    if (!caja) return;
+    const vs = pedido.pagado?.slug ? (pedido.pagado.versiones ?? []) : [];
+    caja.hidden = !vs.length;
+    $('[data-versiones-n]')!.textContent = String(vs.length);
+    $('[data-versiones-lista]')!.replaceChildren(
+      ...vs.map((v) => {
+        const li = document.createElement('li');
+        const t = document.createElement('time');
+        t.dateTime = `${v.created_at.replace(' ', 'T')}Z`;
+        t.textContent = fechaVersion(v.created_at);
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'enlace';
+        b.textContent = 'Volver a esta';
+        b.addEventListener('click', () => void restaurar(v, b));
+        li.append(t, ' ', b);
+        return li;
+      }),
+    );
+  }
+  async function restaurar(v: Version, b: HTMLButtonElement) {
+    const token = pedido.token;
+    const pagado = pedido.pagado;
+    if (!pagado || !pedido.vigente(token)) return;
+    if (!confirm(`¿Volver a publicar tu web como estaba el ${fechaVersion(v.created_at)}? Lo que hay ahora queda guardado en las versiones.`)) return;
+    const st = $('[data-estado-compra]')!;
+    b.disabled = true;
+    st.textContent = 'Restaurando…';
+    try {
+      const r = await fetch('/api/web/restaurar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, id: v.id }) });
+      const d = (await r.json().catch(() => ({}))) as { ok?: boolean; url?: string; slug?: string; datos?: DatosWeb; versiones?: Version[] };
+      if (!pedido.vigente(token)) return;
+      if (!d.ok || !d.url || !d.datos) {
+        st.dataset.tono = 'error';
+        st.textContent = 'No se ha podido restaurar esa versión. Inténtalo de nuevo en un momento.';
+        return;
+      }
+      const { plantilla, color, letra, ...c } = d.datos;
+      Object.assign(estado, { plantilla, color, letra });
+      pagado.slug = d.slug ?? pagado.slug;
+      pagado.datos = d.datos;
+      pagado.versiones = d.versiones ?? pagado.versiones;
+      volcar(c);
+      persistir();
+      pintarControles();
+      programar(true);
+      avisar(d.url, 'Versión restaurada en');
+      resumir();
+    } catch (e) {
+      console.error(e);
+      st.dataset.tono = 'error';
+      st.textContent = 'No se ha podido restaurar. Revisa tu conexión e inténtalo de nuevo.';
     } finally {
       b.disabled = false;
     }
