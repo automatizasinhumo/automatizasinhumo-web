@@ -25,6 +25,7 @@ import {
   WEB_POR_DEFECTO,
 } from '../../features/servicios/webs';
 import { SECTORES_WEB } from '../../features/servicios/sectores';
+import { huellaMiniatura, miniaturaWeb } from '../../features/servicios/miniaturasWeb';
 
 // Estudio de webs: mismo esquema que el de CV (/servicios/cv). Todo ocurre en el navegador:
 // elegir diseño, escribir los datos del negocio, color y letra, y verla al momento con marca
@@ -45,6 +46,9 @@ const config = JSON.stringify({
   maxEnlaces: MAX_ENLACES_WEB,
 });
 const campo = 'campo';
+// ?miniaturas=vivas pinta todas en vivo: lo usa scripts/miniaturas-web.mjs para regenerar las imágenes.
+const vivas = Astro.url.searchParams.get('miniaturas') === 'vivas';
+const imagenMini = (id: (typeof PLANTILLAS_WEB)[number]['id']) => (vivas ? '' : miniaturaWeb(id));
 // Primero los diseños de autor (cada uno con su portada y tipografía), luego las básicas para configurar.
 const GRUPOS_WEB = [
   {
@@ -126,7 +130,13 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
                   {g.plantillas.map((p) => (
                     <label class="tarjeta diseno">
                       <input type="radio" name="plantilla" value={p.id} class="sr-only" />
-                      <span class="mini-web" data-mini={p.id} aria-hidden="true" />
+                      {imagenMini(p.id) ? (
+                        <span class="mini-web" aria-hidden="true">
+                          <img src={imagenMini(p.id)} alt="" width="600" height="450" loading="lazy" decoding="async" />
+                        </span>
+                      ) : (
+                        <span class="mini-web" data-mini={p.id} data-huella={huellaMiniatura(p.id)} aria-hidden="true" />
+                      )}
                       <span class="diseno-pie">
                         <span class="min-w-0">
                           <strong class="block truncate text-ink">{p.nombre}</strong>

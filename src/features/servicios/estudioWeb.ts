@@ -14,6 +14,7 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
+import { CSS_MINI, datosMiniatura } from './miniaturasWeb';
 import { fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type DatosWeb, type IdVarianteWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
@@ -133,7 +134,7 @@ const ERROR_PUBLICAR: Record<string, string> = {
 /** Estilos solo de la vista previa: sin seleccionar texto y la miniatura a escala. */
 /** Ancho al que se pinta la vista «Ordenador» antes de escalarla al panel: pasa los cortes de 640 y 960 px. */
 const ANCHO_ESCRITORIO = 1100;
-const CSS_VISTA = `:host{display:block;user-select:none;-webkit-user-select:none}[data-editar]{cursor:pointer}@media (hover:hover){[data-editar]:hover{outline:2px dashed #2563eb;outline-offset:4px}}.mini{width:250%;transform:scale(.4);transform-origin:0 0}:host([data-escritorio]) .w{width:${ANCHO_ESCRITORIO}px;zoom:var(--escala,1)}`;
+const CSS_VISTA = `:host{display:block;user-select:none;-webkit-user-select:none}[data-editar]{cursor:pointer}@media (hover:hover){[data-editar]:hover{outline:2px dashed #2563eb;outline-offset:4px}}:host([data-escritorio]) .w{width:${ANCHO_ESCRITORIO}px;zoom:var(--escala,1)}`;
 
 /**
  * «Editar tocando»: lo que se ve en la vista previa lleva al campo que lo cambia.
@@ -535,16 +536,31 @@ export function iniciarEstudioWeb() {
       .replace(/^-+|-+$/g, '')
       .slice(0, 40) || 'tu-negocio';
 
-  /** Miniaturas de las plantillas: el ejemplo pintado con cada diseño, a escala. */
+  /**
+   * Miniaturas sin imagen al día (miniaturasWeb.ts): el ejemplo pintado con el diseño, a escala.
+   * Solo al acercarse a la pantalla: pintarlas todas de golpe bajaba las 17 tipografías.
+   */
   function miniaturas() {
-    for (const el of $$('[data-mini]')) {
+    const pintarMini = (el: HTMLElement) => {
+      if (el.dataset.pintada) return;
+      el.dataset.pintada = '1';
       const s = el.attachShadow({ mode: 'closed' });
-      const id = el.dataset.mini as DatosWeb['plantilla'];
-      // Los diseños de autor se enseñan con su propio negocio de muestra, su color y su letra.
-      const x = disenoWeb(id);
-      const datos: DatosWeb = x ? { ...cfg.ejemplo, ...x.muestra, plantilla: id, color: x.color, letra: 'diseno' } : { ...cfg.ejemplo, plantilla: id };
-      s.innerHTML = `<style>${cfg.css}${CSS_VISTA}</style><div class="mini">${renderWeb(datos)}</div>`;
-    }
+      s.innerHTML = `<style>${cfg.css}${CSS_VISTA}${CSS_MINI}</style><div class="mini">${renderWeb(datosMiniatura(el.dataset.mini as DatosWeb['plantilla'], cfg.ejemplo))}</div>`;
+    };
+    const minis = $$<HTMLElement>('[data-mini]');
+    // El script que regenera las imágenes (?miniaturas=vivas) las necesita todas pintadas.
+    if (!('IntersectionObserver' in window) || new URLSearchParams(location.search).get('miniaturas') === 'vivas') return minis.forEach(pintarMini);
+    const io = new IntersectionObserver(
+      (es) => {
+        for (const x of es)
+          if (x.isIntersecting) {
+            io.unobserve(x.target);
+            pintarMini(x.target as HTMLElement);
+          }
+      },
+      { rootMargin: '400px 0px' },
+    );
+    for (const el of minis) io.observe(el);
   }
 
   // ---------- Personalización ----------
