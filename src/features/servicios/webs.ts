@@ -131,9 +131,9 @@ export function aspectoAlElegir(
   if (x) return { color: x.color, letra: 'diseno' };
   const letra = actual.letra === 'diseno' ? porDefecto.letra : actual.letra;
   // El color que trajo el diseño anterior no es del cliente: si no lo cambió, también vuelve al de por defecto.
-  // Sin saber cuál era el anterior, la letra «del diseño» es la única pista.
+  // Si el anterior era una básica, el color es del cliente. Sin saber cuál era, la letra «del diseño» es la única pista.
   const previo = disenoWeb(anterior);
-  const heredado = previo ? actual.color === previo.color : actual.letra === 'diseno';
+  const heredado = anterior ? actual.color === previo?.color : actual.letra === 'diseno';
   return { color: heredado ? porDefecto.color : actual.color, letra };
 }
 
