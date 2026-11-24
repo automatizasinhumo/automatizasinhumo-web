@@ -887,12 +887,14 @@ export function iniciarEstudioWeb() {
       }),
     );
   }
+  let restaurando = false;
   async function restaurar(v: Version, b: HTMLButtonElement) {
     const token = pedido.token;
     const pagado = pedido.pagado;
-    if (!pagado || !pedido.vigente(token)) return;
+    if (restaurando || !pagado || !pedido.vigente(token)) return;
     if (!confirm(`¿Volver a publicar tu web como estaba el ${fechaVersion(v.created_at)}? Lo que hay ahora queda guardado en las versiones.`)) return;
     const st = $('[data-estado-compra]')!;
+    restaurando = true;
     b.disabled = true;
     st.textContent = 'Restaurando…';
     try {
@@ -905,7 +907,7 @@ export function iniciarEstudioWeb() {
         return;
       }
       const { plantilla, color, letra, ...c } = d.datos;
-      Object.assign(estado, { plantilla, color, letra });
+      Object.assign(estado, { plantilla, color, letra, pedido: pagado.ref });
       pagado.slug = d.slug ?? pagado.slug;
       pagado.datos = d.datos;
       pagado.versiones = d.versiones ?? pagado.versiones;
@@ -920,6 +922,7 @@ export function iniciarEstudioWeb() {
       st.dataset.tono = 'error';
       st.textContent = 'No se ha podido restaurar. Revisa tu conexión e inténtalo de nuevo.';
     } finally {
+      restaurando = false;
       b.disabled = false;
     }
   }
