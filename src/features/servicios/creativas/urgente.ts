@@ -70,7 +70,7 @@ ${lema(c)}${c.bloqueAcciones}${zonas}
 .w-d-urgente .w-luz{width:10px;height:10px;border-radius:50%;background:var(--w-c);box-shadow:0 0 0 4px color-mix(in srgb,var(--w-c) 30%,transparent)}
 @media (prefers-reduced-motion:no-preference){.w-d-urgente .w-luz{animation:w-late 1.6s ease-in-out infinite}}
 @keyframes w-late{50%{box-shadow:0 0 0 9px transparent}}
-.w-d-urgente .w-cab h1{font-size:clamp(2.4rem,7.6cqw,5.2rem);overflow-wrap:anywhere;hyphens:auto;line-height:.95;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance}
+.w-d-urgente .w-cab h1{--w-em-letra:.9;font-size:min(clamp(2.4rem,7.6cqw,5.2rem),var(--w-h1-tope,99em));overflow-wrap:anywhere;hyphens:auto;line-height:.95;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance}
 .w-d-urgente .w-cab .w-lema{font-size:clamp(1.1rem,2.3cqw,1.45rem);color:#d6dee8;max-width:36ch}
 .w-d-urgente .w-cab .w-boton{color:#fff;border-radius:6px}
 .w-d-urgente .w-cab .w-boton-lleno{color:var(--w-s)}

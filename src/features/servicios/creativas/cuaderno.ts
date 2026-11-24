@@ -56,7 +56,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-cuaderno .w-hoja::after{content:"";position:absolute;right:0;bottom:0;width:46px;height:46px;background:linear-gradient(315deg,var(--w-fondo) 50%,#e6e1d2 50%);border-radius:0 0 4px 0}
 .w-d-cuaderno .w-cab-txt>*+*{margin-top:clamp(12px,2cqw,20px)}
 .w-d-cuaderno .w-sector{display:inline-block;padding:4px 12px;background:var(--w-panel);color:var(--w-tinta);transform:rotate(-1.5deg)}
-.w-d-cuaderno .w-cab h1{font-weight:800;font-size:clamp(2.4rem,6.6cqw,5rem);line-height:.95;letter-spacing:-.03em;overflow-wrap:break-word;text-wrap:balance}
+.w-d-cuaderno .w-cab h1{font-weight:800;font-size:min(clamp(2.4rem,6.6cqw,5rem),var(--w-h1-tope,99em));line-height:.95;letter-spacing:-.03em;overflow-wrap:break-word;text-wrap:balance}
 .w-d-cuaderno .w-subrayado{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--w-c) 30%,transparent) 62% 90%,transparent 90%);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .w-d-cuaderno .w-cab .w-lema{max-width:40ch;color:var(--w-suave)}
 .w-d-cuaderno .w-boton{border-radius:10px;font-weight:700}

@@ -1,0 +1,62 @@
+name: QA plantillas
+
+# Geometría de cada plantilla de web (básicas y de autor) con datos de ejemplo, largos y cortos
+# a 390, 768 y 1280 px: falla si la página desborda en horizontal, si un titular parte una palabra
+# por la mitad o si el tope por palabra larga deja el titular diminuto. Sin servidor ni build:
+# renderiza con documentoWeb() y sirve las fuentes de public/ (tests/plantillas).
+
+on:
+  pull_request:
+    paths:
+      - 'src/features/servicios/**'
+      - 'public/fonts/**'
+      - 'tests/plantillas/**'
+      - 'qa/navegador/package-lock.json'
+      - '.github/workflows/qa-plantillas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-plantillas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plantillas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            qa/navegador/package-lock.json
+
+      - name: Dependencias
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix qa/navegador --ignore-scripts --no-audit --no-fund
+          ln -s ../../qa/navegador/node_modules tests/plantillas/node_modules
+          qa/navegador/node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Plantillas sin desbordes ni palabras partidas
+        env:
+          CI: '1'
+        run: qa/navegador/node_modules/.bin/playwright test -c tests/plantillas
+
+      - name: Informe
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: qa-plantillas
+          path: |
+            playwright-report-plantillas/
+            test-results/plantillas/
+          retention-days: 7

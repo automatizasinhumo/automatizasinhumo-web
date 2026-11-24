@@ -59,7 +59,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-pulso .w-cab-in{position:relative;display:grid;gap:clamp(24px,4cqw,48px);align-items:end}
 .w-d-pulso .w-cab-txt>*+*{margin-top:clamp(14px,2cqw,22px)}
 .w-d-pulso .w-sector{display:inline-block;background:var(--w-c);color:var(--w-s);padding:4px 10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:.8rem}
-.w-d-pulso .w-cab h1{position:relative;margin-bottom:.12em;overflow-wrap:normal;hyphens:auto;font-weight:400;font-size:clamp(3.4rem,15cqw,11rem);line-height:.86;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
+.w-d-pulso .w-cab h1{--w-em-letra:.9;position:relative;margin-bottom:.12em;overflow-wrap:normal;hyphens:auto;font-weight:400;font-size:min(clamp(3.4rem,15cqw,11rem),var(--w-h1-tope,99em));line-height:.86;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
 .w-d-pulso .w-cab h1 .w-eco{position:absolute;left:.06em;top:.06em;z-index:-1;color:transparent;-webkit-text-stroke:2px var(--w-c)}
 .w-d-pulso .w-cab .w-lema{font-size:clamp(1.08rem,2.2cqw,1.4rem);font-weight:600;max-width:32ch;color:#e6e6e6}
 .w-d-pulso .w-boton{border-radius:0;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#fff;border-width:2px}
@@ -82,7 +82,7 @@ ${lema(c)}${c.bloqueAcciones}
 .w-d-pulso .w-sec h2{font-weight:400;text-transform:uppercase;font-size:clamp(2.8rem,10cqw,6rem);line-height:.9}
 .w-d-pulso .w-sec h2::after{display:none}
 .w-d-pulso .w-sec:nth-of-type(even){background:var(--w-negro);color:#fff;--w-suave:#cfcfcf;--w-borde:#333;--w-panel:#1a1a1a;--w-ct:var(--w-ct-oscuro)}
-.w-d-pulso .w-servicios>li{counter-increment:w-srv;position:relative;border-radius:0;border:0;border-top:3px solid currentColor;padding-top:clamp(56px,8cqw,90px);background:transparent}
+.w-d-pulso .w-servicios>li{counter-increment:w-srv;position:relative;display:block;border-radius:0;border:0;border-top:3px solid currentColor;padding-top:clamp(56px,8cqw,90px);background:transparent}
 .w-d-pulso .w-servicios>li::before{content:counter(w-srv,decimal-leading-zero);position:absolute;top:6px;left:0;font:400 clamp(3.4rem,8cqw,5.4rem)/1 var(--w-ft-titulo);color:transparent;-webkit-text-stroke:2px currentColor}
 .w-d-pulso .w-servicio h3{font-family:var(--w-ft-titulo);font-weight:400;text-transform:uppercase;font-size:clamp(1.5rem,3cqw,2rem)}
 .w-d-pulso .w-precio{background:var(--w-c);color:var(--w-s);border-radius:0;font-weight:800}

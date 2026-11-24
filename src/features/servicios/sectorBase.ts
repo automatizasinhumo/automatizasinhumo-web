@@ -2,7 +2,7 @@
  * Reconocer el sector a partir de lo que escribe el cliente. Sin más dependencias que los datos:
  * así lo puede importar el render de la web (webs.ts) sin ciclos con sectores.ts.
  */
-import datos from '../../data/sectores-web.json';
+import datos from '../../data/sectores-web.json' with { type: 'json' };
 
 export interface SectorBase {
   id: string;

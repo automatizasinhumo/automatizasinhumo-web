@@ -60,7 +60,7 @@ ${destacado}
 .w-d-escaparate .w-hueco{position:relative;display:grid;place-items:center;min-height:150px;border-radius:var(--w-r);background:var(--w-panel);overflow:hidden}
 .w-d-escaparate .w-hueco-txt{grid-template-columns:minmax(0,1fr);grid-column:1/-1;place-items:start;align-content:end;gap:14px;padding:clamp(22px,4cqw,44px);background:#fff;border:1px solid var(--w-borde)}
 .w-d-escaparate .w-sector{color:var(--w-ct)}
-.w-d-escaparate .w-cab h1{font-weight:800;font-size:clamp(2.2rem,5cqw,4rem);line-height:.92;letter-spacing:-.04em;overflow-wrap:break-word;text-wrap:balance}
+.w-d-escaparate .w-cab h1{font-weight:800;font-size:min(clamp(2.2rem,5cqw,4rem),var(--w-h1-tope,99em));line-height:.92;letter-spacing:-.04em;overflow-wrap:break-word;text-wrap:balance}
 .w-d-escaparate .w-cab .w-lema{max-width:38ch;color:var(--w-suave)}
 .w-d-escaparate .w-boton{border-radius:999px;font-weight:700}
 .w-d-escaparate .w-hueco-vis{grid-column:1/-1;min-height:220px;background:var(--w-crema)}

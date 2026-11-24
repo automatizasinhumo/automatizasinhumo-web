@@ -62,7 +62,7 @@ ${primera ? `<p class="w-cab-dato">${esc(primera[0] ? `${primera[0]} · ${primer
 .w-d-bistro .w-carta-in{border:3px double var(--w-tinta);padding:clamp(26px,5cqw,56px) clamp(18px,4cqw,44px);text-align:center;display:grid;justify-items:center;gap:clamp(12px,1.8cqw,20px)}
 .w-d-bistro .w-adorno{width:min(220px,60%);color:var(--w-ct)}
 .w-d-bistro .w-sector{font-family:var(--w-ft-texto);font-size:.78rem;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:var(--w-suave)}
-.w-d-bistro .w-cab h1{font-size:clamp(2.8rem,9.5cqw,6.4rem);font-weight:500;font-style:italic;line-height:.95;letter-spacing:-.01em;text-wrap:balance}
+.w-d-bistro .w-cab h1{font-size:min(clamp(2.8rem,9.5cqw,6.4rem),var(--w-h1-tope,99em));font-weight:500;font-style:italic;line-height:.95;letter-spacing:-.01em;text-wrap:balance}
 .w-d-bistro .w-cab .w-lema{font-family:var(--w-ft-titulo);font-size:clamp(1.15rem,2.4cqw,1.5rem);max-width:30ch;color:var(--w-suave)}
 .w-d-bistro .w-acciones{justify-content:center}
 .w-d-bistro .w-boton{border-radius:2px;letter-spacing:.06em;text-transform:uppercase;font-size:.85rem;font-weight:600}

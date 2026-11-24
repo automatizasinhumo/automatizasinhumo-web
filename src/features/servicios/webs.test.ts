@@ -168,3 +168,16 @@ describe('capa visual', () => {
     expect(renderWeb(datos({ plantilla: 'escaparate' }))).toContain('w-mv-vivo');
   });
 });
+
+describe('titular sin palabras partidas', () => {
+  it('mide la palabra más larga del nombre, con mínimo 6', async () => {
+    const { palabraMasLarga } = await import('./webs');
+    expect(palabraMasLarga('Talleres Hermanos Gil-Fernández')).toBe(9);
+    expect(palabraMasLarga('Xo')).toBe(6);
+    expect(palabraMasLarga('Electrodomésticos')).toBe(17);
+  });
+  it('la raíz de la web lleva el dato para que cada diseño encoja su titular', async () => {
+    const { renderWeb, EJEMPLO_WEB, PLANTILLAS_WEB } = await import('./webs');
+    for (const p of PLANTILLAS_WEB) expect(renderWeb({ ...EJEMPLO_WEB, negocio: 'Reparaciones Gil', plantilla: p.id }), p.id).toContain('--w-pl:12');
+  });
+});

@@ -438,6 +438,9 @@ export interface OpcionesWeb {
   galeria?: string;
 }
 
+/** Letras de la palabra más larga del nombre (mínimo 6): el titular nunca la parte, se encoge. */
+export const palabraMasLarga = (t: string) => Math.max(6, ...t.split(/[\s\-–—/]+/).map((w) => [...w].length));
+
 /** Zonas escritas por el cliente («Vigo, Redondela; Cangas») como lista. */
 export const listaZonas = (zonas: string): string[] => zonas.split(/[,;\n]/).map((z) => z.trim()).filter(Boolean);
 
@@ -472,7 +475,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   // En un diseño de autor el acento se ajusta a sus propios fondos (no a los genéricos).
   const claro = diseno?.fondoClaro ?? FONDO_TEXTO_CLARO;
   const oscuro = diseno?.fondoOscuro ?? FONDO_TEXTO_OSCURO;
-  const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, claro)};--w-ct-oscuro:${acentoSobre(d.color, oscuro)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto}`;
+  const vars = `--w-c:${d.color};--w-s:${sobreAcento(d.color)};--w-ct-claro:${acentoSobre(d.color, claro)};--w-ct-oscuro:${acentoSobre(d.color, oscuro)};--w-ft-titulo:${letra.titulo};--w-ft-texto:${letra.texto};--w-pl:${palabraMasLarga(d.negocio)}`;
   const capa = resolverCapa(d, diseno?.capa);
   const rel = (href: string) => (href.startsWith('http') ? ' rel="noopener"' : '');
   const tel = d.telefono ? `tel:${digitos(d.telefono)}` : '';
