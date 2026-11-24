@@ -1,0 +1,31 @@
+---
+import { alternativas, CONSULTADO, primerAnio } from '../servicios/comparativaPrecio';
+import { euros } from '../servicios/cv';
+
+interface Props {
+  enlace: string;
+}
+const { enlace } = Astro.props;
+const filas = alternativas();
+const cuota = (c: number) => (c ? `${euros(c)}/mes` : 'Sin cuota');
+---
+
+<section class="py-10 sm:py-12" aria-labelledby="precio-comparado">
+  <h2 id="precio-comparado" class="font-serif text-2xl font-bold text-ink sm:text-3xl">Lo que cuesta el primer año</h2>
+  <p class="mt-2 max-w-2xl text-muted">
+    Un solo pago, con el alojamiento incluido. Así queda frente a lo que se suele pagar por una web de una página.
+  </p>
+  <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-precio-comparado>
+    {filas.map((a) => (
+      <li class:list={['flex flex-col rounded-2xl border p-5', a.nuestra ? 'border-brand bg-surface shadow-sm' : 'border-line']}>
+        <span class:list={['text-sm font-semibold', a.nuestra ? 'text-brand' : 'text-muted']}>{a.quien}</span>
+        <strong class="mt-2 font-serif text-3xl text-ink">{euros(primerAnio(a))}</strong>
+        <span class="text-sm text-muted">el primer año{a.masIva ? ' + IVA' : ''}</span>
+        <span class="mt-3 text-sm text-ink">Alta {euros(a.alta)} · {cuota(a.mes)}</span>
+        <p class="mt-2 text-sm text-muted">{a.nota}</p>
+        {a.nuestra && <a href={enlace} class="boton boton-principal mt-auto pt-4 min-h-11">Hacer la mía</a>}
+      </li>
+    ))}
+  </ul>
+  <p class="mt-4 text-xs text-muted">Referencias: precios publicados por proveedores en España, consultados en {CONSULTADO}. Pueden cambiar.</p>
+</section>
