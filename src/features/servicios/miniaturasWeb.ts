@@ -18,10 +18,38 @@ export const CARPETA_MINIATURAS = '/images/webs/mini/';
  */
 export const CSS_MINI = '.mini{width:250%;transform:scale(.4);transform-origin:0 0}.mini .w-barra{display:none}';
 
-/** Datos con que se enseña cada diseño: los de autor, con su negocio de muestra, su color y su letra. */
+/**
+ * Lo que la muestra de un diseño de autor con negocio propio no define sale de aquí, no del ejemplo
+ * general (una peluquería): si no, la miniatura de un taller o de una panadería contaba «cuidando el
+ * pelo» y opiniones de recogidos de boda. Textos que valen para cualquier negocio.
+ */
+export const MUESTRA_NEUTRA: Readonly<Partial<DatosWeb>> = {
+  sobre:
+    'Somos un negocio de barrio con muchos años de oficio. Te atendemos sin prisas, con precios claros y cumpliendo lo que decimos.\n\nEscríbenos por WhatsApp y te contestamos el mismo día.',
+  opiniones: [
+    { texto: 'Trato cercano y trabajo impecable. Se nota que les gusta lo que hacen.', autor: 'Lucía M.' },
+    { texto: 'Me contestaron el mismo día y todo salió como habíamos quedado. Repetiré.', autor: 'Javier R.' },
+  ],
+  preguntas: [
+    { pregunta: '¿Hace falta avisar antes?', respuesta: 'Te recomendamos escribirnos por WhatsApp: así te damos hora y no esperas.' },
+    { pregunta: '¿Cómo puedo pagar?', respuesta: 'Con tarjeta, Bizum o en efectivo.' },
+  ],
+  direccion: 'Calle Mayor 1',
+};
+
+/** hola@<negocio sin tildes, espacios ni signos>.es */
+export const correoMuestra = (negocio: string): string =>
+  `hola@${negocio.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '') || 'tunegocio'}.es`;
+
+/**
+ * Datos con que se enseña cada diseño: los de autor, con su negocio de muestra, su color y su letra.
+ * Si la muestra trae otro negocio, lo que no define sale de MUESTRA_NEUTRA y el correo, de su nombre.
+ */
 export function datosMiniatura(id: DatosWeb['plantilla'], ejemplo: DatosWeb = EJEMPLO_WEB): DatosWeb {
   const x = disenoWeb(id);
-  return x ? { ...ejemplo, ...x.muestra, plantilla: id, color: x.color, letra: 'diseno' } : { ...ejemplo, plantilla: id };
+  if (!x) return { ...ejemplo, plantilla: id };
+  const propio = x.muestra.negocio ? { ...MUESTRA_NEUTRA, email: correoMuestra(x.muestra.negocio) } : {};
+  return { ...ejemplo, ...propio, ...x.muestra, plantilla: id, color: x.color, letra: 'diseno' };
 }
 
 const huellas = new Map<string, string>();
