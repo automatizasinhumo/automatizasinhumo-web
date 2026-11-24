@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { PASOS_TOUR } from './tour';
+import { GUIAS_PANTALLA, PASOS_PORTADA_LIMPIO, PASOS_SERVICIOS, PASOS_TOUR } from './tour';
 
 function astros(dir: string): string[] {
   return readdirSync(dir).flatMap((n) => {
@@ -41,5 +41,35 @@ describe('manifiesto del tour', () => {
       expect(p.titulo.length, p.id).toBeLessThanOrEqual(40);
       expect(p.texto.length, p.id).toBeLessThanOrEqual(140);
     }
+  });
+});
+
+describe('guías por pantalla del tema limpio', () => {
+  const leer = (p: string) => readFileSync(p, 'utf8');
+  const casos = [
+    ['portada-limpio', PASOS_PORTADA_LIMPIO, 'src/themes/limpio/Home.astro', 'src/pages/index.astro'],
+    ['servicios', PASOS_SERVICIOS, 'src/themes/limpio/Servicios.astro', 'src/pages/servicios/index.astro'],
+  ] as const;
+  it.each(casos)('%s: cada paso tiene un único bloque y la página monta la guía', (clave, pasos, tema, pagina) => {
+    const fuente = leer(tema);
+    for (const { id } of pasos) {
+      const n = fuente.split(`data-tour="${id}"`).length - 1 + fuente.split(`'${id}'`).length - 1;
+      expect(n, id).toBe(1);
+    }
+    expect(leer(pagina)).toContain(`<TourInvitacion pantalla="${clave}" />`);
+    expect(GUIAS_PANTALLA[clave]).toBe(pasos);
+  });
+  it('textos breves en todas las guías', () => {
+    for (const pasos of Object.values(GUIAS_PANTALLA))
+      for (const p of pasos) {
+        expect(p.titulo.length, p.id).toBeLessThanOrEqual(40);
+        expect(p.texto.length, p.id).toBeLessThanOrEqual(140);
+      }
+  });
+  it('/servicios ya no explica cuántos servicios y familias hay', () => {
+    expect(leer('src/themes/limpio/Servicios.astro')).not.toMatch(/servicios listos hoy|totalListos/);
+  });
+  it('los pasos de «Así de fácil» no dependen de una animación de scroll para verse', () => {
+    expect(leer('src/themes/limpio/ui/Pasos.astro')).not.toMatch(/animation-timeline/);
   });
 });

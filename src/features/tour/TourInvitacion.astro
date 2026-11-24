@@ -1,19 +1,34 @@
 ---
 /**
- * Tour de bienvenida de la portada con Driver.js (MIT, https://github.com/nilbuild/driver.js).
- * Sale solo una vez por visita, sin que haya que activarlo (src/features/tour/guia.ts): cada
- * ventanita trae la X y «No volver a mostrar». El enlace «Ver guía» del pie (`/#guia`) la
- * reabre siempre. Los pasos salen de src/data/tour.ts; uno cuyo bloque no esté visible se salta.
- * Script empaquetado (sin is:inline) para no sumar excepciones a la CSP.
+ * Guía de bienvenida de una pantalla con Driver.js (MIT, https://github.com/nilbuild/driver.js).
+ * Sale sola una vez por visita (src/features/tour/guia.ts): cada ventanita trae la X y
+ * «No volver a mostrar». El enlace «Ver guía» del pie (`#guia`) la reabre siempre. Los pasos
+ * salen de GUIAS_PANTALLA (src/data/tour.ts); uno cuyo bloque no esté visible se salta.
+ * Script empaquetado (sin is:inline) para no sumar excepciones a la CSP: la pantalla le llega
+ * por un atributo data-, no por una variable en el script.
  */
+import type { PantallaGuia } from '../../data/tour';
+
+interface Props {
+  pantalla?: PantallaGuia;
+}
+const { pantalla = 'portada' } = Astro.props;
 ---
+
+<span hidden data-guia-pantalla={pantalla}></span>
 
 <script>
   import { guiar } from './guia';
-  import { ANCLA_TOUR, PASOS_TOUR } from '../../data/tour';
+  import { ANCLA_TOUR, GUIAS_PANTALLA, type PantallaGuia } from '../../data/tour';
 
-  const pasos = PASOS_TOUR.map((p) => ({ guia: p.id, titulo: p.titulo, texto: p.texto }));
-  const abrir = (auto: boolean) => guiar(pasos, { atributo: 'data-tour', clave: 'portada', auto });
+  const pantalla = (document.querySelector<HTMLElement>('[data-guia-pantalla]')?.dataset.guiaPantalla ??
+    'portada') as PantallaGuia;
+  const pasos = (GUIAS_PANTALLA[pantalla] ?? GUIAS_PANTALLA.portada).map((p) => ({
+    guia: p.id,
+    titulo: p.titulo,
+    texto: p.texto,
+  }));
+  const abrir = (auto: boolean) => guiar(pasos, { atributo: 'data-tour', clave: pantalla, auto });
 
   const pedidaPorEnlace = () => {
     if (location.hash !== `#${ANCLA_TOUR}`) return false;

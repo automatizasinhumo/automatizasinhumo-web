@@ -52,3 +52,25 @@ export const PASOS_TOUR: readonly PasoTour[] = [
     texto: 'Cuéntanos tu caso y te respondemos por email o Telegram. Puedes volver a ver esta guía desde el pie de página.',
   },
 ];
+
+/** Portada del tema limpio: la que tiene su propia Home.astro. */
+export const PASOS_PORTADA_LIMPIO: readonly PasoTour[] = [
+  { id: 'empieza', titulo: 'Empieza por aquí', texto: 'Haz el test y te recomendamos el servicio, o mira todos los que hay.' },
+  { id: 'atajos', titulo: 'O ve directo', texto: 'Toca un servicio y empiezas a rellenarlo al momento.' },
+  { id: 'como-funciona', titulo: 'Así de fácil', texto: 'Eliges, rellenas tus datos y lo ves terminado antes de pagar.' },
+];
+
+/** Catálogo (/servicios). */
+export const PASOS_SERVICIOS: readonly PasoTour[] = [
+  { id: 'familias', titulo: 'Elige una familia', texto: 'Currículum, webs, tarjetas… Toca una y te llevamos a sus servicios.' },
+  { id: 'indice', titulo: 'Salta entre familias', texto: 'Esta barra te acompaña al bajar: tócala para cambiar de familia.' },
+  { id: 'primera-familia', titulo: 'Entra en un servicio', texto: 'Cada tarjeta trae su precio. Lo rellenas y lo ves antes de pagar.' },
+];
+
+/** Guías por pantalla: TourInvitacion recibe la clave y saca de aquí sus pasos. */
+export const GUIAS_PANTALLA = {
+  portada: PASOS_TOUR,
+  'portada-limpio': PASOS_PORTADA_LIMPIO,
+  servicios: PASOS_SERVICIOS,
+} as const satisfies Record<string, readonly PasoTour[]>;
+export type PantallaGuia = keyof typeof GUIAS_PANTALLA;
