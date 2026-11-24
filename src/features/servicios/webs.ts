@@ -125,12 +125,18 @@ export function aspectoAlElegir(
   plantilla: string,
   actual: { color: string; letra: string },
   porDefecto: { color: string; letra: string },
+  anterior = '',
 ): { color: string; letra: string } {
   const x = disenoWeb(plantilla);
   if (x) return { color: x.color, letra: 'diseno' };
-  if (actual.letra === 'diseno') return { color: porDefecto.color, letra: porDefecto.letra };
-  return { color: actual.color, letra: actual.letra };
+  const letra = actual.letra === 'diseno' ? porDefecto.letra : actual.letra;
+  // El color que trajo el diseño anterior no es del cliente: si no lo cambió, también vuelve al de por defecto.
+  const heredado = actual.letra === 'diseno' || actual.color === disenoWeb(anterior)?.color;
+  return { color: heredado ? porDefecto.color : actual.color, letra };
 }
+
+/** Capa y secciones que «Usa una plantilla» (tal cual) devuelve a las del diseño. */
+export const CAPA_TAL_CUAL = { acabado: 'auto', formaFoto: 'auto', movimiento: 'auto', variantes: '0.0.0.0.0' } as const;
 
 export function pasoVecino(camino: CaminoWeb, actual: string, salto: 1 | -1): IdPasoWeb | '' {
   const pasos = pasosDelCamino(camino);

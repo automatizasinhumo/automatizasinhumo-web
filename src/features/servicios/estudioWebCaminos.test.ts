@@ -79,5 +79,10 @@ describe('pasos por camino', () => {
     // Si el cliente ya eligió su letra y color, cambiar entre básicas no los toca.
     const propio = { color: '#abcdef', letra: 'serif' };
     expect(aspectoAlElegir(basica.id, propio, def)).toEqual(propio);
+    // Con letra propia pero el color del diseño anterior sin tocar: el color vuelve al de por defecto.
+    const conLetra = { color: disenoWeb(autor.id)!.color, letra: 'serif' };
+    expect(aspectoAlElegir(basica.id, conLetra, def, autor.id)).toEqual({ color: def.color, letra: 'serif' });
+    // Si cambió también el color, se respeta.
+    expect(aspectoAlElegir(basica.id, propio, def, autor.id)).toEqual(propio);
   });
 });

@@ -15,7 +15,7 @@ import { protegerVista } from './protegerVista';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { CSS_MINI, datosMiniatura } from './miniaturasWeb';
-import { aspectoAlElegir, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
+import { aspectoAlElegir, CAPA_TAL_CUAL, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
 type Fila = Record<string, string>;
@@ -1088,6 +1088,8 @@ export function iniciarEstudioWeb() {
     if (c === 'plantilla' && estado.plantilla) {
       const x = disenoWeb(estado.plantilla);
       Object.assign(estado, x ? { color: x.color, letra: 'diseno' } : { color: cfg.porDefecto.color, letra: cfg.porDefecto.letra });
+      // Acabado, forma de foto, movimiento y variantes de sección tampoco se ven en este camino.
+      for (const [k, v] of Object.entries(CAPA_TAL_CUAL)) campo(k as keyof typeof CAPA_TAL_CUAL).value = v;
     }
     aplicarCamino();
     persistir();
@@ -1366,13 +1368,14 @@ export function iniciarEstudioWeb() {
       return guardar(estado);
     }
     if (c.name === 'plantilla' || c.name === 'plantilla-rapida') {
+      const anterior = estado.plantilla;
       estado.plantilla = c.value;
       $('[data-error="plantilla"]')!.hidden = true;
       // Cada plantilla trae su orden de secciones; el cliente lo puede cambiar después.
       const elegida = PLANTILLAS_WEB.find((p) => p.id === c.value);
       // Un diseño de autor llega con su color y su letra (el cliente los puede cambiar después);
       // al volver a una básica, «la del diseño» pasa a la letra por defecto.
-      Object.assign(estado, aspectoAlElegir(c.value, estado, cfg.porDefecto));
+      Object.assign(estado, aspectoAlElegir(c.value, estado, cfg.porDefecto, anterior));
       if (elegida) {
         const lista = $('[data-orden]')!;
         for (const id of ordenWeb(elegida.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);
