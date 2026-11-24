@@ -130,3 +130,19 @@ describe('servicios puestos por nosotros', () => {
     expect(esServicioDeSector({ nombre: 'Corte', precio: '', texto: 'A mi manera' })).toBe(false);
   });
 });
+
+describe('ideas para la frase de presentación', () => {
+  it('da tres frases distintas, con el lugar y sin pasar de 140', async () => {
+    const { ideasDeLema } = await import('./sectores');
+    const ideas = ideasDeLema('peluquería', 'Peluquería Ana', 'Calle Mayor 3, Vigo');
+    expect(ideas).toHaveLength(3);
+    expect(ideas.every((t) => t.includes('Vigo') && t.length <= 140)).toBe(true);
+    expect(ideas[1]).toContain('reservar cita');
+  });
+  it('funciona sin sector conocido ni negocio', async () => {
+    const { ideasDeLema } = await import('./sectores');
+    const ideas = ideasDeLema('', '');
+    expect(ideas.length).toBeGreaterThanOrEqual(2);
+    expect(ideas.every((t) => t.trim().length > 5)).toBe(true);
+  });
+});
