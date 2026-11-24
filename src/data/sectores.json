@@ -120,5 +120,25 @@
     "demoHints": [
       "auto-repair"
     ]
+  },
+  {
+    "slug": "dentistas",
+    "label": "Dentistas",
+    "title": "Web para clínicas dentales: tratamientos, cita online y urgencias",
+    "description": "Una web para clínicas dentales y de ortodoncia con tratamientos, financiación, urgencias y cita online, que tranquiliza al paciente antes de llamar.",
+    "heading": "Una web que quite el miedo al dentista",
+    "introduction": "Quien busca dentista quiere saber si le atenderán pronto, si duele y cuánto le va a costar. La web debe responder eso con calma, enseñar a tu equipo y dejar pedir cita sin esperar al teléfono.",
+    "considerations": [
+      "Explica cada tratamiento en lenguaje sencillo: qué es, cuántas visitas lleva y si hay primera visita gratuita.",
+      "Deja claro cómo se atienden las urgencias y en qué horario, con el teléfono siempre a mano.",
+      "Indica si trabajas con mutuas o financiación y qué documentación debe traer el paciente."
+    ],
+    "serviceSlugs": [
+      "pagina-citas",
+      "web-una-pagina"
+    ],
+    "demoHints": [
+      "dental-clinic"
+    ]
   }
 ]

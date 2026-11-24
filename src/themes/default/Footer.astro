@@ -38,7 +38,7 @@ const { model } = Astro.props;
   </div>
   {
     model.sectorLinks.length > 0 && (
-      <section aria-labelledby="pie-sectores" class="mx-auto max-w-6xl px-6 pb-10 text-sm">
+      <section aria-labelledby="pie-sectores" data-visual-crece class="mx-auto max-w-6xl px-6 pb-10 text-sm">
         <h2 id="pie-sectores" class="font-semibold text-white">Webs por sector</h2>
         <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
           {model.sectorLinks.map((link) => (

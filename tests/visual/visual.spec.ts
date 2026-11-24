@@ -4,8 +4,10 @@
 // Para aceptar un cambio visual a propósito: lanzar el workflow «QA visual» a mano con
 // actualizar=true y fusionar las capturas nuevas que sube como commit.
 import { expect, test, type Page } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import { CLAVE_GUIAS } from '../../src/data/tour';
 
+const STYLESHEET_CRECE = fileURLToPath(new URL('./ocultar-crece.css', import.meta.url));
 const ANCHOS = [360, 390, 768, 1280] as const;
 const PAGINAS = [
   ['inicio', '/'],
@@ -65,6 +67,9 @@ for (const ancho of ANCHOS) {
           fullPage: true,
           // Contenido que cambia solo (fechas, contadores aleatorios): se tapa.
           mask: [page.locator('time, [data-visual-variable]')],
+          // Listas que crecen con el catálogo (una fila más por cada página de sector nueva): fuera,
+          // o cada alta cambia la altura de todas las capturas.
+          stylePath: STYLESHEET_CRECE,
         });
       });
     }

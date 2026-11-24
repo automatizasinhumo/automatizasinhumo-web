@@ -11,6 +11,7 @@ import { fotograma } from './fotograma';
 import { herbario } from './herbario';
 import { lamina } from './lamina';
 import { matricula } from './matricula';
+import { sonrisa } from './sonrisa';
 import { indice } from './indice';
 import { expediente } from './expediente';
 import { navaja } from './navaja';
@@ -24,7 +25,7 @@ import { vinetas } from './vinetas';
 export type { ContextoDiseno, Diseno, IconoWeb } from './tipos';
 export { cssFuentes, FUENTES_WEB } from './fuentes';
 
-export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal, carta, cuaderno, fotograma, escaparate, herbario, lamina, matricula];
+export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal, carta, cuaderno, fotograma, escaparate, herbario, lamina, matricula, sonrisa];
 
 export const disenoWeb = (id: string): Diseno | undefined => DISENOS.find((x) => x.id === id);
 
