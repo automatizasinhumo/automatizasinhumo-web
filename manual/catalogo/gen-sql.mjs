@@ -1,18 +1,11 @@
 // node manual/catalogo/gen-sql.mjs > manual/catalogo/seed.sql
 // Sustituye el catálogo demo de Minshop por el catálogo de servicios.
 import { existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { categorias, productos, paginas } from './catalogo.mjs';
 import { descripcion } from './descripcion.mjs';
+import { pid } from './ids.mjs';
 import { DEMOS, DEMOS_URL, INTERACTIVAS, demosDe } from '../demos/demos.mjs';
 
-const ALPHA = '0123456789abcdefghjkmnpqrstvwxyz';
-// Id público estable: sale del tipo y de una clave única (slug…), no del azar. Así
-// regenerar el seed solo cambia lo que cambia en catalogo.mjs y los ids no bailan.
-const pid = (p, clave) => {
-  const h = createHash('sha256').update(`${p}:${clave}`).digest();
-  return `${p}_${Array.from({ length: 10 }, (_, i) => ALPHA[h[i] % 32]).join('')}`;
-};
 const q = (s) => (s == null ? 'NULL' : `'${String(s).replace(/'/g, "''")}'`);
 
 const out = [];

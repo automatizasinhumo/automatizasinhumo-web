@@ -38,6 +38,7 @@ export const ICONO_PROD = {
   'etiquetas-codigo-barras': 'barcode', 'optimizar-imagenes': 'photo-down', 'logo-vectorial': 'vector', 'limpieza-csv': 'table',
   'plantilla-inventario': 'packages', 'informe-graficos': 'chart-pie', 'dossier-comercial': 'presentation', 'diagramas-procesos': 'sitemap',
   'descripciones-producto-ia': 'sparkles', 'carruseles-redes': 'carousel-horizontal', 'tarjeta-digital': 'id-badge-2', 'lista-espera': 'clock',
+  'cv-linkedin': 'user-circle', 'cv-infojobs': 'list-check',
 };
 // Captura preferida cuando la primera demo es un índice genérico de plantillas.
 const CAPTURA = {
@@ -47,6 +48,8 @@ const CAPTURA = {
 
 const B = { bg: '#F5F7F4', ink: '#172D2D', brand: '#176B5A', acc: '#B34A28', line: '#D5DDD8', tint: '#E3EDE8' };
 const FONT = "'Space Grotesk', 'Segoe UI', Arial, sans-serif";
+// «Listo en 24 h», pero «Listo al momento» (no «Listo en Al momento», 24/11).
+export const listo = (plazo) => (!plazo ? 'Precio cerrado' : /^al\s/i.test(plazo) ? `Listo ${plazo.replace(/^al/i, 'al')}` : `Listo en ${plazo}`);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const catNombre = Object.fromEntries(categorias.map((c) => [c.slug, c.nombre]));
 
@@ -119,7 +122,7 @@ function conFicha(p, ico) {
 <rect x="${X + 50}" y="${Y + 50}" width="150" height="150" rx="32" fill="${B.tint}"/>
 ${usa(ico, X + 80, Y + 80, 90, B.brand, 1.6)}
 <text x="${X + 240}" y="${Y + 105}" font-family="${FONT}" font-size="26" font-weight="700" letter-spacing="3" fill="${B.brand}">LO QUE RECIBES</text>
-<text x="${X + 240}" y="${Y + 165}" font-family="${FONT}" font-size="46" font-weight="700" fill="${B.ink}">${esc(p.plazo ? `Listo en ${p.plazo}` : 'Precio cerrado')}</text>
+<text x="${X + 240}" y="${Y + 165}" font-family="${FONT}" font-size="46" font-weight="700" fill="${B.ink}">${esc(listo(p.plazo))}</text>
 <line x1="${X + 50}" y1="${Y + 240}" x2="${X + W - 50}" y2="${Y + 240}" stroke="${B.line}" stroke-width="2"/>
 ${filas}
 ${pastilla(p, ICONO_CAT[p.cat] ?? ico)}</svg>`;

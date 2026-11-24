@@ -84,7 +84,7 @@ export const FAMILIAS: readonly FamiliaCatalogo[] = [
         icono: 'qrcode',
         puntos: ['Con los datos de tu CV', 'Botón «Guardar contacto»', 'QR para imprimir'],
         href: '/servicios/cv#tarjeta',
-        desde: EXTRAS_CV[0]!.precio,
+        desde: EXTRAS_CV.find((x) => x.id === 'tarjeta')!.precio,
         muestra: { tipo: 'tarjeta', nombre: 'Lucía Martín Ortega', cargo: 'Responsable de atención al cliente', telefono: '+34 600 123 456', email: 'lucia.martin@correo.es' },
       },
       {

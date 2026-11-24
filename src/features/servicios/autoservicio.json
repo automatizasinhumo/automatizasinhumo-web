@@ -15,6 +15,18 @@
     "estudio": "/servicios/cv",
     "precio": 500
   },
+  "cv-linkedin": {
+    "producto": "prod_sy8s9tbnkj",
+    "nombre": "Tu CV en LinkedIn",
+    "estudio": "/servicios/cv",
+    "precio": 500
+  },
+  "cv-infojobs": {
+    "producto": "prod_agk2kty5s2",
+    "nombre": "Tu CV en InfoJobs",
+    "estudio": "/servicios/cv",
+    "precio": 500
+  },
   "web-una-pagina": {
     "producto": "prod_pv3z0zenn8",
     "nombre": "Web de una página",

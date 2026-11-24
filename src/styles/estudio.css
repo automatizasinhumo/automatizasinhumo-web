@@ -624,22 +624,15 @@
   .extras-lista > .extra:first-child {
     margin-top: 0;
   }
-  .portales summary {
-    display: grid;
-    gap: var(--ds-hueco-1);
-    cursor: pointer;
-  }
-  .portales summary small {
+  .portal-pasos {
+    margin: var(--ds-hueco-3) 0;
+    padding-left: 1.4em;
+    list-style: decimal;
     color: var(--color-muted);
+    font-size: var(--ds-texto-small);
   }
-  .gratis {
-    justify-self: start;
-    padding: 0 var(--ds-hueco-2);
-    border-radius: 999px;
-    background: var(--color-brand);
-    color: var(--color-bg, #fff);
-    font-size: 0.8rem;
-    font-weight: 700;
+  .portal-pasos li + li {
+    margin-top: var(--ds-hueco-1);
   }
   .portales-lista {
     display: grid;

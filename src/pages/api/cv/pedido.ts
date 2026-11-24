@@ -18,5 +18,5 @@ export const POST: APIRoute = async ({ request }) => {
   const p = await pedidoAuto(env.DB, body?.token);
   if (!p) return json({ ok: false }, 404);
   const t = p.tarjeta ? await tarjetaDePedido(env.DB, p.publicId) : null;
-  return json({ ok: true, ref: p.ref, cv: p.cv, tarjeta: p.tarjeta ? { slug: t?.slug ?? null, datos: t?.datos ?? null } : null });
+  return json({ ok: true, ref: p.ref, cv: p.cv, linkedin: p.linkedin, infojobs: p.infojobs, tarjeta: p.tarjeta ? { slug: t?.slug ?? null, datos: t?.datos ?? null } : null });
 };

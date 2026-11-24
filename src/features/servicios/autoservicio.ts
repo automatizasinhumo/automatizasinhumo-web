@@ -26,6 +26,8 @@ export const AUTOSERVICIO: Readonly<Record<string, ServicioAuto>> = servicios;
 export const SLUG_CV = 'cv-profesional';
 export const SLUG_TARJETA = 'tarjeta-digital';
 export const SLUG_WEB = 'web-una-pagina';
+export const SLUG_LINKEDIN = 'cv-linkedin';
+export const SLUG_INFOJOBS = 'cv-infojobs';
 
 export const esAutoservicio = (slug: string): boolean => Object.hasOwn(AUTOSERVICIO, slug);
 

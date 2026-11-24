@@ -30,4 +30,17 @@ describe('fichas del catálogo', () => {
     const generado = execFileSync('node', ['manual/catalogo/gen-sql.mjs'], { encoding: 'utf8' });
     expect(generado.replace(/\r\n/g, '\n')).toBe(readFileSync('manual/catalogo/seed.sql', 'utf8').replace(/\r\n/g, '\n'));
   });
+
+  it('gen-update da de alta los servicios que faltan, con su categoría y portada (no solo UPDATE)', () => {
+    const sql = execFileSync('node', ['manual/catalogo/gen-update.mjs'], { encoding: 'utf8' });
+    for (const p of productos) {
+      const s = p.slug.replace(/'/g, "''");
+      const fin = sql.indexOf(`WHERE NOT EXISTS (SELECT 1 FROM products WHERE slug='${s}');`);
+      expect(fin, p.slug).toBeGreaterThan(0);
+      const alta = sql.slice(sql.lastIndexOf('INSERT INTO products', fin), fin);
+      // Un autoservicio entra con el id público de autoservicio.json: es el que mete el estudio en el carrito.
+      if (p.auto) expect(alta).toContain(`'${p.auto.producto}'`);
+      expect(sql).toContain(`p.slug='${s}' AND c.slug='${p.cat}' AND NOT EXISTS`);
+    }
+  });
 });

@@ -876,6 +876,78 @@ _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tarjeta-digital' AND c.slug='identidad';
 UPDATE products SET image_key='productos/tarjeta-digital.jpg' WHERE slug='tarjeta-digital';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tarjeta-digital.jpg', 0, 'pimg_w9121dqbmd' FROM products WHERE slug='tarjeta-digital';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Tu CV en LinkedIn, listo para copiar y pegar', 'Los datos de tu CV partidos en trozos con el nombre de cada casilla de LinkedIn, con aviso si algo no cabe y una guía paso a paso.
+
+## Qué recibes
+- Cada casilla de tu perfil con su texto listo para copiar
+- Aviso cuando un texto supera el límite de LinkedIn
+- Guía paso a paso para rellenar el perfil
+- Archivo descargable con todo
+
+## No incluye
+- Acceso a tu cuenta de LinkedIn ni publicación por nuestra parte
+- Fotografía de perfil o de portada
+- Redacción nueva del contenido
+- LinkedIn Premium u otras suscripciones
+- Garantía de entrevistas o contratación
+
+## Campos que rellenas
+- Titular y ubicación
+- Acerca de
+- Experiencia y formación
+- Aptitudes, idiomas y cursos
+
+## Ejemplo
+> Marta, administrativa: termina su CV, añade LinkedIn y en diez minutos tiene el perfil completo pegando casilla a casilla.
+
+**Plazo:** al momento. Lo preparas tú en el estudio y, al pagar, lo descargas o queda publicado sin esperas.
+
+## Cómo funciona
+**Hazlo ahora en el [estudio](/servicios/cv):** eliges el diseño, rellenas tus datos y lo ves al momento con una marca de agua de vista previa.
+
+**Al pagar** se quita la marca: descargas la versión final o se publica en tu enlace, y queda guardado en tu pedido.
+
+_Te atiende David Porto Díaz, una persona real que responde a tus dudas._
+', 500, 'eur', 999, 1, 'cv-linkedin', NULL, 0, 'prod_sy8s9tbnkj', datetime('2026-01-01', '-17 minutes'));
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='cv-linkedin' AND c.slug='identidad';
+UPDATE products SET image_key='productos/cv-linkedin.jpg' WHERE slug='cv-linkedin';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/cv-linkedin.jpg', 0, 'pimg_a6ayd9y99v' FROM products WHERE slug='cv-linkedin';
+INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Tu CV en InfoJobs, listo para copiar y pegar', 'Los datos de tu CV en trozos con el nombre de cada casilla de «Mi CV» de InfoJobs, con guía paso a paso y archivo para descargar.
+
+## Qué recibes
+- Cada casilla de «Mi CV» con su texto listo para copiar
+- Guía paso a paso para rellenarlo
+- Resumen listo para la carta de presentación
+- Archivo descargable con todo
+
+## No incluye
+- Acceso a tu cuenta de InfoJobs ni inscripción en ofertas por nuestra parte
+- Redacción nueva del contenido
+- Suscripciones de pago de InfoJobs
+- Fotografía para el perfil
+- Garantía de entrevistas o contratación
+
+## Campos que rellenas
+- Puesto que buscas y localidad
+- Experiencia
+- Estudios
+- Idiomas y conocimientos
+
+## Ejemplo
+> Luis, mozo de almacén: añade InfoJobs al comprar su CV y rellena «Mi CV» copiando cada trozo en su casilla.
+
+**Plazo:** al momento. Lo preparas tú en el estudio y, al pagar, lo descargas o queda publicado sin esperas.
+
+## Cómo funciona
+**Hazlo ahora en el [estudio](/servicios/cv):** eliges el diseño, rellenas tus datos y lo ves al momento con una marca de agua de vista previa.
+
+**Al pagar** se quita la marca: descargas la versión final o se publica en tu enlace, y queda guardado en tu pedido.
+
+_Te atiende David Porto Díaz, una persona real que responde a tus dudas._
+', 500, 'eur', 999, 1, 'cv-infojobs', NULL, 0, 'prod_agk2kty5s2', datetime('2026-01-01', '-18 minutes'));
+INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='cv-infojobs' AND c.slug='identidad';
+UPDATE products SET image_key='productos/cv-infojobs.jpg' WHERE slug='cv-infojobs';
+INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/cv-infojobs.jpg', 0, 'pimg_tay0m24bg1' FROM products WHERE slug='cv-infojobs';
 INSERT INTO products (name, description, price_cents, currency, stock, active, slug, variant_label, requires_shipping, public_id, created_at) VALUES ('Página de enlaces para tu bio con estadísticas', 'Tu alternativa a Linktree, en tu dominio y sin cuota mensual, con clics medidos.
 
 ## Qué recibes
@@ -919,7 +991,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 3900, 'eur', 999, 1, 'link-in-bio', 'Modalidad', 0, 'prod_qexe7mfa5k', datetime('2026-01-01', '-17 minutes'));
+', 3900, 'eur', 999, 1, 'link-in-bio', 'Modalidad', 0, 'prod_qexe7mfa5k', datetime('2026-01-01', '-19 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='link-in-bio' AND c.slug='identidad';
 UPDATE products SET image_key='productos/link-in-bio.jpg' WHERE slug='link-in-bio';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/link-in-bio.jpg', 0, 'pimg_ymfbqqtdac' FROM products WHERE slug='link-in-bio';
@@ -962,7 +1034,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Al pagar** se quita la marca: descargas la versión final o se publica en tu enlace, y queda guardado en tu pedido.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 900, 'eur', 999, 1, 'cv-profesional', 'Modalidad', 0, 'prod_4mkgycmnyq', datetime('2026-01-01', '-18 minutes'));
+', 900, 'eur', 999, 1, 'cv-profesional', 'Modalidad', 0, 'prod_4mkgycmnyq', datetime('2026-01-01', '-20 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='cv-profesional' AND c.slug='identidad';
 UPDATE products SET image_key='productos/cv-profesional.jpg' WHERE slug='cv-profesional';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/cv-profesional.jpg', 0, 'pimg_ap1gsrzgk4' FROM products WHERE slug='cv-profesional';
@@ -1011,7 +1083,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'muro-testimonios', 'Modalidad', 0, 'prod_e6fh1yehs1', datetime('2026-01-01', '-19 minutes'));
+', 4900, 'eur', 999, 1, 'muro-testimonios', 'Modalidad', 0, 'prod_e6fh1yehs1', datetime('2026-01-01', '-21 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='muro-testimonios' AND c.slug='identidad';
 UPDATE products SET image_key='productos/muro-testimonios.jpg' WHERE slug='muro-testimonios';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/muro-testimonios.jpg', 0, 'pimg_ytk34kqr0r' FROM products WHERE slug='muro-testimonios';
@@ -1060,7 +1132,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 3900, 'eur', 999, 1, 'formulario-aviso-telegram', 'Modalidad', 0, 'prod_jf6b9z7q44', datetime('2026-01-01', '-20 minutes'));
+', 3900, 'eur', 999, 1, 'formulario-aviso-telegram', 'Modalidad', 0, 'prod_jf6b9z7q44', datetime('2026-01-01', '-22 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='formulario-aviso-telegram' AND c.slug='captacion';
 UPDATE products SET image_key='productos/formulario-aviso-telegram.jpg' WHERE slug='formulario-aviso-telegram';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/formulario-aviso-telegram.jpg', 0, 'pimg_pfbad1azgy' FROM products WHERE slug='formulario-aviso-telegram';
@@ -1108,7 +1180,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 7900, 'eur', 999, 1, 'lista-espera', 'Modalidad', 0, 'prod_qzb0e1528w', datetime('2026-01-01', '-21 minutes'));
+', 7900, 'eur', 999, 1, 'lista-espera', 'Modalidad', 0, 'prod_qzb0e1528w', datetime('2026-01-01', '-23 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='lista-espera' AND c.slug='captacion';
 UPDATE products SET image_key='productos/lista-espera.jpg' WHERE slug='lista-espera';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/lista-espera.jpg', 0, 'pimg_p6na4p6tpc' FROM products WHERE slug='lista-espera';
@@ -1157,7 +1229,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 5900, 'eur', 999, 1, 'avisos-multicanal', 'Modalidad', 0, 'prod_ahqjj0jsht', datetime('2026-01-01', '-22 minutes'));
+', 5900, 'eur', 999, 1, 'avisos-multicanal', 'Modalidad', 0, 'prod_ahqjj0jsht', datetime('2026-01-01', '-24 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='avisos-multicanal' AND c.slug='captacion';
 UPDATE products SET image_key='productos/avisos-multicanal.jpg' WHERE slug='avisos-multicanal';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/avisos-multicanal.jpg', 0, 'pimg_k7nwn73fgt' FROM products WHERE slug='avisos-multicanal';
@@ -1206,7 +1278,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 9900, 'eur', 999, 1, 'bot-telegram-chatgpt', 'Modalidad', 0, 'prod_q63f0mb3tr', datetime('2026-01-01', '-23 minutes'));
+', 9900, 'eur', 999, 1, 'bot-telegram-chatgpt', 'Modalidad', 0, 'prod_q63f0mb3tr', datetime('2026-01-01', '-25 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='bot-telegram-chatgpt' AND c.slug='bots';
 UPDATE products SET image_key='productos/bot-telegram-chatgpt.jpg' WHERE slug='bot-telegram-chatgpt';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/bot-telegram-chatgpt.jpg', 0, 'pimg_cx53xt8r8j' FROM products WHERE slug='bot-telegram-chatgpt';
@@ -1254,7 +1326,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 24900, 'eur', 999, 1, 'bot-telegram-medida', 'Modalidad', 0, 'prod_gw27ysda25', datetime('2026-01-01', '-24 minutes'));
+', 24900, 'eur', 999, 1, 'bot-telegram-medida', 'Modalidad', 0, 'prod_gw27ysda25', datetime('2026-01-01', '-26 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='bot-telegram-medida' AND c.slug='bots';
 UPDATE products SET image_key='productos/bot-telegram-medida.jpg' WHERE slug='bot-telegram-medida';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/bot-telegram-medida.jpg', 0, 'pimg_6n23xs233f' FROM products WHERE slug='bot-telegram-medida';
@@ -1303,7 +1375,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 29900, 'eur', 999, 1, 'crm-whatsapp', 'Modalidad', 0, 'prod_4fd25f3sda', datetime('2026-01-01', '-25 minutes'));
+', 29900, 'eur', 999, 1, 'crm-whatsapp', 'Modalidad', 0, 'prod_4fd25f3sda', datetime('2026-01-01', '-27 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='crm-whatsapp' AND c.slug='bots';
 UPDATE products SET image_key='productos/crm-whatsapp.jpg' WHERE slug='crm-whatsapp';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/crm-whatsapp.jpg', 0, 'pimg_mf7z757553' FROM products WHERE slug='crm-whatsapp';
@@ -1352,7 +1424,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 14900, 'eur', 999, 1, 'auto-captacion-leads', 'Modalidad', 0, 'prod_gk628v891f', datetime('2026-01-01', '-26 minutes'));
+', 14900, 'eur', 999, 1, 'auto-captacion-leads', 'Modalidad', 0, 'prod_gk628v891f', datetime('2026-01-01', '-28 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-captacion-leads' AND c.slug='automatizaciones';
 UPDATE products SET image_key='productos/auto-captacion-leads.jpg' WHERE slug='auto-captacion-leads';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-captacion-leads.jpg', 0, 'pimg_j2d2jy0cj5' FROM products WHERE slug='auto-captacion-leads';
@@ -1400,7 +1472,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 14900, 'eur', 999, 1, 'auto-facturas', 'Modalidad', 0, 'prod_dk9nw95m0e', datetime('2026-01-01', '-27 minutes'));
+', 14900, 'eur', 999, 1, 'auto-facturas', 'Modalidad', 0, 'prod_dk9nw95m0e', datetime('2026-01-01', '-29 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-facturas' AND c.slug='automatizaciones';
 UPDATE products SET image_key='productos/auto-facturas.jpg' WHERE slug='auto-facturas';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-facturas.jpg', 0, 'pimg_p44ep2grdw' FROM products WHERE slug='auto-facturas';
@@ -1447,7 +1519,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 9900, 'eur', 999, 1, 'auto-resenas', 'Modalidad', 0, 'prod_g6m3rk25ay', datetime('2026-01-01', '-28 minutes'));
+', 9900, 'eur', 999, 1, 'auto-resenas', 'Modalidad', 0, 'prod_g6m3rk25ay', datetime('2026-01-01', '-30 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-resenas' AND c.slug='automatizaciones';
 UPDATE products SET image_key='productos/auto-resenas.jpg' WHERE slug='auto-resenas';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-resenas.jpg', 0, 'pimg_mrk5z7kc24' FROM products WHERE slug='auto-resenas';
@@ -1495,7 +1567,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 9900, 'eur', 999, 1, 'auto-plantilla-medida', 'Modalidad', 0, 'prod_xddgmabd64', datetime('2026-01-01', '-29 minutes'));
+', 9900, 'eur', 999, 1, 'auto-plantilla-medida', 'Modalidad', 0, 'prod_xddgmabd64', datetime('2026-01-01', '-31 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-plantilla-medida' AND c.slug='automatizaciones';
 UPDATE products SET image_key='productos/auto-plantilla-medida.jpg' WHERE slug='auto-plantilla-medida';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-plantilla-medida.jpg', 0, 'pimg_74qq3xmafv' FROM products WHERE slug='auto-plantilla-medida';
@@ -1542,7 +1614,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 19900, 'eur', 999, 1, 'auto-tareas-programadas', 'Modalidad', 0, 'prod_gzm3q1d9ae', datetime('2026-01-01', '-30 minutes'));
+', 19900, 'eur', 999, 1, 'auto-tareas-programadas', 'Modalidad', 0, 'prod_gzm3q1d9ae', datetime('2026-01-01', '-32 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auto-tareas-programadas' AND c.slug='automatizaciones';
 UPDATE products SET image_key='productos/auto-tareas-programadas.jpg' WHERE slug='auto-tareas-programadas';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auto-tareas-programadas.jpg', 0, 'pimg_v6xcczh9ze' FROM products WHERE slug='auto-tareas-programadas';
@@ -1588,7 +1660,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'acortador-enlaces', 'Modalidad', 0, 'prod_c90k565k6c', datetime('2026-01-01', '-31 minutes'));
+', 4900, 'eur', 999, 1, 'acortador-enlaces', 'Modalidad', 0, 'prod_c90k565k6c', datetime('2026-01-01', '-33 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='acortador-enlaces' AND c.slug='enlaces';
 UPDATE products SET image_key='productos/acortador-enlaces.jpg' WHERE slug='acortador-enlaces';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/acortador-enlaces.jpg', 0, 'pimg_p9f7zasga3' FROM products WHERE slug='acortador-enlaces';
@@ -1634,7 +1706,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1900, 'eur', 999, 1, 'qr-campanas', 'Modalidad', 0, 'prod_8yzpe14pwe', datetime('2026-01-01', '-32 minutes'));
+', 1900, 'eur', 999, 1, 'qr-campanas', 'Modalidad', 0, 'prod_8yzpe14pwe', datetime('2026-01-01', '-34 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='qr-campanas' AND c.slug='enlaces';
 UPDATE products SET image_key='productos/qr-campanas.jpg' WHERE slug='qr-campanas';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/qr-campanas.jpg', 0, 'pimg_hbqqerq31t' FROM products WHERE slug='qr-campanas';
@@ -1680,7 +1752,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'analitica-sin-cookies', 'Modalidad', 0, 'prod_6g912a3yvz', datetime('2026-01-01', '-33 minutes'));
+', 4900, 'eur', 999, 1, 'analitica-sin-cookies', 'Modalidad', 0, 'prod_6g912a3yvz', datetime('2026-01-01', '-35 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='analitica-sin-cookies' AND c.slug='enlaces';
 UPDATE products SET image_key='productos/analitica-sin-cookies.jpg' WHERE slug='analitica-sin-cookies';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/analitica-sin-cookies.jpg', 0, 'pimg_mzj8yg5q9j' FROM products WHERE slug='analitica-sin-cookies';
@@ -1729,7 +1801,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 29900, 'eur', 999, 1, 'tienda-productos-digitales', 'Modalidad', 0, 'prod_668s8tsgjk', datetime('2026-01-01', '-34 minutes'));
+', 29900, 'eur', 999, 1, 'tienda-productos-digitales', 'Modalidad', 0, 'prod_668s8tsgjk', datetime('2026-01-01', '-36 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tienda-productos-digitales' AND c.slug='tiendas';
 UPDATE products SET image_key='productos/tienda-productos-digitales.jpg' WHERE slug='tienda-productos-digitales';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tienda-productos-digitales.jpg', 0, 'pimg_8p0mf7y89y' FROM products WHERE slug='tienda-productos-digitales';
@@ -1781,7 +1853,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 49900, 'eur', 999, 1, 'tienda-online', 'Modalidad', 0, 'prod_4qwfngv5wg', datetime('2026-01-01', '-35 minutes'));
+', 49900, 'eur', 999, 1, 'tienda-online', 'Modalidad', 0, 'prod_4qwfngv5wg', datetime('2026-01-01', '-37 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='tienda-online' AND c.slug='tiendas';
 UPDATE products SET image_key='productos/tienda-online.jpg' WHERE slug='tienda-online';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/tienda-online.jpg', 0, 'pimg_jf6r9y5xjx' FROM products WHERE slug='tienda-online';
@@ -1834,7 +1906,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 69900, 'eur', 999, 1, 'marketplace-plantillas', 'Modalidad', 0, 'prod_d2acs016sh', datetime('2026-01-01', '-36 minutes'));
+', 69900, 'eur', 999, 1, 'marketplace-plantillas', 'Modalidad', 0, 'prod_d2acs016sh', datetime('2026-01-01', '-38 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='marketplace-plantillas' AND c.slug='tiendas';
 UPDATE products SET image_key='productos/marketplace-plantillas.jpg' WHERE slug='marketplace-plantillas';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/marketplace-plantillas.jpg', 0, 'pimg_c6k8qxa5kw' FROM products WHERE slug='marketplace-plantillas';
@@ -1882,7 +1954,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 29900, 'eur', 999, 1, 'portal-cliente', 'Modalidad', 0, 'prod_gp46f74q1q', datetime('2026-01-01', '-37 minutes'));
+', 29900, 'eur', 999, 1, 'portal-cliente', 'Modalidad', 0, 'prod_gp46f74q1q', datetime('2026-01-01', '-39 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='portal-cliente' AND c.slug='portales';
 UPDATE products SET image_key='productos/portal-cliente.jpg' WHERE slug='portal-cliente';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/portal-cliente.jpg', 0, 'pimg_ypxs8tjbmv' FROM products WHERE slug='portal-cliente';
@@ -1931,7 +2003,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 39900, 'eur', 999, 1, 'web-editable-visual', 'Modalidad', 0, 'prod_97djtwf4zm', datetime('2026-01-01', '-38 minutes'));
+', 39900, 'eur', 999, 1, 'web-editable-visual', 'Modalidad', 0, 'prod_97djtwf4zm', datetime('2026-01-01', '-40 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-editable-visual' AND c.slug='portales';
 UPDATE products SET image_key='productos/web-editable-visual.jpg' WHERE slug='web-editable-visual';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-editable-visual.jpg', 0, 'pimg_5bsmx0t53x' FROM products WHERE slug='web-editable-visual';
@@ -1969,7 +2041,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1900, 'eur', 999, 1, 'plan-mantenimiento-web', NULL, 0, 'prod_5ytqwnxnsd', datetime('2026-01-01', '-39 minutes'));
+', 1900, 'eur', 999, 1, 'plan-mantenimiento-web', NULL, 0, 'prod_5ytqwnxnsd', datetime('2026-01-01', '-41 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plan-mantenimiento-web' AND c.slug='planes';
 UPDATE products SET image_key='productos/plan-mantenimiento-web.jpg' WHERE slug='plan-mantenimiento-web';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plan-mantenimiento-web.jpg', 0, 'pimg_azhvckg2ae' FROM products WHERE slug='plan-mantenimiento-web';
@@ -2003,7 +2075,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 900, 'eur', 999, 1, 'plan-hosting-dominio', NULL, 0, 'prod_9hqh0z3t1y', datetime('2026-01-01', '-40 minutes'));
+', 900, 'eur', 999, 1, 'plan-hosting-dominio', NULL, 0, 'prod_9hqh0z3t1y', datetime('2026-01-01', '-42 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plan-hosting-dominio' AND c.slug='planes';
 UPDATE products SET image_key='productos/plan-hosting-dominio.jpg' WHERE slug='plan-hosting-dominio';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plan-hosting-dominio.jpg', 0, 'pimg_3pt1vgdnca' FROM products WHERE slug='plan-hosting-dominio';
@@ -2036,7 +2108,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 3900, 'eur', 999, 1, 'plan-automatizaciones', NULL, 0, 'prod_jywv1chmke', datetime('2026-01-01', '-41 minutes'));
+', 3900, 'eur', 999, 1, 'plan-automatizaciones', NULL, 0, 'prod_jywv1chmke', datetime('2026-01-01', '-43 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plan-automatizaciones' AND c.slug='planes';
 UPDATE products SET image_key='productos/plan-automatizaciones.jpg' WHERE slug='plan-automatizaciones';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plan-automatizaciones.jpg', 0, 'pimg_9g7yzdbzd1' FROM products WHERE slug='plan-automatizaciones';
@@ -2069,7 +2141,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'auditoria-web', NULL, 0, 'prod_jkyp2f083a', datetime('2026-01-01', '-42 minutes'));
+', 4900, 'eur', 999, 1, 'auditoria-web', NULL, 0, 'prod_jkyp2f083a', datetime('2026-01-01', '-44 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='auditoria-web' AND c.slug='planes';
 UPDATE products SET image_key='productos/auditoria-web.jpg' WHERE slug='auditoria-web';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/auditoria-web.jpg', 0, 'pimg_c0dzvd3m81' FROM products WHERE slug='auditoria-web';
@@ -2115,7 +2187,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 3900, 'eur', 999, 1, 'vigilancia-caidas', 'Modalidad', 0, 'prod_hv31gp1rt6', datetime('2026-01-01', '-43 minutes'));
+', 3900, 'eur', 999, 1, 'vigilancia-caidas', 'Modalidad', 0, 'prod_hv31gp1rt6', datetime('2026-01-01', '-45 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='vigilancia-caidas' AND c.slug='planes';
 UPDATE products SET image_key='productos/vigilancia-caidas.jpg' WHERE slug='vigilancia-caidas';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/vigilancia-caidas.jpg', 0, 'pimg_6xkzrqx0b4' FROM products WHERE slug='vigilancia-caidas';
@@ -2164,7 +2236,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 7900, 'eur', 999, 1, 'facturas-presupuestos', 'Modalidad', 0, 'prod_bxsx4ndenh', datetime('2026-01-01', '-44 minutes'));
+', 7900, 'eur', 999, 1, 'facturas-presupuestos', 'Modalidad', 0, 'prod_bxsx4ndenh', datetime('2026-01-01', '-46 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='facturas-presupuestos' AND c.slug='documentos';
 UPDATE products SET image_key='productos/facturas-presupuestos.jpg' WHERE slug='facturas-presupuestos';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/facturas-presupuestos.jpg', 0, 'pimg_y6crpj1tva' FROM products WHERE slug='facturas-presupuestos';
@@ -2213,7 +2285,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 9900, 'eur', 999, 1, 'certificados-automaticos', 'Modalidad', 0, 'prod_n4x1tk4vtz', datetime('2026-01-01', '-45 minutes'));
+', 9900, 'eur', 999, 1, 'certificados-automaticos', 'Modalidad', 0, 'prod_n4x1tk4vtz', datetime('2026-01-01', '-47 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='certificados-automaticos' AND c.slug='documentos';
 UPDATE products SET image_key='productos/certificados-automaticos.jpg' WHERE slug='certificados-automaticos';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/certificados-automaticos.jpg', 0, 'pimg_6fd66m13bv' FROM products WHERE slug='certificados-automaticos';
@@ -2262,7 +2334,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'transcripcion-audios', 'Modalidad', 0, 'prod_117jj2y39k', datetime('2026-01-01', '-46 minutes'));
+', 4900, 'eur', 999, 1, 'transcripcion-audios', 'Modalidad', 0, 'prod_117jj2y39k', datetime('2026-01-01', '-48 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='transcripcion-audios' AND c.slug='documentos';
 UPDATE products SET image_key='productos/transcripcion-audios.jpg' WHERE slug='transcripcion-audios';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/transcripcion-audios.jpg', 0, 'pimg_f0fde2ahr0' FROM products WHERE slug='transcripcion-audios';
@@ -2312,7 +2384,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 19900, 'eur', 999, 1, 'chat-ia-web', 'Modalidad', 0, 'prod_7ydh66gv8v', datetime('2026-01-01', '-47 minutes'));
+', 19900, 'eur', 999, 1, 'chat-ia-web', 'Modalidad', 0, 'prod_7ydh66gv8v', datetime('2026-01-01', '-49 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='chat-ia-web' AND c.slug='bots';
 UPDATE products SET image_key='productos/chat-ia-web.jpg' WHERE slug='chat-ia-web';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/chat-ia-web.jpg', 0, 'pimg_8e0h9de11x' FROM products WHERE slug='chat-ia-web';
@@ -2361,7 +2433,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 14900, 'eur', 999, 1, 'centro-ayuda', 'Modalidad', 0, 'prod_hq37rtaass', datetime('2026-01-01', '-48 minutes'));
+', 14900, 'eur', 999, 1, 'centro-ayuda', 'Modalidad', 0, 'prod_hq37rtaass', datetime('2026-01-01', '-50 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='centro-ayuda' AND c.slug='portales';
 UPDATE products SET image_key='productos/centro-ayuda.jpg' WHERE slug='centro-ayuda';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/centro-ayuda.jpg', 0, 'pimg_162bb8rcde' FROM products WHERE slug='centro-ayuda';
@@ -2411,7 +2483,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 14900, 'eur', 999, 1, 'newsletter-propia', 'Modalidad', 0, 'prod_xrzh1d2vk3', datetime('2026-01-01', '-49 minutes'));
+', 14900, 'eur', 999, 1, 'newsletter-propia', 'Modalidad', 0, 'prod_xrzh1d2vk3', datetime('2026-01-01', '-51 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='newsletter-propia' AND c.slug='captacion';
 UPDATE products SET image_key='productos/newsletter-propia.jpg' WHERE slug='newsletter-propia';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/newsletter-propia.jpg', 0, 'pimg_9am00vbg83' FROM products WHERE slug='newsletter-propia';
@@ -2455,7 +2527,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 0, 'banner-cookies-rgpd', 'Modalidad', 0, 'prod_thetrzyfvw', datetime('2026-01-01', '-50 minutes'));
+', 2900, 'eur', 999, 0, 'banner-cookies-rgpd', 'Modalidad', 0, 'prod_thetrzyfvw', datetime('2026-01-01', '-52 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='banner-cookies-rgpd' AND c.slug='webs';
 UPDATE products SET image_key='productos/banner-cookies-rgpd.jpg' WHERE slug='banner-cookies-rgpd';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/banner-cookies-rgpd.jpg', 0, 'pimg_2c719vg6y0' FROM products WHERE slug='banner-cookies-rgpd';
@@ -2503,7 +2575,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 9900, 'eur', 999, 1, 'web-multidioma', 'Modalidad', 0, 'prod_a5j1bfatsj', datetime('2026-01-01', '-51 minutes'));
+', 9900, 'eur', 999, 1, 'web-multidioma', 'Modalidad', 0, 'prod_a5j1bfatsj', datetime('2026-01-01', '-53 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-multidioma' AND c.slug='webs';
 UPDATE products SET image_key='productos/web-multidioma.jpg' WHERE slug='web-multidioma';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-multidioma.jpg', 0, 'pimg_zkv2bvg8ry' FROM products WHERE slug='web-multidioma';
@@ -2555,7 +2627,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'ficha-google', 'Modalidad', 0, 'prod_fajwzwpx0t', datetime('2026-01-01', '-52 minutes'));
+', 4900, 'eur', 999, 1, 'ficha-google', 'Modalidad', 0, 'prod_fajwzwpx0t', datetime('2026-01-01', '-54 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='ficha-google' AND c.slug='captacion';
 UPDATE products SET image_key='productos/ficha-google.jpg' WHERE slug='ficha-google';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/ficha-google.jpg', 0, 'pimg_r1gdzn3efs' FROM products WHERE slug='ficha-google';
@@ -2603,7 +2675,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'fotos-producto-fondo', 'Modalidad', 0, 'prod_ercd1rwy60', datetime('2026-01-01', '-53 minutes'));
+', 2900, 'eur', 999, 1, 'fotos-producto-fondo', 'Modalidad', 0, 'prod_ercd1rwy60', datetime('2026-01-01', '-55 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='fotos-producto-fondo' AND c.slug='tiendas';
 UPDATE products SET image_key='productos/fotos-producto-fondo.jpg' WHERE slug='fotos-producto-fondo';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/fotos-producto-fondo.jpg', 0, 'pimg_db2j1s9e2a' FROM products WHERE slug='fotos-producto-fondo';
@@ -2651,7 +2723,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1900, 'eur', 999, 1, 'firma-email', 'Modalidad', 0, 'prod_z2faz5bj72', datetime('2026-01-01', '-54 minutes'));
+', 1900, 'eur', 999, 1, 'firma-email', 'Modalidad', 0, 'prod_z2faz5bj72', datetime('2026-01-01', '-56 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='firma-email' AND c.slug='identidad';
 UPDATE products SET image_key='productos/firma-email.jpg' WHERE slug='firma-email';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/firma-email.jpg', 0, 'pimg_n1vdwamp2j' FROM products WHERE slug='firma-email';
@@ -2698,7 +2770,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 4900, 'eur', 999, 1, 'pizarra-planos', 'Modalidad', 0, 'prod_wbby59743p', datetime('2026-01-01', '-55 minutes'));
+', 4900, 'eur', 999, 1, 'pizarra-planos', 'Modalidad', 0, 'prod_wbby59743p', datetime('2026-01-01', '-57 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='pizarra-planos' AND c.slug='documentos';
 UPDATE products SET image_key='productos/pizarra-planos.jpg' WHERE slug='pizarra-planos';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/pizarra-planos.jpg', 0, 'pimg_wexmnwdc2w' FROM products WHERE slug='pizarra-planos';
@@ -2736,7 +2808,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1200, 'eur', 999, 1, 'vigilancia-precios', NULL, 0, 'prod_hvqt9gp4wq', datetime('2026-01-01', '-56 minutes'));
+', 1200, 'eur', 999, 1, 'vigilancia-precios', NULL, 0, 'prod_hvqt9gp4wq', datetime('2026-01-01', '-58 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='vigilancia-precios' AND c.slug='planes';
 UPDATE products SET image_key='productos/vigilancia-precios.jpg' WHERE slug='vigilancia-precios';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/vigilancia-precios.jpg', 0, 'pimg_mqgz57qr8j' FROM products WHERE slug='vigilancia-precios';
@@ -2771,7 +2843,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 900, 'eur', 999, 1, 'aviso-cambios-web', NULL, 0, 'prod_7xt87bppvp', datetime('2026-01-01', '-57 minutes'));
+', 900, 'eur', 999, 1, 'aviso-cambios-web', NULL, 0, 'prod_7xt87bppvp', datetime('2026-01-01', '-59 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='aviso-cambios-web' AND c.slug='planes';
 UPDATE products SET image_key='productos/aviso-cambios-web.jpg' WHERE slug='aviso-cambios-web';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/aviso-cambios-web.jpg', 0, 'pimg_szfyvdv1fv' FROM products WHERE slug='aviso-cambios-web';
@@ -2818,7 +2890,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1900, 'eur', 999, 1, 'etiquetas-codigo-barras', 'Modalidad', 0, 'prod_2td2f3j41s', datetime('2026-01-01', '-58 minutes'));
+', 1900, 'eur', 999, 1, 'etiquetas-codigo-barras', 'Modalidad', 0, 'prod_2td2f3j41s', datetime('2026-01-01', '-60 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='etiquetas-codigo-barras' AND c.slug='tiendas';
 UPDATE products SET image_key='productos/etiquetas-codigo-barras.jpg' WHERE slug='etiquetas-codigo-barras';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/etiquetas-codigo-barras.jpg', 0, 'pimg_vnc8xsm388' FROM products WHERE slug='etiquetas-codigo-barras';
@@ -2866,7 +2938,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información (en este servicio, optimizamos 2 de tus imágenes para que veas el resultado). Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1400, 'eur', 999, 1, 'optimizar-imagenes', 'Modalidad', 0, 'prod_m7dma279bg', datetime('2026-01-01', '-59 minutes'));
+', 1400, 'eur', 999, 1, 'optimizar-imagenes', 'Modalidad', 0, 'prod_m7dma279bg', datetime('2026-01-01', '-61 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='optimizar-imagenes' AND c.slug='webs';
 UPDATE products SET image_key='productos/optimizar-imagenes.jpg' WHERE slug='optimizar-imagenes';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/optimizar-imagenes.jpg', 0, 'pimg_sk9aha23hf' FROM products WHERE slug='optimizar-imagenes';
@@ -2914,7 +2986,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 1900, 'eur', 999, 1, 'logo-vectorial', 'Modalidad', 0, 'prod_agfbf5q3wa', datetime('2026-01-01', '-60 minutes'));
+', 1900, 'eur', 999, 1, 'logo-vectorial', 'Modalidad', 0, 'prod_agfbf5q3wa', datetime('2026-01-01', '-62 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='logo-vectorial' AND c.slug='identidad';
 UPDATE products SET image_key='productos/logo-vectorial.jpg' WHERE slug='logo-vectorial';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/logo-vectorial.jpg', 0, 'pimg_bzrd1fsrgg' FROM products WHERE slug='logo-vectorial';
@@ -2963,7 +3035,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'limpieza-csv', 'Modalidad', 0, 'prod_bpz6bsedxv', datetime('2026-01-01', '-61 minutes'));
+', 2900, 'eur', 999, 1, 'limpieza-csv', 'Modalidad', 0, 'prod_bpz6bsedxv', datetime('2026-01-01', '-63 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='limpieza-csv' AND c.slug='documentos';
 UPDATE products SET image_key='productos/limpieza-csv.jpg' WHERE slug='limpieza-csv';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/limpieza-csv.jpg', 0, 'pimg_e0m78fsa9n' FROM products WHERE slug='limpieza-csv';
@@ -3012,7 +3084,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'plantilla-inventario', 'Modalidad', 0, 'prod_642rvxq0yy', datetime('2026-01-01', '-62 minutes'));
+', 2900, 'eur', 999, 1, 'plantilla-inventario', 'Modalidad', 0, 'prod_642rvxq0yy', datetime('2026-01-01', '-64 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plantilla-inventario' AND c.slug='documentos';
 UPDATE products SET image_key='productos/plantilla-inventario.jpg' WHERE slug='plantilla-inventario';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plantilla-inventario.jpg', 0, 'pimg_fynntregxe' FROM products WHERE slug='plantilla-inventario';
@@ -3060,7 +3132,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'informe-graficos', 'Modalidad', 0, 'prod_npr5t3es1s', datetime('2026-01-01', '-63 minutes'));
+', 2900, 'eur', 999, 1, 'informe-graficos', 'Modalidad', 0, 'prod_npr5t3es1s', datetime('2026-01-01', '-65 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='informe-graficos' AND c.slug='documentos';
 UPDATE products SET image_key='productos/informe-graficos.jpg' WHERE slug='informe-graficos';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/informe-graficos.jpg', 0, 'pimg_1533yvs0ew' FROM products WHERE slug='informe-graficos';
@@ -3108,7 +3180,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 3900, 'eur', 999, 1, 'dossier-comercial', 'Modalidad', 0, 'prod_12bb8dpt3n', datetime('2026-01-01', '-64 minutes'));
+', 3900, 'eur', 999, 1, 'dossier-comercial', 'Modalidad', 0, 'prod_12bb8dpt3n', datetime('2026-01-01', '-66 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='dossier-comercial' AND c.slug='documentos';
 UPDATE products SET image_key='productos/dossier-comercial.jpg' WHERE slug='dossier-comercial';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/dossier-comercial.jpg', 0, 'pimg_z0vqnzxh2a' FROM products WHERE slug='dossier-comercial';
@@ -3156,7 +3228,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'diagramas-procesos', 'Modalidad', 0, 'prod_hqbzt5trmb', datetime('2026-01-01', '-65 minutes'));
+', 2900, 'eur', 999, 1, 'diagramas-procesos', 'Modalidad', 0, 'prod_hqbzt5trmb', datetime('2026-01-01', '-67 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='diagramas-procesos' AND c.slug='documentos';
 UPDATE products SET image_key='productos/diagramas-procesos.jpg' WHERE slug='diagramas-procesos';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/diagramas-procesos.jpg', 0, 'pimg_k04g9qnmf1' FROM products WHERE slug='diagramas-procesos';
@@ -3206,7 +3278,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 2900, 'eur', 999, 1, 'descripciones-producto-ia', 'Modalidad', 0, 'prod_f26s0xkbgz', datetime('2026-01-01', '-66 minutes'));
+', 2900, 'eur', 999, 1, 'descripciones-producto-ia', 'Modalidad', 0, 'prod_f26s0xkbgz', datetime('2026-01-01', '-68 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='descripciones-producto-ia' AND c.slug='contenido';
 UPDATE products SET image_key='productos/descripciones-producto-ia.jpg' WHERE slug='descripciones-producto-ia';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/descripciones-producto-ia.jpg', 0, 'pimg_n8sey6aes7' FROM products WHERE slug='descripciones-producto-ia';
@@ -3256,7 +3328,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 3900, 'eur', 999, 1, 'carruseles-redes', 'Modalidad', 0, 'prod_vp89b3xk6h', datetime('2026-01-01', '-67 minutes'));
+', 3900, 'eur', 999, 1, 'carruseles-redes', 'Modalidad', 0, 'prod_vp89b3xk6h', datetime('2026-01-01', '-69 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='carruseles-redes' AND c.slug='contenido';
 UPDATE products SET image_key='productos/carruseles-redes.jpg' WHERE slug='carruseles-redes';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/carruseles-redes.jpg', 0, 'pimg_djthj3ksks' FROM products WHERE slug='carruseles-redes';
@@ -3308,7 +3380,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 24900, 'eur', 999, 1, 'web-wordpress', 'Modalidad', 0, 'prod_q6aa8a4tbk', datetime('2026-01-01', '-68 minutes'));
+', 24900, 'eur', 999, 1, 'web-wordpress', 'Modalidad', 0, 'prod_q6aa8a4tbk', datetime('2026-01-01', '-70 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-wordpress' AND c.slug='webs';
 UPDATE products SET image_key='productos/web-wordpress.jpg' WHERE slug='web-wordpress';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-wordpress.jpg', 0, 'pimg_kek5y8se2d' FROM products WHERE slug='web-wordpress';
@@ -3360,7 +3432,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 19900, 'eur', 999, 1, 'web-arrastrar-soltar', 'Modalidad', 0, 'prod_75sg58cjg8', datetime('2026-01-01', '-69 minutes'));
+', 19900, 'eur', 999, 1, 'web-arrastrar-soltar', 'Modalidad', 0, 'prod_75sg58cjg8', datetime('2026-01-01', '-71 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='web-arrastrar-soltar' AND c.slug='portales';
 UPDATE products SET image_key='productos/web-arrastrar-soltar.jpg' WHERE slug='web-arrastrar-soltar';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/web-arrastrar-soltar.jpg', 0, 'pimg_frh4y6cxjk' FROM products WHERE slug='web-arrastrar-soltar';
@@ -3411,7 +3483,7 @@ INSERT INTO products (name, description, price_cents, currency, stock, active, s
 **Muestra gratis:** pulsa **Empieza gratis**, rellena los campos y te enviamos una muestra limitada con parte de tu información. Si te gusta, lo contratas; si no, no pagas nada.
 
 _Te atiende David Porto Díaz, una persona real que responde a tus dudas._
-', 49000, 'eur', 999, 1, 'plataforma-agencia', 'Modalidad', 0, 'prod_4zm8vpr4g8', datetime('2026-01-01', '-70 minutes'));
+', 49000, 'eur', 999, 1, 'plataforma-agencia', 'Modalidad', 0, 'prod_4zm8vpr4g8', datetime('2026-01-01', '-72 minutes'));
 INSERT INTO product_categories (product_id, category_id) SELECT p.id, c.id FROM products p, categories c WHERE p.slug='plataforma-agencia' AND c.slug='portales';
 UPDATE products SET image_key='productos/plataforma-agencia.jpg' WHERE slug='plataforma-agencia';
 INSERT INTO product_images (product_id, image_key, position, public_id) SELECT id, 'productos/plataforma-agencia.jpg', 0, 'pimg_bex51zezxy' FROM products WHERE slug='plataforma-agencia';
