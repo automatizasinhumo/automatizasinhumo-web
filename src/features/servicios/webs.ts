@@ -137,6 +137,40 @@ export function ordenWeb(v: unknown): IdSeccionWeb[] {
   return [...new Set([...dadas, ...ORDEN_POR_DEFECTO])];
 }
 
+/**
+ * Variantes por sección que el cliente cambia sin cambiar de plantilla («Prueba otra portada»…).
+ * Se guardan en un texto compacto «portada.servicios.galería.opiniones.contacto»; 0 = la de la plantilla.
+ */
+export const VARIANTES_WEB = [
+  { id: 'hero', boton: 'Otra portada', max: 6 },
+  { id: 'servicios', boton: 'Otros servicios', max: 5 },
+  { id: 'galeria', boton: 'Otras fotos', max: 4 },
+  { id: 'opiniones', boton: 'Otras opiniones', max: 3 },
+  { id: 'contacto', boton: 'Otro contacto', max: 4 },
+] as const;
+export type IdVarianteWeb = (typeof VARIANTES_WEB)[number]['id'];
+/** Texto válido: cinco números en su rango (lo que no cuadra vuelve a 0). */
+export function variantesWeb(v: unknown): string {
+  const xs = typeof v === 'string' ? v.split('.') : [];
+  return VARIANTES_WEB.map((x, i) => {
+    const n = Number(xs[i]);
+    return Number.isInteger(n) && n >= 0 && n <= x.max ? n : 0;
+  }).join('.');
+}
+/** La variante que se pinta: la elegida o, con 0, la de la plantilla. */
+export function varianteDe(v: string, id: IdVarianteWeb, deLaPlantilla: number): number {
+  return Number(variantesWeb(v).split('.')[VARIANTES_WEB.findIndex((x) => x.id === id)]) || deLaPlantilla;
+}
+/** Siguiente variante al pulsar el botón; al dar la vuelta a la de la plantilla, vuelve a 0. */
+export function siguienteVariante(v: string, id: IdVarianteWeb, deLaPlantilla: number): string {
+  const i = VARIANTES_WEB.findIndex((x) => x.id === id);
+  const max = VARIANTES_WEB[i]!.max;
+  const sig = (varianteDe(v, id, deLaPlantilla) % max) + 1;
+  const xs = variantesWeb(v).split('.');
+  xs[i] = String(sig === deLaPlantilla ? 0 : sig);
+  return xs.join('.');
+}
+
 export interface ServicioWeb {
   nombre: string;
   precio: string;
@@ -184,6 +218,8 @@ export interface DatosWeb {
   preguntas: PreguntaWeb[];
   /** Orden de las secciones (ordenWeb). */
   orden: IdSeccionWeb[];
+  /** Variantes por sección elegidas por el cliente (VARIANTES_WEB). */
+  variantes: string;
   /** Foto del negocio ya reducida en el navegador (data URL WebP/JPEG), o ''. */
   foto: string;
   /** Fotos del trabajo o del local (data URL más pequeñas que la portada), hasta MAX_GALERIA_WEB. */
@@ -298,6 +334,7 @@ export function validarWeb(x: unknown): ResultadoWeb {
       opinionesUrl: urlSegura(o.opinionesUrl),
       preguntas,
       orden: ordenWeb(o.orden),
+      variantes: variantesWeb(o.variantes),
       foto: fotoValida(o.foto) ? o.foto : '',
       galeria: galeriaValida(o.galeria),
     },
@@ -337,6 +374,7 @@ export const EJEMPLO_WEB: DatosWeb = {
   ],
   opinionesUrl: '',
   orden: [...ORDEN_POR_DEFECTO],
+  variantes: '0.0.0.0.0',
   foto: '',
   galeria: [],
 };
@@ -527,8 +565,10 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   // Las variantes se degradan cuando faltan datos: un servicio se presenta como ficha destacada,
   // una tarifa sin precios como lista compacta y una sola opinión como cita protagonista.
   const nS = d.servicios.length;
-  const vS = nS === 1 ? 3 : p.servicios === 2 && !d.servicios.some((s) => s.precio) ? 5 : p.servicios;
-  const vO = d.opiniones.length === 1 ? 1 : p.opiniones;
+  const v = (id: IdVarianteWeb) => varianteDe(d.variantes, id, p[id]);
+  const vS = nS === 1 ? 3 : v('servicios') === 2 && !d.servicios.some((s) => s.precio) ? 5 : v('servicios');
+  const vO = d.opiniones.length === 1 ? 1 : v('opiniones');
+  const vH = p.hero ? v('hero') : 0;
   const servicios = d.servicios
     .map(
       (s) =>
@@ -558,7 +598,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const bloques: Record<string, string> = {
     sobre: d.sobre ? seccion('sobre', titulo('sobre'), `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
     servicios: nS ? seccion('servicios', titulo('servicios'), `<ul class="w-servicios w-s-${vS}" data-n="${nS}">${servicios}</ul>`) : '',
-    galeria: fotos ? seccion('galeria', titulo('galeria'), `<ul class="w-galeria w-g-${p.galeria}" data-n="${d.galeria.length}">${fotos}</ul>`) : '',
+    galeria: fotos ? seccion('galeria', titulo('galeria'), `<ul class="w-galeria w-g-${v('galeria')}" data-n="${d.galeria.length}">${fotos}</ul>`) : '',
     opiniones: opiniones
       ? seccion(
           'opiniones',
@@ -570,7 +610,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     contacto: seccion(
       'contacto',
       titulo('contacto'),
-      `<div class="w-contacto-bloque w-c-${p.contacto}"><div class="w-contacto-cta"><p class="w-contacto-grande">${grande}</p>${bloqueAcciones}</div><ul class="w-contacto">${filasContacto.join('')}</ul></div>`,
+      `<div class="w-contacto-bloque w-c-${v('contacto')}"><div class="w-contacto-cta"><p class="w-contacto-grande">${grande}</p>${bloqueAcciones}</div><ul class="w-contacto">${filasContacto.join('')}</ul></div>`,
     ),
     zonas: conExtra.zonas ? seccion('zonas', titulo('zonas'), `<ul class="w-zonas">${zonas.map((z) => `<li>${esc(z)}</li>`).join('')}</ul>`) : '',
     horario: conExtra.horario ? seccion('horario', titulo('horario'), `<table class="w-horario">${tabla}</table>`) : '',
@@ -627,14 +667,14 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   }
   const primera = horario[0];
   const datoCab =
-    p.hero === 4 && zonas.length
+    vH === 4 && zonas.length
       ? `${icono('zona')}${esc(zonas.join(' · '))}`
       : primera
         ? `${icono('reloj')}${esc(primera[0] ? `${primera[0]}: ${primera[1]}` : primera[1])}`
         : '';
   return [
     `<div lang="es" class="w w-t-${p.id}${clasesCapa(capa)}" style="${esc(vars)}"><div class="w-cuerpo">`,
-    `<header class="w-cab w-h-${p.hero}${conFoto ? '' : ' w-sin-foto'}"><div class="w-in w-cab-in"><div class="w-cab-txt">`,
+    `<header class="w-cab w-h-${vH}${conFoto ? '' : ' w-sin-foto'}"><div class="w-in w-cab-in"><div class="w-cab-txt">`,
     d.sector ? `<p class="w-sector">${esc(d.sector)}</p>` : '',
     `<h1>${esc(d.negocio)}</h1>`,
     d.lema ? `<p class="w-lema">${esc(d.lema)}</p>` : '',

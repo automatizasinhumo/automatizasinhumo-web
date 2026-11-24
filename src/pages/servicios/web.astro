@@ -13,6 +13,7 @@ import {
   ACABADOS_WEB,
   FORMAS_FOTO_WEB,
   MOVIMIENTOS_WEB,
+  VARIANTES_WEB,
   MAX_ENLACES_WEB,
   MAX_OPINIONES_WEB,
   MAX_PREGUNTAS_WEB,
@@ -297,6 +298,18 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
                 </fieldset>
               ))
             }
+            <fieldset class="bloque">
+              <legend>Cambia una sección</legend>
+              <p class="ayuda text-sm">Otra forma para cada parte sin cambiar de plantilla. Púlsalo varias veces para ver todas.</p>
+              <input type="hidden" name="variantes" value="0.0.0.0.0" />
+              <div class="variantes">
+                {VARIANTES_WEB.map((x) => (
+                  <button type="button" class="variante" data-variante={x.id}>{x.boton}</button>
+                ))}
+                <button type="button" class="variante variante-reset" data-variante-reset>Como la plantilla</button>
+              </div>
+              <p class="ayuda text-sm" data-estado-variante role="status" aria-live="polite"></p>
+            </fieldset>
             <fieldset class="bloque" data-guia="orden">
               <legend>Orden de las secciones</legend>
               <p class="ayuda text-sm">La portada va siempre arriba. Las secciones vacías no salen.</p>
