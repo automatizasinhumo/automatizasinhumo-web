@@ -1,0 +1,10 @@
+{
+  "//": "Tipos de los tests de Playwright (tests/visual, tests/plantillas). Fuera del tsconfig general porque @playwright/test solo se instala en qa/navegador (npm ci --prefix qa/navegador). Lo comprueban los workflows de QA visual y QA plantillas.",
+  "extends": "astro/tsconfigs/strict",
+  "include": ["tests/visual/**/*.ts", "tests/plantillas/**/*.ts"],
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "paths": { "@playwright/test": ["./qa/navegador/node_modules/@playwright/test"] }
+  }
+}

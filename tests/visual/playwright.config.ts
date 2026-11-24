@@ -30,7 +30,7 @@ export default defineConfig({
     locale: 'es-ES',
     timezoneId: 'Europe/Madrid',
     colorScheme: 'light',
-    reducedMotion: 'reduce',
+    contextOptions: { reducedMotion: 'reduce' },
     browserName: 'chromium',
   },
   webServer: {
