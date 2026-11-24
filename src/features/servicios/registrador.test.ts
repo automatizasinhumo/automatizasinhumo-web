@@ -7,9 +7,11 @@ describe('configRegistrador', () => {
   it('solo con dominios configurados y CF_REGISTRAR_ACTIVO=1; precio máximo por defecto 15', () => {
     const base = { token: 't', cuenta: 'acc', worker: 'w' };
     expect(configRegistrador(base, {})).toBeNull();
-    expect(configRegistrador(null, { CF_REGISTRAR_ACTIVO: '1' })).toBeNull();
-    expect(configRegistrador(base, { CF_REGISTRAR_ACTIVO: '1' })?.precioMax).toBe(15);
-    expect(configRegistrador(base, { CF_REGISTRAR_ACTIVO: '1', CF_DOMINIO_PRECIO_MAX: '25' })?.precioMax).toBe(25);
+    // Sin cobro del dominio en el carrito no se ofrece ni se registra ninguno.
+    expect(configRegistrador(base, { CF_REGISTRAR_ACTIVO: '1' })).toBeNull();
+    expect(configRegistrador(null, { CF_REGISTRAR_ACTIVO: '1', CF_DOMINIO_COBRO: '1' })).toBeNull();
+    expect(configRegistrador(base, { CF_REGISTRAR_ACTIVO: '1', CF_DOMINIO_COBRO: '1' })?.precioMax).toBe(15);
+    expect(configRegistrador(base, { CF_REGISTRAR_ACTIVO: '1', CF_DOMINIO_COBRO: '1', CF_DOMINIO_PRECIO_MAX: '25' })?.precioMax).toBe(25);
   });
 });
 

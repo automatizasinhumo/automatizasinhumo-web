@@ -18,6 +18,15 @@ describe('dominio propio: aparte de la web, a coste + margen', () => {
     expect(precioDominioEur(0)).toBeNull();
     expect(precioDominioEur(Number.NaN)).toBeNull();
   });
+  it('solo convierte USD; EUR va tal cual y otra moneda no se ofrece', () => {
+    expect(precioDominioEur(10.44, null, 'usd')).toBe(15);
+    expect(precioDominioEur(10, null, 'EUR')).toBe(10 + MARGEN_DOMINIO_EUR);
+    expect(precioDominioEur(10, null, 'GBP')).toBeNull();
+    expect(precioDominioEur(10, null, null)).toBeNull();
+  });
+  it('los textos no llaman «precio de registro» a un precio con margen', () => {
+    for (const r of ['../../pages/servicios/web.astro', '../storefront/ComparativaPrecio.astro']) expect(leer(r)).not.toMatch(/precio de registro/i);
+  });
   it('la oferta enseña su precio al año, nunca «Incluido»', () => {
     expect(etiquetaOferta({ euros: 15 })).toBe('15 €/año · Elegir');
     expect(etiquetaOferta({ euros: null })).toBe('Elegir');

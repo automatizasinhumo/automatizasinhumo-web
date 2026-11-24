@@ -83,8 +83,10 @@ export const POST: APIRoute = async ({ request }) => {
       try {
         ofertas = (await cotizarDominios(reg, candidatos(w.datos.negocio, w.datos.direccion)))
           .filter((c) => c.incluido)
-          .slice(0, 5)
-          .map(({ dominio, precio, renovacion, moneda }) => ({ dominio, precio, moneda, euros: precioDominioEur(precio, renovacion) }));
+          .map(({ dominio, precio, renovacion, moneda }) => ({ dominio, precio, moneda, euros: precioDominioEur(precio, renovacion, moneda) }))
+          // Sin precio en euros (moneda desconocida) no se ofrece: no se puede anunciar ni cobrar.
+          .filter((o) => o.euros !== null)
+          .slice(0, 5);
       } catch {
         ofertas = [];
       }
