@@ -69,7 +69,7 @@ for (const ancho of ANCHOS) {
           mask: [page.locator('time, [data-visual-variable]')],
           // Listas que crecen con el catálogo (una fila más por cada página de sector nueva): fuera,
           // o cada alta cambia la altura de todas las capturas.
-          stylesheet: STYLESHEET_CRECE,
+          stylePath: STYLESHEET_CRECE,
         });
       });
     }
