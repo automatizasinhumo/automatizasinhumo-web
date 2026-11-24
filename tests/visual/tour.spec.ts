@@ -2,7 +2,7 @@
 // portada, en escritorio y en móvil. Sale solo una vez por visita; avanzar, retroceder, Escape,
 // «No volver a mostrar» y el enlace del pie que la reabre.
 import { expect, test } from '@playwright/test';
-import { CLAVE_GUIAS, PASOS_TOUR } from '../../src/data/tour';
+import { CLAVE_GUIAS, MAX_AUTO_GUIA as MAX_AUTO, PASOS_TOUR } from '../../src/data/tour';
 
 for (const ancho of [390, 1280]) {
   test.describe(`tour ${ancho}px`, () => {
@@ -21,7 +21,8 @@ for (const ancho of [390, 1280]) {
       await page.goto('/');
       const globo = page.locator('.driver-popover');
       await expect(globo).toContainText(PASOS_TOUR[0].titulo);
-      await expect(globo).toContainText(`1 de ${PASOS_TOUR.length}`);
+      // Sola enseña solo los primeros pasos; la guía entera, con el enlace del pie.
+      await expect(globo).toContainText(`1 de ${Math.min(PASOS_TOUR.length, MAX_AUTO)}`);
       await expect(globo.getByRole('button', { name: 'Cerrar la guía' })).toBeVisible();
       await globo.getByRole('button', { name: /Siguiente/ }).click();
       await expect(globo).toContainText(PASOS_TOUR[1].titulo);

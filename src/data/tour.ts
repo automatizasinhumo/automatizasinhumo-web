@@ -12,11 +12,13 @@ export interface PasoTour {
 
 /**
  * Claves de las guías de toda la web (src/features/tour/guia.ts). En localStorage, `CLAVE_GUIAS`
- * vale «no» si alguien pulsó «No volver a mostrar»; en sessionStorage, `VISTA_GUIA + clave`
- * marca la pantalla cuya guía ya salió sola en esta visita.
+ * vale «no» si alguien pulsó «No volver a mostrar» y `VISTA_GUIA + clave` marca la pantalla cuya
+ * guía ya salió (sola o pedida): no vuelve a salir sola.
  */
 export const CLAVE_GUIAS = 'ash:guias';
 export const VISTA_GUIA = 'ash:guia-vista:';
+/** Pasos que enseña una guía cuando sale sola; entera, solo si se pide. */
+export const MAX_AUTO_GUIA = 3;
 /** Enlace que reabre la guía (pie de página): `/#guia`. */
 export const ANCLA_TOUR = 'guia';
 
