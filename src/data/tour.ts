@@ -17,6 +17,8 @@ export interface PasoTour {
  */
 export const CLAVE_GUIAS = 'ash:guias';
 export const VISTA_GUIA = 'ash:guia-vista:';
+/** Pasos que enseña una guía cuando sale sola; entera, solo si se pide. */
+export const MAX_AUTO_GUIA = 3;
 /** Enlace que reabre la guía (pie de página): `/#guia`. */
 export const ANCLA_TOUR = 'guia';
 

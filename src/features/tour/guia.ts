@@ -8,7 +8,7 @@
  */
 import type { DriveStep } from 'driver.js';
 import './guia.css';
-import { CLAVE_GUIAS as APAGADAS, VISTA_GUIA as VISTA } from '../../data/tour';
+import { CLAVE_GUIAS as APAGADAS, MAX_AUTO_GUIA, VISTA_GUIA as VISTA } from '../../data/tour';
 
 export interface PasoGuia {
   /** Valor del atributo `data-guia` (o el que diga `atributo`) del bloque que explica. */
@@ -44,7 +44,7 @@ const local = () => almacen('localStorage');
 const sesion = () => almacen('sessionStorage');
 
 /** Pasos que salen solos; el resto, con el botón «Guía». */
-export const MAX_AUTO = 3;
+export const MAX_AUTO = MAX_AUTO_GUIA;
 
 /**
  * Qué pasos enseñar. Sola (`auto`): ninguno si las guías están apagadas, si esa pantalla ya la
@@ -81,7 +81,9 @@ export async function guiar(
   { raiz, atributo = 'data-guia', clave, auto = false }: { raiz?: Document | HTMLElement | null; atributo?: string; clave: string; auto?: boolean },
 ): Promise<boolean> {
   // Las ya vistas de antes (sessionStorage) también cuentan: nadie la ve dos veces por el cambio.
-  const vista = !!(leer(local(), VISTA + clave) || leer(sesion(), VISTA + clave));
+  const antigua = !leer(local(), VISTA + clave) && !!leer(sesion(), VISTA + clave);
+  if (antigua) escribir(local(), VISTA + clave, '1'); // la marca de antes pasa a ser permanente
+  const vista = antigua || !!leer(local(), VISTA + clave);
   const elegidos = pasosAMostrar(pasos, { auto, apagadas: guiasApagadas(), vista, escribiendo: escribiendo() });
   if (!elegidos.length) return false;
   if (!auto) encenderGuias();
@@ -94,7 +96,8 @@ export async function guiar(
   const { driver } = await import('driver.js');
   await import('driver.js/dist/driver.css');
   // Otra guía se pidió mientras cargaba, o el paso ya no está a la vista: esta llega tarde.
-  if (mio !== turno || !seleccion.every((s) => visible(s.element as Element))) return false;
+  // Sola, tampoco si mientras cargaba se puso a escribir.
+  if (mio !== turno || (auto && escribiendo()) || !seleccion.every((s) => visible(s.element as Element))) return false;
   abierta?.destroy();
   const previo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
