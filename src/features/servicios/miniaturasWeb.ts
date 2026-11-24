@@ -7,7 +7,7 @@
 // y nadie la regenera, la huella no casa y esa miniatura vuelve a pintarse en vivo (nunca se
 // enseña una imagen caducada). Regenerar: `node scripts/miniaturas-web.mjs` (ver su cabecera).
 import manifiesto from './miniaturas-web.json';
-import { CSS_WEB, disenoWeb, EJEMPLO_WEB, huellaFnv as fnv, renderWeb, type DatosWeb } from './webs';
+import { cssWebDe, disenoWeb, EJEMPLO_WEB, huellaFnv as fnv, renderWeb, type DatosWeb } from './webs';
 
 /** Carpeta pública de las imágenes. */
 export const CARPETA_MINIATURAS = '/images/webs/mini/';
@@ -25,11 +25,17 @@ export function datosMiniatura(id: DatosWeb['plantilla'], ejemplo: DatosWeb = EJ
 }
 
 const huellas = new Map<string, string>();
-/** Huella de lo que se ve en la miniatura: el CSS (plantillas y escala) y el HTML del diseño. */
+/**
+ * Lo que se ve en la miniatura: el CSS que pinta ese diseño (básicas, común y solo el suyo, no el de
+ * los demás: dar de alta o retocar otro diseño no caduca esta imagen), la escala y su HTML.
+ */
+export const materialHuella = (id: DatosWeb['plantilla']): string => `${cssWebDe(id)}\n${CSS_MINI}\n${renderWeb(datosMiniatura(id))}`;
+
+/** Huella de `materialHuella`, calculada una vez por diseño. */
 export function huellaMiniatura(id: DatosWeb['plantilla']): string {
   let h = huellas.get(id);
   if (!h) {
-    h = fnv(`${CSS_WEB}\n${CSS_MINI}\n${renderWeb(datosMiniatura(id))}`);
+    h = fnv(materialHuella(id));
     huellas.set(id, h);
   }
   return h;

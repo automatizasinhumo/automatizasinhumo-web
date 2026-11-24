@@ -112,6 +112,7 @@ describe('orden y preguntas de partida', () => {
   it('recomienda por lo que escribe el cliente y, si no encaja, los de cualquier negocio', () => {
     expect(disenosRecomendados('Barbería Roble').ids).toContain('navaja');
     expect(disenosRecomendados('fontanero urgente').ids[0]).toBe('urgente');
+    expect(disenosRecomendados('Talleres Lago, mecánica del automóvil').ids[0]).toBe('matricula');
     const otro = disenosRecomendados('fabricamos velas');
     expect(otro.sector).toBeNull();
     expect(otro.ids).toEqual(SECTOR_GENERICO.disenos);

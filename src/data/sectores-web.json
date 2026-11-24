@@ -366,9 +366,9 @@
         "¿Hace falta cita previa?"
       ],
       "disenos": [
+        "matricula",
         "urgente",
-        "expediente",
-        "pulso"
+        "expediente"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir cita",

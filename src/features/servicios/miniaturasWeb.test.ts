@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import manifiesto from './miniaturas-web.json';
-import { CARPETA_MINIATURAS, huellaMiniatura, miniaturaWeb } from './miniaturasWeb';
+import { CARPETA_MINIATURAS, huellaMiniatura, materialHuella, miniaturaWeb } from './miniaturasWeb';
 import { PLANTILLAS_WEB } from './webs';
 
 const ids = PLANTILLAS_WEB.map((p) => p.id);
@@ -18,6 +18,13 @@ describe('miniaturas de los diseños de web', () => {
       expect(readFileSync(imagen(id)).subarray(8, 12).toString('latin1'), id).toBe('WEBP');
       expect(kb, id).toBeLessThan(40);
     }
+  });
+
+  it('la huella de un diseño no depende del CSS de los demás (dar de alta otro no caduca su imagen)', () => {
+    const urgente = materialHuella('urgente');
+    expect(urgente).toContain('.w-d-urgente');
+    expect(urgente).not.toContain('.w-d-bistro');
+    expect(materialHuella(PLANTILLAS_WEB.find((p) => p.familia === 'basica')!.id)).not.toContain('.w-d-urgente');
   });
 
   it('la huella es estable y distinta por diseño', () => {
