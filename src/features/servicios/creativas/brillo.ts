@@ -83,7 +83,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
   },
   tras: (c) => {
     const pasos = [
-      ['Nos cuentas qué necesitas', `${{ wa: 'Por WhatsApp', tel: 'Por teléfono', mail: 'Por correo', cita: 'Pide cita' }[c.principal?.[1] ?? 'mail'] ?? 'Escríbenos'}: qué hay que limpiar y cada cuánto.`],
+      ['Nos cuentas qué necesitas', `${({ wa: 'Por WhatsApp', tel: 'Por teléfono', mail: 'Por correo', cita: 'Pide cita' } as Record<string, string>)[c.principal?.[1] ?? 'mail'] ?? 'Escríbenos'}: qué hay que limpiar y cada cuánto.`],
       ['Te damos presupuesto', 'Claro y sin compromiso, el mismo día.'],
       ['Lo dejamos brillante', 'Y si algo no te convence, volvemos.'],
     ];
