@@ -237,6 +237,26 @@ export const MAX_FOTO_WEB = 400_000;
 export const MAX_GALERIA_WEB = 6;
 export const MAX_FOTO_GALERIA_WEB = 150_000;
 const FOTO = /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/;
+/** FNV-1a de 32 bits en hexadecimal: estable entre servidor, navegador y script. */
+export function huellaFnv(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
+/** URL versionada de una foto publicada: cambia cuando cambia la foto, así puede cachearse para siempre. */
+export const urlFotoVersion = (base: string, foto: string) => `${base}?v=${huellaFnv(foto)}`;
+
+/**
+ * Caché de /w/<slug>/foto y /galeria/<n>: con la versión de la foto actual (la que enlaza la
+ * publicada) es inmutable un año; sin ella o con una vieja, unos minutos.
+ */
+export const cacheFoto = (foto: string, v: string | null) =>
+  v && v === huellaFnv(foto) ? 'public, max-age=31536000, immutable' : 'public, max-age=300';
+
 /** Foto guardada como bytes y tipo, para servirla en /w/<slug>/foto (og:image no admite data URL). */
 export function bytesFoto(foto: string, max = MAX_FOTO_WEB): { tipo: string; bytes: Uint8Array<ArrayBuffer> } | null {
   if (!fotoValida(foto, max)) return null;
@@ -474,6 +494,11 @@ export interface OpcionesWeb {
    * lleve los bytes y las fotos carguen al bajar. Sin él (vista previa), van las data URL.
    */
   galeria?: string;
+  /**
+   * URL de la foto de portada en la publicada (…/w/<slug>/foto?v=…). Sin ella (vista previa) va la
+   * data URL; con ella, el HTML no lleva cientos de KB en base64 y la foto se cachea aparte.
+   */
+  foto?: string;
 }
 
 /** Letras de la palabra más larga del nombre (mínimo 6): el titular nunca la parte, se encoge. */
@@ -584,7 +609,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const fotos = d.galeria
     .map(
       (f, i) =>
-        `<li><img src="${esc(o.galeria ? `${o.galeria}${i}` : f)}" alt="${esc(`${d.negocio} · foto ${i + 1}`)}" loading="lazy" decoding="async"></li>`,
+        `<li><img src="${esc(o.galeria ? urlFotoVersion(`${o.galeria}${i}`, f) : f)}" alt="${esc(`${d.negocio} · foto ${i + 1}`)}" loading="lazy" decoding="async"></li>`,
     )
     .join('');
   const tabla = horario
@@ -627,7 +652,8 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const orden = p.orden.map((id) => (propio && (ORDEN_POR_DEFECTO as string[]).includes(id) ? cola.shift()! : id));
 
   const conFoto = Boolean(d.foto);
-  const imgFoto = conFoto ? `<img src="${esc(d.foto)}" alt="${esc(d.negocio)}" decoding="async" fetchpriority="high">` : '';
+  const srcFoto = o.foto || d.foto;
+  const imgFoto = conFoto ? `<img src="${esc(srcFoto)}" alt="${esc(d.negocio)}" decoding="async" fetchpriority="high">` : '';
   if (diseno) {
     const ctx: ContextoDiseno = {
       d,
@@ -681,7 +707,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     bloqueAcciones,
     datoCab ? `<p class="w-cab-dato">${datoCab}</p>` : '',
     `</div>`,
-    conFoto ? `<figure class="w-cab-foto"><img src="${esc(d.foto)}" alt="${esc(d.negocio)}" decoding="async" fetchpriority="high"></figure>` : '',
+    conFoto ? `<figure class="w-cab-foto"><img src="${esc(srcFoto)}" alt="${esc(d.negocio)}" decoding="async" fetchpriority="high"></figure>` : '',
     `</div></header>`,
     `<main>`,
     ...orden.map((id) => bloques[id] ?? ''),
@@ -755,7 +781,7 @@ ${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta
 ${fuentesDoc(d, tienda)}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
 </head>
 <body>
-${renderWeb(d, { pie, galeria })}
+${renderWeb(d, { pie, galeria, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
 </body>
 </html>
 `;

@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cacheFoto,
+  documentoWeb,
   EJEMPLO_WEB,
   fichaNegocio,
   galeriaValida,
+  huellaFnv,
   MAX_FOTO_GALERIA_WEB,
   MAX_GALERIA_WEB,
   MAX_OPINIONES_WEB,
@@ -128,10 +131,25 @@ describe('galería', () => {
   it('la publicada sirve las fotos por ruta, con carga diferida', () => {
     const html = renderWeb(datos({ galeria: [foto(1), foto(2)] }), { galeria: '/w/x/galeria/' });
     expect(html).toContain('id="galeria"');
-    expect(html).toContain('src="/w/x/galeria/0"');
-    expect(html).toContain('src="/w/x/galeria/1"');
+    expect(html).toContain(`src="/w/x/galeria/0?v=${huellaFnv(foto(1))}"`);
+    expect(html).toContain(`src="/w/x/galeria/1?v=${huellaFnv(foto(2))}"`);
     expect(html).toContain('loading="lazy"');
     expect(html).not.toContain('data:image');
+  });
+
+  it('la publicada enlaza la portada por URL versionada; el HTML no lleva la foto en base64', () => {
+    const d = datos({ foto: foto(7), galeria: [foto(1)] });
+    const html = documentoWeb(d, 'https://x.test/w/x', '', 'https://x.test/w/x/foto', 'https://x.test/w/x/galeria/');
+    expect(html).toContain(`src="https://x.test/w/x/foto?v=${huellaFnv(foto(7))}"`);
+    expect(html).not.toContain(';base64,');
+    // La vista previa (sin URL) sigue con la data URL.
+    expect(renderWeb(d)).toContain(`src="${foto(7)}"`);
+  });
+
+  it('la foto se cachea un año solo con la versión de la foto actual', () => {
+    expect(cacheFoto(foto(1), huellaFnv(foto(1)))).toContain('immutable');
+    expect(cacheFoto(foto(1), huellaFnv(foto(2)))).toBe('public, max-age=300');
+    expect(cacheFoto(foto(1), null)).toBe('public, max-age=300');
   });
 
   it('la vista previa usa la data URL y sin fotos no hay sección', () => {
