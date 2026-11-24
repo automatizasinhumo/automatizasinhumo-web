@@ -3,6 +3,7 @@ import { mediaUrl } from '../media/url';
 import type { StorefrontLink, StorefrontShellModel } from './models';
 // Datos puros del JSON: sectors.ts arrastra consultas a D1 y este módulo no debe.
 import sectores from '../../data/sectores.json';
+import { PUESTOS_CV } from '../servicios/puestosCv';
 import { CATALOGO_HREF, familiasMenu } from '../servicios/catalogo';
 
 /**
@@ -59,6 +60,7 @@ export function buildShellModel(input: ShellInput): StorefrontShellModel {
     familias: familiasMenu(),
     footerLinks: input.footerItems.map(toLink),
     sectorLinks: (sectores as { slug: string; label: string }[]).map((sector) => ({ text: `Web para ${sector.label.toLowerCase()}`, href: `/webs/${sector.slug}` })),
+    puestoLinks: PUESTOS_CV.map((p) => ({ text: p.slug === 'ats' ? 'Currículum para ATS' : `Currículum de ${p.nombre.toLowerCase()}`, href: `/curriculum/${p.slug}` })),
     search: { action: '/search', query: input.searchQuery },
     cart: { enabled: input.cartEnabled, href: '/cart' },
     account: { enabled: input.accountsEnabled, href: '/account' },

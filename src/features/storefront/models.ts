@@ -91,6 +91,8 @@ export interface StorefrontShellModel {
   footerLinks: StorefrontLink[];
   /** Páginas «Web para …» de cada oficio: enlazadas en todas las rutas para que no queden huérfanas. */
   sectorLinks: StorefrontLink[];
+  /** Páginas «Currículum de …» de cada puesto (/curriculum/<slug>), por la misma razón. */
+  puestoLinks: StorefrontLink[];
   /** Form action plus the current query, so the field repopulates on /search. */
   search: { action: string; query: string };
   cart: { enabled: boolean; href: string };

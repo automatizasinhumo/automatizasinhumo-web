@@ -84,6 +84,18 @@ const gruposVisibles = grupos.filter((g) => g.links.length > 0);
         </section>
       )
     }
+    {
+      model.puestoLinks.length > 0 && (
+        <section aria-labelledby="pie-puestos" class="sectores">
+          <h2 id="pie-puestos">Currículum por puesto</h2>
+          <ul>
+            {model.puestoLinks.map((link) => (
+              <li><a href={link.href}>{link.text}</a></li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
     <p class="legal">&copy; {new Date().getFullYear()} {model.storeName} · Sin complicaciones y con una persona detrás.</p>
   </div>
   <p class="gigante" aria-hidden="true">sin humo</p>
