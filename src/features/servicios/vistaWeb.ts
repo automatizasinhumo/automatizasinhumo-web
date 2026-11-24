@@ -45,3 +45,30 @@ export async function leerVista(db: D1Database, id: string, ahora = new Date()):
   const v = validarBorrador(JSON.parse(r.datos));
   return v.ok ? v.datos : null;
 }
+
+/** Lee el JSON contando bytes del flujo (no se fía de Content-Length): 'grande' antes de analizar nada. */
+export async function jsonLimitado(req: Request, max = MAX_BYTES_VISTA): Promise<unknown | 'grande' | null> {
+  if (Number(req.headers.get('content-length') ?? 0) > max) return 'grande';
+  if (!req.body) return null;
+  const lector = req.body.getReader();
+  const trozos: Uint8Array[] = [];
+  let n = 0;
+  for (;;) {
+    const { done, value } = await lector.read();
+    if (done) break;
+    n += value.byteLength;
+    if (n > max) {
+      await lector.cancel().catch(() => {});
+      return 'grande';
+    }
+    trozos.push(value);
+  }
+  const todo = new Uint8Array(n);
+  let i = 0;
+  for (const t of trozos) (todo.set(t, i), (i += t.byteLength));
+  try {
+    return JSON.parse(new TextDecoder().decode(todo));
+  } catch {
+    return null;
+  }
+}

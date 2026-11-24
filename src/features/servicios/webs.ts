@@ -748,7 +748,7 @@ export function documentoVista(d: DatosWeb): string {
 <meta name="robots" content="noindex, nofollow">
 <title>${esc(d.negocio)} · borrador</title>
 <link rel="icon" href="/favicon.svg">
-${fuentesDoc(d, '')}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
+${fuentesDoc(d, '')}<style>body{margin:0;padding-bottom:76px}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
 </head>
 <body>
 ${renderWeb(d, { marca: MARCA_WEB })}

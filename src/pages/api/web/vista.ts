@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { guardarVista, validarBorrador } from '../../../features/servicios/vistaWeb';
+import { guardarVista, jsonLimitado, validarBorrador } from '../../../features/servicios/vistaWeb';
 
 export const prerender = false;
 
@@ -12,7 +12,9 @@ const json = (body: unknown, status = 200) =>
 
 // POST /api/web/vista {datos} — guarda el borrador y devuelve un enlace para enseñarlo (30 días).
 export const POST: APIRoute = async ({ request }) => {
-  const body = (await request.json().catch(() => null)) as { datos?: unknown } | null;
+  const leido = await jsonLimitado(request);
+  if (leido === 'grande') return json({ ok: false, error: 'grande' }, 413);
+  const body = leido as { datos?: unknown } | null;
   const v = validarBorrador(body?.datos);
   if (!v.ok) return json({ ok: false, error: v.error }, 422);
   const id = await guardarVista(env.DB, v.datos);
