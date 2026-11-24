@@ -16,7 +16,7 @@ describe('muestras por sector', () => {
       expect(resolverPlantilla(u.searchParams.get('diseno'))).toBe(m.id);
       expect(u.searchParams.get('sector')).toBe(m.datos.sector);
       if (label !== 'Peluquerías') expect(m.datos.negocio).not.toBe('Peluquería Lola');
-      expect(m.html).toContain(m.datos.negocio.replace('&', '&amp;'));
+      expect(m.html).toContain(m.datos.negocio.replaceAll('&', '&amp;'));
     }
   });
   it('las muestras de otros sectores no traen opiniones de peluquería', () => {
