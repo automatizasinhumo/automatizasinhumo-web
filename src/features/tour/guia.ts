@@ -96,8 +96,9 @@ export async function guiar(
   const { driver } = await import('driver.js');
   await import('driver.js/dist/driver.css');
   // Otra guía se pidió mientras cargaba, o el paso ya no está a la vista: esta llega tarde.
-  // Sola, tampoco si mientras cargaba se puso a escribir.
-  if (mio !== turno || (auto && escribiendo()) || !seleccion.every((s) => visible(s.element as Element))) return false;
+  // Sola, tampoco si mientras cargaba se puso a escribir, otra pestaña ya la enseñó o las apagaron.
+  const yaNo = () => escribiendo() || !!leer(local(), VISTA + clave) || guiasApagadas();
+  if (mio !== turno || (auto && yaNo()) || !seleccion.every((s) => visible(s.element as Element))) return false;
   abierta?.destroy();
   const previo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
