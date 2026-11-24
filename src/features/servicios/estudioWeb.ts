@@ -588,7 +588,7 @@ export function iniciarEstudioWeb() {
       );
       lista.closest<HTMLElement>('[data-revision-caja]')!.dataset.completa = String(!avisos.length);
     }
-    $('[data-solo-compra]')!.hidden = !!pedido.pagado;
+    for (const el of document.querySelectorAll<HTMLElement>('[data-solo-compra]')) el.hidden = !!pedido.pagado;
     $('[data-solo-pagado]')!.hidden = !pedido.pagado;
     if (pedido.pagado) res('ref').textContent = pedido.pagado.ref;
     pintarVersiones();
@@ -830,6 +830,33 @@ export function iniciarEstudioWeb() {
     a.textContent = `${location.host}${url}`;
     st.dataset.tono = '';
     st.replaceChildren(`${texto} `, a);
+  }
+  /** Enlace temporal (30 días, con marca de agua) para enseñar el borrador antes de comprar. */
+  async function compartir(b: HTMLButtonElement) {
+    const st = $('[data-estado-compra]')!;
+    b.disabled = true;
+    st.textContent = 'Creando el enlace…';
+    try {
+      const r = await fetch('/api/web/vista', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ datos: datos() }) });
+      const j = (await r.json().catch(() => null)) as { ok?: boolean; url?: string; error?: string } | null;
+      if (!r.ok || !j?.ok || !j.url) {
+        st.textContent = j?.error === 'grande' ? 'Las fotos pesan demasiado para compartir: quita alguna y vuelve a probar.' : 'Revisa los campos marcados: el nombre del negocio es obligatorio.';
+        return;
+      }
+      const enlace = new URL(j.url, location.origin).href;
+      avisar(j.url, 'Enlace para enseñarla:');
+      try {
+        if (navigator.share) await navigator.share({ title: datos().negocio, url: enlace });
+        else await navigator.clipboard?.writeText(enlace);
+      } catch {
+        /* El usuario cerró el menú de compartir: el enlace sigue visible. */
+      }
+    } catch (e) {
+      console.error(e);
+      st.textContent = 'No hemos podido crear el enlace. Inténtalo en un momento.';
+    } finally {
+      b.disabled = false;
+    }
   }
   // Restauración de versión en curso: ni otra restauración ni publicar hasta que acabe.
   let restaurando = false;
@@ -1131,6 +1158,7 @@ export function iniciarEstudioWeb() {
       });
       return;
     }
+    if (b.hasAttribute('data-compartir')) return void compartir(b as HTMLButtonElement);
     if (b.hasAttribute('data-comprar')) return void (pedido.cargando ? undefined : pedido.pagado ? publicar(b as HTMLButtonElement) : comprar(b as HTMLButtonElement));
   });
 
