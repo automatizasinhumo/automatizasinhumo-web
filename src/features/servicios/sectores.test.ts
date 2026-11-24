@@ -120,6 +120,8 @@ describe('orden y preguntas de partida', () => {
     expect(disenosRecomendados('Fisio Centro Vida').ids[0]).toBe('serena');
     expect(disenosRecomendados('Horno San Blas').ids[0]).toBe('hornada');
     expect(disenosRecomendados('Pastelería Dulce Mayo').ids[0]).toBe('hornada');
+    expect(disenosRecomendados('Limpiezas Brillo').ids[0]).toBe('brillo');
+    expect(disenosRecomendados('Lavandería La Espuma').ids[0]).toBe('brillo');
     const otro = disenosRecomendados('fabricamos velas');
     expect(otro.sector).toBeNull();
     expect(otro.ids).toEqual(SECTOR_GENERICO.disenos);

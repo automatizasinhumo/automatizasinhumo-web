@@ -23,6 +23,7 @@ describe('sitemapLocs', () => {
     '/webs/talleres',
     '/webs/dentistas',
     '/webs/panaderias',
+    '/webs/limpieza',
     '/curriculum/camarero',
     '/curriculum/dependienta',
     '/curriculum/administrativo',

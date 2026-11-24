@@ -31,6 +31,21 @@ describe('diseños de autor', () => {
     for (const f of usadas) expect(x.fuentes, `${id} usa ${f}`).toContain(f);
   });
 
+  // Un nombre compuesto largo («Martínez-Fernández-Rodríguez») tiene que poder partirse en el h1:
+  // si una pieza decorativa del nombre lleva nowrap, desborda la cabecera en móvil.
+  it.each(DISENOS.map((x) => [x.id]))('%s deja partir el nombre del h1 en varias líneas', (id) => {
+    const x = DISENOS.find((d) => d.id === id)!;
+    const html = renderWeb(datos({ plantilla: id, letra: 'diseno', ...x.muestra, negocio: 'Limpiezas Martínez-Fernández-Rodríguez' }));
+    const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? '';
+    for (const [, clases] of h1.matchAll(/class="([^"]+)"/g)) {
+      for (const cl of clases!.split(/\s+/)) {
+        for (const [, regla] of x.css.matchAll(new RegExp(`\\.${cl}(?![\\w-])[^{]*\\{([^}]*)\\}`, 'g'))) {
+          expect(regla, `${id} .${cl}`).not.toMatch(/white-space:\s*nowrap/);
+        }
+      }
+    }
+  });
+
   it('con otra letra el diseño usa esa letra y no la suya', () => {
     const html = renderWeb(datos({ plantilla: 'pulso', letra: 'clasica' }));
     expect(html).not.toContain('ash-anton');
