@@ -31,6 +31,12 @@ export class Historial<T> {
     return true;
   }
 
+  /** Empieza de cero con este estado (otro pedido: sus pasos no se mezclan con los del anterior). */
+  reiniciar(valor: T) {
+    this.pila = [{ clave: this.clave(valor), valor, t: -Infinity }];
+    this.i = 0;
+  }
+
   get puedeDeshacer() {
     return this.i > 0;
   }

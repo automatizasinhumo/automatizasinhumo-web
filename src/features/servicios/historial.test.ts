@@ -53,4 +53,15 @@ describe('deshacer y rehacer del estudio', () => {
     while (h.deshacer() !== undefined) pasos++;
     expect(pasos).toBe(4);
   });
+  it('reiniciar (otro pedido) borra los pasos del anterior y el siguiente cambio no se funde', () => {
+    const h = nuevo();
+    h.registrar('A1', 0);
+    h.registrar('A2', 5000);
+    h.reiniciar('B');
+    expect(h.puedeDeshacer).toBe(false);
+    expect(h.puedeRehacer).toBe(false);
+    h.registrar('B1', 10);
+    expect(h.deshacer()).toBe('B');
+    expect(h.deshacer()).toBeUndefined();
+  });
 });

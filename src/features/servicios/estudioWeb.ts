@@ -220,8 +220,15 @@ export function iniciarEstudioWeb() {
   let actual = 'plantilla';
 
   // Deshacer / rehacer. Instantánea de lo que el cliente edita (contenido y aspecto); la galería se comparte por referencia.
-  type Instantanea = Pick<Estado, 'plantilla' | 'color' | 'letra'> & { contenido: Partial<Contenido> };
-  const instantanea = (): Instantanea => ({ plantilla: estado.plantilla, color: estado.color, letra: estado.letra, contenido: estado.contenido ?? {} });
+  // Los textos automáticos van con su procedencia (`escritos`): al deshacer, se siguen reconociendo como nuestros.
+  type Instantanea = Pick<Estado, 'plantilla' | 'color' | 'letra'> & { contenido: Partial<Contenido>; escritos: Estado['escritos'] };
+  const instantanea = (): Instantanea => ({
+    plantilla: estado.plantilla,
+    color: estado.color,
+    letra: estado.letra,
+    contenido: estado.contenido ?? {},
+    escritos: { ...estado.escritos },
+  });
   const historial = new Historial<Instantanea>(({ contenido: { galeria, ...resto }, ...aspecto }) =>
     JSON.stringify([aspecto, resto, (galeria ?? []).map((g) => g.length + g.slice(-24))]),
   );
@@ -854,6 +861,7 @@ export function iniciarEstudioWeb() {
       Object.assign(estado, { plantilla, color, letra, alcanzado: PASOS.length - 1, pedido: d.ref });
       volcar(c);
       persistir();
+      if (ajeno) nuevoHistorial();
       pintarControles();
       programar(true);
       return;
@@ -862,6 +870,7 @@ export function iniciarEstudioWeb() {
       estado.pedido = d.ref;
       volcar(vacio());
       persistir();
+      nuevoHistorial();
       programar(true);
       return;
     }
@@ -923,9 +932,16 @@ export function iniciarEstudioWeb() {
       if (b) b.disabled = !ok;
     }
   }
+  /** Otro pedido: deshacer no puede devolver el contenido del anterior (se publicaría con este token). */
+  function nuevoHistorial() {
+    historial.reiniciar(instantanea());
+    pintarHistorial();
+  }
   function saltar(v: Instantanea | undefined, que: string) {
     if (!v) return;
     Object.assign(estado, { plantilla: v.plantilla, color: v.color, letra: v.letra, contenido: v.contenido });
+    // Mismo objeto: `escritos` guarda una referencia a estado.escritos.
+    Object.assign(estado.escritos, v.escritos);
     volcar(v.contenido);
     pintarControles();
     guardar(estado);
@@ -933,6 +949,7 @@ export function iniciarEstudioWeb() {
     const aviso = $('[data-historial-aviso]');
     if (aviso) aviso.textContent = que;
     programar(true);
+    if (actual === 'publica') resumir();
   }
 
   // ---------- Eventos ----------
