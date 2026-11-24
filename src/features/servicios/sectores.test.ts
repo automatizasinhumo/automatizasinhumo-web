@@ -113,11 +113,13 @@ describe('orden y preguntas de partida', () => {
     expect(disenosRecomendados('Barbería Roble').ids).toContain('navaja');
     expect(disenosRecomendados('fontanero urgente').ids[0]).toBe('urgente');
     expect(disenosRecomendados('Talleres Lago, mecánica del automóvil').ids[0]).toBe('matricula');
-  expect(disenosRecomendados('Clínica dental Alba').ids[0]).toBe('sonrisa');
-  // «sonrisa» no es clave: no roba a la fisioterapia un nombre con esa palabra.
-  expect(disenosRecomendados('Fisio Centro Sonrisa').ids[0]).toBe('serena');
-  expect(disenosRecomendados('Implantes Ríos').ids[0]).toBe('sonrisa');
-  expect(disenosRecomendados('Fisio Centro Vida').ids[0]).toBe('serena');
+    expect(disenosRecomendados('Clínica dental Alba').ids[0]).toBe('sonrisa');
+    // «sonrisa» no es clave: no roba a la fisioterapia un nombre con esa palabra.
+    expect(disenosRecomendados('Fisio Centro Sonrisa').ids[0]).toBe('serena');
+    expect(disenosRecomendados('Implantes Ríos').ids[0]).toBe('sonrisa');
+    expect(disenosRecomendados('Fisio Centro Vida').ids[0]).toBe('serena');
+    expect(disenosRecomendados('Horno San Blas').ids[0]).toBe('hornada');
+    expect(disenosRecomendados('Pastelería Dulce Mayo').ids[0]).toBe('hornada');
     const otro = disenosRecomendados('fabricamos velas');
     expect(otro.sector).toBeNull();
     expect(otro.ids).toEqual(SECTOR_GENERICO.disenos);

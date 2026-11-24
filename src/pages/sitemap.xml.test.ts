@@ -22,6 +22,7 @@ describe('sitemapLocs', () => {
     '/webs/fisioterapeutas',
     '/webs/talleres',
     '/webs/dentistas',
+    '/webs/panaderias',
     '/curriculum/camarero',
     '/curriculum/dependienta',
     '/curriculum/administrativo',
