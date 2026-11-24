@@ -51,10 +51,38 @@ export function tomarTokenDelHash(clave: string, destino: string): string | null
   return token;
 }
 
+/** Pedidos que se acumulan en la pestaña (CV + un extra comprado después…): como mucho estos. */
+export const MAX_TOKENS = 5;
+/** Lista de tokens guardada: JSON `["a","b"]` o, de antes, un token suelto. */
+export function leerTokens(raw: string): string[] {
+  if (!raw) return [];
+  if (!raw.startsWith('[')) return [raw];
+  try {
+    const v: unknown = JSON.parse(raw);
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && !!x).slice(-MAX_TOKENS) : [];
+  } catch {
+    return [];
+  }
+}
+/** Añade un token al final (sin repetir) y conserva solo los MAX_TOKENS últimos. */
+export function sumarToken(lista: readonly string[], t: string): string[] {
+  return [...lista.filter((x) => x !== t), t].slice(-MAX_TOKENS);
+}
+
+/** Un pedido cargado con su token. */
+export interface PedidoCargado<D> {
+  token: string;
+  d: D;
+}
+
 /**
  * Pedido pagado ligado a su token. Cambiar de token (`#pedido=B` tras A) invalida en el acto el
  * pedido anterior y descarta las respuestas atrasadas: lo que se publica siempre va con el token
  * cuyo pedido está cargado. Cada estudio solo decide qué hacer con el pedido (`alCambiar`).
+ *
+ * Con `combinar`, un token nuevo se suma a los de la pestaña en vez de sustituirlos: volver de
+ * pagar un extra suelto no hace olvidar el CV ya pagado (ni lo vuelve a cobrar). `combinar` une
+ * los pedidos cargados y elige el token con el que se actúa (p. ej. el que incluye la tarjeta).
  */
 export interface PedidoEstudio<D extends { ref: string }> {
   /** Token vigente ('' si no hay). */
@@ -71,32 +99,45 @@ export interface PedidoEstudio<D extends { ref: string }> {
   vigente(token: string): boolean;
 }
 
-export function pedidoEstudio<D extends { ref: string }>(clave: string, url: string, alCambiar: (d: D | null) => void): PedidoEstudio<D> {
+export function pedidoEstudio<D extends { ref: string }>(
+  clave: string,
+  url: string,
+  alCambiar: (d: D | null) => void,
+  combinar?: (pedidos: PedidoCargado<D>[]) => PedidoCargado<D> | null,
+): PedidoEstudio<D> {
   let token = '';
   let pagado: D | null = null;
   let gen = 0;
   let cargando = false;
-  async function cargar(t: string) {
+  const guardados = () => (combinar ? leerTokens(tokenGuardado(clave)) : [tokenGuardado(clave)].filter(Boolean));
+  const guardar = (lista: string[]) => guardarToken(clave, combinar ? (lista.length ? JSON.stringify(lista) : '') : (lista.at(-1) ?? ''));
+  async function cargar(lista: string[]) {
     const g = ++gen;
-    token = t;
+    token = lista.at(-1) ?? '';
     pagado = null;
-    cargando = !!t;
+    cargando = lista.length > 0;
     alCambiar(null);
-    if (!t) return;
+    if (!lista.length) return;
     try {
-      const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: t }) });
-      if (g !== gen) return;
-      if (r.status === 404) {
-        guardarToken(clave, '');
-        token = '';
+      const cargados: PedidoCargado<D>[] = [];
+      const caducados: string[] = [];
+      for (const t of lista) {
+        const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: t }) });
+        if (g !== gen) return;
+        if (r.status === 404) caducados.push(t);
+        else if (r.ok) cargados.push({ token: t, d: (await r.json()) as D });
+        if (g !== gen) return;
+      }
+      if (caducados.length) guardar(lista.filter((t) => !caducados.includes(t)));
+      const elegido = combinar ? combinar(cargados) : (cargados.at(-1) ?? null);
+      if (!elegido) {
+        if (caducados.length === lista.length) token = '';
         return;
       }
-      if (!r.ok) return;
-      const d = (await r.json()) as D;
-      if (g !== gen) return;
-      pagado = d;
+      token = elegido.token;
+      pagado = elegido.d;
       cargando = false;
-      alCambiar(d);
+      alCambiar(elegido.d);
     } catch (e) {
       console.error(e);
     } finally {
@@ -117,12 +158,16 @@ export function pedidoEstudio<D extends { ref: string }>(clave: string, url: str
       return cargando;
     },
     tomar(destino) {
+      const previos = guardados();
       const t = tomarTokenDelHash(clave, destino);
-      if (t !== null) void cargar(t);
-      return t !== null;
+      if (t === null) return false;
+      const lista = combinar ? sumarToken(previos, t) : [t];
+      guardar(lista);
+      void cargar(lista);
+      return true;
     },
     arrancar(destino) {
-      if (!this.tomar(destino)) void cargar(tokenGuardado(clave));
+      if (!this.tomar(destino)) void cargar(guardados());
     },
     vigente(t) {
       return !!t && t === token && pagado !== null;

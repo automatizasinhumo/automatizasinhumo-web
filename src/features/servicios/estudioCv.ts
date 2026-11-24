@@ -14,6 +14,7 @@ import { MODELO_TARJETA_POR_DEFECTO, coloresTarjeta, esModeloTarjeta } from './m
 import { guiar } from '../tour/guia';
 import { AJUSTE_INICIAL, ZOOM_MAX, normalizarAjuste, recortar, reducirBase, type AjusteFoto } from './fotoCv';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
+import { combinarPedidosCv, type PagadoCv } from './cvPedidos';
 import { ANCHO_MAX_VISTA, protegerVista } from './protegerVista';
 
 type Lista = keyof typeof LIMITES_CV.items;
@@ -60,13 +61,7 @@ interface Config {
   guia: Record<string, { guia: string; titulo: string; texto: string }[]>;
 }
 type DatosTarjeta = Record<string, unknown> & { enlaces?: { etiqueta: string; url: string }[] };
-interface Pagado {
-  ref: string;
-  cv: ModalidadCv | null;
-  tarjeta: { slug: string | null; datos: DatosTarjeta | null } | null;
-  linkedin?: boolean;
-  infojobs?: boolean;
-}
+type Pagado = PagadoCv<DatosTarjeta>;
 interface Estado {
   diseno: string;
   /** Camino del primer paso: plantilla tal cual, diseño propio (modalidad más alta) o asesoría. */
@@ -629,7 +624,7 @@ export function iniciarEstudioCv() {
   const pedido = pedidoEstudio<Pagado>(CLAVE_PEDIDO, '/api/cv/pedido', () => {
     if (actual === 'descarga' || actual === 'anade') resumir();
     if (actual === 'anade') pintarPortales();
-  });
+  }, combinarPedidosCv);
   /** Deja el carrito exactamente con lo elegido (cantidad 1, sin la otra modalidad) y va al pago. */
   async function comprar(b: HTMLButtonElement) {
     const st = $('[data-estado-compra]')!;
