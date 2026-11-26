@@ -13,6 +13,7 @@ import { getConfig } from './config';
 import { firmadorDecision } from './features/solicitudes/decision';
 import { avanzarDominios, avisarDominiosActivos, configDominios, servirDominio } from './features/servicios/dominios';
 import { documentoWeb, webPorSlug } from './features/servicios/webs';
+import { formularioWeb } from './features/servicios/mensajesWeb';
 
 /**
  * Worker entrypoint.
@@ -153,7 +154,9 @@ export default {
       // Sin origen de tienda, las fotos van dentro del HTML: el dominio del cliente solo sirve «/».
       if (!tienda) return documentoWeb(w.datos, url);
       const recursos = `${tienda}/w/${w.slug}`;
-      return documentoWeb(w.datos, url, tienda, `${recursos}/foto`, `${recursos}/galeria/`);
+      // El formulario se envía a la tienda (el dominio del cliente solo sirve GET) y vuelve aquí.
+      const formulario = await formularioWeb(w.slug, `${recursos}/mensaje`, url, env.AUTH_SECRET);
+      return documentoWeb(w.datos, url, tienda, `${recursos}/foto`, `${recursos}/galeria/`, formulario);
     }).catch((err) => {
       console.error('Custom domain lookup failed:', err instanceof Error ? err.message : 'error');
       return null;

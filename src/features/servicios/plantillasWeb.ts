@@ -334,6 +334,15 @@ const VARIANTES = `
 .w .w-c-4 .w-contacto{gap:10px}
 .w .w-c-4 .w-contacto>li{background:var(--w-panel);border:1px solid var(--w-borde);border-radius:var(--w-r);padding:0 18px}
 .w .w-c-4 .w-contacto>li:has(a[href*="maps"]){border-inline-start:5px solid var(--w-c)}
+.w .w-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px 18px;margin-top:clamp(28px,5cqw,48px);padding:clamp(20px,4cqw,36px);background:var(--w-panel);border:1px solid var(--w-borde);border-radius:var(--w-r)}
+.w .w-form-titulo{grid-column:1/-1;font:700 clamp(1.15rem,2.6cqw,1.45rem)/1.25 var(--w-ft-titulo)}
+.w .w-campo{display:grid;gap:6px;min-width:0;font-size:.9rem;font-weight:600}
+.w .w-campo-ancho{grid-column:1/-1}
+.w .w-campo :is(input,textarea){width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;font:inherit;font-weight:400;font-size:1rem;color:var(--w-tinta);background:var(--w-fondo);border:1.5px solid var(--w-borde);border-radius:min(var(--w-r),12px)}
+.w .w-campo textarea{resize:vertical;min-height:120px}
+.w .w-campo :is(input,textarea):focus-visible{outline:3px solid var(--w-c);outline-offset:1px;border-color:var(--w-c)}
+.w .w-form .w-boton{justify-self:start;cursor:pointer;font:inherit;font-weight:600}
+.w .w-form-trampa{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 .w .w-zonas{display:flex;flex-wrap:wrap;gap:10px}
 .w .w-zonas>li{border:1px solid var(--w-borde);border-radius:999px;padding:10px 16px;background:var(--w-panel);font-size:.95rem;font-weight:600}
 .w .w-horario{width:100%;max-width:640px;border-collapse:collapse;font-variant-numeric:tabular-nums}

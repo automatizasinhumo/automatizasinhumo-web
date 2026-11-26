@@ -561,6 +561,11 @@ export interface OpcionesWeb {
    * data URL; con ella, el HTML no lleva cientos de KB en base64 y la foto se cachea aparte.
    */
   foto?: string;
+  /**
+   * Formulario de contacto de la publicada: adónde se envía (…/w/<slug>/mensaje) y el sello
+   * firmado con la hora (mensajesWeb.ts). Sin él (vista previa, sin secreto) no sale.
+   */
+  formulario?: { accion: string; sello: string };
 }
 
 /** Letras de la palabra más larga del nombre (mínimo 6): el titular nunca la parte, se encoge. */
@@ -592,6 +597,26 @@ export const TITULOS_GENERICOS: Readonly<Record<string, string>> = {
 };
 
 /** HTML de la web (solo el contenido, con ámbito en `.w`). Todo texto del cliente va escapado. */
+/** Nombre del campo trampa del formulario (lo comprueba mensajesWeb.ts). */
+export const CAMPO_TRAMPA = 'web_url';
+
+/**
+ * Formulario sin JavaScript: nombre, cómo responderte y el mensaje. El campo trampa queda fuera
+ * de la vista y del orden de tabulación; solo lo rellenan los robots.
+ */
+function formularioContacto(f: OpcionesWeb['formulario']): string {
+  if (!f) return '';
+  return `<form class="w-form" method="post" action="${esc(f.accion)}" accept-charset="utf-8">
+<p class="w-form-titulo">O escríbenos aquí y te respondemos</p>
+<input type="hidden" name="sello" value="${esc(f.sello)}">
+<div class="w-form-trampa" aria-hidden="true"><label>No rellenar <input name="${CAMPO_TRAMPA}" tabindex="-1" autocomplete="off"></label></div>
+<label class="w-campo"><span>Nombre</span><input name="nombre" autocomplete="name" maxlength="100"></label>
+<label class="w-campo"><span>Email o teléfono</span><input name="contacto" required autocomplete="email" maxlength="254"></label>
+<label class="w-campo w-campo-ancho"><span>Mensaje</span><textarea name="mensaje" required minlength="5" maxlength="2000" rows="4"></textarea></label>
+<button class="w-boton w-boton-lleno" type="submit">Enviar mensaje</button>
+</form>`;
+}
+
 export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const p = plantillaWeb(d.plantilla);
   const diseno = disenoWeb(p.id);
@@ -699,7 +724,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     contacto: seccion(
       'contacto',
       titulo('contacto'),
-      `<div class="w-contacto-bloque w-c-${v('contacto')}"><div class="w-contacto-cta"><p class="w-contacto-grande">${grande}</p>${bloqueAcciones}</div><ul class="w-contacto">${filasContacto.join('')}</ul></div>`,
+      `<div class="w-contacto-bloque w-c-${v('contacto')}"><div class="w-contacto-cta"><p class="w-contacto-grande">${grande}</p>${bloqueAcciones}</div><ul class="w-contacto">${filasContacto.join('')}</ul></div>${formularioContacto(o.formulario)}`,
     ),
     zonas: conExtra.zonas ? seccion('zonas', titulo('zonas'), `<ul class="w-zonas">${zonas.map((z) => `<li>${esc(z)}</li>`).join('')}</ul>`) : '',
     horario: conExtra.horario ? seccion('horario', titulo('horario'), `<table class="w-horario">${tabla}</table>`) : '',
@@ -821,7 +846,7 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
  * cuando la página se sirve desde otro dominio ('' = mismo origen). `imagen` es la URL absoluta
  * de la foto (/w/<slug>/foto) para la tarjeta que sale al compartir el enlace; '' si no hay foto.
  */
-export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = ''): string {
+export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = '', formulario?: OpcionesWeb['formulario']): string {
   // «Nombre · Actividad en Zona»: la zona principal en el título ayuda a salir en búsquedas locales.
   const zona = listaZonas(d.zonas)[0];
   const titulo = (d.sector ? `${d.negocio} · ${d.sector}` : d.negocio) + (zona && d.sector ? ` en ${zona}` : '');
@@ -847,7 +872,7 @@ ${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta
 ${fuentesDoc(d, tienda)}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
 </head>
 <body>
-${renderWeb(d, { pie, galeria, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
+${renderWeb(d, { pie, galeria, formulario, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
 </body>
 </html>
 `;
