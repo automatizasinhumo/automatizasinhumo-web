@@ -1,5 +1,5 @@
 Fuentes de los diseños de autor (subconjunto latino, woff2), de Google Fonts.
 Todas bajo SIL Open Font License 1.1 (https://openfontlicense.org): Anton, Archivo, Archivo Black,
 Bebas Neue, Big Shoulders Display, Bricolage Grotesque, Cormorant Garamond, DM Sans,
-DM Mono, DM Serif Display, Fraunces, IBM Plex Mono, Instrument Sans, Manrope, Outfit,
-Playfair Display, Space Grotesk y Syne.
+DM Mono, DM Serif Display, Fraunces, IBM Plex Mono, Instrument Sans, Lexend, Manrope, Outfit,
+Playfair Display, Space Grotesk, Syne, Young Serif y Zilla Slab.
