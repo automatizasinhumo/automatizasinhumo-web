@@ -26,6 +26,8 @@ export const FUENTES_WEB: Readonly<Record<string, { archivo: string; peso: strin
   'ash-zilla-slab': { archivo: 'zilla-slab.woff2', peso: '600' },
   'ash-young-serif': { archivo: 'young-serif.woff2', peso: '400' },
   'ash-lexend': { archivo: 'lexend.woff2', peso: '100 900' },
+  'ash-saira-extra-condensed': { archivo: 'saira-extra-condensed.woff2', peso: '800' },
+  'ash-chakra-petch': { archivo: 'chakra-petch.woff2', peso: '600' },
 };
 
 /**

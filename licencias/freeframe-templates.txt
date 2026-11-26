@@ -1,7 +1,9 @@
 Source: https://github.com/empeeryal/freeframe-templates
 Adaptadas en src/features/servicios/creativas/: hornada.ts (crumb), posada.ts (hearth, con
-hearth/assets/img/hero.svg), causa.ts (nonprofit, con nonprofit/assets/img/hero.svg) y charla.ts
-(lingua, con lingua/assets/img/hero-class.svg).
+hearth/assets/img/hero.svg), causa.ts (nonprofit, con nonprofit/assets/img/hero.svg), charla.ts
+(lingua, con lingua/assets/img/hero-class.svg), plano.ts (garage, con el SVG del coche de
+garage/index.html), sillon.ts (clinic, con clinic/assets/img/hero.svg) y grua.ts (keystone, con
+el SVG de la grúa de keystone/index.html).
 
 MIT License
 
