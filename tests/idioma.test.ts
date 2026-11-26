@@ -25,8 +25,9 @@ const SHORT_TEXT_ELEMENTS =
   /<(a|button|label|option|th|title|h[1-6]|p|summary)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
 // franc confunde el español breve (fechas, firmas) con francés o italiano, y algo de inglés con francés.
 // Si no dice «spa», decide el recuento de palabras vacías: falla cuando hay tantas inglesas como españolas.
-const SPANISH_STOPWORDS = /\b(?:y|de|del|la|el|en|para|con|tu|tus|las|los|una?|por|sin|que|se)\b/gi;
-const ENGLISH_STOPWORDS = /\b(?:the|and|of|for|with|your|to|an?|by|in|on|is|are|we|you|our|it|this)\b/gi;
+// Límites por letra Unicode: con \b, la «a» final de «Grúa» contaba como la inglesa «a».
+const SPANISH_STOPWORDS = /(?<!\p{L})(?:y|de|del|la|el|en|para|con|tu|tus|las|los|una?|por|sin|que|se)(?!\p{L})/giu;
+const ENGLISH_STOPWORDS = /(?<!\p{L})(?:the|and|of|for|with|your|to|an?|by|in|on|is|are|we|you|our|it|this)(?!\p{L})/giu;
 function looksEnglish(text: string): boolean {
   const spanish = text.match(SPANISH_STOPWORDS)?.length ?? 0;
   const english = text.match(ENGLISH_STOPWORDS)?.length ?? 0;

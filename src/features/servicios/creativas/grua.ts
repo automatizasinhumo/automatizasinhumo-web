@@ -18,7 +18,7 @@ export const grua: Diseno = {
   nombre: 'Grúa',
   descripcion: 'Obra sobre fondo oscuro con retícula de plano, titular enorme, cotas en monoespaciada y naranja de seguridad. Para reformas, construcción, carpintería y estructuras.',
   color: '#c2410c',
-  fondoClaro: '#f3f2ee',
+  fondoClaro: '#e8e6df',
   fondoOscuro: '#141414',
   fuentes: ['ash-big-shoulders', 'ash-plex-mono', 'ash-archivo'],
   titulo: "'ash-big-shoulders', 'Arial Narrow', Impact, system-ui, sans-serif",

@@ -20,7 +20,7 @@ export const plano: Diseno = {
   nombre: 'Plano',
   descripcion: 'Hoja de revisión sobre amarillo, rótulo estrecho y el dibujo técnico del coche con sus puntos numerados. Para talleres mecánicos, ITV y neumáticos.',
   color: '#17803a',
-  fondoClaro: '#f3f2ee',
+  fondoClaro: '#e9e7e0',
   fondoOscuro: '#121316',
   fuentes: ['ash-saira-extra-condensed', 'ash-chakra-petch', 'ash-dm-sans'],
   titulo: "'ash-saira-extra-condensed', 'Arial Narrow', Impact, system-ui, sans-serif",

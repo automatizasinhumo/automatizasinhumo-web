@@ -17,7 +17,7 @@ export const sillon: Diseno = {
   nombre: 'Sillón',
   descripcion: 'Clínica luminosa en verde agua, titular con remate, gabinete ilustrado y tarjetas flotantes con la próxima cita. Para dentistas, ortodoncia y clínicas.',
   color: '#1f6f64',
-  fondoClaro: '#f0faf8',
+  fondoClaro: '#e2f3ef',
   fondoOscuro: '#12302c',
   fuentes: ['ash-fraunces', 'ash-dm-sans'],
   titulo: "'ash-fraunces', Georgia, 'Times New Roman', serif",
