@@ -74,6 +74,11 @@ describe('diseños de autor', () => {
     expect(html).toContain('w-ilus-sector');
   });
 
+  it.each(['Peluquería perruna', 'Guardería de perros', 'Hotel felino'])('viñetas sigue siendo suyo para «%s»', (sector) => {
+    const html = renderWeb(datos({ plantilla: 'vinetas', ...DISENOS.find((d) => d.id === 'vinetas')!.muestra, sector, foto: '' }));
+    expect(html).not.toContain('w-ilus-sector');
+  });
+
   it('escaparate fuera de su sector quita también el jarrón y la bolsa', () => {
     const x = DISENOS.find((d) => d.id === 'escaparate')!;
     const propio = renderWeb(datos({ plantilla: 'escaparate', ...x.muestra, foto: '' }));
