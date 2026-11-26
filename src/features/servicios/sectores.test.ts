@@ -111,7 +111,9 @@ describe('orden y preguntas de partida', () => {
   });
   it('recomienda por lo que escribe el cliente y, si no encaja, los de cualquier negocio', () => {
     expect(disenosRecomendados('Barbería Roble').ids).toContain('navaja');
-    expect(disenosRecomendados('fontanero urgente').ids[0]).toBe('urgente');
+    expect(disenosRecomendados('fontanero urgente').ids[0]).toBe('furgoneta');
+    expect(disenosRecomendados('Clínica veterinaria Trébol').ids[0]).toBe('huella');
+    expect(disenosRecomendados('Inés Morales, fotógrafa de bodas').ids[0]).toBe('objetivo');
     expect(disenosRecomendados('Talleres Lago, mecánica del automóvil').ids[0]).toBe('matricula');
     expect(disenosRecomendados('Clínica dental Alba').ids[0]).toBe('sonrisa');
     // «sonrisa» no es clave: no roba a la fisioterapia un nombre con esa palabra.
