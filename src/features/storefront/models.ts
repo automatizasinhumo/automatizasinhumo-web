@@ -255,6 +255,8 @@ export interface ProductDetailModel {
   backHref: string;
   /** «Empieza gratis»: formulario sin pago (/empezar/<slug>). */
   startHref: string;
+  /** Autoservicio: estudio donde el cliente lo prepara solo y lo recibe al momento (autoservicio.json). */
+  estudioHref: string | null;
   /** Demos que se ven DENTRO de la ficha (visor embebido), primero las que se tocan. */
   demos: StorefrontDemo[];
   /** Plantillas de diseño elegibles con «Quiero este diseño» (ver solicitudes/diseno.ts). */

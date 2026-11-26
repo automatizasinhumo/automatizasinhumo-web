@@ -101,6 +101,7 @@ const detail = (overrides: Partial<ProductDetailModel> = {}): ProductDetailModel
   backHref: '/',
   breadcrumbs: [{ text: 'Servicios', href: '/' }, { text: 'Sample Tee', href: null }],
   startHref: '/empezar/tee',
+  estudioHref: null,
   demos: [],
   disenos: [],
   error: null,
