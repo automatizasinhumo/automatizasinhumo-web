@@ -312,9 +312,9 @@
         "¿Os encargáis de los materiales?"
       ],
       "disenos": [
+        "grua",
         "expediente",
-        "lamina",
-        "urgente"
+        "lamina"
       ],
       "reserva": "Pedir visita",
       "contacto": "Pedir presupuesto",
@@ -367,8 +367,8 @@
       ],
       "disenos": [
         "matricula",
-        "urgente",
-        "expediente"
+        "plano",
+        "grua"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir cita",
@@ -418,8 +418,8 @@
       ],
       "disenos": [
         "sonrisa",
-        "serena",
-        "agenda"
+        "sillon",
+        "serena"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir cita",
@@ -476,8 +476,8 @@
       ],
       "disenos": [
         "serena",
-        "indice",
-        "agenda"
+        "sillon",
+        "indice"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir cita",
@@ -590,8 +590,8 @@
         "¿Cómo funciona la matrícula?"
       ],
       "disenos": [
+        "charla",
         "cuaderno",
-        "vinetas",
         "indice"
       ],
       "reserva": "Reservar clase",
@@ -765,8 +765,8 @@
       ],
       "disenos": [
         "hornada",
-        "escaparate",
-        "bistro"
+        "bistro",
+        "escaparate"
       ],
       "reserva": "Hacer un encargo",
       "contacto": "Hacer un encargo",
@@ -818,8 +818,8 @@
       ],
       "disenos": [
         "brillo",
-        "urgente",
-        "serena"
+        "serena",
+        "vinetas"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir presupuesto",
@@ -926,9 +926,9 @@
         "¿Hay aparcamiento?"
       ],
       "disenos": [
+        "posada",
         "postal",
-        "fotograma",
-        "atelier"
+        "fotograma"
       ],
       "reserva": "Reservar",
       "contacto": "Consultar disponibilidad",

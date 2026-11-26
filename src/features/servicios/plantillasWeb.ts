@@ -84,7 +84,34 @@ const BASICAS = [
 ] as const;
 
 /** Ids de los diseños de autor (creativas/): cada uno con portada, ilustración y tipografía propias. */
-export type IdDisenoWeb = 'agenda' | 'urgente' | 'bistro' | 'serena' | 'pulso' | 'indice' | 'navaja' | 'expediente' | 'vinetas' | 'postal';
+export type IdDisenoWeb =
+  | 'agenda'
+  | 'urgente'
+  | 'bistro'
+  | 'serena'
+  | 'pulso'
+  | 'indice'
+  | 'navaja'
+  | 'expediente'
+  | 'vinetas'
+  | 'postal'
+  | 'carta-impresa'
+  | 'cuaderno'
+  | 'fotograma'
+  | 'escaparate'
+  | 'herbario'
+  | 'lamina'
+  | 'matricula'
+  | 'sonrisa'
+  | 'hornada'
+  | 'brillo'
+  | 'petalo'
+  | 'posada'
+  | 'causa'
+  | 'charla'
+  | 'plano'
+  | 'sillon'
+  | 'grua';
 export type IdPlantillaWeb = (typeof BASICAS)[number]['id'] | IdDisenoWeb;
 export type FamiliaPlantilla = 'autor' | 'basica';
 

@@ -18,6 +18,9 @@ import { hornada } from './hornada';
 import { posada } from './posada';
 import { causa } from './causa';
 import { charla } from './charla';
+import { plano } from './plano';
+import { sillon } from './sillon';
+import { grua } from './grua';
 import { indice } from './indice';
 import { expediente } from './expediente';
 import { navaja } from './navaja';
@@ -32,7 +35,7 @@ export type { ContextoDiseno, Diseno, IconoWeb } from './tipos';
 export { cssFuentes, FUENTES_WEB } from './fuentes';
 export { ilustracionSector } from './sectorIlus';
 
-export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal, carta, cuaderno, fotograma, escaparate, herbario, lamina, matricula, sonrisa, hornada, brillo, petalo, posada, causa, charla];
+export const DISENOS: readonly Diseno[] = [agenda, urgente, bistro, serena, pulso, indice, navaja, expediente, vinetas, postal, carta, cuaderno, fotograma, escaparate, herbario, lamina, matricula, sonrisa, hornada, brillo, petalo, posada, causa, charla, plano, sillon, grua];
 
 export const disenoWeb = (id: string): Diseno | undefined => DISENOS.find((x) => x.id === id);
 
