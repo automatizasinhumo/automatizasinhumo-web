@@ -361,6 +361,7 @@ const { model, purchase } = Astro.props;
   const barra = document.querySelector<HTMLElement>('[data-cta-fijo]');
   const zonas = [
     document.getElementById('comprar'),
+    document.querySelector('[data-pagar-primero]'),
     document.querySelector('[data-empieza-gratis]'),
     [...document.querySelectorAll('footer')].at(-1) ?? null,
   ].filter(
