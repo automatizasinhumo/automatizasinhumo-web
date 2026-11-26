@@ -74,8 +74,8 @@
    "tipo": "diseno",
    "producto": "web-una-pagina",
    "nombre": "Web de una página para tu negocio",
-   "precio": 149,
-   "plazo": "48 h",
+   "precio": 49,
+   "plazo": "Al momento",
    "cat": "webs"
   },
   {
@@ -85,8 +85,8 @@
    "tipo": "diseno",
    "producto": "web-una-pagina",
    "nombre": "Web de una página para tu negocio",
-   "precio": 149,
-   "plazo": "48 h",
+   "precio": 49,
+   "plazo": "Al momento",
    "cat": "webs"
   },
   {
@@ -96,8 +96,8 @@
    "tipo": "diseno",
    "producto": "web-una-pagina",
    "nombre": "Web de una página para tu negocio",
-   "precio": 149,
-   "plazo": "48 h",
+   "precio": 49,
+   "plazo": "Al momento",
    "cat": "webs"
   },
   {
@@ -107,8 +107,8 @@
    "tipo": "diseno",
    "producto": "web-una-pagina",
    "nombre": "Web de una página para tu negocio",
-   "precio": 149,
-   "plazo": "48 h",
+   "precio": 49,
+   "plazo": "Al momento",
    "cat": "webs"
   },
   {
@@ -117,8 +117,8 @@
    "titulo": "Consultoría",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
+   "nombre": "Web corporativa de hasta 5 páginas",
+   "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
   },
@@ -128,8 +128,8 @@
    "titulo": "Agencia creativa",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
+   "nombre": "Web corporativa de hasta 5 páginas",
+   "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
   },
@@ -139,8 +139,8 @@
    "titulo": "Atelier",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
+   "nombre": "Web corporativa de hasta 5 páginas",
+   "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
   },
@@ -150,8 +150,8 @@
    "titulo": "Ironworks",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
+   "nombre": "Web corporativa de hasta 5 páginas",
+   "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
   },
@@ -161,8 +161,8 @@
    "titulo": "100 plantillas por sector",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
+   "nombre": "Web corporativa de hasta 5 páginas",
+   "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
   },
@@ -172,8 +172,8 @@
    "titulo": "Plantillas de estilo clásico",
    "tipo": "diseno",
    "producto": "web-corporativa-5-secciones",
-   "nombre": "Web corporativa de 5 secciones",
-   "precio": 449,
+   "nombre": "Web corporativa de hasta 5 páginas",
+   "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
   },
@@ -205,8 +205,8 @@
    "titulo": "Portfolio sencillo",
    "tipo": "diseno",
    "producto": "portfolio-editable",
-   "nombre": "Portfolio con panel para editarlo tú",
-   "precio": 179,
+   "nombre": "Portfolio editable para profesionales",
+   "precio": 249,
    "plazo": "3 días",
    "cat": "webs"
   },
@@ -216,8 +216,8 @@
    "titulo": "Fotógrafo",
    "tipo": "diseno",
    "producto": "portfolio-editable",
-   "nombre": "Portfolio con panel para editarlo tú",
-   "precio": 179,
+   "nombre": "Portfolio editable para profesionales",
+   "precio": 249,
    "plazo": "3 días",
    "cat": "webs"
   },
@@ -227,8 +227,8 @@
    "titulo": "Arquitecto",
    "tipo": "diseno",
    "producto": "portfolio-editable",
-   "nombre": "Portfolio con panel para editarlo tú",
-   "precio": 179,
+   "nombre": "Portfolio editable para profesionales",
+   "precio": 249,
    "plazo": "3 días",
    "cat": "webs"
   },
@@ -238,7 +238,7 @@
    "titulo": "Blog personal",
    "tipo": "diseno",
    "producto": "web-blog-astro",
-   "nombre": "Web con blog rápida",
+   "nombre": "Web rápida con blog",
    "precio": 249,
    "plazo": "4 días",
    "cat": "webs"
@@ -249,7 +249,7 @@
    "titulo": "Taller mecánico",
    "tipo": "diseno",
    "producto": "web-taller",
-   "nombre": "Web para taller con cita previa",
+   "nombre": "Web para taller con reserva de citas",
    "precio": 249,
    "plazo": "4 días",
    "cat": "webs"
@@ -260,7 +260,7 @@
    "titulo": "Fontanería",
    "tipo": "diseno",
    "producto": "web-taller",
-   "nombre": "Web para taller con cita previa",
+   "nombre": "Web para taller con reserva de citas",
    "precio": 249,
    "plazo": "4 días",
    "cat": "webs"
@@ -271,7 +271,7 @@
    "titulo": "Limpiezas",
    "tipo": "diseno",
    "producto": "web-taller",
-   "nombre": "Web para taller con cita previa",
+   "nombre": "Web para taller con reserva de citas",
    "precio": 249,
    "plazo": "4 días",
    "cat": "webs"
@@ -480,9 +480,9 @@
    "titulo": "Currículum web",
    "tipo": "diseno",
    "producto": "cv-profesional",
-   "nombre": "Currículum profesional ATS en PDF",
-   "precio": 29,
-   "plazo": "48 h",
+   "nombre": "Currículum profesional en PDF que pasa los filtros de empresas",
+   "precio": 9,
+   "plazo": "Al momento",
    "cat": "identidad"
   },
   {
@@ -568,7 +568,7 @@
    "titulo": "Hotel",
    "tipo": "diseno",
    "producto": "web-multidioma",
-   "nombre": "Tu web en inglés (u otro idioma)",
+   "nombre": "Añade un segundo idioma a tu web",
    "precio": 99,
    "plazo": "4 días",
    "cat": "webs"
@@ -579,7 +579,7 @@
    "titulo": "Guía turístico",
    "tipo": "diseno",
    "producto": "web-multidioma",
-   "nombre": "Tu web en inglés (u otro idioma)",
+   "nombre": "Añade un segundo idioma a tu web",
    "precio": 99,
    "plazo": "4 días",
    "cat": "webs"
@@ -590,7 +590,7 @@
    "titulo": "Empresa",
    "tipo": "diseno",
    "producto": "web-wordpress",
-   "nombre": "Web WordPress llave en mano",
+   "nombre": "Web WordPress de hasta 5 páginas",
    "precio": 249,
    "plazo": "5 días",
    "cat": "webs"
