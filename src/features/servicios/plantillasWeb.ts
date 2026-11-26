@@ -111,7 +111,10 @@ export type IdDisenoWeb =
   | 'charla'
   | 'plano'
   | 'sillon'
-  | 'grua';
+  | 'grua'
+  | 'huella'
+  | 'furgoneta'
+  | 'objetivo';
 export type IdPlantillaWeb = (typeof BASICAS)[number]['id'] | IdDisenoWeb;
 export type FamiliaPlantilla = 'autor' | 'basica';
 

@@ -28,6 +28,11 @@ export const FUENTES_WEB: Readonly<Record<string, { archivo: string; peso: strin
   'ash-lexend': { archivo: 'lexend.woff2', peso: '100 900' },
   'ash-saira-extra-condensed': { archivo: 'saira-extra-condensed.woff2', peso: '800' },
   'ash-chakra-petch': { archivo: 'chakra-petch.woff2', peso: '600' },
+  'ash-calistoga': { archivo: 'calistoga.woff2', peso: '400' },
+  'ash-work-sans': { archivo: 'work-sans.woff2', peso: '100 900' },
+  'ash-public-sans': { archivo: 'public-sans.woff2', peso: '100 900' },
+  'ash-bodoni-moda': { archivo: 'bodoni-moda.woff2', peso: '400 900' },
+  'ash-hanken-grotesk': { archivo: 'hanken-grotesk.woff2', peso: '100 900' },
 };
 
 /**

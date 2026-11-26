@@ -204,9 +204,9 @@
         "¿Cobráis el desplazamiento?"
       ],
       "disenos": [
+        "furgoneta",
         "urgente",
-        "expediente",
-        "guardia"
+        "expediente"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir presupuesto",
@@ -256,8 +256,8 @@
         "¿Hacéis instalaciones nuevas y reparaciones?"
       ],
       "disenos": [
+        "furgoneta",
         "urgente",
-        "expediente",
         "lamina"
       ],
       "reserva": "Pedir cita",
@@ -871,9 +871,9 @@
         "¿Qué tengo que llevar?"
       ],
       "disenos": [
+        "huella",
         "vinetas",
-        "serena",
-        "escaparate"
+        "serena"
       ],
       "reserva": "Pedir cita",
       "contacto": "Pedir cita",
@@ -981,9 +981,9 @@
         "¿Os desplazáis?"
       ],
       "disenos": [
+        "objetivo",
         "fotograma",
-        "lamina",
-        "postal"
+        "lamina"
       ],
       "reserva": "Reservar fecha",
       "contacto": "Pedir presupuesto",
