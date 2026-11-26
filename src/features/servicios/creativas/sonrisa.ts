@@ -34,6 +34,8 @@ export const sonrisa: Diseno = {
   opiniones: 2,
   contacto: 2,
   orden: ['servicios', 'opiniones', 'horario', 'preguntas', 'galeria', 'sobre', 'zonas', 'contacto'],
+  sectores: ['dental'],
+  palabras: ['dentist', 'ortodonc'],
   titulos: { servicios: 'Tratamientos', horario: 'Cuándo venir', galeria: 'La clínica', sobre: 'Quiénes somos', opiniones: 'Sonrisas que lo cuentan', preguntas: 'Antes de tu cita' },
   muestra: {
     negocio: 'Clínica Dental Alba',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cssWebDe, DISENOS, documentoWeb, PLANTILLAS_WEB, renderWeb, validarWeb, type DatosWeb } from './webs';
+import { cssWebDe, DISENOS, documentoWeb, PLANTILLAS_WEB, renderWeb, TITULOS_GENERICOS, validarWeb, type DatosWeb } from './webs';
 
 const datos = (x: Record<string, unknown>): DatosWeb => {
   const r = validarWeb({ negocio: 'Taller Ana & Co', telefono: '600 123 456', ...x });
@@ -44,6 +44,28 @@ describe('diseños de autor', () => {
         }
       }
     }
+  });
+
+  it.each(DISENOS.map((x) => [x.id]))('%s reconoce el sector de su propia muestra (no la trata como ajena)', (id) => {
+    const x = DISENOS.find((d) => d.id === id)!;
+    expect(x.sectores.length + (x.palabras?.length ?? 0)).toBeGreaterThan(0);
+    const html = renderWeb(datos({ plantilla: id, ...x.muestra, foto: '' }));
+    expect(html).not.toContain('w-ilus-sector');
+  });
+
+  it.each(DISENOS.map((x) => [x.id]))('%s fuera de su sector: ni su dibujo ni sus títulos, sí el icono del sector', (id) => {
+    const x = DISENOS.find((d) => d.id === id)!;
+    const ajeno = x.sectores.includes('dental') ? 'Taller mecánico' : 'Clínica dental';
+    const html = renderWeb(datos({ plantilla: id, ...x.muestra, sector: ajeno, foto: '' }));
+    expect(html).toContain('w-ilus-sector');
+    for (const t of Object.values(x.titulos ?? {})) if (!Object.values(TITULOS_GENERICOS).includes(t)) expect(html).not.toContain(`>${t}</h2>`);
+  });
+
+  it('sin sector reconocible pone la inicial del negocio, y con foto no sustituye nada', () => {
+    const sin = renderWeb(datos({ plantilla: 'agenda', negocio: 'Zeta Viajes', sector: 'Agencia de viajes', foto: '' }));
+    expect(sin).toMatch(/w-ilus-sector[^]*>Z<\/text>/);
+    const con = renderWeb(datos({ plantilla: 'agenda', negocio: 'Zeta Viajes', sector: 'Agencia de viajes', foto: 'data:image/png;base64,AAAA' }));
+    expect(con).not.toContain('w-ilus-sector');
   });
 
   it('con otra letra el diseño usa esa letra y no la suya', () => {

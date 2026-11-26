@@ -49,6 +49,7 @@ export const brillo: Diseno = {
   opiniones: 1,
   contacto: 2,
   orden: ['servicios', 'opiniones', 'preguntas', 'galeria', 'zonas', 'horario', 'sobre', 'contacto'],
+  sectores: ['limpieza'],
   titulos: { servicios: 'Qué limpiamos', galeria: 'Antes y después', opiniones: 'Lo que dicen nuestros clientes', preguntas: 'Antes de contratar', zonas: 'Dónde trabajamos', sobre: 'Quiénes somos' },
   muestra: {
     negocio: 'Limpiezas Brillo',

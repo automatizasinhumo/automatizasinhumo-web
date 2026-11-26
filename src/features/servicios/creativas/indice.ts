@@ -28,6 +28,8 @@ export const indice: Diseno = {
   opiniones: 3,
   contacto: 1,
   orden: ['servicios', 'sobre', 'opiniones', 'preguntas', 'horario', 'galeria', 'contacto'],
+  sectores: ['asesoria'],
+  palabras: ['abogad', 'gestor', 'despacho', 'notar', 'seguro', 'consultor'],
   titulos: { servicios: 'Áreas de trabajo', sobre: 'El despacho', opiniones: 'Clientes', preguntas: 'Consultas frecuentes', galeria: 'La oficina' },
   muestra: {
     negocio: 'Ferreiro Asesores',

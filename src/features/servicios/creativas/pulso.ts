@@ -25,6 +25,8 @@ export const pulso: Diseno = {
   opiniones: 2,
   contacto: 2,
   orden: ['servicios', 'galeria', 'horario', 'opiniones', 'sobre', 'preguntas', 'contacto'],
+  sectores: ['deporte'],
+  palabras: ['gimnasio', 'entrena', 'crossfit', 'box'],
   titulos: { servicios: 'Entrena', galeria: 'Sala', horario: 'Horario', opiniones: 'Socios', sobre: 'Nosotros', contacto: 'Empieza hoy' },
   muestra: {
     negocio: 'Box Norte',

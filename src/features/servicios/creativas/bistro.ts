@@ -33,6 +33,7 @@ export const bistro: Diseno = {
   opiniones: 3,
   contacto: 3,
   orden: ['servicios', 'galeria', 'sobre', 'opiniones', 'horario', 'preguntas', 'contacto'],
+  sectores: ['bar', 'alimentacion'],
   titulos: { servicios: 'La carta', galeria: 'De la cocina', sobre: 'La casa', opiniones: 'Quien ya vino', horario: 'Cuándo abrimos', contacto: 'Reservas' },
   muestra: {
     negocio: 'Casa Amparo',

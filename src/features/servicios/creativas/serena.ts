@@ -26,6 +26,8 @@ export const serena: Diseno = {
   opiniones: 2,
   contacto: 4,
   orden: ['servicios', 'sobre', 'opiniones', 'horario', 'galeria', 'preguntas', 'contacto'],
+  sectores: ['salud', 'deporte'],
+  palabras: ['fisio', 'osteopat', 'yoga', 'pilates', 'psicolog', 'terapia'],
   titulos: { servicios: 'Tratamientos', sobre: 'Cómo trabajamos', opiniones: 'Pacientes', galeria: 'El centro', preguntas: 'Dudas habituales', contacto: 'Pide cita' },
   muestra: {
     negocio: 'Fisio Alameda',

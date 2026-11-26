@@ -34,11 +34,13 @@ export const agenda: Diseno = {
   opiniones: 1,
   contacto: 1,
   orden: ['servicios', 'galeria', 'opiniones', 'sobre', 'horario', 'preguntas', 'contacto'],
+  sectores: ['peluqueria'],
+  palabras: ['peluquer', 'salon'],
   titulos: { servicios: 'Tarifas', galeria: 'Nuestro trabajo', sobre: 'El salón', opiniones: 'Lo que dicen' },
   muestra: {},
   cabecera: (c) => {
     const { d, esc } = c;
-    const visual = c.foto ? `<div class="w-arco">${c.foto}</div>` : `<div class="w-arco">${ILUSTRACION}</div>`;
+    const visual = c.foto ? `<div class="w-arco">${c.foto}</div>` : `<div class="w-arco">${c.ilustracion(ILUSTRACION)}</div>`;
     const primera = c.horario[0];
     return `<header class="w-cab w-cab-agenda"><div class="w-in w-cab-in"><div class="w-cab-txt">
 ${sector(c)}<h1>${esc(d.negocio)}</h1>

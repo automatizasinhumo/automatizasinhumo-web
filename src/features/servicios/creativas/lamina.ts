@@ -32,6 +32,8 @@ export const lamina: Diseno = {
   opiniones: 1,
   contacto: 3,
   orden: ['servicios', 'galeria', 'sobre', 'opiniones', 'zonas', 'preguntas', 'contacto'],
+  sectores: ['reformas'],
+  palabras: ['arquitect', 'interior', 'decora', 'diseño'],
   titulos: { servicios: 'Servicios', galeria: 'Proyectos', sobre: 'Estudio', opiniones: 'Clientes', zonas: 'Ámbito', contacto: 'Hablemos de tu proyecto' },
   muestra: {
     negocio: 'Estudio Cota',

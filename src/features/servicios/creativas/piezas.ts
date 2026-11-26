@@ -8,4 +8,4 @@ export const sector = (c: ContextoDiseno) => (c.d.sector ? `<p class="w-sector">
 export const lema = (c: ContextoDiseno, clase = '') => (c.d.lema ? `<p class="w-lema${clase ? ` ${clase}` : ''}">${c.esc(c.d.lema)}</p>` : '');
 
 /** La foto principal en su figura o, sin foto, lo que el diseño dibuja en su lugar. */
-export const fotoO = (c: ContextoDiseno, sinFoto = '') => (c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : sinFoto);
+export const fotoO = (c: ContextoDiseno, sinFoto = '') => (c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : c.ilustracion(sinFoto));

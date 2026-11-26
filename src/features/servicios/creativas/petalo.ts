@@ -49,6 +49,8 @@ export const petalo: Diseno = {
   opiniones: 1,
   contacto: 2,
   orden: ['servicios', 'opiniones', 'galeria', 'preguntas', 'horario', 'sobre', 'contacto'],
+  sectores: ['estetica'],
+  palabras: ['unas', 'spa', 'masaje'],
   titulos: { servicios: 'Tratamientos', galeria: 'Nuestro espacio', opiniones: 'Lo que nos dicen', preguntas: 'Antes de tu cita', sobre: 'Quiénes somos' },
   muestra: {
     negocio: 'Estética Pétalo',

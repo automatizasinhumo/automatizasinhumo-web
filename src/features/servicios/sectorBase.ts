@@ -46,3 +46,18 @@ export function accionesDeSector(texto: string): { reserva: string; contacto?: s
   const s = sectorEn(BASE, texto);
   return { reserva: s?.reserva ?? 'Reservar cita', contacto: s?.contacto };
 }
+
+/** Id del sector que se reconoce en lo que escribió el cliente, o null. */
+export const sectorIdDe = (texto: string): string | null => sectorEn(BASE, texto)?.id ?? null;
+
+/**
+ * ¿Le encaja al sector escrito un diseño pensado para `sectores` (ids) o `palabras`? Sin sector
+ * escrito, sí: el diseño se ve tal cual. Con un sector que no es suyo, no.
+ */
+export function sectorEncaja(texto: string, sectores: readonly string[], palabras: readonly string[] = []): boolean {
+  if (!texto.trim()) return true;
+  const id = sectorIdDe(texto);
+  if (id && sectores.includes(id)) return true;
+  const t = ` ${sinTildes(texto).replace(/[^a-z0-9ñ]+/g, ' ')}`;
+  return palabras.some((p) => t.includes(` ${sinTildes(p)}`));
+}

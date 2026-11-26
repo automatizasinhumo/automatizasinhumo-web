@@ -29,6 +29,7 @@ export const carta: Diseno = {
   opiniones: 2,
   contacto: 3,
   orden: ['servicios', 'galeria', 'horario', 'opiniones', 'sobre', 'preguntas', 'contacto'],
+  sectores: ['bar'],
   titulos: { servicios: 'La carta', galeria: 'De la cocina', horario: 'Horario de cocina', opiniones: 'Notas de los comensales', sobre: 'La casa', contacto: 'Reservar mesa' },
   muestra: {
     negocio: 'Casa Remedios',
