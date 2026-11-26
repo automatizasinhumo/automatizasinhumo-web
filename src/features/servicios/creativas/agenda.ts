@@ -35,7 +35,7 @@ export const agenda: Diseno = {
   contacto: 1,
   orden: ['servicios', 'galeria', 'opiniones', 'sobre', 'horario', 'preguntas', 'contacto'],
   sectores: ['peluqueria'],
-  palabras: ['peluquer', 'salon'],
+  palabras: ['peluquer', 'salon de belleza', 'barber', 'estetica'],
   titulos: { servicios: 'Tarifas', galeria: 'Nuestro trabajo', sobre: 'El salón', opiniones: 'Lo que dicen' },
   muestra: {},
   cabecera: (c) => {

@@ -36,7 +36,7 @@ export const vinetas: Diseno = {
   contacto: 2,
   orden: ['servicios', 'opiniones', 'galeria', 'sobre', 'horario', 'preguntas', 'contacto'],
   sectores: ['mascotas'],
-  palabras: ['canin', 'veterinar', 'infantil', 'niños', 'ludoteca'],
+  palabras: ['canin', 'veterinar', 'perr', 'gato'],
   titulos: { servicios: 'Lo que hacemos', galeria: 'Clientes peludos', opiniones: 'Dicen sus humanos', sobre: 'Quiénes somos', contacto: '¿Nos vemos?' },
   muestra: {
     negocio: 'Pelusa & Co',

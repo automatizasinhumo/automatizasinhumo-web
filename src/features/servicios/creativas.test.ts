@@ -61,6 +61,28 @@ describe('diseños de autor', () => {
     for (const t of Object.values(x.titulos ?? {})) if (!Object.values(TITULOS_GENERICOS).includes(t)) expect(html).not.toContain(`>${t}</h2>`);
   });
 
+  it.each([
+    ['hornada', 'Reparación de pantallas'],
+    ['expediente', 'Obrador de panadería'],
+    ['agenda', 'Salón de eventos'],
+    ['lamina', 'Diseño gráfico'],
+    ['serena', 'Estudio de yoga'],
+    ['vinetas', 'Ludoteca infantil'],
+    ['escaparate', 'Clínica dental'],
+  ])('%s no se queda con su dibujo para «%s» (palabra corta o de otro sector)', (id, sector) => {
+    const html = renderWeb(datos({ plantilla: id, ...DISENOS.find((d) => d.id === id)!.muestra, sector, foto: '' }));
+    expect(html).toContain('w-ilus-sector');
+  });
+
+  it('escaparate fuera de su sector quita también el jarrón y la bolsa', () => {
+    const x = DISENOS.find((d) => d.id === 'escaparate')!;
+    const propio = renderWeb(datos({ plantilla: 'escaparate', ...x.muestra, foto: '' }));
+    const ajeno = renderWeb(datos({ plantilla: 'escaparate', ...x.muestra, sector: 'Clínica dental', foto: '' }));
+    expect(propio).toMatch(/w-hueco-c">\s*<svg/);
+    expect(ajeno).toContain('<div class="w-hueco w-hueco-d"></div>');
+    expect(ajeno).not.toMatch(/w-hueco-c">\s*<svg/);
+  });
+
   it('sin sector reconocible pone la inicial del negocio, y con foto no sustituye nada', () => {
     const sin = renderWeb(datos({ plantilla: 'agenda', negocio: 'Zeta Viajes', sector: 'Agencia de viajes', foto: '' }));
     expect(sin).toMatch(/w-ilus-sector[^]*>Z<\/text>/);

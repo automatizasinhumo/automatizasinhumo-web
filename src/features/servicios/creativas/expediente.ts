@@ -31,7 +31,7 @@ export const expediente: Diseno = {
   contacto: 4,
   orden: ['servicios', 'galeria', 'zonas', 'opiniones', 'sobre', 'horario', 'preguntas', 'contacto'],
   sectores: ['reformas'],
-  palabras: ['obra', 'construc', 'albañil', 'pintor'],
+  palabras: ['obra', 'obras', 'construc', 'albañil', 'pintor'],
   titulos: { servicios: 'Partidas', galeria: 'Obras terminadas', zonas: 'Dónde trabajamos', opiniones: 'Clientes', sobre: 'La empresa', contacto: 'Pide presupuesto' },
   muestra: {
     negocio: 'Reformas Duero',

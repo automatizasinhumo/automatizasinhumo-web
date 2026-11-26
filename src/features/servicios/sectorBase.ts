@@ -58,6 +58,11 @@ export function sectorEncaja(texto: string, sectores: readonly string[], palabra
   if (!texto.trim()) return true;
   const id = sectorIdDe(texto);
   if (id && sectores.includes(id)) return true;
-  const t = ` ${sinTildes(texto).replace(/[^a-z0-9ñ]+/g, ' ')}`;
-  return palabras.some((p) => t.includes(` ${sinTildes(p)}`));
+  const t = ` ${sinTildes(texto).replace(/[^a-z0-9ñ]+/g, ' ')} `;
+  // Las cortas (≤ 4 letras: «pan», «obra») solo como palabra entera, para que «pantallas» no
+  // sea pan ni «obrador» sea obra; las largas son raíces («arquitect» vale para «arquitectura»).
+  return palabras.some((p) => {
+    const w = sinTildes(p);
+    return t.includes(w.length <= 4 ? ` ${w} ` : ` ${w}`);
+  });
 }
