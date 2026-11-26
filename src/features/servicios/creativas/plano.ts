@@ -61,6 +61,7 @@ ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
   },
   css: `
 .w-d-plano{--w-fondo:#f3f2ee;--w-papel:#fff;--w-tinta:#121316;--w-suave:#44474e;--w-borde:#d4d2cb;--w-panel:#e9e7e0;--w-placa:#ffd21f;--w-placa-h:#f0bf00;--w-acero:#545961;--w-r:0;--w-esp:24px;--w-corte:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.w-d-plano .w-boton:focus-visible{outline:3px solid currentColor;outline-offset:-7px}
 .w-d-plano .w-nav{background:var(--w-tinta);color:#fff;border-bottom:0}
 .w-d-plano .w-nav-marca{font-family:var(--w-ft-titulo);font-weight:800;text-transform:uppercase;letter-spacing:.02em}
 .w-d-plano .w-nav .w-boton{color:#fff;border-color:#b9bcc2}

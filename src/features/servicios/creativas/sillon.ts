@@ -4,7 +4,7 @@ import { lema, fotoO } from './piezas';
 /*
  * Adaptado de la plantilla «Clinic» de Freeframe (licencia MIT, (c) 2026 Freeframe; ver
  * licencias/freeframe-templates.txt): clínica tranquila en verde agua, titular con remate
- * (Fraunces), cinta de urgencias, gabinete ilustrado con el sillón, ventana en arco y plantas, y
+ * (Fraunces), cinta con el teléfono, gabinete ilustrado con el sillón, ventana en arco y plantas, y
  * dos tarjetas flotantes con lo que más se pregunta. Reescrito para el contrato de diseños de autor
  * (HTML + CSS con ámbito, sin JavaScript); la ilustración es la de la plantilla, con los id prefijados.
  */
@@ -44,12 +44,12 @@ export const sillon: Diseno = {
     const { d, esc } = c;
     const h = c.horario[0];
     const cinta = c.tel || h
-      ? `<div class="w-cinta"><div class="w-in w-cinta-in">${c.tel ? `<p>${c.icono('tel')}<span>Urgencias: ${c.grande}</span></p>` : ''}${h ? `<p>${c.icono('reloj')}<span>${esc(h[0] || 'Consulta')}: ${esc(h[1])}</span></p>` : ''}</div></div>`
+      ? `<div class="w-cinta"><div class="w-in w-cinta-in">${c.tel ? `<p>${c.icono('tel')}<span>Teléfono: ${c.grande}</span></p>` : ''}${h ? `<p>${c.icono('reloj')}<span>${esc(h[0] || 'Consulta')}: ${esc(h[1])}</span></p>` : ''}</div></div>`
       : '';
     const ante = d.sector ? `<p class="w-sector"><span aria-hidden="true"></span>${esc(d.sector)}</p>` : '';
     const s = d.servicios?.[0];
     const t1 = s ? `<div class="w-flota w-flota-1"><p class="w-flota-t">${esc(s.nombre)}</p>${s.precio ? `<p>${esc(s.precio)}</p>` : ''}</div>` : '';
-    const t2 = h ? `<div class="w-flota w-flota-2"><span class="w-flota-punto" aria-hidden="true"></span><div><p class="w-flota-t">Próxima cita libre</p><p>${esc(h[0] || 'Esta semana')}</p></div></div>` : '';
+    const t2 = h ? `<div class="w-flota w-flota-2"><span class="w-flota-punto" aria-hidden="true"></span><div><p class="w-flota-t">Horario de consulta</p><p>${esc(h[0] ? `${h[0]}: ${h[1]}` : h[1])}</p></div></div>` : '';
     return `<header class="w-cab w-cab-sillon${c.foto ? '' : ' w-sin-foto'}">${cinta}<div class="w-in w-cab-in"><div class="w-cab-txt">
 ${ante}<h1>${esc(d.negocio)}</h1>
 ${lema(c, 'w-lema-bloque')}${c.bloqueAcciones}
