@@ -23,6 +23,9 @@ export const FUENTES_WEB: Readonly<Record<string, { archivo: string; peso: strin
   'ash-syne': { archivo: 'syne.woff2', peso: '400 800' },
   'ash-plex-mono': { archivo: 'ibm-plex-mono.woff2', peso: '500' },
   'ash-dm-mono': { archivo: 'dm-mono.woff2', peso: '500' },
+  'ash-zilla-slab': { archivo: 'zilla-slab.woff2', peso: '600' },
+  'ash-young-serif': { archivo: 'young-serif.woff2', peso: '400' },
+  'ash-lexend': { archivo: 'lexend.woff2', peso: '100 900' },
 };
 
 /**
