@@ -21,14 +21,14 @@ const precios = services
   .filter((s): s is { name: string; href: string; desde: string } => s.desde !== null);
 
 const destacados = [
-  { href: '/categories/webs', titulo: 'Webs para tu negocio', desde: 'desde 149 €', icono: 'world-www' },
+  { href: '/servicios/web', titulo: 'Webs para tu negocio', desde: 'desde 49 €', icono: 'world-www' },
   { href: '/categories/automatizaciones', titulo: 'Automatizaciones', desde: 'desde 99 €', icono: 'route' },
   { href: '/categories/documentos', titulo: 'Documentos, PDF e IA', desde: 'desde 29 €', icono: 'file-text' },
   { href: '/categories/planes', titulo: 'Planes mensuales', desde: 'desde 9 €/mes', icono: 'calendar-repeat' },
 ];
 const pasos = [
   ['01', 'Eliges cómo empezar', 'Puedes contratar el servicio directamente o pedir una prueba gratuita, sin tarjeta.', 'pencil'],
-  ['02', 'Recibes una primera versión', 'Nos das tus datos y la preparamos en 24–72 h laborables desde que estén completos.', 'eye'],
+  ['02', 'Lo ves terminado al momento', 'Webs y CV se montan solos mientras escribes; los servicios a medida, en 24–72 h laborables.', 'eye'],
   ['03', 'Lo revisas y lo recibes', 'Publicado o con una guía para publicarlo tú, según la modalidad. Si empezaste gratis, pagas solo si te gusta.', 'cash'],
 ];
 const ventajas = [
@@ -46,9 +46,9 @@ const faq = [
 ];
 // Capturas reales de plantillas publicadas en el worker de demos.
 const muestras = [
-  { src: '/images/demos/carta-whatsapp.png', alt: 'Carta digital con pedido por WhatsApp' },
-  { src: '/images/demos/boda-sage.png', alt: 'Web de boda con confirmación de asistencia' },
-  { src: '/images/demos/real-estate-agency.png', alt: 'Web de inmobiliaria con fichas de pisos' },
+  { src: '/images/demos/es-casa-remedios.png', alt: 'Web de bar con la carta y pedido por WhatsApp' },
+  { src: '/images/demos/es-clinica-dental.png', alt: 'Web de clínica dental con cita previa' },
+  { src: '/images/demos/es-taller.png', alt: 'Web de taller mecánico con presupuesto previo' },
 ];
 ---
 
@@ -90,7 +90,7 @@ const muestras = [
       {/* Móvil en primer plano: la mayoría de clientes verá su web en el teléfono. */}
       <figure class="absolute bottom-0 right-[2%] z-10 w-[29%] overflow-hidden rounded-[1.4rem] border-[5px] border-ink bg-ink shadow-[0_22px_40px_-18px_rgba(23,45,45,0.6)]" aria-hidden="true">
         <span class="mx-auto my-1 block h-1.5 w-8 rounded-full bg-paper/30"></span>
-        <Captura src="/images/demos/link-in-bio.png" alt="" loading="eager" sizes="(min-width: 1024px) 220px, 50vw" class="aspect-[9/17] w-full rounded-b-[1rem] object-cover object-[50%_0]" />
+        <Captura src="/images/demos/es-movil-peluqueria.png" alt="" loading="eager" sizes="(min-width: 1024px) 220px, 50vw" class="aspect-[9/17] w-full rounded-b-[1rem] object-cover object-[50%_0]" />
       </figure>
       <span class="absolute -bottom-3 left-2 z-10 pildora pildora-flotante">
         <Icono name="player-play" class="h-3.5 w-3.5 text-brand" /> Ver demos en vivo

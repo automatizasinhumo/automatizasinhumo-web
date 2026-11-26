@@ -5,7 +5,7 @@
  * servicios y, debajo, «Así funciona».
  *
  * Animación de la portada (CSS puro, sin JavaScript): un ciclo de 9 s con tres turnos.
- * En cada turno se enciende una parte del título («Tu negocio», «tu evento», «tu idea»)
+ * En cada turno se enciende una parte del título («Tu negocio», «tus reservas», «tu idea»)
  * como una bombilla y a la vez aparece su escena: la web y la ficha de mapa de un
  * negocio, la invitación de una boda y un flujo automático. Todas las piezas usan el
  * mismo keyframe desfasado (0, -6 y -3 s), así que nunca se descoordinan. Solo se animan
@@ -76,7 +76,7 @@ const atajos = (
 <section class="portada" aria-labelledby="portada-titulo">
   <div class="titulo-caja">
     <h1 id="portada-titulo" class="h1-portada">
-      <span class="fila fila-1"><span class="luz t1" data-t="Tu negocio">Tu negocio</span>, <span class="luz t2" data-t="tu evento">tu evento</span>,</span>
+      <span class="fila fila-1"><span class="luz t1" data-t="Tu negocio">Tu negocio</span>, <span class="luz t2" data-t="tus reservas">tus reservas</span>,</span>
       <span class="fila fila-2"><span class="luz t3" data-t="tu idea">tu idea</span>, <span class="marca">en marcha</span></span>
       <span class="fila fila-3"><span class="marca">sin complicaciones</span></span>
     </h1>
@@ -85,13 +85,13 @@ const atajos = (
   <div class="escena-caja">
   <div class="escenario" aria-hidden="true">
     <div class="escena t1">
-      <Marco url="cafeterialuna.es">
-        <img src="/images/demos/cafe-coffee-shop-640.webp" width="640" height="430" alt="" fetchpriority="high" decoding="async" />
+      <Marco url="casaremedios.es">
+        <img src="/images/demos/es-casa-remedios-640.webp" width="640" height="430" alt="" fetchpriority="high" decoding="async" />
       </Marco>
       <div class="flotante abajo-izq">
         <span class="icono-redondo"><Icono name="map-pin" class="h-4 w-4" /></span>
         <span>
-          <b>Cafetería Luna</b>
+          <b>Casa Remedios</b>
           <span class="estrellas"><Icono name="star" class="h-3 w-3" /> 4,9 · 128 reseñas</span>
           <span class="estado">Abierto · Cómo llegar</span>
         </span>
@@ -99,14 +99,14 @@ const atajos = (
     </div>
 
     <div class="escena t2">
-      <Marco url="lauraydani.es">
-        <img src="/images/demos/wedding-640.webp" width="640" height="430" alt="" decoding="async" />
+      <Marco url="clinicadentalalba.es">
+        <img src="/images/demos/es-clinica-dental-640.webp" width="640" height="430" alt="" decoding="async" />
       </Marco>
       <div class="flotante abajo-der">
         <span class="icono-redondo ok"><Icono name="circle-check" class="h-4 w-4" /></span>
         <span>
-          <b>Asistencia confirmada</b>
-          <span class="estado">86 invitados · 14 de junio</span>
+          <b>Cita confirmada</b>
+          <span class="estado">Mañana, 10:30 · Revisión</span>
         </span>
       </div>
     </div>
@@ -238,7 +238,7 @@ const atajos = (
   /* Mínimo y máximo en rem: siguen el tamaño de letra que elija el usuario. Si con
      una base grande la fila no cabe, se parte en vez de desbordar. */
   .fila { display: block; text-wrap: balance; }
-  .fila-1 { font-size: clamp(1.5rem, 9.2cqi, 4.4rem); }
+  .fila-1 { font-size: clamp(1.35rem, 8.1cqi, 3.9rem); }
   .fila-2 { font-size: clamp(1.35rem, 8.3cqi, 4rem); }
   .fila-3 { font-size: clamp(1.2rem, 7.4cqi, 3.55rem); }
   .marca {
