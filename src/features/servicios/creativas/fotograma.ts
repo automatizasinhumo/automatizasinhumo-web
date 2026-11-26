@@ -26,6 +26,8 @@ export const fotograma: Diseno = {
   opiniones: 1,
   contacto: 2,
   orden: ['galeria', 'servicios', 'opiniones', 'sobre', 'zonas', 'preguntas', 'contacto'],
+  sectores: ['fotografia'],
+  palabras: ['video', 'film', 'boda'],
   titulos: { galeria: 'Contactos', servicios: 'Sesiones', opiniones: 'Revelado', sobre: 'Detrás de la cámara', zonas: 'Dónde disparo', contacto: 'Reserva fecha' },
   muestra: {
     negocio: 'Lucía Grano',

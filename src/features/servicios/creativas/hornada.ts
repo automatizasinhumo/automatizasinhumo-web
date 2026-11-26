@@ -44,6 +44,8 @@ export const hornada: Diseno = {
   opiniones: 2,
   contacto: 2,
   orden: ['servicios', 'galeria', 'horario', 'opiniones', 'sobre', 'preguntas', 'zonas', 'contacto'],
+  sectores: ['alimentacion'],
+  palabras: ['pan', 'pasteler', 'obrador', 'cafeteria'],
   titulos: { servicios: 'Del obrador', horario: 'Cuándo abrimos', galeria: 'El mostrador', sobre: 'Nuestra historia', opiniones: 'Lo que dicen en el barrio', preguntas: 'Antes de encargar' },
   muestra: {
     negocio: 'Horno San Blas',

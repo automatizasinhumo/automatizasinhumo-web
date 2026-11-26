@@ -34,6 +34,8 @@ export const herbario: Diseno = {
   opiniones: 2,
   contacto: 1,
   orden: ['servicios', 'galeria', 'sobre', 'opiniones', 'horario', 'zonas', 'preguntas', 'contacto'],
+  sectores: [],
+  palabras: ['flor', 'planta', 'vivero', 'jardin', 'huerto'],
   titulos: { servicios: 'Del taller', galeria: 'Temporada', sobre: 'Nuestra historia', opiniones: 'Cartas de clientes', horario: 'Horario', zonas: 'Entregamos en', contacto: 'Encarga tu ramo' },
   muestra: {
     negocio: 'Flor de Sal',

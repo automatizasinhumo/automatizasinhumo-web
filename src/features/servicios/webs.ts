@@ -11,7 +11,7 @@
  * formulario, la validación y la publicación no cambian al añadir una.
  */
 import { horarioSchema, tipoNegocio } from './negocioSchema';
-import { accionesDeSector } from './sectorBase';
+import { accionesDeSector, sectorEncaja, sectorIdDe } from './sectorBase';
 import {
   COLOR_VALIDO,
   EMAIL,
@@ -25,7 +25,7 @@ import {
   type PaginaPublicada,
 } from './paginas';
 
-import { cssFuentes, FUENTES_WEB, type ContextoDiseno, type IconoWeb } from './creativas';
+import { cssFuentes, FUENTES_WEB, ilustracionSector, type ContextoDiseno, type IconoWeb } from './creativas';
 import { cssWebDe, disenoWeb, plantillaWeb, resolverPlantilla } from './plantillasWeb';
 export { cssFuentes, DISENOS, FUENTES_WEB } from './creativas';
 export { CSS_WEB, cssWebDe, disenoWeb, PLANTILLAS_WEB, PLANTILLAS_ANTIGUAS, resolverPlantilla, type IdPlantillaWeb } from './plantillasWeb';
@@ -580,7 +580,7 @@ export const filasHorario = (horario: string): [string, string][] =>
       return m ? [m[1]!, m[2]!] : ['', l];
     });
 
-const TITULOS_GENERICOS: Readonly<Record<string, string>> = {
+export const TITULOS_GENERICOS: Readonly<Record<string, string>> = {
   sobre: 'Quiénes somos',
   servicios: 'Servicios',
   galeria: 'Fotos',
@@ -681,7 +681,9 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
 
   const seccion = (id: string, titulo: string, cuerpo: string) =>
     `<section class="w-sec w-${id}-sec" id="${id}"><div class="w-in"><h2>${titulo}</h2>${cuerpo}</div></section>`;
-  const titulo = (id: string) => esc(diseno?.titulos?.[id] ?? TITULOS_GENERICOS[id] ?? id);
+  // Un diseño fuera de su sector no enseña tijeras a un dentista ni «La carta» a un taller.
+  const ajeno = !!diseno && !sectorEncaja(d.sector, diseno.sectores, diseno.palabras);
+  const titulo = (id: string) => esc((ajeno ? undefined : diseno?.titulos?.[id]) ?? TITULOS_GENERICOS[id] ?? id);
   const bloques: Record<string, string> = {
     sobre: d.sobre ? seccion('sobre', titulo('sobre'), `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
     servicios: nS ? seccion('servicios', titulo('servicios'), `<ul class="w-servicios w-s-${vS}" data-n="${nS}">${servicios}</ul>`) : '',
@@ -729,7 +731,9 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
       zonas,
       horario,
       foto: imgFoto,
-      titulo: (id) => diseno.titulos?.[id] ?? TITULOS_GENERICOS[id] ?? id,
+      ajeno,
+      ilustracion: (propia) => (ajeno ? ilustracionSector(sectorIdDe(d.sector), [...d.negocio.trim()][0]?.toUpperCase() ?? '', esc) : propia),
+      titulo: (id) => (ajeno ? undefined : diseno.titulos?.[id]) ?? TITULOS_GENERICOS[id] ?? id,
       seccion: (id, t, cuerpo) => seccion(id, esc(t), cuerpo),
     };
     Object.assign(bloques, diseno.bloques?.(ctx) ?? {});

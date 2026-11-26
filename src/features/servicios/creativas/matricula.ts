@@ -39,6 +39,8 @@ export const matricula: Diseno = {
   opiniones: 2,
   contacto: 2,
   orden: ['servicios', 'horario', 'opiniones', 'galeria', 'zonas', 'preguntas', 'sobre', 'contacto'],
+  sectores: ['taller'],
+  palabras: ['mecanic', 'neumatic', 'chapa', 'moto'],
   titulos: { servicios: 'En el box', horario: 'Horario del taller', galeria: 'Del taller', sobre: 'El taller', opiniones: 'Lo que dicen' },
   muestra: {
     negocio: 'Talleres Lago',

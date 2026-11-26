@@ -31,6 +31,8 @@ export const postal: Diseno = {
   opiniones: 3,
   contacto: 1,
   orden: ['galeria', 'servicios', 'opiniones', 'sobre', 'zonas', 'preguntas', 'horario', 'contacto'],
+  sectores: ['alojamiento'],
+  palabras: ['hotel', 'hostal', 'rural', 'apartamento', 'camping'],
   titulos: { servicios: 'Habitaciones', galeria: 'Así es', opiniones: 'Desde el libro de visitas', sobre: 'La casa', zonas: 'Qué hay cerca', horario: 'Llegadas y salidas', contacto: 'Reserva directa' },
   muestra: {
     negocio: 'Casa del Faro',

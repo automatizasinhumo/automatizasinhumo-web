@@ -25,6 +25,8 @@ export const escaparate: Diseno = {
   opiniones: 3,
   contacto: 2,
   orden: ['servicios', 'galeria', 'opiniones', 'sobre', 'horario', 'preguntas', 'contacto'],
+  sectores: ['tienda'],
+  palabras: ['decoracion', 'regalo', 'moda', 'boutique'],
   titulos: { servicios: 'Lo más buscado', galeria: 'En la tienda', opiniones: 'Clientas y clientes', sobre: 'La tienda', horario: 'Abrimos', contacto: 'Pregúntanos' },
   muestra: {
     negocio: 'Nido Concept',
@@ -41,14 +43,14 @@ export const escaparate: Diseno = {
     const top = d.servicios.find((s) => s.nombre.trim());
     const destacado = top
       ? `<div class="w-hueco w-hueco-dest"><span class="w-etiqueta">Destacado</span><p class="w-dest-nombre">${esc(top.nombre)}</p>${top.precio ? `<p class="w-dest-precio">${esc(top.precio)}</p>` : ''}</div>`
-      : `<div class="w-hueco w-hueco-dest">${OBJETO.regalo}</div>`;
-    const visual = c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : OBJETO.lampara;
+      : `<div class="w-hueco w-hueco-dest">${c.ajeno ? '' : OBJETO.regalo}</div>`;
+    const visual = c.foto ? `<figure class="w-cab-foto">${c.foto}</figure>` : c.ilustracion(OBJETO.lampara);
     return `<header class="w-cab w-cab-escaparate"><div class="w-in"><div class="w-bento">
 <div class="w-hueco w-hueco-txt">${sector(c)}<h1>${esc(d.negocio)}</h1>${lema(c)}${c.bloqueAcciones}</div>
 <div class="w-hueco w-hueco-vis">${visual}</div>
 ${destacado}
-<div class="w-hueco w-hueco-c">${OBJETO.jarron}</div>
-<div class="w-hueco w-hueco-d">${OBJETO.bolsa}</div>
+<div class="w-hueco w-hueco-c">${c.ajeno ? '' : OBJETO.jarron}</div>
+<div class="w-hueco w-hueco-d">${c.ajeno ? '' : OBJETO.bolsa}</div>
 <div class="w-hueco w-hueco-e" aria-hidden="true"><span>Nuevo</span></div>
 </div></div></header>`;
   },

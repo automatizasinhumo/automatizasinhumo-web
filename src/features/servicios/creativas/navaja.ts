@@ -28,6 +28,8 @@ export const navaja: Diseno = {
   opiniones: 2,
   contacto: 3,
   orden: ['servicios', 'horario', 'galeria', 'opiniones', 'sobre', 'preguntas', 'contacto'],
+  sectores: ['peluqueria'],
+  palabras: ['barber'],
   titulos: { servicios: 'Tarifa', galeria: 'Cortes de la casa', horario: 'Abrimos', opiniones: 'Clientes', sobre: 'La barbería', contacto: 'Pide tu turno' },
   muestra: {
     negocio: 'Barbería Tomás',

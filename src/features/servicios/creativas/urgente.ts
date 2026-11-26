@@ -30,6 +30,8 @@ export const urgente: Diseno = {
   opiniones: 2,
   contacto: 2,
   orden: ['servicios', 'zonas', 'opiniones', 'galeria', 'horario', 'preguntas', 'sobre', 'contacto'],
+  sectores: ['fontaneria'],
+  palabras: ['calefacc', 'fontaner', 'desatasc', 'cerrajer'],
   titulos: { servicios: 'Qué arreglamos', zonas: 'Dónde llegamos', galeria: 'Trabajos hechos', sobre: 'Quiénes somos' },
   muestra: {
     negocio: 'Fontanería Ríos',

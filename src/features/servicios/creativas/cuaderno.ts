@@ -27,6 +27,8 @@ export const cuaderno: Diseno = {
   opiniones: 3,
   contacto: 2,
   orden: ['servicios', 'horario', 'opiniones', 'galeria', 'sobre', 'zonas', 'preguntas', 'contacto'],
+  sectores: ['academia'],
+  palabras: ['clases', 'idioma', 'formacion'],
   titulos: { servicios: 'Cursos', horario: 'Horario de clases', opiniones: 'Lo que dicen los alumnos', galeria: 'El aula', sobre: 'Quiénes somos', zonas: 'Dónde damos clase', contacto: 'Reserva tu prueba de nivel' },
   muestra: {
     negocio: 'Academia Pizarra',

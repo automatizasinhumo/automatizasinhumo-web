@@ -29,6 +29,10 @@ export interface ContextoDiseno {
   foto: string;
   /** Título de una sección (el propio del diseño o el genérico). */
   titulo: (id: string) => string;
+  /** El sector del cliente no es de los del diseño: títulos genéricos e ilustración del sector. */
+  ajeno: boolean;
+  /** La ilustración propia del diseño o, si el sector es ajeno, la del sector del cliente. */
+  ilustracion: (propia: string) => string;
   /** Envoltorio estándar de sección (`.w-sec`, ancla `#id`). */
   seccion: (id: string, titulo: string, cuerpo: string) => string;
 }
@@ -52,6 +56,13 @@ export interface Diseno {
   opiniones: 1 | 2 | 3;
   contacto: 1 | 2 | 3 | 4;
   orden: readonly string[];
+  /**
+   * Sectores (ids de sectores-web.json) a los que corresponden su ilustración y sus títulos.
+   * Con otro sector, la web usa títulos genéricos y el icono del sector del cliente.
+   */
+  sectores: readonly string[];
+  /** Palabras del sector escrito que también le encajan («flor» en Herbario, «arquitect» en Lámina). */
+  palabras?: readonly string[];
   /** Nombres de sección con el tono del diseño («La carta», «Tratamientos»…). */
   titulos?: Readonly<Record<string, string>>;
   /** Negocio de muestra para su miniatura en el selector. */
