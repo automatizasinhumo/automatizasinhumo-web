@@ -118,7 +118,9 @@ describe('storefront boundary check', () => {
 
     expect(withDefault.output).toBe(withExplicit.output);
     expect(withDefault.ok).toBe(true);
-  });
+    // Two full scans of the tree, which grows with every design added: the 5 s default
+    // already timed out on busy runners (main #212, PR #214).
+  }, 30_000);
 
   it('allows a control to use a pure helper', async () => {
     // The whole point of the second policy: controls encapsulate core behavior,
