@@ -31,6 +31,13 @@ describe('panel del cliente', () => {
     expect(await paginasDeCliente(db, 'nadie@x.es', HOY)).toEqual([]);
   });
 
+  it('marca las webs con carta (para ofrecer el cartel con QR)', async () => {
+    const { db } = await montar();
+    expect((await paginasDeCliente(db, 'ana@x.es', HOY))[0]!.carta).toBe(false);
+    await publicarPagina(db, 'web', 'ord_a', 'Peluquería Ana', { negocio: 'Peluquería Ana', carta: [{ nombre: 'Café' }] });
+    expect((await paginasDeCliente(db, 'ana@x.es', HOY))[0]!.carta).toBe(true);
+  });
+
   it('un dominio aún sin DNS no se enseña como suyo', async () => {
     const { db } = await montar();
     db.sql.exec(`INSERT INTO dominios_paginas (dominio, tipo, pedido_public_id) VALUES ('ana.es', 'web', 'ord_a')`);

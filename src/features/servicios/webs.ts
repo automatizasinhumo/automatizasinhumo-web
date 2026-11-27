@@ -27,6 +27,7 @@ import {
 
 import { cssFuentes, FUENTES_WEB, ilustracionSector, type ContextoDiseno, type IconoWeb } from './creativas';
 import { cssWebDe, disenoWeb, plantillaWeb, resolverPlantilla } from './plantillasWeb';
+import { validarCarta, type PlatoCarta } from './cartaWeb';
 export { cssFuentes, DISENOS, FUENTES_WEB } from './creativas';
 export { CSS_WEB, cssWebDe, disenoWeb, PLANTILLAS_WEB, PLANTILLAS_ANTIGUAS, resolverPlantilla, type IdPlantillaWeb } from './plantillasWeb';
 import type { IdPlantillaWeb } from './plantillasWeb';
@@ -280,6 +281,8 @@ export interface DatosWeb {
   /** Dónde leer todas sus opiniones (su ficha de Google, por ejemplo). */
   opinionesUrl: string;
   preguntas: PreguntaWeb[];
+  /** Carta de bar o restaurante con alérgenos (cartaWeb.ts): con platos se publica /w/<slug>/carta. */
+  carta: PlatoCarta[];
   /** Orden de las secciones (ordenWeb). */
   orden: IdSeccionWeb[];
   /** Variantes por sección elegidas por el cliente (VARIANTES_WEB). */
@@ -418,6 +421,7 @@ export function validarWeb(x: unknown): ResultadoWeb {
       opiniones,
       opinionesUrl: urlSegura(o.opinionesUrl),
       preguntas,
+      carta: validarCarta(o.carta),
       orden: ordenWeb(o.orden),
       variantes: variantesWeb(o.variantes),
       foto: fotoValida(o.foto) ? o.foto : '',
@@ -459,6 +463,7 @@ export const EJEMPLO_WEB: DatosWeb = {
     { pregunta: '¿Puedo pagar con tarjeta?', respuesta: 'Sí, con tarjeta, Bizum o en efectivo.' },
   ],
   opinionesUrl: '',
+  carta: [],
   orden: [...ORDEN_POR_DEFECTO],
   variantes: '0.0.0.0.0',
   foto: '',
@@ -572,6 +577,8 @@ export interface OpcionesWeb {
   formulario?: { accion: string; sello: string };
   /** Página de citas de la publicada (…/w/<slug>/reservas). Sin ella (vista previa) el botón va a #. */
   citas?: string;
+  /** Página de la carta de la publicada (…/w/<slug>/carta). Sin ella (vista previa) el enlace va a #. */
+  carta?: string;
 }
 
 /** Letras de la palabra más larga del nombre (mínimo 6): el titular nunca la parte, se encoge. */
@@ -651,8 +658,11 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
     d.whatsapp && [enlaceWhatsapp(d.whatsapp), 'wa', 'WhatsApp'],
     tel && [tel, 'tel', 'Llamar'],
     !d.telefono && !d.whatsapp && d.email && [`mailto:${d.email}`, 'mail', 'Escríbenos'],
-  ].filter(Boolean) as [string, 'cita' | 'wa' | 'tel' | 'mail', string][];
+  ].filter(Boolean) as [string, 'cita' | 'wa' | 'tel' | 'mail' | 'enlace', string][];
   if (!reservar && textos.contacto && listaAcciones[0]) listaAcciones[0] = [listaAcciones[0][0], listaAcciones[0][1], textos.contacto];
+  // La carta va siempre la última: el botón principal sigue siendo reservar o contactar.
+  const carta = d.carta.length ? (o.carta ?? '#') : '';
+  if (carta && listaAcciones.length) listaAcciones.push([carta, 'enlace', 'Ver la carta']);
   const acciones = listaAcciones
     .map(([href, ico, txt], i) => `<a class="w-boton${i ? '' : ' w-boton-lleno'}" href="${esc(href)}"${rel(href)}>${icono(ico)}${txt}</a>`)
     .join('');
@@ -716,7 +726,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const tabla = horario
     .map(([dia, horas]) => (dia ? `<tr><th scope="row">${esc(dia)}</th><td>${esc(horas)}</td></tr>` : `<tr><td colspan="2">${esc(horas)}</td></tr>`))
     .join('');
-  const textoFranja = { cita: '¿Te reservamos cita?', wa: '¿Hablamos? Escríbenos por WhatsApp', tel: 'Llámanos y te atendemos', mail: 'Escríbenos y te respondemos' };
+  const textoFranja = { cita: '¿Te reservamos cita?', wa: '¿Hablamos? Escríbenos por WhatsApp', tel: 'Llámanos y te atendemos', mail: 'Escríbenos y te respondemos', enlace: 'Mira nuestra carta' };
 
   const seccion = (id: string, titulo: string, cuerpo: string) =>
     `<section class="w-sec w-${id}-sec" id="${id}"><div class="w-in"><h2>${titulo}</h2>${cuerpo}</div></section>`;
@@ -725,7 +735,15 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const titulo = (id: string) => esc((ajeno ? undefined : diseno?.titulos?.[id]) ?? TITULOS_GENERICOS[id] ?? id);
   const bloques: Record<string, string> = {
     sobre: d.sobre ? seccion('sobre', titulo('sobre'), `<div class="w-sobre">${parrafosHtml(d.sobre)}</div>`) : '',
-    servicios: nS ? seccion('servicios', titulo('servicios'), `<ul class="w-servicios w-s-${vS}" data-n="${nS}">${servicios}</ul>`) : '',
+    servicios:
+      nS || carta
+        ? seccion(
+            'servicios',
+            titulo('servicios'),
+            (nS ? `<ul class="w-servicios w-s-${vS}" data-n="${nS}">${servicios}</ul>` : '') +
+              (carta ? `<p class="w-mas"><a href="${esc(carta)}">Ver la carta completa, con alérgenos</a></p>` : ''),
+          )
+        : '',
     galeria: fotos ? seccion('galeria', titulo('galeria'), `<ul class="w-galeria w-g-${v('galeria')}" data-n="${d.galeria.length}">${fotos}</ul>`) : '',
     opiniones: opiniones
       ? seccion(
@@ -832,7 +850,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
  * dirección, servicios y redes. Solo lo que el cliente rellenó. Va en un <script> de datos,
  * no ejecutable, y se escapa `<` para que ningún texto pueda cerrar la etiqueta.
  */
-export function fichaNegocio(d: DatosWeb, url: string): string {
+export function fichaNegocio(d: DatosWeb, url: string, carta = ''): string {
   const ficha: Record<string, unknown> = { '@context': 'https://schema.org', '@type': tipoNegocio(d.sector), name: d.negocio, url };
   const horas = horarioSchema(d.horario);
   if (horas) ficha.openingHoursSpecification = horas;
@@ -852,6 +870,7 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
       itemOffered: { '@type': 'Service', name: s.nombre, ...(s.texto ? { description: s.texto } : {}) },
     }));
   }
+  if (carta && d.carta.length) ficha.hasMenu = carta;
   return JSON.stringify(ficha).replace(/</g, '\\u003c');
 }
 
@@ -861,7 +880,7 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
  * cuando la página se sirve desde otro dominio ('' = mismo origen). `imagen` es la URL absoluta
  * de la foto (/w/<slug>/foto) para la tarjeta que sale al compartir el enlace; '' si no hay foto.
  */
-export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = '', formulario?: OpcionesWeb['formulario'], citas?: string): string {
+export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = '', formulario?: OpcionesWeb['formulario'], citas?: string, carta?: string): string {
   // «Nombre · Actividad en Zona»: la zona principal en el título ayuda a salir en búsquedas locales.
   const zona = listaZonas(d.zonas)[0];
   const titulo = (d.sector ? `${d.negocio} · ${d.sector}` : d.negocio) + (zona && d.sector ? ` en ${zona}` : '');
@@ -883,11 +902,11 @@ export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '',
 <meta property="og:url" content="${esc(url)}">
 ${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta name="twitter:card" content="summary_large_image">\n` : ''}<meta name="theme-color" content="${esc(d.color)}">
 <link rel="icon" href="${esc(tienda)}/favicon.svg">
-<script type="application/ld+json">${fichaNegocio(d, url)}</script>
+<script type="application/ld+json">${fichaNegocio(d, url, carta)}</script>
 ${fuentesDoc(d, tienda)}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
 </head>
 <body>
-${renderWeb(d, { pie, galeria, formulario, citas, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
+${renderWeb(d, { pie, galeria, formulario, citas, carta, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
 </body>
 </html>
 `;

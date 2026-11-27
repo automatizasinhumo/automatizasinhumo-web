@@ -16,8 +16,9 @@ export const GET: APIRoute = async ({ params, url, request, locals }) => {
   const galeria = new URL(`/w/${w.slug}/galeria/`, url).href;
   const propia = new URL(`/w/${w.slug}`, url).href;
   const citas = citasActivas(w.datos) ? `/w/${w.slug}/reservas` : undefined;
+  const carta = w.datos.carta.length ? new URL(`/w/${w.slug}/carta`, url).href : undefined;
   const formulario = await formularioWeb(w.slug, `/w/${w.slug}/mensaje`, propia, env.AUTH_SECRET);
-  return new Response(documentoWeb(w.datos, propia, '', imagen, galeria, formulario, citas), {
+  return new Response(documentoWeb(w.datos, propia, '', imagen, galeria, formulario, citas, carta), {
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60' },
   });
 };

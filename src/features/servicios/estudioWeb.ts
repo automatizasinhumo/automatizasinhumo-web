@@ -17,7 +17,7 @@ import { guiar } from '../tour/guia';
 import { CSS_MINI, datosMiniatura } from './miniaturasWeb';
 import { aspectoAlElegir, CAPA_TAL_CUAL, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
 
-type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas';
+type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas' | 'carta';
 type Fila = Record<string, string>;
 type Contenido = Omit<DatosWeb, 'plantilla' | 'color' | 'letra'>;
 interface Config {
@@ -123,7 +123,7 @@ async function reducirFoto(f: File, lado = 1200, max = MAX_FOTO_WEB): Promise<st
     }
   return '';
 }
-const LISTAS: Lista[] = ['servicios', 'enlaces', 'opiniones', 'preguntas'];
+const LISTAS: Lista[] = ['servicios', 'enlaces', 'opiniones', 'preguntas', 'carta'];
 const COLOR = /^#[0-9a-f]{6}$/i;
 const ERROR_PUBLICAR: Record<string, string> = {
   negocio: 'Falta el nombre del negocio.',
@@ -268,11 +268,30 @@ export function iniciarEstudioWeb() {
     if (!t || !caja) return null;
     const item = t.content.firstElementChild!.cloneNode(true) as HTMLElement;
     for (const c of $$<HTMLInputElement>('[data-k]', item)) {
-      const v = valores[c.dataset.k!];
+      const v: unknown = valores[c.dataset.k!];
+      // Los alérgenos y dietas de la carta se guardan como lista; en el formulario, «gluten,leche».
       if (typeof v === 'string') c.value = v;
+      else if (Array.isArray(v)) c.value = v.filter((x) => typeof x === 'string').join(',');
     }
+    marcarCasillas(item);
     caja.appendChild(item);
     return item;
+  }
+  /** Casillas (alérgenos, dietas) ↔ campo oculto data-k del mismo plato: el oculto es lo que se guarda. */
+  function marcarCasillas(item: HTMLElement) {
+    for (const o of $$<HTMLInputElement>('input[type=hidden][data-k]', item)) {
+      const marcados = new Set(o.value.split(','));
+      for (const x of $$<HTMLInputElement>(`[data-marca="${o.dataset.k}"]`, item)) x.checked = marcados.has(x.value);
+    }
+  }
+  function casillaACampo(x: HTMLInputElement) {
+    const item = x.closest<HTMLElement>('.item');
+    const o = item && $<HTMLInputElement>(`input[type=hidden][data-k="${x.dataset.marca}"]`, item);
+    if (!o) return;
+    o.value = $$<HTMLInputElement>(`[data-marca="${x.dataset.marca}"]`, item)
+      .filter((c) => c.checked)
+      .map((c) => c.value)
+      .join(',');
   }
   /** El botón «Añadir» desaparece al llegar al máximo que acepta la web. */
   function limitar() {
@@ -374,7 +393,7 @@ export function iniciarEstudioWeb() {
     c.galeria = galeria;
     return c as unknown as Contenido;
   }
-  const vacio = (): Partial<Contenido> => ({ servicios: [{ nombre: '', precio: '', texto: '' }], enlaces: [], opiniones: [], preguntas: [], orden: ordenWeb(recoger().orden) });
+  const vacio = (): Partial<Contenido> => ({ servicios: [{ nombre: '', precio: '', texto: '' }], enlaces: [], opiniones: [], preguntas: [], carta: [], orden: ordenWeb(recoger().orden) });
   const ejemplo = (): Contenido => {
     const { plantilla: _p, color: _c, letra: _l, ...c } = cfg.ejemplo;
     return c;
@@ -1389,6 +1408,7 @@ export function iniciarEstudioWeb() {
   });
   form.addEventListener('input', (ev) => {
     const c = ev.target as HTMLInputElement;
+    if (c.dataset.marca) casillaACampo(c);
     if (c.hasAttribute('data-sector-rapido')) return sectorRapido(c.value, false);
     if (c.dataset.espejo) {
       const f = campo(c.dataset.espejo as (typeof CAMPOS)[number]);
