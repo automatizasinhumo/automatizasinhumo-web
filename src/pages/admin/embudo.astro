@@ -2,6 +2,8 @@
 import { env } from 'cloudflare:workers';
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { pct, resumen, type Resumen } from '../../features/embudo';
+import { metricasRecuperacion, type Metricas } from '../../features/servicios/recuperarWeb';
+import { DIAS_VISTA } from '../../features/servicios/vistaWeb';
 
 export const prerender = false;
 
@@ -19,6 +21,24 @@ try {
 } catch (error) {
   console.error('Embudo: no se pudo leer', error);
 }
+
+// Borradores del estudio guardados con correo (#225). Las filas se borran a los
+// DIAS_VISTA días, así que un periodo más largo solo ve los últimos DIAS_VISTA.
+let rec: Metricas | null = null;
+try {
+  const desde = new Date(Date.now() - dias * 86_400_000).toISOString().slice(0, 19).replace('T', ' ');
+  rec = await metricasRecuperacion(env.DB, desde);
+} catch (error) {
+  console.error('Embudo: no se pudieron leer los borradores', error);
+}
+const NOMBRE_PASO: Record<number, string> = {
+  0: 'Antes del primer correo',
+  1: 'Tras el correo con el enlace',
+  2: 'Tras el recordatorio de 2 h',
+  3: 'Tras el recordatorio de 24 h',
+  4: 'Tras el recordatorio de 72 h',
+};
+const pasosRec = rec ? Object.entries(rec.porPaso).map(([p, n]) => ({ paso: Number(p), n })).sort((a, b) => a.paso - b.paso) : [];
 
 const filas = r
   ? [
@@ -75,6 +95,29 @@ const NOMBRE_METRICA: Record<string, string> = {
               ))}
             </tbody>
           </table>
+        </section>
+
+        <section>
+          <h2 class="mb-1 text-lg font-semibold">Borradores guardados</h2>
+          <p class="mb-3 text-sm text-gray-600">
+            Webs del estudio guardadas con el correo para seguir luego. Se conservan {DIAS_VISTA} días{dias > DIAS_VISTA ? `: este periodo solo ve los últimos ${DIAS_VISTA}` : ''}.
+          </p>
+          {!rec ? (
+            <p class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">No se pudieron leer los borradores. ¿Falta aplicar la migración 0058?</p>
+          ) : rec.guardados === 0 ? (
+            <p class="text-sm text-gray-500">Todavía no hay borradores guardados en este periodo.</p>
+          ) : (
+            <table class="w-full text-sm" data-testid="metricas-recuperacion">
+              <tbody>
+                <tr class="border-t border-line"><td class="py-2">Guardados</td><td class="py-2 text-right font-mono">{rec.guardados}</td><td class="py-2 text-right font-mono text-gray-600"></td></tr>
+                <tr class="border-t border-line"><td class="py-2">Acaban pagando</td><td class="py-2 text-right font-mono">{rec.pagados}</td><td class="py-2 text-right font-mono text-gray-600">{pct(rec.pagados, rec.guardados)} de los guardados</td></tr>
+                {pasosRec.map((p) => (
+                  <tr class="border-t border-line"><td class="py-2 pl-4 text-gray-600">{NOMBRE_PASO[p.paso] ?? `Tras el correo ${p.paso}`}</td><td class="py-2 text-right font-mono">{p.n}</td><td class="py-2 text-right font-mono text-gray-600">{pct(p.n, rec!.pagados)} de los pagos</td></tr>
+                ))}
+                <tr class="border-t border-line"><td class="py-2">Bajas de los recordatorios</td><td class="py-2 text-right font-mono">{rec.bajas}</td><td class="py-2 text-right font-mono text-gray-600">{pct(rec.bajas, rec.guardados)} de los guardados</td></tr>
+              </tbody>
+            </table>
+          )}
         </section>
 
         <section>
