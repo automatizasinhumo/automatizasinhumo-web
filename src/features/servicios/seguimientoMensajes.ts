@@ -164,7 +164,7 @@ export function correoRecordatorio(para: string, negocio: string, ms: Pendiente[
 <ul style="margin:0 0 16px;padding-left:20px">${ms.map((m) => `<li style="margin:0 0 8px">${escapeHtml(linea(m))}</li>`).join('')}</ul>
 <p style="margin:0"><a href="${escapeHtml(panel)}">Contestar desde tu panel</a></p>`;
   const html = emailShell({ storeName: tienda, heading: 'Tienes mensajes sin contestar', subheading: negocio ? escapeHtml(negocio) : undefined, body: cuerpo });
-  return { to: para, subject, html, text, idempotencyKey: `web-recordatorio/${ms.map((m) => m.id).sort().join(',')}` };
+  return { to: para, subject, html, text, idempotencyKey: `web-recordatorio/${ms.map((m) => m.id).sort((a, b) => a.localeCompare(b)).join(',')}` };
 }
 
 /**
