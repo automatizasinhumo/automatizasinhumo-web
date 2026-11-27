@@ -90,7 +90,18 @@ export const CSS_CAPA = `
     .w:is(.w-mv-sutil,.w-mv-vivo) .w-sec .w-in>*{animation:w-sube linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
     .w.w-mv-vivo .w-sec .w-in>*{animation-name:w-entra}
   }
+  /* Solo en la página servida (body>.w): en la vista previa del estudio, que se repinta al teclear, no parpadea. */
+  body>.w:is(.w-mv-sutil,.w-mv-vivo) :is(.w-cab-txt>*,.w-cab-foto){transition:opacity .7s cubic-bezier(.2,.7,.2,1),translate .7s cubic-bezier(.2,.7,.2,1)}
+  body>.w:is(.w-mv-sutil,.w-mv-vivo) .w-cab-txt>:nth-child(2){transition-delay:.07s}
+  body>.w:is(.w-mv-sutil,.w-mv-vivo) .w-cab-txt>:nth-child(3){transition-delay:.14s}
+  body>.w:is(.w-mv-sutil,.w-mv-vivo) .w-cab-txt>:nth-child(n+4){transition-delay:.21s}
+  body>.w:is(.w-mv-sutil,.w-mv-vivo) .w-cab-foto{transition-delay:.12s}
+  @starting-style{body>.w:is(.w-mv-sutil,.w-mv-vivo) :is(.w-cab-txt>*,.w-cab-foto){opacity:0;translate:0 18px}}
+  @supports (animation-timeline:scroll()){
+    body>.w:is(.w-mv-sutil,.w-mv-vivo) .w-nav{animation:w-compacta linear both;animation-timeline:scroll(root block);animation-range:0px 160px}
+  }
 }
+@keyframes w-compacta{to{box-shadow:0 12px 32px -14px rgb(0 0 0 / .28)}}
 @keyframes w-sube{from{transform:translateY(26px)}}
 @keyframes w-entra{from{transform:translateY(48px) scale(.96)}}
 `;
