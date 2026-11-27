@@ -14,6 +14,7 @@ import { firmadorDecision } from './features/solicitudes/decision';
 import { avanzarDominios, avisarDominiosActivos, configDominios, servirDominio } from './features/servicios/dominios';
 import { citasActivas, documentoWeb, webPorSlug } from './features/servicios/webs';
 import { formularioWeb } from './features/servicios/mensajesWeb';
+import { pedirResenas } from './features/servicios/resenasCitas';
 
 /**
  * Worker entrypoint.
@@ -112,6 +113,16 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     if (email) await avisarDominiosActivos(db, ({ para, dominio }) => email.send(correoDominioActivo(para, dominio)).then(() => undefined));
   } catch (err) {
     console.error('Scheduled domain sweep failed:', err instanceof Error ? err.message : 'error');
+  }
+
+  // Citas de las webs publicadas: un correo pidiendo opinión 72 h después (resenasCitas.ts).
+  try {
+    const s = await getStoreSettings(db);
+    const email = await getEmailProvider(s);
+    const tienda = (await getSetting(db, 'store_name')) || getConfig().storeName;
+    if (email) await pedirResenas(db, email, tienda, cuando.getTime());
+  } catch (err) {
+    console.error('Scheduled review request sweep failed:', err instanceof Error ? err.message : 'error');
   }
 
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
