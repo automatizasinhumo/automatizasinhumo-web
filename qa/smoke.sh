@@ -17,8 +17,9 @@ check /pages/como-funciona "funciona"
 check /pages/aviso-legal "David Porto"
 check /pages/privacidad ""
 check /cart "carrito"
-# Recorrido de compra directa: la ficha enseña la demo dentro y el bloque de compra.
-check /products/web-una-pagina "data-compra-directa"
+# La ficha enseña la demo dentro y el camino de compra: «Contratar ahora» (compra directa)
+# o, en los servicios de autoservicio, «Empezar ahora» al estudio (ProductDetail.astro).
+check /products/web-una-pagina 'data-compra-directa\|data-ir-estudio'
 check /products/web-una-pagina "data-demo-visor"
 check /products/web-una-pagina "<iframe"
 check /empezar/web-una-pagina "<form"
