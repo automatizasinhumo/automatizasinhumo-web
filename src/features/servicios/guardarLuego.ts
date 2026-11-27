@@ -51,12 +51,25 @@ export function iniciarGuardarLuego(caja: HTMLFormElement | null, datos: () => D
   let reloj = 0;
   const estado = caja?.querySelector<HTMLElement>('[data-guardar-estado]');
 
-  const subir = () => {
+  // Una subida cada vez: si hay cambios mientras va una, se manda otra al acabar (lo último gana).
+  let enCurso = false;
+  let pendiente = false;
+  let fallos = 0;
+  const programarSubida = (ms: number) => {
+    window.clearTimeout(temporizador);
+    temporizador = window.setTimeout(subir, ms);
+  };
+  function subir(): void {
     if (!token || pagado()) return;
-    void fetch('/api/web/borrador', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, datos: datos() }), keepalive: true })
+    if (enCurso) return void (pendiente = true);
+    const t = token;
+    enCurso = true;
+    pendiente = false;
+    void fetch('/api/web/borrador', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: t, datos: datos() }), keepalive: true })
       .then((r) => {
         // Enlace caducado o borrador borrado: se deja de subir y se puede volver a guardar.
-        if (r.status === 404) {
+        // Solo si sigue siendo el token de esta subida (no uno restaurado entre medias).
+        if (r.status === 404 && token === t) {
           token = null;
           try {
             localStorage.removeItem(CLAVE_SEGUIR);
@@ -64,9 +77,19 @@ export function iniciarGuardarLuego(caja: HTMLFormElement | null, datos: () => D
             /* nada */
           }
         }
+        if (r.status >= 500 || r.status === 429) throw new Error('reintentar');
+        fallos = 0;
       })
-      .catch(() => {});
-  };
+      .catch(() => {
+        // Fallo pasajero: se reintenta con espera creciente (los cambios siguen en el dispositivo).
+        if (fallos < 5) pendiente = true;
+        fallos++;
+      })
+      .finally(() => {
+        enCurso = false;
+        if (pendiente) programarSubida(fallos ? 5000 * fallos : 0);
+      });
+  }
 
   const quizaOfrecer = () => {
     if (!caja || !caja.hidden) return;
@@ -93,10 +116,11 @@ export function iniciarGuardarLuego(caja: HTMLFormElement | null, datos: () => D
     if (boton) boton.disabled = true;
     if (estado) estado.textContent = 'Guardando…';
     try {
+      const enviado = JSON.stringify(datos());
       const r = await fetch('/api/web/borrador', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ datos: datos(), email: email.value, avisos: !!avisos?.checked }),
+        body: JSON.stringify({ datos: JSON.parse(enviado), email: email.value, avisos: !!avisos?.checked }),
       });
       const j = (await r.json().catch(() => null)) as { ok?: boolean; token?: string; error?: string } | null;
       if (!r.ok || !j?.ok || !j.token) {
@@ -107,6 +131,8 @@ export function iniciarGuardarLuego(caja: HTMLFormElement | null, datos: () => D
       }
       token = j.token;
       escribirLocal(CLAVE_SEGUIR, j.token);
+      // Lo que se escribió mientras se guardaba también sube.
+      if (JSON.stringify(datos()) !== enviado) programarSubida(0);
       caja.replaceChildren(Object.assign(document.createElement('p'), { className: 'guardar-hecho', textContent: `Guardada. Te hemos mandado el enlace a ${email.value} para seguir desde cualquier dispositivo.` }));
     } catch {
       if (estado) estado.textContent = 'No hemos podido guardarla. Inténtalo en un momento.';
@@ -119,8 +145,7 @@ export function iniciarGuardarLuego(caja: HTMLFormElement | null, datos: () => D
     cambio() {
       quizaOfrecer();
       if (!token) return;
-      window.clearTimeout(temporizador);
-      temporizador = window.setTimeout(subir, 4000);
+      programarSubida(4000);
     },
     usar(t: string) {
       token = t;

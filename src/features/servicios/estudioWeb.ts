@@ -1501,6 +1501,13 @@ export function iniciarEstudioWeb() {
     }
     const aqui = campo('negocio').value.trim();
     if (aqui && aqui !== d.negocio?.trim() && !confirm(`¿Cargar «${d.negocio}», la web guardada en el enlace? Se sustituye la que tienes ahora en este dispositivo.`)) return;
+    // Un borrador es otra web sin pagar: nunca se publica con el pedido que tenga esta pestaña.
+    // La web ya pagada no se toca y se vuelve a abrir con el enlace del correo de compra.
+    if (pedido.token || estado.pedido) {
+      if (!confirm('Este navegador tiene abierta una web ya pagada. ¿Cargar el borrador como una web nueva? La pagada no cambia y la puedes abrir desde el correo de compra.')) return;
+      pedido.soltar();
+      estado.pedido = '';
+    }
     const { plantilla, color, letra, ...c } = d;
     Object.assign(estado, { plantilla, color, letra, camino: 'personaliza', alcanzado: PASOS.length - 1 });
     aplicarCamino();

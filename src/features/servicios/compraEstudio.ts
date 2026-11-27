@@ -97,6 +97,8 @@ export interface PedidoEstudio<D extends { ref: string }> {
   arrancar(destino: string): void;
   /** ¿Sigue cargado el pedido de este token? Se comprueba tras cada await antes de tocar estado. */
   vigente(token: string): boolean;
+  /** Desvincula el pedido de esta pestaña (otra web): no se publica lo nuevo con su token. */
+  soltar(): void;
 }
 
 /** Reintentos de las consultas caídas (red, 5xx) antes de rendirse hasta recargar la página. */
@@ -194,6 +196,14 @@ export function pedidoEstudio<D extends { ref: string }>(
     },
     vigente(t) {
       return !!t && t === token && pagado !== null;
+    },
+    soltar() {
+      gen++;
+      token = '';
+      pagado = null;
+      cargando = false;
+      guardar([]);
+      alCambiar(null);
     },
   };
 }

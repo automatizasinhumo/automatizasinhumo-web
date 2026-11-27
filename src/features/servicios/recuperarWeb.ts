@@ -31,6 +31,13 @@ const TTL_SEGUIR = DIAS_VISTA * 86_400;
 const TTL_BAJA = 365 * 86_400;
 const EMAIL = /^[^\s@<>()",;:]{1,64}@[^\s@<>()",;:]+\.[a-z]{2,}$/i;
 
+/** Quita las barras finales (sin regex: Sonar avisa de retroceso con /\/+$/). */
+export function sinBarraFinal(s: string): string {
+  let i = s.length;
+  while (i > 0 && s[i - 1] === '/') i--;
+  return s.slice(0, i);
+}
+
 const sqlFecha = (ms: number) => new Date(ms).toISOString().slice(0, 19).replace('T', ' ');
 const deSql = (s: string) => Date.parse(`${s.replace(' ', 'T')}Z`);
 
@@ -238,7 +245,7 @@ export async function recordarBorradores(
 
 /** Enlaces del correo. La firma se hace con la hora de guardado: el cuerpo es igual en cada reintento. */
 export async function enlaces(origen: string, id: string, secret: string, creado: number): Promise<Enlaces> {
-  const o = origen.replace(/\/+$/, '');
+  const o = sinBarraFinal(origen);
   return {
     seguir: `${o}/servicios/web?seguir=${await firmarSeguir(id, secret, creado)}`,
     vista: `${o}/vista/${id}`,

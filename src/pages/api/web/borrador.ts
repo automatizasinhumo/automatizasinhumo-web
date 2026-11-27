@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers';
 import { getConfig } from '../../../config';
 import { getEmailProvider } from '../../../features/email';
 import { getSetting, getStoreSettings } from '../../../features/settings/db';
-import { actualizarBorrador, correoValido, guardarRecuperacion, leerSeguir, recordarBorradores } from '../../../features/servicios/recuperarWeb';
+import { actualizarBorrador, correoValido, guardarRecuperacion, leerSeguir, recordarBorradores, sinBarraFinal } from '../../../features/servicios/recuperarWeb';
 import { jsonLimitado, leerVista, validarBorrador } from '../../../features/servicios/vistaWeb';
 
 export const prerender = false;
@@ -16,7 +16,7 @@ const json = (body: unknown, status = 200) =>
 
 /** Origen https de la tienda para los enlaces del correo: el ajuste o, si falta, el de la petición. */
 async function origen(request: Request): Promise<string | null> {
-  const o = ((await getSetting(env.DB, 'store_url').catch(() => null)) || new URL(request.url).origin).replace(/\/+$/, '');
+  const o = sinBarraFinal((await getSetting(env.DB, 'store_url').catch(() => null)) || new URL(request.url).origin);
   return /^https:\/\/[^\s/]+$/.test(o) ? o : null;
 }
 
