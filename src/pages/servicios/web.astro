@@ -511,6 +511,18 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
           <div class="web-host" data-host></div>
         </div>
       </div>
+      <!-- Guardar y seguir luego: aparece tras unos campos y un minuto (guardarLuego.ts, /api/web/borrador). -->
+      <form class="guardar-luego" data-guardar-luego hidden novalidate>
+        <button type="button" class="guardar-cerrar" data-guardar-cerrar aria-label="Cerrar">×</button>
+        <p class="guardar-titulo"><strong>Tu web ya está tomando forma</strong></p>
+        <label class="guardar-campo">Tu correo electrónico
+          <input type="email" name="guardar-email" autocomplete="email" inputmode="email" required maxlength="254" />
+        </label>
+        <p class="ayuda">Te enviaremos un enlace para continuar donde lo has dejado. Sin crear cuenta.</p>
+        <label class="guardar-avisos"><input type="checkbox" name="guardar-avisos" /> Quiero recibir hasta 3 recordatorios por correo para terminar y publicar mi web. Puedo darme de baja cuando quiera.</label>
+        <button type="submit" class="boton boton-secundario min-h-11 w-full">Guardar y seguir luego</button>
+        <p class="ayuda" role="status" data-guardar-estado></p>
+      </form>
     </aside>
   </div>
 

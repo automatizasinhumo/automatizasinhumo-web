@@ -32,6 +32,7 @@ export function createResendEmail(
           html: msg.html,
           text: msg.text,
           ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
+          ...(msg.headers && Object.keys(msg.headers).length ? { headers: msg.headers } : {}),
           ...(msg.attachments?.length
             ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: base64(a.content), content_type: a.contentType })) }
             : {}),

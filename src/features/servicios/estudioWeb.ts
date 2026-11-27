@@ -9,6 +9,7 @@
  * con /api/web/publicar. Volver a publicar actualiza la misma dirección.
  */
 import { Historial } from './historial';
+import { iniciarGuardarLuego, leerBorradorDelEnlace, type GuardarLuego } from './guardarLuego';
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
@@ -267,6 +268,8 @@ export function iniciarEstudioWeb() {
     contenido: estado.contenido ?? {},
     escritos: { ...estado.escritos },
   });
+  /** «Guardar y seguir luego»: se crea cuando ya se pueden leer los datos (más abajo). */
+  let luego: GuardarLuego | null = null;
   const historial = new Historial<Instantanea>(({ contenido: { galeria, ...resto }, ...aspecto }) =>
     JSON.stringify([aspecto, resto, (galeria ?? []).map((g) => g.length + g.slice(-24))]),
   );
@@ -468,6 +471,7 @@ export function iniciarEstudioWeb() {
     return algo;
   }
   const datos = (): DatosWeb => ({ ...recoger(), plantilla: estado.plantilla || cfg.porDefecto.plantilla, color: estado.color, letra: estado.letra }) as DatosWeb;
+  luego = iniciarGuardarLuego($<HTMLFormElement>('[data-guardar-luego]'), datos, () => !!estado.pedido);
   const nombrePlantilla = (id: string) => PLANTILLAS_WEB.find((p) => p.id === id)?.nombre ?? id;
 
   // ---------- Vista previa ----------
@@ -1140,6 +1144,7 @@ export function iniciarEstudioWeb() {
     estado.contenido = recoger();
     marcarGuardado(guardar(estado));
     if (historial.registrar(instantanea())) pintarHistorial();
+    luego?.cambio();
   }
 
   /** «Guardado» visible: quien escribe en el móvil sabe que puede cerrar y volver sin perder nada. */
@@ -1476,6 +1481,37 @@ export function iniciarEstudioWeb() {
   pedido.arrancar(destinoPedido());
   desdeHash(false);
   desdeEnlace();
+  void desdeSeguir();
+
+  /**
+   * Enlace «Sigue donde lo dejaste» del correo (?seguir=…): carga el borrador guardado. Si aquí
+   * ya hay otra web a medias, se pregunta antes de pisarla. Después, los cambios se suben solos.
+   */
+  async function desdeSeguir() {
+    const q = new URLSearchParams(location.search);
+    const t = q.get('seguir');
+    if (!t) return;
+    q.delete('seguir');
+    history.replaceState(null, '', location.pathname + (q.size ? `?${q}` : '') + location.hash);
+    const d = await leerBorradorDelEnlace(t);
+    const st = $('[data-estado-compra]');
+    if (!d) {
+      if (st) st.textContent = 'Ese enlace ha caducado: la web que ves es la guardada en este dispositivo.';
+      return;
+    }
+    const aqui = campo('negocio').value.trim();
+    if (aqui && aqui !== d.negocio?.trim() && !confirm(`¿Cargar «${d.negocio}», la web guardada en el enlace? Se sustituye la que tienes ahora en este dispositivo.`)) return;
+    const { plantilla, color, letra, ...c } = d;
+    Object.assign(estado, { plantilla, color, letra, camino: 'personaliza', alcanzado: PASOS.length - 1 });
+    aplicarCamino();
+    volcar(c);
+    luego?.usar(t);
+    persistir();
+    nuevoHistorial();
+    pintarControles();
+    programar(true);
+    if (st) st.textContent = 'Hemos recuperado tu web tal como la dejaste.';
+  }
 
   /** Las páginas de sector enlazan con ?sector=…&diseno=…: se aplican una vez y se limpian de la URL. */
   function desdeEnlace() {

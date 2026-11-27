@@ -20,6 +20,14 @@ function isWebMessagePath(pathname: string): boolean {
   return /^\/w\/[^/]+\/mensaje\/?$/.test(pathname);
 }
 
+/**
+ * Baja de recordatorios en un clic (RFC 8058): el gestor de correo hace el POST desde sus
+ * servidores, sin Origin. La autoriza el token firmado de la URL; no usa la sesión.
+ */
+function isUnsubscribePath(pathname: string): boolean {
+  return pathname === '/api/web/baja';
+}
+
 function isCapabilityPayPath(pathname: string): boolean {
   if (!pathname.startsWith('/pay/')) return false;
   const token = pathname.slice('/pay/'.length);
@@ -42,5 +50,5 @@ export function isForbiddenFormOrigin(request: Request, url: URL): boolean {
   if (!hasFormContentType(request.headers.get('content-type'))) return false;
   if (originMatches) return false;
 
-  return !(request.method === 'POST' && (isCapabilityPayPath(url.pathname) || isWebMessagePath(url.pathname)));
+  return !(request.method === 'POST' && (isCapabilityPayPath(url.pathname) || isWebMessagePath(url.pathname) || isUnsubscribePath(url.pathname)));
 }

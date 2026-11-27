@@ -21,6 +21,11 @@ export interface EmailMessage {
   replyTo?: string;
   /** Adjuntos de texto (p. ej. la cita en .ics). Quien envía debe aguantar que el proveedor los rechace. */
   attachments?: EmailAttachment[];
+  /**
+   * Cabeceras extra (p. ej. List-Unsubscribe y List-Unsubscribe-Post para la baja en un clic).
+   * Resend las manda; el binding de Cloudflare las ignora.
+   */
+  headers?: Record<string, string>;
 }
 
 export interface EmailAttachment {

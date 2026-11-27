@@ -10,6 +10,7 @@ import { enviarSeguimientos, enviarEntregasListas, enviarVistasPreviasListas } f
 import { lanzarProgramados, marcasD1 } from './features/automatizacion/respaldoCron';
 import { conciliar, textoAviso } from './features/solicitudes/conciliacion';
 import { getConfig } from './config';
+import { recordarBorradores } from './features/servicios/recuperarWeb';
 import { firmadorDecision } from './features/solicitudes/decision';
 import { avanzarDominios, avisarDominiosActivos, configDominios, servirDominio } from './features/servicios/dominios';
 import { citasActivas, documentoWeb, webPorSlug } from './features/servicios/webs';
@@ -126,6 +127,19 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     }
   } catch (err) {
     console.error('Scheduled message reminder failed:', err instanceof Error ? err.message : 'error');
+  }
+
+  // Borradores del estudio guardados con correo: el enlace pedido (si falló al guardar) y los
+  // recordatorios a las 2 h, 24 h y 72 h; paran al pagar o al darse de baja (recuperarWeb.ts).
+  try {
+    const origen = ((await getSetting(db, 'store_url')) ?? '').replace(/\/+$/, '');
+    if (env.AUTH_SECRET && /^https:\/\/[^\s/]+$/.test(origen)) {
+      const email = await getEmailProvider(await getStoreSettings(db));
+      const tienda = (await getSetting(db, 'store_name')) || getConfig().storeName;
+      if (email) await recordarBorradores(db, email, origen, env.AUTH_SECRET, tienda, cuando.getTime());
+    }
+  } catch (err) {
+    console.error('Scheduled draft recovery sweep failed:', err instanceof Error ? err.message : 'error');
   }
 
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
