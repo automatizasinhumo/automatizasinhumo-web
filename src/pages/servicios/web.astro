@@ -25,6 +25,7 @@ import {
   SECCIONES_WEB,
   MAX_GALERIA_WEB,
   WEB_POR_DEFECTO,
+  DURACIONES_CITA,
 } from '../../features/servicios/webs';
 import { SECTORES_WEB } from '../../features/servicios/sectores';
 import { huellaMiniatura, miniaturaWeb } from '../../features/servicios/miniaturasWeb';
@@ -240,6 +241,12 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
                 <label class={campo}>Dirección<input name="direccion" autocomplete="street-address" maxlength="160" /></label>
               </div>
               <label class={campo}>Horario<textarea name="horario" rows="2" maxlength="300" placeholder="Lunes a viernes: 9:00 – 14:00"></textarea></label>
+              <label class={campo}>Citas en tu web <span class="ayuda">(salen las horas libres de tu horario; te llegan por correo)</span>
+                <select name="citas">
+                  <option value="">Sin citas en la web</option>
+                  {DURACIONES_CITA.filter(Boolean).map((m) => <option value={m}>Citas de {m} minutos</option>)}
+                </select>
+              </label>
               <div class="filas">
                 <label class={campo}>Zonas que atendéis <span class="ayuda">(opcional)</span><input name="zonas" maxlength="300" placeholder="Lugo, Outeiro de Rei, Rábade" /></label>
                 <label class={campo}>Enlace para reservar cita <span class="ayuda">(opcional)</span><input name="reservas" inputmode="url" maxlength="300" placeholder="booksy.com/tunegocio" /></label>

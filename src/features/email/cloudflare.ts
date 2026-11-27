@@ -8,7 +8,15 @@ export interface EmailBinding {
     subject: string;
     html?: string;
     text?: string;
+    attachments?: { filename: string; content: string; type: string; disposition: 'attachment' }[];
   }): Promise<unknown>;
+}
+
+/** El binding lee un `content` de texto como Base64: se codifican los bytes UTF-8. */
+export function base64Utf8(texto: string): string {
+  let bin = '';
+  for (const b of new TextEncoder().encode(texto)) bin += String.fromCharCode(b);
+  return btoa(bin);
 }
 
 /**
@@ -27,6 +35,9 @@ export function createCloudflareEmail(
         subject: msg.subject,
         html: msg.html,
         text: msg.text,
+        ...(msg.attachments?.length
+          ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: base64Utf8(a.content), type: a.contentType, disposition: 'attachment' as const })) }
+          : {}),
       });
     },
   };

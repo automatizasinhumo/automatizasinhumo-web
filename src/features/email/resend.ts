@@ -31,6 +31,9 @@ export function createResendEmail(
           subject: msg.subject,
           html: msg.html,
           text: msg.text,
+          ...(msg.attachments?.length
+            ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: base64(a.content), content_type: a.contentType })) }
+            : {}),
         }),
       });
       if (!res.ok) {
@@ -39,4 +42,11 @@ export function createResendEmail(
       }
     },
   };
+}
+
+/** Base64 de un texto UTF-8 (Resend recibe los adjuntos así). */
+function base64(texto: string): string {
+  let bin = '';
+  for (const b of new TextEncoder().encode(texto)) bin += String.fromCharCode(b);
+  return btoa(bin);
 }
