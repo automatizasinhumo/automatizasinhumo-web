@@ -1533,6 +1533,8 @@ export function iniciarEstudioWeb() {
     c.value = negocio;
     c.removeAttribute('aria-invalid');
     for (const e of $$<HTMLInputElement>('[data-espejo="negocio"]')) e.value = negocio;
+    // Los textos automáticos que dicen «nuestro negocio» pasan a llevar el nombre (los escritos se respetan).
+    actualizarTextos();
     persistir();
     programar(true);
   }
