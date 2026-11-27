@@ -275,7 +275,8 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
               <p class="ayuda text-sm">Copia las que ya tengas en Google, Facebook o WhatsApp, con el nombre que te dejen poner.</p>
               <div data-items></div>
               <button type="button" class="anadir" data-anadir>+ Añadir opinión</button>
-              <label class={campo}>Enlace a todas tus opiniones <span class="ayuda">(tu ficha de Google, por ejemplo)</span><input name="opinionesUrl" inputmode="url" maxlength="300" /></label>
+              <label class={campo}>Enlace a todas tus opiniones <span class="ayuda">(tu ficha de Google, por ejemplo)</span><input name="opinionesUrl" inputmode="url" maxlength="300" aria-describedby="opiniones-aviso" /></label>
+              <p id="opiniones-aviso" class="ayuda text-sm opiniones-aviso" data-opiniones-aviso role="status" hidden></p>
             </fieldset>
 
             <fieldset class="bloque" data-lista="preguntas" data-max={MAX_PREGUNTAS_WEB}>

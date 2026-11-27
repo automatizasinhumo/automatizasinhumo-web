@@ -14,8 +14,9 @@ import { euros } from './cv';
 import { protegerVista } from './protegerVista';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
+import { avisoEnlaceOpiniones, estadoEnlaceOpiniones } from './resenasCitas';
 import { CSS_MINI, datosMiniatura } from './miniaturasWeb';
-import { aspectoAlElegir, CAPA_TAL_CUAL, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
+import { aspectoAlElegir, CAPA_TAL_CUAL, citasActivas, fotoValida, galeriaValida, GUIA_WEB, MARCA_WEB, MAX_FOTO_GALERIA_WEB, MAX_FOTO_WEB, MAX_GALERIA_WEB, MAX_PREGUNTAS_WEB, ordenWeb, PASOS_WEB, pasoVecino, pasosDelCamino, esCaminoWeb, PLANTILLAS_WEB, disenoWeb, renderWeb, resolverPlantilla, siguienteVariante, validarWeb, VARIANTES_WEB, type CaminoWeb, type DatosWeb, type IdVarianteWeb } from './webs';
 
 type Lista = 'servicios' | 'enlaces' | 'opiniones' | 'preguntas' | 'carta';
 type Fila = Record<string, string>;
@@ -175,12 +176,21 @@ export function revisarWeb(d: Partial<DatosWeb>): { puntos: number; avisos: [cam
     [!!t(d.foto), '[data-foto-elegir]', 'Sin foto de portada: una foto real del negocio da confianza.', 10],
     [!!t(d.horario), '[name="horario"]', 'Falta el horario (también sale en Google).', 10],
     [!!(t(d.zonas) || t(d.direccion)), '[name="zonas"]', 'Di dónde trabajas (barrio, ciudad o zonas): así te encuentran en tu zona.', 10],
-    [(d.opiniones ?? []).some((o) => t(o.texto)), '[data-lista="opiniones"]', 'Sin opiniones: copia dos o tres reseñas de clientes.', 8],
     [!!t(d.sobre), '[name="sobre"]', 'Cuenta quiénes sois en dos frases.', 7],
+    [(d.opiniones ?? []).some((o) => t(o.texto)), '[data-lista="opiniones"]', 'Sin opiniones: copia dos o tres reseñas de clientes.', 5],
     [servicios.length === 0 || servicios.some((s) => t(s.precio)), '[data-lista="servicios"]', 'Ningún servicio tiene precio orientativo: ayuda a decidir.', 5],
     [preguntas.length > 0 && preguntas.every((p) => t(p.respuesta)), '[data-lista="preguntas"]', preguntas.length ? 'Hay preguntas sin respuesta.' : 'Responde las dudas típicas en «Preguntas frecuentes».', 5],
     [(d.galeria ?? []).length >= 3, '[data-galeria]', 'Sube al menos tres fotos a la galería.', 5],
     [!!t(d.sector), '[name="sector"]', 'Escribe a qué se dedica el negocio.', 5],
+    // Con citas, el enlace de opiniones es el que se manda a cada cliente para dejar la reseña.
+    [
+      t(d.opinionesUrl) ? estadoEnlaceOpiniones(t(d.opinionesUrl)) !== 'desconocido' : !citasActivas({ citas: d.citas ?? '', horario: d.horario ?? '' }),
+      '[name="opinionesUrl"]',
+      t(d.opinionesUrl)
+        ? 'El enlace a tus opiniones no es de una página de reseñas que reconozcamos: no podremos pedir reseñas tras las citas.'
+        : 'Tienes citas online: pon el enlace a tus opiniones de Google y pediremos reseña a cada cliente.',
+      3,
+    ],
   ];
   const fallos = reglas.filter((r) => !r[0]);
   return { puntos: 100 - fallos.reduce((n, r) => n + r[3], 0), avisos: fallos.map(([, c, a, p]) => [c, a, p]) };
@@ -301,6 +311,14 @@ export function iniciarEstudioWeb() {
       $('[data-anadir]', fs)!.hidden = $$('[data-items] > .item', fs).length >= max;
     }
   }
+  function avisarOpiniones() {
+    const a = $('[data-opiniones-aviso]');
+    if (!a) return;
+    const v = campo('opinionesUrl').value;
+    a.textContent = avisoEnlaceOpiniones(v);
+    a.hidden = !a.textContent;
+    a.dataset.estado = estadoEnlaceOpiniones(v);
+  }
   /** Sube con cada foto elegida, quitada o formulario cargado: una reducción tardía no pisa a la vigente. */
   let genFoto = 0;
   function volcar(c: Partial<Contenido>) {
@@ -313,6 +331,7 @@ export function iniciarEstudioWeb() {
       for (const fila of Array.isArray(c[l]) ? (c[l] as unknown as Fila[]) : []) anadir(l, fila);
     }
     limitar();
+    avisarOpiniones();
     const lista = $('[data-orden]')!;
     for (const id of ordenWeb(c.orden)) lista.appendChild($(`[data-seccion="${id}"]`, lista)!);
     pintarOrden();
@@ -1418,6 +1437,7 @@ export function iniciarEstudioWeb() {
       return programar();
     }
     if (c.type === 'radio' || c.type === 'file' || c.name === 'dominio' || c.name?.startsWith('titular-')) return;
+    if (c.name === 'opinionesUrl') avisarOpiniones();
     // Y al revés: si cambia el campo, su espejo del primer paso no se queda con el valor viejo.
     for (const e of $$<HTMLInputElement>(`[data-espejo="${c.name}"]`)) e.value = c.value;
     if (c.name === 'colorLibre' && COLOR.test(c.value)) {

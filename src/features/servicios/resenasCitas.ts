@@ -110,6 +110,30 @@ export function enlaceResena(raw: string): string | null {
   return null;
 }
 
+export type EstadoEnlaceOpiniones = 'vacio' | 'ok' | 'corto' | 'desconocido';
+
+/** Para el editor, sin consultar fuera: si con este enlace se podrán pedir reseñas tras las citas. */
+export function estadoEnlaceOpiniones(raw: string): EstadoEnlaceOpiniones {
+  if (!raw.trim()) return 'vacio';
+  if (enlaceResena(raw)) return 'ok';
+  const u = https(raw);
+  return u && CORTOS.has(u.hostname.toLowerCase()) ? 'corto' : 'desconocido';
+}
+
+/** Texto bajo el campo del editor; '' cuando no hay nada que decir. */
+export function avisoEnlaceOpiniones(raw: string): string {
+  switch (estadoEnlaceOpiniones(raw)) {
+    case 'ok':
+      return 'Enlace reconocido: tras cada cita pediremos la reseña con él.';
+    case 'corto':
+      return 'Enlace corto de Google: lo abriremos al pedir la primera reseña. Si puedes, usa el de «Pedir reseñas» de tu Perfil de Empresa.';
+    case 'desconocido':
+      return 'Este enlace saldrá en tu web, pero no lo reconocemos como página de opiniones (Google, Tripadvisor, Trustpilot, Yelp o Facebook): no podremos pedir reseñas tras las citas. En tu Perfil de Empresa de Google pulsa «Pedir reseñas» y copia ese enlace.';
+    default:
+      return '';
+  }
+}
+
 /** Fallo de red, tiempo agotado, 429 o 5xx: el enlace puede ser bueno; se reintenta en otro barrido. */
 export const TEMPORAL = 'temporal' as const;
 
