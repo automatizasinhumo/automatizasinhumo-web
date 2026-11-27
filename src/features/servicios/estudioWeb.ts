@@ -1522,13 +1522,17 @@ export function iniciarEstudioWeb() {
     if (st) st.textContent = 'Hemos recuperado tu web tal como la dejaste.';
   }
 
-  /** Nombre escrito en la ficha («¿Cómo se llama tu negocio?»): solo rellena un estudio vacío, nunca pisa un borrador. */
+  /**
+   * Nombre escrito en la ficha («¿Cómo se llama tu negocio?»): solo rellena un estudio vacío y sin
+   * pedido. Nunca pisa un borrador, y con un pedido en curso se deja que recuperar() traiga su web.
+   */
   function desdeFicha() {
     const negocio = tomarInicio();
     const c = campo('negocio');
-    if (!negocio || c.value.trim()) return;
+    if (!negocio || c.value.trim() || pedido.token || pedido.cargando) return;
     c.value = negocio;
     c.removeAttribute('aria-invalid');
+    for (const e of $$<HTMLInputElement>('[data-espejo="negocio"]')) e.value = negocio;
     persistir();
     programar(true);
   }

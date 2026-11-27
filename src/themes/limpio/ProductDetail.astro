@@ -4,6 +4,7 @@ import ProductCard from './ProductCard.astro';
 import { REGLA_PLAZOS } from './plazos';
 import ProductGallery from '../../features/storefront/controls/ProductGallery.astro';
 import ProductPurchaseForm from '../../features/storefront/controls/ProductPurchaseForm.astro';
+import InicioRapido from '../../features/storefront/controls/InicioRapido.astro';
 import ComparativaModalidades from '../../features/storefront/controls/ComparativaModalidades.astro';
 import StoreBreadcrumbs from '../../features/storefront/controls/StoreBreadcrumbs.astro';
 
@@ -95,21 +96,7 @@ const { model, purchase } = Astro.props;
             </ol>
             {
               model.estudioHref === '/servicios/web' ? (
-                <form action={model.estudioHref} method="get" class="mt-4" data-inicio-rapido>
-                  {/* Sin name: el nombre no viaja en la URL; con JS pasa al estudio por sessionStorage. */}
-                  <label for="inicio-negocio" class="text-sm font-semibold text-ink">¿Cómo se llama tu negocio?</label>
-                  <input
-                    id="inicio-negocio"
-                    type="text"
-                    maxlength="80"
-                    autocomplete="organization"
-                    placeholder="Ej. Peluquería Alba"
-                    class="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2 text-base text-ink"
-                    data-inicio-negocio
-                  />
-                  <button type="submit" class="boton boton-principal mt-3 w-full" data-ir-estudio>Crear mi web →</button>
-                  <p class="mt-2 text-center text-xs text-muted">Vista previa gratis · Sin registro · Publicación al momento: {model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice}</p>
-                </form>
+                <InicioRapido href={model.estudioHref} precio={model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice} />
               ) : (
                 <a href={model.estudioHref} class="boton boton-principal mt-4 w-full" data-ir-estudio>Empezar ahora →</a>
               )
@@ -395,16 +382,4 @@ const { model, purchase } = Astro.props;
     });
     zonas.forEach((z) => obs.observe(z));
   }
-</script>
-
-<script>
-  import { guardarInicio } from '../../features/servicios/inicioRapido';
-  document.querySelector<HTMLFormElement>('[data-inicio-rapido]')?.addEventListener('submit', (ev) => {
-    const form = ev.currentTarget as HTMLFormElement;
-    const negocio = form.querySelector<HTMLInputElement>('[data-inicio-negocio]')?.value ?? '';
-    guardarInicio(negocio);
-    // Navegación propia: un GET sin campos dejaría «?» suelto en la dirección del estudio.
-    ev.preventDefault();
-    location.assign(form.action);
-  });
 </script>
