@@ -826,6 +826,55 @@
     accent-color: var(--color-brand);
   }
 
+  /* Guardar y seguir luego (guardarLuego.ts). */
+  .guardar-luego {
+    position: relative;
+    display: grid;
+    gap: var(--ds-hueco-2);
+    margin-top: var(--ds-hueco-4);
+    padding: var(--ds-hueco-4);
+    border: 1px solid var(--color-line);
+    border-radius: var(--ds-radio-tarjeta);
+    background: var(--color-surface, #fff);
+  }
+  .guardar-luego[hidden] {
+    display: none;
+  }
+  .guardar-campo {
+    display: grid;
+    gap: var(--ds-hueco-1, 0.25rem);
+    font-size: var(--ds-texto-small);
+  }
+  .guardar-campo input {
+    min-height: 2.75rem;
+    padding: 0 var(--ds-hueco-2);
+    border: 1px solid var(--color-line);
+    border-radius: calc(var(--ds-radio-tarjeta) - 0.5rem);
+    font: inherit;
+  }
+  .guardar-avisos {
+    display: flex;
+    gap: var(--ds-hueco-2);
+    align-items: flex-start;
+    font-size: var(--ds-texto-small);
+    color: var(--color-muted);
+  }
+  .guardar-avisos input {
+    margin-top: 0.2rem;
+  }
+  .guardar-cerrar {
+    position: absolute;
+    top: var(--ds-hueco-1, 0.25rem);
+    right: var(--ds-hueco-1, 0.25rem);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 0;
+    background: none;
+    font-size: 1.25rem;
+    color: var(--color-faint);
+    cursor: pointer;
+  }
+
   /* Vista previa. */
   .vista-estado {
     min-height: 1.25rem;

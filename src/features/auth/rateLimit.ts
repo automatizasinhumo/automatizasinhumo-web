@@ -23,6 +23,7 @@ export function rateLimitBucket(
     pathname.startsWith('/pay/') ||
     pathname === '/api/solicitudes' ||
     pathname === '/api/web/vista' ||
+    pathname === '/api/web/borrador' ||
     /^\/w\/[^/]+\/(mensaje|reservas(\/anular)?)\/?$/.test(pathname)
   ) {
     return 'checkout';
