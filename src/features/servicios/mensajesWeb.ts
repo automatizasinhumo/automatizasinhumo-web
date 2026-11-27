@@ -134,8 +134,8 @@ export function numeroWhatsApp(telefono: string): string | null {
 }
 
 /** Botones para contestar desde el panel, con el texto ya empezado. */
-export function respuestasMensaje(m: Mensaje, negocio: string): Respuesta[] {
-  const saludo = `Hola${m.nombre ? ` ${m.nombre}` : ''}, gracias por escribir${negocio ? ` a ${negocio}` : ''}. `;
+export function respuestasMensaje(m: Mensaje, negocio: string, texto?: string): Respuesta[] {
+  const saludo = texto ?? `Hola${m.nombre ? ` ${m.nombre}` : ''}, gracias por escribir${negocio ? ` a ${negocio}` : ''}. `;
   if (EMAIL.test(m.contacto)) {
     const cita = m.texto.split('\n').map((l) => `> ${l}`).join('\n');
     const q = `subject=${encodeURIComponent(`Re: tu mensaje${negocio ? ` a ${negocio}` : ''}`)}&body=${encodeURIComponent(`${saludo}\n\n\n${cita}`)}`;
@@ -152,18 +152,23 @@ export interface MensajeCliente extends Mensaje {
   id: string;
   slug: string;
   creado: string;
+  /** nuevo | contestado | ganado | perdido (seguimientoMensajes.ts). */
+  estado: string;
+  /** El sector de la web, para las respuestas guardadas. */
+  sector: string;
 }
 
 /** Últimos mensajes de las webs del cliente, para su área (/account). */
 export async function mensajesDeCliente(db: D1Database, email: string, limite = 30): Promise<MensajeCliente[]> {
   const { results } = await db
     .prepare(
-      `SELECT m.id, m.slug, m.nombre, m.contacto, m.texto, m.creado
+      `SELECT m.id, m.slug, m.nombre, m.contacto, m.texto, m.creado, m.estado,
+              COALESCE(json_extract(p.datos, '$.sector'), '') AS sector
          FROM webs_mensajes m
          JOIN paginas_publicadas p ON p.tipo = 'web' AND p.slug = m.slug
          JOIN orders o ON o.public_id = p.pedido_public_id
         WHERE o.email = ?
-        ORDER BY m.creado DESC LIMIT ?`,
+        ORDER BY m.estado = 'nuevo' DESC, m.creado DESC LIMIT ?`,
     )
     .bind(email, limite)
     .all<MensajeCliente>();

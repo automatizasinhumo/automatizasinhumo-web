@@ -15,6 +15,7 @@ import { avanzarDominios, avisarDominiosActivos, configDominios, servirDominio }
 import { citasActivas, documentoWeb, webPorSlug } from './features/servicios/webs';
 import { formularioWeb } from './features/servicios/mensajesWeb';
 import { pedirResenas } from './features/servicios/resenasCitas';
+import { recordarMensajes } from './features/servicios/seguimientoMensajes';
 
 /**
  * Worker entrypoint.
@@ -113,6 +114,18 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     if (email) await avisarDominiosActivos(db, ({ para, dominio }) => email.send(correoDominioActivo(para, dominio)).then(() => undefined));
   } catch (err) {
     console.error('Scheduled domain sweep failed:', err instanceof Error ? err.message : 'error');
+  }
+
+  // Mensajes de las webs sin contestar tras 2 h: un solo recordatorio al dueño (9 a 21, Madrid).
+  try {
+    const origen = await getSetting(db, 'store_url');
+    const email = origen ? await getEmailProvider(await getStoreSettings(db)) : null;
+    if (origen && email) {
+      const tienda = (await getSetting(db, 'store_name')) || getConfig().storeName;
+      await recordarMensajes(db, (m) => email.send(m), new URL('/account', origen).href, tienda, cuando.getTime());
+    }
+  } catch (err) {
+    console.error('Scheduled message reminder failed:', err instanceof Error ? err.message : 'error');
   }
 
   // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.

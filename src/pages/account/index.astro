@@ -12,6 +12,7 @@ import Pagination from '../../components/Pagination.astro';
 import { catalogPath } from '../../features/settings/home';
 import { NOMBRE_TIPO, paginasDeCliente } from '../../features/servicios/panelCliente';
 import { mensajesDeCliente, respuestasMensaje } from '../../features/servicios/mensajesWeb';
+import { duracionLegible, NOMBRE_ESTADO, resumenMensajes, respuestasGuardadas, type EstadoMensaje } from '../../features/servicios/seguimientoMensajes';
 import { citasDeCliente, diaYHora, selloCita } from '../../features/servicios/citasWeb';
 
 if (!(await accountsEnabled())) return Astro.redirect('/', 303);
@@ -50,6 +51,19 @@ const mensajes = paginas.some((p) => p.tipo === 'web')
       return [];
     })
   : [];
+// Cifras de 30 días encima de los mensajes: si fallan, los mensajes salen igual.
+const resumen = mensajes.length
+  ? await resumenMensajes(env.DB, email).catch((e) => {
+      console.error('Panel: no se pudo calcular el resumen de mensajes', e);
+      return null;
+    })
+  : null;
+const OTROS_ESTADOS: Record<EstadoMensaje, [EstadoMensaje, string][]> = {
+  nuevo: [['contestado', 'Ya le he contestado'], ['ganado', 'Cliente ganado'], ['perdido', 'No salió']],
+  contestado: [['ganado', 'Cliente ganado'], ['perdido', 'No salió']],
+  ganado: [['contestado', 'Deshacer']],
+  perdido: [['contestado', 'Deshacer']],
+};
 // Próximas citas pedidas desde sus webs (citasWeb.ts), con el mismo enlace firmado para anular.
 let errorCitas = false;
 const citas = paginas.some((p) => p.tipo === 'web')
@@ -130,6 +144,14 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
       paginas.some((p) => p.tipo === 'web') && (
         <section class="mb-10" aria-labelledby="tus-mensajes">
           <h2 id="tus-mensajes" class="mb-3 font-serif text-2xl tracking-tight">Mensajes de tu web</h2>
+          {resumen && resumen.mensajes > 0 && (
+            <p class="mb-3 text-sm text-muted" data-resumen-mensajes>
+              <span class="tabular-nums font-medium text-ink">{miles.format(resumen.mensajes)}</span> en 30 días
+              {resumen.sinContestar > 0 && <> · <span class="tabular-nums font-medium text-ink">{miles.format(resumen.sinContestar)}</span> sin contestar</>}
+              {resumen.minutosRespuesta !== null && <> · contestas en <span class="font-medium text-ink">{duracionLegible(resumen.minutosRespuesta)}</span> de media</>}
+              {resumen.ganados > 0 && <> · <span class="tabular-nums font-medium text-ink">{miles.format(resumen.ganados)}</span> {resumen.ganados === 1 ? 'cliente ganado' : 'clientes ganados'}</>}
+            </p>
+          )}
           {errorMensajes ? (
             <p class="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted" role="alert" data-error-mensajes>
               No se han podido cargar tus mensajes ahora mismo. Recarga la página en un rato; también te llegan por correo.
@@ -142,23 +164,57 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
             <ul class="grid gap-3">
               {mensajes.map((m) => {
                 const correo = /@/.test(m.contacto);
+                const estado = (m.estado in NOMBRE_ESTADO ? m.estado : 'nuevo') as EstadoMensaje;
+                const negocio = negocioWeb.get(m.slug) ?? '';
+                const canal = (t: string) => respuestasMensaje(m, negocio, t).find((r) => r.tipo !== 'llamar');
                 return (
-                  <li class="rounded-lg border border-line bg-surface p-4 text-sm" data-mensaje>
+                  <li id={`m-${m.id}`} class="rounded-lg border border-line bg-surface p-4 text-sm" data-mensaje={m.id} data-estado={estado}>
                     <div class="flex flex-wrap items-baseline justify-between gap-2">
-                      <strong class="text-base text-ink">{m.nombre || 'Sin nombre'}</strong>
+                      <span>
+                        <strong class="text-base text-ink">{m.nombre || 'Sin nombre'}</strong>
+                        <span class:list={['ml-2 rounded px-2 py-0.5 text-xs font-medium', estado === 'nuevo' ? 'bg-accent text-white' : 'border border-line text-muted']} data-estado-etiqueta>
+                          {NOMBRE_ESTADO[estado]}
+                        </span>
+                      </span>
                       <span class="text-xs text-faint">{formatDate(m.creado, undefined, timeZone)}{nombreWeb.size > 1 && ` · ${nombreWeb.get(m.slug) ?? ''}`}</span>
                     </div>
-                    <a href={correo ? `mailto:${encodeURIComponent(m.contacto).replace(/%40/g, '@')}` : `tel:${m.contacto.replace(/[^\d+]/g, '')}`} class="mt-1 inline-flex min-h-11 items-center break-all font-medium text-accent">
+                    <a href={correo ? `mailto:${encodeURIComponent(m.contacto).replace(/%40/g, '@')}` : `tel:${m.contacto.replace(/[^\d+]/g, '')}`} class="mt-1 inline-flex min-h-11 items-center break-all font-medium text-accent" data-respuesta="contacto">
                       {m.contacto}
                     </a>
                     <p class="mt-1 whitespace-pre-line text-ink">{m.texto}</p>
                     <div class="mt-3 flex flex-wrap gap-2" data-responder>
-                      {respuestasMensaje(m, negocioWeb.get(m.slug) ?? '').map((r) => (
+                      {respuestasMensaje(m, negocio).map((r) => (
                         <a href={r.href} {...(r.tipo === 'whatsapp' ? { target: '_blank', rel: 'noopener' } : {})} class="inline-flex min-h-11 items-center rounded-md border border-line px-4 font-medium text-ink" data-respuesta={r.tipo}>
                           {r.etiqueta}
                         </a>
                       ))}
                     </div>
+                    {canal('') && (
+                      <details class="mt-3" data-guardadas>
+                        <summary class="inline-flex min-h-11 cursor-pointer items-center font-medium text-accent">Respuestas guardadas</summary>
+                        <ul class="mt-2 grid gap-2">
+                          {respuestasGuardadas(m, negocio, m.sector).map((t) => {
+                            const r = canal(t)!;
+                            return (
+                              <li class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line p-3">
+                                <span class="text-ink">{t}</span>
+                                <a href={r.href} {...(r.tipo === 'whatsapp' ? { target: '_blank', rel: 'noopener' } : {})} class="inline-flex min-h-11 items-center font-medium text-accent" data-respuesta={r.tipo}>
+                                  {r.tipo === 'whatsapp' ? 'Enviar por WhatsApp' : 'Enviar por correo'}
+                                </a>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </details>
+                    )}
+                    <form method="post" action="/account/mensajes" class="mt-3 flex flex-wrap gap-2" data-estados>
+                      <input type="hidden" name="id" value={m.id} />
+                      {OTROS_ESTADOS[estado].map(([e, etiqueta]) => (
+                        <button name="estado" value={e} class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-muted underline-offset-2 hover:underline">
+                          {etiqueta}
+                        </button>
+                      ))}
+                    </form>
                   </li>
                 );
               })}
@@ -242,3 +298,17 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
     <Pagination page={page} totalPages={totalPages} hrefFor={hrefFor} />
   </div>
 </Layout>
+
+<script>
+  // Al pulsar responder (correo, WhatsApp, llamar), el mensaje pasa a «contestado» solo.
+  document.addEventListener('click', (ev) => {
+    const a = (ev.target as Element | null)?.closest<HTMLAnchorElement>('[data-mensaje] [data-respuesta]');
+    const li = a?.closest<HTMLElement>('[data-mensaje]');
+    if (!a || !li || li.dataset.estado !== 'nuevo') return;
+    const f = new FormData();
+    f.set('id', li.dataset.mensaje!);
+    f.set('estado', 'contestado');
+    f.set('beacon', '1');
+    if (navigator.sendBeacon?.('/account/mensajes', f)) li.dataset.estado = 'contestado';
+  });
+</script>
