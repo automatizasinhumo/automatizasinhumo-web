@@ -11,6 +11,7 @@ import { paginate, queryHref } from '../../pagination';
 import Pagination from '../../components/Pagination.astro';
 import { catalogPath } from '../../features/settings/home';
 import { NOMBRE_TIPO, paginasDeCliente } from '../../features/servicios/panelCliente';
+import { mensajesDeCliente } from '../../features/servicios/mensajesWeb';
 
 if (!(await accountsEnabled())) return Astro.redirect('/', 303);
 const email = await getCustomerEmail(Astro.cookies);
@@ -39,6 +40,16 @@ const paginas = await paginasDeCliente(env.DB, email).catch((e) => {
   console.error('Panel: no se pudieron leer las páginas', e);
   return [];
 });
+// Lo que le han escrito desde el formulario de sus webs (mensajesWeb.ts).
+let errorMensajes = false;
+const mensajes = paginas.some((p) => p.tipo === 'web')
+  ? await mensajesDeCliente(env.DB, email).catch((e) => {
+      console.error('Panel: no se pudieron leer los mensajes', e);
+      errorMensajes = true;
+      return [];
+    })
+  : [];
+const nombreWeb = new Map(paginas.filter((p) => p.tipo === 'web').map((p) => [p.slug, p.nombre ?? NOMBRE_TIPO.web]));
 const ESTADO: Record<string, string> = { paid: 'Pagado', pending: 'Pendiente', refunded: 'Reembolsado' };
 const miles = new Intl.NumberFormat('es-ES');
 // The catalog is at / until the home page is pointed elsewhere.
@@ -87,6 +98,41 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
               );
             })}
           </ul>
+        </section>
+      )
+    }
+
+    {
+      paginas.some((p) => p.tipo === 'web') && (
+        <section class="mb-10" aria-labelledby="tus-mensajes">
+          <h2 id="tus-mensajes" class="mb-3 font-serif text-2xl tracking-tight">Mensajes de tu web</h2>
+          {errorMensajes ? (
+            <p class="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted" role="alert" data-error-mensajes>
+              No se han podido cargar tus mensajes ahora mismo. Recarga la página en un rato; también te llegan por correo.
+            </p>
+          ) : mensajes.length === 0 ? (
+            <p class="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted" data-sin-mensajes>
+              Aún no te han escrito. Cuando alguien use el formulario de tu web, el mensaje saldrá aquí y te llegará por correo.
+            </p>
+          ) : (
+            <ul class="grid gap-3">
+              {mensajes.map((m) => {
+                const correo = /@/.test(m.contacto);
+                return (
+                  <li class="rounded-lg border border-line bg-surface p-4 text-sm" data-mensaje>
+                    <div class="flex flex-wrap items-baseline justify-between gap-2">
+                      <strong class="text-base text-ink">{m.nombre || 'Sin nombre'}</strong>
+                      <span class="text-xs text-faint">{formatDate(m.creado, undefined, timeZone)}{nombreWeb.size > 1 && ` · ${nombreWeb.get(m.slug) ?? ''}`}</span>
+                    </div>
+                    <a href={correo ? `mailto:${encodeURIComponent(m.contacto).replace(/%40/g, '@')}` : `tel:${m.contacto.replace(/[^\d+]/g, '')}`} class="mt-1 inline-flex min-h-11 items-center break-all font-medium text-accent">
+                      {m.contacto}
+                    </a>
+                    <p class="mt-1 whitespace-pre-line text-ink">{m.texto}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
       )
     }

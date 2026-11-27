@@ -12,6 +12,14 @@ function hasFormContentType(contentType: string | null): boolean {
   return FORM_CONTENT_TYPES.some((type) => value.includes(type));
 }
 
+/**
+ * Formulario de contacto de una web publicada: puede llegar desde el dominio propio del
+ * cliente (otro origen) y no usa la sesión; lo protegen su sello firmado y el límite por IP.
+ */
+function isWebMessagePath(pathname: string): boolean {
+  return /^\/w\/[^/]+\/mensaje\/?$/.test(pathname);
+}
+
 function isCapabilityPayPath(pathname: string): boolean {
   if (!pathname.startsWith('/pay/')) return false;
   const token = pathname.slice('/pay/'.length);
@@ -34,5 +42,5 @@ export function isForbiddenFormOrigin(request: Request, url: URL): boolean {
   if (!hasFormContentType(request.headers.get('content-type'))) return false;
   if (originMatches) return false;
 
-  return !(request.method === 'POST' && isCapabilityPayPath(url.pathname));
+  return !(request.method === 'POST' && (isCapabilityPayPath(url.pathname) || isWebMessagePath(url.pathname)));
 }
