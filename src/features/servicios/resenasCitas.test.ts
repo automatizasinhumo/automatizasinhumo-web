@@ -149,4 +149,18 @@ describe('pedirResenas', () => {
     expect(await pedirResenas(db, { send }, 'T', AHORA + 15 * 60_000, 20, ok)).toBe(1);
     expect(estado('espera')).toBe('enviada');
   });
+
+  it('las citas de una web con Google caído no tapan a las demás; el tope cuenta envíos', async () => {
+    const { db, web, cita, estado } = base();
+    const caida = web('https://maps.app.goo.gl/caida');
+    for (let i = 0; i < 5; i++) cita(`c${i}`, AHORA - 6 * DIA + i, caida);
+    cita('buena1', AHORA - 5 * DIA, web(G_PAGE));
+    cita('buena2', AHORA - 5 * DIA + 1, web(G_PAGE));
+    cita('buena3', AHORA - 5 * DIA + 2, web(G_PAGE));
+    const f = vi.fn().mockResolvedValue(new Response(null, { status: 503 }));
+    const send = vi.fn(async () => undefined);
+    expect(await pedirResenas(db, { send }, 'T', AHORA, 2, f)).toBe(2);
+    expect(f).toHaveBeenCalledTimes(1);
+    expect([estado('c0'), estado('buena1'), estado('buena2'), estado('buena3')]).toEqual(['pendiente', 'enviada', 'enviada', 'pendiente']);
+  });
 });

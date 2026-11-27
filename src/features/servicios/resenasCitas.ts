@@ -183,6 +183,9 @@ const marcar = (db: D1Database, id: string, de: string, a: string, cuando: strin
  * de opiniones (las de webs sin enlace siguen pendientes: si el negocio lo añade dentro de la
  * ventana, aún se piden). Devuelve cuántos correos salieron.
  */
+/** Filas leídas por cada envío permitido en un barrido (los enlaces se resuelven una vez por barrido). */
+const LECTURA_POR_ENVIO = 10;
+
 export async function pedirResenas(
   db: D1Database,
   emailer: Pick<EmailProvider, 'send'>,
@@ -202,11 +205,15 @@ export async function pedirResenas(
          AND json_valid(p.datos) AND TRIM(COALESCE(json_extract(p.datos, '$.opinionesUrl'), '')) <> ''
        ORDER BY c.fin LIMIT ?`,
     )
-    .bind(desde, hasta, limite)
+    // Se leen más filas que envíos: las que se saltan (enlace caído un rato, omitidas) no
+    // pueden ocupar el lote entero y dejar sin petición a las webs que sí funcionan.
+    .bind(desde, hasta, limite * LECTURA_POR_ENVIO)
     .all<Candidata>();
   let enviadas = 0;
+  let intentos = 0;
   const resueltos = new Map<string, string | null | typeof TEMPORAL>();
   for (const row of results) {
+    if (intentos >= limite) break;
     let d: { negocio?: unknown; opinionesUrl?: unknown } = {};
     try {
       d = JSON.parse(row.datos);
@@ -227,6 +234,7 @@ export async function pedirResenas(
     }
     const claim = await marcar(db, row.id, 'pendiente', 'reclamada', sello);
     if ((claim.meta?.changes ?? 0) !== 1) continue;
+    intentos++;
     const negocio = typeof d.negocio === 'string' && d.negocio.trim() ? d.negocio.trim() : tienda;
     try {
       await emailer.send(correoResena(row, negocio, enlace, tienda));
