@@ -8,6 +8,7 @@ export interface EmailBinding {
     subject: string;
     html?: string;
     text?: string;
+    replyTo?: string;
     attachments?: { filename: string; content: string; type: string; disposition: 'attachment' }[];
   }): Promise<unknown>;
 }
@@ -35,6 +36,7 @@ export function createCloudflareEmail(
         subject: msg.subject,
         html: msg.html,
         text: msg.text,
+        ...(msg.replyTo ? { replyTo: msg.replyTo } : {}),
         ...(msg.attachments?.length
           ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: base64Utf8(a.content), type: a.contentType, disposition: 'attachment' as const })) }
           : {}),

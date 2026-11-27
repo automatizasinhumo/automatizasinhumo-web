@@ -17,6 +17,8 @@ export interface EmailMessage {
    * notices) need not invent one.
    */
   idempotencyKey?: string;
+  /** A quién va la respuesta (Reply-To): p. ej. la persona que escribió desde la web del cliente. */
+  replyTo?: string;
   /** Adjuntos de texto (p. ej. la cita en .ics). Quien envía debe aguantar que el proveedor los rechace. */
   attachments?: EmailAttachment[];
 }
