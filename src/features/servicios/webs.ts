@@ -609,9 +609,9 @@ function formularioContacto(f: OpcionesWeb['formulario']): string {
   return `<form class="w-form" method="post" action="${esc(f.accion)}" accept-charset="utf-8">
 <p class="w-form-titulo">O escríbenos aquí y te respondemos</p>
 <input type="hidden" name="sello" value="${esc(f.sello)}">
-<div class="w-form-trampa" aria-hidden="true"><label>No rellenar <input name="${CAMPO_TRAMPA}" tabindex="-1" autocomplete="off"></label></div>
-<label class="w-campo"><span>Nombre</span><input name="nombre" autocomplete="name" maxlength="100"></label>
-<label class="w-campo"><span>Email o teléfono</span><input name="contacto" required autocomplete="email" maxlength="254"></label>
+<div class="w-form-trampa" aria-hidden="true"><label>No rellenar <input type="text" name="${CAMPO_TRAMPA}" tabindex="-1" autocomplete="off"></label></div>
+<label class="w-campo"><span>Nombre</span><input type="text" name="nombre" autocomplete="name" maxlength="100"></label>
+<label class="w-campo"><span>Email o teléfono</span><input type="text" name="contacto" required autocomplete="email" maxlength="254"></label>
 <label class="w-campo w-campo-ancho"><span>Mensaje</span><textarea name="mensaje" required minlength="5" maxlength="2000" rows="4"></textarea></label>
 <button class="w-boton w-boton-lleno" type="submit">Enviar mensaje</button>
 </form>`;
@@ -629,6 +629,8 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   const capa = resolverCapa(d, diseno?.capa);
   const rel = (href: string) => (href.startsWith('http') ? ' rel="noopener"' : '');
   const tel = d.telefono ? `tel:${digitos(d.telefono)}` : '';
+  // El número a la vista no se parte entre dos líneas en el móvil.
+  const telTexto = d.telefono.replace(/ /g, ' ');
   // El primero es el botón principal (relleno): reservar, si hay enlace; si no, WhatsApp, llamar o correo.
   // Los textos dependen del sector: un bar reserva mesa; un fontanero pide presupuesto.
   const textos = accionesDeSector(d.sector);
@@ -659,7 +661,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
       : `<li><div class="w-dato">${icono(ico)}<span><small>${esc(titulo)}</small>${conSaltos(valor)}</span></div></li>`;
   // Horario y zonas solo van como fila si la plantilla no les da sección propia.
   const filasContacto = [
-    d.telefono && dato('tel', 'Teléfono', d.telefono, tel),
+    d.telefono && dato('tel', 'Teléfono', telTexto, tel),
     d.whatsapp && dato('wa', 'WhatsApp', d.whatsapp, enlaceWhatsapp(d.whatsapp)),
     d.email && dato('mail', 'Correo', d.email, `mailto:${d.email}`),
     d.direccion && dato('mapa', 'Dirección', d.direccion, enlaceMapa(d.direccion)),
@@ -669,7 +671,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   ].filter(Boolean);
   // El dato más útil a la vista, en grande: teléfono, si no WhatsApp, si no correo.
   const grande = d.telefono
-    ? `<a href="${esc(tel)}">${esc(d.telefono)}</a>`
+    ? `<a href="${esc(tel)}">${esc(telTexto)}</a>`
     : d.whatsapp
       ? `<a href="${esc(enlaceWhatsapp(d.whatsapp))}" rel="noopener">${esc(d.whatsapp)}</a>`
       : `<a href="${esc(`mailto:${d.email}`)}">${esc(d.email)}</a>`;
@@ -727,7 +729,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
       `<div class="w-contacto-bloque w-c-${v('contacto')}"><div class="w-contacto-cta"><p class="w-contacto-grande">${grande}</p>${bloqueAcciones}</div><ul class="w-contacto">${filasContacto.join('')}</ul></div>${formularioContacto(o.formulario)}`,
     ),
     zonas: conExtra.zonas ? seccion('zonas', titulo('zonas'), `<ul class="w-zonas">${zonas.map((z) => `<li>${esc(z)}</li>`).join('')}</ul>`) : '',
-    horario: conExtra.horario ? seccion('horario', titulo('horario'), `<table class="w-horario">${tabla}</table>`) : '',
+    horario: conExtra.horario ? seccion('horario', titulo('horario'), `<table class="w-horario"><tbody>${tabla}</tbody></table>`) : '',
     franja: conExtra.franja
       ? `<aside class="w-franja" aria-label="Contactar"><div class="w-in"><p>${textoFranja[listaAcciones[0]![1]]}</p>${bloqueAcciones}</div></aside>`
       : '',
@@ -752,6 +754,7 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
       bloqueAcciones,
       principal: listaAcciones[0],
       tel,
+      telTexto,
       grande,
       zonas,
       horario,

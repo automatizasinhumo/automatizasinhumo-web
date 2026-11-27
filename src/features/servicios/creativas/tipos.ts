@@ -21,6 +21,8 @@ export interface ContextoDiseno {
   principal?: readonly [string, IconoWeb, string];
   /** Enlace `tel:` (vacío sin teléfono). */
   tel: string;
+  /** Teléfono para mostrar, con espacios que no parten la línea. */
+  telTexto: string;
   /** El dato de contacto más útil, ya como enlace. */
   grande: string;
   zonas: string[];

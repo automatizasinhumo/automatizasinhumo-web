@@ -74,7 +74,7 @@ export const brillo: Diseno = {
     const datos = [
       c.zonas.length ? `<li>${c.icono('zona')}<span>${c.zonas.map((z) => esc(z)).join(', ')}</span></li>` : '',
       primera ? `<li>${c.icono('reloj')}<span>${esc(primera[0] || 'Horario')}: ${esc(primera[1])}</span></li>` : '',
-      c.tel ? `<li>${c.icono('tel')}<a href="${esc(c.tel)}">${esc(d.telefono)}</a></li>` : '',
+      c.tel ? `<li>${c.icono('tel')}<a href="${esc(c.tel)}">${esc(c.telTexto)}</a></li>` : '',
     ].join('');
     const franja = datos ? `<div class="w-franja-datos"><ul class="w-in">${datos}</ul></div>` : '';
     return `<header class="w-cab w-cab-brillo${c.foto ? '' : ' w-sin-foto'}"><div class="w-in w-cab-in"><div class="w-cab-txt">
