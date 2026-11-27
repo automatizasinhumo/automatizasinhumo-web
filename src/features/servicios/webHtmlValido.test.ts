@@ -38,6 +38,9 @@ async function errores(html: string): Promise<string[]> {
   return r.results.flatMap((x) => x.messages.map((m) => `${m.ruleId}: ${m.message} (${m.selector ?? `${m.line}:${m.column}`})`));
 }
 
+/** PNG de 1×1: basta para que se pinten la portada y la galería. */
+const FOTO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 function datos(x: Record<string, unknown>): DatosWeb {
   const r = validarWeb(x);
   if (!r.ok) throw new Error(r.error);
@@ -49,9 +52,10 @@ describe('HTML de las webs publicadas', () => {
     it(`${p.id}: válido y accesible`, async () => {
       const minima = datos({ negocio: 'Reparaciones Gil', telefono: '600 123 456', plantilla: p.id });
       const ejemplo: DatosWeb = { ...EJEMPLO_WEB, plantilla: p.id as DatosWeb['plantilla'] };
+      const conFotos: DatosWeb = { ...ejemplo, foto: FOTO, galeria: [FOTO, FOTO] };
       const muestra: DatosWeb = { ...ejemplo, ...(disenoWeb(p.id)?.muestra ?? {}) };
       expect(await errores(documentoWeb(minima, URL, TIENDA)), 'mínima').toEqual([]);
-      expect(await errores(documentoWeb(ejemplo, URL, TIENDA, `${URL}/foto`, `${URL}/galeria/`)), 'ejemplo con foto y galería').toEqual([]);
+      expect(await errores(documentoWeb(conFotos, URL, TIENDA, `${URL}/foto`, `${URL}/galeria/`)), 'ejemplo con foto y galería').toEqual([]);
       expect(await errores(documentoWeb(muestra, URL, TIENDA)), 'muestra del diseño').toEqual([]);
       const formulario = { accion: '/w/ejemplo/mensaje', sello: 'sello.de.prueba' };
       expect(await errores(documentoWeb(ejemplo, URL, TIENDA, '', '', formulario)), 'con formulario de contacto').toEqual([]);
