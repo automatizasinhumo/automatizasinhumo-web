@@ -185,7 +185,7 @@ export function revisarWeb(d: Partial<DatosWeb>): { puntos: number; avisos: [cam
     // Con citas, el enlace de opiniones es el que se manda a cada cliente para dejar la reseña.
     [
       t(d.opinionesUrl) ? estadoEnlaceOpiniones(t(d.opinionesUrl)) !== 'desconocido' : !citasActivas({ citas: d.citas ?? '', horario: d.horario ?? '' }),
-      '[data-lista="opiniones"]',
+      '[name="opinionesUrl"]',
       t(d.opinionesUrl)
         ? 'El enlace a tus opiniones no es de una página de reseñas que reconozcamos: no podremos pedir reseñas tras las citas.'
         : 'Tienes citas online: pon el enlace a tus opiniones de Google y pediremos reseña a cada cliente.',
