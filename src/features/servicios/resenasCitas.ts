@@ -110,8 +110,12 @@ export function enlaceResena(raw: string): string | null {
   return null;
 }
 
-/** Sigue hasta cinco redirecciones HTTPS de un enlace corto de Google, sin salir de Google. */
-export async function resolverCorto(raw: string, f: typeof fetch = fetch): Promise<string | null> {
+/** Fallo de red, tiempo agotado, 429 o 5xx: el enlace puede ser bueno; se reintenta en otro barrido. */
+export const TEMPORAL = 'temporal' as const;
+
+/** Sigue hasta cinco redirecciones HTTPS de un enlace corto de Google, sin salir de Google.
+ *  null = enlace que no lleva a una página de opiniones; TEMPORAL = no se ha podido saber ahora. */
+export async function resolverCorto(raw: string, f: typeof fetch = fetch): Promise<string | null | typeof TEMPORAL> {
   let actual = https(raw);
   if (!actual || !CORTOS.has(actual.hostname.toLowerCase())) return null;
   for (let i = 0; i < 5; i++) {
@@ -119,8 +123,9 @@ export async function resolverCorto(raw: string, f: typeof fetch = fetch): Promi
     try {
       r = await f(actual.toString(), { redirect: 'manual', signal: AbortSignal.timeout(5000) });
     } catch {
-      return null;
+      return TEMPORAL;
     }
+    if (r.status === 429 || r.status >= 500) return TEMPORAL;
     const loc = [301, 302, 303, 307, 308].includes(r.status) ? r.headers.get('location') : null;
     if (!loc) return null;
     let sig: URL;
@@ -200,7 +205,7 @@ export async function pedirResenas(
     .bind(desde, hasta, limite)
     .all<Candidata>();
   let enviadas = 0;
-  const resueltos = new Map<string, string | null>();
+  const resueltos = new Map<string, string | null | typeof TEMPORAL>();
   for (const row of results) {
     let d: { negocio?: unknown; opinionesUrl?: unknown } = {};
     try {
@@ -214,6 +219,8 @@ export async function pedirResenas(
       enlace = raw ? (enlaceResena(raw) ?? (await resolverCorto(raw, f))) : null;
       resueltos.set(raw, enlace);
     }
+    // Sin poder resolverlo ahora la cita sigue pendiente: un tiempo agotado no le quita la petición.
+    if (enlace === TEMPORAL) continue;
     if (!enlace) {
       await marcar(db, row.id, 'pendiente', 'omitida', sello);
       continue;

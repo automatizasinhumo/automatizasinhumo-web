@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { d1 } from './d1Prueba';
-import { correoResena, enlaceResena, pedirResenas, placeIdDeFeature, resolverCorto } from './resenasCitas';
+import { correoResena, enlaceResena, pedirResenas, placeIdDeFeature, resolverCorto, TEMPORAL } from './resenasCitas';
 
 const MIGRACIONES = ['0048_paginas_publicadas.sql', '0051_paginas_versiones.sql', '0055_citas_web.sql', '0056_citas_resena.sql'];
 const HORA = 3_600_000;
@@ -65,7 +65,11 @@ describe('resolverCorto', () => {
     const fuera = vi.fn().mockResolvedValue(new Response(null, { status: 302, headers: { location: 'https://evil.example/maps' } }));
     expect(await resolverCorto('https://maps.app.goo.gl/abc', fuera)).toBeNull();
     const roto = vi.fn().mockRejectedValue(new Error('red'));
-    expect(await resolverCorto('https://maps.app.goo.gl/abc', roto)).toBeNull();
+    expect(await resolverCorto('https://maps.app.goo.gl/abc', roto)).toBe(TEMPORAL);
+    const caido = vi.fn().mockResolvedValue(new Response(null, { status: 503 }));
+    expect(await resolverCorto('https://maps.app.goo.gl/abc', caido)).toBe(TEMPORAL);
+    const sinRedireccion = vi.fn().mockResolvedValue(new Response(null, { status: 404 }));
+    expect(await resolverCorto('https://maps.app.goo.gl/abc', sinRedireccion)).toBeNull();
   });
 });
 
@@ -132,5 +136,17 @@ describe('pedirResenas', () => {
     expect(await pedirResenas(db, { send }, 'T', AHORA, 20, f)).toBe(2);
     expect(f).toHaveBeenCalledTimes(1);
     expect([estado('sin'), estado('mala'), estado('corto1'), estado('corto2')]).toEqual(['pendiente', 'omitida', 'enviada', 'enviada']);
+  });
+
+  it('si Google no responde, la cita sigue pendiente y sale en el barrido siguiente', async () => {
+    const { db, web, cita, estado } = base();
+    cita('espera', AHORA - 4 * DIA, web('https://maps.app.goo.gl/abc'));
+    const send = vi.fn(async () => undefined);
+    const caido = vi.fn().mockRejectedValue(new Error('timeout'));
+    expect(await pedirResenas(db, { send }, 'T', AHORA, 20, caido)).toBe(0);
+    expect(estado('espera')).toBe('pendiente');
+    const ok = vi.fn().mockResolvedValue(new Response(null, { status: 302, headers: { location: FEATURE } }));
+    expect(await pedirResenas(db, { send }, 'T', AHORA + 15 * 60_000, 20, ok)).toBe(1);
+    expect(estado('espera')).toBe('enviada');
   });
 });
