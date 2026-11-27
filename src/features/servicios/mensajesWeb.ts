@@ -113,7 +113,39 @@ export function correoMensaje(para: string, negocio: string, m: Mensaje, panel: 
 <blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #ccc;white-space:pre-wrap">${escapeHtml(m.texto)}</blockquote>
 <p style="margin:0"><a href="${escapeHtml(panel)}">Ver todos tus mensajes</a></p>`;
   const html = emailShell({ storeName: tienda, heading: 'Nuevo mensaje desde tu web', subheading: negocio ? escapeHtml(negocio) : undefined, body: cuerpo });
-  return { to: para, subject, html, text, ...(id ? { idempotencyKey: `web-mensaje/${id}` } : {}) };
+  // Si dejó correo, «Responder» en el buzón del dueño le contesta directamente a esa persona.
+  return { to: para, subject, html, text, ...(EMAIL.test(m.contacto) ? { replyTo: m.contacto } : {}), ...(id ? { idempotencyKey: `web-mensaje/${id}` } : {}) };
+}
+
+export interface Respuesta {
+  tipo: 'correo' | 'whatsapp' | 'llamar';
+  etiqueta: string;
+  href: string;
+}
+
+/** Cifras para wa.me: con prefijo de país; un móvil español de 9 cifras sin prefijo lleva el 34. */
+export function numeroWhatsApp(telefono: string): string | null {
+  const t = telefono.trim();
+  let d = t.replace(/\D/g, '');
+  if (t.startsWith('00')) d = d.slice(2);
+  else if (!t.startsWith('+') && /^[67]\d{8}$/.test(d)) d = `34${d}`;
+  else if (!t.startsWith('+')) return null;
+  return d.length >= 8 && d.length <= 15 ? d : null;
+}
+
+/** Botones para contestar desde el panel, con el texto ya empezado. */
+export function respuestasMensaje(m: Mensaje, negocio: string): Respuesta[] {
+  const saludo = `Hola${m.nombre ? ` ${m.nombre}` : ''}, gracias por escribir${negocio ? ` a ${negocio}` : ''}. `;
+  if (EMAIL.test(m.contacto)) {
+    const cita = m.texto.split('\n').map((l) => `> ${l}`).join('\n');
+    const q = `subject=${encodeURIComponent(`Re: tu mensaje${negocio ? ` a ${negocio}` : ''}`)}&body=${encodeURIComponent(`${saludo}\n\n\n${cita}`)}`;
+    return [{ tipo: 'correo', etiqueta: 'Responder por correo', href: `mailto:${encodeURIComponent(m.contacto).replace(/%40/g, '@')}?${q}` }];
+  }
+  const r: Respuesta[] = [];
+  const wa = numeroWhatsApp(m.contacto);
+  if (wa) r.push({ tipo: 'whatsapp', etiqueta: 'Responder por WhatsApp', href: `https://wa.me/${wa}?text=${encodeURIComponent(saludo)}` });
+  r.push({ tipo: 'llamar', etiqueta: 'Llamar', href: `tel:${m.contacto.replace(/[^\d+]/g, '')}` });
+  return r;
 }
 
 export interface MensajeCliente extends Mensaje {

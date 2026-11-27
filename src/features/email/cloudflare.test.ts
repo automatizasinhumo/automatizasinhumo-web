@@ -16,5 +16,12 @@ describe('adaptador de correo de Cloudflare', () => {
     const enviados: Parameters<EmailBinding['send']>[0][] = [];
     await createCloudflareEmail({ send: async (m) => void enviados.push(m) }, { email: 'a@b.es', name: 'A' }).send({ to: 'c@d.es', subject: 's', html: '<p>t</p>', text: 't' });
     expect(enviados[0]).not.toHaveProperty('attachments');
+    expect(enviados[0]).not.toHaveProperty('replyTo');
+  });
+
+  it('pasa el Reply-To al binding', async () => {
+    const enviados: Parameters<EmailBinding['send']>[0][] = [];
+    await createCloudflareEmail({ send: async (m) => void enviados.push(m) }, { email: 'a@b.es', name: 'A' }).send({ to: 'c@d.es', subject: 's', html: '<p>t</p>', text: 't', replyTo: 'x@y.es' });
+    expect(enviados[0]!.replyTo).toBe('x@y.es');
   });
 });

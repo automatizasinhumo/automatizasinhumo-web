@@ -9,7 +9,9 @@ import {
   guardarMensaje,
   leerSello,
   mensajesDeCliente,
+  numeroWhatsApp,
   paginaRespuesta,
+  respuestasMensaje,
   selloFormulario,
   validarMensaje,
 } from './mensajesWeb';
@@ -93,6 +95,44 @@ describe('guardado y área de cliente', () => {
     expect(c.html).toContain('&lt;script&gt;');
     expect(c.html).not.toContain('<script>');
     expect(c.text).toContain('https://t.es/account');
+  });
+
+  it('con correo, «Responder» va a quien escribió; con teléfono, no hay Reply-To', () => {
+    const conCorreo = correoMensaje('ana@x.es', '', { nombre: 'Luis', contacto: 'luis@x.es', texto: 'Hola hola' }, 'https://t.es/account', 'T');
+    expect(conCorreo.replyTo).toBe('luis@x.es');
+    const conTelefono = correoMensaje('ana@x.es', '', { nombre: 'Luis', contacto: '600 123 456', texto: 'Hola hola' }, 'https://t.es/account', 'T');
+    expect(conTelefono).not.toHaveProperty('replyTo');
+  });
+});
+
+describe('respuestas rápidas del panel', () => {
+  it('número de WhatsApp: móvil español sin prefijo, con +, con 00; fijo sin prefijo no', () => {
+    expect(numeroWhatsApp('600 123 456')).toBe('34600123456');
+    expect(numeroWhatsApp('+34 600-12-34-56')).toBe('34600123456');
+    expect(numeroWhatsApp('0044 7911 123456')).toBe('447911123456');
+    expect(numeroWhatsApp('912 345 678')).toBeNull();
+    expect(numeroWhatsApp('+12')).toBeNull();
+  });
+
+  it('correo: mailto con asunto y el mensaje citado', () => {
+    const [r, ...resto] = respuestasMensaje({ nombre: 'Luis', contacto: 'luis+x@x.es', texto: 'Hola\n¿cita?' }, 'Bar Lola');
+    expect(resto).toEqual([]);
+    expect(r!.tipo).toBe('correo');
+    const u = new URL(r!.href);
+    expect(u.protocol).toBe('mailto:');
+    expect(decodeURIComponent(u.pathname)).toBe('luis+x@x.es');
+    expect(u.searchParams.get('subject')).toBe('Re: tu mensaje a Bar Lola');
+    expect(u.searchParams.get('body')).toContain('Hola Luis, gracias por escribir a Bar Lola.');
+    expect(u.searchParams.get('body')).toContain('> Hola\n> ¿cita?');
+  });
+
+  it('teléfono: WhatsApp con saludo y llamar; un fijo solo llamar', () => {
+    const r = respuestasMensaje({ nombre: '', contacto: '600 123 456', texto: 'Hola hola' }, '');
+    expect(r.map((x) => x.tipo)).toEqual(['whatsapp', 'llamar']);
+    expect(new URL(r[0]!.href).searchParams.get('text')).toBe('Hola, gracias por escribir. ');
+    expect(r[0]!.href.startsWith('https://wa.me/34600123456?')).toBe(true);
+    expect(r[1]!.href).toBe('tel:600123456');
+    expect(respuestasMensaje({ nombre: '', contacto: '912 345 678', texto: 'Hola hola' }, '').map((x) => x.tipo)).toEqual(['llamar']);
   });
 });
 
