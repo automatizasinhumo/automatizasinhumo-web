@@ -102,7 +102,8 @@ async function recorrido(ctx, ancho) {
         pg.waitForURL((u) => u.pathname.startsWith('/servicios/'), { timeout: 30000 }),
         pg.locator('[data-ir-estudio]').first().click(),
       ]);
-      await pg.locator('[data-vista]').first().waitFor({ state: 'attached', timeout: 30000 });
+      // Un paso del estudio a la vista (el panel de la vista previa empieza oculto).
+      await pg.locator('section[data-paso]:visible').first().waitFor({ state: 'visible', timeout: 30000 });
       await pg.screenshot({ path: `capturas/recorrido-${ancho}-estudio.png` });
       await ir(`/products/${slug}`);
       await pg.locator('[data-pagar-primero] summary').first().click();
