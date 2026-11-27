@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { d1 } from './d1Prueba';
-import { correoResena, enlaceResena, pedirResenas, placeIdDeFeature, resolverCorto, TEMPORAL } from './resenasCitas';
+import { avisoEnlaceOpiniones, correoResena, enlaceResena, estadoEnlaceOpiniones, pedirResenas, placeIdDeFeature, resolverCorto, TEMPORAL } from './resenasCitas';
 
 const MIGRACIONES = ['0048_paginas_publicadas.sql', '0051_paginas_versiones.sql', '0055_citas_web.sql', '0056_citas_resena.sql'];
 const HORA = 3_600_000;
@@ -55,6 +55,17 @@ describe('enlaceResena', () => {
     expect(enlaceResena('https://maps.app.goo.gl/abc123')).toBeNull();
     expect(enlaceResena('https://www.google.com/maps/place/Taller/@40.4,-3.7,17z')).toBeNull();
     expect(enlaceResena('javascript:alert(1)')).toBeNull();
+  });
+});
+
+describe('estadoEnlaceOpiniones', () => {
+  it('clasifica sin red lo que pondrá el dueño', () => {
+    expect(estadoEnlaceOpiniones('  ')).toBe('vacio');
+    expect(estadoEnlaceOpiniones('https://g.page/r/AbC123/review')).toBe('ok');
+    expect(estadoEnlaceOpiniones('https://maps.app.goo.gl/xyz')).toBe('corto');
+    expect(estadoEnlaceOpiniones('https://mi-web.es/opiniones')).toBe('desconocido');
+    expect(avisoEnlaceOpiniones('')).toBe('');
+    expect(avisoEnlaceOpiniones('https://mi-web.es/opiniones')).toContain('Pedir reseñas');
   });
 });
 
