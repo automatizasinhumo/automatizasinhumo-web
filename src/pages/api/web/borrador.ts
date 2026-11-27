@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { getConfig } from '../../../config';
 import { getEmailProvider } from '../../../features/email';
+import { rememberStoreUrl } from '../../../features/email/outbox';
 import { getSetting, getStoreSettings } from '../../../features/settings/db';
 import { actualizarBorrador, correoValido, guardarRecuperacion, leerSeguir, recordarBorradores, sinBarraFinal } from '../../../features/servicios/recuperarWeb';
 import { jsonLimitado, leerVista, validarBorrador } from '../../../features/servicios/vistaWeb';
@@ -16,8 +17,12 @@ const json = (body: unknown, status = 200) =>
 
 /** Origen https de la tienda para los enlaces del correo: el ajuste o, si falta, el de la petición. */
 async function origen(request: Request): Promise<string | null> {
-  const o = sinBarraFinal((await getSetting(env.DB, 'store_url').catch(() => null)) || new URL(request.url).origin);
-  return /^https:\/\/[^\s/]+$/.test(o) ? o : null;
+  const guardado = await getSetting(env.DB, 'store_url').catch(() => null);
+  const o = sinBarraFinal(guardado || new URL(request.url).origin);
+  if (!/^https:\/\/[^\s/]+$/.test(o)) return null;
+  // Sin store_url el cron no puede mandar los recordatorios: se aprende de esta petición.
+  if (!guardado) await rememberStoreUrl(env.DB, o);
+  return o;
 }
 
 // POST /api/web/borrador {datos, email, avisos} — «Guardar y seguir luego»: guarda el borrador y

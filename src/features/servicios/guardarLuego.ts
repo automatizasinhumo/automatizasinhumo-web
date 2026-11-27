@@ -145,6 +145,7 @@ export function iniciarGuardarLuego(caja: HTMLFormElement | null, datos: () => D
     cambio() {
       quizaOfrecer();
       if (!token) return;
+      fallos = 0; // una edición nueva vuelve a tener sus reintentos
       programarSubida(4000);
     },
     usar(t: string) {
