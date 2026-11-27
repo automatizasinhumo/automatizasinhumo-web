@@ -101,7 +101,7 @@ const PASOS = PASOS_WEB.map((p) => p.id) as string[];
 const CAPA = ['acabado', 'formaFoto', 'movimiento'] as const;
 /** Lo que cambia «Prueba otra combinación»: lo visual, nunca el texto ni las fotos. */
 export const MEZCLA = ['color', 'letra', 'acabado', 'formaFoto'] as const;
-const CAMPOS = [...CAPA, 'negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'opinionesUrl', 'variantes'] as const;
+const CAMPOS = [...CAPA, 'negocio', 'sector', 'lema', 'sobre', 'foto', 'telefono', 'whatsapp', 'email', 'direccion', 'horario', 'zonas', 'reservas', 'citas', 'opinionesUrl', 'variantes'] as const;
 
 /**
  * Reduce la foto en el navegador (lado mayor 1200 px) y la devuelve como data URL que quepa en

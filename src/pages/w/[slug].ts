@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { contarVisita } from '../../features/servicios/panelCliente';
 import { formularioWeb } from '../../features/servicios/mensajesWeb';
-import { documentoWeb, webPorSlug } from '../../features/servicios/webs';
+import { citasActivas, documentoWeb, webPorSlug } from '../../features/servicios/webs';
 
 export const prerender = false;
 
@@ -15,8 +15,9 @@ export const GET: APIRoute = async ({ params, url, request, locals }) => {
   const imagen = new URL(`/w/${w.slug}/foto`, url).href;
   const galeria = new URL(`/w/${w.slug}/galeria/`, url).href;
   const propia = new URL(`/w/${w.slug}`, url).href;
+  const citas = citasActivas(w.datos) ? `/w/${w.slug}/reservas` : undefined;
   const formulario = await formularioWeb(w.slug, `/w/${w.slug}/mensaje`, propia, env.AUTH_SECRET);
-  return new Response(documentoWeb(w.datos, propia, '', imagen, galeria, formulario), {
+  return new Response(documentoWeb(w.datos, propia, '', imagen, galeria, formulario, citas), {
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60' },
   });
 };

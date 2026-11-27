@@ -6,7 +6,7 @@ import type { EmailProvider } from './provider';
 import { createCloudflareEmail } from './cloudflare';
 import { createResendEmail } from './resend';
 
-export type { EmailProvider, EmailMessage } from './provider';
+export type { EmailProvider, EmailMessage, EmailAttachment } from './provider';
 
 /**
  * The active email provider, or null when email is disabled/unconfigured (callers

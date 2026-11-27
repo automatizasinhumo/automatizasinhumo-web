@@ -13,7 +13,7 @@ describe('rateLimitBucket', () => {
     expect(rateLimitBucket('POST', path)).toBe('auth');
   });
 
-  it.each(['/api/checkout', '/checkout', '/pay/order-token'])('limits checkout POST %s', (path) => {
+  it.each(['/api/checkout', '/checkout', '/pay/order-token', '/w/peluqueria/mensaje', '/w/peluqueria/reservas', '/w/peluqueria/reservas/anular'])('limits checkout POST %s', (path) => {
     expect(rateLimitBucket('POST', path)).toBe('checkout');
   });
 

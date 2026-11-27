@@ -16,7 +16,8 @@ export function d1(migraciones: string[], extra = ''): D1Database & { sql: Datab
       first: async () => (st().get(...a) as unknown) ?? null,
       all: async () => ({ results: st().all(...a) }),
       run: async () => ({ meta: { changes: Number(st().run(...a).changes) } }),
-      todo: () => ({ results: st().all(...a) }),
+      todo: () =>
+        /^\s*SELECT/i.test(q) ? { results: st().all(...a) } : { results: [], meta: { changes: Number(st().run(...a).changes) } },
     };
   };
   const batch = async (ps: ReturnType<typeof prep>[]) => {

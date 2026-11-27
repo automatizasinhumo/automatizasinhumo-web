@@ -12,6 +12,7 @@ import Pagination from '../../components/Pagination.astro';
 import { catalogPath } from '../../features/settings/home';
 import { NOMBRE_TIPO, paginasDeCliente } from '../../features/servicios/panelCliente';
 import { mensajesDeCliente } from '../../features/servicios/mensajesWeb';
+import { citasDeCliente, diaYHora, selloCita } from '../../features/servicios/citasWeb';
 
 if (!(await accountsEnabled())) return Astro.redirect('/', 303);
 const email = await getCustomerEmail(Astro.cookies);
@@ -49,6 +50,22 @@ const mensajes = paginas.some((p) => p.tipo === 'web')
       return [];
     })
   : [];
+// Próximas citas pedidas desde sus webs (citasWeb.ts), con el mismo enlace firmado para anular.
+let errorCitas = false;
+const citas = paginas.some((p) => p.tipo === 'web')
+  ? await citasDeCliente(env.DB, email).catch((e) => {
+      console.error('Panel: no se pudieron leer las citas', e);
+      errorCitas = true;
+      return [];
+    })
+  : [];
+const anularCita = new Map(
+  env.AUTH_SECRET
+    ? await Promise.all(
+        citas.map(async (c) => [c.id, `/w/${c.slug}/reservas/anular?t=${encodeURIComponent(await selloCita(c, env.AUTH_SECRET!))}`] as const),
+      )
+    : [],
+);
 const nombreWeb = new Map(paginas.filter((p) => p.tipo === 'web').map((p) => [p.slug, p.nombre ?? NOMBRE_TIPO.web]));
 const ESTADO: Record<string, string> = { paid: 'Pagado', pending: 'Pendiente', refunded: 'Reembolsado' };
 const miles = new Intl.NumberFormat('es-ES');
@@ -131,6 +148,41 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                   </li>
                 );
               })}
+            </ul>
+          )}
+        </section>
+      )
+    }
+
+    {
+      (citas.length > 0 || errorCitas) && (
+        <section class="mb-10" aria-labelledby="tus-citas">
+          <h2 id="tus-citas" class="mb-3 font-serif text-2xl tracking-tight">Próximas citas</h2>
+          {errorCitas ? (
+            <p class="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted" role="alert" data-error-citas>
+              No se han podido cargar tus citas ahora mismo. Recarga la página en un rato; también te llegan por correo.
+            </p>
+          ) : (
+            <ul class="grid gap-3">
+              {citas.map((c) => (
+                <li class="rounded-lg border border-line bg-surface p-4 text-sm" data-cita>
+                  <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <strong class="text-base text-ink">{diaYHora(c.inicio)}</strong>
+                    {nombreWeb.size > 1 && <span class="text-xs text-faint">{c.negocio}</span>}
+                  </div>
+                  <p class="mt-1 text-ink">{c.nombre}</p>
+                  <p class="mt-1 flex flex-wrap gap-x-4">
+                    <a href={`mailto:${encodeURIComponent(c.email).replace(/%40/g, '@')}`} class="inline-flex min-h-11 items-center break-all font-medium text-accent">{c.email}</a>
+                    {c.telefono && <a href={`tel:${c.telefono.replace(/[^\d+]/g, '')}`} class="inline-flex min-h-11 items-center font-medium text-accent">{c.telefono}</a>}
+                  </p>
+                  {c.nota && <p class="mt-1 whitespace-pre-line text-muted">{c.nota}</p>}
+                  {anularCita.get(c.id) && (
+                    <a href={anularCita.get(c.id)} class="mt-2 inline-flex min-h-11 items-center rounded-md border border-line px-4 font-medium text-ink" rel="noreferrer">
+                      Anular la cita
+                    </a>
+                  )}
+                </li>
+              ))}
             </ul>
           )}
         </section>

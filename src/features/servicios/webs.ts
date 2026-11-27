@@ -272,6 +272,8 @@ export interface DatosWeb {
   zonas: string;
   /** Página para reservar cita (Booksy, Google, la suya…): pasa a ser el botón principal. */
   reservas: string;
+  /** Citas en la propia web (/w/<slug>/reservas): duración en minutos, '' = sin citas. Usa el horario. */
+  citas: IdCitasWeb;
   enlaces: EnlaceWeb[];
   /** Opiniones de clientes que el negocio copia de donde las tenga (Google, Facebook…). */
   opiniones: OpinionWeb[];
@@ -411,6 +413,7 @@ export function validarWeb(x: unknown): ResultadoWeb {
       horario: parrafos(o.horario, 300),
       zonas: texto(o.zonas, 300),
       reservas: urlSegura(o.reservas),
+      citas: (DURACIONES_CITA as readonly unknown[]).includes(o.citas) ? (o.citas as IdCitasWeb) : '',
       enlaces,
       opiniones,
       opinionesUrl: urlSegura(o.opinionesUrl),
@@ -445,6 +448,7 @@ export const EJEMPLO_WEB: DatosWeb = {
   horario: 'Lunes a viernes: 9:30 – 20:00\nSábados: 9:30 – 14:00',
   zonas: '',
   reservas: '',
+  citas: '',
   enlaces: [{ etiqueta: 'Instagram', url: 'https://www.instagram.com/' }],
   opiniones: [
     { texto: 'Me cortan el pelo aquí desde hace años y siempre salgo contenta. Puntuales y muy cuidadosas.', autor: 'Marta G.' },
@@ -566,6 +570,8 @@ export interface OpcionesWeb {
    * firmado con la hora (mensajesWeb.ts). Sin él (vista previa, sin secreto) no sale.
    */
   formulario?: { accion: string; sello: string };
+  /** Página de citas de la publicada (…/w/<slug>/reservas). Sin ella (vista previa) el botón va a #. */
+  citas?: string;
 }
 
 /** Letras de la palabra más larga del nombre (mínimo 6): el titular nunca la parte, se encoge. */
@@ -599,6 +605,11 @@ export const TITULOS_GENERICOS: Readonly<Record<string, string>> = {
 /** HTML de la web (solo el contenido, con ámbito en `.w`). Todo texto del cliente va escapado. */
 /** Nombre del campo trampa del formulario (lo comprueba mensajesWeb.ts). */
 export const CAMPO_TRAMPA = 'web_url';
+/** Duración de las citas en la propia web, en minutos; '' = sin citas (citasWeb.ts). */
+export const DURACIONES_CITA = ['', '15', '20', '30', '45', '60', '90'] as const;
+export type IdCitasWeb = (typeof DURACIONES_CITA)[number];
+/** Hay citas en la web si se eligió duración y el horario se entiende (de él salen las horas). */
+export const citasActivas = (d: Pick<DatosWeb, 'citas' | 'horario'>) => Number(d.citas) > 0 && (horarioSchema(d.horario)?.length ?? 0) > 0;
 
 /**
  * Formulario sin JavaScript: nombre, cómo responderte y el mensaje. El campo trampa queda fuera
@@ -634,13 +645,14 @@ export function renderWeb(d: DatosWeb, o: OpcionesWeb = {}): string {
   // El primero es el botón principal (relleno): reservar, si hay enlace; si no, WhatsApp, llamar o correo.
   // Los textos dependen del sector: un bar reserva mesa; un fontanero pide presupuesto.
   const textos = accionesDeSector(d.sector);
+  const reservar = d.reservas || (citasActivas(d) ? (o.citas ?? '#') : '');
   const listaAcciones = [
-    d.reservas && [d.reservas, 'cita', textos.reserva],
+    reservar && [reservar, 'cita', textos.reserva],
     d.whatsapp && [enlaceWhatsapp(d.whatsapp), 'wa', 'WhatsApp'],
     tel && [tel, 'tel', 'Llamar'],
     !d.telefono && !d.whatsapp && d.email && [`mailto:${d.email}`, 'mail', 'Escríbenos'],
   ].filter(Boolean) as [string, 'cita' | 'wa' | 'tel' | 'mail', string][];
-  if (!d.reservas && textos.contacto && listaAcciones[0]) listaAcciones[0] = [listaAcciones[0][0], listaAcciones[0][1], textos.contacto];
+  if (!reservar && textos.contacto && listaAcciones[0]) listaAcciones[0] = [listaAcciones[0][0], listaAcciones[0][1], textos.contacto];
   const acciones = listaAcciones
     .map(([href, ico, txt], i) => `<a class="w-boton${i ? '' : ' w-boton-lleno'}" href="${esc(href)}"${rel(href)}>${icono(ico)}${txt}</a>`)
     .join('');
@@ -849,7 +861,7 @@ export function fichaNegocio(d: DatosWeb, url: string): string {
  * cuando la página se sirve desde otro dominio ('' = mismo origen). `imagen` es la URL absoluta
  * de la foto (/w/<slug>/foto) para la tarjeta que sale al compartir el enlace; '' si no hay foto.
  */
-export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = '', formulario?: OpcionesWeb['formulario']): string {
+export function documentoWeb(d: DatosWeb, url: string, tienda = '', imagen = '', galeria = '', formulario?: OpcionesWeb['formulario'], citas?: string): string {
   // «Nombre · Actividad en Zona»: la zona principal en el título ayuda a salir en búsquedas locales.
   const zona = listaZonas(d.zonas)[0];
   const titulo = (d.sector ? `${d.negocio} · ${d.sector}` : d.negocio) + (zona && d.sector ? ` en ${zona}` : '');
@@ -875,7 +887,7 @@ ${d.foto && imagen ? `<meta property="og:image" content="${esc(imagen)}">\n<meta
 ${fuentesDoc(d, tienda)}<style>body{margin:0}${cssWebDe(plantillaWeb(d.plantilla).id)}</style>
 </head>
 <body>
-${renderWeb(d, { pie, galeria, formulario, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
+${renderWeb(d, { pie, galeria, formulario, citas, foto: d.foto && imagen ? urlFotoVersion(imagen, d.foto) : '' })}
 </body>
 </html>
 `;

@@ -17,6 +17,15 @@ export interface EmailMessage {
    * notices) need not invent one.
    */
   idempotencyKey?: string;
+  /** Adjuntos de texto (p. ej. la cita en .ics). Quien envía debe aguantar que el proveedor los rechace. */
+  attachments?: EmailAttachment[];
+}
+
+export interface EmailAttachment {
+  filename: string;
+  /** Contenido en texto (UTF-8). */
+  content: string;
+  contentType: string;
 }
 
 export interface EmailProvider {
