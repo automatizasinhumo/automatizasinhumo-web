@@ -115,6 +115,15 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     console.error('Scheduled domain sweep failed:', err instanceof Error ? err.message : 'error');
   }
 
+  // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
+  // No-op sin GITHUB_DISPATCH_TOKEN y GITHUB_DISPATCH_REPO (ver respaldoCron.ts).
+  try {
+    await lanzarProgramados(cuando, env.GITHUB_DISPATCH_TOKEN, env.GITHUB_DISPATCH_REPO, marcasD1(db));
+  } catch (err) {
+    console.error('Scheduled workflow dispatch failed:', err);
+  }
+
+  // Al final: abre enlaces externos (Google) y no debe retrasar lo de arriba.
   // Citas de las webs publicadas: un correo pidiendo opinión 72 h después (resenasCitas.ts).
   try {
     const s = await getStoreSettings(db);
@@ -123,14 +132,6 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     if (email) await pedirResenas(db, email, tienda, cuando.getTime());
   } catch (err) {
     console.error('Scheduled review request sweep failed:', err instanceof Error ? err.message : 'error');
-  }
-
-  // GitHub no dispara los `on: schedule` de este repo; el cron del Worker sí.
-  // No-op sin GITHUB_DISPATCH_TOKEN y GITHUB_DISPATCH_REPO (ver respaldoCron.ts).
-  try {
-    await lanzarProgramados(cuando, env.GITHUB_DISPATCH_TOKEN, env.GITHUB_DISPATCH_REPO, marcasD1(db));
-  } catch (err) {
-    console.error('Scheduled workflow dispatch failed:', err);
   }
 }
 
