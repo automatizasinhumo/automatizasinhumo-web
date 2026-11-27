@@ -21,7 +21,7 @@ import { rateLimitBucket } from '../auth/rateLimit';
 const SECRETO = 'secreto-de-prueba-con-entropia-suficiente';
 const T0 = Date.parse('2026-11-27T10:00:00Z');
 const PEDIDOS = `CREATE TABLE orders (id INTEGER PRIMARY KEY, public_id TEXT UNIQUE, email TEXT);`;
-const MIGRACIONES = ['0048_paginas_publicadas.sql', '0051_paginas_versiones.sql', '0054_webs_mensajes.sql'];
+const MIGRACIONES = ['0048_paginas_publicadas.sql', '0051_paginas_versiones.sql', '0054_webs_mensajes.sql', '0057_mensajes_seguimiento.sql'];
 
 const form = (campos: Record<string, string>) => {
   const f = new FormData();
