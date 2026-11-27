@@ -26,6 +26,8 @@ export const MAX = { nombre: 100, contacto: 254, texto: 2000 } as const;
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TELEFONO = /^\+?[\d\s().-]{6,20}$/;
+/** Un teléfono con el que se pueda llamar: al menos 6 cifras, no solo separadores. */
+const esTelefono = (v: string) => TELEFONO.test(v) && (v.match(/\d/g)?.length ?? 0) >= 6;
 
 /** Sello del formulario de `slug` servido ahora; `vuelta` es la URL a la que volver tras enviar. */
 export function selloFormulario(slug: string, vuelta: string, secret: string, ahora = Date.now()): Promise<string> {
@@ -72,7 +74,7 @@ export type Validado = { ok: true; mensaje: Mensaje } | { ok: false; error: 'tra
 export function validarMensaje(f: FormData): Validado {
   if (limpio(f.get(CAMPO_TRAMPA), 200)) return { ok: false, error: 'trampa' };
   const contacto = limpio(f.get('contacto'), MAX.contacto);
-  if (!EMAIL.test(contacto) && !TELEFONO.test(contacto)) return { ok: false, error: 'contacto' };
+  if (!EMAIL.test(contacto) && !esTelefono(contacto)) return { ok: false, error: 'contacto' };
   const texto = limpio(f.get('mensaje'), MAX.texto, true);
   if (texto.length < 5) return { ok: false, error: 'texto' };
   return { ok: true, mensaje: { nombre: limpio(f.get('nombre'), MAX.nombre), contacto, texto } };

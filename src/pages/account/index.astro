@@ -41,9 +41,11 @@ const paginas = await paginasDeCliente(env.DB, email).catch((e) => {
   return [];
 });
 // Lo que le han escrito desde el formulario de sus webs (mensajesWeb.ts).
+let errorMensajes = false;
 const mensajes = paginas.some((p) => p.tipo === 'web')
   ? await mensajesDeCliente(env.DB, email).catch((e) => {
       console.error('Panel: no se pudieron leer los mensajes', e);
+      errorMensajes = true;
       return [];
     })
   : [];
@@ -104,7 +106,11 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
       paginas.some((p) => p.tipo === 'web') && (
         <section class="mb-10" aria-labelledby="tus-mensajes">
           <h2 id="tus-mensajes" class="mb-3 font-serif text-2xl tracking-tight">Mensajes de tu web</h2>
-          {mensajes.length === 0 ? (
+          {errorMensajes ? (
+            <p class="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted" role="alert" data-error-mensajes>
+              No se han podido cargar tus mensajes ahora mismo. Recarga la página en un rato; también te llegan por correo.
+            </p>
+          ) : mensajes.length === 0 ? (
             <p class="rounded-lg border border-line bg-surface px-4 py-6 text-center text-sm text-muted" data-sin-mensajes>
               Aún no te han escrito. Cuando alguien use el formulario de tu web, el mensaje saldrá aquí y te llegará por correo.
             </p>
@@ -118,7 +124,7 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                       <strong class="text-base text-ink">{m.nombre || 'Sin nombre'}</strong>
                       <span class="text-xs text-faint">{formatDate(m.creado, undefined, timeZone)}{nombreWeb.size > 1 && ` · ${nombreWeb.get(m.slug) ?? ''}`}</span>
                     </div>
-                    <a href={correo ? `mailto:${m.contacto}` : `tel:${m.contacto.replace(/[^\d+]/g, '')}`} class="mt-1 inline-flex min-h-11 items-center break-all font-medium text-accent">
+                    <a href={correo ? `mailto:${encodeURIComponent(m.contacto).replace(/%40/g, '@')}` : `tel:${m.contacto.replace(/[^\d+]/g, '')}`} class="mt-1 inline-flex min-h-11 items-center break-all font-medium text-accent">
                       {m.contacto}
                     </a>
                     <p class="mt-1 whitespace-pre-line text-ink">{m.texto}</p>

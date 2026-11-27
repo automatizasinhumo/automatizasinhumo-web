@@ -33,6 +33,14 @@ describe('isForbiddenFormOrigin', () => {
     expect(isForbiddenFormOrigin(request('POST'), legacy)).toBe(true);
   });
 
+  it('allows the contact form of a published web from its own domain', () => {
+    const msg = new globalThis.URL('https://shop.example/w/lola/mensaje');
+    expect(isForbiddenFormOrigin(request('POST', 'https://lola.es'), msg)).toBe(false);
+    expect(isForbiddenFormOrigin(request('PUT', 'https://lola.es'), msg)).toBe(true);
+    const otra = new globalThis.URL('https://shop.example/w/lola/otra');
+    expect(isForbiddenFormOrigin(request('POST', 'https://lola.es'), otra)).toBe(true);
+  });
+
   it('does not extend the exception to other methods or routes', () => {
     expect(isForbiddenFormOrigin(request('PUT'), URL)).toBe(true);
     const order = new globalThis.URL(

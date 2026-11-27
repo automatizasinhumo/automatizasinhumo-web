@@ -338,7 +338,7 @@ const VARIANTES = `
 .w .w-form-titulo{grid-column:1/-1;font:700 clamp(1.15rem,2.6cqw,1.45rem)/1.25 var(--w-ft-titulo)}
 .w .w-campo{display:grid;gap:6px;min-width:0;font-size:.9rem;font-weight:600}
 .w .w-campo-ancho{grid-column:1/-1}
-.w .w-campo :is(input,textarea){width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;font:inherit;font-weight:400;font-size:1rem;color:var(--w-tinta);background:var(--w-fondo);border:1.5px solid var(--w-borde);border-radius:min(var(--w-r),12px)}
+.w .w-campo :is(input,textarea){width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;font:inherit;font-weight:400;font-size:1rem;color:var(--w-tinta);background:var(--w-fondo);border:1.5px solid color-mix(in srgb,var(--w-tinta) 50%,var(--w-fondo));border-radius:min(var(--w-r),12px)}
 .w .w-campo textarea{resize:vertical;min-height:120px}
 .w .w-campo :is(input,textarea):focus-visible{outline:3px solid var(--w-c);outline-offset:1px;border-color:var(--w-c)}
 .w .w-form .w-boton{justify-self:start;cursor:pointer;font:inherit;font-weight:600}

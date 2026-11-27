@@ -60,6 +60,8 @@ describe('validación del mensaje', () => {
   it('rechaza la trampa rellena, un contacto inválido y un mensaje vacío', () => {
     expect(validarMensaje(form({ [CAMPO_TRAMPA]: 'http://spam', contacto: 'ana@x.es', mensaje: 'Hola hola' }))).toEqual({ ok: false, error: 'trampa' });
     expect(validarMensaje(form({ contacto: 'no', mensaje: 'Hola hola' }))).toEqual({ ok: false, error: 'contacto' });
+    expect(validarMensaje(form({ contacto: '------', mensaje: 'Hola hola' }))).toEqual({ ok: false, error: 'contacto' });
+    expect(validarMensaje(form({ contacto: '(.) 1 2', mensaje: 'Hola hola' }))).toEqual({ ok: false, error: 'contacto' });
     expect(validarMensaje(form({ contacto: 'ana@x.es', mensaje: ' ' }))).toEqual({ ok: false, error: 'texto' });
   });
 
@@ -107,6 +109,7 @@ describe('formulario en la web publicada', () => {
 
   it('el envío tiene límite por IP', () => {
     expect(rateLimitBucket('POST', '/w/lola/mensaje')).toBe('checkout');
+    expect(rateLimitBucket('POST', '/w/lola/mensaje/')).toBe('checkout');
     expect(rateLimitBucket('GET', '/w/lola/mensaje')).toBeNull();
     expect(rateLimitBucket('POST', '/w/lola/otra/mensaje')).toBeNull();
   });
