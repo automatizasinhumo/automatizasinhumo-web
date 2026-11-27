@@ -97,12 +97,12 @@ async function recorrido(ctx, ancho) {
 
     await paso('«Empezar ahora» abre el estudio', async () => {
       if (!autoservicio) return;
-      const destino = new URL((await pg.locator('[data-ir-estudio]').first().getAttribute('href')) ?? '', base);
+      // El destino se comprueba por su cuenta: un enlace roto a /empezar/<slug> también tiene formulario.
       await Promise.all([
-        pg.waitForURL((u) => u.pathname === destino.pathname, { timeout: 30000 }),
+        pg.waitForURL((u) => u.pathname.startsWith('/servicios/'), { timeout: 30000 }),
         pg.locator('[data-ir-estudio]').first().click(),
       ]);
-      await pg.locator('form').first().waitFor({ state: 'attached', timeout: 30000 });
+      await pg.locator('[data-vista]').first().waitFor({ state: 'attached', timeout: 30000 });
       await pg.screenshot({ path: `capturas/recorrido-${ancho}-estudio.png` });
       await ir(`/products/${slug}`);
       await pg.locator('[data-pagar-primero] summary').first().click();
