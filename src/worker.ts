@@ -122,7 +122,7 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     const email = origen ? await getEmailProvider(await getStoreSettings(db)) : null;
     if (origen && email) {
       const tienda = (await getSetting(db, 'store_name')) || getConfig().storeName;
-      await recordarMensajes(db, (m) => email.send(m), new URL('/account', origen).href, tienda, cuando.getTime());
+      await recordarMensajes(db, (m) => email.send(m), new URL('/account', origen).href, tienda, Date.now());
     }
   } catch (err) {
     console.error('Scheduled message reminder failed:', err instanceof Error ? err.message : 'error');

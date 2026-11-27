@@ -304,11 +304,27 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
   document.addEventListener('click', (ev) => {
     const a = (ev.target as Element | null)?.closest<HTMLAnchorElement>('[data-mensaje] [data-respuesta]');
     const li = a?.closest<HTMLElement>('[data-mensaje]');
-    if (!a || !li || li.dataset.estado !== 'nuevo') return;
+    if (!a || !li || li.dataset.estado !== 'nuevo' || li.dataset.guardando) return;
     const f = new FormData();
     f.set('id', li.dataset.mensaje!);
     f.set('estado', 'contestado');
     f.set('beacon', '1');
-    if (navigator.sendBeacon?.('/account/mensajes', f)) li.dataset.estado = 'contestado';
+    li.dataset.guardando = '1';
+    // keepalive: la petición sobrevive aunque el enlace abra otra app. El estado cambia solo si
+    // el servidor lo confirma; si falla, el próximo clic lo vuelve a intentar.
+    fetch('/account/mensajes', { method: 'POST', body: f, keepalive: true, credentials: 'same-origin' })
+      .then((r) => {
+        if (!r.ok) return;
+        li.dataset.estado = 'contestado';
+        const et = li.querySelector<HTMLElement>('[data-estado-etiqueta]');
+        if (et) {
+          et.textContent = 'Contestado';
+          et.classList.remove('bg-accent', 'text-white');
+          et.classList.add('border', 'border-line', 'text-muted');
+        }
+        li.querySelector<HTMLButtonElement>('[data-estados] button[value="contestado"]')?.remove();
+      })
+      .catch(() => {})
+      .finally(() => delete li.dataset.guardando);
   });
 </script>

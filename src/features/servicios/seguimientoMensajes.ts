@@ -26,18 +26,19 @@ export const NOMBRE_ESTADO: Record<EstadoMensaje, string> = {
 const DE_CLIENTE = `SELECT p.slug FROM paginas_publicadas p JOIN orders o ON o.public_id = p.pedido_public_id WHERE p.tipo = 'web' AND o.email = ?`;
 
 /**
- * Cambia el estado de un mensaje del cliente. «contestado» no rebaja un ganado o perdido
- * (el botón de responder se puede volver a pulsar después) y la primera respuesta queda fechada.
+ * Cambia el estado de un mensaje del cliente. Solo «contestado» fecha la primera respuesta
+ * (cerrar sin contestar no cuenta en el tiempo medio). Con `automatico` (pulsar un botón de
+ * responder) un ganado o perdido no vuelve a «contestado»; el «Deshacer» del dueño sí lo cambia.
  */
-export async function cambiarEstadoMensaje(db: D1Database, email: string, id: string, estado: EstadoMensaje): Promise<boolean> {
+export async function cambiarEstadoMensaje(db: D1Database, email: string, id: string, estado: EstadoMensaje, automatico = false): Promise<boolean> {
   const r = await db
     .prepare(
       `UPDATE webs_mensajes
-          SET estado = CASE WHEN ?1 = 'contestado' AND estado IN ('ganado', 'perdido') THEN estado ELSE ?1 END,
-              contestado = CASE WHEN ?1 = 'nuevo' THEN contestado ELSE COALESCE(contestado, datetime('now')) END
+          SET estado = CASE WHEN ?4 = 1 AND ?1 = 'contestado' AND estado IN ('ganado', 'perdido') THEN estado ELSE ?1 END,
+              contestado = CASE WHEN ?1 = 'contestado' THEN COALESCE(contestado, datetime('now')) ELSE contestado END
         WHERE id = ?2 AND slug IN (${DE_CLIENTE.replace('?', '?3')})`,
     )
-    .bind(estado, id, email)
+    .bind(estado, id, email, automatico ? 1 : 0)
     .run();
   return (r.meta?.changes ?? 0) > 0;
 }
@@ -164,7 +165,19 @@ export function correoRecordatorio(para: string, negocio: string, ms: Pendiente[
 <ul style="margin:0 0 16px;padding-left:20px">${ms.map((m) => `<li style="margin:0 0 8px">${escapeHtml(linea(m))}</li>`).join('')}</ul>
 <p style="margin:0"><a href="${escapeHtml(panel)}">Contestar desde tu panel</a></p>`;
   const html = emailShell({ storeName: tienda, heading: 'Tienes mensajes sin contestar', subheading: negocio ? escapeHtml(negocio) : undefined, body: cuerpo });
-  return { to: para, subject, html, text, idempotencyKey: `web-recordatorio/${ms.map((m) => m.id).sort((a, b) => a.localeCompare(b)).join(',')}` };
+  return { to: para, subject, html, text, idempotencyKey: claveGrupo(ms.map((m) => m.id)) };
+}
+
+/** Clave de longitud fija para un grupo de mensajes (Resend admite 256 caracteres como mucho). */
+export function claveGrupo(ids: string[]): string {
+  const todo = [...ids].sort((a, b) => a.localeCompare(b)).join(',');
+  // Dos FNV-1a de 32 bits con semillas distintas: determinista, síncrono y sin choques prácticos.
+  const fnv = (semilla: number) => {
+    let h = semilla;
+    for (let i = 0; i < todo.length; i++) h = Math.imul(h ^ todo.charCodeAt(i), 16777619) >>> 0;
+    return h.toString(16).padStart(8, '0');
+  };
+  return `web-recordatorio/${ids.length}/${fnv(2166136261)}${fnv(0x9747b28c)}`;
 }
 
 /**
@@ -178,8 +191,13 @@ export async function recordarMensajes(
   tienda: string,
   ahora = Date.now(),
 ): Promise<number> {
-  const h = horaMadrid(ahora);
-  if (h < 9 || h >= 21) return 0;
+  const inicio = Date.now();
+  const enHorario = () => {
+    // El reloj sigue corriendo mientras se envía: el último correo tampoco sale pasadas las 21.
+    const h = horaMadrid(ahora + (Date.now() - inicio));
+    return h >= 9 && h < 21;
+  };
+  if (!enHorario()) return 0;
   const { results } = await db
     .prepare(
       `SELECT id, slug, nombre, contacto, texto FROM webs_mensajes
@@ -193,6 +211,7 @@ export async function recordarMensajes(
   const marca = fechaSql(ahora);
   let enviados = 0;
   for (const [slug, todos] of porWeb) {
+    if (!enHorario()) break;
     const reservas = await db.batch(todos.map((m) => db.prepare(`UPDATE webs_mensajes SET recordado = ? WHERE id = ? AND recordado IS NULL AND estado = 'nuevo'`).bind(marca, m.id)));
     const mios = todos.filter((_, i) => (reservas[i]?.meta?.changes ?? 0) > 0);
     if (!mios.length) continue;

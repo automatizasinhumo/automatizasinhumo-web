@@ -4,6 +4,7 @@ import { publicarPagina } from './paginas';
 import { guardarMensaje, mensajesDeCliente } from './mensajesWeb';
 import {
   cambiarEstadoMensaje,
+  claveGrupo,
   duracionLegible,
   fechaSql,
   horaMadrid,
@@ -43,20 +44,36 @@ async function montar() {
 }
 
 describe('estados del mensaje', () => {
-  it('solo el dueño lo cambia; contestar fecha la respuesta y no rebaja un ganado', async () => {
+  it('solo el dueño lo cambia; contestar fecha la respuesta y el clic automático no rebaja un ganado', async () => {
     const { db, web, nuevo } = await montar();
     const id = await nuevo(web, 30);
     expect(await cambiarEstadoMensaje(db, 'otro@x.es', id, 'ganado')).toBe(false);
     expect(fila(db, id).estado).toBe('nuevo');
-    expect(await cambiarEstadoMensaje(db, 'ana@x.es', id, 'contestado')).toBe(true);
+    expect(await cambiarEstadoMensaje(db, 'ana@x.es', id, 'contestado', true)).toBe(true);
     const primera = fila(db, id).contestado;
     expect(primera).not.toBeNull();
     await cambiarEstadoMensaje(db, 'ana@x.es', id, 'ganado');
-    await cambiarEstadoMensaje(db, 'ana@x.es', id, 'contestado');
+    await cambiarEstadoMensaje(db, 'ana@x.es', id, 'contestado', true);
     expect(fila(db, id)).toMatchObject({ estado: 'ganado', contestado: primera });
+    // «Deshacer» del dueño sí lo devuelve a contestado.
+    await cambiarEstadoMensaje(db, 'ana@x.es', id, 'contestado');
+    expect(fila(db, id)).toMatchObject({ estado: 'contestado', contestado: primera });
     await cambiarEstadoMensaje(db, 'ana@x.es', id, 'nuevo');
     expect(fila(db, id).estado).toBe('nuevo');
     expect(await cambiarEstadoMensaje(db, 'ana@x.es', 'no-existe', 'ganado')).toBe(false);
+  });
+  it('cerrar sin contestar no fecha una respuesta', async () => {
+    const { db, web, nuevo } = await montar();
+    const id = await nuevo(web, 30);
+    await cambiarEstadoMensaje(db, 'ana@x.es', id, 'perdido');
+    expect(fila(db, id)).toMatchObject({ estado: 'perdido', contestado: null });
+  });
+  it('la clave del grupo es fija, corta y no depende del orden', () => {
+    const ids = Array.from({ length: 50 }, (_, i) => `${i}-0b7f6a2e-4c1d-4e8a-9f3b-5d2c1a0e9b8${i % 10}`);
+    const k = claveGrupo(ids);
+    expect(k.length).toBeLessThan(64);
+    expect(claveGrupo([...ids].reverse())).toBe(k);
+    expect(claveGrupo(ids.slice(1))).not.toBe(k);
   });
 
   it('el panel trae estado y sector, con los sin contestar primero', async () => {
@@ -127,7 +144,7 @@ describe('recordatorio al dueño', () => {
     const deAna = enviados.find((m) => m.to === 'ana@x.es')!;
     expect(deAna.subject).toBe('2 personas siguen esperando tu respuesta');
     expect(deAna.text).toContain(PANEL);
-    expect(deAna.idempotencyKey).toBe(`web-recordatorio/${[a, b].sort().join(',')}`);
+    expect(deAna.idempotencyKey).toBe(claveGrupo([a, b]));
     expect(enviados.find((m) => m.to === 'otro@x.es')!.subject).toBe('Otro sigue esperando tu respuesta');
     expect([pronto, muyViejo, contestado].map((id) => fila(db, id).recordado)).toEqual([null, null, null]);
     expect(await recordarMensajes(db, enviar, PANEL, 'T', MEDIODIA + 10 * 60_000)).toBe(0);
