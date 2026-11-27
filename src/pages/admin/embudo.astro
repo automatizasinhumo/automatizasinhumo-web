@@ -98,29 +98,6 @@ const NOMBRE_METRICA: Record<string, string> = {
         </section>
 
         <section>
-          <h2 class="mb-1 text-lg font-semibold">Borradores guardados</h2>
-          <p class="mb-3 text-sm text-gray-600">
-            Webs del estudio guardadas con el correo para seguir luego. Se conservan {DIAS_VISTA} días{dias > DIAS_VISTA ? `: este periodo solo ve los últimos ${DIAS_VISTA}` : ''}.
-          </p>
-          {!rec ? (
-            <p class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">No se pudieron leer los borradores. ¿Falta aplicar la migración 0058?</p>
-          ) : rec.guardados === 0 ? (
-            <p class="text-sm text-gray-500">Todavía no hay borradores guardados en este periodo.</p>
-          ) : (
-            <table class="w-full text-sm" data-testid="metricas-recuperacion">
-              <tbody>
-                <tr class="border-t border-line"><td class="py-2">Guardados</td><td class="py-2 text-right font-mono">{rec.guardados}</td><td class="py-2 text-right font-mono text-gray-600"></td></tr>
-                <tr class="border-t border-line"><td class="py-2">Acaban pagando</td><td class="py-2 text-right font-mono">{rec.pagados}</td><td class="py-2 text-right font-mono text-gray-600">{pct(rec.pagados, rec.guardados)} de los guardados</td></tr>
-                {pasosRec.map((p) => (
-                  <tr class="border-t border-line"><td class="py-2 pl-4 text-gray-600">{NOMBRE_PASO[p.paso] ?? `Tras el correo ${p.paso}`}</td><td class="py-2 text-right font-mono">{p.n}</td><td class="py-2 text-right font-mono text-gray-600">{pct(p.n, rec!.pagados)} de los pagos</td></tr>
-                ))}
-                <tr class="border-t border-line"><td class="py-2">Bajas de los recordatorios</td><td class="py-2 text-right font-mono">{rec.bajas}</td><td class="py-2 text-right font-mono text-gray-600">{pct(rec.bajas, rec.guardados)} de los guardados</td></tr>
-              </tbody>
-            </table>
-          )}
-        </section>
-
-        <section>
           <h2 class="mb-3 text-lg font-semibold">De dónde llegan</h2>
           {r.origenes.length === 0 ? (
             <p class="text-sm text-gray-500">Todavía no hay entradas en este periodo.</p>
@@ -193,5 +170,31 @@ const NOMBRE_METRICA: Record<string, string> = {
         </section>
       </>
     )}
+
+    <section>
+      <h2 class="mb-1 text-lg font-semibold">Borradores guardados</h2>
+      <p class="mb-3 text-sm text-gray-600">
+        Webs del estudio guardadas con el correo para seguir luego. Se conservan {DIAS_VISTA} días{dias > DIAS_VISTA ? `: este periodo solo ve los últimos ${DIAS_VISTA}` : ''}.
+      </p>
+      {!rec ? (
+        <p class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">No se pudieron leer los borradores. ¿Falta aplicar la migración 0058?</p>
+      ) : rec.guardados === 0 ? (
+        <p class="text-sm text-gray-500">Todavía no hay borradores guardados en este periodo.</p>
+      ) : (
+        <table class="w-full text-sm" data-testid="metricas-recuperacion">
+          <thead class="text-left text-xs uppercase tracking-widest text-gray-500">
+            <tr><th scope="col" class="py-1">Borradores</th><th scope="col" class="py-1 text-right">Total</th><th scope="col" class="py-1 text-right">Porcentaje</th></tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-line"><th scope="row" class="py-2 text-left font-normal">Guardados</th><td class="py-2 text-right font-mono">{rec.guardados}</td><td class="py-2 text-right font-mono text-gray-600"></td></tr>
+            <tr class="border-t border-line"><th scope="row" class="py-2 text-left font-normal">Acaban pagando</th><td class="py-2 text-right font-mono">{rec.pagados}</td><td class="py-2 text-right font-mono text-gray-600">{pct(rec.pagados, rec.guardados)} de los guardados</td></tr>
+            {pasosRec.map((p) => (
+              <tr class="border-t border-line"><th scope="row" class="py-2 text-left font-normal pl-4 text-gray-600">{NOMBRE_PASO[p.paso] ?? `Tras el correo ${p.paso}`}</th><td class="py-2 text-right font-mono">{p.n}</td><td class="py-2 text-right font-mono text-gray-600">{pct(p.n, rec!.pagados)} de los pagos</td></tr>
+            ))}
+            <tr class="border-t border-line"><th scope="row" class="py-2 text-left font-normal">Bajas de los recordatorios</th><td class="py-2 text-right font-mono">{rec.bajas}</td><td class="py-2 text-right font-mono text-gray-600">{pct(rec.bajas, rec.guardados)} de los guardados</td></tr>
+          </tbody>
+        </table>
+      )}
+    </section>
   </div>
 </AdminLayout>
