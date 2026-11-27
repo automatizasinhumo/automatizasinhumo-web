@@ -14,6 +14,7 @@ import { firmadorDecision } from './features/solicitudes/decision';
 import { avanzarDominios, avisarDominiosActivos, configDominios, servirDominio } from './features/servicios/dominios';
 import { citasActivas, documentoWeb, webPorSlug } from './features/servicios/webs';
 import { formularioWeb } from './features/servicios/mensajesWeb';
+import { pedirResenas } from './features/servicios/resenasCitas';
 
 /**
  * Worker entrypoint.
@@ -120,6 +121,17 @@ async function runScheduledSweeps(cuando: Date): Promise<void> {
     await lanzarProgramados(cuando, env.GITHUB_DISPATCH_TOKEN, env.GITHUB_DISPATCH_REPO, marcasD1(db));
   } catch (err) {
     console.error('Scheduled workflow dispatch failed:', err);
+  }
+
+  // Al final: abre enlaces externos (Google) y no debe retrasar lo de arriba.
+  // Citas de las webs publicadas: un correo pidiendo opinión 72 h después (resenasCitas.ts).
+  try {
+    const s = await getStoreSettings(db);
+    const email = await getEmailProvider(s);
+    const tienda = (await getSetting(db, 'store_name')) || getConfig().storeName;
+    if (email) await pedirResenas(db, email, tienda, cuando.getTime());
+  } catch (err) {
+    console.error('Scheduled review request sweep failed:', err instanceof Error ? err.message : 'error');
   }
 }
 
