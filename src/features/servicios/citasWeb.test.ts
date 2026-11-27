@@ -8,6 +8,7 @@ import {
   cubos,
   diasVista,
   enviarConAdjunto,
+  festivoNacional,
   guardarCita,
   huecosDelDia,
   ics,
@@ -264,5 +265,38 @@ describe('páginas de citas', () => {
     if (!r.ok) throw new Error(r.error);
     expect(documentoWeb(r.datos, 'https://t.es/w/ana', '', undefined, undefined, undefined, '/w/ana/reservas')).toContain('href="/w/ana/reservas"');
     expect(documentoWeb({ ...r.datos, citas: '' }, 'https://t.es/w/ana', '', undefined, undefined, undefined, '/w/ana/reservas')).not.toContain('/w/ana/reservas');
+  });
+});
+
+describe('revisión de citas', () => {
+  it('festivos nacionales sin huecos (8 de diciembre y Viernes Santo)', () => {
+    expect(festivoNacional('2026-12-08')).toBe(true);
+    expect(festivoNacional('2027-03-26')).toBe(true);
+    expect(festivoNacional('2026-04-03')).toBe(true);
+    expect(festivoNacional('2026-12-09')).toBe(false);
+    expect(huecosDelDia('2026-12-08', TRAMOS, 30, [], AHORA)).toEqual([]);
+    expect(huecosDelDia('2026-12-09', TRAMOS, 30, [], AHORA).length).toBeGreaterThan(0);
+  });
+
+  it('los comienzos caen en cubos: tras reservar 9:35 la siguiente cabe', async () => {
+    const tramos = tramosHorario('Viernes: 9:32-12:00');
+    const h = huecosDelDia('2026-12-04', tramos, 30, [], AHORA);
+    expect(h.every((x) => x.min % 5 === 0)).toBe(true);
+    const db = d1(MIGRACIONES, PEDIDOS);
+    const datos = { nombre: 'A', email: 'a@b.es', telefono: '', nota: '' };
+    expect('id' in (await guardarCita(db, 'ana', datos, h[0]!))).toBe(true);
+    const libres = huecosDelDia('2026-12-04', tramos, 30, await ocupadas(db, 'ana', AHORA, AHORA + 30 * 86_400_000), AHORA);
+    expect('id' in (await guardarCita(db, 'ana', datos, libres[0]!))).toBe(true);
+  });
+
+  it('«Domingos y festivos: cerrado» quita los domingos', () => {
+    const t = tramosHorario('Lunes a domingo: 9-14\nDomingos y festivos: cerrado');
+    expect(t.map((x) => x.dia)).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  it('el texto sobre el color de acento contrasta (fondo claro → texto oscuro)', () => {
+    const n = negocioDe('ana', { negocio: 'Ana', direccion: '', telefono: '', color: '#ffffff' });
+    const html = paginaReservas({ negocio: n, dur: 30, dias: [{ fecha: '2026-12-04', libres: 0 }], dia: '2026-12-04', huecos: [], vuelta: '/w/ana', accion: '/w/ana/reservas', sello: 'x', aviso: '' });
+    expect(html).toContain("--o:#000000;");
   });
 });

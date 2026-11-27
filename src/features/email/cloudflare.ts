@@ -12,6 +12,13 @@ export interface EmailBinding {
   }): Promise<unknown>;
 }
 
+/** El binding lee un `content` de texto como Base64: se codifican los bytes UTF-8. */
+export function base64Utf8(texto: string): string {
+  let bin = '';
+  for (const b of new TextEncoder().encode(texto)) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
 /**
  * Cloudflare Email Sending adapter. The `from` address must be on a domain
  * onboarded via `wrangler email sending enable <domain>`.
@@ -29,7 +36,7 @@ export function createCloudflareEmail(
         html: msg.html,
         text: msg.text,
         ...(msg.attachments?.length
-          ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: a.content, type: a.contentType, disposition: 'attachment' as const })) }
+          ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: base64Utf8(a.content), type: a.contentType, disposition: 'attachment' as const })) }
           : {}),
       });
     },

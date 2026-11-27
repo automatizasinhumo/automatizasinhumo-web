@@ -19,7 +19,7 @@ import { signToken, verifyToken } from '../auth/token';
 import { emailShell, escapeHtml } from '../email/layout';
 import type { EmailMessage, EmailProvider } from '../email';
 import { horarioSchema } from './negocioSchema';
-import { CAMPO_TRAMPA, type DatosWeb } from './webs';
+import { CAMPO_TRAMPA, sobreAcento, type DatosWeb } from './webs';
 export { DURACIONES_CITA, citasActivas, type IdCitasWeb } from './webs';
 
 export const ZONA = 'Europe/Madrid';
@@ -87,6 +87,23 @@ export function fechaValida(fecha: string): boolean {
   return t.getUTCFullYear() === Number(m[1]) && t.getUTCMonth() === Number(m[2]) - 1 && t.getUTCDate() === Number(m[3]);
 }
 
+/** Domingo de Pascua (algoritmo gregoriano anónimo), «AAAA-MM-DD». */
+function pascua(y: number): string {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+  const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(Date.UTC(y, mes - 1, dia)).toISOString().slice(0, 10);
+}
+const FIJOS = ['01-01', '01-06', '05-01', '08-15', '10-12', '11-01', '12-06', '12-08', '12-25'];
+/** Festivo nacional en España (fijos + Viernes Santo): ese día no se ofrecen citas. */
+export function festivoNacional(fecha: string): boolean {
+  if (FIJOS.includes(fecha.slice(5))) return true;
+  const y = Number(fecha.slice(0, 4));
+  const p = Date.parse(pascua(y));
+  return new Date(p - 2 * 86_400_000).toISOString().slice(0, 10) === fecha;
+}
+
 /** Cada cuánto empieza una cita: 15 → cada 15 min, 30 o 60 → cada 30, 45 → cada 15. */
 export const paso = (dur: number) => (dur % 30 === 0 ? 30 : dur < 30 ? dur : 15);
 
@@ -108,12 +125,13 @@ export interface Hueco extends Intervalo {
 
 /** Horas libres de `fecha`: dentro del horario, con antelación y sin pisar otra cita. */
 export function huecosDelDia(fecha: string, tramos: Tramo[], dur: number, ocupadas: Intervalo[], ahora: number): Hueco[] {
+  if (festivoNacional(fecha)) return [];
   const dia = diaSemana(fecha);
   const p = paso(dur);
   const vistos = new Set<number>();
   const salida: Hueco[] = [];
   for (const t of tramos.filter((x) => x.dia === dia).sort((a, b) => a.abre - b.abre)) {
-    for (let min = t.abre; min + dur <= t.cierra; min += p) {
+    for (let min = Math.ceil(t.abre / CUBO_MIN) * CUBO_MIN; min + dur <= t.cierra; min += p) {
       const inicio = instante(fecha, min);
       // Cambio de hora: la hora que no existe ese día (2:30 de marzo) no se ofrece.
       const l = local(inicio);
@@ -406,7 +424,7 @@ function pagina(n: Negocio, titulo: string, cuerpo: string): string {
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex"><title>${escapeHtml(titulo)} · ${escapeHtml(n.negocio)}</title>
 <style>
-:root{--c:${color};--t:#1b1b1b;--s:#5c5c5c;--f:#f6f5f2;--l:#cfcac0}
+:root{--c:${color};--o:${sobreAcento(color)};--t:#1b1b1b;--s:#5c5c5c;--f:#f6f5f2;--l:#cfcac0}
 *{box-sizing:border-box}body{margin:0;font:1rem/1.5 system-ui,sans-serif;background:var(--f);color:var(--t)}
 main{max-width:44rem;margin:0 auto;padding:28px 18px 56px}
 .vuelta{color:var(--s);font-size:.95rem}
@@ -417,20 +435,20 @@ h2{margin:28px 0 10px;font-size:1.1rem}
 .dias a,.dias span{display:grid;min-width:4.6rem;padding:10px 8px;border:1px solid var(--l);border-radius:14px;background:#fff;text-align:center;text-decoration:none;color:var(--t);scroll-snap-align:start;font-size:.92rem;line-height:1.25}
 .dias b{display:block;font-size:1.25rem}
 .dias span{opacity:.45}
-.dias a[aria-current]{background:var(--c);border-color:var(--c);color:#fff}
+.dias a[aria-current]{background:var(--c);border-color:var(--c);color:var(--o)}
 fieldset{border:0;margin:0;padding:0}
 .horas{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.2rem,1fr));gap:8px}
 .horas label{position:relative}
 .horas input{position:absolute;opacity:0;inset:0}
 .horas span{display:block;padding:10px 0;border:1px solid var(--l);border-radius:999px;background:#fff;text-align:center;font-weight:600;cursor:pointer}
-.horas input:checked+span{background:var(--c);border-color:var(--c);color:#fff}
+.horas input:checked+span{background:var(--c);border-color:var(--c);color:var(--o)}
 .horas input:focus-visible+span{outline:3px solid var(--c);outline-offset:2px}
 .campos{display:grid;gap:14px;margin-top:8px}
 .campos label{display:grid;gap:4px;font-weight:600}
 .campos input,.campos textarea{font:inherit;padding:11px 12px;border:1px solid #8a857c;border-radius:10px;background:#fff;font-weight:400}
 .ayuda{font-weight:400;color:var(--s)}
 .trampa{position:absolute;left:-9999px}
-button,.boton{display:inline-block;margin-top:20px;padding:13px 24px;border:0;border-radius:999px;background:var(--c);color:#fff;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+button,.boton{display:inline-block;margin-top:20px;padding:13px 24px;border:0;border-radius:999px;background:var(--c);color:var(--o);font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
 .boton.sec{background:transparent;color:var(--t);border:1px solid var(--l)}
 .aviso{padding:12px 14px;border-radius:12px;background:#fff3cd;color:#5a4300}
 .vacio{padding:18px;border:1px dashed var(--l);border-radius:14px;color:var(--s);text-align:center}

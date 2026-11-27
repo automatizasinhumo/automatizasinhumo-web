@@ -10,7 +10,6 @@ import {
   enviarConAdjunto,
   guardarCita,
   huecosDelDia,
-  leerCita,
   negocioDe,
   ocupadas,
   paginaCitaHecha,
@@ -19,6 +18,7 @@ import {
   selloCita,
   tramosHorario,
   validarCita,
+  type Cita,
 } from '../../../../features/servicios/citasWeb';
 import { correoDueno, leerSello, selloFormulario } from '../../../../features/servicios/mensajesWeb';
 import { citasActivas, webPorSlug } from '../../../../features/servicios/webs';
@@ -103,8 +103,8 @@ export const POST: APIRoute = async ({ params, request, url, locals }) => {
   if (!hueco) return vista(slug, otra(v.fecha), ahora, AVISO.ocupada, 409);
   const r = await guardarCita(env.DB, w.slug, v.datos, hueco);
   if ('ocupada' in r) return vista(slug, otra(v.fecha), ahora, AVISO.ocupada, 409);
-  const cita = await leerCita(env.DB, r.id);
-  if (!cita) return paginaError(n, 'No se ha podido reservar. Vuelve a intentarlo.', sello.vuelta, 500);
+  // Ya está guardada: la confirmación se arma con lo escrito, sin otra lectura que pueda fallar.
+  const cita: Cita = { ...v.datos, inicio: hueco.inicio, fin: hueco.fin, id: r.id, slug: w.slug, estado: 'confirmada' };
   const t = encodeURIComponent(await selloCita(cita, secret, ahora));
   const anular = new URL(`/w/${w.slug}/reservas/anular?t=${t}`, url).href;
   const icsUrl = new URL(`/w/${w.slug}/reservas/cita.ics?t=${t}`, url).href;

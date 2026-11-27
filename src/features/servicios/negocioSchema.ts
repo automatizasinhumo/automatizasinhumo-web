@@ -112,7 +112,7 @@ export function horarioSchema(horario: string): Record<string, unknown>[] | unde
   const cerrados = new Set<string>();
   for (const l of lineas) {
     if (/cerrado/.test(l)) {
-      for (const d of leerDias(l.replace(/cerrados?.*$/, '')) ?? []) cerrados.add(d);
+      for (const d of leerDias(l.replace(/cerrados?.*$/, '').replace(/\b(?:festivos?|vacaciones)\b/g, ' ')) ?? []) cerrados.add(d);
       continue;
     }
     if (/festivo|vacaciones|cita previa/.test(l)) continue;
