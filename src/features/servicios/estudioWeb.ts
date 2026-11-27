@@ -13,6 +13,7 @@ import { iniciarGuardarLuego, leerBorradorDelEnlace, type GuardarLuego } from '.
 import { llenarCarrito, pedidoEstudio } from './compraEstudio';
 import { euros } from './cv';
 import { protegerVista } from './protegerVista';
+import { tomarInicio } from './inicioRapido';
 import { disenosRecomendados, esOrdenDeSector, ideasDeLema, esPreguntaDeSector, esServicioDeSector, textosDeSector } from './sectores';
 import { guiar } from '../tour/guia';
 import { avisoEnlaceOpiniones, estadoEnlaceOpiniones } from './resenasCitas';
@@ -1481,6 +1482,7 @@ export function iniciarEstudioWeb() {
   pedido.arrancar(destinoPedido());
   desdeHash(false);
   desdeEnlace();
+  desdeFicha();
   void desdeSeguir();
 
   /**
@@ -1518,6 +1520,23 @@ export function iniciarEstudioWeb() {
     pintarControles();
     programar(true);
     if (st) st.textContent = 'Hemos recuperado tu web tal como la dejaste.';
+  }
+
+  /**
+   * Nombre escrito en la ficha («¿Cómo se llama tu negocio?»): solo rellena un estudio vacío y sin
+   * pedido. Nunca pisa un borrador, y con un pedido en curso se deja que recuperar() traiga su web.
+   */
+  function desdeFicha() {
+    const negocio = tomarInicio();
+    const c = campo('negocio');
+    if (!negocio || c.value.trim() || pedido.token || pedido.cargando) return;
+    c.value = negocio;
+    c.removeAttribute('aria-invalid');
+    for (const e of $$<HTMLInputElement>('[data-espejo="negocio"]')) e.value = negocio;
+    // Los textos automáticos que dicen «nuestro negocio» pasan a llevar el nombre (los escritos se respetan).
+    actualizarTextos();
+    persistir();
+    programar(true);
   }
 
   /** Las páginas de sector enlazan con ?sector=…&diseno=…: se aplican una vez y se limpian de la URL. */

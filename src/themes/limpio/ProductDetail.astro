@@ -4,6 +4,7 @@ import ProductCard from './ProductCard.astro';
 import { REGLA_PLAZOS } from './plazos';
 import ProductGallery from '../../features/storefront/controls/ProductGallery.astro';
 import ProductPurchaseForm from '../../features/storefront/controls/ProductPurchaseForm.astro';
+import InicioRapido from '../../features/storefront/controls/InicioRapido.astro';
 import ComparativaModalidades from '../../features/storefront/controls/ComparativaModalidades.astro';
 import StoreBreadcrumbs from '../../features/storefront/controls/StoreBreadcrumbs.astro';
 
@@ -93,7 +94,13 @@ const { model, purchase } = Astro.props;
               <li><strong class="text-ink">2.</strong> Escribes tus datos y ves el resultado mientras escribes, gratis y con marca de agua.</li>
               <li><strong class="text-ink">3.</strong> Si te convence, pagas {model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice} y lo tienes al momento, sin marca de agua.</li>
             </ol>
-            <a href={model.estudioHref} class="boton boton-principal mt-4 w-full" data-ir-estudio>Empezar ahora →</a>
+            {
+              model.estudioHref === '/servicios/web' ? (
+                <InicioRapido href={model.estudioHref} precio={model.priceVaries ? `desde ${model.formattedPrice}` : model.formattedPrice} />
+              ) : (
+                <a href={model.estudioHref} class="boton boton-principal mt-4 w-full" data-ir-estudio>Empezar ahora →</a>
+              )
+            }
             <p class="mt-3 text-xs leading-relaxed text-faint" data-garantia>
               Sin tarjeta hasta que decidas pagar. Pago seguro, con factura. Si en 7 días no hace lo que dice la ficha, te devolvemos el dinero.
             </p>

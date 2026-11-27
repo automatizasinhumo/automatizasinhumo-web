@@ -1,0 +1,38 @@
+---
+/**
+ * Inicio rápido de la ficha de la web (ronda GPT 40): pide el nombre del negocio y abre el estudio
+ * con él puesto. El nombre viaja por sessionStorage, no por la URL (el campo no lleva name). Sin JS
+ * el formulario lleva igualmente al estudio, vacío.
+ */
+interface Props {
+  href: string;
+  precio: string;
+}
+const { href, precio } = Astro.props;
+---
+
+<form action={href} method="get" class="mt-4" data-inicio-rapido>
+  <label for="inicio-negocio" class="text-sm font-semibold text-ink">¿Cómo se llama tu negocio?</label>
+  <input
+    id="inicio-negocio"
+    type="text"
+    maxlength="80"
+    autocomplete="organization"
+    placeholder="Ej. Peluquería Alba"
+    class="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2 text-base text-ink"
+    data-inicio-negocio
+  />
+  <button type="submit" class="boton boton-principal mt-3 w-full" data-ir-estudio>Crear mi web →</button>
+  <p class="mt-2 text-center text-xs text-muted">Vista previa gratis · Sin registro · Publicación al momento: {precio}</p>
+</form>
+
+<script>
+  import { guardarInicio } from '../../servicios/inicioRapido';
+  document.querySelector<HTMLFormElement>('[data-inicio-rapido]')?.addEventListener('submit', (ev) => {
+    const form = ev.currentTarget as HTMLFormElement;
+    guardarInicio(form.querySelector<HTMLInputElement>('[data-inicio-negocio]')?.value ?? '');
+    // Navegación propia: un GET sin campos dejaría «?» suelto en la dirección del estudio.
+    ev.preventDefault();
+    location.assign(form.action);
+  });
+</script>
