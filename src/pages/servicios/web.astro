@@ -28,6 +28,7 @@ import {
   DURACIONES_CITA,
 } from '../../features/servicios/webs';
 import { SECTORES_WEB } from '../../features/servicios/sectores';
+import { ALERGENOS, DIETAS, MAX_CARTA_WEB } from '../../features/servicios/cartaWeb';
 import { huellaMiniatura, miniaturaWeb } from '../../features/servicios/miniaturasWeb';
 
 // Estudio de webs: mismo esquema que el de CV (/servicios/cv). Todo ocurre en el navegador:
@@ -231,6 +232,16 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
               <div data-items></div>
               <button type="button" class="anadir" data-anadir>+ Añadir servicio</button>
             </fieldset>
+
+            <details class="mas-apartados carta-web">
+              <summary>Carta con alérgenos <span class="ayuda">(bares y restaurantes; opcional)</span></summary>
+              <p class="ayuda">Cada plato con su precio y sus alérgenos. Sale en una página aparte de tu web, con un cartel con código QR para las mesas.</p>
+              <fieldset data-lista="carta" data-max={MAX_CARTA_WEB}>
+                <legend class="sr-only">Platos de la carta (hasta {MAX_CARTA_WEB})</legend>
+                <div data-items></div>
+                <button type="button" class="anadir" data-anadir>+ Añadir plato</button>
+              </fieldset>
+            </details>
 
             <fieldset class="bloque" data-guia="contacto">
               <legend>Contacto <span class="ayuda">(al menos uno)</span></legend>
@@ -509,6 +520,34 @@ const FUENTES_CSS = cssFuentes('/fonts/web/');
         <label class={campo}>Precio<input data-k="precio" maxlength="20" placeholder="desde 20 €" /></label>
       </div>
       <label class={campo}>Descripción<input data-k="texto" maxlength="200" /></label>
+      <button type="button" class="quitar" data-quitar>Quitar</button>
+    </div>
+  </template>
+  <template id="t-carta">
+    <div class="item plato-web">
+      <div class="filas">
+        <label class={campo}>Sección<input data-k="seccion" maxlength="40" placeholder="Entrantes" /></label>
+        <label class={campo}>Plato<input data-k="nombre" maxlength="80" /></label>
+        <label class={campo}>Precio<input data-k="precio" maxlength="20" placeholder="9,50 €" /></label>
+      </div>
+      <label class={campo}>Descripción<input data-k="texto" maxlength="240" /></label>
+      <input type="hidden" data-k="alergenos" />
+      <input type="hidden" data-k="dietas" />
+      <details class="marcas">
+        <summary>Alérgenos y dietas</summary>
+        <fieldset>
+          <legend>Lleva</legend>
+          <div class="casillas">
+            {ALERGENOS.map((a) => <label><input type="checkbox" data-marca="alergenos" value={a.id} /> {a.nombre}</label>)}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Apto para</legend>
+          <div class="casillas">
+            {DIETAS.map((a) => <label><input type="checkbox" data-marca="dietas" value={a.id} /> {a.nombre}</label>)}
+          </div>
+        </fieldset>
+      </details>
       <button type="button" class="quitar" data-quitar>Quitar</button>
     </div>
   </template>

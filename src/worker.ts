@@ -164,6 +164,7 @@ export default {
         `${recursos}/galeria/`,
         formulario,
         citasActivas(w.datos) ? `${recursos}/reservas` : undefined,
+        w.datos.carta.length ? `${recursos}/carta` : undefined,
       );
     }).catch((err) => {
       console.error('Custom domain lookup failed:', err instanceof Error ? err.message : 'error');

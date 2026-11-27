@@ -110,6 +110,11 @@ const shopHref = catalogPath(Astro.locals.settings?.homePage);
                     <a href={publica} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center rounded-md border border-line px-4 font-medium text-ink">
                       Ver publicada
                     </a>
+                    {p.carta && (
+                      <a href={`${p.ruta}/carta/cartel`} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center rounded-md border border-line px-4 font-medium text-ink">
+                        Cartel QR de la carta
+                      </a>
+                    )}
                   </div>
                 </li>
               );

@@ -422,6 +422,33 @@
   .quitar {
     color: var(--color-muted);
   }
+  .marcas {
+    margin-top: var(--ds-hueco-3);
+  }
+  .marcas > summary {
+    font-size: var(--ds-texto-small);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .marcas fieldset {
+    margin-top: var(--ds-hueco-2);
+  }
+  .marcas legend {
+    font-size: var(--ds-texto-small);
+    font-weight: 600;
+  }
+  .casillas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: var(--ds-hueco-1) var(--ds-hueco-3);
+    font-size: var(--ds-texto-small);
+  }
+  .casillas label {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-hueco-1);
+    cursor: pointer;
+  }
   .quitar:hover,
   .anadir:hover {
     text-decoration: underline;
