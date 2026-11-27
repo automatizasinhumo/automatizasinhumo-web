@@ -66,7 +66,7 @@ export function paginaCarta(d: DatosWeb, url: string, volver = ''): string {
   const cuerpo = secciones
     .map(
       (s) =>
-        `<section class="sec" id="${s.id}" aria-labelledby="${s.id}-t"><h2 id="${s.id}-t">${esc(s.nombre)}</h2><ul class="platos">${s.platos
+        `<section class="sec" id="${s.id}" aria-labelledby="t-${s.id}"><h2 id="t-${s.id}">${esc(s.nombre)}</h2><ul class="platos">${s.platos
           .map(
             (p) =>
               `<li class="plato"><div class="cab"><h3>${esc(p.nombre)}</h3>${p.precio ? `<span class="precio">${esc(p.precio)}</span>` : ''}</div>` +
@@ -107,7 +107,7 @@ a{color:inherit}a:focus-visible{outline:3px solid var(--ct);outline-offset:3px}
 header{background:var(--c);color:var(--cs);padding:28px 0 22px}
 header p{margin:0;font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 h1{margin:6px 0 0;font-size:clamp(1.9rem,7vw,3rem);line-height:1.1;overflow-wrap:anywhere}
-.volver{display:inline-block;margin-top:12px;font-size:.9rem}
+.volver{display:inline-block;margin-top:12px;font-size:.9rem}.volver:focus-visible{outline-color:currentColor}
 .nav{position:sticky;top:0;z-index:1;display:flex;gap:8px;overflow-x:auto;padding:12px 0;background:var(--fondo)}
 .nav a{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:8px 15px;background:#fff;border:1px solid var(--linea);border-radius:999px;text-decoration:none;font-weight:600;font-size:.92rem}
 .sec{scroll-margin-top:72px;padding:8px 0 18px}

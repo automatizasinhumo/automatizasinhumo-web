@@ -152,7 +152,8 @@ export default {
       if (request.method === 'GET') ctx.waitUntil(contarVisita(env.DB, 'web', w.slug, request.headers.get('user-agent')));
       const tienda = await origenTienda();
       // Sin origen de tienda, las fotos van dentro del HTML: el dominio del cliente solo sirve «/».
-      if (!tienda) return documentoWeb(w.datos, url);
+      // Sin tienda tampoco hay página de carta a la que enlazar: la web sale sin carta, sin enlaces a «#».
+      if (!tienda) return documentoWeb({ ...w.datos, carta: [] }, url);
       const recursos = `${tienda}/w/${w.slug}`;
       // El formulario se envía a la tienda (el dominio del cliente solo sirve GET) y vuelve aquí.
       const formulario = await formularioWeb(w.slug, `${recursos}/mensaje`, url, env.AUTH_SECRET);

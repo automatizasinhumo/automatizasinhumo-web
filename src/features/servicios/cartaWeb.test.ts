@@ -76,6 +76,8 @@ describe('página de la carta', () => {
   it('HTML válido y accesible, con y sin varias secciones', async () => {
     expect(await errores(paginaCarta(d, url, '/w/bar-gil'))).toEqual([]);
     expect(await errores(paginaCarta(datos({ carta: [{ nombre: 'Café', precio: '1,20 €' }] }), url))).toEqual([]);
+    // «Tapas» y «Tapas t»: la sección de una y el encabezado de la otra no pueden compartir id.
+    expect(await errores(paginaCarta(datos({ carta: [{ seccion: 'Tapas', nombre: 'Bravas' }, { seccion: 'Tapas t', nombre: 'Oreja' }] }), url))).toEqual([]);
   });
   it('escapa el texto y la leyenda solo trae los alérgenos usados', () => {
     const html = paginaCarta(d, url);
