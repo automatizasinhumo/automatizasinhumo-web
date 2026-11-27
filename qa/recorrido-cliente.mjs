@@ -1,7 +1,8 @@
 // Empleado «recorrido del cliente» (C22): hace en un navegador real lo que hace un cliente,
 // a 390 px (móvil) y a 1280 px:
 //   portada → ficha del servicio → «Contratar ahora» abre el pago (sin pagar)
-//   → «Empieza gratis» → formulario por pasos → gracias con su número → página de estado
+//   (en autoservicio: «Empezar ahora» abre el estudio y el pago está en «¿Prefieres pagar primero?»)
+//   → «Empieza gratis» (o /empezar/<slug>) → formulario por pasos → gracias con su número → página de estado
 //   → el mismo formulario enviado otra vez devuelve la misma solicitud (no crea otra)
 //   → cada servicio de autoservicio (autoservicio.json) entra en el carrito.
 // Falla si falta un botón, si una página da error o si salta un error de JavaScript.
@@ -82,10 +83,30 @@ async function recorrido(ctx, ancho) {
       await comprobarPieYMenu(pg, ancho);
     });
 
-    await paso('la ficha tiene «Contratar ahora» y «Empieza gratis»', async () => {
+    // Dos fichas: la de compra directa («Contratar ahora» + «Empieza gratis») y la de
+    // autoservicio («Empezar ahora» al estudio; el pago, dentro de «¿Prefieres pagar primero?»).
+    let autoservicio = false;
+    await paso('la ficha tiene su camino de compra y de prueba', async () => {
       await ir(`/products/${slug}`);
+      await pg.locator('[data-compra-directa], [data-ir-estudio]').first().waitFor({ state: 'visible', timeout: 10000 });
+      autoservicio = (await pg.locator('[data-ir-estudio]').count()) > 0;
+      if (autoservicio) return;
       await pg.getByRole('button', { name: /Contratar/i }).first().waitFor({ state: 'visible', timeout: 10000 });
       await pg.getByRole('link', { name: /Empieza gratis/i }).first().waitFor({ state: 'visible', timeout: 10000 });
+    });
+
+    await paso('«Empezar ahora» abre el estudio', async () => {
+      if (!autoservicio) return;
+      // El destino se comprueba por su cuenta: un enlace roto a /empezar/<slug> también tiene formulario.
+      await Promise.all([
+        pg.waitForURL((u) => u.pathname.startsWith('/servicios/'), { timeout: 30000 }),
+        pg.locator('[data-ir-estudio]').first().click(),
+      ]);
+      // Un paso del estudio a la vista (el panel de la vista previa empieza oculto).
+      await pg.locator('section[data-paso]:visible').first().waitFor({ state: 'visible', timeout: 30000 });
+      await pg.screenshot({ path: `capturas/recorrido-${ancho}-estudio.png` });
+      await ir(`/products/${slug}`);
+      await pg.locator('[data-pagar-primero] summary').first().click();
     });
 
     await paso('«Contratar ahora» abre el pago', async () => {
@@ -100,6 +121,13 @@ async function recorrido(ctx, ancho) {
     });
 
     await paso('«Empieza gratis» abre el formulario', async () => {
+      if (autoservicio) {
+        // La ficha de autoservicio ya no enlaza al formulario, pero sigue siendo la entrada de
+        // quien quiere que se lo hagamos (enlaces de correo, campañas).
+        await ir(`/empezar/${slug}`);
+        await pg.locator('#solicitud-form').waitFor();
+        return;
+      }
       await ir(`/products/${slug}`);
       await Promise.all([
         pg.waitForURL(`**/empezar/${slug}**`, { timeout: 30000 }),
